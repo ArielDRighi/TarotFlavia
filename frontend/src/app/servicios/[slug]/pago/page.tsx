@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 import { ServicePaymentPage } from '@/components/features/holistic-services';
@@ -10,11 +10,17 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
  * Pago de Servicio Holístico - Payment Instructions Page
  *
  * Protected page showing payment instructions after a purchase is created.
+ * Reads pre-selected date and time slot from query params (?date=YYYY-MM-DD&time=HH:MM)
+ * and forwards them to ServicePaymentPage.
  * Business logic delegated to ServicePaymentPage component.
  */
 export default function ServicioPagoPage() {
   const { slug } = useParams<{ slug: string }>();
+  const searchParams = useSearchParams();
   const { isLoading: isAuthLoading } = useRequireAuth();
+
+  const selectedDate = searchParams.get('date') ?? '';
+  const selectedTime = searchParams.get('time') ?? '';
 
   if (isAuthLoading) {
     return (
@@ -27,5 +33,5 @@ export default function ServicioPagoPage() {
     );
   }
 
-  return <ServicePaymentPage slug={slug} />;
+  return <ServicePaymentPage slug={slug} selectedDate={selectedDate} selectedTime={selectedTime} />;
 }

@@ -59,12 +59,20 @@ describe('useHolisticServiceMutations Hooks', () => {
         wrapper: createWrapper(queryClient),
       });
 
-      result.current.mutate({ holisticServiceId: 1 });
+      result.current.mutate({
+        holisticServiceId: 1,
+        selectedDate: '2026-04-15',
+        selectedTime: '10:00',
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toEqual(mockPurchase);
-      expect(holisticApi.createPurchase).toHaveBeenCalledWith({ holisticServiceId: 1 });
+      expect(holisticApi.createPurchase).toHaveBeenCalledWith({
+        holisticServiceId: 1,
+        selectedDate: '2026-04-15',
+        selectedTime: '10:00',
+      });
     });
 
     it('should handle errors when creation fails', async () => {
@@ -77,7 +85,11 @@ describe('useHolisticServiceMutations Hooks', () => {
         wrapper: createWrapper(queryClient),
       });
 
-      result.current.mutate({ holisticServiceId: 1 });
+      result.current.mutate({
+        holisticServiceId: 1,
+        selectedDate: '2026-04-15',
+        selectedTime: '10:00',
+      });
 
       await waitFor(() => expect(result.current.isError).toBe(true));
 
@@ -94,7 +106,11 @@ describe('useHolisticServiceMutations Hooks', () => {
         wrapper: createWrapper(queryClient),
       });
 
-      result.current.mutate({ holisticServiceId: 1 });
+      result.current.mutate({
+        holisticServiceId: 1,
+        selectedDate: '2026-04-15',
+        selectedTime: '10:00',
+      });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 

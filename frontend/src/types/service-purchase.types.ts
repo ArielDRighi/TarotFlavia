@@ -41,6 +41,10 @@ export interface ServicePurchase {
   paidAt: string | null;
   whatsappNumber?: string;
   mercadoPagoUrl?: string;
+  /** Fecha elegida por el usuario al momento de contratar (YYYY-MM-DD) */
+  selectedDate?: string | null;
+  /** Horario elegido por el usuario al momento de contratar (HH:MM) */
+  selectedTime?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -51,6 +55,10 @@ export interface ServicePurchase {
  */
 export interface CreatePurchasePayload {
   holisticServiceId: number;
+  /** Fecha elegida por el usuario (YYYY-MM-DD) */
+  selectedDate: string;
+  /** Horario elegido por el usuario (HH:MM) */
+  selectedTime: string;
 }
 
 /**

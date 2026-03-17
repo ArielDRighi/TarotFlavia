@@ -1360,7 +1360,7 @@ Implementar un endpoint de webhook que reciba notificaciones de Mercado Pago, va
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2-3 días
 **Dependencias:** T-SF-D01 (backend debe aceptar selectedDate/selectedTime en la purchase)
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Actualmente el usuario paga sin elegir horario. El flujo correcto es: ver disponibilidad → elegir fecha/horario → pagar. El horario seleccionado se envía junto con la creación de la compra, y queda reservado al confirmarse el pago.
 
@@ -1372,43 +1372,43 @@ Rediseñar el flujo de contratación para que el usuario seleccione fecha y hora
 
 **Frontend — Página de detalle (refactor):**
 
-- [ ] El `BookingCalendar` en la página de detalle pasa de readOnly a interactivo
-- [ ] Al seleccionar un slot disponible, se habilita el botón "Contratar servicio"
-- [ ] El botón "Contratar servicio" lleva a la página de pago con la fecha/hora seleccionada como query params o state
-- [ ] Si no hay disponibilidad configurada (0 slots en los próximos 14 días), mostrar aviso y deshabilitar CTA
-- [ ] Si el usuario no seleccionó un horario, el botón de contratar permanece deshabilitado
+- [x] El `BookingCalendar` en la página de detalle pasa de readOnly a interactivo
+- [x] Al seleccionar un slot disponible, se habilita el botón "Contratar servicio"
+- [x] El botón "Contratar servicio" lleva a la página de pago con la fecha/hora seleccionada como query params o state
+- [x] Si no hay disponibilidad configurada (0 slots en los próximos 14 días), mostrar aviso y deshabilitar CTA
+- [x] Si el usuario no seleccionó un horario, el botón de contratar permanece deshabilitado
 
 **Frontend — Página de pago (refactor):**
 
-- [ ] Recibir fecha y horario seleccionados (via query params, state o store)
-- [ ] Mostrar resumen: servicio + fecha + hora + duración + precio
-- [ ] Validar que el slot sigue disponible antes de permitir el pago (llamar al endpoint de available-slots)
-- [ ] Al crear la purchase, enviar `selectedDate` y `selectedTime` al backend
-- [ ] Abrir link de MP (init_point) en nueva pestaña
-- [ ] Mostrar mensaje de "pago en proceso" con instrucciones
+- [x] Recibir fecha y horario seleccionados (via query params, state o store)
+- [x] Mostrar resumen: servicio + fecha + hora + duración + precio
+- [x] Validar que el slot sigue disponible antes de permitir el pago (llamar al endpoint de available-slots)
+- [x] Al crear la purchase, enviar `selectedDate` y `selectedTime` al backend
+- [x] Abrir link de MP (init_point) en nueva pestaña
+- [x] Mostrar mensaje de "pago en proceso" con instrucciones
 
 **Frontend — Eliminar flujo de reserva post-pago:**
 
-- [ ] Eliminar o deprecar la página `/servicios/reservar/[purchaseId]` (ya no es necesaria)
-- [ ] El flujo post-pago ya no requiere que el usuario elija horario — se agendó automáticamente
+- [x] Eliminar o deprecar la página `/servicios/reservar/[purchaseId]` (ya no es necesaria)
+- [x] El flujo post-pago ya no requiere que el usuario elija horario — se agendó automáticamente
 
 **Frontend — Tests:**
 
-- [ ] Tests de selección de slot en la página de detalle
-- [ ] Tests de la página de pago con datos de slot
-- [ ] Tests de validación de disponibilidad pre-pago
-- [ ] Tests de estados: slot no seleccionado, slot ocupado, pago exitoso
-- [ ] Coverage ≥ 80%
+- [x] Tests de selección de slot en la página de detalle
+- [x] Tests de la página de pago con datos de slot
+- [x] Tests de validación de disponibilidad pre-pago
+- [x] Tests de estados: slot no seleccionado, slot ocupado, pago exitoso
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- El usuario DEBE seleccionar fecha y horario antes de poder pagar
-- La página de pago muestra el resumen completo (servicio + fecha + hora + precio)
-- Si no hay disponibilidad, no se puede contratar
-- Si el slot se ocupó entre la selección y el pago, se muestra error y se pide elegir otro
-- El flujo es: detalle → elegir slot → pagar → confirmación automática
-- Coverage ≥ 80%
-- Ciclo de calidad completo pasa
+- [x] El usuario DEBE seleccionar fecha y horario antes de poder pagar
+- [x] La página de pago muestra el resumen completo (servicio + fecha + hora + precio)
+- [x] Si no hay disponibilidad, no se puede contratar
+- [x] Si el slot se ocupó entre la selección y el pago, se muestra error y se pide elegir otro
+- [x] El flujo es: detalle → elegir slot → pagar → confirmación automática
+- [x] Coverage ≥ 80%
+- [x] Ciclo de calidad completo pasa
 
 #### 📁 Archivos involucrados
 

@@ -137,20 +137,26 @@ describe('Holistic Services API', () => {
     it('should create a purchase and return it', async () => {
       vi.mocked(apiClient.post).mockResolvedValue({ data: mockPurchase });
 
-      const result = await createPurchase({ holisticServiceId: 1 });
+      const result = await createPurchase({
+        holisticServiceId: 1,
+        selectedDate: '2026-04-15',
+        selectedTime: '10:00',
+      });
 
       expect(result).toEqual(mockPurchase);
       expect(apiClient.post).toHaveBeenCalledWith('/holistic-services/purchases', {
         holisticServiceId: 1,
+        selectedDate: '2026-04-15',
+        selectedTime: '10:00',
       });
     });
 
     it('should throw error with Spanish message on failure', async () => {
       vi.mocked(apiClient.post).mockRejectedValue(new Error('Network error'));
 
-      await expect(createPurchase({ holisticServiceId: 1 })).rejects.toThrow(
-        'Error al crear la compra'
-      );
+      await expect(
+        createPurchase({ holisticServiceId: 1, selectedDate: '2026-04-15', selectedTime: '10:00' })
+      ).rejects.toThrow('Error al crear la compra');
     });
   });
 

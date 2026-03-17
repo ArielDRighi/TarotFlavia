@@ -2,12 +2,16 @@
  * ServiceDetailPage Component
  *
  * Public detail page for a single holistic service.
- * Shows name, long description, price, duration, a read-only BookingCalendar,
- * availability disclaimer, and a "Contratar servicio" CTA.
+ * Shows name, long description, price, duration, an interactive BookingCalendar
+ * where the user selects a date and time slot BEFORE paying.
+ * The "Contratar servicio" CTA is enabled only after a slot is selected.
  * Handles loading skeleton, 404 not-found state, and generic error state on the client.
+ *
+ * T-SF-D02: Rediseño — calendario interactivo pre-pago.
  */
 'use client';
 
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { BookingCalendar } from '@/components/features/marketplace/BookingCalendar';
 import { Button } from '@/components/ui/button';
@@ -28,6 +32,22 @@ function formatArs(amount: number): string {
 
 export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
   const { data: service, isLoading, isError, error } = useHolisticServiceDetail(slug);
+
+  // Selected slot state — user must pick date + time before paying
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
+
+  const handleBook = useCallback((date: string, time: string) => {
+    setSelectedDate(date);
+    setSelectedTime(time);
+  }, []);
+
+  const hasSlotSelected = Boolean(selectedDate && selectedTime);
+
+  // Build the payment URL with selected slot as query params
+  const paymentHref = hasSlotSelected
+    ? `${ROUTES.SERVICIO_PAGO(slug)}?date=${encodeURIComponent(selectedDate)}&time=${encodeURIComponent(selectedTime)}`
+    : ROUTES.SERVICIO_PAGO(slug);
 
   // Handle 404 — render client-side not-found state
   if (isError) {
@@ -121,24 +141,44 @@ export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
           <p className="text-text-primary leading-relaxed">{service.longDescription}</p>
         </div>
 
-        {/* Booking Calendar (read-only preview) */}
+        {/* Booking Calendar — interactive slot selection pre-payment */}
         <div>
-          <h2 className="mb-4 font-serif text-2xl font-medium">Disponibilidad</h2>
+          <h2 className="mb-4 font-serif text-2xl font-medium">Elegí fecha y horario</h2>
           <BookingCalendar
             tarotistaId={FLAVIA_TAROTISTA_ID}
-            onBook={() => {}}
-            readOnly={true}
+            onBook={handleBook}
+            readOnly={false}
             serviceSlug={slug}
           />
-          <p className="text-text-secondary mt-3 text-xs">
+          {!hasSlotSelected && (
+            <p data-testid="slot-required-hint" className="text-text-secondary mt-3 text-xs">
+              Seleccioná una fecha y horario para poder contratar el servicio.
+            </p>
+          )}
+          {hasSlotSelected && (
+            <p data-testid="slot-selected-hint" className="mt-3 text-xs text-green-600">
+              Horario seleccionado: {selectedDate} a las {selectedTime}
+            </p>
+          )}
+          <p className="text-text-secondary mt-2 text-xs">
             Las fechas disponibles son al momento de la consulta. Una vez realizado el pago, la
             fecha que observaste libre podría ya estar ocupada.
           </p>
         </div>
 
-        {/* CTA */}
-        <Button asChild size="lg" className="w-full sm:w-auto">
-          <Link href={ROUTES.SERVICIO_PAGO(service.slug)}>Contratar servicio</Link>
+        {/* CTA — disabled until a slot is selected */}
+        <Button
+          asChild={hasSlotSelected}
+          size="lg"
+          className="w-full sm:w-auto"
+          disabled={!hasSlotSelected}
+          data-testid="contratar-button"
+        >
+          {hasSlotSelected ? (
+            <Link href={paymentHref}>Contratar servicio</Link>
+          ) : (
+            <span>Contratar servicio</span>
+          )}
         </Button>
       </div>
     </div>
