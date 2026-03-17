@@ -43,6 +43,8 @@ function createMockPurchase(overrides: Partial<ServicePurchase> = {}): ServicePu
     paymentReference: null,
     paidAt: null,
     initPoint: null,
+    selectedDate: null,
+    selectedTime: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
@@ -132,9 +134,13 @@ describe('MyServicesWidget', () => {
     expect(screen.getByText('Péndulo Hebreo')).toBeInTheDocument();
   });
 
-  it('should show status badges for each purchase', () => {
+  it('should show derived status badges for each purchase', () => {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 7);
+    const futureDateStr = futureDate.toISOString().split('T')[0];
+
     const purchases = [
-      createMockPurchase({ id: 1, paymentStatus: 'paid' }),
+      createMockPurchase({ id: 1, paymentStatus: 'paid', selectedDate: futureDateStr }),
       createMockPurchase({ id: 2, paymentStatus: 'pending' }),
     ];
 
@@ -145,12 +151,12 @@ describe('MyServicesWidget', () => {
 
     render(<MyServicesWidget />, { wrapper });
 
-    expect(screen.getByText('Pagado')).toBeInTheDocument();
+    expect(screen.getByText('Confirmado')).toBeInTheDocument();
     expect(screen.getByText('Pendiente')).toBeInTheDocument();
   });
 
-  it('should show "Reservar turno" link for paid purchases without session', () => {
-    const purchases = [createMockPurchase({ id: 1, paymentStatus: 'paid', sessionId: null })];
+  it('should show "Completado" for paid purchases without selectedDate', () => {
+    const purchases = [createMockPurchase({ id: 1, paymentStatus: 'paid', selectedDate: null })];
 
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: purchases,
@@ -159,13 +165,13 @@ describe('MyServicesWidget', () => {
 
     render(<MyServicesWidget />, { wrapper });
 
-    const bookLink = screen.getByTestId('widget-book-1');
-    expect(bookLink).toBeInTheDocument();
-    expect(bookLink).toHaveAttribute('href', '/servicios/reservar/1');
+    expect(screen.getByText('Completado')).toBeInTheDocument();
   });
 
-  it('should NOT show "Reservar turno" link for paid purchases with session', () => {
-    const purchases = [createMockPurchase({ id: 1, paymentStatus: 'paid', sessionId: 42 })];
+  it('should show "Completado" for paid purchases with past selectedDate', () => {
+    const purchases = [
+      createMockPurchase({ id: 1, paymentStatus: 'paid', selectedDate: '2020-01-01' }),
+    ];
 
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: purchases,
@@ -174,7 +180,7 @@ describe('MyServicesWidget', () => {
 
     render(<MyServicesWidget />, { wrapper });
 
-    expect(screen.queryByTestId('widget-book-1')).not.toBeInTheDocument();
+    expect(screen.getByText('Completado')).toBeInTheDocument();
   });
 
   it('should limit visible purchases to 3 and show total count', () => {

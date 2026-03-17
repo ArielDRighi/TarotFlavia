@@ -1426,7 +1426,7 @@ Rediseñar el flujo de contratación para que el usuario seleccione fecha y hora
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1 día
 **Dependencias:** T-SF-D01 y T-SF-D02
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Actualmente "Mis Servicios" muestra solo precio y fecha de compra. Debe mostrar la información relevante del turno agendado: nombre del servicio, fecha y horario del turno, duración, precio pagado, y estado.
 
@@ -1438,27 +1438,27 @@ Rediseñar las cards de "Mis Servicios" para mostrar información completa y út
 
 **Frontend — Rediseño de cards:**
 
-- [ ] Mostrar nombre del servicio (ya existe)
-- [ ] Mostrar fecha y horario del turno agendado (no la fecha de compra)
-- [ ] Mostrar duración del servicio
-- [ ] Mostrar precio pagado
-- [ ] Mostrar estado del turno: Confirmado, Pendiente de pago, Completado, Cancelado
-- [ ] Mostrar link de WhatsApp para contacto (post-pago)
-- [ ] Diseño visual mejorado con iconos y badges informativos
+- [x] Mostrar nombre del servicio (ya existe)
+- [x] Mostrar fecha y horario del turno agendado (no la fecha de compra)
+- [x] Mostrar duración del servicio
+- [x] Mostrar precio pagado
+- [x] Mostrar estado del turno: Confirmado, Pendiente de pago, Completado, Cancelado
+- [x] Mostrar link de WhatsApp para contacto (post-pago)
+- [x] Diseño visual mejorado con iconos y badges informativos
 
 **Frontend — Estados de la card:**
 
-- [ ] **Pendiente de pago**: badge amarillo, sin datos de turno, link a reintentar pago
-- [ ] **Confirmado**: badge verde, fecha/hora del turno, link WhatsApp, countdown si es próximo
-- [ ] **Completado**: badge gris, fecha del turno pasada
-- [ ] **Cancelado**: badge rojo, motivo si existe
+- [x] **Pendiente de pago**: badge amarillo, sin datos de turno, link a reintentar pago
+- [x] **Confirmado**: badge verde, fecha/hora del turno, link WhatsApp, countdown si es próximo
+- [x] **Completado**: badge gris, fecha del turno pasada
+- [x] **Cancelado**: badge rojo, motivo si existe
 
 **Frontend — Tests:**
 
-- [ ] Tests de renderizado de cada estado
-- [ ] Tests de datos mostrados (fecha, hora, precio, servicio)
-- [ ] Tests de acciones por estado (WhatsApp, reintentar pago)
-- [ ] Coverage ≥ 80%
+- [x] Tests de renderizado de cada estado
+- [x] Tests de datos mostrados (fecha, hora, precio, servicio)
+- [x] Tests de acciones por estado (WhatsApp, reintentar pago)
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
