@@ -60,6 +60,7 @@ const mockPendingPurchase: ServicePurchase = {
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
+  initPoint: null,
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedAt: '2025-01-01T00:00:00.000Z',
 };

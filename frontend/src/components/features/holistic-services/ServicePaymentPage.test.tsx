@@ -1,7 +1,8 @@
 /**
  * Tests for ServicePaymentPage component
  *
- * TDD RED phase — tests written before implementation.
+ * Updated for T-SF-D02: slot (selectedDate + selectedTime) is received as props,
+ * shown in the summary, and sent to createPurchase.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -60,11 +61,15 @@ const mockPurchase: ServicePurchase = {
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
+  initPoint: null,
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedAt: '2025-01-01T00:00:00.000Z',
 };
 
 const mockMutateAsync = vi.fn();
+
+// Default slot props used across tests
+const DEFAULT_SLOT = { selectedDate: '2026-04-15', selectedTime: '10:00' };
 
 describe('ServicePaymentPage', () => {
   let queryClient: QueryClient;
@@ -97,7 +102,7 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     expect(screen.getByTestId('service-payment-skeleton')).toBeInTheDocument();
   });
@@ -117,7 +122,7 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="slug-inexistente" />, { wrapper });
+    render(<ServicePaymentPage slug="slug-inexistente" {...DEFAULT_SLOT} />, { wrapper });
 
     expect(screen.getByTestId('service-payment-error')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /volver al catálogo/i })).toBeInTheDocument();
@@ -138,7 +143,7 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     expect(screen.getByTestId('service-payment-page')).toBeInTheDocument();
   });
@@ -156,7 +161,7 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     expect(screen.getByText('Árbol Genealógico')).toBeInTheDocument();
   });
@@ -174,7 +179,7 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     // Price should be formatted with thousands separator and ARS label
     expect(screen.getByText(/15[\.,]000/)).toBeInTheDocument();
@@ -194,10 +199,83 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     expect(screen.getByText(/90/)).toBeInTheDocument();
     expect(screen.getByText(/min/i)).toBeInTheDocument();
+  });
+
+  // ---- Slot summary ----
+
+  it('should display the selected date in the summary', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: mockService,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+    } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
+
+    render(
+      <ServicePaymentPage
+        slug="arbol-genealogico"
+        selectedDate="2026-04-15"
+        selectedTime="10:00"
+      />,
+      { wrapper }
+    );
+
+    // Date should be displayed in DD/MM/YYYY format
+    expect(screen.getByTestId('slot-summary-date')).toHaveTextContent('15/04/2026');
+  });
+
+  it('should display the selected time in the summary', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: mockService,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+    } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
+
+    render(
+      <ServicePaymentPage
+        slug="arbol-genealogico"
+        selectedDate="2026-04-15"
+        selectedTime="10:00"
+      />,
+      { wrapper }
+    );
+
+    expect(screen.getByTestId('slot-summary-time')).toHaveTextContent('10:00');
+  });
+
+  it('should render slot-summary-date as empty string when selectedDate is empty', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: mockService,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+    } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
+
+    render(<ServicePaymentPage slug="arbol-genealogico" selectedDate="" selectedTime="10:00" />, {
+      wrapper,
+    });
+
+    expect(screen.getByTestId('slot-summary-date')).toHaveTextContent('');
   });
 
   it('should render "Pagar con Mercado Pago" button', () => {
@@ -213,14 +291,14 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     expect(screen.getByRole('button', { name: /pagar con mercado pago/i })).toBeInTheDocument();
   });
 
   // ---- Payment button click flow ----
 
-  it('should call createPurchase with correct serviceId when button is clicked', async () => {
+  it('should call createPurchase with serviceId, selectedDate and selectedTime', async () => {
     vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
       data: mockService,
       isLoading: false,
@@ -230,7 +308,7 @@ describe('ServicePaymentPage', () => {
 
     mockMutateAsync.mockResolvedValue({
       ...mockPurchase,
-      mercadoPagoUrl: 'https://mp.com/pay/123',
+      initPoint: 'https://mp.com/pay/123',
     });
 
     vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
@@ -238,11 +316,22 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(
+      <ServicePaymentPage
+        slug="arbol-genealogico"
+        selectedDate="2026-04-15"
+        selectedTime="10:00"
+      />,
+      { wrapper }
+    );
 
     await userEvent.click(screen.getByRole('button', { name: /pagar con mercado pago/i }));
 
-    expect(mockMutateAsync).toHaveBeenCalledWith({ holisticServiceId: 1 });
+    expect(mockMutateAsync).toHaveBeenCalledWith({
+      holisticServiceId: 1,
+      selectedDate: '2026-04-15',
+      selectedTime: '10:00',
+    });
   });
 
   it('should open MP link in new tab after purchase creation', async () => {
@@ -255,7 +344,7 @@ describe('ServicePaymentPage', () => {
 
     mockMutateAsync.mockResolvedValue({
       ...mockPurchase,
-      mercadoPagoUrl: 'https://mp.com/pay/123',
+      initPoint: 'https://mp.com/pay/123',
     });
 
     vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
@@ -263,7 +352,7 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     await userEvent.click(screen.getByRole('button', { name: /pagar con mercado pago/i }));
 
@@ -285,7 +374,7 @@ describe('ServicePaymentPage', () => {
 
     mockMutateAsync.mockResolvedValue({
       ...mockPurchase,
-      mercadoPagoUrl: 'https://mp.com/pay/123',
+      initPoint: 'https://mp.com/pay/123',
     });
 
     vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
@@ -293,7 +382,7 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     await userEvent.click(screen.getByRole('button', { name: /pagar con mercado pago/i }));
 
@@ -321,7 +410,7 @@ describe('ServicePaymentPage', () => {
       isPending: false,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     await userEvent.click(screen.getByRole('button', { name: /pagar con mercado pago/i }));
 
@@ -345,7 +434,7 @@ describe('ServicePaymentPage', () => {
       isPending: true,
     } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
 
-    render(<ServicePaymentPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServicePaymentPage slug="arbol-genealogico" {...DEFAULT_SLOT} />, { wrapper });
 
     expect(screen.getByRole('button', { name: /procesando/i })).toBeDisabled();
   });

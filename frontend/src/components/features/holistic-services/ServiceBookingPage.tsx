@@ -1,6 +1,12 @@
 /**
  * ServiceBookingPage Component
  *
+ * @deprecated T-SF-D02 — Esta página ya no forma parte del flujo principal.
+ * La selección de fecha y horario ahora ocurre ANTES del pago, en ServiceDetailPage.
+ * La sesión se crea automáticamente en el backend al confirmar el pago (webhook de MP).
+ * Esta ruta (/servicios/reservar/[purchaseId]) se mantiene por compatibilidad pero
+ * no debe utilizarse en nuevos flujos.
+ *
  * Authenticated page for booking a holistic service session after payment approval.
  * Validates purchase ownership and payment status before rendering BookingCalendar.
  * Shows a pending notice if payment not yet approved.

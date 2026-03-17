@@ -1,10 +1,12 @@
 /**
  * Tests for ServiceDetailPage component
  *
- * TDD RED phase — tests written before implementation.
+ * Updated for T-SF-D02: interactive calendar pre-payment flow.
+ * User must select a date + time slot before the CTA is enabled.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ServiceDetailPage } from './ServiceDetailPage';
 import * as useHolisticServicesHook from '@/hooks/api/useHolisticServices';
@@ -14,14 +16,26 @@ vi.mock('@/hooks/api/useHolisticServices', () => ({
   useHolisticServiceDetail: vi.fn(),
 }));
 
-// Mock BookingCalendar
+// Mock BookingCalendar — exposes onBook callback via a test button
 vi.mock('@/components/features/marketplace/BookingCalendar', () => ({
-  BookingCalendar: ({ readOnly, serviceSlug }: { readOnly?: boolean; serviceSlug?: string }) => (
+  BookingCalendar: ({
+    readOnly,
+    serviceSlug,
+    onBook,
+  }: {
+    readOnly?: boolean;
+    serviceSlug?: string;
+    onBook?: (date: string, time: string, duration: number) => void;
+  }) => (
     <div
       data-testid="booking-calendar"
       data-readonly={String(readOnly ?? false)}
       data-service-slug={serviceSlug ?? ''}
-    />
+    >
+      <button data-testid="mock-select-slot" onClick={() => onBook?.('2026-04-15', '10:00', 90)}>
+        Seleccionar horario
+      </button>
+    </div>
   ),
 }));
 
@@ -145,7 +159,7 @@ describe('ServiceDetailPage', () => {
     expect(screen.queryByText(/número de whatsapp/i)).not.toBeInTheDocument();
   });
 
-  it('should render BookingCalendar with readOnly=true', () => {
+  it('should render BookingCalendar with readOnly=false (interactive)', () => {
     vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
       data: mockServiceDetail,
       isLoading: false,
@@ -157,7 +171,7 @@ describe('ServiceDetailPage', () => {
 
     const calendar = screen.getByTestId('booking-calendar');
     expect(calendar).toBeInTheDocument();
-    expect(calendar).toHaveAttribute('data-readonly', 'true');
+    expect(calendar).toHaveAttribute('data-readonly', 'false');
   });
 
   it('should pass serviceSlug to BookingCalendar', () => {
@@ -187,7 +201,7 @@ describe('ServiceDetailPage', () => {
     expect(screen.getByText(/fechas disponibles son al momento/i)).toBeInTheDocument();
   });
 
-  it('should render "Contratar servicio" button linking to payment page', () => {
+  it('should render "Contratar servicio" button disabled when no slot selected', () => {
     vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
       data: mockServiceDetail,
       isLoading: false,
@@ -197,9 +211,60 @@ describe('ServiceDetailPage', () => {
 
     render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
 
+    const button = screen.getByTestId('contratar-button');
+    expect(button).toBeInTheDocument();
+    expect(button).toBeDisabled();
+  });
+
+  it('should show slot required hint when no slot is selected', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: mockServiceDetail,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+
+    expect(screen.getByTestId('slot-required-hint')).toBeInTheDocument();
+  });
+
+  it('should enable CTA and show correct href after slot is selected', async () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: mockServiceDetail,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+
+    // Simulate slot selection via BookingCalendar mock
+    await userEvent.click(screen.getByTestId('mock-select-slot'));
+
     const link = screen.getByRole('link', { name: /contratar servicio/i });
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', '/servicios/arbol-genealogico/pago');
+    expect(link).toHaveAttribute(
+      'href',
+      '/servicios/arbol-genealogico/pago?date=2026-04-15&time=10%3A00'
+    );
+  });
+
+  it('should show selected slot hint after slot is picked', async () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: mockServiceDetail,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+
+    await userEvent.click(screen.getByTestId('mock-select-slot'));
+
+    expect(screen.getByTestId('slot-selected-hint')).toBeInTheDocument();
+    expect(screen.getByText(/2026-04-15/)).toBeInTheDocument();
+    expect(screen.getByText(/10:00/)).toBeInTheDocument();
   });
 
   it('should render skeleton when loading', () => {

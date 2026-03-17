@@ -42,6 +42,7 @@ const mockPurchasePending: ServicePurchase = {
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
+  initPoint: null,
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedAt: '2025-01-01T00:00:00.000Z',
 };
@@ -63,6 +64,7 @@ const mockPurchasePaidNoSession: ServicePurchase = {
   paymentReference: 'ref-abc',
   paidAt: '2025-01-05T12:00:00.000Z',
   whatsappNumber: '+5491112345678',
+  initPoint: null,
   createdAt: '2025-01-03T00:00:00.000Z',
   updatedAt: '2025-01-05T12:00:00.000Z',
 };
@@ -84,6 +86,7 @@ const mockPurchasePaidWithSession: ServicePurchase = {
   paymentReference: 'ref-xyz',
   paidAt: '2025-02-01T12:00:00.000Z',
   whatsappNumber: '+5491112345678',
+  initPoint: null,
   createdAt: '2025-01-28T00:00:00.000Z',
   updatedAt: '2025-02-01T12:00:00.000Z',
 };
@@ -104,6 +107,7 @@ const mockPurchaseCancelled: ServicePurchase = {
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
+  initPoint: null,
   createdAt: '2025-01-10T00:00:00.000Z',
   updatedAt: '2025-01-10T00:00:00.000Z',
 };

@@ -2,9 +2,13 @@
  * ServicePaymentPage Component
  *
  * Authenticated page for initiating a Mercado Pago payment for a holistic service.
- * Shows a summary (name, price, duration) and a "Pagar con Mercado Pago" button.
- * After clicking, opens the MP link in a new tab and shows a verification message.
+ * Receives the pre-selected date and time slot (from query params, forwarded by the page).
+ * Shows a full summary: service name, price, duration, selected date + time.
+ * After clicking "Pagar", creates a purchase with selectedDate + selectedTime, then
+ * opens the MP link in a new tab and shows a verification message.
  * Handles loading skeleton, error state, and purchase creation failure.
+ *
+ * T-SF-D02: Rediseño — slot recibido pre-pago.
  */
 'use client';
 
@@ -23,6 +27,10 @@ import { ROUTES } from '@/lib/constants/routes';
 
 interface ServicePaymentPageProps {
   slug: string;
+  /** Date selected by the user on the detail page (YYYY-MM-DD) */
+  selectedDate: string;
+  /** Time slot selected by the user on the detail page (HH:MM) */
+  selectedTime: string;
 }
 
 // ============================================================================
@@ -33,11 +41,23 @@ function formatArs(amount: number): string {
   return amount.toLocaleString('es-AR');
 }
 
+/**
+ * Formats a YYYY-MM-DD date string into a human-readable Spanish date.
+ * e.g. "2026-04-15" → "15/04/2026"
+ * Returns empty string if input is empty or not in expected format.
+ */
+function formatDate(dateStr: string): string {
+  const parts = dateStr.split('-');
+  if (parts.length !== 3 || parts.some((p) => p === '')) return '';
+  const [year, month, day] = parts;
+  return `${day}/${month}/${year}`;
+}
+
 // ============================================================================
 // Component
 // ============================================================================
 
-export function ServicePaymentPage({ slug }: ServicePaymentPageProps) {
+export function ServicePaymentPage({ slug, selectedDate, selectedTime }: ServicePaymentPageProps) {
   const { data: service, isLoading, isError } = useHolisticServiceDetail(slug);
   const { mutateAsync: createPurchase, isPending } = useCreatePurchase();
 
@@ -54,10 +74,14 @@ export function ServicePaymentPage({ slug }: ServicePaymentPageProps) {
     const mpTab = window.open('', '_blank');
 
     try {
-      const purchase = await createPurchase({ holisticServiceId: service.id });
+      const purchase = await createPurchase({
+        holisticServiceId: service.id,
+        selectedDate,
+        selectedTime,
+      });
 
-      if (purchase.mercadoPagoUrl && mpTab) {
-        mpTab.location.href = purchase.mercadoPagoUrl;
+      if (purchase.initPoint && mpTab) {
+        mpTab.location.href = purchase.initPoint;
       } else {
         // Close the blank tab if there is no URL to navigate to
         mpTab?.close();
@@ -70,7 +94,7 @@ export function ServicePaymentPage({ slug }: ServicePaymentPageProps) {
         'No fue posible iniciar el pago. Es posible que ya hayas contratado este servicio. Por favor, revisá "Mis Servicios" o intentá de nuevo.'
       );
     }
-  }, [service, createPurchase]);
+  }, [service, createPurchase, selectedDate, selectedTime]);
 
   // ---- Loading state ----
   if (isLoading) {
@@ -136,6 +160,24 @@ export function ServicePaymentPage({ slug }: ServicePaymentPageProps) {
               </p>
             </div>
           </div>
+
+          {/* Selected slot summary */}
+          <div data-testid="slot-summary" className="border-t pt-4">
+            <div className="flex flex-wrap gap-6">
+              <div>
+                <span className="text-text-secondary text-sm">Fecha</span>
+                <p className="font-medium" data-testid="slot-summary-date">
+                  {formatDate(selectedDate)}
+                </p>
+              </div>
+              <div>
+                <span className="text-text-secondary text-sm">Horario</span>
+                <p className="font-medium" data-testid="slot-summary-time">
+                  {selectedTime}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Post-click verification message */}
@@ -146,8 +188,8 @@ export function ServicePaymentPage({ slug }: ServicePaymentPageProps) {
             role="status"
           >
             <p className="text-sm leading-relaxed">
-              Tu pago está siendo verificado. Una vez confirmado, te habilitaremos la reserva de
-              turno y recibirás un email con todos los datos.
+              Tu pago está siendo verificado. Una vez confirmado, recibirás un email con todos los
+              datos de tu sesión.
             </p>
           </div>
         )}
