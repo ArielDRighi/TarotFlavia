@@ -1,22 +1,27 @@
 /**
  * Tests for MyServicesList component
  *
- * TDD RED phase — tests written before implementation.
+ * TDD — tests for T-SF-D03: full appointment info in "Mis Servicios" cards.
+ *
+ * Covers:
+ * - Skeleton while loading
+ * - Empty state with catalog link
+ * - Service name, duration, price in each card
+ * - Status badges: Pendiente (amber), Confirmado (green), Completado (grey), Cancelado (red)
+ * - Confirmed state: selectedDate + selectedTime from purchase
+ * - Pending state: initPoint link to retry payment
+ * - WhatsApp link shown only for confirmed/completed state
+ * - "Reservar Turno" button NOT shown (deprecated flow)
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MyServicesList } from './MyServicesList';
 import * as useHolisticServicesHook from '@/hooks/api/useHolisticServices';
-import * as useSessionsHook from '@/hooks/api/useSessions';
-import type { ServicePurchase, SessionDetail } from '@/types';
+import type { ServicePurchase } from '@/types';
 
 vi.mock('@/hooks/api/useHolisticServices', () => ({
   useMyPurchases: vi.fn(),
-}));
-
-vi.mock('@/hooks/api/useSessions', () => ({
-  useSessionDetail: vi.fn(),
 }));
 
 // Mock Next.js Link
@@ -25,6 +30,10 @@ vi.mock('next/link', () => ({
     <a href={href}>{children}</a>
   ),
 }));
+
+// ============================================================================
+// Mock data
+// ============================================================================
 
 const mockPurchasePending: ServicePurchase = {
   id: 10,
@@ -42,12 +51,16 @@ const mockPurchasePending: ServicePurchase = {
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
-  initPoint: null,
+  initPoint: 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=abc123',
+  selectedDate: null,
+  selectedTime: null,
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedAt: '2025-01-01T00:00:00.000Z',
 };
 
-const mockPurchasePaidNoSession: ServicePurchase = {
+// Paid purchase with selectedDate/selectedTime (new flow from T-SF-D02)
+// Future date → badge "Confirmado"
+const mockPurchaseConfirmed: ServicePurchase = {
   id: 11,
   userId: 7,
   holisticServiceId: 2,
@@ -65,11 +78,14 @@ const mockPurchasePaidNoSession: ServicePurchase = {
   paidAt: '2025-01-05T12:00:00.000Z',
   whatsappNumber: '+5491112345678',
   initPoint: null,
+  selectedDate: '2099-12-31',
+  selectedTime: '14:00',
   createdAt: '2025-01-03T00:00:00.000Z',
   updatedAt: '2025-01-05T12:00:00.000Z',
 };
 
-const mockPurchasePaidWithSession: ServicePurchase = {
+// Paid purchase with past date → badge "Completado"
+const mockPurchaseCompleted: ServicePurchase = {
   id: 12,
   userId: 7,
   holisticServiceId: 3,
@@ -80,15 +96,17 @@ const mockPurchasePaidWithSession: ServicePurchase = {
     durationMinutes: 60,
     sessionType: 'energy_cleaning',
   },
-  sessionId: 55,
+  sessionId: null,
   paymentStatus: 'paid',
   amountArs: 10000,
   paymentReference: 'ref-xyz',
-  paidAt: '2025-02-01T12:00:00.000Z',
+  paidAt: '2020-02-01T12:00:00.000Z',
   whatsappNumber: '+5491112345678',
   initPoint: null,
-  createdAt: '2025-01-28T00:00:00.000Z',
-  updatedAt: '2025-02-01T12:00:00.000Z',
+  selectedDate: '2020-04-20',
+  selectedTime: '10:00',
+  createdAt: '2020-01-28T00:00:00.000Z',
+  updatedAt: '2020-02-01T12:00:00.000Z',
 };
 
 const mockPurchaseCancelled: ServicePurchase = {
@@ -108,26 +126,15 @@ const mockPurchaseCancelled: ServicePurchase = {
   paymentReference: null,
   paidAt: null,
   initPoint: null,
+  selectedDate: null,
+  selectedTime: null,
   createdAt: '2025-01-10T00:00:00.000Z',
   updatedAt: '2025-01-10T00:00:00.000Z',
 };
 
-const mockSessionDetail: SessionDetail = {
-  id: 55,
-  tarotistaId: 1,
-  userId: 7,
-  sessionDate: '2026-04-20',
-  sessionTime: '14:00',
-  durationMinutes: 60,
-  sessionType: 'ENERGY_CLEANING',
-  status: 'confirmed',
-  priceUsd: 0,
-  paymentStatus: 'PAID',
-  googleMeetLink: '',
-  userEmail: 'user@test.com',
-  createdAt: '2025-02-01T12:00:00.000Z',
-  updatedAt: '2025-02-01T12:00:00.000Z',
-};
+// ============================================================================
+// Tests
+// ============================================================================
 
 describe('MyServicesList', () => {
   let queryClient: QueryClient;
@@ -135,14 +142,6 @@ describe('MyServicesList', () => {
   beforeEach(() => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     vi.clearAllMocks();
-
-    // Default: no session detail (for purchases without sessionId)
-    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      isError: false,
-      error: null,
-    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -196,11 +195,11 @@ describe('MyServicesList', () => {
     expect(screen.getByTestId('my-services-list')).toBeInTheDocument();
   });
 
-  // ---- Purchase cards ----
+  // ---- Service name ----
 
   it('should render service name in each card', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
-      data: [mockPurchasePending, mockPurchasePaidNoSession],
+      data: [mockPurchasePending, mockPurchaseConfirmed],
       isLoading: false,
       isError: false,
       error: null,
@@ -211,6 +210,26 @@ describe('MyServicesList', () => {
     expect(screen.getByText('Árbol Genealógico')).toBeInTheDocument();
     expect(screen.getByText('Péndulo Hebreo')).toBeInTheDocument();
   });
+
+  // ---- Duration ----
+
+  it('should render service duration in each card', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(screen.getByTestId(`purchase-duration-${mockPurchasePending.id}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`purchase-duration-${mockPurchasePending.id}`)).toHaveTextContent(
+      '90'
+    );
+  });
+
+  // ---- Price ----
 
   it('should render formatted price in ARS for each card', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
@@ -228,7 +247,7 @@ describe('MyServicesList', () => {
 
   // ---- Status badges ----
 
-  it('should render amber badge for pending status', () => {
+  it('should render "Pendiente" amber badge for pending status', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: [mockPurchasePending],
       isLoading: false,
@@ -240,12 +259,13 @@ describe('MyServicesList', () => {
 
     const badge = screen.getByTestId('purchase-status-badge-10');
     expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent(/pendiente/i);
     expect(badge.className).toMatch(/amber|yellow|orange/i);
   });
 
-  it('should render green badge for paid status', () => {
+  it('should render "Confirmado" green badge for paid+future date status', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
-      data: [mockPurchasePaidNoSession],
+      data: [mockPurchaseConfirmed],
       isLoading: false,
       isError: false,
       error: null,
@@ -255,10 +275,27 @@ describe('MyServicesList', () => {
 
     const badge = screen.getByTestId('purchase-status-badge-11');
     expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent(/confirmado/i);
     expect(badge.className).toMatch(/green|emerald|teal/i);
   });
 
-  it('should render red badge for cancelled status', () => {
+  it('should render "Completado" grey badge for paid+past date status', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchaseCompleted],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    const badge = screen.getByTestId('purchase-status-badge-12');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent(/completado/i);
+    expect(badge.className).toMatch(/gray|grey|slate|neutral/i);
+  });
+
+  it('should render "Cancelado" red badge for cancelled status', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: [mockPurchaseCancelled],
       isLoading: false,
@@ -270,14 +307,15 @@ describe('MyServicesList', () => {
 
     const badge = screen.getByTestId('purchase-status-badge-13');
     expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent(/cancelado/i);
     expect(badge.className).toMatch(/red|rose|destructive/i);
   });
 
-  // ---- Reservar Turno button (paid, no session) ----
+  // ---- Turno info (confirmed/completed): selectedDate + selectedTime ----
 
-  it('should render "Reservar Turno" button when paid without session', () => {
+  it('should show selectedDate and selectedTime for confirmed purchase', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
-      data: [mockPurchasePaidNoSession],
+      data: [mockPurchaseConfirmed],
       isLoading: false,
       isError: false,
       error: null,
@@ -285,12 +323,28 @@ describe('MyServicesList', () => {
 
     render(<MyServicesList />, { wrapper });
 
-    const link = screen.getByRole('link', { name: /reservar turno/i });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', '/servicios/reservar/11');
+    const dateEl = screen.getByTestId(`purchase-appointment-date-${mockPurchaseConfirmed.id}`);
+    const timeEl = screen.getByTestId(`purchase-appointment-time-${mockPurchaseConfirmed.id}`);
+    expect(dateEl).toBeInTheDocument();
+    expect(timeEl).toBeInTheDocument();
+    expect(timeEl).toHaveTextContent('14:00');
   });
 
-  it('should NOT render "Reservar Turno" button for pending purchase', () => {
+  it('should show selectedDate and selectedTime for completed purchase', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchaseCompleted],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    const timeEl = screen.getByTestId(`purchase-appointment-time-${mockPurchaseCompleted.id}`);
+    expect(timeEl).toHaveTextContent('10:00');
+  });
+
+  it('should NOT show appointment date section for pending purchase', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: [mockPurchasePending],
       isLoading: false,
@@ -300,95 +354,103 @@ describe('MyServicesList', () => {
 
     render(<MyServicesList />, { wrapper });
 
-    expect(screen.queryByRole('link', { name: /reservar turno/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`purchase-appointment-date-${mockPurchasePending.id}`)
+    ).not.toBeInTheDocument();
   });
 
-  // ---- Session info (paid with session) ----
+  // ---- WhatsApp link ----
 
-  it('should render WhatsApp link when purchase is paid with session booked', () => {
+  it('should show WhatsApp link for confirmed purchase', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
-      data: [mockPurchasePaidWithSession],
+      data: [mockPurchaseConfirmed],
       isLoading: false,
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
 
-    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
-      data: mockSessionDetail,
-      isLoading: false,
-      isError: false,
-      error: null,
-    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
-
     render(<MyServicesList />, { wrapper });
 
-    const waLink = screen.getByRole('link', { name: /whatsapp/i });
+    const waLink = screen.getByTestId(`whatsapp-link-${mockPurchaseConfirmed.id}`);
     expect(waLink).toBeInTheDocument();
     expect(waLink).toHaveAttribute('href', expect.stringContaining('wa.me'));
   });
 
-  it('should NOT render "Reservar Turno" when session already booked', () => {
+  it('should show WhatsApp link for completed purchase', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
-      data: [mockPurchasePaidWithSession],
+      data: [mockPurchaseCompleted],
       isLoading: false,
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
 
-    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
-      data: mockSessionDetail,
-      isLoading: false,
-      isError: false,
-      error: null,
-    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
-
     render(<MyServicesList />, { wrapper });
 
-    expect(screen.queryByRole('link', { name: /reservar turno/i })).not.toBeInTheDocument();
+    const waLink = screen.getByTestId(`whatsapp-link-${mockPurchaseCompleted.id}`);
+    expect(waLink).toBeInTheDocument();
+    expect(waLink).toHaveAttribute('href', expect.stringContaining('wa.me'));
   });
 
-  it('should show session date and time when session is booked', async () => {
+  it('should NOT show WhatsApp link for pending purchase', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
-      data: [mockPurchasePaidWithSession],
+      data: [mockPurchasePending],
       isLoading: false,
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
 
-    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
-      data: mockSessionDetail,
-      isLoading: false,
-      isError: false,
-      error: null,
-    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
-
     render(<MyServicesList />, { wrapper });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('session-date-12')).toBeInTheDocument();
-      expect(screen.getByTestId('session-time-12')).toBeInTheDocument();
-    });
-
-    expect(screen.getByTestId('session-time-12')).toHaveTextContent('14:00');
+    expect(screen.queryByTestId(`whatsapp-link-${mockPurchasePending.id}`)).not.toBeInTheDocument();
   });
 
-  it('should render session-info container when purchase has session', () => {
+  it('should NOT show WhatsApp link for cancelled purchase', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
-      data: [mockPurchasePaidWithSession],
+      data: [mockPurchaseCancelled],
       isLoading: false,
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
 
-    vi.mocked(useSessionsHook.useSessionDetail).mockReturnValue({
-      data: undefined,
-      isLoading: true,
+    render(<MyServicesList />, { wrapper });
+
+    expect(
+      screen.queryByTestId(`whatsapp-link-${mockPurchaseCancelled.id}`)
+    ).not.toBeInTheDocument();
+  });
+
+  // ---- Retry payment link (pending) ----
+
+  it('should show retry payment link for pending purchase with initPoint', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending],
+      isLoading: false,
       isError: false,
       error: null,
-    } as unknown as ReturnType<typeof useSessionsHook.useSessionDetail>);
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
 
     render(<MyServicesList />, { wrapper });
 
-    expect(screen.getByTestId('session-info-12')).toBeInTheDocument();
+    const retryLink = screen.getByTestId(`retry-payment-link-${mockPurchasePending.id}`);
+    expect(retryLink).toBeInTheDocument();
+    expect(retryLink).toHaveAttribute(
+      'href',
+      'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=abc123'
+    );
+  });
+
+  it('should NOT show retry payment link for confirmed purchase', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchaseConfirmed],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(
+      screen.queryByTestId(`retry-payment-link-${mockPurchaseConfirmed.id}`)
+    ).not.toBeInTheDocument();
   });
 });

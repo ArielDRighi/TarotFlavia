@@ -2,23 +2,43 @@
  * MyServicesList Component
  *
  * Authenticated page listing the user's holistic service purchases.
- * Shows purchase cards with status badges, price, and action buttons.
- * - pending: amber badge
- * - paid (no session): green badge + "Reservar Turno" button
- * - paid (with session): green badge + WhatsApp link
- * - cancelled: red badge
- * Empty state: message + link to catalog.
+ * Shows purchase cards with complete appointment information:
+ * - Nombre del servicio, duración, precio en ARS
+ * - Estado visual: Pendiente (amber), Confirmado (green), Completado (grey), Cancelado (red)
+ * - Turno confirmado: fecha, hora, link WhatsApp
+ * - Pendiente de pago: link para reintentar el pago en MP
+ * - Estado vacío: mensaje + link al catálogo
  */
 'use client';
 
 import Link from 'next/link';
+import { CalendarDays, Clock, MessageCircle, CreditCard } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
-import { useSessionDetail } from '@/hooks/api/useSessions';
 import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
-import type { ServicePurchase, PurchaseStatus } from '@/types';
+import type { ServicePurchase } from '@/types';
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: 'Pendiente',
+  confirmed: 'Confirmado',
+  completed: 'Completado',
+  cancelled: 'Cancelado',
+  refunded: 'Reembolsado',
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  pending: 'bg-amber-100 text-amber-800 border-amber-300',
+  confirmed: 'bg-green-100 text-green-800 border-green-300',
+  completed: 'bg-gray-100 text-gray-600 border-gray-300',
+  cancelled: 'bg-red-100 text-red-800 border-red-300',
+  refunded: 'bg-rose-100 text-rose-800 border-rose-300',
+};
 
 // ============================================================================
 // Helpers
@@ -28,8 +48,29 @@ function formatArs(amount: number): string {
   return amount.toLocaleString('es-AR');
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('es-AR', {
+/**
+ * Derives a display status from the purchase.
+ * - "paid" with future selectedDate → "confirmed"
+ * - "paid" with past selectedDate (or no date) → "completed"
+ * - all others: use paymentStatus as-is
+ */
+function deriveDisplayStatus(purchase: ServicePurchase): string {
+  if (purchase.paymentStatus !== 'paid') return purchase.paymentStatus;
+
+  if (!purchase.selectedDate) return 'completed';
+
+  const appointmentDate = new Date(purchase.selectedDate + 'T23:59:59');
+  const today = new Date();
+  return appointmentDate >= today ? 'confirmed' : 'completed';
+}
+
+/**
+ * Formats a date string (YYYY-MM-DD) for display in es-AR locale.
+ * Uses noon-local trick to avoid UTC-midnight day shift.
+ */
+function formatAppointmentDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day, 12, 0, 0).toLocaleDateString('es-AR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -41,34 +82,23 @@ function formatDate(dateStr: string): string {
 // ============================================================================
 
 interface StatusBadgeProps {
-  status: PurchaseStatus;
+  displayStatus: string;
   purchaseId: number;
 }
 
-function StatusBadge({ status, purchaseId }: StatusBadgeProps) {
-  const label: Record<PurchaseStatus, string> = {
-    pending: 'Pendiente',
-    paid: 'Pagado',
-    cancelled: 'Cancelado',
-    refunded: 'Reembolsado',
-  };
-
-  const colorClass: Record<PurchaseStatus, string> = {
-    pending: 'bg-amber-100 text-amber-800 border-amber-300',
-    paid: 'bg-green-100 text-green-800 border-green-300',
-    cancelled: 'bg-red-100 text-red-800 border-red-300',
-    refunded: 'bg-rose-100 text-rose-800 border-rose-300',
-  };
+function StatusBadge({ displayStatus, purchaseId }: StatusBadgeProps) {
+  const label = STATUS_LABEL[displayStatus] ?? displayStatus;
+  const colorClass = STATUS_COLOR[displayStatus] ?? 'bg-gray-100 text-gray-600 border-gray-300';
 
   return (
     <span
       data-testid={`purchase-status-badge-${purchaseId}`}
       className={cn(
         'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        colorClass[status]
+        colorClass
       )}
     >
-      {label[status]}
+      {label}
     </span>
   );
 }
@@ -77,50 +107,14 @@ interface PurchaseCardProps {
   purchase: ServicePurchase;
 }
 
-interface SessionInfoProps {
-  sessionId: number;
-  whatsappNumber?: string;
-  purchaseId: number;
-}
-
-function SessionInfo({ sessionId, whatsappNumber, purchaseId }: SessionInfoProps) {
-  const { data: session } = useSessionDetail(sessionId);
-
-  return (
-    <div data-testid={`session-info-${purchaseId}`} className="space-y-1">
-      {session && (
-        <div className="text-text-secondary flex flex-wrap gap-4 text-sm">
-          <span data-testid={`session-date-${purchaseId}`}>
-            Fecha:{' '}
-            {new Date(session.sessionDate + 'T' + session.sessionTime).toLocaleDateString('es-AR', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-            })}
-          </span>
-          <span data-testid={`session-time-${purchaseId}`}>Hora: {session.sessionTime}</span>
-        </div>
-      )}
-
-      {whatsappNumber && (
-        <a
-          href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-3 py-1.5 text-sm text-white hover:bg-green-600"
-          data-testid={`whatsapp-link-${purchaseId}`}
-        >
-          Contactar por WhatsApp
-        </a>
-      )}
-    </div>
-  );
-}
-
 function PurchaseCard({ purchase }: PurchaseCardProps) {
   const serviceName = purchase.holisticService?.name ?? 'Servicio';
-  const isPaid = purchase.paymentStatus === 'paid';
-  const hasSession = purchase.sessionId !== null;
+  const durationMinutes = purchase.holisticService?.durationMinutes ?? null;
+  const displayStatus = deriveDisplayStatus(purchase);
+  const hasAppointment = purchase.selectedDate && purchase.selectedTime;
+  const showWhatsApp =
+    (displayStatus === 'confirmed' || displayStatus === 'completed') && purchase.whatsappNumber;
+  const showRetryPayment = displayStatus === 'pending' && purchase.initPoint;
 
   return (
     <div
@@ -130,30 +124,73 @@ function PurchaseCard({ purchase }: PurchaseCardProps) {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-serif text-lg font-medium">{serviceName}</h3>
-        <StatusBadge status={purchase.paymentStatus} purchaseId={purchase.id} />
+        <StatusBadge displayStatus={displayStatus} purchaseId={purchase.id} />
       </div>
 
-      {/* Details */}
+      {/* Service details */}
       <div className="text-text-secondary flex flex-wrap gap-4 text-sm">
         <span>
           ${formatArs(purchase.amountArs)} <span className="text-xs">ARS</span>
         </span>
-        <span>Compra: {formatDate(purchase.createdAt)}</span>
+        {durationMinutes !== null && (
+          <span
+            data-testid={`purchase-duration-${purchase.id}`}
+            className="flex items-center gap-1"
+          >
+            <Clock className="h-3.5 w-3.5" />
+            {durationMinutes} min
+          </span>
+        )}
       </div>
 
-      {/* Actions */}
-      {isPaid && !hasSession && (
-        <Button asChild size="sm" className="mt-1">
-          <Link href={ROUTES.SERVICIO_RESERVAR(purchase.id)}>Reservar Turno</Link>
-        </Button>
+      {/* Appointment info (confirmed / completed) */}
+      {hasAppointment && (
+        <div className="rounded-lg bg-gray-50 p-3 text-sm">
+          <div className="flex flex-wrap gap-4">
+            <span
+              data-testid={`purchase-appointment-date-${purchase.id}`}
+              className="flex items-center gap-1.5 font-medium"
+            >
+              <CalendarDays className="h-4 w-4 text-purple-600" />
+              {formatAppointmentDate(purchase.selectedDate as string)}
+            </span>
+            <span
+              data-testid={`purchase-appointment-time-${purchase.id}`}
+              className="flex items-center gap-1.5 font-medium"
+            >
+              <Clock className="h-4 w-4 text-purple-600" />
+              {purchase.selectedTime}
+            </span>
+          </div>
+        </div>
       )}
 
-      {isPaid && hasSession && (
-        <SessionInfo
-          sessionId={purchase.sessionId as number}
-          whatsappNumber={purchase.whatsappNumber}
-          purchaseId={purchase.id}
-        />
+      {/* WhatsApp link (confirmed / completed) */}
+      {showWhatsApp && (
+        <a
+          href={`https://wa.me/${(purchase.whatsappNumber as string).replace(/\D/g, '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-3 py-1.5 text-sm text-white hover:bg-green-600"
+          data-testid={`whatsapp-link-${purchase.id}`}
+        >
+          <MessageCircle className="h-4 w-4" />
+          Contactar por WhatsApp
+        </a>
+      )}
+
+      {/* Retry payment (pending) */}
+      {showRetryPayment && (
+        <a
+          href={purchase.initPoint as string}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-50 px-3 py-1.5 text-sm text-amber-800 hover:bg-amber-100"
+          data-testid={`retry-payment-link-${purchase.id}`}
+        >
+          <CreditCard className="h-4 w-4" />
+          Completar pago en Mercado Pago
+        </a>
       )}
     </div>
   );

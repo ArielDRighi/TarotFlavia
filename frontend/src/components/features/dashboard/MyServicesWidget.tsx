@@ -1,25 +1,37 @@
 'use client';
 
 import Link from 'next/link';
-import { HandHeart, ArrowRight, CalendarCheck, Clock, AlertCircle } from 'lucide-react';
+import { HandHeart, ArrowRight, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
 import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
-import type { ServicePurchase, PurchaseStatus } from '@/types';
+import type { ServicePurchase } from '@/types';
 
 // ============================================================================
 // Constants
 // ============================================================================
 
-const STATUS_CONFIG: Record<PurchaseStatus, { label: string; className: string }> = {
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   pending: { label: 'Pendiente', className: 'bg-amber-100 text-amber-800' },
-  paid: { label: 'Pagado', className: 'bg-green-100 text-green-800' },
+  confirmed: { label: 'Confirmado', className: 'bg-green-100 text-green-800' },
+  completed: { label: 'Completado', className: 'bg-gray-100 text-gray-600' },
   cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-800' },
   refunded: { label: 'Reembolsado', className: 'bg-rose-100 text-rose-800' },
 };
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function deriveDisplayStatus(purchase: ServicePurchase): string {
+  if (purchase.paymentStatus !== 'paid') return purchase.paymentStatus;
+  if (!purchase.selectedDate) return 'completed';
+  const appointmentDate = new Date(purchase.selectedDate + 'T23:59:59');
+  return appointmentDate >= new Date() ? 'confirmed' : 'completed';
+}
 
 const MAX_VISIBLE_PURCHASES = 3;
 
@@ -33,8 +45,8 @@ interface PurchaseItemProps {
 
 function PurchaseItem({ purchase }: PurchaseItemProps) {
   const serviceName = purchase.holisticService?.name ?? 'Servicio';
-  const config = STATUS_CONFIG[purchase.paymentStatus];
-  const isPaidNoSession = purchase.paymentStatus === 'paid' && purchase.sessionId === null;
+  const displayStatus = deriveDisplayStatus(purchase);
+  const config = STATUS_CONFIG[displayStatus] ?? STATUS_CONFIG['pending'];
 
   return (
     <div
@@ -52,19 +64,8 @@ function PurchaseItem({ purchase }: PurchaseItemProps) {
           >
             {config.label}
           </span>
-          {isPaidNoSession && (
-            <Link
-              href={ROUTES.SERVICIO_RESERVAR(purchase.id)}
-              className="inline-flex items-center gap-1 text-xs font-medium text-purple-600 hover:text-purple-800"
-              data-testid={`widget-book-${purchase.id}`}
-            >
-              <CalendarCheck className="h-3 w-3" />
-              Reservar turno
-            </Link>
-          )}
         </div>
       </div>
-      <Clock className="h-4 w-4 shrink-0 text-gray-400" />
     </div>
   );
 }
