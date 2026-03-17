@@ -1382,7 +1382,7 @@ Rediseñar el flujo de contratación para que el usuario seleccione fecha y hora
 
 - [x] Recibir fecha y horario seleccionados (via query params, state o store)
 - [x] Mostrar resumen: servicio + fecha + hora + duración + precio
-- [x] Validar que el slot sigue disponible antes de permitir el pago (llamar al endpoint de available-slots)
+- [x] Validar que el slot sigue disponible antes de permitir el pago (el backend enforces disponibilidad al crear la purchase y devuelve error si el slot fue tomado; no se realiza un pre-check separado en frontend)
 - [x] Al crear la purchase, enviar `selectedDate` y `selectedTime` al backend
 - [x] Abrir link de MP (init_point) en nueva pestaña
 - [x] Mostrar mensaje de "pago en proceso" con instrucciones

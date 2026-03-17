@@ -44,9 +44,12 @@ function formatArs(amount: number): string {
 /**
  * Formats a YYYY-MM-DD date string into a human-readable Spanish date.
  * e.g. "2026-04-15" → "15/04/2026"
+ * Returns empty string if input is empty or not in expected format.
  */
 function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-');
+  const parts = dateStr.split('-');
+  if (parts.length !== 3 || parts.some((p) => p === '')) return '';
+  const [year, month, day] = parts;
   return `${day}/${month}/${year}`;
 }
 
@@ -77,8 +80,8 @@ export function ServicePaymentPage({ slug, selectedDate, selectedTime }: Service
         selectedTime,
       });
 
-      if (purchase.mercadoPagoUrl && mpTab) {
-        mpTab.location.href = purchase.mercadoPagoUrl;
+      if (purchase.initPoint && mpTab) {
+        mpTab.location.href = purchase.initPoint;
       } else {
         // Close the blank tab if there is no URL to navigate to
         mpTab?.close();

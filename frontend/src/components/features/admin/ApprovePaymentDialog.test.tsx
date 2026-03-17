@@ -24,6 +24,7 @@ const mockPurchase: ServicePurchase = {
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
+  initPoint: null,
   createdAt: '2026-03-01T10:00:00.000Z',
   updatedAt: '2026-03-01T10:00:00.000Z',
 };

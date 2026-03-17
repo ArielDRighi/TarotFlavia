@@ -61,6 +61,7 @@ const mockPurchase: ServicePurchase = {
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
+  initPoint: null,
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedAt: '2025-01-01T00:00:00.000Z',
 };
@@ -257,6 +258,26 @@ describe('ServicePaymentPage', () => {
     expect(screen.getByTestId('slot-summary-time')).toHaveTextContent('10:00');
   });
 
+  it('should render slot-summary-date as empty string when selectedDate is empty', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
+      data: mockService,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
+
+    vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+    } as unknown as ReturnType<typeof useHolisticServiceMutationsHook.useCreatePurchase>);
+
+    render(<ServicePaymentPage slug="arbol-genealogico" selectedDate="" selectedTime="10:00" />, {
+      wrapper,
+    });
+
+    expect(screen.getByTestId('slot-summary-date')).toHaveTextContent('');
+  });
+
   it('should render "Pagar con Mercado Pago" button', () => {
     vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
       data: mockService,
@@ -287,7 +308,7 @@ describe('ServicePaymentPage', () => {
 
     mockMutateAsync.mockResolvedValue({
       ...mockPurchase,
-      mercadoPagoUrl: 'https://mp.com/pay/123',
+      initPoint: 'https://mp.com/pay/123',
     });
 
     vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
@@ -323,7 +344,7 @@ describe('ServicePaymentPage', () => {
 
     mockMutateAsync.mockResolvedValue({
       ...mockPurchase,
-      mercadoPagoUrl: 'https://mp.com/pay/123',
+      initPoint: 'https://mp.com/pay/123',
     });
 
     vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({
@@ -353,7 +374,7 @@ describe('ServicePaymentPage', () => {
 
     mockMutateAsync.mockResolvedValue({
       ...mockPurchase,
-      mercadoPagoUrl: 'https://mp.com/pay/123',
+      initPoint: 'https://mp.com/pay/123',
     });
 
     vi.mocked(useHolisticServiceMutationsHook.useCreatePurchase).mockReturnValue({

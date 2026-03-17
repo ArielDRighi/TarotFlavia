@@ -40,7 +40,10 @@ export interface ServicePurchase {
   paymentReference: string | null;
   paidAt: string | null;
   whatsappNumber?: string;
-  mercadoPagoUrl?: string;
+  /** URL de pago generada por Mercado Pago. Coincide con backend PurchaseResponseDto.initPoint */
+  initPoint: string | null;
+  /** ID de la preferencia de Mercado Pago. Coincide con backend PurchaseResponseDto.preferenceId */
+  preferenceId?: string | null;
   /** Fecha elegida por el usuario al momento de contratar (YYYY-MM-DD) */
   selectedDate?: string | null;
   /** Horario elegido por el usuario al momento de contratar (HH:MM) */
