@@ -93,7 +93,7 @@ export class CreatePurchaseUseCase {
         serviceName: service.name,
         amountArs: service.priceArs,
         userEmail,
-        notificationUrl: `${backendUrl}/webhooks/mercadopago`,
+        notificationUrl: `${backendUrl}/api/v1/webhooks/mercadopago`,
         backUrls: {
           success: `${frontendUrl}/servicios/pago-exitoso`,
           pending: `${frontendUrl}/servicios/pago-pendiente`,

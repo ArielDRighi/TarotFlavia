@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { DataSource, QueryRunner, EntityManager } from 'typeorm';
 import { BookSessionUseCase } from './book-session.use-case';
 import { ISessionRepository } from '../../domain/interfaces/session-repository.interface';
@@ -118,6 +114,7 @@ describe('BookSessionUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),

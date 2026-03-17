@@ -68,7 +68,11 @@ describe('HolisticServicesController', () => {
       const result = await controller.createPurchase(mockRequest, dto);
 
       expect(result).toEqual(mockPurchase);
-      expect(mockOrchestrator.createPurchase).toHaveBeenCalledWith(42, dto, 'user@test.com');
+      expect(mockOrchestrator.createPurchase).toHaveBeenCalledWith(
+        42,
+        dto,
+        'user@test.com',
+      );
     });
 
     it('should propagate errors from orchestrator', async () => {

@@ -85,15 +85,15 @@ export class ServicePurchase {
   approvedByAdminId: number | null;
 
   /**
-   * Date selected by the user when creating the purchase (for automatic scheduling post-payment).
-   * Format: YYYY-MM-DD
+   * Date selected by the user when creating the purchase (suggested date for manual
+   * session booking after payment is confirmed). Format: YYYY-MM-DD
    */
   @Column({ name: 'selected_date', type: 'date', nullable: true })
   selectedDate: string | null;
 
   /**
-   * Time selected by the user when creating the purchase (for automatic scheduling post-payment).
-   * Format: HH:MM
+   * Time selected by the user when creating the purchase (suggested time for manual
+   * session booking after payment is confirmed). Format: HH:MM
    */
   @Column({
     name: 'selected_time',

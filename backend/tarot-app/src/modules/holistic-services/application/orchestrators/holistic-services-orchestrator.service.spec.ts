@@ -224,7 +224,11 @@ describe('HolisticServicesOrchestratorService', () => {
 
       const result = await orchestrator.createPurchase(5, dto, 'user@test.com');
 
-      expect(mockCreatePurchase.execute).toHaveBeenCalledWith(5, dto, 'user@test.com');
+      expect(mockCreatePurchase.execute).toHaveBeenCalledWith(
+        5,
+        dto,
+        'user@test.com',
+      );
       expect(result.paymentStatus).toBe(PurchaseStatus.PENDING);
     });
   });

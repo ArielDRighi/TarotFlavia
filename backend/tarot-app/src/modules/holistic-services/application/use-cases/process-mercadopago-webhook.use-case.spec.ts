@@ -70,6 +70,11 @@ const mockPurchasePaid: ServicePurchase = {
   paidAt: new Date('2026-01-02'),
 };
 
+const mockPurchaseCancelled: ServicePurchase = {
+  ...mockPurchasePending,
+  paymentStatus: PurchaseStatus.CANCELLED,
+};
+
 function buildPaymentResponse(
   status: string,
   paymentId: string,
@@ -114,6 +119,7 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
@@ -182,13 +188,15 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
     mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
       mockPurchasePending,
     );
-    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
+    // updateStatusIfCurrent returns true → transition applied
+    mockPurchaseRepo.updateStatusIfCurrent.mockResolvedValue(true);
 
     const result = await useCase.execute(validPayload, xSignature, xRequestId);
 
     expect(result.processed).toBe(true);
-    expect(mockPurchaseRepo.updateStatus).toHaveBeenCalledWith(
+    expect(mockPurchaseRepo.updateStatusIfCurrent).toHaveBeenCalledWith(
       10,
+      PurchaseStatus.PENDING,
       PurchaseStatus.PAID,
       expect.objectContaining({
         mercadoPagoPaymentId: '123456789',
@@ -204,7 +212,7 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
     mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
       mockPurchasePending,
     );
-    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
+    mockPurchaseRepo.updateStatusIfCurrent.mockResolvedValue(true);
 
     await useCase.execute(validPayload, xSignature, xRequestId);
 
@@ -229,7 +237,7 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
     mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
       mockPurchasePending,
     );
-    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
+    mockPurchaseRepo.updateStatusIfCurrent.mockResolvedValue(true);
     mockEmailService.sendHolisticServiceConfirmation.mockRejectedValue(
       new Error('SMTP down'),
     );
@@ -237,7 +245,26 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
     const result = await useCase.execute(validPayload, xSignature, xRequestId);
 
     expect(result.processed).toBe(true);
-    expect(mockPurchaseRepo.updateStatus).toHaveBeenCalledTimes(1);
+    expect(mockPurchaseRepo.updateStatusIfCurrent).toHaveBeenCalledTimes(1);
+  });
+
+  it('debe ignorar webhook concurrente cuando updateStatusIfCurrent retorna false', async () => {
+    mockMpService.getPayment.mockResolvedValue(
+      buildPaymentResponse('approved', '123456789', '10'),
+    );
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
+      mockPurchasePending,
+    );
+    // Simulates race condition: another webhook already transitioned to PAID
+    mockPurchaseRepo.updateStatusIfCurrent.mockResolvedValue(false);
+
+    const result = await useCase.execute(validPayload, xSignature, xRequestId);
+
+    expect(result.processed).toBe(false);
+    expect(result.message).toContain('concurrente');
+    expect(
+      mockEmailService.sendHolisticServiceConfirmation,
+    ).not.toHaveBeenCalled();
   });
 
   // ── Idempotency ───────────────────────────────────────────────────────────
@@ -252,7 +279,7 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
 
     expect(result.processed).toBe(false);
     expect(result.message).toBe('Notificación duplicada');
-    expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
+    expect(mockPurchaseRepo.updateStatusIfCurrent).not.toHaveBeenCalled();
   });
 
   // ── Rejected payment ──────────────────────────────────────────────────────
@@ -298,6 +325,39 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
     ).not.toHaveBeenCalled();
   });
 
+  it('debe ignorar webhook "rejected" si la compra ya está PAID (PAID es terminal)', async () => {
+    mockMpService.getPayment.mockResolvedValue(
+      buildPaymentResponse('rejected', '999999', '10'),
+    );
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(mockPurchasePaid);
+
+    const result = await useCase.execute(
+      { type: 'payment', data: { id: '999999' } },
+      xSignature,
+      xRequestId,
+    );
+
+    expect(result.processed).toBe(false);
+    expect(result.message).toContain(PurchaseStatus.PAID);
+    expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
+    expect(mockPurchaseRepo.updateStatusIfCurrent).not.toHaveBeenCalled();
+  });
+
+  it('debe ignorar webhook "rejected" si la compra ya está CANCELLED', async () => {
+    mockMpService.getPayment.mockResolvedValue(
+      buildPaymentResponse('rejected', '123456789', '10'),
+    );
+    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(
+      mockPurchaseCancelled,
+    );
+
+    const result = await useCase.execute(validPayload, xSignature, xRequestId);
+
+    expect(result.processed).toBe(false);
+    expect(result.message).toContain(PurchaseStatus.CANCELLED);
+    expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
+  });
+
   // ── Pending / in_process ─────────────────────────────────────────────────
 
   it('debe retornar processed=true sin acción cuando el pago está "pending"', async () => {
@@ -313,6 +373,7 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
     expect(result.processed).toBe(true);
     expect(result.message).toContain('pending');
     expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
+    expect(mockPurchaseRepo.updateStatusIfCurrent).not.toHaveBeenCalled();
   });
 
   // ── Purchase not found ────────────────────────────────────────────────────
@@ -328,6 +389,7 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
     expect(result.processed).toBe(false);
     expect(result.message).toContain('999');
     expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
+    expect(mockPurchaseRepo.updateStatusIfCurrent).not.toHaveBeenCalled();
   });
 
   // ── MP API error ──────────────────────────────────────────────────────────
@@ -340,5 +402,6 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
     expect(result.processed).toBe(false);
     expect(result.message).toContain('Error consultando pago en MP');
     expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
+    expect(mockPurchaseRepo.updateStatusIfCurrent).not.toHaveBeenCalled();
   });
 });

@@ -138,6 +138,43 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
     return this.repository.findOne({ where: { id } });
   }
 
+  async updateStatusIfCurrent(
+    id: number,
+    expectedStatus: PurchaseStatus,
+    newStatus: PurchaseStatus,
+    extra?: Partial<ServicePurchase>,
+  ): Promise<boolean> {
+    const allowedKeys: (keyof ServicePurchaseScalarFields)[] = [
+      'userId',
+      'holisticServiceId',
+      'sessionId',
+      'amountArs',
+      'paymentReference',
+      'paidAt',
+      'approvedByAdminId',
+      'mercadoPagoPaymentId',
+      'preferenceId',
+      'selectedDate',
+      'selectedTime',
+    ];
+    const scalarExtra: Partial<ServicePurchaseScalarFields> = {};
+    if (extra) {
+      for (const key of allowedKeys) {
+        if (key in extra) {
+          (scalarExtra as Record<string, unknown>)[key] = (
+            extra as Record<string, unknown>
+          )[key];
+        }
+      }
+    }
+
+    const result = await this.repository.update(
+      { id, paymentStatus: expectedStatus },
+      { ...scalarExtra, paymentStatus: newStatus },
+    );
+    return (result.affected ?? 0) === 1;
+  }
+
   async findByMercadoPagoPaymentId(
     mercadoPagoPaymentId: string,
   ): Promise<ServicePurchase | null> {

@@ -152,14 +152,27 @@ export class ProcessMercadoPagoWebhookUseCase {
       return { processed: false, message: 'Compra ya estaba PAID' };
     }
 
-    await this.servicePurchaseRepository.updateStatus(
+    // Atomic update: only apply if the purchase is still PENDING (race condition guard).
+    // If two concurrent webhooks arrive, only one will get affected === 1.
+    const updated = await this.servicePurchaseRepository.updateStatusIfCurrent(
       purchase.id,
+      PurchaseStatus.PENDING,
       PurchaseStatus.PAID,
       {
         mercadoPagoPaymentId: paymentId,
         paidAt: new Date(),
       },
     );
+
+    if (!updated) {
+      this.logger.log(
+        `Compra ${purchase.id} ya fue procesada por otro webhook concurrente — ignorando`,
+      );
+      return {
+        processed: false,
+        message: 'Notificación duplicada (concurrente)',
+      };
+    }
 
     this.logger.log(
       `Compra ${purchase.id} marcada como PAID (payment: ${paymentId})`,
@@ -207,9 +220,19 @@ export class ProcessMercadoPagoWebhookUseCase {
     purchase: ServicePurchase,
     paymentId: string,
   ): Promise<WebhookProcessResult> {
-    if (purchase.paymentStatus === PurchaseStatus.CANCELLED) {
-      this.logger.log(`Compra ${purchase.id} ya estaba CANCELLED — ignorando`);
-      return { processed: false, message: 'Compra ya estaba CANCELLED' };
+    // PAID is a terminal state — a rejected webhook from a previous/deferred
+    // payment attempt must never cancel an already-paid purchase.
+    if (
+      purchase.paymentStatus === PurchaseStatus.PAID ||
+      purchase.paymentStatus === PurchaseStatus.CANCELLED
+    ) {
+      this.logger.log(
+        `Compra ${purchase.id} ya estaba ${purchase.paymentStatus} — ignorando webhook rejected`,
+      );
+      return {
+        processed: false,
+        message: `Compra ya estaba ${purchase.paymentStatus}`,
+      };
     }
 
     await this.servicePurchaseRepository.updateStatus(

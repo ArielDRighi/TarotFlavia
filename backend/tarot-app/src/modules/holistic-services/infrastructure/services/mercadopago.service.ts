@@ -101,10 +101,18 @@ export class MercadoPagoService {
   ): boolean {
     const secret = this.configService.get<string>('MP_WEBHOOK_SECRET');
     if (!secret) {
+      const isProduction =
+        this.configService.get<string>('NODE_ENV') === 'production';
+      if (isProduction) {
+        this.logger.error(
+          'MP_WEBHOOK_SECRET no configurado en producción — rechazando webhook',
+        );
+        return false;
+      }
       this.logger.warn(
-        'MP_WEBHOOK_SECRET no configurado — omitiendo validación de firma',
+        'MP_WEBHOOK_SECRET no configurado — omitiendo validación de firma (solo desarrollo)',
       );
-      return true; // En desarrollo puede no estar configurado
+      return true;
     }
 
     try {

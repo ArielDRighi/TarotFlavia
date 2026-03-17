@@ -1331,7 +1331,7 @@ Implementar un endpoint de webhook que reciba notificaciones de Mercado Pago, va
 
 - [x] Tests unitarios del webhook handler (payment approved, rejected, duplicado)
 - [x] Tests de integración del endpoint webhook
-- [x] Tests del flujo completo: crear purchase → webhook approved → sesión creada
+- [x] Tests del flujo completo: crear purchase → webhook approved → PAID + email (reserva manual post-pago, sin auto-sesión)
 - [x] Tests de validación de firma MP
 - [x] Coverage ≥ 80%
 

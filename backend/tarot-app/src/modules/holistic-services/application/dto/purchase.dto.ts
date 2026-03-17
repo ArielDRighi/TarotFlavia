@@ -29,6 +29,9 @@ export class CreatePurchaseDto {
     {},
     { message: 'La fecha seleccionada debe ser una fecha válida (YYYY-MM-DD)' },
   )
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'La fecha debe tener el formato exacto YYYY-MM-DD',
+  })
   selectedDate?: string;
 
   @ApiProperty({
