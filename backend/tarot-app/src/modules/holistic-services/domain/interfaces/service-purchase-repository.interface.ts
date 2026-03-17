@@ -34,4 +34,18 @@ export interface IServicePurchaseRepository {
     userId: number,
     sessionType: SessionType,
   ): Promise<ServicePurchase | null>;
+
+  /**
+   * Finds a purchase by its Mercado Pago payment ID.
+   * Used during webhook processing to locate the purchase to update.
+   */
+  findByMercadoPagoPaymentId(
+    mercadoPagoPaymentId: string,
+  ): Promise<ServicePurchase | null>;
+
+  /**
+   * Finds a purchase by its Mercado Pago preference ID.
+   * Used as a fallback lookup when the webhook references a preference ID.
+   */
+  findByPreferenceId(preferenceId: string): Promise<ServicePurchase | null>;
 }

@@ -46,10 +46,14 @@ export class HolisticServicesController {
     description: 'Ya tienes una compra pendiente para este servicio',
   })
   async createPurchase(
-    @Request() req: { user: { userId: number } },
+    @Request() req: { user: { userId: number; email: string } },
     @Body() dto: CreatePurchaseDto,
   ): Promise<PurchaseResponseDto> {
-    return this.orchestrator.createPurchase(req.user.userId, dto);
+    return this.orchestrator.createPurchase(
+      req.user.userId,
+      dto,
+      req.user.email,
+    );
   }
 
   @Get('purchases/my')

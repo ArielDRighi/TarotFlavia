@@ -29,6 +29,10 @@ export class GetPendingPaymentsUseCase {
       amountArs: purchase.amountArs,
       paymentReference: purchase.paymentReference,
       paidAt: purchase.paidAt,
+      preferenceId: purchase.preferenceId,
+      initPoint: null,
+      selectedDate: purchase.selectedDate,
+      selectedTime: purchase.selectedTime,
       createdAt: purchase.createdAt,
       updatedAt: purchase.updatedAt,
     };

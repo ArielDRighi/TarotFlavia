@@ -15,6 +15,10 @@ type ServicePurchaseScalarFields = Pick<
   | 'paymentReference'
   | 'paidAt'
   | 'approvedByAdminId'
+  | 'mercadoPagoPaymentId'
+  | 'preferenceId'
+  | 'selectedDate'
+  | 'selectedTime'
 >;
 
 @Injectable()
@@ -111,6 +115,10 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
       'paymentReference',
       'paidAt',
       'approvedByAdminId',
+      'mercadoPagoPaymentId',
+      'preferenceId',
+      'selectedDate',
+      'selectedTime',
     ];
     const scalarExtra: Partial<ServicePurchaseScalarFields> = {};
     if (extra) {
@@ -128,5 +136,17 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
       paymentStatus: status,
     });
     return this.repository.findOne({ where: { id } });
+  }
+
+  async findByMercadoPagoPaymentId(
+    mercadoPagoPaymentId: string,
+  ): Promise<ServicePurchase | null> {
+    return this.repository.findOne({ where: { mercadoPagoPaymentId } });
+  }
+
+  async findByPreferenceId(
+    preferenceId: string,
+  ): Promise<ServicePurchase | null> {
+    return this.repository.findOne({ where: { preferenceId } });
   }
 }

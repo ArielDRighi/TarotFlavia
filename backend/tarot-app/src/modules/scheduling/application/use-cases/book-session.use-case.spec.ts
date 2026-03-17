@@ -119,6 +119,8 @@ describe('BookSessionUseCase', () => {
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
     } as jest.Mocked<IServicePurchaseRepository>;
 
     mockGetAvailableSlotsUseCase = {
@@ -183,7 +185,7 @@ describe('BookSessionUseCase', () => {
       expect(result.googleMeetLink).toBeTruthy();
     });
 
-    it('should throw BadRequestException when session is less than 2 hours away', async () => {
+    it('should throw ConflictException when session is less than 2 hours away', async () => {
       const now = new Date();
       const soonDate = now.toISOString().split('T')[0];
       const soonTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -194,7 +196,7 @@ describe('BookSessionUseCase', () => {
           sessionDate: soonDate,
           sessionTime: soonTime,
         }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should throw ConflictException when user has pending session with tarotist', async () => {

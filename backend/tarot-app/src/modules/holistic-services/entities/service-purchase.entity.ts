@@ -84,6 +84,47 @@ export class ServicePurchase {
   @Column({ name: 'approved_by_admin_id', type: 'int', nullable: true })
   approvedByAdminId: number | null;
 
+  /**
+   * Date selected by the user when creating the purchase (for automatic scheduling post-payment).
+   * Format: YYYY-MM-DD
+   */
+  @Column({ name: 'selected_date', type: 'date', nullable: true })
+  selectedDate: string | null;
+
+  /**
+   * Time selected by the user when creating the purchase (for automatic scheduling post-payment).
+   * Format: HH:MM
+   */
+  @Column({
+    name: 'selected_time',
+    type: 'varchar',
+    length: 10,
+    nullable: true,
+  })
+  selectedTime: string | null;
+
+  /**
+   * Mercado Pago payment ID for reconciliation (populated via webhook IPN).
+   */
+  @Column({
+    name: 'mercado_pago_payment_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  mercadoPagoPaymentId: string | null;
+
+  /**
+   * Mercado Pago preference ID generated when the purchase was created (Checkout Pro).
+   */
+  @Column({
+    name: 'preference_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  preferenceId: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
