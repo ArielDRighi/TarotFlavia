@@ -24,6 +24,7 @@ import { SessionType } from '../../../scheduling/domain/enums';
 import { CreatePurchaseDto, ApprovePurchaseDto } from '../dto/purchase.dto';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../../../email/email.service';
+import { MercadoPagoService } from '../../infrastructure/services/mercadopago.service';
 
 const mockService: HolisticService = {
   id: 1,
@@ -57,6 +58,10 @@ const mockPurchasePending: ServicePurchase = {
   paymentReference: null,
   paidAt: null,
   approvedByAdminId: null,
+  selectedDate: null,
+  selectedTime: null,
+  mercadoPagoPaymentId: null,
+  preferenceId: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 };
@@ -73,6 +78,7 @@ describe('CreatePurchaseUseCase', () => {
   let useCase: CreatePurchaseUseCase;
   let mockServiceRepo: jest.Mocked<IHolisticServiceRepository>;
   let mockPurchaseRepo: jest.Mocked<IServicePurchaseRepository>;
+  let mockMpService: jest.Mocked<Pick<MercadoPagoService, 'createPreference'>>;
 
   const dto: CreatePurchaseDto = { holisticServiceId: 1 };
 
@@ -94,7 +100,21 @@ describe('CreatePurchaseUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
+    };
+    mockMpService = {
+      createPreference: jest.fn().mockResolvedValue({
+        preferenceId: 'pref_test123',
+        initPoint:
+          'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=pref_test123',
+      }),
+    };
+
+    const mockConfigService = {
+      get: jest.fn().mockReturnValue('http://localhost:3001'),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -102,6 +122,8 @@ describe('CreatePurchaseUseCase', () => {
         CreatePurchaseUseCase,
         { provide: HOLISTIC_SERVICE_REPOSITORY, useValue: mockServiceRepo },
         { provide: SERVICE_PURCHASE_REPOSITORY, useValue: mockPurchaseRepo },
+        { provide: MercadoPagoService, useValue: mockMpService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
@@ -114,8 +136,9 @@ describe('CreatePurchaseUseCase', () => {
     mockServiceRepo.findById.mockResolvedValue(mockService);
     mockPurchaseRepo.findPendingByUserAndService.mockResolvedValue(null);
     mockPurchaseRepo.save.mockResolvedValue(mockPurchasePending);
+    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePending);
 
-    const result = await useCase.execute(5, dto);
+    const result = await useCase.execute(5, dto, 'user@test.com');
 
     expect(result.id).toBe(10);
     expect(result.paymentStatus).toBe(PurchaseStatus.PENDING);
@@ -123,10 +146,24 @@ describe('CreatePurchaseUseCase', () => {
     expect(mockPurchaseRepo.save).toHaveBeenCalledTimes(1);
   });
 
+  it('debe guardar preferenceId y retornar initPoint cuando MP responde OK', async () => {
+    mockServiceRepo.findById.mockResolvedValue(mockService);
+    mockPurchaseRepo.findPendingByUserAndService.mockResolvedValue(null);
+    mockPurchaseRepo.save.mockResolvedValue(mockPurchasePending);
+    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePending);
+
+    const result = await useCase.execute(5, dto, 'user@test.com');
+
+    expect(mockMpService.createPreference).toHaveBeenCalledTimes(1);
+    expect(result.initPoint).toContain('mercadopago.com.ar');
+  });
+
   it('debe lanzar NotFoundException si el servicio no existe', async () => {
     mockServiceRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(5, dto)).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute(5, dto, 'user@test.com')).rejects.toThrow(
+      NotFoundException,
+    );
     expect(mockPurchaseRepo.save).not.toHaveBeenCalled();
   });
 
@@ -136,7 +173,9 @@ describe('CreatePurchaseUseCase', () => {
       isActive: false,
     });
 
-    await expect(useCase.execute(5, dto)).rejects.toThrow(BadRequestException);
+    await expect(useCase.execute(5, dto, 'user@test.com')).rejects.toThrow(
+      BadRequestException,
+    );
     expect(mockPurchaseRepo.save).not.toHaveBeenCalled();
   });
 
@@ -146,7 +185,9 @@ describe('CreatePurchaseUseCase', () => {
       mockPurchasePending,
     );
 
-    await expect(useCase.execute(5, dto)).rejects.toThrow(ConflictException);
+    await expect(useCase.execute(5, dto, 'user@test.com')).rejects.toThrow(
+      ConflictException,
+    );
     expect(mockPurchaseRepo.save).not.toHaveBeenCalled();
   });
 
@@ -154,10 +195,23 @@ describe('CreatePurchaseUseCase', () => {
     mockServiceRepo.findById.mockResolvedValue(mockService);
     mockPurchaseRepo.findPendingByUserAndService.mockResolvedValue(null);
     mockPurchaseRepo.save.mockResolvedValue(mockPurchasePending);
+    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePending);
 
-    const result = await useCase.execute(5, dto);
+    const result = await useCase.execute(5, dto, 'user@test.com');
 
     expect(result.whatsappNumber).toBeUndefined();
+  });
+
+  it('debe continuar aunque la creación de preferencia MP falle', async () => {
+    mockServiceRepo.findById.mockResolvedValue(mockService);
+    mockPurchaseRepo.findPendingByUserAndService.mockResolvedValue(null);
+    mockPurchaseRepo.save.mockResolvedValue(mockPurchasePending);
+    mockMpService.createPreference.mockRejectedValue(new Error('MP timeout'));
+
+    const result = await useCase.execute(5, dto, 'user@test.com');
+
+    expect(result.id).toBe(10);
+    expect(result.initPoint).toBeNull();
   });
 });
 
@@ -180,7 +234,10 @@ describe('ApprovePurchaseUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
     };
     mockEmailService = {
       sendHolisticServiceConfirmation: jest.fn().mockResolvedValue(undefined),
@@ -318,7 +375,10 @@ describe('GetUserPurchasesUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -388,7 +448,10 @@ describe('GetPendingPaymentsUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -439,7 +502,10 @@ describe('CancelPurchaseUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -524,7 +590,10 @@ describe('GetPurchaseByIdUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

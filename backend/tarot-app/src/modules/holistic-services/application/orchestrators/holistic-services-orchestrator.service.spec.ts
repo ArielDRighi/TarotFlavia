@@ -12,6 +12,7 @@ import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { GetServiceAvailabilityUseCase } from '../use-cases/get-service-availability.use-case';
+import { ProcessMercadoPagoWebhookUseCase } from '../use-cases/process-mercadopago-webhook.use-case';
 import { HolisticServiceResponseDto } from '../dto/holistic-service-response.dto';
 import { HolisticServiceAdminResponseDto } from '../dto/holistic-service-response.dto';
 import { PurchaseResponseDto } from '../dto/purchase-response.dto';
@@ -45,6 +46,10 @@ const mockPurchaseResponse: PurchaseResponseDto = {
   amountArs: 15000,
   paymentReference: null,
   paidAt: null,
+  preferenceId: null,
+  initPoint: null,
+  selectedDate: null,
+  selectedTime: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 };
@@ -71,6 +76,9 @@ describe('HolisticServicesOrchestratorService', () => {
   let mockGetServiceAvailability: jest.Mocked<
     Pick<GetServiceAvailabilityUseCase, 'execute'>
   >;
+  let mockProcessMercadoPagoWebhook: jest.Mocked<
+    Pick<ProcessMercadoPagoWebhookUseCase, 'execute'>
+  >;
 
   beforeEach(async () => {
     mockGetAllActive = { execute: jest.fn() };
@@ -85,6 +93,7 @@ describe('HolisticServicesOrchestratorService', () => {
     mockCancelPurchase = { execute: jest.fn() };
     mockGetPurchaseById = { execute: jest.fn() };
     mockGetServiceAvailability = { execute: jest.fn() };
+    mockProcessMercadoPagoWebhook = { execute: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -106,6 +115,10 @@ describe('HolisticServicesOrchestratorService', () => {
         {
           provide: GetServiceAvailabilityUseCase,
           useValue: mockGetServiceAvailability,
+        },
+        {
+          provide: ProcessMercadoPagoWebhookUseCase,
+          useValue: mockProcessMercadoPagoWebhook,
         },
       ],
     }).compile();
@@ -209,9 +222,13 @@ describe('HolisticServicesOrchestratorService', () => {
       const dto: CreatePurchaseDto = { holisticServiceId: 1 };
       mockCreatePurchase.execute.mockResolvedValue(mockPurchaseResponse);
 
-      const result = await orchestrator.createPurchase(5, dto);
+      const result = await orchestrator.createPurchase(5, dto, 'user@test.com');
 
-      expect(mockCreatePurchase.execute).toHaveBeenCalledWith(5, dto);
+      expect(mockCreatePurchase.execute).toHaveBeenCalledWith(
+        5,
+        dto,
+        'user@test.com',
+      );
       expect(result.paymentStatus).toBe(PurchaseStatus.PENDING);
     });
   });

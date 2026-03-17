@@ -33,11 +33,15 @@ describe('HolisticServicesController', () => {
     amountArs: 15000,
     paymentReference: null,
     paidAt: null,
+    preferenceId: null,
+    initPoint: null,
+    selectedDate: null,
+    selectedTime: null,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
 
-  const mockRequest = { user: { userId: 42 } };
+  const mockRequest = { user: { userId: 42, email: 'user@test.com' } };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -64,7 +68,11 @@ describe('HolisticServicesController', () => {
       const result = await controller.createPurchase(mockRequest, dto);
 
       expect(result).toEqual(mockPurchase);
-      expect(mockOrchestrator.createPurchase).toHaveBeenCalledWith(42, dto);
+      expect(mockOrchestrator.createPurchase).toHaveBeenCalledWith(
+        42,
+        dto,
+        'user@test.com',
+      );
     });
 
     it('should propagate errors from orchestrator', async () => {

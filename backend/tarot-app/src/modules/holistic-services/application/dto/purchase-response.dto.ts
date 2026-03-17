@@ -44,6 +44,38 @@ export class PurchaseResponseDto {
   paidAt: Date | null;
 
   @ApiProperty({
+    example: 'pref_12345678',
+    nullable: true,
+    required: false,
+    description: 'Mercado Pago Preference ID generado al crear la compra',
+  })
+  preferenceId: string | null;
+
+  @ApiProperty({
+    example: 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=...',
+    nullable: true,
+    required: false,
+    description: 'URL de pago de Mercado Pago (Checkout Pro init_point)',
+  })
+  initPoint: string | null;
+
+  @ApiProperty({
+    example: '2026-04-15',
+    nullable: true,
+    required: false,
+    description: 'Fecha seleccionada por el usuario para la sesión',
+  })
+  selectedDate: string | null;
+
+  @ApiProperty({
+    example: '14:30',
+    nullable: true,
+    required: false,
+    description: 'Horario seleccionado por el usuario para la sesión',
+  })
+  selectedTime: string | null;
+
+  @ApiProperty({
     example: '+5491112345678',
     nullable: true,
     required: false,

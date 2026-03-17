@@ -11,6 +11,11 @@ import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { GetServiceAvailabilityUseCase } from '../use-cases/get-service-availability.use-case';
+import {
+  ProcessMercadoPagoWebhookUseCase,
+  MercadoPagoWebhookPayload,
+  WebhookProcessResult,
+} from '../use-cases/process-mercadopago-webhook.use-case';
 import { ServiceAvailabilityResponseDto } from '../dto/service-availability-response.dto';
 import { HolisticServiceResponseDto } from '../dto/holistic-service-response.dto';
 import {
@@ -37,6 +42,7 @@ export class HolisticServicesOrchestratorService {
     private readonly cancelPurchaseUseCase: CancelPurchaseUseCase,
     private readonly getPurchaseByIdUseCase: GetPurchaseByIdUseCase,
     private readonly getServiceAvailabilityUseCase: GetServiceAvailabilityUseCase,
+    private readonly processMercadoPagoWebhookUseCase: ProcessMercadoPagoWebhookUseCase,
   ) {}
 
   getAllActiveServices(): Promise<HolisticServiceResponseDto[]> {
@@ -67,8 +73,9 @@ export class HolisticServicesOrchestratorService {
   createPurchase(
     userId: number,
     dto: CreatePurchaseDto,
+    userEmail: string,
   ): Promise<PurchaseResponseDto> {
-    return this.createPurchaseUseCase.execute(userId, dto);
+    return this.createPurchaseUseCase.execute(userId, dto, userEmail);
   }
 
   approvePurchase(
@@ -111,5 +118,17 @@ export class HolisticServicesOrchestratorService {
     date: string,
   ): Promise<ServiceAvailabilityResponseDto> {
     return this.getServiceAvailabilityUseCase.execute(slug, date);
+  }
+
+  processWebhook(
+    payload: MercadoPagoWebhookPayload,
+    xSignature: string,
+    xRequestId: string,
+  ): Promise<WebhookProcessResult> {
+    return this.processMercadoPagoWebhookUseCase.execute(
+      payload,
+      xSignature,
+      xRequestId,
+    );
   }
 }

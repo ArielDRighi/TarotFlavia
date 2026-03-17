@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   ConflictException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { DataSource, QueryRunner, EntityManager } from 'typeorm';
 import { BookSessionUseCase } from './book-session.use-case';
@@ -118,7 +118,10 @@ describe('BookSessionUseCase', () => {
       findPendingPayments: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
       findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
     } as jest.Mocked<IServicePurchaseRepository>;
 
     mockGetAvailableSlotsUseCase = {
@@ -184,8 +187,13 @@ describe('BookSessionUseCase', () => {
     });
 
     it('should throw BadRequestException when session is less than 2 hours away', async () => {
+      // Use local date/time getters to match how the use case parses the string:
+      // new Date(`${sessionDate}T${sessionTime}`) → local time interpretation
       const now = new Date();
-      const soonDate = now.toISOString().split('T')[0];
+      const soonYear = now.getFullYear();
+      const soonMonth = String(now.getMonth() + 1).padStart(2, '0');
+      const soonDay = String(now.getDate()).padStart(2, '0');
+      const soonDate = `${soonYear}-${soonMonth}-${soonDay}`;
       const soonTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
       await expect(

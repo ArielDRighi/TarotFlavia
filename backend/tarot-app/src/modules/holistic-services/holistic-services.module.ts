@@ -10,6 +10,7 @@ import { ServicePurchase } from './entities/service-purchase.entity';
 import { HolisticServicesPublicController } from './infrastructure/controllers/holistic-services-public.controller';
 import { HolisticServicesController } from './infrastructure/controllers/holistic-services.controller';
 import { HolisticServicesAdminController } from './infrastructure/controllers/holistic-services-admin.controller';
+import { WebhookController } from './infrastructure/controllers/webhook.controller';
 
 // ==================== Repositories ====================
 import { TypeOrmHolisticServiceRepository } from './infrastructure/repositories/typeorm-holistic-service.repository';
@@ -18,6 +19,9 @@ import {
   HOLISTIC_SERVICE_REPOSITORY,
   SERVICE_PURCHASE_REPOSITORY,
 } from './domain/interfaces/repository.tokens';
+
+// ==================== Services ====================
+import { MercadoPagoService } from './infrastructure/services/mercadopago.service';
 
 // ==================== Use Cases ====================
 import { GetAllActiveServicesUseCase } from './application/use-cases/get-all-active-services.use-case';
@@ -32,6 +36,7 @@ import { GetPendingPaymentsUseCase } from './application/use-cases/get-pending-p
 import { CancelPurchaseUseCase } from './application/use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from './application/use-cases/get-purchase-by-id.use-case';
 import { GetServiceAvailabilityUseCase } from './application/use-cases/get-service-availability.use-case';
+import { ProcessMercadoPagoWebhookUseCase } from './application/use-cases/process-mercadopago-webhook.use-case';
 
 // ==================== Orchestrator ====================
 import { HolisticServicesOrchestratorService } from './application/orchestrators/holistic-services-orchestrator.service';
@@ -51,6 +56,7 @@ import { SchedulingModule } from '../scheduling/scheduling.module';
     HolisticServicesPublicController,
     HolisticServicesController,
     HolisticServicesAdminController,
+    WebhookController,
   ],
   providers: [
     // Repositories
@@ -62,6 +68,9 @@ import { SchedulingModule } from '../scheduling/scheduling.module';
       provide: SERVICE_PURCHASE_REPOSITORY,
       useClass: TypeOrmServicePurchaseRepository,
     },
+
+    // Services
+    MercadoPagoService,
 
     // Use Cases
     GetAllActiveServicesUseCase,
@@ -76,6 +85,7 @@ import { SchedulingModule } from '../scheduling/scheduling.module';
     CancelPurchaseUseCase,
     GetPurchaseByIdUseCase,
     GetServiceAvailabilityUseCase,
+    ProcessMercadoPagoWebhookUseCase,
 
     // Orchestrator
     HolisticServicesOrchestratorService,

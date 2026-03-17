@@ -27,6 +27,19 @@ export interface IServicePurchaseRepository {
   ): Promise<ServicePurchase | null>;
 
   /**
+   * Updates a purchase status atomically, only if the current status matches
+   * the expected status. Returns true if the update was applied (exactly 1 row
+   * affected), false if the row was already in a different state (idempotent /
+   * race condition guard).
+   */
+  updateStatusIfCurrent(
+    id: number,
+    expectedStatus: PurchaseStatus,
+    newStatus: PurchaseStatus,
+    extra?: Partial<ServicePurchase>,
+  ): Promise<boolean>;
+
+  /**
    * Finds a paid purchase for a user with no session assigned yet,
    * matching the holistic service's session type.
    */
@@ -34,4 +47,18 @@ export interface IServicePurchaseRepository {
     userId: number,
     sessionType: SessionType,
   ): Promise<ServicePurchase | null>;
+
+  /**
+   * Finds a purchase by its Mercado Pago payment ID.
+   * Used during webhook processing to locate the purchase to update.
+   */
+  findByMercadoPagoPaymentId(
+    mercadoPagoPaymentId: string,
+  ): Promise<ServicePurchase | null>;
+
+  /**
+   * Finds a purchase by its Mercado Pago preference ID.
+   * Used as a fallback lookup when the webhook references a preference ID.
+   */
+  findByPreferenceId(preferenceId: string): Promise<ServicePurchase | null>;
 }

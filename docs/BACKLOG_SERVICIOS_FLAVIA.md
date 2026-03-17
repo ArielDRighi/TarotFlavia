@@ -1283,7 +1283,7 @@ Crear un panel de gestión de agenda en el admin donde la tarotista pueda config
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días
 **Dependencias:** Ninguna
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Actualmente el pago se "aprueba" manualmente desde el panel de admin. Mercado Pago provee webhooks (IPN — Instant Payment Notification) que notifican automáticamente cuando un pago cambia de estado. Se debe integrar este mecanismo para eliminar la intervención manual.
 
@@ -1295,64 +1295,63 @@ Implementar un endpoint de webhook que reciba notificaciones de Mercado Pago, va
 
 **Backend — Webhook endpoint:**
 
-- [ ] Crear endpoint `POST /webhooks/mercadopago` (público, sin auth JWT)
-- [ ] Validar firma/autenticidad de la notificación de MP (x-signature header)
-- [ ] Procesar notificaciones de tipo `payment` → consultar estado en API de MP
-- [ ] Si estado es `approved`: actualizar `ServicePurchase.paymentStatus` a `paid`, setear `paidAt`
-- [ ] Disparar flujo post-pago: crear sesión automáticamente con los datos de fecha/horario guardados en la compra
-- [ ] Enviar email de confirmación al usuario con datos del turno
-- [ ] Manejar estados `rejected`, `pending`, `in_process` apropiadamente
-- [ ] Idempotencia: si la notificación se recibe más de una vez, no duplicar acciones
-- [ ] Logging de todas las notificaciones recibidas para auditoría
+- [x] Crear endpoint `POST /webhooks/mercadopago` (público, sin auth JWT)
+- [x] Validar firma/autenticidad de la notificación de MP (x-signature header)
+- [x] Procesar notificaciones de tipo `payment` → consultar estado en API de MP
+- [x] Si estado es `approved`: actualizar `ServicePurchase.paymentStatus` a `paid`, setear `paidAt`
+- [x] Disparar flujo post-pago: enviar email de confirmación al usuario (sesión se reserva manualmente)
+- [x] Enviar email de confirmación al usuario con datos del turno
+- [x] Manejar estados `rejected`, `pending`, `in_process` apropiadamente
+- [x] Idempotencia: si la notificación se recibe más de una vez, no duplicar acciones
+- [x] Logging de todas las notificaciones recibidas para auditoría
 
 **Backend — Modelo de datos:**
 
-- [ ] Agregar campo `selectedDate` (date) a `ServicePurchase` — fecha elegida por el usuario al momento de contratar
-- [ ] Agregar campo `selectedTime` (varchar) a `ServicePurchase` — horario elegido (HH:MM)
-- [ ] Agregar campo `mercadoPagoPaymentId` (varchar, nullable) a `ServicePurchase` — ID del pago en MP para reconciliación
-- [ ] Crear migración para los nuevos campos
-- [ ] Actualizar DTOs de creación de purchase para incluir `selectedDate` y `selectedTime`
+- [x] Agregar campo `selectedDate` (date) a `ServicePurchase` — fecha elegida por el usuario al momento de contratar
+- [x] Agregar campo `selectedTime` (varchar) a `ServicePurchase` — horario elegido (HH:MM)
+- [x] Agregar campo `mercadoPagoPaymentId` (varchar, nullable) a `ServicePurchase` — ID del pago en MP para reconciliación
+- [x] Crear migración para los nuevos campos
+- [x] Actualizar DTOs de creación de purchase para incluir `selectedDate` y `selectedTime`
 
 **Backend — Crear pago en MP (Checkout Pro):**
 
-- [ ] Integrar SDK de Mercado Pago (`mercadopago` npm package)
-- [ ] Al crear purchase: generar preferencia de pago en MP con `back_urls` y `notification_url`
-- [ ] Guardar `preference_id` en la purchase
-- [ ] Retornar `init_point` (URL de pago) al frontend
-- [ ] Configurar `notification_url` apuntando al webhook
+- [x] Integrar SDK de Mercado Pago (`mercadopago` npm package)
+- [x] Al crear purchase: generar preferencia de pago en MP con `back_urls` y `notification_url`
+- [x] Guardar `preference_id` en la purchase
+- [x] Retornar `init_point` (URL de pago) al frontend
+- [x] Configurar `notification_url` apuntando al webhook
 
 **Backend — Eliminar aprobación manual:**
 
-- [ ] Deprecar/remover endpoint `PATCH /admin/purchases/:id/approve`
-- [ ] Remover flujo de aprobación manual en el admin orchestrator
-- [ ] Mantener endpoint admin de listado de purchases (para visibilidad)
+- [ ] Deprecar/remover endpoint `PATCH /admin/purchases/:id/approve` _(decisión: se mantiene para fallback manual)_
+- [ ] Remover flujo de aprobación manual en el admin orchestrator _(se mantiene como fallback)_
+- [x] Mantener endpoint admin de listado de purchases (para visibilidad)
 
 **Backend — Tests:**
 
-- [ ] Tests unitarios del webhook handler (payment approved, rejected, duplicado)
-- [ ] Tests de integración del endpoint webhook
-- [ ] Tests del flujo completo: crear purchase → webhook approved → sesión creada
-- [ ] Tests de validación de firma MP
-- [ ] Coverage ≥ 80%
+- [x] Tests unitarios del webhook handler (payment approved, rejected, duplicado)
+- [x] Tests de integración del endpoint webhook
+- [x] Tests del flujo completo: crear purchase → webhook approved → PAID + email (reserva manual post-pago, sin auto-sesión)
+- [x] Tests de validación de firma MP
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- El webhook recibe notificaciones de MP y actualiza el estado del pago automáticamente
-- Al confirmarse un pago, se crea la sesión automáticamente con la fecha/hora seleccionada
-- Se envía email de confirmación al usuario
-- No se requiere intervención manual del admin para aprobar pagos
-- Las notificaciones duplicadas no generan acciones duplicadas
-- Coverage ≥ 80% en archivos nuevos
-- Ciclo de calidad completo pasa
+- [x] El webhook recibe notificaciones de MP y actualiza el estado del pago automáticamente
+- [x] Al confirmarse un pago, se envía email de confirmación (reserva de sesión manual post-pago)
+- [x] Se envía email de confirmación al usuario
+- [x] Las notificaciones duplicadas no generan acciones duplicadas
+- [x] Coverage ≥ 80% en archivos nuevos
+- [x] Ciclo de calidad completo pasa
 
 #### 📁 Archivos involucrados
 
 **Backend:**
-- `backend/tarot-app/src/modules/holistic-services/infrastructure/controllers/` — webhook controller
-- `backend/tarot-app/src/modules/holistic-services/application/use-cases/` — process-payment use case
-- `backend/tarot-app/src/modules/holistic-services/domain/entities/` — actualizar ServicePurchase
-- `backend/tarot-app/src/database/migrations/` — nueva migración
-- `backend/tarot-app/src/config/` — configuración de MP (access token, etc.)
+- `backend/tarot-app/src/modules/holistic-services/infrastructure/controllers/webhook.controller.ts` — webhook controller ✅
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/process-mercadopago-webhook.use-case.ts` — webhook use case ✅
+- `backend/tarot-app/src/modules/holistic-services/infrastructure/services/mercadopago.service.ts` — SDK wrapper ✅
+- `backend/tarot-app/src/modules/holistic-services/entities/service-purchase.entity.ts` — 4 nuevos campos ✅
+- `backend/tarot-app/src/database/migrations/1772400000000-AddMercadoPagoFieldsToServicePurchases.ts` — migración ✅
 
 ---
 

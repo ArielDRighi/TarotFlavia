@@ -57,6 +57,10 @@ describe('HolisticServicesAdminController', () => {
     amountArs: 15000,
     paymentReference: null,
     paidAt: null,
+    preferenceId: null,
+    initPoint: null,
+    selectedDate: null,
+    selectedTime: null,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
