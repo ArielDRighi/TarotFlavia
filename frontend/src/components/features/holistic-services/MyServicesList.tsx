@@ -18,6 +18,9 @@ import { Button } from '@/components/ui/button';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
 import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
+import { parseDateString } from '@/lib/utils/date';
+import { deriveDisplayStatus } from '@/lib/utils/holistic-services';
+import type { DisplayStatus } from '@/lib/utils/holistic-services';
 import type { ServicePurchase } from '@/types';
 
 // ============================================================================
@@ -48,29 +51,8 @@ function formatArs(amount: number): string {
   return amount.toLocaleString('es-AR');
 }
 
-/**
- * Derives a display status from the purchase.
- * - "paid" with future selectedDate → "confirmed"
- * - "paid" with past selectedDate (or no date) → "completed"
- * - all others: use paymentStatus as-is
- */
-function deriveDisplayStatus(purchase: ServicePurchase): string {
-  if (purchase.paymentStatus !== 'paid') return purchase.paymentStatus;
-
-  if (!purchase.selectedDate) return 'completed';
-
-  const appointmentDate = new Date(purchase.selectedDate + 'T23:59:59');
-  const today = new Date();
-  return appointmentDate >= today ? 'confirmed' : 'completed';
-}
-
-/**
- * Formats a date string (YYYY-MM-DD) for display in es-AR locale.
- * Uses noon-local trick to avoid UTC-midnight day shift.
- */
 function formatAppointmentDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day, 12, 0, 0).toLocaleDateString('es-AR', {
+  return parseDateString(dateStr).toLocaleDateString('es-AR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -82,7 +64,7 @@ function formatAppointmentDate(dateStr: string): string {
 // ============================================================================
 
 interface StatusBadgeProps {
-  displayStatus: string;
+  displayStatus: DisplayStatus;
   purchaseId: number;
 }
 
@@ -111,7 +93,10 @@ function PurchaseCard({ purchase }: PurchaseCardProps) {
   const serviceName = purchase.holisticService?.name ?? 'Servicio';
   const durationMinutes = purchase.holisticService?.durationMinutes ?? null;
   const displayStatus = deriveDisplayStatus(purchase);
-  const hasAppointment = purchase.selectedDate && purchase.selectedTime;
+  const hasAppointment =
+    (displayStatus === 'confirmed' || displayStatus === 'completed') &&
+    purchase.selectedDate &&
+    purchase.selectedTime;
   const showWhatsApp =
     (displayStatus === 'confirmed' || displayStatus === 'completed') && purchase.whatsappNumber;
   const showRetryPayment = displayStatus === 'pending' && purchase.initPoint;

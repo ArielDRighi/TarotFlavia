@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
 import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
+import { deriveDisplayStatus } from '@/lib/utils/holistic-services';
 import type { ServicePurchase } from '@/types';
 
 // ============================================================================
@@ -21,17 +22,6 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-800' },
   refunded: { label: 'Reembolsado', className: 'bg-rose-100 text-rose-800' },
 };
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function deriveDisplayStatus(purchase: ServicePurchase): string {
-  if (purchase.paymentStatus !== 'paid') return purchase.paymentStatus;
-  if (!purchase.selectedDate) return 'completed';
-  const appointmentDate = new Date(purchase.selectedDate + 'T23:59:59');
-  return appointmentDate >= new Date() ? 'confirmed' : 'completed';
-}
 
 const MAX_VISIBLE_PURCHASES = 3;
 

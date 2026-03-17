@@ -132,6 +132,33 @@ const mockPurchaseCancelled: ServicePurchase = {
   updatedAt: '2025-01-10T00:00:00.000Z',
 };
 
+// Pending purchase WITH selectedDate and selectedTime already chosen
+// (e.g., user picked a slot but hasn't paid yet)
+// Bug: old code would show the appointment info block because hasAppointment
+// only checked selectedDate != null, ignoring paymentStatus.
+const mockPurchasePendingWithDate: ServicePurchase = {
+  id: 14,
+  userId: 7,
+  holisticServiceId: 2,
+  holisticService: {
+    id: 2,
+    name: 'Péndulo Hebreo',
+    slug: 'pendulo-hebreo',
+    durationMinutes: 60,
+    sessionType: 'hebrew_pendulum',
+  },
+  sessionId: null,
+  paymentStatus: 'pending',
+  amountArs: 8000,
+  paymentReference: null,
+  paidAt: null,
+  initPoint: 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=xyz789',
+  selectedDate: '2099-12-31',
+  selectedTime: '10:00',
+  createdAt: '2025-01-15T00:00:00.000Z',
+  updatedAt: '2025-01-15T00:00:00.000Z',
+};
+
 // ============================================================================
 // Tests
 // ============================================================================
@@ -451,6 +478,26 @@ describe('MyServicesList', () => {
 
     expect(
       screen.queryByTestId(`retry-payment-link-${mockPurchaseConfirmed.id}`)
+    ).not.toBeInTheDocument();
+  });
+
+  // ---- Bug fix: pending + selectedDate + selectedTime should NOT show appointment info ----
+
+  it('should NOT show appointment date/time for pending purchase even when selectedDate and selectedTime are set', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePendingWithDate],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(
+      screen.queryByTestId(`purchase-appointment-date-${mockPurchasePendingWithDate.id}`)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`purchase-appointment-time-${mockPurchasePendingWithDate.id}`)
     ).not.toBeInTheDocument();
   });
 });
