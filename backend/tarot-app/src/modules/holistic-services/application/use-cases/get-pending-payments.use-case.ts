@@ -7,15 +7,14 @@ import { PurchaseResponseDto } from '../dto/purchase-response.dto';
 import { ServicePurchase } from '../../entities/service-purchase.entity';
 
 @Injectable()
-export class GetPendingPaymentsUseCase {
+export class GetAllPurchasesUseCase {
   constructor(
     @Inject(SERVICE_PURCHASE_REPOSITORY)
     private readonly servicePurchaseRepository: IServicePurchaseRepository,
   ) {}
 
   async execute(): Promise<PurchaseResponseDto[]> {
-    const purchases =
-      await this.servicePurchaseRepository.findPendingPayments();
+    const purchases = await this.servicePurchaseRepository.findAllPurchases();
     return purchases.map((purchase) => this.mapToResponseDto(purchase));
   }
 
@@ -33,6 +32,7 @@ export class GetPendingPaymentsUseCase {
       initPoint: null,
       selectedDate: purchase.selectedDate,
       selectedTime: purchase.selectedTime,
+      mercadoPagoPaymentId: purchase.mercadoPagoPaymentId,
       createdAt: purchase.createdAt,
       updatedAt: purchase.updatedAt,
     };

@@ -18,6 +18,12 @@ export interface IServicePurchaseRepository {
 
   findPendingPayments(): Promise<ServicePurchase[]>;
 
+  /**
+   * Returns all purchases regardless of status, with user and holisticService
+   * relations loaded. Used by the admin transactions history view.
+   */
+  findAllPurchases(): Promise<ServicePurchase[]>;
+
   findByIdWithRelations(id: number): Promise<ServicePurchase | null>;
 
   updateStatus(

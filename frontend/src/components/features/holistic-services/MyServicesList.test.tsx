@@ -54,6 +54,7 @@ const mockPurchasePending: ServicePurchase = {
   initPoint: 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=abc123',
   selectedDate: null,
   selectedTime: null,
+  mercadoPagoPaymentId: null,
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedAt: '2025-01-01T00:00:00.000Z',
 };
@@ -80,6 +81,7 @@ const mockPurchaseConfirmed: ServicePurchase = {
   initPoint: null,
   selectedDate: '2099-12-31',
   selectedTime: '14:00',
+  mercadoPagoPaymentId: null,
   createdAt: '2025-01-03T00:00:00.000Z',
   updatedAt: '2025-01-05T12:00:00.000Z',
 };
@@ -105,6 +107,7 @@ const mockPurchaseCompleted: ServicePurchase = {
   initPoint: null,
   selectedDate: '2020-04-20',
   selectedTime: '10:00',
+  mercadoPagoPaymentId: null,
   createdAt: '2020-01-28T00:00:00.000Z',
   updatedAt: '2020-02-01T12:00:00.000Z',
 };
@@ -128,6 +131,7 @@ const mockPurchaseCancelled: ServicePurchase = {
   initPoint: null,
   selectedDate: null,
   selectedTime: null,
+  mercadoPagoPaymentId: null,
   createdAt: '2025-01-10T00:00:00.000Z',
   updatedAt: '2025-01-10T00:00:00.000Z',
 };
@@ -155,6 +159,7 @@ const mockPurchasePendingWithDate: ServicePurchase = {
   initPoint: 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=xyz789',
   selectedDate: '2099-12-31',
   selectedTime: '10:00',
+  mercadoPagoPaymentId: null,
   createdAt: '2025-01-15T00:00:00.000Z',
   updatedAt: '2025-01-15T00:00:00.000Z',
 };

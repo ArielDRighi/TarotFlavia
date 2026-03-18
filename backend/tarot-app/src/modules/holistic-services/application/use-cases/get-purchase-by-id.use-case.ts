@@ -51,6 +51,7 @@ export class GetPurchaseByIdUseCase {
       initPoint: null,
       selectedDate: purchase.selectedDate,
       selectedTime: purchase.selectedTime,
+      mercadoPagoPaymentId: purchase.mercadoPagoPaymentId,
       createdAt: purchase.createdAt,
       updatedAt: purchase.updatedAt,
     };

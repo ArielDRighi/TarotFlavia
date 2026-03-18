@@ -8,7 +8,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreatePurchaseUseCase } from './create-purchase.use-case';
 import { ApprovePurchaseUseCase } from './approve-purchase.use-case';
 import { GetUserPurchasesUseCase } from './get-user-purchases.use-case';
-import { GetPendingPaymentsUseCase } from './get-pending-payments.use-case';
+import { GetAllPurchasesUseCase } from './get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from './cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from './get-purchase-by-id.use-case';
 import {
@@ -98,6 +98,7 @@ describe('CreatePurchaseUseCase', () => {
       findByUserIdWithService: jest.fn(),
       findPendingByUserAndService: jest.fn(),
       findPendingPayments: jest.fn(),
+      findAllPurchases: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
       updateStatusIfCurrent: jest.fn(),
@@ -232,6 +233,7 @@ describe('ApprovePurchaseUseCase', () => {
       findByUserIdWithService: jest.fn(),
       findPendingByUserAndService: jest.fn(),
       findPendingPayments: jest.fn(),
+      findAllPurchases: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
       updateStatusIfCurrent: jest.fn(),
@@ -373,6 +375,7 @@ describe('GetUserPurchasesUseCase', () => {
       findByUserIdWithService: jest.fn(),
       findPendingByUserAndService: jest.fn(),
       findPendingPayments: jest.fn(),
+      findAllPurchases: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
       updateStatusIfCurrent: jest.fn(),
@@ -434,8 +437,8 @@ describe('GetUserPurchasesUseCase', () => {
   });
 });
 
-describe('GetPendingPaymentsUseCase', () => {
-  let useCase: GetPendingPaymentsUseCase;
+describe('GetAllPurchasesUseCase', () => {
+  let useCase: GetAllPurchasesUseCase;
   let mockPurchaseRepo: jest.Mocked<IServicePurchaseRepository>;
 
   beforeEach(async () => {
@@ -446,6 +449,7 @@ describe('GetPendingPaymentsUseCase', () => {
       findByUserIdWithService: jest.fn(),
       findPendingByUserAndService: jest.fn(),
       findPendingPayments: jest.fn(),
+      findAllPurchases: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
       updateStatusIfCurrent: jest.fn(),
@@ -456,31 +460,49 @@ describe('GetPendingPaymentsUseCase', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        GetPendingPaymentsUseCase,
+        GetAllPurchasesUseCase,
         { provide: SERVICE_PURCHASE_REPOSITORY, useValue: mockPurchaseRepo },
       ],
     }).compile();
 
-    useCase = module.get(GetPendingPaymentsUseCase);
+    useCase = module.get(GetAllPurchasesUseCase);
   });
 
   afterEach(() => jest.clearAllMocks());
 
-  it('debe retornar todos los pagos pendientes', async () => {
-    mockPurchaseRepo.findPendingPayments.mockResolvedValue([
+  it('debe retornar todas las compras de todos los estados', async () => {
+    mockPurchaseRepo.findAllPurchases.mockResolvedValue([
       mockPurchasePending,
-      { ...mockPurchasePending, id: 12, userId: 6 },
+      { ...mockPurchasePending, id: 11, paymentStatus: PurchaseStatus.PAID },
+      {
+        ...mockPurchasePending,
+        id: 12,
+        paymentStatus: PurchaseStatus.CANCELLED,
+      },
     ]);
 
     const result = await useCase.execute();
 
-    expect(result).toHaveLength(2);
-    expect(result[0].paymentStatus).toBe(PurchaseStatus.PENDING);
-    expect(mockPurchaseRepo.findPendingPayments).toHaveBeenCalledTimes(1);
+    expect(result).toHaveLength(3);
+    expect(mockPurchaseRepo.findAllPurchases).toHaveBeenCalledTimes(1);
   });
 
-  it('debe retornar lista vacía si no hay pagos pendientes', async () => {
-    mockPurchaseRepo.findPendingPayments.mockResolvedValue([]);
+  it('debe incluir mercadoPagoPaymentId en la respuesta', async () => {
+    const purchaseWithMpId: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 11,
+      paymentStatus: PurchaseStatus.PAID,
+      mercadoPagoPaymentId: 'MP-987654321',
+    };
+    mockPurchaseRepo.findAllPurchases.mockResolvedValue([purchaseWithMpId]);
+
+    const result = await useCase.execute();
+
+    expect(result[0].mercadoPagoPaymentId).toBe('MP-987654321');
+  });
+
+  it('debe retornar lista vacía si no hay compras', async () => {
+    mockPurchaseRepo.findAllPurchases.mockResolvedValue([]);
 
     const result = await useCase.execute();
 
@@ -500,6 +522,7 @@ describe('CancelPurchaseUseCase', () => {
       findByUserIdWithService: jest.fn(),
       findPendingByUserAndService: jest.fn(),
       findPendingPayments: jest.fn(),
+      findAllPurchases: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
       updateStatusIfCurrent: jest.fn(),
@@ -588,6 +611,7 @@ describe('GetPurchaseByIdUseCase', () => {
       findByUserIdWithService: jest.fn(),
       findPendingByUserAndService: jest.fn(),
       findPendingPayments: jest.fn(),
+      findAllPurchases: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
       updateStatusIfCurrent: jest.fn(),

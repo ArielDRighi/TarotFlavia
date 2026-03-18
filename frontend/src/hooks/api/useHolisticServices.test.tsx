@@ -67,6 +67,7 @@ const mockPurchase: ServicePurchase = {
   paymentReference: null,
   paidAt: null,
   initPoint: null,
+  mercadoPagoPaymentId: null,
   createdAt: '2026-01-01T10:00:00Z',
   updatedAt: '2026-01-01T10:00:00Z',
 };

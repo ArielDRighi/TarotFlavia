@@ -6,9 +6,8 @@ import { GetServiceBySlugUseCase } from '../use-cases/get-service-by-slug.use-ca
 import { AdminCreateServiceUseCase } from '../use-cases/admin-create-service.use-case';
 import { AdminUpdateServiceUseCase } from '../use-cases/admin-update-service.use-case';
 import { CreatePurchaseUseCase } from '../use-cases/create-purchase.use-case';
-import { ApprovePurchaseUseCase } from '../use-cases/approve-purchase.use-case';
+import { GetAllPurchasesUseCase } from '../use-cases/get-pending-payments.use-case';
 import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-case';
-import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { GetServiceAvailabilityUseCase } from '../use-cases/get-service-availability.use-case';
@@ -20,7 +19,7 @@ import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
 import { SessionType } from '../../../scheduling/domain/enums';
 import { CreateHolisticServiceDto } from '../dto/create-holistic-service.dto';
 import { UpdateHolisticServiceDto } from '../dto/update-holistic-service.dto';
-import { CreatePurchaseDto, ApprovePurchaseDto } from '../dto/purchase.dto';
+import { CreatePurchaseDto } from '../dto/purchase.dto';
 
 const mockServiceResponse: HolisticServiceResponseDto = {
   id: 1,
@@ -50,6 +49,7 @@ const mockPurchaseResponse: PurchaseResponseDto = {
   initPoint: null,
   selectedDate: null,
   selectedTime: null,
+  mercadoPagoPaymentId: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 };
@@ -64,12 +64,9 @@ describe('HolisticServicesOrchestratorService', () => {
   let mockAdminCreate: jest.Mocked<Pick<AdminCreateServiceUseCase, 'execute'>>;
   let mockAdminUpdate: jest.Mocked<Pick<AdminUpdateServiceUseCase, 'execute'>>;
   let mockCreatePurchase: jest.Mocked<Pick<CreatePurchaseUseCase, 'execute'>>;
-  let mockApprovePurchase: jest.Mocked<Pick<ApprovePurchaseUseCase, 'execute'>>;
+  let mockGetAllPurchases: jest.Mocked<Pick<GetAllPurchasesUseCase, 'execute'>>;
   let mockGetUserPurchases: jest.Mocked<
     Pick<GetUserPurchasesUseCase, 'execute'>
-  >;
-  let mockGetPendingPayments: jest.Mocked<
-    Pick<GetPendingPaymentsUseCase, 'execute'>
   >;
   let mockCancelPurchase: jest.Mocked<Pick<CancelPurchaseUseCase, 'execute'>>;
   let mockGetPurchaseById: jest.Mocked<Pick<GetPurchaseByIdUseCase, 'execute'>>;
@@ -87,9 +84,8 @@ describe('HolisticServicesOrchestratorService', () => {
     mockAdminCreate = { execute: jest.fn() };
     mockAdminUpdate = { execute: jest.fn() };
     mockCreatePurchase = { execute: jest.fn() };
-    mockApprovePurchase = { execute: jest.fn() };
+    mockGetAllPurchases = { execute: jest.fn() };
     mockGetUserPurchases = { execute: jest.fn() };
-    mockGetPendingPayments = { execute: jest.fn() };
     mockCancelPurchase = { execute: jest.fn() };
     mockGetPurchaseById = { execute: jest.fn() };
     mockGetServiceAvailability = { execute: jest.fn() };
@@ -104,12 +100,8 @@ describe('HolisticServicesOrchestratorService', () => {
         { provide: AdminCreateServiceUseCase, useValue: mockAdminCreate },
         { provide: AdminUpdateServiceUseCase, useValue: mockAdminUpdate },
         { provide: CreatePurchaseUseCase, useValue: mockCreatePurchase },
-        { provide: ApprovePurchaseUseCase, useValue: mockApprovePurchase },
+        { provide: GetAllPurchasesUseCase, useValue: mockGetAllPurchases },
         { provide: GetUserPurchasesUseCase, useValue: mockGetUserPurchases },
-        {
-          provide: GetPendingPaymentsUseCase,
-          useValue: mockGetPendingPayments,
-        },
         { provide: CancelPurchaseUseCase, useValue: mockCancelPurchase },
         { provide: GetPurchaseByIdUseCase, useValue: mockGetPurchaseById },
         {
@@ -233,18 +225,14 @@ describe('HolisticServicesOrchestratorService', () => {
     });
   });
 
-  describe('approvePurchase', () => {
-    it('debe delegar en ApprovePurchaseUseCase con purchaseId, adminId y DTO', async () => {
-      const dto: ApprovePurchaseDto = { paymentReference: 'MP-123' };
-      mockApprovePurchase.execute.mockResolvedValue({
-        ...mockPurchaseResponse,
-        paymentStatus: PurchaseStatus.PAID,
-      });
+  describe('getAllPurchases', () => {
+    it('debe delegar en GetAllPurchasesUseCase', async () => {
+      mockGetAllPurchases.execute.mockResolvedValue([mockPurchaseResponse]);
 
-      const result = await orchestrator.approvePurchase(10, 99, dto);
+      const result = await orchestrator.getAllPurchases();
 
-      expect(mockApprovePurchase.execute).toHaveBeenCalledWith(10, 99, dto);
-      expect(result.paymentStatus).toBe(PurchaseStatus.PAID);
+      expect(mockGetAllPurchases.execute).toHaveBeenCalledTimes(1);
+      expect(result).toHaveLength(1);
     });
   });
 
@@ -255,17 +243,6 @@ describe('HolisticServicesOrchestratorService', () => {
       const result = await orchestrator.getUserPurchases(5);
 
       expect(mockGetUserPurchases.execute).toHaveBeenCalledWith(5);
-      expect(result).toHaveLength(1);
-    });
-  });
-
-  describe('getPendingPayments', () => {
-    it('debe delegar en GetPendingPaymentsUseCase', async () => {
-      mockGetPendingPayments.execute.mockResolvedValue([mockPurchaseResponse]);
-
-      const result = await orchestrator.getPendingPayments();
-
-      expect(mockGetPendingPayments.execute).toHaveBeenCalledTimes(1);
       expect(result).toHaveLength(1);
     });
   });

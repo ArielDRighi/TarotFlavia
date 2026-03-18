@@ -140,6 +140,7 @@ export class CreatePurchaseUseCase {
       initPoint,
       selectedDate: purchase.selectedDate,
       selectedTime: purchase.selectedTime,
+      mercadoPagoPaymentId: purchase.mercadoPagoPaymentId,
       // whatsappNumber no se incluye para compras PENDING
       createdAt: purchase.createdAt,
       updatedAt: purchase.updatedAt,

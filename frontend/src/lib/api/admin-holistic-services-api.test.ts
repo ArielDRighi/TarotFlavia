@@ -6,8 +6,7 @@ import {
   adminGetHolisticServices,
   adminCreateHolisticService,
   adminUpdateHolisticService,
-  adminGetPendingPayments,
-  adminApprovePayment,
+  adminGetAllPurchases,
 } from './admin-holistic-services-api';
 import { apiClient } from './axios-config';
 import type { HolisticServiceAdmin, CreateHolisticServicePayload, ServicePurchase } from '@/types';
@@ -65,6 +64,7 @@ const mockPurchase: ServicePurchase = {
   paymentReference: null,
   paidAt: null,
   initPoint: null,
+  mercadoPagoPaymentId: null,
   createdAt: '2026-01-01T10:00:00Z',
   updatedAt: '2026-01-01T10:00:00Z',
 };
@@ -164,78 +164,46 @@ describe('Admin Holistic Services API', () => {
   });
 
   // ============================================================================
-  // adminGetPendingPayments
+  // adminGetAllPurchases
   // ============================================================================
 
-  describe('adminGetPendingPayments', () => {
-    it('should fetch pending purchases for admin review', async () => {
+  describe('adminGetAllPurchases', () => {
+    it('should fetch all purchases for admin transaction history', async () => {
       vi.mocked(apiClient.get).mockResolvedValue({ data: [mockPurchase] });
 
-      const result = await adminGetPendingPayments();
+      const result = await adminGetAllPurchases();
 
       expect(result).toEqual([mockPurchase]);
       expect(apiClient.get).toHaveBeenCalledWith('/admin/holistic-services/payments');
     });
 
-    it('should return empty array when no pending purchases', async () => {
+    it('should return empty array when no purchases exist', async () => {
       vi.mocked(apiClient.get).mockResolvedValue({ data: [] });
 
-      const result = await adminGetPendingPayments();
+      const result = await adminGetAllPurchases();
 
       expect(result).toEqual([]);
+    });
+
+    it('should include mercadoPagoPaymentId in each purchase', async () => {
+      const purchaseWithMpId: ServicePurchase = {
+        ...mockPurchase,
+        paymentStatus: 'paid',
+        mercadoPagoPaymentId: 'mp-payment-abc123',
+      };
+      vi.mocked(apiClient.get).mockResolvedValue({ data: [purchaseWithMpId] });
+
+      const result = await adminGetAllPurchases();
+
+      expect(result[0].mercadoPagoPaymentId).toBe('mp-payment-abc123');
     });
 
     it('should throw error with Spanish message on failure', async () => {
       vi.mocked(apiClient.get).mockRejectedValue(new Error('Network error'));
 
-      await expect(adminGetPendingPayments()).rejects.toThrow('Error al obtener pagos pendientes');
-    });
-  });
-
-  // ============================================================================
-  // adminApprovePayment
-  // ============================================================================
-
-  describe('adminApprovePayment', () => {
-    it('should approve a payment without reference', async () => {
-      const approvedPurchase = { ...mockPurchase, paymentStatus: 'paid' as const };
-      vi.mocked(apiClient.patch).mockResolvedValue({ data: approvedPurchase });
-
-      const result = await adminApprovePayment(10);
-
-      expect(result).toEqual(approvedPurchase);
-      expect(apiClient.patch).toHaveBeenCalledWith(
-        '/admin/holistic-services/payments/10/approve',
-        {}
+      await expect(adminGetAllPurchases()).rejects.toThrow(
+        'Error al obtener el historial de transacciones'
       );
-    });
-
-    it('should approve a payment with payment reference', async () => {
-      const approvedPurchase = {
-        ...mockPurchase,
-        paymentStatus: 'paid' as const,
-        paymentReference: 'REF-001',
-      };
-      vi.mocked(apiClient.patch).mockResolvedValue({ data: approvedPurchase });
-
-      const result = await adminApprovePayment(10, { paymentReference: 'REF-001' });
-
-      expect(result.paymentReference).toBe('REF-001');
-      expect(apiClient.patch).toHaveBeenCalledWith('/admin/holistic-services/payments/10/approve', {
-        paymentReference: 'REF-001',
-      });
-    });
-
-    it('should throw "Compra no encontrada" on 404', async () => {
-      vi.mocked(apiClient.patch).mockRejectedValue({ response: { status: 404 } });
-
-      await expect(adminApprovePayment(999)).rejects.toThrow('Compra no encontrada');
-    });
-
-    it('should throw generic error on non-404 failures', async () => {
-      vi.mocked(apiClient.patch).mockRejectedValue(new Error('Network error'));
-
-      await expect(adminApprovePayment(10)).rejects.toThrow('Error al aprobar el pago');
     });
   });
 });

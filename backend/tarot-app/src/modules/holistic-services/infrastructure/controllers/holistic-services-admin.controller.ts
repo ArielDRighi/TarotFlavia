@@ -5,11 +5,8 @@ import {
   Patch,
   Param,
   Body,
-  Request,
   UseGuards,
   ParseIntPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,7 +24,6 @@ import { HolisticServiceAdminResponseDto } from '../../application/dto/holistic-
 import { PurchaseResponseDto } from '../../application/dto/purchase-response.dto';
 import { CreateHolisticServiceDto } from '../../application/dto/create-holistic-service.dto';
 import { UpdateHolisticServiceDto } from '../../application/dto/update-holistic-service.dto';
-import { ApprovePurchaseDto } from '../../application/dto/purchase.dto';
 
 @ApiTags('Admin — Servicios Holísticos')
 @ApiBearerAuth()
@@ -83,35 +79,13 @@ export class HolisticServicesAdminController {
   }
 
   @Get('payments')
-  @ApiOperation({ summary: 'Listar pagos pendientes de aprobación' })
+  @ApiOperation({ summary: 'Historial de transacciones (todos los estados)' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de compras con pago pendiente',
+    description: 'Historial completo de compras de servicios holísticos',
     type: [PurchaseResponseDto],
   })
-  async getPendingPayments(): Promise<PurchaseResponseDto[]> {
-    return this.orchestrator.getPendingPayments();
-  }
-
-  @Patch('payments/:id/approve')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Aprobar pago de servicio holístico' })
-  @ApiResponse({
-    status: 200,
-    description: 'Pago aprobado exitosamente',
-    type: PurchaseResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Compra no encontrada' })
-  @ApiResponse({
-    status: 400,
-    description: 'Solo se pueden aprobar compras en estado PENDING',
-  })
-  @ApiParam({ name: 'id', type: Number, description: 'ID de la compra' })
-  async approvePayment(
-    @Request() req: { user: { userId: number } },
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: ApprovePurchaseDto,
-  ): Promise<PurchaseResponseDto> {
-    return this.orchestrator.approvePurchase(id, req.user.userId, dto);
+  async getAllPurchases(): Promise<PurchaseResponseDto[]> {
+    return this.orchestrator.getAllPurchases();
   }
 }

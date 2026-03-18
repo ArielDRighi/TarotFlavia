@@ -283,7 +283,6 @@ export type {
   PurchasedServiceSummary,
   ServicePurchase,
   CreatePurchasePayload,
-  ApprovePurchasePayload,
 } from './service-purchase.types';
 
 // Scheduling Admin Types

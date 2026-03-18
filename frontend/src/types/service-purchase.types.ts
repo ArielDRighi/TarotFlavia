@@ -1,7 +1,7 @@
 /**
  * Service Purchase Types
  *
- * Types for service purchase lifecycle (create, pay, approve).
+ * Types for service purchase lifecycle (create, pay).
  * Reflect exactly the backend ServicePurchase entity contracts.
  */
 
@@ -44,6 +44,8 @@ export interface ServicePurchase {
   initPoint: string | null;
   /** ID de la preferencia de Mercado Pago. Coincide con backend PurchaseResponseDto.preferenceId */
   preferenceId?: string | null;
+  /** ID del pago en Mercado Pago. Coincide con backend PurchaseResponseDto.mercadoPagoPaymentId */
+  mercadoPagoPaymentId: string | null;
   /** Fecha elegida por el usuario al momento de contratar (YYYY-MM-DD) */
   selectedDate?: string | null;
   /** Horario elegido por el usuario al momento de contratar (HH:MM) */
@@ -62,12 +64,4 @@ export interface CreatePurchasePayload {
   selectedDate: string;
   /** Horario elegido por el usuario (HH:MM) */
   selectedTime: string;
-}
-
-/**
- * DTO to approve a purchase (admin only)
- * Coincide con backend ApprovePurchaseDto
- */
-export interface ApprovePurchasePayload {
-  paymentReference?: string;
 }
