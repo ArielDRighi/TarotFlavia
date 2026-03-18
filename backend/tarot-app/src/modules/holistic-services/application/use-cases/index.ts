@@ -5,7 +5,7 @@ export { AdminCreateServiceUseCase } from './admin-create-service.use-case';
 export { AdminUpdateServiceUseCase } from './admin-update-service.use-case';
 export { CreatePurchaseUseCase } from './create-purchase.use-case';
 export { GetUserPurchasesUseCase } from './get-user-purchases.use-case';
-export { GetAllPurchasesUseCase } from './get-pending-payments.use-case';
+export { GetAllPurchasesUseCase } from './get-all-purchases.use-case';
 export { CancelPurchaseUseCase } from './cancel-purchase.use-case';
 export { GetPurchaseByIdUseCase } from './get-purchase-by-id.use-case';
 export { GetServiceAvailabilityUseCase } from './get-service-availability.use-case';

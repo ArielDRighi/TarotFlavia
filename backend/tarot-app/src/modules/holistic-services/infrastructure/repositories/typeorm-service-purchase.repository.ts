@@ -77,7 +77,7 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
 
   async findAllPurchases(): Promise<ServicePurchase[]> {
     return this.repository.find({
-      relations: ['user', 'holisticService'],
+      relations: ['holisticService'],
       order: { createdAt: 'DESC' },
     });
   }

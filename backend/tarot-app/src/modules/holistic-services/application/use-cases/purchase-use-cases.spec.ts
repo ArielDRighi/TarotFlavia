@@ -6,9 +6,8 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreatePurchaseUseCase } from './create-purchase.use-case';
-import { ApprovePurchaseUseCase } from './approve-purchase.use-case';
 import { GetUserPurchasesUseCase } from './get-user-purchases.use-case';
-import { GetAllPurchasesUseCase } from './get-pending-payments.use-case';
+import { GetAllPurchasesUseCase } from './get-all-purchases.use-case';
 import { CancelPurchaseUseCase } from './cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from './get-purchase-by-id.use-case';
 import {
@@ -21,9 +20,8 @@ import { HolisticService } from '../../entities/holistic-service.entity';
 import { ServicePurchase } from '../../entities/service-purchase.entity';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
 import { SessionType } from '../../../scheduling/domain/enums';
-import { CreatePurchaseDto, ApprovePurchaseDto } from '../dto/purchase.dto';
+import { CreatePurchaseDto } from '../dto/purchase.dto';
 import { ConfigService } from '@nestjs/config';
-import { EmailService } from '../../../email/email.service';
 import { MercadoPagoService } from '../../infrastructure/services/mercadopago.service';
 
 const mockService: HolisticService = {
@@ -213,153 +211,6 @@ describe('CreatePurchaseUseCase', () => {
 
     expect(result.id).toBe(10);
     expect(result.initPoint).toBeNull();
-  });
-});
-
-describe('ApprovePurchaseUseCase', () => {
-  let useCase: ApprovePurchaseUseCase;
-  let mockPurchaseRepo: jest.Mocked<IServicePurchaseRepository>;
-  let mockEmailService: jest.Mocked<
-    Pick<EmailService, 'sendHolisticServiceConfirmation'>
-  >;
-
-  const dto: ApprovePurchaseDto = { paymentReference: 'MP-123' };
-
-  beforeEach(async () => {
-    mockPurchaseRepo = {
-      save: jest.fn(),
-      findById: jest.fn(),
-      findByUserId: jest.fn(),
-      findByUserIdWithService: jest.fn(),
-      findPendingByUserAndService: jest.fn(),
-      findPendingPayments: jest.fn(),
-      findAllPurchases: jest.fn(),
-      findByIdWithRelations: jest.fn(),
-      updateStatus: jest.fn(),
-      updateStatusIfCurrent: jest.fn(),
-      findPaidUnassignedByUserAndSessionType: jest.fn(),
-      findByMercadoPagoPaymentId: jest.fn(),
-      findByPreferenceId: jest.fn(),
-    };
-    mockEmailService = {
-      sendHolisticServiceConfirmation: jest.fn().mockResolvedValue(undefined),
-    };
-
-    const mockConfigService = {
-      get: jest.fn().mockReturnValue('http://localhost:3001'),
-    };
-
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ApprovePurchaseUseCase,
-        { provide: SERVICE_PURCHASE_REPOSITORY, useValue: mockPurchaseRepo },
-        { provide: EmailService, useValue: mockEmailService },
-        { provide: ConfigService, useValue: mockConfigService },
-      ],
-    }).compile();
-
-    useCase = module.get(ApprovePurchaseUseCase);
-  });
-
-  afterEach(() => jest.clearAllMocks());
-
-  it('debe cambiar el status a PAID y llamar a EmailService', async () => {
-    const purchaseWithRelations = {
-      ...mockPurchasePending,
-      user: {
-        id: 5,
-        email: 'user@test.com',
-        name: 'Test User',
-      } as ServicePurchase['user'],
-      holisticService: mockService,
-    };
-    mockPurchaseRepo.findByIdWithRelations
-      .mockResolvedValueOnce(purchaseWithRelations)
-      .mockResolvedValueOnce({
-        ...mockPurchasePaid,
-        holisticService: mockService,
-      });
-    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
-
-    const result = await useCase.execute(10, 99, dto);
-
-    expect(result.paymentStatus).toBe(PurchaseStatus.PAID);
-    expect(mockPurchaseRepo.updateStatus).toHaveBeenCalledWith(
-      10,
-      PurchaseStatus.PAID,
-      expect.objectContaining({
-        approvedByAdminId: 99,
-        paymentReference: 'MP-123',
-      }),
-    );
-    expect(
-      mockEmailService.sendHolisticServiceConfirmation,
-    ).toHaveBeenCalledTimes(1);
-  });
-
-  it('debe lanzar NotFoundException si la compra no existe', async () => {
-    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(null);
-
-    await expect(useCase.execute(999, 99, dto)).rejects.toThrow(
-      NotFoundException,
-    );
-    expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
-  });
-
-  it('debe lanzar BadRequestException si la compra ya está PAID', async () => {
-    mockPurchaseRepo.findByIdWithRelations.mockResolvedValue(mockPurchasePaid);
-
-    await expect(useCase.execute(11, 99, dto)).rejects.toThrow(
-      BadRequestException,
-    );
-    expect(mockPurchaseRepo.updateStatus).not.toHaveBeenCalled();
-  });
-
-  it('debe incluir whatsappNumber en la respuesta cuando está PAID', async () => {
-    const purchaseWithRelations = {
-      ...mockPurchasePending,
-      user: {
-        id: 5,
-        email: 'user@test.com',
-        name: 'Test User',
-      } as ServicePurchase['user'],
-      holisticService: mockService,
-    };
-    mockPurchaseRepo.findByIdWithRelations
-      .mockResolvedValueOnce(purchaseWithRelations)
-      .mockResolvedValueOnce({
-        ...mockPurchasePaid,
-        holisticService: mockService,
-      });
-    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
-
-    const result = await useCase.execute(10, 99, dto);
-
-    expect(result.whatsappNumber).toBe('+5491112345678');
-  });
-
-  it('debe continuar aunque el email falle (no relanzar el error)', async () => {
-    const purchaseWithRelations = {
-      ...mockPurchasePending,
-      user: {
-        id: 5,
-        email: 'user@test.com',
-        name: 'Test User',
-      } as ServicePurchase['user'],
-      holisticService: mockService,
-    };
-    mockPurchaseRepo.findByIdWithRelations
-      .mockResolvedValueOnce(purchaseWithRelations)
-      .mockResolvedValueOnce({
-        ...mockPurchasePaid,
-        holisticService: mockService,
-      });
-    mockPurchaseRepo.updateStatus.mockResolvedValue(mockPurchasePaid);
-    mockEmailService.sendHolisticServiceConfirmation.mockRejectedValue(
-      new Error('SMTP error'),
-    );
-
-    await expect(useCase.execute(10, 99, dto)).resolves.toBeDefined();
   });
 });
 

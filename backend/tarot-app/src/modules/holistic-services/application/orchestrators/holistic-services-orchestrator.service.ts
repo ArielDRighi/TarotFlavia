@@ -6,7 +6,7 @@ import { AdminCreateServiceUseCase } from '../use-cases/admin-create-service.use
 import { AdminUpdateServiceUseCase } from '../use-cases/admin-update-service.use-case';
 import { CreatePurchaseUseCase } from '../use-cases/create-purchase.use-case';
 import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-case';
-import { GetAllPurchasesUseCase } from '../use-cases/get-pending-payments.use-case';
+import { GetAllPurchasesUseCase } from '../use-cases/get-all-purchases.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { GetServiceAvailabilityUseCase } from '../use-cases/get-service-availability.use-case';
