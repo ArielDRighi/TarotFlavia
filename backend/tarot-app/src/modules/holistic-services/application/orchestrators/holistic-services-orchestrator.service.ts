@@ -5,9 +5,8 @@ import { GetServiceBySlugUseCase } from '../use-cases/get-service-by-slug.use-ca
 import { AdminCreateServiceUseCase } from '../use-cases/admin-create-service.use-case';
 import { AdminUpdateServiceUseCase } from '../use-cases/admin-update-service.use-case';
 import { CreatePurchaseUseCase } from '../use-cases/create-purchase.use-case';
-import { ApprovePurchaseUseCase } from '../use-cases/approve-purchase.use-case';
 import { GetUserPurchasesUseCase } from '../use-cases/get-user-purchases.use-case';
-import { GetPendingPaymentsUseCase } from '../use-cases/get-pending-payments.use-case';
+import { GetAllPurchasesUseCase } from '../use-cases/get-all-purchases.use-case';
 import { CancelPurchaseUseCase } from '../use-cases/cancel-purchase.use-case';
 import { GetPurchaseByIdUseCase } from '../use-cases/get-purchase-by-id.use-case';
 import { GetServiceAvailabilityUseCase } from '../use-cases/get-service-availability.use-case';
@@ -25,7 +24,7 @@ import {
 import { PurchaseResponseDto } from '../dto/purchase-response.dto';
 import { CreateHolisticServiceDto } from '../dto/create-holistic-service.dto';
 import { UpdateHolisticServiceDto } from '../dto/update-holistic-service.dto';
-import { CreatePurchaseDto, ApprovePurchaseDto } from '../dto/purchase.dto';
+import { CreatePurchaseDto } from '../dto/purchase.dto';
 
 @Injectable()
 export class HolisticServicesOrchestratorService {
@@ -36,9 +35,8 @@ export class HolisticServicesOrchestratorService {
     private readonly adminCreateServiceUseCase: AdminCreateServiceUseCase,
     private readonly adminUpdateServiceUseCase: AdminUpdateServiceUseCase,
     private readonly createPurchaseUseCase: CreatePurchaseUseCase,
-    private readonly approvePurchaseUseCase: ApprovePurchaseUseCase,
     private readonly getUserPurchasesUseCase: GetUserPurchasesUseCase,
-    private readonly getPendingPaymentsUseCase: GetPendingPaymentsUseCase,
+    private readonly getAllPurchasesUseCase: GetAllPurchasesUseCase,
     private readonly cancelPurchaseUseCase: CancelPurchaseUseCase,
     private readonly getPurchaseByIdUseCase: GetPurchaseByIdUseCase,
     private readonly getServiceAvailabilityUseCase: GetServiceAvailabilityUseCase,
@@ -78,20 +76,12 @@ export class HolisticServicesOrchestratorService {
     return this.createPurchaseUseCase.execute(userId, dto, userEmail);
   }
 
-  approvePurchase(
-    purchaseId: number,
-    adminId: number,
-    dto: ApprovePurchaseDto,
-  ): Promise<PurchaseResponseDto> {
-    return this.approvePurchaseUseCase.execute(purchaseId, adminId, dto);
-  }
-
   getUserPurchases(userId: number): Promise<PurchaseResponseDto[]> {
     return this.getUserPurchasesUseCase.execute(userId);
   }
 
-  getPendingPayments(): Promise<PurchaseResponseDto[]> {
-    return this.getPendingPaymentsUseCase.execute();
+  getAllPurchases(): Promise<PurchaseResponseDto[]> {
+    return this.getAllPurchasesUseCase.execute();
   }
 
   cancelPurchase(

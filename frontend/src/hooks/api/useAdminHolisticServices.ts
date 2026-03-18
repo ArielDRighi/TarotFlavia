@@ -1,7 +1,7 @@
 /**
  * TanStack Query hooks for admin holistic services management
  *
- * Provides queries and mutations for admin-only service and payment management.
+ * Provides queries and mutations for admin-only service and transaction history.
  */
 'use client';
 
@@ -10,15 +10,10 @@ import {
   adminGetHolisticServices,
   adminCreateHolisticService,
   adminUpdateHolisticService,
-  adminGetPendingPayments,
-  adminApprovePayment,
+  adminGetAllPurchases,
 } from '@/lib/api/admin-holistic-services-api';
 import { holisticServiceQueryKeys } from './useHolisticServices';
-import type {
-  CreateHolisticServicePayload,
-  UpdateHolisticServicePayload,
-  ApprovePurchasePayload,
-} from '@/types';
+import type { CreateHolisticServicePayload, UpdateHolisticServicePayload } from '@/types';
 
 // ============================================================================
 // Admin Query Keys (extends base keys)
@@ -27,7 +22,7 @@ import type {
 export const adminHolisticServiceQueryKeys = {
   admin: ['admin', 'holistic-services'] as const,
   adminList: () => [...adminHolisticServiceQueryKeys.admin, 'list'] as const,
-  pendingPayments: () => [...adminHolisticServiceQueryKeys.admin, 'pending-payments'] as const,
+  allPurchases: () => [...adminHolisticServiceQueryKeys.admin, 'all-purchases'] as const,
 } as const;
 
 // ============================================================================
@@ -47,14 +42,14 @@ export function useAdminHolisticServices() {
 }
 
 /**
- * Hook to fetch purchases pending payment approval
- * @returns TanStack Query result with paginated pending purchases
+ * Hook to fetch the full transaction history for admin (read-only)
+ * @returns TanStack Query result with all purchases including MP data
  */
-export function usePendingPayments() {
+export function useAllPurchases() {
   return useQuery({
-    queryKey: adminHolisticServiceQueryKeys.pendingPayments(),
-    queryFn: adminGetPendingPayments,
-    staleTime: 30 * 1000, // 30 seconds - approvals are time-sensitive
+    queryKey: adminHolisticServiceQueryKeys.allPurchases(),
+    queryFn: adminGetAllPurchases,
+    staleTime: 30 * 1000, // 30 seconds
   });
 }
 
@@ -95,25 +90,6 @@ export function useUpdateHolisticService() {
       queryClient.invalidateQueries({ queryKey: adminHolisticServiceQueryKeys.adminList() });
       // Invalidate public list and details cache (slug may change)
       queryClient.invalidateQueries({ queryKey: holisticServiceQueryKeys.all });
-    },
-  });
-}
-
-/**
- * Hook to approve a purchase payment (admin only)
- * Invalidates pending payments and purchases queries on success.
- * @returns TanStack Mutation result for approving a payment
- */
-export function useApprovePayment() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data?: ApprovePurchasePayload }) =>
-      adminApprovePayment(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminHolisticServiceQueryKeys.pendingPayments() });
-      // Invalidate user purchases too in case admin and user see same data
-      queryClient.invalidateQueries({ queryKey: holisticServiceQueryKeys.purchases() });
     },
   });
 }

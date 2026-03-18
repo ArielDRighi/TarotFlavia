@@ -1,7 +1,7 @@
 /**
  * Admin Holistic Services API
  *
- * Admin-only API functions for managing holistic services and approving payments.
+ * Admin-only API functions for managing holistic services and viewing purchase history.
  * These are pure API functions - use TanStack Query hooks in hooks/api/ for data fetching.
  */
 import { apiClient } from './axios-config';
@@ -11,7 +11,6 @@ import type {
   CreateHolisticServicePayload,
   UpdateHolisticServicePayload,
   ServicePurchase,
-  ApprovePurchasePayload,
 } from '@/types';
 
 // ============================================================================
@@ -83,49 +82,21 @@ export async function adminUpdateHolisticService(
 }
 
 // ============================================================================
-// Admin: Purchase / Payment Management
+// Admin: Purchase / Transaction History
 // ============================================================================
 
 /**
- * Fetch all purchases pending payment approval (admin only)
- * @returns Promise<ServicePurchase[]> Array of pending purchases
+ * Fetch all purchases (admin only) — read-only transaction history
+ * @returns Promise<ServicePurchase[]> Array of all purchases with MP data
  * @throws Error with clear message on failure
  */
-export async function adminGetPendingPayments(): Promise<ServicePurchase[]> {
+export async function adminGetAllPurchases(): Promise<ServicePurchase[]> {
   try {
     const response = await apiClient.get<ServicePurchase[]>(
-      API_ENDPOINTS.HOLISTIC_SERVICES.ADMIN_PENDING_PAYMENTS
+      API_ENDPOINTS.HOLISTIC_SERVICES.ADMIN_ALL_PURCHASES
     );
     return response.data;
   } catch {
-    throw new Error('Error al obtener pagos pendientes');
-  }
-}
-
-/**
- * Approve a purchase payment (admin only)
- * @param id - Purchase ID (numeric)
- * @param data - Optional payment reference
- * @returns Promise<ServicePurchase> The approved purchase
- * @throws Error with clear message on failure (404 → 'Compra no encontrada')
- */
-export async function adminApprovePayment(
-  id: number,
-  data: ApprovePurchasePayload = {}
-): Promise<ServicePurchase> {
-  try {
-    const response = await apiClient.patch<ServicePurchase>(
-      API_ENDPOINTS.HOLISTIC_SERVICES.ADMIN_APPROVE_PAYMENT(id),
-      data
-    );
-    return response.data;
-  } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 404) {
-        throw new Error('Compra no encontrada');
-      }
-    }
-    throw new Error('Error al aprobar el pago');
+    throw new Error('Error al obtener el historial de transacciones');
   }
 }

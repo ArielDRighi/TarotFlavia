@@ -75,6 +75,13 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
     });
   }
 
+  async findAllPurchases(): Promise<ServicePurchase[]> {
+    return this.repository.find({
+      relations: ['holisticService'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findByIdWithRelations(id: number): Promise<ServicePurchase | null> {
     return this.repository.findOne({
       where: { id },

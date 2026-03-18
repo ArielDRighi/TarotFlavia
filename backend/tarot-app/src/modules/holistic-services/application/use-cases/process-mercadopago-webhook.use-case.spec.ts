@@ -117,6 +117,7 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
       findByUserIdWithService: jest.fn(),
       findPendingByUserAndService: jest.fn(),
       findPendingPayments: jest.fn(),
+      findAllPurchases: jest.fn(),
       findByIdWithRelations: jest.fn(),
       updateStatus: jest.fn(),
       updateStatusIfCurrent: jest.fn(),

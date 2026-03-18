@@ -201,8 +201,7 @@ export const API_ENDPOINTS = {
     // Admin
     ADMIN_LIST: '/admin/holistic-services',
     ADMIN_BY_ID: (id: number) => `/admin/holistic-services/${id}`,
-    ADMIN_PENDING_PAYMENTS: '/admin/holistic-services/payments',
-    ADMIN_APPROVE_PAYMENT: (id: number) => `/admin/holistic-services/payments/${id}/approve`,
+    ADMIN_ALL_PURCHASES: '/admin/holistic-services/payments',
   },
 
   // Admin Dashboard

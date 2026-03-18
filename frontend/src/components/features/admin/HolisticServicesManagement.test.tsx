@@ -1,6 +1,9 @@
 /**
  * HolisticServicesManagement Component Tests
  * TDD: Tests escritos ANTES de la implementación
+ *
+ * Verifica el flujo de admin sin botón de aprobación manual.
+ * Tab 2 ahora es "Historial de Transacciones" (solo lectura).
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -11,18 +14,16 @@ import type { HolisticServiceAdmin, ServicePurchase } from '@/types';
 // Mock de hooks
 vi.mock('@/hooks/api/useAdminHolisticServices', () => ({
   useAdminHolisticServices: vi.fn(),
-  usePendingPayments: vi.fn(),
+  useAllPurchases: vi.fn(),
   useCreateHolisticService: vi.fn(),
   useUpdateHolisticService: vi.fn(),
-  useApprovePayment: vi.fn(),
 }));
 
 import {
   useAdminHolisticServices,
-  usePendingPayments,
+  useAllPurchases,
   useCreateHolisticService,
   useUpdateHolisticService,
-  useApprovePayment,
 } from '@/hooks/api/useAdminHolisticServices';
 
 const mockServices: HolisticServiceAdmin[] = [
@@ -45,7 +46,7 @@ const mockServices: HolisticServiceAdmin[] = [
   },
 ];
 
-const mockPendingPayments: ServicePurchase[] = [
+const mockPurchases: ServicePurchase[] = [
   {
     id: 10,
     userId: 5,
@@ -58,13 +59,14 @@ const mockPendingPayments: ServicePurchase[] = [
       sessionType: 'family_tree',
     },
     sessionId: null,
-    paymentStatus: 'pending',
+    paymentStatus: 'paid',
     amountArs: 15000,
     paymentReference: null,
-    paidAt: null,
+    paidAt: '2026-03-01T14:00:00.000Z',
     initPoint: null,
+    mercadoPagoPaymentId: 'MP-98765',
     createdAt: '2026-03-01T10:00:00.000Z',
-    updatedAt: '2026-03-01T10:00:00.000Z',
+    updatedAt: '2026-03-01T14:00:00.000Z',
   },
 ];
 
@@ -76,11 +78,11 @@ describe('HolisticServicesManagement', () => {
       error: null,
     } as ReturnType<typeof useAdminHolisticServices>);
 
-    vi.mocked(usePendingPayments).mockReturnValue({
-      data: mockPendingPayments,
+    vi.mocked(useAllPurchases).mockReturnValue({
+      data: mockPurchases,
       isLoading: false,
       error: null,
-    } as ReturnType<typeof usePendingPayments>);
+    } as ReturnType<typeof useAllPurchases>);
 
     vi.mocked(useCreateHolisticService).mockReturnValue({
       mutate: vi.fn(),
@@ -91,18 +93,19 @@ describe('HolisticServicesManagement', () => {
       mutate: vi.fn(),
       isPending: false,
     } as unknown as ReturnType<typeof useUpdateHolisticService>);
-
-    vi.mocked(useApprovePayment).mockReturnValue({
-      mutate: vi.fn(),
-      isPending: false,
-    } as unknown as ReturnType<typeof useApprovePayment>);
   });
 
-  it('should render tabs for services and pending payments', () => {
+  it('should render tabs for services and transaction history', () => {
     render(<HolisticServicesManagement />);
 
     expect(screen.getByRole('tab', { name: /servicios/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /pagos pendientes/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /historial de transacciones/i })).toBeInTheDocument();
+  });
+
+  it('should NOT render a "Pagos Pendientes" tab', () => {
+    render(<HolisticServicesManagement />);
+
+    expect(screen.queryByRole('tab', { name: /pagos pendientes/i })).not.toBeInTheDocument();
   });
 
   it('should show services in Servicios tab by default', () => {
@@ -111,20 +114,40 @@ describe('HolisticServicesManagement', () => {
     expect(screen.getByText('Árbol Genealógico')).toBeInTheDocument();
   });
 
-  it('should show pending payment badge with count', () => {
+  it('should switch to Historial de Transacciones tab when clicked', async () => {
     render(<HolisticServicesManagement />);
 
-    expect(screen.getByText('1')).toBeInTheDocument();
-  });
-
-  it('should switch to Pagos Pendientes tab when clicked', async () => {
-    render(<HolisticServicesManagement />);
-
-    const pagosTab = screen.getByRole('tab', { name: /pagos pendientes/i });
-    fireEvent.click(pagosTab);
+    const historialTab = screen.getByRole('tab', { name: /historial de transacciones/i });
+    fireEvent.click(historialTab);
 
     await waitFor(() => {
-      expect(screen.getByTestId('pending-payments-table')).toBeInTheDocument();
+      expect(screen.getByTestId('transactions-table')).toBeInTheDocument();
+    });
+  });
+
+  it('should show transaction data in historial tab', async () => {
+    render(<HolisticServicesManagement />);
+
+    const historialTab = screen.getByRole('tab', { name: /historial de transacciones/i });
+    fireEvent.click(historialTab);
+
+    await waitFor(() => {
+      expect(screen.getByText('MP-98765')).toBeInTheDocument();
+    });
+  });
+
+  it('should NOT show an approve button anywhere', async () => {
+    render(<HolisticServicesManagement />);
+
+    // Check services tab
+    expect(screen.queryByRole('button', { name: /aprobar/i })).not.toBeInTheDocument();
+
+    // Check historial tab
+    const historialTab = screen.getByRole('tab', { name: /historial de transacciones/i });
+    fireEvent.click(historialTab);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /aprobar/i })).not.toBeInTheDocument();
     });
   });
 
@@ -136,22 +159,6 @@ describe('HolisticServicesManagement', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
-    });
-  });
-
-  it('should open ApprovePaymentDialog when approve button is clicked in payments tab', async () => {
-    render(<HolisticServicesManagement />);
-
-    const pagosTab = screen.getByRole('tab', { name: /pagos pendientes/i });
-    fireEvent.click(pagosTab);
-
-    await waitFor(() => {
-      const approveButtons = screen.getAllByRole('button', { name: /aprobar/i });
-      fireEvent.click(approveButtons[0]);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByRole('alertdialog')).toBeInTheDocument();
     });
   });
 
@@ -167,6 +174,23 @@ describe('HolisticServicesManagement', () => {
     expect(screen.getByTestId('services-loading')).toBeInTheDocument();
   });
 
+  it('should show loading skeleton while loading transactions', async () => {
+    vi.mocked(useAllPurchases).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+    } as ReturnType<typeof useAllPurchases>);
+
+    render(<HolisticServicesManagement />);
+
+    const historialTab = screen.getByRole('tab', { name: /historial de transacciones/i });
+    fireEvent.click(historialTab);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transactions-loading')).toBeInTheDocument();
+    });
+  });
+
   it('should show error state when services fetch fails', () => {
     vi.mocked(useAdminHolisticServices).mockReturnValue({
       data: undefined,
@@ -177,6 +201,23 @@ describe('HolisticServicesManagement', () => {
     render(<HolisticServicesManagement />);
 
     expect(screen.getByText(/error al cargar servicios/i)).toBeInTheDocument();
+  });
+
+  it('should show error state when transactions fetch fails', async () => {
+    vi.mocked(useAllPurchases).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('Error de red'),
+    } as ReturnType<typeof useAllPurchases>);
+
+    render(<HolisticServicesManagement />);
+
+    const historialTab = screen.getByRole('tab', { name: /historial de transacciones/i });
+    fireEvent.click(historialTab);
+
+    await waitFor(() => {
+      expect(screen.getByText(/error al cargar historial/i)).toBeInTheDocument();
+    });
   });
 
   it('should show "Nuevo Servicio" button in services tab', () => {

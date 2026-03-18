@@ -7,10 +7,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import {
   useAdminHolisticServices,
-  usePendingPayments,
+  useAllPurchases,
   useCreateHolisticService,
   useUpdateHolisticService,
-  useApprovePayment,
 } from './useAdminHolisticServices';
 import * as adminApi from '@/lib/api/admin-holistic-services-api';
 import type { HolisticServiceAdmin, ServicePurchase, CreateHolisticServicePayload } from '@/types';
@@ -61,13 +60,14 @@ const mockPurchase: ServicePurchase = {
   userId: 100,
   holisticServiceId: 1,
   sessionId: null,
-  paymentStatus: 'pending',
+  paymentStatus: 'paid',
   amountArs: 15000,
   paymentReference: null,
-  paidAt: null,
+  paidAt: '2026-01-02T10:00:00Z',
   initPoint: null,
+  mercadoPagoPaymentId: 'MP-98765',
   createdAt: '2026-01-01T10:00:00Z',
-  updatedAt: '2026-01-01T10:00:00Z',
+  updatedAt: '2026-01-02T10:00:00Z',
 };
 
 const mockCreatePayload: CreateHolisticServicePayload = {
@@ -123,15 +123,15 @@ describe('useAdminHolisticServices Hooks', () => {
   });
 
   // ============================================================================
-  // usePendingPayments
+  // useAllPurchases
   // ============================================================================
 
-  describe('usePendingPayments', () => {
-    it('should fetch pending payments for admin review', async () => {
-      vi.mocked(adminApi.adminGetPendingPayments).mockResolvedValue([mockPurchase]);
+  describe('useAllPurchases', () => {
+    it('should fetch all purchases for admin transaction history', async () => {
+      vi.mocked(adminApi.adminGetAllPurchases).mockResolvedValue([mockPurchase]);
 
       const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => usePendingPayments(), {
+      const { result } = renderHook(() => useAllPurchases(), {
         wrapper: createWrapper(queryClient),
       });
 
@@ -141,13 +141,26 @@ describe('useAdminHolisticServices Hooks', () => {
       expect(result.current.data).toHaveLength(1);
     });
 
+    it('should expose mercadoPagoPaymentId from purchase data', async () => {
+      vi.mocked(adminApi.adminGetAllPurchases).mockResolvedValue([mockPurchase]);
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useAllPurchases(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(result.current.data?.[0].mercadoPagoPaymentId).toBe('MP-98765');
+    });
+
     it('should handle errors', async () => {
-      vi.mocked(adminApi.adminGetPendingPayments).mockRejectedValue(
-        new Error('Error al obtener pagos pendientes')
+      vi.mocked(adminApi.adminGetAllPurchases).mockRejectedValue(
+        new Error('Error al obtener el historial de transacciones')
       );
 
       const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => usePendingPayments(), {
+      const { result } = renderHook(() => useAllPurchases(), {
         wrapper: createWrapper(queryClient),
       });
 
@@ -246,84 +259,6 @@ describe('useAdminHolisticServices Hooks', () => {
       });
 
       result.current.mutate({ id: 999, data: {} });
-
-      await waitFor(() => expect(result.current.isError).toBe(true));
-
-      expect(result.current.error).toBeDefined();
-    });
-  });
-
-  // ============================================================================
-  // useApprovePayment
-  // ============================================================================
-
-  describe('useApprovePayment', () => {
-    it('should approve a payment successfully', async () => {
-      const approvedPurchase = { ...mockPurchase, paymentStatus: 'paid' as const };
-      vi.mocked(adminApi.adminApprovePayment).mockResolvedValue(approvedPurchase);
-
-      const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => useApprovePayment(), {
-        wrapper: createWrapper(queryClient),
-      });
-
-      result.current.mutate({ id: 10 });
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-      expect(result.current.data?.paymentStatus).toBe('paid');
-      expect(adminApi.adminApprovePayment).toHaveBeenCalledWith(10, undefined);
-    });
-
-    it('should approve a payment with reference', async () => {
-      const approvedPurchase = {
-        ...mockPurchase,
-        paymentStatus: 'paid' as const,
-        paymentReference: 'REF-001',
-      };
-      vi.mocked(adminApi.adminApprovePayment).mockResolvedValue(approvedPurchase);
-
-      const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => useApprovePayment(), {
-        wrapper: createWrapper(queryClient),
-      });
-
-      result.current.mutate({ id: 10, data: { paymentReference: 'REF-001' } });
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-      expect(adminApi.adminApprovePayment).toHaveBeenCalledWith(10, {
-        paymentReference: 'REF-001',
-      });
-    });
-
-    it('should invalidate pending payments and purchases on success', async () => {
-      const approvedPurchase = { ...mockPurchase, paymentStatus: 'paid' as const };
-      vi.mocked(adminApi.adminApprovePayment).mockResolvedValue(approvedPurchase);
-
-      const queryClient = createTestQueryClient();
-      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-
-      const { result } = renderHook(() => useApprovePayment(), {
-        wrapper: createWrapper(queryClient),
-      });
-
-      result.current.mutate({ id: 10 });
-
-      await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-      expect(invalidateSpy).toHaveBeenCalledTimes(2);
-    });
-
-    it('should handle errors', async () => {
-      vi.mocked(adminApi.adminApprovePayment).mockRejectedValue(new Error('Compra no encontrada'));
-
-      const queryClient = createTestQueryClient();
-      const { result } = renderHook(() => useApprovePayment(), {
-        wrapper: createWrapper(queryClient),
-      });
-
-      result.current.mutate({ id: 999 });
 
       await waitFor(() => expect(result.current.isError).toBe(true));
 

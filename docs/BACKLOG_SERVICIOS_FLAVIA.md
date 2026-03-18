@@ -1484,7 +1484,7 @@ Rediseñar las cards de "Mis Servicios" para mostrar información completa y út
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1 día
 **Dependencias:** T-SF-D01 (webhook funcional)
-**Estado:** 📋 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Con los webhooks de MP activos, la funcionalidad de aprobación manual del admin ya no es necesaria. Se debe remover del frontend y backend para evitar confusión.
 
@@ -1496,30 +1496,30 @@ Eliminar el flujo de aprobación manual de pagos del panel admin y reemplazarlo 
 
 **Backend:**
 
-- [ ] Deprecar endpoint `PATCH /admin/purchases/:id/approve`
-- [ ] Mantener `GET /admin/purchases` como vista de lectura (listado de transacciones)
-- [ ] Agregar información de MP (payment_id, estado) a la respuesta del listado
+- [x] Deprecar endpoint `PATCH /admin/purchases/:id/approve`
+- [x] Mantener `GET /admin/purchases` como vista de lectura (listado de transacciones)
+- [x] Agregar información de MP (payment_id, estado) a la respuesta del listado
 
 **Frontend — Panel admin:**
 
-- [ ] Remover botón "Aprobar pago" de la tabla de pagos pendientes
-- [ ] Reemplazar tabla de "Pagos Pendientes" por "Historial de Transacciones"
-- [ ] Mostrar: servicio, usuario, monto, estado MP, fecha de pago, fecha del turno
-- [ ] Filtros: por estado, por fecha, por servicio
+- [x] Remover botón "Aprobar pago" de la tabla de pagos pendientes
+- [x] Reemplazar tabla de "Pagos Pendientes" por "Historial de Transacciones"
+- [x] Mostrar: servicio, usuario, monto, estado MP, fecha de pago, fecha del turno
+- [x] Filtros: por estado, por fecha, por servicio
 
 **Frontend — Tests:**
 
-- [ ] Actualizar tests del panel admin
-- [ ] Tests de la nueva vista de transacciones
-- [ ] Coverage ≥ 80%
+- [x] Actualizar tests del panel admin
+- [x] Tests de la nueva vista de transacciones
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- No existe botón de aprobación manual en el admin
-- El admin puede ver el historial de transacciones con estados de MP
-- La información es de solo lectura (no se pueden modificar pagos manualmente)
-- Coverage ≥ 80%
-- Ciclo de calidad completo pasa
+- [x] No existe botón de aprobación manual en el admin
+- [x] El admin puede ver el historial de transacciones con estados de MP
+- [x] La información es de solo lectura (no se pueden modificar pagos manualmente)
+- [x] Coverage ≥ 80%
+- [x] Ciclo de calidad completo pasa
 
 #### 📁 Archivos involucrados
 

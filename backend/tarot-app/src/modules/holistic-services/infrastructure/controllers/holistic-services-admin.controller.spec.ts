@@ -6,7 +6,6 @@ import { HolisticServiceAdminResponseDto } from '../../application/dto/holistic-
 import { PurchaseResponseDto } from '../../application/dto/purchase-response.dto';
 import { CreateHolisticServiceDto } from '../../application/dto/create-holistic-service.dto';
 import { UpdateHolisticServiceDto } from '../../application/dto/update-holistic-service.dto';
-import { ApprovePurchaseDto } from '../../application/dto/purchase.dto';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
 import { SessionType } from '../../../scheduling/domain/enums';
 
@@ -19,15 +18,13 @@ describe('HolisticServicesAdminController', () => {
       | 'adminCreateService'
       | 'adminUpdateService'
       | 'adminGetAllServices'
-      | 'approvePurchase'
-      | 'getPendingPayments'
+      | 'getAllPurchases'
     >
   > = {
     adminCreateService: jest.fn(),
     adminUpdateService: jest.fn(),
     adminGetAllServices: jest.fn(),
-    approvePurchase: jest.fn(),
-    getPendingPayments: jest.fn(),
+    getAllPurchases: jest.fn(),
   };
 
   const mockAdminService: HolisticServiceAdminResponseDto = {
@@ -61,11 +58,28 @@ describe('HolisticServicesAdminController', () => {
     initPoint: null,
     selectedDate: null,
     selectedTime: null,
+    mercadoPagoPaymentId: null,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
 
-  const mockAdminRequest = { user: { userId: 99 } };
+  const mockPaidPurchase: PurchaseResponseDto = {
+    id: 2,
+    userId: 11,
+    holisticServiceId: 1,
+    sessionId: null,
+    paymentStatus: PurchaseStatus.PAID,
+    amountArs: 15000,
+    paymentReference: 'MP-REF-001',
+    paidAt: new Date('2024-02-01'),
+    preferenceId: 'pref_abc123',
+    initPoint: null,
+    selectedDate: '2024-03-01',
+    selectedTime: '14:30',
+    mercadoPagoPaymentId: 'pay_987654321',
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2024-02-01'),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -146,53 +160,40 @@ describe('HolisticServicesAdminController', () => {
   });
 
   describe('GET /admin/holistic-services/payments', () => {
-    it('should return list of pending payments', async () => {
-      mockOrchestrator.getPendingPayments.mockResolvedValue([
+    it('should return all purchases (all statuses) as transaction history', async () => {
+      mockOrchestrator.getAllPurchases.mockResolvedValue([
         mockPendingPurchase,
+        mockPaidPurchase,
       ]);
 
-      const result = await controller.getPendingPayments();
+      const result = await controller.getAllPurchases();
 
-      expect(result).toEqual([mockPendingPurchase]);
-      expect(mockOrchestrator.getPendingPayments).toHaveBeenCalledTimes(1);
+      expect(result).toEqual([mockPendingPurchase, mockPaidPurchase]);
+      expect(mockOrchestrator.getAllPurchases).toHaveBeenCalledTimes(1);
     });
 
-    it('should return empty array when no pending payments', async () => {
-      mockOrchestrator.getPendingPayments.mockResolvedValue([]);
+    it('should return empty array when no purchases exist', async () => {
+      mockOrchestrator.getAllPurchases.mockResolvedValue([]);
 
-      const result = await controller.getPendingPayments();
+      const result = await controller.getAllPurchases();
 
       expect(result).toEqual([]);
     });
+
+    it('should include mercadoPagoPaymentId in the response', async () => {
+      mockOrchestrator.getAllPurchases.mockResolvedValue([mockPaidPurchase]);
+
+      const result = await controller.getAllPurchases();
+
+      expect(result[0].mercadoPagoPaymentId).toBe('pay_987654321');
+    });
   });
 
-  describe('PATCH /admin/holistic-services/payments/:id/approve', () => {
-    it('should approve a pending payment', async () => {
-      const dto: ApprovePurchaseDto = { paymentReference: 'MP-12345678' };
-      const approvedPurchase: PurchaseResponseDto = {
-        ...mockPendingPurchase,
-        paymentStatus: PurchaseStatus.PAID,
-        paymentReference: 'MP-12345678',
-        paidAt: new Date(),
-        whatsappNumber: '+5491112345678',
-      };
-      mockOrchestrator.approvePurchase.mockResolvedValue(approvedPurchase);
-
-      const result = await controller.approvePayment(mockAdminRequest, 1, dto);
-
-      expect(result).toEqual(approvedPurchase);
-      expect(mockOrchestrator.approvePurchase).toHaveBeenCalledWith(1, 99, dto);
-    });
-
-    it('should throw NotFoundException when purchase not found', async () => {
-      const dto: ApprovePurchaseDto = {};
-      mockOrchestrator.approvePurchase.mockRejectedValue(
-        new NotFoundException('Compra no encontrada'),
-      );
-
-      await expect(
-        controller.approvePayment(mockAdminRequest, 999, dto),
-      ).rejects.toThrow(NotFoundException);
+  describe('PATCH /admin/holistic-services/payments/:id/approve — REMOVED', () => {
+    it('should not have an approvePayment method on the controller', () => {
+      expect(
+        (controller as unknown as Record<string, unknown>)['approvePayment'],
+      ).toBeUndefined();
     });
   });
 });

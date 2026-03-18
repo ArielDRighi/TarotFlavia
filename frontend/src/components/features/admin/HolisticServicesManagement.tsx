@@ -1,8 +1,8 @@
 /**
  * HolisticServicesManagement Component
  *
- * Main container for admin management of holistic services and pending payments.
- * Uses tabs to switch between the services list and pending payment approvals.
+ * Main container for admin management of holistic services and transaction history.
+ * Uses tabs to switch between the services list and the read-only transaction history.
  */
 
 'use client';
@@ -15,16 +15,14 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ServicesTable } from './ServicesTable';
 import { EditServiceModal } from './EditServiceModal';
-import { PendingPaymentsTable } from './PendingPaymentsTable';
-import { ApprovePaymentDialog } from './ApprovePaymentDialog';
+import { TransactionsTable } from './TransactionsTable';
 import {
   useAdminHolisticServices,
-  usePendingPayments,
+  useAllPurchases,
   useCreateHolisticService,
   useUpdateHolisticService,
-  useApprovePayment,
 } from '@/hooks/api/useAdminHolisticServices';
-import type { HolisticServiceAdmin, ServicePurchase, ApprovePurchasePayload } from '@/types';
+import type { HolisticServiceAdmin } from '@/types';
 import type { CreateHolisticServiceForm } from '@/lib/validations/holistic-service.schemas';
 
 // ============================================================================
@@ -42,23 +40,18 @@ export function HolisticServicesManagement() {
     error: servicesError,
   } = useAdminHolisticServices();
   const {
-    data: pendingPayments,
-    isLoading: paymentsLoading,
-    error: paymentsError,
-  } = usePendingPayments();
+    data: allPurchases,
+    isLoading: purchasesLoading,
+    error: purchasesError,
+  } = useAllPurchases();
 
   // ---- Mutations ----
   const createServiceMutation = useCreateHolisticService();
   const updateServiceMutation = useUpdateHolisticService();
-  const approvePaymentMutation = useApprovePayment();
 
   // ---- Modal state ----
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<HolisticServiceAdmin | null>(null);
-
-  // ---- Approve dialog state ----
-  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
-  const [selectedPurchase, setSelectedPurchase] = useState<ServicePurchase | null>(null);
 
   // ---- Handlers: services ----
   const handleNewService = () => {
@@ -80,7 +73,7 @@ export function HolisticServicesManagement() {
             toast.success('Servicio actualizado correctamente');
             setEditModalOpen(false);
           },
-          onError: (error) => {
+          onError: (error: Error) => {
             toast.error(`Error al actualizar servicio: ${error.message}`);
           },
         }
@@ -91,7 +84,7 @@ export function HolisticServicesManagement() {
           toast.success('Servicio creado correctamente');
           setEditModalOpen(false);
         },
-        onError: (error) => {
+        onError: (error: Error) => {
           toast.error(`Error al crear servicio: ${error.message}`);
         },
       });
@@ -103,37 +96,7 @@ export function HolisticServicesManagement() {
     setSelectedService(null);
   };
 
-  // ---- Handlers: payments ----
-  const handleApproveClick = (purchase: ServicePurchase) => {
-    setSelectedPurchase(purchase);
-    setApproveDialogOpen(true);
-  };
-
-  const handleApproveConfirm = (data: ApprovePurchasePayload) => {
-    if (!selectedPurchase) return;
-
-    approvePaymentMutation.mutate(
-      { id: selectedPurchase.id, data },
-      {
-        onSuccess: () => {
-          toast.success('Pago aprobado correctamente');
-          setApproveDialogOpen(false);
-          setSelectedPurchase(null);
-        },
-        onError: (error) => {
-          toast.error(`Error al aprobar pago: ${error.message}`);
-        },
-      }
-    );
-  };
-
-  const handleCloseApproveDialog = () => {
-    setApproveDialogOpen(false);
-    setSelectedPurchase(null);
-  };
-
   // ---- Derived state ----
-  const pendingCount = pendingPayments?.length ?? 0;
   const isEditPending = createServiceMutation.isPending || updateServiceMutation.isPending;
 
   // ---- Render ----
@@ -157,24 +120,19 @@ export function HolisticServicesManagement() {
           Servicios
         </button>
         <button
-          id="tab-pagos-pendientes"
+          id="tab-historial"
           role="tab"
-          aria-selected={activeTab === 'pagos-pendientes'}
-          aria-controls="tabpanel-pagos-pendientes"
-          onClick={() => setActiveTab('pagos-pendientes')}
+          aria-selected={activeTab === 'historial'}
+          aria-controls="tabpanel-historial"
+          onClick={() => setActiveTab('historial')}
           className={cn(
             'flex items-center rounded-md px-4 py-2 text-sm font-medium transition-colors',
-            activeTab === 'pagos-pendientes'
+            activeTab === 'historial'
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted text-muted-foreground hover:text-foreground'
           )}
         >
-          Pagos Pendientes
-          {pendingCount > 0 && (
-            <span className="bg-primary ml-2 rounded-full px-2 py-0.5 text-xs text-white">
-              {pendingCount}
-            </span>
-          )}
+          Historial de Transacciones
         </button>
       </div>
 
@@ -206,26 +164,23 @@ export function HolisticServicesManagement() {
         </div>
       )}
 
-      {/* TAB 2: PAGOS PENDIENTES */}
-      {activeTab === 'pagos-pendientes' && (
-        <div id="tabpanel-pagos-pendientes" role="tabpanel" aria-labelledby="tab-pagos-pendientes">
-          {paymentsLoading ? (
-            <div className="space-y-4">
+      {/* TAB 2: HISTORIAL DE TRANSACCIONES */}
+      {activeTab === 'historial' && (
+        <div id="tabpanel-historial" role="tabpanel" aria-labelledby="tab-historial">
+          {purchasesLoading ? (
+            <div data-testid="transactions-loading" className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-16" />
               ))}
             </div>
-          ) : paymentsError ? (
+          ) : purchasesError ? (
             <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
               <p className="text-red-700">
-                Error al cargar pagos pendientes. Por favor, intenta de nuevo.
+                Error al cargar historial de transacciones. Por favor, intenta de nuevo.
               </p>
             </div>
           ) : (
-            <PendingPaymentsTable
-              purchases={pendingPayments ?? []}
-              onApprove={handleApproveClick}
-            />
+            <TransactionsTable purchases={allPurchases ?? []} />
           )}
         </div>
       )}
@@ -238,17 +193,6 @@ export function HolisticServicesManagement() {
         onSubmit={handleServiceSubmit}
         isPending={isEditPending}
       />
-
-      {/* DIALOG: APROBAR PAGO */}
-      {selectedPurchase && (
-        <ApprovePaymentDialog
-          purchase={selectedPurchase}
-          open={approveDialogOpen}
-          onClose={handleCloseApproveDialog}
-          onConfirm={handleApproveConfirm}
-          isPending={approvePaymentMutation.isPending}
-        />
-      )}
     </div>
   );
 }

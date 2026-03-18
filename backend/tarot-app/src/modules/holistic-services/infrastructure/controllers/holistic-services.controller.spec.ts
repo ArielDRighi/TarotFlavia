@@ -37,6 +37,7 @@ describe('HolisticServicesController', () => {
     initPoint: null,
     selectedDate: null,
     selectedTime: null,
+    mercadoPagoPaymentId: null,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };

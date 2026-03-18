@@ -76,6 +76,14 @@ export class PurchaseResponseDto {
   selectedTime: string | null;
 
   @ApiProperty({
+    example: 'pay_987654321',
+    nullable: true,
+    required: false,
+    description: 'ID de pago de Mercado Pago (poblado vía webhook IPN)',
+  })
+  mercadoPagoPaymentId: string | null;
+
+  @ApiProperty({
     example: '+5491112345678',
     nullable: true,
     required: false,
