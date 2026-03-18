@@ -93,6 +93,21 @@ describe('Holistic Services Integration Tests', () => {
     return { user, token: loginResponse.access_token };
   }
 
+  /**
+   * Helper: simular aprobación de pago via MercadoPago
+   * (equivalente al webhook que aprobaría el pago automáticamente)
+   */
+  async function simulateMercadoPagoApproval(
+    purchaseId: number,
+    paymentReference: string = 'MP-TEST-SIMULATED',
+  ): Promise<void> {
+    await servicePurchaseRepository.update(purchaseId, {
+      paymentStatus: PurchaseStatus.PAID,
+      mercadoPagoPaymentId: paymentReference,
+      paidAt: new Date(),
+    });
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // SETUP GLOBAL: App + Users + Test Services (self-contained, no seeds)
   // ─────────────────────────────────────────────────────────────────────────
@@ -415,40 +430,40 @@ describe('Holistic Services Integration Tests', () => {
         .expect(404);
     });
 
-    it('admin debe ver la compra pendiente en pagos pendientes', async () => {
+    it('admin debe ver la compra en el historial de transacciones', async () => {
       const response = await request(app.getHttpServer())
         .get(`${API}/admin/holistic-services/payments`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const pending = response.body as Array<{
+      const purchases = response.body as Array<{
         id: number;
         paymentStatus: string;
       }>;
-      const found = pending.find((p) => p.id === purchaseId);
+      const found = purchases.find((p) => p.id === purchaseId);
       expect(found).toBeDefined();
       expect(found!.paymentStatus).toBe(PurchaseStatus.PENDING);
     });
 
-    it('admin debe aprobar pago → estado cambia a PAID con whatsappNumber', async () => {
+    it('pago aprobado via webhook → estado cambia a PAID con whatsappNumber', async () => {
+      // Simula la aprobación automática que haría el webhook de MercadoPago
+      await simulateMercadoPagoApproval(purchaseId, 'MP-TEST-12345');
+
       const response = await request(app.getHttpServer())
-        .patch(`${API}/admin/holistic-services/payments/${purchaseId}/approve`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({ paymentReference: 'MP-TEST-12345' })
+        .get(`${API}/holistic-services/purchases/${purchaseId}`)
+        .set('Authorization', `Bearer ${regularToken}`)
         .expect(200);
 
-      const approved = response.body as {
+      const purchase = response.body as {
         id: number;
         paymentStatus: string;
         paidAt: string | null;
         whatsappNumber?: string;
-        paymentReference: string | null;
       };
-      expect(approved.paymentStatus).toBe(PurchaseStatus.PAID);
-      expect(approved.paidAt).not.toBeNull();
-      expect(approved.whatsappNumber).toBeDefined();
-      expect(typeof approved.whatsappNumber).toBe('string');
-      expect(approved.paymentReference).toBe('MP-TEST-12345');
+      expect(purchase.paymentStatus).toBe(PurchaseStatus.PAID);
+      expect(purchase.paidAt).not.toBeNull();
+      expect(purchase.whatsappNumber).toBeDefined();
+      expect(typeof purchase.whatsappNumber).toBe('string');
     });
 
     it('GET /purchases/:id post-aprobación debe incluir whatsappNumber', async () => {
@@ -463,14 +478,6 @@ describe('Holistic Services Integration Tests', () => {
       };
       expect(purchase.paymentStatus).toBe(PurchaseStatus.PAID);
       expect(purchase.whatsappNumber).toBeDefined();
-    });
-
-    it('no debe poder aprobar un pago ya aprobado (400)', async () => {
-      await request(app.getHttpServer())
-        .patch(`${API}/admin/holistic-services/payments/${purchaseId}/approve`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({})
-        .expect(400);
     });
 
     it('no debe poder cancelar una compra ya aprobada (400)', async () => {
@@ -853,20 +860,12 @@ describe('Holistic Services Integration Tests', () => {
         .set('Authorization', `Bearer ${regularToken}`)
         .expect(403);
     });
-
-    it('PATCH /admin/holistic-services/payments/:id/approve debe retornar 403 para usuario normal', async () => {
-      await request(app.getHttpServer())
-        .patch(`${API}/admin/holistic-services/payments/1/approve`)
-        .set('Authorization', `Bearer ${regularToken}`)
-        .send({})
-        .expect(403);
-    });
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SECCIÓN 8: USER JOURNEY COMPLETO
   // ═══════════════════════════════════════════════════════════════════════════
-  describe('User journey completo: catálogo → compra → aprobación → WhatsApp', () => {
+  describe('User journey completo: catálogo → compra → pago automático → WhatsApp', () => {
     let journeyPurchaseId: number;
 
     beforeAll(async () => {
@@ -931,21 +930,21 @@ describe('Holistic Services Integration Tests', () => {
       expect(found!.paymentStatus).toBe(PurchaseStatus.PENDING);
     });
 
-    it('Paso 5: admin aprueba el pago', async () => {
+    it('Paso 5: pago aprobado automáticamente via MercadoPago webhook', async () => {
+      // Simula la aprobación automática que realiza el webhook de MercadoPago
+      await simulateMercadoPagoApproval(journeyPurchaseId, 'MP-JOURNEY-001');
+
       const response = await request(app.getHttpServer())
-        .patch(
-          `${API}/admin/holistic-services/payments/${journeyPurchaseId}/approve`,
-        )
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({ paymentReference: 'MP-JOURNEY-001' })
+        .get(`${API}/holistic-services/purchases/${journeyPurchaseId}`)
+        .set('Authorization', `Bearer ${secondToken}`)
         .expect(200);
 
-      const approved = response.body as {
+      const purchase = response.body as {
         paymentStatus: string;
         whatsappNumber?: string;
       };
-      expect(approved.paymentStatus).toBe(PurchaseStatus.PAID);
-      expect(approved.whatsappNumber).toBeDefined();
+      expect(purchase.paymentStatus).toBe(PurchaseStatus.PAID);
+      expect(purchase.whatsappNumber).toBeDefined();
     });
 
     it('Paso 6: usuario ve WhatsApp en detalle de compra post-aprobación', async () => {
@@ -965,15 +964,19 @@ describe('Holistic Services Integration Tests', () => {
       expect(purchase.holisticService).toBeDefined();
     });
 
-    it('Paso 7: compra aprobada desaparece de pagos pendientes', async () => {
+    it('Paso 7: compra aprobada aparece en historial admin de transacciones', async () => {
       const response = await request(app.getHttpServer())
         .get(`${API}/admin/holistic-services/payments`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      const pending = response.body as Array<{ id: number }>;
-      const found = pending.find((p) => p.id === journeyPurchaseId);
-      expect(found).toBeUndefined();
+      const purchases = response.body as Array<{
+        id: number;
+        paymentStatus: string;
+      }>;
+      const found = purchases.find((p) => p.id === journeyPurchaseId);
+      expect(found).toBeDefined();
+      expect(found!.paymentStatus).toBe(PurchaseStatus.PAID);
     });
   });
 });
