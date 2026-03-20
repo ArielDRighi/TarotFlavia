@@ -149,6 +149,7 @@ export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
             onBook={handleBook}
             readOnly={false}
             serviceSlug={slug}
+            serviceDurationMinutes={service.durationMinutes}
           />
           {!hasSlotSelected && (
             <p data-testid="slot-required-hint" className="text-text-secondary mt-3 text-xs">
@@ -160,10 +161,6 @@ export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
               Horario seleccionado: {selectedDate} a las {selectedTime}
             </p>
           )}
-          <p className="text-text-secondary mt-2 text-xs">
-            Las fechas disponibles son al momento de la consulta. Una vez realizado el pago, la
-            fecha que observaste libre podría ya estar ocupada.
-          </p>
         </div>
 
         {/* CTA — disabled until a slot is selected */}

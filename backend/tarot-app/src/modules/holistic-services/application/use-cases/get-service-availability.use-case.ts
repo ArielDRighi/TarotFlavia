@@ -5,7 +5,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { IHolisticServiceRepository } from '../../domain/interfaces/holistic-service-repository.interface';
-import { HOLISTIC_SERVICE_REPOSITORY } from '../../domain/interfaces/repository.tokens';
+import { IServicePurchaseRepository } from '../../domain/interfaces/service-purchase-repository.interface';
+import {
+  HOLISTIC_SERVICE_REPOSITORY,
+  SERVICE_PURCHASE_REPOSITORY,
+} from '../../domain/interfaces/repository.tokens';
 import { IAvailabilityRepository } from '../../../scheduling/domain/interfaces/availability-repository.interface';
 import { IExceptionRepository } from '../../../scheduling/domain/interfaces/exception-repository.interface';
 import { ISessionRepository } from '../../../scheduling/domain/interfaces/session-repository.interface';
@@ -16,6 +20,7 @@ import {
 } from '../../../scheduling/domain/interfaces/repository.tokens';
 import { ExceptionType, SessionStatus } from '../../../scheduling/domain/enums';
 import { Session } from '../../../scheduling/entities/session.entity';
+import { ServicePurchase } from '../../entities/service-purchase.entity';
 import {
   ServiceAvailabilitySlotDto,
   ServiceAvailabilityResponseDto,
@@ -30,6 +35,8 @@ export class GetServiceAvailabilityUseCase {
   constructor(
     @Inject(HOLISTIC_SERVICE_REPOSITORY)
     private readonly holisticServiceRepo: IHolisticServiceRepository,
+    @Inject(SERVICE_PURCHASE_REPOSITORY)
+    private readonly purchaseRepo: IServicePurchaseRepository,
     @Inject(AVAILABILITY_REPOSITORY)
     private readonly availabilityRepo: IAvailabilityRepository,
     @Inject(EXCEPTION_REPOSITORY)
@@ -70,20 +77,22 @@ export class GetServiceAvailabilityUseCase {
     }
 
     // 3. Fetch scheduling data for Flavia (tarotistaId=1)
-    const [weeklyAvailability, exceptions, sessions] = await Promise.all([
-      this.availabilityRepo.getWeeklyAvailability(FLAVIA_TAROTISTA_ID),
-      this.exceptionRepo.getExceptionsByDateRange(
-        FLAVIA_TAROTISTA_ID,
-        date,
-        date,
-      ),
-      this.sessionRepo.findSessionsByTarotistAndDateRange(
-        FLAVIA_TAROTISTA_ID,
-        date,
-        date,
-        [SessionStatus.PENDING, SessionStatus.CONFIRMED],
-      ),
-    ]);
+    const [weeklyAvailability, exceptions, sessions, activePurchases] =
+      await Promise.all([
+        this.availabilityRepo.getWeeklyAvailability(FLAVIA_TAROTISTA_ID),
+        this.exceptionRepo.getExceptionsByDateRange(
+          FLAVIA_TAROTISTA_ID,
+          date,
+          date,
+        ),
+        this.sessionRepo.findSessionsByTarotistAndDateRange(
+          FLAVIA_TAROTISTA_ID,
+          date,
+          date,
+          [SessionStatus.PENDING, SessionStatus.CONFIRMED],
+        ),
+        this.purchaseRepo.findActiveByDate(date),
+      ]);
 
     // 4. If no weekly availability is configured, return empty
     if (weeklyAvailability.length === 0) {
@@ -131,13 +140,21 @@ export class GetServiceAvailabilityUseCase {
     const slots: ServiceAvailabilitySlotDto[] = timeSlots.map((time) => {
       const slotDateTime = new Date(`${date}T${time}:00`);
       const isTooSoon = slotDateTime < minDateTime;
-      const isOccupied = this.isSlotOccupied(
+      const isOccupiedBySession = this.isSlotOccupied(
         sessions,
         date,
         time,
         service.durationMinutes,
       );
-      return { time, available: !isTooSoon && !isOccupied };
+      const isOccupiedByPurchase = this.isSlotOccupiedByPurchase(
+        activePurchases,
+        time,
+        service.durationMinutes,
+      );
+      return {
+        time,
+        available: !isTooSoon && !isOccupiedBySession && !isOccupiedByPurchase,
+      };
     });
 
     return { date, slots };
@@ -165,6 +182,39 @@ export class GetServiceAvailabilityUseCase {
     }
 
     return slots;
+  }
+
+  private isSlotOccupiedByPurchase(
+    purchases: ServicePurchase[],
+    time: string,
+    durationMinutes: number,
+  ): boolean {
+    const [slotHour, slotMin] = time.split(':').map(Number);
+    const slotStart = slotHour * 60 + slotMin;
+    const slotEnd = slotStart + durationMinutes;
+
+    for (const purchase of purchases) {
+      if (!purchase.selectedTime) continue;
+
+      const [purchaseHour, purchaseMin] = purchase.selectedTime
+        .split(':')
+        .map(Number);
+      const purchaseStart = purchaseHour * 60 + purchaseMin;
+      const purchaseDuration =
+        purchase.holisticService?.durationMinutes ?? durationMinutes;
+      const purchaseEnd = purchaseStart + purchaseDuration;
+
+      // Overlap check
+      if (
+        (slotStart >= purchaseStart && slotStart < purchaseEnd) ||
+        (slotEnd > purchaseStart && slotEnd <= purchaseEnd) ||
+        (slotStart <= purchaseStart && slotEnd >= purchaseEnd)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private isSlotOccupied(

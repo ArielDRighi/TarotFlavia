@@ -486,9 +486,9 @@ describe('MyServicesList', () => {
     ).not.toBeInTheDocument();
   });
 
-  // ---- Bug fix: pending + selectedDate + selectedTime should NOT show appointment info ----
+  // ---- Pending + selectedDate + selectedTime SHOULD show appointment info ----
 
-  it('should NOT show appointment date/time for pending purchase even when selectedDate and selectedTime are set', () => {
+  it('should show appointment date/time for pending purchase when selectedDate and selectedTime are set', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: [mockPurchasePendingWithDate],
       isLoading: false,
@@ -499,10 +499,13 @@ describe('MyServicesList', () => {
     render(<MyServicesList />, { wrapper });
 
     expect(
-      screen.queryByTestId(`purchase-appointment-date-${mockPurchasePendingWithDate.id}`)
-    ).not.toBeInTheDocument();
+      screen.getByTestId(`purchase-appointment-date-${mockPurchasePendingWithDate.id}`)
+    ).toBeInTheDocument();
     expect(
-      screen.queryByTestId(`purchase-appointment-time-${mockPurchasePendingWithDate.id}`)
-    ).not.toBeInTheDocument();
+      screen.getByTestId(`purchase-appointment-time-${mockPurchasePendingWithDate.id}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`purchase-appointment-time-${mockPurchasePendingWithDate.id}`)
+    ).toHaveTextContent('10:00');
   });
 });

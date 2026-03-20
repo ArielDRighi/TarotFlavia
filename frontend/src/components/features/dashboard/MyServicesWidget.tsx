@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { HandHeart, ArrowRight, AlertCircle } from 'lucide-react';
+import { HandHeart, ArrowRight, AlertCircle, CalendarDays, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,6 +25,13 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
 
 const MAX_VISIBLE_PURCHASES = 3;
 
+function formatShortDate(dateStr: string): string {
+  const parts = dateStr.split('-');
+  if (parts.length !== 3 || parts.some((p) => p === '')) return '';
+  const [year, month, day] = parts;
+  return `${day}/${month}/${year}`;
+}
+
 // ============================================================================
 // Sub-components
 // ============================================================================
@@ -37,6 +44,7 @@ function PurchaseItem({ purchase }: PurchaseItemProps) {
   const serviceName = purchase.holisticService?.name ?? 'Servicio';
   const displayStatus = deriveDisplayStatus(purchase);
   const config = STATUS_CONFIG[displayStatus] ?? STATUS_CONFIG['pending'];
+  const hasAppointment = Boolean(purchase.selectedDate && purchase.selectedTime);
 
   return (
     <div
@@ -54,6 +62,18 @@ function PurchaseItem({ purchase }: PurchaseItemProps) {
           >
             {config.label}
           </span>
+          {hasAppointment && (
+            <>
+              <span className="flex items-center gap-1 text-xs text-gray-500">
+                <CalendarDays className="h-3 w-3" />
+                {formatShortDate(purchase.selectedDate as string)}
+              </span>
+              <span className="flex items-center gap-1 text-xs text-gray-500">
+                <Clock className="h-3 w-3" />
+                {purchase.selectedTime}
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>

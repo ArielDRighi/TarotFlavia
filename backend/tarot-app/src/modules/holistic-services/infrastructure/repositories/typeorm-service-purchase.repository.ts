@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { ServicePurchase } from '../../entities/service-purchase.entity';
 import { IServicePurchaseRepository } from '../../domain/interfaces/service-purchase-repository.interface';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
@@ -192,5 +192,15 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
     preferenceId: string,
   ): Promise<ServicePurchase | null> {
     return this.repository.findOne({ where: { preferenceId } });
+  }
+
+  async findActiveByDate(date: string): Promise<ServicePurchase[]> {
+    return this.repository.find({
+      where: {
+        selectedDate: date,
+        paymentStatus: In([PurchaseStatus.PENDING, PurchaseStatus.PAID]),
+      },
+      relations: ['holisticService'],
+    });
   }
 }
