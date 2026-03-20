@@ -409,21 +409,83 @@ describe('BookingCalendar', () => {
   // Duration selector
   // ============================================================================
 
-  describe('Duration selector', () => {
-    it('should render duration selector with radio buttons', () => {
-      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} />, { wrapper });
+  describe('Duration handling', () => {
+    it('should use serviceDurationMinutes when provided', () => {
+      const mockSlots: TimeSlot[] = [
+        { date: '2025-12-15', time: '09:00', durationMinutes: 60, available: true },
+      ];
 
-      expect(screen.getByLabelText(/30 min/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/60 min/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/90 min/i)).toBeInTheDocument();
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: mockSlots,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} serviceDurationMinutes={90} />, {
+        wrapper,
+      });
+
+      const futureDays = screen
+        .getAllByTestId(/^calendar-day-/)
+        .filter(
+          (el) =>
+            el.getAttribute('data-past') === 'false' && el.getAttribute('data-empty') !== 'true'
+        );
+
+      if (futureDays.length > 0) {
+        fireEvent.click(futureDays[0]);
+        const timeSlot = screen.getByRole('button', { name: '09:00' });
+        fireEvent.click(timeSlot);
+
+        const confirmButton = screen.getByRole('button', { name: /confirmar y reservar/i });
+        fireEvent.click(confirmButton);
+
+        expect(mockOnBook).toHaveBeenCalledWith(expect.any(String), '09:00', 90);
+      }
     });
 
-    it('should show duration selector when readOnly is false', () => {
-      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={false} />, { wrapper });
+    it('should default duration to 60 when serviceDurationMinutes not provided', () => {
+      const mockSlots: TimeSlot[] = [
+        { date: '2025-12-15', time: '09:00', durationMinutes: 60, available: true },
+      ];
 
-      expect(screen.getByLabelText(/30 min/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/60 min/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/90 min/i)).toBeInTheDocument();
+      vi.mocked(useAvailableSlotsHook.useAvailableSlots).mockReturnValue({
+        data: mockSlots,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useAvailableSlotsHook.useAvailableSlots>);
+
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} />, { wrapper });
+
+      const futureDays = screen
+        .getAllByTestId(/^calendar-day-/)
+        .filter(
+          (el) =>
+            el.getAttribute('data-past') === 'false' && el.getAttribute('data-empty') !== 'true'
+        );
+
+      if (futureDays.length > 0) {
+        fireEvent.click(futureDays[0]);
+        const timeSlot = screen.getByRole('button', { name: '09:00' });
+        fireEvent.click(timeSlot);
+
+        const confirmButton = screen.getByRole('button', { name: /confirmar y reservar/i });
+        fireEvent.click(confirmButton);
+
+        expect(mockOnBook).toHaveBeenCalledWith(expect.any(String), '09:00', 60);
+      }
+    });
+
+    it('should not render duration radio buttons (duration is fixed by service)', () => {
+      render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} serviceDurationMinutes={60} />, {
+        wrapper,
+      });
+
+      expect(screen.queryByLabelText(/30 min/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/60 min/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/90 min/i)).not.toBeInTheDocument();
     });
   });
 
@@ -594,9 +656,6 @@ describe('BookingCalendar', () => {
     it('should hide duration selector when readOnly is true', () => {
       render(<BookingCalendar tarotistaId={1} onBook={mockOnBook} readOnly={true} />, { wrapper });
 
-      expect(
-        screen.queryByRole('radiogroup', { name: /duración de la sesión/i })
-      ).not.toBeInTheDocument();
       expect(screen.queryByLabelText(/30 min/i)).not.toBeInTheDocument();
       expect(screen.queryByLabelText(/60 min/i)).not.toBeInTheDocument();
       expect(screen.queryByLabelText(/90 min/i)).not.toBeInTheDocument();
@@ -608,7 +667,7 @@ describe('BookingCalendar', () => {
   // ============================================================================
 
   describe('serviceSlug prop (public availability preview)', () => {
-    it('should use public availability hook when readOnly=true and serviceSlug is provided', () => {
+    it('should use public availability hook when serviceSlug is provided', () => {
       const mockPublicAvailability: ServiceAvailabilityResponse = {
         date: '2025-12-15',
         slots: [

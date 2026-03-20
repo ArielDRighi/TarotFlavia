@@ -3,8 +3,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GetServiceAvailabilityUseCase } from './get-service-availability.use-case';
 import {
   HOLISTIC_SERVICE_REPOSITORY,
+  SERVICE_PURCHASE_REPOSITORY,
   IHolisticServiceRepository,
 } from '../../domain/interfaces';
+import { IServicePurchaseRepository } from '../../domain/interfaces/service-purchase-repository.interface';
+import { ServicePurchase } from '../../entities/service-purchase.entity';
+import { PurchaseStatus as HolisticPurchaseStatus } from '../../domain/enums/purchase-status.enum';
 import { IAvailabilityRepository } from '../../../scheduling/domain/interfaces/availability-repository.interface';
 import { IExceptionRepository } from '../../../scheduling/domain/interfaces/exception-repository.interface';
 import { ISessionRepository } from '../../../scheduling/domain/interfaces/session-repository.interface';
@@ -95,6 +99,7 @@ const mockOccupiedSession: Session = {
 describe('GetServiceAvailabilityUseCase', () => {
   let useCase: GetServiceAvailabilityUseCase;
   let mockHolisticRepo: jest.Mocked<IHolisticServiceRepository>;
+  let mockPurchaseRepo: jest.Mocked<IServicePurchaseRepository>;
   let mockAvailabilityRepo: jest.Mocked<IAvailabilityRepository>;
   let mockExceptionRepo: jest.Mocked<IExceptionRepository>;
   let mockSessionRepo: jest.Mocked<ISessionRepository>;
@@ -107,6 +112,23 @@ describe('GetServiceAvailabilityUseCase', () => {
       findAll: jest.fn(),
       save: jest.fn(),
       update: jest.fn(),
+    };
+
+    mockPurchaseRepo = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      findByUserId: jest.fn(),
+      findByUserIdWithService: jest.fn(),
+      findPendingByUserAndService: jest.fn(),
+      findPendingPayments: jest.fn(),
+      findAllPurchases: jest.fn(),
+      findByIdWithRelations: jest.fn(),
+      updateStatus: jest.fn(),
+      updateStatusIfCurrent: jest.fn(),
+      findPaidUnassignedByUserAndSessionType: jest.fn(),
+      findByMercadoPagoPaymentId: jest.fn(),
+      findByPreferenceId: jest.fn(),
+      findActiveByDate: jest.fn(),
     };
 
     mockAvailabilityRepo = {
@@ -139,6 +161,7 @@ describe('GetServiceAvailabilityUseCase', () => {
       providers: [
         GetServiceAvailabilityUseCase,
         { provide: HOLISTIC_SERVICE_REPOSITORY, useValue: mockHolisticRepo },
+        { provide: SERVICE_PURCHASE_REPOSITORY, useValue: mockPurchaseRepo },
         { provide: AVAILABILITY_REPOSITORY, useValue: mockAvailabilityRepo },
         { provide: EXCEPTION_REPOSITORY, useValue: mockExceptionRepo },
         { provide: SESSION_REPOSITORY, useValue: mockSessionRepo },
@@ -195,6 +218,7 @@ describe('GetServiceAvailabilityUseCase', () => {
       mockHolisticRepo.findBySlug.mockResolvedValue(mockHolisticService);
       mockExceptionRepo.getExceptionsByDateRange.mockResolvedValue([]);
       mockSessionRepo.findSessionsByTarotistAndDateRange.mockResolvedValue([]);
+      mockPurchaseRepo.findActiveByDate.mockResolvedValue([]);
     });
 
     it('debe retornar objeto con date y slots cuando el servicio existe', async () => {
@@ -341,6 +365,7 @@ describe('GetServiceAvailabilityUseCase', () => {
       mockHolisticRepo.findBySlug.mockResolvedValue(mockHolisticService);
       mockExceptionRepo.getExceptionsByDateRange.mockResolvedValue([]);
       mockSessionRepo.findSessionsByTarotistAndDateRange.mockResolvedValue([]);
+      mockPurchaseRepo.findActiveByDate.mockResolvedValue([]);
     });
 
     afterEach(() => {
@@ -400,6 +425,132 @@ describe('GetServiceAvailabilityUseCase', () => {
       result.slots.forEach((slot) => {
         expect(slot.available).toBe(false);
       });
+    });
+  });
+
+  describe('bloqueo de slots por compras existentes (service_purchases)', () => {
+    const futureMonday = '2099-06-01';
+
+    beforeEach(() => {
+      mockHolisticRepo.findBySlug.mockResolvedValue(mockHolisticService);
+      mockExceptionRepo.getExceptionsByDateRange.mockResolvedValue([]);
+      mockSessionRepo.findSessionsByTarotistAndDateRange.mockResolvedValue([]);
+      mockAvailabilityRepo.getWeeklyAvailability.mockResolvedValue([
+        mockAvailabilityMonday, // 09:00-11:00 → 4 slots
+      ]);
+    });
+
+    it('debe marcar available=false para slots ocupados por una compra pagada', async () => {
+      mockPurchaseRepo.findActiveByDate.mockResolvedValue([
+        {
+          id: 100,
+          selectedDate: futureMonday,
+          selectedTime: '09:00',
+          paymentStatus: HolisticPurchaseStatus.PAID,
+          holisticService: mockHolisticService,
+        } as ServicePurchase,
+      ]);
+
+      const result = await useCase.execute('arbol-genealogico', futureMonday);
+
+      const slot900 = result.slots.find((s) => s.time === '09:00');
+      expect(slot900).toBeDefined();
+      expect(slot900?.available).toBe(false);
+
+      // 09:30 also blocked (60min duration overlaps)
+      const slot930 = result.slots.find((s) => s.time === '09:30');
+      expect(slot930).toBeDefined();
+      expect(slot930?.available).toBe(false);
+    });
+
+    it('debe marcar available=false para slots ocupados por una compra pendiente', async () => {
+      mockPurchaseRepo.findActiveByDate.mockResolvedValue([
+        {
+          id: 101,
+          selectedDate: futureMonday,
+          selectedTime: '10:00',
+          paymentStatus: HolisticPurchaseStatus.PENDING,
+          holisticService: mockHolisticService,
+        } as ServicePurchase,
+      ]);
+
+      const result = await useCase.execute('arbol-genealogico', futureMonday);
+
+      const slot1000 = result.slots.find((s) => s.time === '10:00');
+      expect(slot1000).toBeDefined();
+      expect(slot1000?.available).toBe(false);
+    });
+
+    it('debe mantener available=true para slots no ocupados por compras', async () => {
+      mockPurchaseRepo.findActiveByDate.mockResolvedValue([
+        {
+          id: 102,
+          selectedDate: futureMonday,
+          selectedTime: '09:00',
+          paymentStatus: HolisticPurchaseStatus.PAID,
+          holisticService: mockHolisticService,
+        } as ServicePurchase,
+      ]);
+
+      const result = await useCase.execute('arbol-genealogico', futureMonday);
+
+      // 10:00 should still be available (09:00 + 60min = 10:00, no overlap)
+      const slot1000 = result.slots.find((s) => s.time === '10:00');
+      expect(slot1000).toBeDefined();
+      expect(slot1000?.available).toBe(true);
+    });
+
+    it('debe bloquear slots por múltiples compras en la misma fecha', async () => {
+      mockPurchaseRepo.findActiveByDate.mockResolvedValue([
+        {
+          id: 103,
+          selectedDate: futureMonday,
+          selectedTime: '09:00',
+          paymentStatus: HolisticPurchaseStatus.PAID,
+          holisticService: mockHolisticService,
+        } as ServicePurchase,
+        {
+          id: 104,
+          selectedDate: futureMonday,
+          selectedTime: '10:00',
+          paymentStatus: HolisticPurchaseStatus.PENDING,
+          holisticService: mockHolisticService,
+        } as ServicePurchase,
+      ]);
+
+      const result = await useCase.execute('arbol-genealogico', futureMonday);
+
+      // All 4 slots should be blocked:
+      // 09:00-10:00 by purchase 103, 10:00-11:00 by purchase 104
+      const allBlocked = result.slots.every((s) => !s.available);
+      expect(allBlocked).toBe(true);
+    });
+
+    it('debe llamar a findActiveByDate con la fecha correcta', async () => {
+      mockPurchaseRepo.findActiveByDate.mockResolvedValue([]);
+
+      await useCase.execute('arbol-genealogico', futureMonday);
+
+      expect(mockPurchaseRepo.findActiveByDate).toHaveBeenCalledWith(
+        futureMonday,
+      );
+    });
+
+    it('no debe bloquear slots por compras sin selectedTime', async () => {
+      mockPurchaseRepo.findActiveByDate.mockResolvedValue([
+        {
+          id: 105,
+          selectedDate: futureMonday,
+          selectedTime: null,
+          paymentStatus: HolisticPurchaseStatus.PAID,
+          holisticService: mockHolisticService,
+        } as ServicePurchase,
+      ]);
+
+      const result = await useCase.execute('arbol-genealogico', futureMonday);
+
+      const availableSlots = result.slots.filter((s) => s.available);
+      expect(availableSlots.length).toBe(4);
     });
   });
 });

@@ -219,6 +219,40 @@ describe('MyServicesWidget', () => {
     expect(screen.getByText('Ver todos mis servicios')).toBeInTheDocument();
   });
 
+  it('should show appointment date and time when purchase has selectedDate and selectedTime', () => {
+    const purchases = [
+      createMockPurchase({
+        id: 1,
+        paymentStatus: 'pending',
+        selectedDate: '2026-05-15',
+        selectedTime: '14:30',
+      }),
+    ];
+
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: purchases,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesWidget />, { wrapper });
+
+    expect(screen.getByText('15/05/2026')).toBeInTheDocument();
+    expect(screen.getByText('14:30')).toBeInTheDocument();
+  });
+
+  it('should not show appointment info when purchase has no selectedDate', () => {
+    const purchases = [createMockPurchase({ id: 1, selectedDate: null, selectedTime: null })];
+
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: purchases,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesWidget />, { wrapper });
+
+    expect(screen.queryByText(/\d{2}\/\d{2}\/\d{4}/)).not.toBeInTheDocument();
+  });
+
   it('should link to /mis-servicios from the footer', () => {
     const purchases = [createMockPurchase({ id: 1 })];
 

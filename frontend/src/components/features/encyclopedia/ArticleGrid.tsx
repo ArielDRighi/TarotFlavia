@@ -46,11 +46,17 @@ export function ArticleGrid({
   className,
 }: ArticleGridProps) {
   if (isLoading) {
-    return <ArticleSkeleton />;
+    return (
+      <div className={className}>
+        <ArticleSkeleton />
+      </div>
+    );
   }
 
   if (articles.length === 0) {
-    return <div className="text-muted-foreground py-12 text-center">{emptyMessage}</div>;
+    return (
+      <div className={cn('text-muted-foreground py-12 text-center', className)}>{emptyMessage}</div>
+    );
   }
 
   return (

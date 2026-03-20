@@ -124,6 +124,7 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
       findPaidUnassignedByUserAndSessionType: jest.fn(),
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
+      findActiveByDate: jest.fn(),
     };
 
     mockMpService = {

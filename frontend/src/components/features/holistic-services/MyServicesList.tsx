@@ -93,10 +93,7 @@ function PurchaseCard({ purchase }: PurchaseCardProps) {
   const serviceName = purchase.holisticService?.name ?? 'Servicio';
   const durationMinutes = purchase.holisticService?.durationMinutes ?? null;
   const displayStatus = deriveDisplayStatus(purchase);
-  const hasAppointment =
-    (displayStatus === 'confirmed' || displayStatus === 'completed') &&
-    purchase.selectedDate &&
-    purchase.selectedTime;
+  const hasAppointment = Boolean(purchase.selectedDate && purchase.selectedTime);
   const showWhatsApp =
     (displayStatus === 'confirmed' || displayStatus === 'completed') && purchase.whatsappNumber;
   const showRetryPayment = displayStatus === 'pending' && purchase.initPoint;

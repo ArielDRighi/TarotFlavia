@@ -67,4 +67,10 @@ export interface IServicePurchaseRepository {
    * Used as a fallback lookup when the webhook references a preference ID.
    */
   findByPreferenceId(preferenceId: string): Promise<ServicePurchase | null>;
+
+  /**
+   * Finds active purchases (pending or paid) for a specific date.
+   * Used to block already-booked time slots in the availability calendar.
+   */
+  findActiveByDate(date: string): Promise<ServicePurchase[]>;
 }

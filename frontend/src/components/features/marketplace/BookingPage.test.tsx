@@ -154,7 +154,7 @@ describe('BookingPage', () => {
     render(<BookingPage tarotistaId={1} />, { wrapper });
 
     await waitFor(() => {
-      expect(screen.getByText(/selecciona una fecha/i)).toBeInTheDocument();
+      expect(screen.getByText(/selecciona fecha y hora/i)).toBeInTheDocument();
     });
   });
 

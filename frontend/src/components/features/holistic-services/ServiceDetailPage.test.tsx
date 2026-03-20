@@ -21,16 +21,19 @@ vi.mock('@/components/features/marketplace/BookingCalendar', () => ({
   BookingCalendar: ({
     readOnly,
     serviceSlug,
+    serviceDurationMinutes,
     onBook,
   }: {
     readOnly?: boolean;
     serviceSlug?: string;
+    serviceDurationMinutes?: number;
     onBook?: (date: string, time: string, duration: number) => void;
   }) => (
     <div
       data-testid="booking-calendar"
       data-readonly={String(readOnly ?? false)}
       data-service-slug={serviceSlug ?? ''}
+      data-service-duration={String(serviceDurationMinutes ?? '')}
     >
       <button data-testid="mock-select-slot" onClick={() => onBook?.('2026-04-15', '10:00', 90)}>
         Seleccionar horario
@@ -188,7 +191,7 @@ describe('ServiceDetailPage', () => {
     expect(calendar).toHaveAttribute('data-service-slug', 'arbol-genealogico');
   });
 
-  it('should show calendar availability disclaimer', () => {
+  it('should pass serviceDurationMinutes to BookingCalendar', () => {
     vi.mocked(useHolisticServicesHook.useHolisticServiceDetail).mockReturnValue({
       data: mockServiceDetail,
       isLoading: false,
@@ -198,7 +201,11 @@ describe('ServiceDetailPage', () => {
 
     render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
 
-    expect(screen.getByText(/fechas disponibles son al momento/i)).toBeInTheDocument();
+    const calendar = screen.getByTestId('booking-calendar');
+    expect(calendar).toHaveAttribute(
+      'data-service-duration',
+      String(mockServiceDetail.durationMinutes)
+    );
   });
 
   it('should render "Contratar servicio" button disabled when no slot selected', () => {

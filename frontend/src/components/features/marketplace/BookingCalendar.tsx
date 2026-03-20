@@ -12,8 +12,6 @@ import { useAvailableSlots } from '@/hooks/api/useAvailableSlots';
 import { useHolisticServiceAvailability } from '@/hooks/api/useHolisticServices';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   format,
@@ -37,14 +35,9 @@ interface BookingCalendarProps {
   onBook: (date: string, time: string, duration: number) => void;
   readOnly?: boolean;
   serviceSlug?: string;
+  /** When provided, locks the duration to this value and hides the selector. */
+  serviceDurationMinutes?: number;
 }
-
-// Durations available with prices (mock prices for now)
-const DURATIONS = [
-  { value: 30, label: '30 min', price: 25 },
-  { value: 60, label: '60 min', price: 45 },
-  { value: 90, label: '90 min', price: 65 },
-] as const;
 
 // Day of week headers — starts on Monday (ISO week)
 const DAY_HEADERS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -63,13 +56,14 @@ export function BookingCalendar({
   onBook,
   readOnly = false,
   serviceSlug,
+  serviceDurationMinutes,
 }: BookingCalendarProps) {
   const today = useMemo(() => startOfDay(new Date()), []);
 
   const [currentMonth, setCurrentMonth] = useState<Date>(startOfMonth(today));
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
-  const [selectedDuration, setSelectedDuration] = useState<number>(60);
+  const [selectedDuration, setSelectedDuration] = useState<number>(serviceDurationMinutes ?? 60);
 
   // Build the calendar grid for the current month
   const calendarGrid = useMemo(() => {
@@ -83,25 +77,23 @@ export function BookingCalendar({
     return { days, leadingBlanks };
   }, [currentMonth]);
 
-  // Fetch slots via authenticated endpoint (booking mode)
+  // Determine data source: public endpoint when serviceSlug is provided (detail page),
+  // authenticated endpoint only when no serviceSlug (legacy booking page).
+  const usePublicSlots = !!serviceSlug;
+
+  // Fetch slots via authenticated endpoint (legacy booking page without serviceSlug)
   const {
     data: authenticatedSlots,
     isLoading: isLoadingAuthenticated,
     isError: isErrorAuthenticated,
-  } = useAvailableSlots(tarotistaId, !readOnly || !serviceSlug ? selectedDate : '');
+  } = useAvailableSlots(tarotistaId, !usePublicSlots ? selectedDate : '', selectedDuration);
 
-  // Fetch slots via public endpoint (readOnly preview mode with serviceSlug)
+  // Fetch slots via public endpoint (service detail page with serviceSlug)
   const {
     data: publicAvailability,
     isLoading: isLoadingPublic,
     isError: isErrorPublic,
-  } = useHolisticServiceAvailability(
-    serviceSlug ?? '',
-    readOnly && !!serviceSlug ? selectedDate : ''
-  );
-
-  // Resolve which data source to use
-  const usePublicSlots = readOnly && !!serviceSlug;
+  } = useHolisticServiceAvailability(serviceSlug ?? '', usePublicSlots ? selectedDate : '');
   const slots = usePublicSlots ? (publicAvailability?.slots ?? undefined) : authenticatedSlots;
   const isLoading = usePublicSlots ? isLoadingPublic : isLoadingAuthenticated;
   const isError = usePublicSlots ? isErrorPublic : isErrorAuthenticated;
@@ -134,11 +126,6 @@ export function BookingCalendar({
     setSelectedTime(time);
   };
 
-  // Duration selection
-  const handleDurationChange = (duration: string) => {
-    setSelectedDuration(Number(duration));
-  };
-
   // Booking confirmation
   const handleConfirm = () => {
     if (selectedDate && selectedTime && selectedDuration) {
@@ -147,7 +134,6 @@ export function BookingCalendar({
   };
 
   const isReadyToBook = Boolean(selectedDate && selectedTime && selectedDuration);
-  const currentPrice = DURATIONS.find((d) => d.value === selectedDuration)?.price ?? 0;
 
   return (
     <div className="space-y-6">
@@ -300,31 +286,8 @@ export function BookingCalendar({
         </div>
       )}
 
-      {/* Duration Selector — hidden in readOnly mode */}
-      {!readOnly && (
-        <div>
-          <h3 className="mb-3 font-serif text-lg font-medium">Duración</h3>
-          <RadioGroup
-            value={String(selectedDuration)}
-            onValueChange={handleDurationChange}
-            aria-label="Duración de la sesión"
-          >
-            <div className="space-y-2">
-              {DURATIONS.map((duration) => (
-                <div key={duration.value} className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value={String(duration.value)}
-                    id={`duration-${duration.value}`}
-                  />
-                  <Label htmlFor={`duration-${duration.value}`} className="cursor-pointer">
-                    {duration.label} - ${duration.price} USD
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </RadioGroup>
-        </div>
-      )}
+      {/* Duration — hidden in readOnly mode; when serviceDurationMinutes is set the
+          duration is locked to the service config and we skip the selector entirely. */}
 
       {/* Booking Summary */}
       {isReadyToBook && !readOnly && (
@@ -349,11 +312,7 @@ export function BookingCalendar({
               <p className="text-sm font-medium text-gray-500">Duración</p>
               <p className="font-serif text-base">{selectedDuration} minutos</p>
             </div>
-            <div className="border-t pt-2">
-              <p className="text-sm font-medium text-gray-500">Precio total</p>
-              <p className="text-primary font-serif text-2xl font-bold">${currentPrice} USD</p>
-            </div>
-            <Button className="w-full" size="lg" onClick={handleConfirm}>
+            <Button className="mt-2 w-full" size="lg" onClick={handleConfirm}>
               Confirmar y Reservar
             </Button>
           </CardContent>
