@@ -59,6 +59,7 @@ describe('useAvailableSlots', () => {
     expect(schedulingApi.getAvailableSlots).toHaveBeenCalledWith({
       tarotistaId: 1,
       date: '2025-12-15',
+      durationMinutes: 60,
     });
   });
 
@@ -107,6 +108,21 @@ describe('useAvailableSlots', () => {
       expect(schedulingApi.getAvailableSlots).toHaveBeenCalledWith({
         tarotistaId: 1,
         date: '2025-12-15',
+        durationMinutes: 60,
+      });
+    });
+  });
+
+  it('should pass custom durationMinutes to API', async () => {
+    vi.mocked(schedulingApi.getAvailableSlots).mockResolvedValue([]);
+
+    renderHook(() => useAvailableSlots(1, '2025-12-15', 90), { wrapper });
+
+    await waitFor(() => {
+      expect(schedulingApi.getAvailableSlots).toHaveBeenCalledWith({
+        tarotistaId: 1,
+        date: '2025-12-15',
+        durationMinutes: 90,
       });
     });
   });
@@ -132,6 +148,7 @@ describe('useAvailableSlots', () => {
     expect(schedulingApi.getAvailableSlots).toHaveBeenLastCalledWith({
       tarotistaId: 2,
       date: '2025-12-15',
+      durationMinutes: 60,
     });
   });
 
@@ -156,6 +173,7 @@ describe('useAvailableSlots', () => {
     expect(schedulingApi.getAvailableSlots).toHaveBeenLastCalledWith({
       tarotistaId: 1,
       date: '2025-12-16',
+      durationMinutes: 60,
     });
   });
 });

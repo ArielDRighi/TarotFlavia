@@ -86,7 +86,7 @@ export function BookingCalendar({
     data: authenticatedSlots,
     isLoading: isLoadingAuthenticated,
     isError: isErrorAuthenticated,
-  } = useAvailableSlots(tarotistaId, !usePublicSlots ? selectedDate : '');
+  } = useAvailableSlots(tarotistaId, !usePublicSlots ? selectedDate : '', selectedDuration);
 
   // Fetch slots via public endpoint (service detail page with serviceSlug)
   const {

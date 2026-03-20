@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
 import { ROUTES } from '@/lib/constants/routes';
-import { cn } from '@/lib/utils';
+import { cn, formatDateShort } from '@/lib/utils';
 import { deriveDisplayStatus } from '@/lib/utils/holistic-services';
 import type { ServicePurchase } from '@/types';
 
@@ -24,13 +24,6 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
 };
 
 const MAX_VISIBLE_PURCHASES = 3;
-
-function formatShortDate(dateStr: string): string {
-  const parts = dateStr.split('-');
-  if (parts.length !== 3 || parts.some((p) => p === '')) return '';
-  const [year, month, day] = parts;
-  return `${day}/${month}/${year}`;
-}
 
 // ============================================================================
 // Sub-components
@@ -66,7 +59,7 @@ function PurchaseItem({ purchase }: PurchaseItemProps) {
             <>
               <span className="flex items-center gap-1 text-xs text-gray-500">
                 <CalendarDays className="h-3 w-3" />
-                {formatShortDate(purchase.selectedDate as string)}
+                {formatDateShort(purchase.selectedDate as string)}
               </span>
               <span className="flex items-center gap-1 text-xs text-gray-500">
                 <Clock className="h-3 w-3" />

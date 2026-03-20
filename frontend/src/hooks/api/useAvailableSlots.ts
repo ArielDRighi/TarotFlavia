@@ -28,10 +28,10 @@ export const availableSlotsQueryKeys = {
  * @param date - Date in YYYY-MM-DD format
  * @returns TanStack Query result with available time slots
  */
-export function useAvailableSlots(tarotistaId: number, date: string) {
+export function useAvailableSlots(tarotistaId: number, date: string, durationMinutes: number = 60) {
   return useQuery({
-    queryKey: availableSlotsQueryKeys.byTarotista(tarotistaId, date),
-    queryFn: () => getAvailableSlots({ tarotistaId, date }),
+    queryKey: [...availableSlotsQueryKeys.byTarotista(tarotistaId, date), durationMinutes],
+    queryFn: () => getAvailableSlots({ tarotistaId, date, durationMinutes }),
     enabled: tarotistaId > 0 && /^\d{4}-\d{2}-\d{2}$/.test(date), // Only fetch if valid params and format
     staleTime: 1 * 60 * 1000, // 1 minute - slots can change frequently
   });
