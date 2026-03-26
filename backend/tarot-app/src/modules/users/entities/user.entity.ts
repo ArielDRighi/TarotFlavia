@@ -148,13 +148,42 @@ export class User {
   })
   subscriptionStatus: SubscriptionStatus;
 
+  /**
+   * @deprecated Campo de Stripe, nunca se utilizó. Usar mpCustomerId para MercadoPago.
+   */
   @ApiProperty({
     example: 'cus_123456789',
-    description: 'ID del cliente en Stripe',
+    description: 'ID del cliente en Stripe (deprecated, no utilizado)',
     nullable: true,
   })
   @Column({ nullable: true })
   stripeCustomerId: string;
+
+  @ApiProperty({
+    example: '2c9380849837a27101983c5be8920c06',
+    description: 'ID del preapproval de MercadoPago (suscripción recurrente)',
+    nullable: true,
+  })
+  @Column({
+    name: 'mp_preapproval_id',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
+  mpPreapprovalId: string | null;
+
+  @ApiProperty({
+    example: '123456789',
+    description: 'ID del cliente en MercadoPago',
+    nullable: true,
+  })
+  @Column({
+    name: 'mp_customer_id',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
+  mpCustomerId: string | null;
 
   @OneToMany(() => TarotReading, (reading) => reading.user)
   readings: TarotReading[];
