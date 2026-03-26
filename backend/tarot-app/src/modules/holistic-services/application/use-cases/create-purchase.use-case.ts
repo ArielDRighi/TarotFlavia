@@ -17,7 +17,7 @@ import { CreatePurchaseDto } from '../dto/purchase.dto';
 import { PurchaseResponseDto } from '../dto/purchase-response.dto';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
 import { ServicePurchase } from '../../entities/service-purchase.entity';
-import { MercadoPagoService } from '../../infrastructure/services/mercadopago.service';
+import { MercadoPagoService } from '../../../payments/infrastructure/services/mercadopago.service';
 
 @Injectable()
 export class CreatePurchaseUseCase {

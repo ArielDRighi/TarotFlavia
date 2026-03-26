@@ -22,7 +22,7 @@ import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
 import { SessionType } from '../../../scheduling/domain/enums';
 import { CreatePurchaseDto } from '../dto/purchase.dto';
 import { ConfigService } from '@nestjs/config';
-import { MercadoPagoService } from '../../infrastructure/services/mercadopago.service';
+import { MercadoPagoService } from '../../../payments/infrastructure/services/mercadopago.service';
 
 const mockService: HolisticService = {
   id: 1,

@@ -6,7 +6,7 @@ import {
   IServicePurchaseRepository,
 } from '../../domain/interfaces';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
-import { MercadoPagoService } from '../../infrastructure/services/mercadopago.service';
+import { MercadoPagoService } from '../../../payments/infrastructure/services/mercadopago.service';
 import { EmailService } from '../../../email/email.service';
 import { ServicePurchase } from '../../entities/service-purchase.entity';
 

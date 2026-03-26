@@ -20,9 +20,6 @@ import {
   SERVICE_PURCHASE_REPOSITORY,
 } from './domain/interfaces/repository.tokens';
 
-// ==================== Services ====================
-import { MercadoPagoService } from './infrastructure/services/mercadopago.service';
-
 // ==================== Use Cases ====================
 import { GetAllActiveServicesUseCase } from './application/use-cases/get-all-active-services.use-case';
 import { AdminGetAllServicesUseCase } from './application/use-cases/admin-get-all-services.use-case';
@@ -43,6 +40,7 @@ import { HolisticServicesOrchestratorService } from './application/orchestrators
 // ==================== External Modules ====================
 import { EmailModule } from '../email/email.module';
 import { SchedulingModule } from '../scheduling/scheduling.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
@@ -50,6 +48,7 @@ import { SchedulingModule } from '../scheduling/scheduling.module';
     TypeOrmModule.forFeature([HolisticService, ServicePurchase]),
     EmailModule,
     forwardRef(() => SchedulingModule),
+    PaymentsModule,
   ],
   controllers: [
     HolisticServicesPublicController,
@@ -69,7 +68,7 @@ import { SchedulingModule } from '../scheduling/scheduling.module';
     },
 
     // Services
-    MercadoPagoService,
+    // (MercadoPagoService is provided via PaymentsModule)
 
     // Use Cases
     GetAllActiveServicesUseCase,
