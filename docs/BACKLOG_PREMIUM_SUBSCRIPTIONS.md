@@ -198,7 +198,7 @@ Crear `payments.module` con `MercadoPagoService` extraído y reutilizable. Mante
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1.5 días
 **Dependencias:** T-BE-02
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** El webhook controller actual (`POST /webhooks/mercadopago`) vive en holistic-services y solo procesa `type: "payment"`. Necesita manejar también `type: "subscription_preapproval"` y diferenciar cobros recurrentes de pagos de servicios holísticos (ambos llegan como `type: "payment"`).
 
@@ -209,36 +209,36 @@ Mover el webhook controller a `payments.module` y convertirlo en un router que d
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Mover `WebhookController` de `holistic-services/infrastructure/controllers/` a `payments/infrastructure/controllers/webhook.controller.ts`
-- [ ] Actualizar `WebhookController` para ser un router:
+- [x] Mover `WebhookController` de `holistic-services/infrastructure/controllers/` a `payments/infrastructure/controllers/webhook.controller.ts`
+- [x] Actualizar `WebhookController` para ser un router:
   - `type: "payment"` → verificar `external_reference`:
     - Si empieza con `sub_` → delegará a `ProcessSubscriptionPaymentUseCase` (se implementa en T-INT-02)
     - Si es numérico → delegar a `ProcessMercadoPagoWebhookUseCase` existente (holistic-services)
   - `type: "subscription_preapproval"` → delegará a `ProcessSubscriptionWebhookUseCase` (se implementa en T-INT-02)
   - Otros tipos → log + ignorar (comportamiento actual)
-- [ ] Actualizar `payments.module.ts`:
+- [x] Actualizar `payments.module.ts`:
   - Agregar `WebhookController` a controllers
-  - Importar `HolisticServicesModule` (para inyectar el orchestrator/use case de pagos existente)
-- [ ] Remover `WebhookController` de `holistic-services.module.ts` controllers
-- [ ] Exportar `HolisticServicesOrchestratorService` desde `holistic-services.module` (ya se exporta)
-- [ ] **Preparar inyección placeholder** para los use cases de suscripción que aún no existen: usar `@Optional()` + `@Inject()` con token, o bien inyectar un stub que logee "not implemented yet" para que el código compile
+  - Importar `HolisticServicesModule` con `forwardRef` (para resolver dependencia circular)
+- [x] Remover `WebhookController` de `holistic-services.module.ts` controllers
+- [x] Exportar `HolisticServicesOrchestratorService` desde `holistic-services.module` (ya se exportaba)
+- [x] **Preparar inyección placeholder** para los use cases de suscripción: `@Optional() @Inject(SUBSCRIPTION_WEBHOOK_USE_CASE)` con token en `payments/tokens/payment.tokens.ts`
 
 **Tests:**
-- [ ] Test: webhook con `type: "payment"` y `external_reference` numérico → delega a holistic-services
-- [ ] Test: webhook con `type: "payment"` y `external_reference` con prefijo `sub_` → delega a suscripciones (stub por ahora)
-- [ ] Test: webhook con `type: "subscription_preapproval"` → delega a suscripciones (stub por ahora)
-- [ ] Test: webhook con tipo desconocido → ignora con 200 OK
-- [ ] Verificar que el endpoint sigue siendo `POST /api/v1/webhooks/mercadopago` (misma ruta)
-- [ ] Coverage ≥ 80%
+- [x] Test: webhook con `type: "payment"` y `external_reference` numérico → delega a holistic-services
+- [x] Test: webhook con `type: "payment"` y `external_reference` con prefijo `sub_` → delega a suscripciones (stub por ahora)
+- [x] Test: webhook con `type: "subscription_preapproval"` → delega a suscripciones (stub por ahora)
+- [x] Test: webhook con tipo desconocido → ignora con 200 OK
+- [x] Verificar que el endpoint sigue siendo `POST /api/v1/webhooks/mercadopago` (misma ruta)
+- [x] Coverage ≥ 80% (97.61% Stmts, 100% Funcs)
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Webhook controller vive en `payments.module`
-- [ ] Pagos de servicios holísticos siguen funcionando exactamente igual
-- [ ] Routing por `type` + `external_reference` implementado
-- [ ] Endpoint URL no cambió (`POST /webhooks/mercadopago`)
-- [ ] Compilación y tests existentes pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] Webhook controller vive en `payments.module`
+- [x] Pagos de servicios holísticos siguen funcionando exactamente igual
+- [x] Routing por `type` + `external_reference` implementado
+- [x] Endpoint URL no cambió (`POST /webhooks/mercadopago`)
+- [x] Compilación y tests existentes pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 

@@ -15,6 +15,14 @@ export interface MercadoPagoWebhookPayload {
   data: {
     id: string;
   };
+  /**
+   * Campo de extensión para routing en el WebhookController de payments.
+   * NO forma parte del payload estándar de Mercado Pago (MP solo envía type + data.id).
+   * Puede ser inyectado por middleware o tests para indicar que el pago pertenece
+   * a una suscripción (valor con prefijo "sub_"). En producción, el routing definitivo
+   * se realiza consultando payment.external_reference desde la API de MP en T-INT-02.
+   */
+  externalReference?: string;
 }
 
 export interface WebhookProcessResult {

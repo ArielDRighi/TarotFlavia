@@ -10,7 +10,7 @@ import { ServicePurchase } from './entities/service-purchase.entity';
 import { HolisticServicesPublicController } from './infrastructure/controllers/holistic-services-public.controller';
 import { HolisticServicesController } from './infrastructure/controllers/holistic-services.controller';
 import { HolisticServicesAdminController } from './infrastructure/controllers/holistic-services-admin.controller';
-import { WebhookController } from './infrastructure/controllers/webhook.controller';
+// WebhookController fue movido a payments.module (T-BE-03)
 
 // ==================== Repositories ====================
 import { TypeOrmHolisticServiceRepository } from './infrastructure/repositories/typeorm-holistic-service.repository';
@@ -48,13 +48,13 @@ import { PaymentsModule } from '../payments/payments.module';
     TypeOrmModule.forFeature([HolisticService, ServicePurchase]),
     EmailModule,
     forwardRef(() => SchedulingModule),
-    PaymentsModule,
+    forwardRef(() => PaymentsModule),
   ],
   controllers: [
     HolisticServicesPublicController,
     HolisticServicesController,
     HolisticServicesAdminController,
-    WebhookController,
+    // WebhookController fue movido a payments.module (T-BE-03)
   ],
   providers: [
     // Repositories
