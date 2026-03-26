@@ -52,7 +52,7 @@ Paralelo 3 (independiente desde el inicio):
 **Dependencias:** Ninguna
 **Estado:** ✅ COMPLETADA
 
-**Contexto:** `JwtStrategy.validate()` retaba retornando `plan: payload.plan || 'free'` (del JWT) en vez de `plan: user.plan` (de la DB). Esto significaba que cuando el webhook actualiza `plan=premium` en la DB, el `PremiumGuard` seguía leyendo `plan=free` del JWT hasta que el token expire (7 días). Sin este fix, el upgrade a premium no funciona.
+**Contexto:** `JwtStrategy.validate()` estaba retornando `plan: payload.plan || 'free'` (del JWT) en vez de `plan: user.plan` (de la DB). Esto significaba que cuando el webhook actualiza `plan=premium` en la DB, el `PremiumGuard` seguía leyendo `plan=free` del JWT hasta que el token expire (7 días). Sin este fix, el upgrade a premium no funciona.
 
 #### 📋 Descripción
 

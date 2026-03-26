@@ -62,7 +62,7 @@ describe('JwtStrategy', () => {
       sub: 1,
       email: 'test@example.com',
       isAdmin: false,
-      plan: 'free',
+      plan: UserPlan.FREE,
     };
 
     it('should return user data for valid non-banned user', async () => {
@@ -126,6 +126,25 @@ describe('JwtStrategy', () => {
       );
     });
 
+    it('should return email from DB, not from JWT payload', async () => {
+      // JWT tiene email viejo; DB tiene email actualizado
+      const staleEmailPayload = {
+        sub: 1,
+        email: 'old@example.com', // JWT desactualizado
+      };
+      const dbUserWithNewEmail = {
+        ...mockUser,
+        email: 'new@example.com', // DB actualizada
+        isBanned: jest.fn().mockReturnValue(false),
+      };
+      mockUsersService.findById.mockResolvedValue(dbUserWithNewEmail);
+
+      const result = await strategy.validate(staleEmailPayload);
+
+      // Debe retornar el email de la DB, ignorando el JWT
+      expect(result.email).toBe('new@example.com');
+    });
+
     it('should return isAdmin from DB, not from JWT payload', async () => {
       // JWT payload dice isAdmin: false, pero DB tiene isAdmin: true
       const payloadWithFalseAdmin = {
@@ -167,7 +186,7 @@ describe('JwtStrategy', () => {
       const staleJwtPayload = {
         sub: 1,
         email: 'test@example.com',
-        plan: 'free', // JWT desactualizado
+        plan: UserPlan.FREE, // JWT desactualizado
       };
       const dbUserWithPremium = {
         ...mockUser,

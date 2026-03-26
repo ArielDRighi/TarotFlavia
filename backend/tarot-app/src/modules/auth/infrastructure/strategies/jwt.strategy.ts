@@ -4,13 +4,14 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../../users/users.service';
 import { UserRole } from '../../../../common/enums/user-role.enum';
+import { UserPlan } from '../../../users/entities/user.entity';
 
 interface JwtPayload {
   sub: number;
   email: string;
   isAdmin?: boolean;
   roles?: UserRole[];
-  plan?: string;
+  plan?: UserPlan;
   tarotistaId?: number;
 }
 
@@ -46,11 +47,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       email: string;
       isAdmin: boolean;
       roles: UserRole[];
-      plan: string;
+      plan: UserPlan;
       tarotistaId?: number;
     } = {
       userId: payload.sub,
-      email: payload.email,
+      email: user.email,
       isAdmin: user.isAdmin,
       roles: user.roles,
       plan: user.plan,
