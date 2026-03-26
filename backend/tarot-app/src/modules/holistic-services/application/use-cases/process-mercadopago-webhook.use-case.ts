@@ -15,6 +15,12 @@ export interface MercadoPagoWebhookPayload {
   data: {
     id: string;
   };
+  /**
+   * Campo opcional usado para routing en el WebhookController de payments.
+   * MP puede incluir el external_reference a nivel del payload del webhook.
+   * Si empieza con "sub_" indica un cobro recurrente de suscripción.
+   */
+  externalReference?: string;
 }
 
 export interface WebhookProcessResult {
