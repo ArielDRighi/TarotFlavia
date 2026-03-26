@@ -1,5 +1,5 @@
-import { WebhookProcessResult } from '../../holistic-services/application/use-cases/process-mercadopago-webhook.use-case';
-import { MercadoPagoWebhookPayload } from '../../holistic-services/application/use-cases/process-mercadopago-webhook.use-case';
+import type { WebhookProcessResult } from '../../holistic-services/application/use-cases/process-mercadopago-webhook.use-case';
+import type { MercadoPagoWebhookPayload } from '../../holistic-services/application/use-cases/process-mercadopago-webhook.use-case';
 
 /**
  * Token de inyección para el use case que procesa webhooks de suscripción.

@@ -53,7 +53,7 @@ describe('WebhookController (payments module)', () => {
     controller = module.get(WebhookController);
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => jest.restoreAllMocks());
 
   describe('type: "payment" (pago de servicio holístico — external_reference numérico)', () => {
     it('debe delegar al orchestrator de holistic-services y retornar el resultado', async () => {

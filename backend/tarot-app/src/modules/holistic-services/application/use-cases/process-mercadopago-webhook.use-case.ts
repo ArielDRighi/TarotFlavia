@@ -16,9 +16,11 @@ export interface MercadoPagoWebhookPayload {
     id: string;
   };
   /**
-   * Campo opcional usado para routing en el WebhookController de payments.
-   * MP puede incluir el external_reference a nivel del payload del webhook.
-   * Si empieza con "sub_" indica un cobro recurrente de suscripción.
+   * Campo de extensión para routing en el WebhookController de payments.
+   * NO forma parte del payload estándar de Mercado Pago (MP solo envía type + data.id).
+   * Puede ser inyectado por middleware o tests para indicar que el pago pertenece
+   * a una suscripción (valor con prefijo "sub_"). En producción, el routing definitivo
+   * se realiza consultando payment.external_reference desde la API de MP en T-INT-02.
    */
   externalReference?: string;
 }
