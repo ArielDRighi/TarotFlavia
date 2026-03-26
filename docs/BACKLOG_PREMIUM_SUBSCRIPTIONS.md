@@ -91,7 +91,7 @@ Cambiar `JwtStrategy.validate()` para que use el plan de la DB (que ya se consul
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1 día
 **Dependencias:** T-BE-01
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** La tabla `user` necesita campos para vincular con la suscripción de Mercado Pago. El campo `stripeCustomerId` existe pero nunca se usó — se deja como deprecated.
 
@@ -102,30 +102,37 @@ Crear migración TypeORM que agregue campos de MercadoPago a la tabla `user` y a
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Generar migración: `npm run migration:generate -- src/database/migrations/AddMercadoPagoSubscriptionFields`
-- [ ] Agregar campo `mp_preapproval_id` (`varchar(100)`, nullable) a tabla `user`
-- [ ] Agregar campo `mp_customer_id` (`varchar(100)`, nullable) a tabla `user`
-- [ ] Crear índice `IDX_user_mp_preapproval_id` en `mp_preapproval_id`
-- [ ] Actualizar `User` entity en `src/modules/users/entities/user.entity.ts`:
+- [x] Generar migración: `1774555788556-AddMercadoPagoSubscriptionFields.ts`
+- [x] Agregar campo `mp_preapproval_id` (`varchar(100)`, nullable) a tabla `user`
+- [x] Agregar campo `mp_customer_id` (`varchar(100)`, nullable) a tabla `user`
+- [x] Crear índice `IDX_user_mp_preapproval_id` en `mp_preapproval_id`
+- [x] Actualizar `User` entity en `src/modules/users/entities/user.entity.ts`:
   - Agregar `mpPreapprovalId: string | null` con `@Column({ name: 'mp_preapproval_id', type: 'varchar', length: 100, nullable: true })`
   - Agregar `mpCustomerId: string | null` con `@Column({ name: 'mp_customer_id', type: 'varchar', length: 100, nullable: true })`
   - Marcar `stripeCustomerId` con `@deprecated` en JSDoc
-- [ ] Ejecutar migración contra DB de desarrollo: `npm run migration:run`
-- [ ] Verificar que la migración es reversible (down method)
+- [x] Ejecutar migración contra DB de desarrollo: `npm run migration:run`
+- [x] Verificar que la migración es reversible (down method)
 
 **Tests:**
-- [ ] Verificar que tests existentes de User entity siguen pasando
-- [ ] Verificar que el build compila correctamente
-- [ ] Coverage ≥ 80%
+- [x] Verificar que tests existentes de User entity siguen pasando
+- [x] Agregar tests para `mpPreapprovalId` y `mpCustomerId` (45 tests, todos verdes)
+- [x] Verificar que el build compila correctamente
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Migración aplica correctamente en DB limpia y en DB existente
-- [ ] Migración tiene `down()` funcional
-- [ ] User entity tiene los nuevos campos con tipos correctos
-- [ ] Índice creado en `mp_preapproval_id`
-- [ ] Tests existentes no se rompen
-- [ ] Ciclo de calidad completo pasa
+- [x] Migración aplica correctamente en DB limpia y en DB existente
+- [x] Migración tiene `down()` funcional
+- [x] User entity tiene los nuevos campos con tipos correctos
+- [x] Índice creado en `mp_preapproval_id`
+- [x] Tests existentes no se rompen
+- [x] Ciclo de calidad completo pasa
+
+**Notas técnicas:**
+- PR: `feature/t-db-01-migration-mp-subscription-fields` → `develop`
+- Archivos modificados: `user.entity.ts`, `user.entity.spec.ts`, `1774555788556-AddMercadoPagoSubscriptionFields.ts`
+- 45 tests, todos verdes
+- Migración generada con TypeORM CLI + índice `IDX_user_mp_preapproval_id` agregado manualmente
 
 ---
 

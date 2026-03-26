@@ -252,6 +252,43 @@ describe('User Entity', () => {
     });
   });
 
+  describe('MercadoPago Subscription Fields', () => {
+    it('should allow setting mpPreapprovalId', () => {
+      const user = new User();
+      user.mpPreapprovalId = '2c9380849837a27101983c5be8920c06';
+
+      expect(user.mpPreapprovalId).toBe('2c9380849837a27101983c5be8920c06');
+    });
+
+    it('should allow mpPreapprovalId to be null', () => {
+      const user = new User();
+      user.mpPreapprovalId = null;
+
+      expect(user.mpPreapprovalId).toBeNull();
+    });
+
+    it('should allow setting mpCustomerId', () => {
+      const user = new User();
+      user.mpCustomerId = '123456789';
+
+      expect(user.mpCustomerId).toBe('123456789');
+    });
+
+    it('should allow mpCustomerId to be null', () => {
+      const user = new User();
+      user.mpCustomerId = null;
+
+      expect(user.mpCustomerId).toBeNull();
+    });
+
+    it('should have mpPreapprovalId and mpCustomerId as undefined by default (no column default)', () => {
+      const user = new User();
+
+      expect(user.mpPreapprovalId).toBeUndefined();
+      expect(user.mpCustomerId).toBeUndefined();
+    });
+  });
+
   describe('Ban Status Methods', () => {
     describe('isBanned', () => {
       it('should return true when user has banned_at date', () => {
