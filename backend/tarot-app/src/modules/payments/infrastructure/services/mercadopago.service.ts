@@ -176,11 +176,12 @@ export class MercadoPagoService {
   ): Promise<{ preapprovalId: string; initPoint: string }> {
     const preApprovalClient = new PreApproval(this.client);
 
-    const body: PreApprovalRequest = {
+    const body: PreApprovalRequest & { notification_url: string } = {
       preapproval_plan_id: params.preapprovalPlanId,
       payer_email: params.payerEmail,
       external_reference: params.externalReference,
       back_url: params.backUrl,
+      notification_url: params.notificationUrl,
     };
 
     const response: PreApprovalResponse = await preApprovalClient.create({

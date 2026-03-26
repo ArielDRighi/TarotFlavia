@@ -301,6 +301,9 @@ describe('MercadoPagoService', () => {
             external_reference: 'sub_42',
             preapproval_plan_id: 'plan_test_123',
             payer_email: 'user@test.com',
+            back_url: 'http://localhost:3001/premium/activacion',
+            notification_url:
+              'http://localhost:3000/api/v1/webhooks/mercadopago',
           }),
         }),
       );
