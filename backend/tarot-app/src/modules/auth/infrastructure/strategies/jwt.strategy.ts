@@ -4,13 +4,14 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../../users/users.service';
 import { UserRole } from '../../../../common/enums/user-role.enum';
+import { UserPlan } from '../../../users/entities/user.entity';
 
 interface JwtPayload {
   sub: number;
   email: string;
   isAdmin?: boolean;
   roles?: UserRole[];
-  plan?: string;
+  plan?: UserPlan;
   tarotistaId?: number;
 }
 
@@ -41,13 +42,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
-    return {
+    const result: {
+      userId: number;
+      email: string;
+      isAdmin: boolean;
+      roles: UserRole[];
+      plan: UserPlan;
+      tarotistaId?: number;
+    } = {
       userId: payload.sub,
-      email: payload.email,
-      isAdmin: payload.isAdmin || false,
-      roles: payload.roles || [],
-      plan: payload.plan || 'free',
-      tarotistaId: payload.tarotistaId,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      roles: user.roles,
+      plan: user.plan,
     };
+
+    if (payload.tarotistaId !== undefined) {
+      result.tarotistaId = payload.tarotistaId;
+    }
+
+    return result;
   }
 }
