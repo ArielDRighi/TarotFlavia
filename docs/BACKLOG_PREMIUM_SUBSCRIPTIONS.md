@@ -141,7 +141,7 @@ Crear migración TypeORM que agregue campos de MercadoPago a la tabla `user` y a
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1.5 días
 **Dependencias:** T-DB-01
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** `MercadoPagoService` vive dentro de `holistic-services` y no está exportado. Ahora lo necesitan tanto holistic-services (pagos únicos) como subscriptions (suscripciones recurrentes). Hay que extraerlo a un módulo compartido.
 
@@ -152,7 +152,7 @@ Crear `payments.module` con `MercadoPagoService` extraído y reutilizable. Mante
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Crear estructura de carpetas:
+- [x] Crear estructura de carpetas:
   ```
   src/modules/payments/
   ├── payments.module.ts
@@ -160,36 +160,36 @@ Crear `payments.module` con `MercadoPagoService` extraído y reutilizable. Mante
       └── services/
           └── mercadopago.service.ts
   ```
-- [ ] Mover `MercadoPagoService` de `src/modules/holistic-services/infrastructure/services/mercadopago.service.ts` al nuevo módulo
-- [ ] Extender `MercadoPagoService` con métodos de PreApproval:
+- [x] Mover `MercadoPagoService` de `src/modules/holistic-services/infrastructure/services/mercadopago.service.ts` al nuevo módulo
+- [x] Extender `MercadoPagoService` con métodos de PreApproval:
   - `createPreapproval(params)`: Crea suscripción en MP, retorna `{ preapprovalId, initPoint }`
   - `getPreapproval(id)`: Obtiene estado de suscripción por ID
   - `cancelPreapproval(id)`: Cancela suscripción en MP
   - Mantener métodos existentes: `createPreference()`, `getPayment()`, `validateSignature()`
-- [ ] Configurar `payments.module.ts`:
+- [x] Configurar `payments.module.ts`:
   - Imports: `ConfigModule`
   - Providers: `MercadoPagoService`
   - Exports: `MercadoPagoService`
-- [ ] Actualizar `holistic-services.module.ts`:
+- [x] Actualizar `holistic-services.module.ts`:
   - Agregar `PaymentsModule` a imports
   - Remover `MercadoPagoService` de providers
   - Actualizar imports en todos los use cases que usaban `MercadoPagoService` (path de import)
-- [ ] Verificar que `ProcessMercadoPagoWebhookUseCase` sigue funcionando con el nuevo import path
-- [ ] Verificar que `CreatePurchaseUseCase` sigue funcionando
+- [x] Verificar que `ProcessMercadoPagoWebhookUseCase` sigue funcionando con el nuevo import path
+- [x] Verificar que `CreatePurchaseUseCase` sigue funcionando
 
 **Tests:**
-- [ ] Mover/actualizar tests de `MercadoPagoService` al nuevo módulo
-- [ ] Agregar tests para los nuevos métodos de PreApproval (mock del SDK)
-- [ ] Verificar que tests existentes de holistic-services siguen pasando
-- [ ] Coverage ≥ 80%
+- [x] Mover/actualizar tests de `MercadoPagoService` al nuevo módulo
+- [x] Agregar tests para los nuevos métodos de PreApproval (mock del SDK)
+- [x] Verificar que tests existentes de holistic-services siguen pasando
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] `MercadoPagoService` vive en `payments.module` y es importable desde otros módulos
-- [ ] `holistic-services.module` importa `PaymentsModule` y usa `MercadoPagoService` vía DI
-- [ ] Todos los tests existentes de holistic-services siguen pasando
-- [ ] Métodos de PreApproval (`create`, `get`, `cancel`) implementados y testeados
-- [ ] Ciclo de calidad completo pasa
+- [x] `MercadoPagoService` vive en `payments.module` y es importable desde otros módulos
+- [x] `holistic-services.module` importa `PaymentsModule` y usa `MercadoPagoService` vía DI
+- [x] Todos los tests existentes de holistic-services siguen pasando
+- [x] Métodos de PreApproval (`create`, `get`, `cancel`) implementados y testeados
+- [x] Ciclo de calidad completo pasa
 
 ---
 

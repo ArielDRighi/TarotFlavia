@@ -1,9 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
+import {
+  MercadoPagoConfig,
+  Preference,
+  Payment,
+  PreApproval,
+} from 'mercadopago';
 import type { PreferenceRequest } from 'mercadopago/dist/clients/preference/commonTypes';
 import type { PreferenceResponse } from 'mercadopago/dist/clients/preference/commonTypes';
 import type { PaymentResponse } from 'mercadopago/dist/clients/payment/commonTypes';
+import type {
+  PreApprovalRequest,
+  PreApprovalResponse,
+} from 'mercadopago/dist/clients/preApproval/commonTypes';
 import * as crypto from 'crypto';
 
 export interface CreatePreferenceParams {
@@ -17,6 +26,14 @@ export interface CreatePreferenceParams {
     pending: string;
     failure: string;
   };
+}
+
+export interface CreatePreapprovalParams {
+  preapprovalPlanId: string;
+  payerEmail: string;
+  externalReference: string;
+  backUrl: string;
+  notificationUrl: string;
 }
 
 @Injectable()
@@ -148,5 +165,62 @@ export class MercadoPagoService {
       );
       return false;
     }
+  }
+
+  /**
+   * Creates a PreApproval (recurring subscription) in Mercado Pago.
+   * Returns the preapprovalId and initPoint (URL to redirect user to for authorization).
+   */
+  async createPreapproval(
+    params: CreatePreapprovalParams,
+  ): Promise<{ preapprovalId: string; initPoint: string }> {
+    const preApprovalClient = new PreApproval(this.client);
+
+    const body: PreApprovalRequest = {
+      preapproval_plan_id: params.preapprovalPlanId,
+      payer_email: params.payerEmail,
+      external_reference: params.externalReference,
+      back_url: params.backUrl,
+    };
+
+    const response: PreApprovalResponse = await preApprovalClient.create({
+      body,
+    });
+
+    if (!response.id || !response.init_point) {
+      throw new Error(
+        `Mercado Pago devolvió un preapproval sin ID o init_point (external_reference: ${params.externalReference})`,
+      );
+    }
+
+    this.logger.log(
+      `Preapproval MP creado: ${response.id} para referencia ${params.externalReference}`,
+    );
+
+    return {
+      preapprovalId: response.id,
+      initPoint: response.init_point,
+    };
+  }
+
+  /**
+   * Retrieves a PreApproval (subscription) by its ID.
+   */
+  async getPreapproval(preapprovalId: string): Promise<PreApprovalResponse> {
+    const preApprovalClient = new PreApproval(this.client);
+    return preApprovalClient.get({ id: preapprovalId });
+  }
+
+  /**
+   * Cancels a PreApproval (subscription) by updating its status to 'cancelled'.
+   */
+  async cancelPreapproval(preapprovalId: string): Promise<void> {
+    const preApprovalClient = new PreApproval(this.client);
+    await preApprovalClient.update({
+      id: preapprovalId,
+      body: { status: 'cancelled' },
+    });
+
+    this.logger.log(`Preapproval MP cancelado: ${preapprovalId}`);
   }
 }
