@@ -371,7 +371,7 @@ Implementar el procesamiento de webhooks de suscripción (tanto `type: "subscrip
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1.5 días
 **Dependencias:** T-INT-01
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** El usuario necesita poder cancelar su suscripción desde el perfil y el frontend necesita un endpoint para hacer polling del estado de activación post-checkout.
 
@@ -382,38 +382,38 @@ Implementar use cases y endpoints para cancelar suscripción y consultar estado.
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Crear `src/modules/subscriptions/application/use-cases/cancel-subscription.use-case.ts`:
+- [x] Crear `src/modules/subscriptions/application/use-cases/cancel-subscription.use-case.ts`:
   - Valida que el usuario tiene suscripción activa (`mpPreapprovalId` no null, `subscriptionStatus=active`)
   - Llama a `MercadoPagoService.cancelPreapproval(mpPreapprovalId)`
   - Actualiza `subscriptionStatus=cancelled` en User
   - NO cambia `plan` ni `planExpiresAt` (usuario mantiene acceso hasta fin de período)
   - Retorna `{ message, planExpiresAt }`
-- [ ] Crear `src/modules/subscriptions/application/use-cases/check-subscription-status.use-case.ts`:
+- [x] Crear `src/modules/subscriptions/application/use-cases/check-subscription-status.use-case.ts`:
   - Retorna: `{ plan, subscriptionStatus, planExpiresAt, mpPreapprovalId }`
   - Lee directamente de la DB (estado fresco, para polling)
-- [ ] Agregar endpoints al `SubscriptionController`:
+- [x] Agregar endpoints al `SubscriptionController`:
   - `POST /subscriptions/cancel` — Guard: `JwtAuthGuard`
   - `GET /subscriptions/status` — Guard: `JwtAuthGuard`
-- [ ] Crear DTOs de respuesta:
+- [x] Crear DTOs de respuesta:
   - `CancelSubscriptionResponseDto`: `{ message: string, planExpiresAt: string }`
   - `SubscriptionStatusResponseDto`: `{ plan: string, subscriptionStatus: string | null, planExpiresAt: string | null }`
 
 **Tests:**
-- [ ] Test: cancelar suscripción activa → `subscriptionStatus=cancelled`, plan no cambia
-- [ ] Test: cancelar sin suscripción activa → 400 Bad Request
-- [ ] Test: cancelar suscripción ya cancelada → 400 Bad Request
-- [ ] Test: MP API falla al cancelar → 502 con mensaje claro
-- [ ] Test: check status retorna datos correctos para usuario free/premium/cancelled
-- [ ] Coverage ≥ 80%
+- [x] Test: cancelar suscripción activa → `subscriptionStatus=cancelled`, plan no cambia
+- [x] Test: cancelar sin suscripción activa → 400 Bad Request
+- [x] Test: cancelar suscripción ya cancelada → 400 Bad Request
+- [x] Test: MP API falla al cancelar → 502 con mensaje claro
+- [x] Test: check status retorna datos correctos para usuario free/premium/cancelled
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] `POST /subscriptions/cancel` cancela en MP y actualiza DB
-- [ ] Plan permanece `premium` después de cancelar (hasta `planExpiresAt`)
-- [ ] `GET /subscriptions/status` retorna estado fresco de la DB
-- [ ] Validaciones de estado (no cancelar lo que no está activo)
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] `POST /subscriptions/cancel` cancela en MP y actualiza DB
+- [x] Plan permanece `premium` después de cancelar (hasta `planExpiresAt`)
+- [x] `GET /subscriptions/status` retorna estado fresco de la DB
+- [x] Validaciones de estado (no cancelar lo que no está activo)
+- [x] Tests pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 

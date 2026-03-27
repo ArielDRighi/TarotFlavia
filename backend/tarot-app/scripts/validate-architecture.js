@@ -18,7 +18,12 @@ const THRESHOLD_LINES = 1500;
 // T-SF-B01 implements domain layer only (entities, repositories, enums, migration).
 // The application/ layer (use cases, DTOs, orchestrator) will be added in T-SF-B02+.
 // Target: Remove exception once application/ folder is introduced in subsequent tasks.
-const MODULES_PENDING_LAYERS = new Set(['encyclopedia', 'holistic-services']);
+// TODO[ARCH-SUBSCRIPTIONS-LAYERS]: Temporary exception for subscriptions module awaiting layered architecture.
+// T-INT-01/02/03 added use cases and DTOs under application/ but the module root still mixes
+// controller, service, module and spec files at the flat level. Full domain/application/infrastructure
+// layers will be applied in a dedicated refactor task after the premium subscription flow is complete.
+// Target: Apply layers once T-BE-04, T-BE-05, T-BE-06 are implemented (Q2 2026).
+const MODULES_PENDING_LAYERS = new Set(['encyclopedia', 'holistic-services', 'subscriptions']);
 
 let exitCode = 0;
 

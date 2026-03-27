@@ -3,6 +3,7 @@ import { SubscriptionsController } from './subscriptions.controller';
 import { SubscriptionsService } from './subscriptions.service';
 import {
   BadRequestException,
+  BadGatewayException,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
@@ -12,10 +13,18 @@ import {
   UserTarotistaSubscription,
 } from '../tarotistas/entities/user-tarotista-subscription.entity';
 import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
+import { CancelSubscriptionUseCase } from './application/use-cases/cancel-subscription.use-case';
+import { CheckSubscriptionStatusUseCase } from './application/use-cases/check-subscription-status.use-case';
+import {
+  UserPlan,
+  SubscriptionStatus as UserSubscriptionStatus,
+} from '../users/entities/user.entity';
 
 describe('SubscriptionsController', () => {
   let controller: SubscriptionsController;
   let service: SubscriptionsService;
+  let cancelSubscriptionUseCase: CancelSubscriptionUseCase;
+  let checkSubscriptionStatusUseCase: CheckSubscriptionStatusUseCase;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -36,11 +45,29 @@ describe('SubscriptionsController', () => {
             execute: jest.fn(),
           },
         },
+        {
+          provide: CancelSubscriptionUseCase,
+          useValue: {
+            execute: jest.fn(),
+          },
+        },
+        {
+          provide: CheckSubscriptionStatusUseCase,
+          useValue: {
+            execute: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<SubscriptionsController>(SubscriptionsController);
     service = module.get<SubscriptionsService>(SubscriptionsService);
+    cancelSubscriptionUseCase = module.get<CancelSubscriptionUseCase>(
+      CancelSubscriptionUseCase,
+    );
+    checkSubscriptionStatusUseCase = module.get<CheckSubscriptionStatusUseCase>(
+      CheckSubscriptionStatusUseCase,
+    );
   });
 
   describe('setFavoriteTarotista', () => {
@@ -187,6 +214,186 @@ describe('SubscriptionsController', () => {
 
       await expect(controller.enableAllAccess(req)).rejects.toThrow(
         ForbiddenException,
+      );
+    });
+  });
+
+  describe('cancelSubscription', () => {
+    it('debería cancelar suscripción activa y retornar message y planExpiresAt', async () => {
+      // Arrange
+      const userId = 1;
+      const req = { user: { userId } };
+      const planExpiresAt = new Date('2026-04-30T00:00:00.000Z').toISOString();
+      const mockResponse = {
+        message: 'Suscripción cancelada exitosamente',
+        planExpiresAt,
+      };
+
+      jest
+        .spyOn(cancelSubscriptionUseCase, 'execute')
+        .mockResolvedValue(mockResponse);
+
+      // Act
+      const result = await controller.cancelSubscription(req);
+
+      // Assert
+      expect(result).toEqual(mockResponse);
+      expect(cancelSubscriptionUseCase.execute).toHaveBeenCalledWith(userId);
+    });
+
+    it('debería lanzar BadRequestException si no hay suscripción activa', async () => {
+      // Arrange
+      const userId = 1;
+      const req = { user: { userId } };
+
+      jest
+        .spyOn(cancelSubscriptionUseCase, 'execute')
+        .mockRejectedValue(
+          new BadRequestException('No tenés una suscripción activa'),
+        );
+
+      // Act & Assert
+      await expect(controller.cancelSubscription(req)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('debería lanzar BadRequestException si suscripción ya está cancelada', async () => {
+      // Arrange
+      const userId = 1;
+      const req = { user: { userId } };
+
+      jest
+        .spyOn(cancelSubscriptionUseCase, 'execute')
+        .mockRejectedValue(
+          new BadRequestException('La suscripción ya está cancelada'),
+        );
+
+      // Act & Assert
+      await expect(controller.cancelSubscription(req)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('debería lanzar NotFoundException si usuario no existe', async () => {
+      // Arrange
+      const userId = 999;
+      const req = { user: { userId } };
+
+      jest
+        .spyOn(cancelSubscriptionUseCase, 'execute')
+        .mockRejectedValue(new NotFoundException('Usuario no encontrado'));
+
+      // Act & Assert
+      await expect(controller.cancelSubscription(req)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('debería lanzar BadGatewayException si MP API falla', async () => {
+      // Arrange
+      const userId = 1;
+      const req = { user: { userId } };
+
+      jest
+        .spyOn(cancelSubscriptionUseCase, 'execute')
+        .mockRejectedValue(
+          new BadGatewayException(
+            'Error al cancelar la suscripción en Mercado Pago',
+          ),
+        );
+
+      // Act & Assert
+      await expect(controller.cancelSubscription(req)).rejects.toThrow(
+        BadGatewayException,
+      );
+    });
+  });
+
+  describe('getSubscriptionStatus', () => {
+    it('debería retornar estado de suscripción para usuario free', async () => {
+      // Arrange
+      const userId = 1;
+      const req = { user: { userId } };
+      const mockStatus = {
+        plan: UserPlan.FREE,
+        subscriptionStatus: null,
+        planExpiresAt: null,
+        mpPreapprovalId: null,
+      };
+
+      jest
+        .spyOn(checkSubscriptionStatusUseCase, 'execute')
+        .mockResolvedValue(mockStatus);
+
+      // Act
+      const result = await controller.getSubscriptionStatus(req);
+
+      // Assert
+      expect(result).toEqual(mockStatus);
+      expect(checkSubscriptionStatusUseCase.execute).toHaveBeenCalledWith(
+        userId,
+      );
+    });
+
+    it('debería retornar estado premium activo', async () => {
+      // Arrange
+      const userId = 1;
+      const req = { user: { userId } };
+      const planExpiresAt = new Date('2026-04-30T00:00:00.000Z').toISOString();
+      const mockStatus = {
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: UserSubscriptionStatus.ACTIVE,
+        planExpiresAt,
+        mpPreapprovalId: 'preapproval_abc123',
+      };
+
+      jest
+        .spyOn(checkSubscriptionStatusUseCase, 'execute')
+        .mockResolvedValue(mockStatus);
+
+      // Act
+      const result = await controller.getSubscriptionStatus(req);
+
+      // Assert
+      expect(result).toEqual(mockStatus);
+    });
+
+    it('debería retornar estado premium cancelado', async () => {
+      // Arrange
+      const userId = 1;
+      const req = { user: { userId } };
+      const planExpiresAt = new Date('2026-04-30T00:00:00.000Z').toISOString();
+      const mockStatus = {
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: UserSubscriptionStatus.CANCELLED,
+        planExpiresAt,
+        mpPreapprovalId: 'preapproval_abc123',
+      };
+
+      jest
+        .spyOn(checkSubscriptionStatusUseCase, 'execute')
+        .mockResolvedValue(mockStatus);
+
+      // Act
+      const result = await controller.getSubscriptionStatus(req);
+
+      // Assert
+      expect(result.subscriptionStatus).toBe(UserSubscriptionStatus.CANCELLED);
+    });
+
+    it('debería lanzar NotFoundException si usuario no existe', async () => {
+      // Arrange
+      const userId = 999;
+      const req = { user: { userId } };
+
+      jest
+        .spyOn(checkSubscriptionStatusUseCase, 'execute')
+        .mockRejectedValue(new NotFoundException('Usuario no encontrado'));
+
+      // Act & Assert
+      await expect(controller.getSubscriptionStatus(req)).rejects.toThrow(
+        NotFoundException,
       );
     });
   });

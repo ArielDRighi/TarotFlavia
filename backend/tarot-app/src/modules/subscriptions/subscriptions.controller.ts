@@ -22,7 +22,11 @@ import { SetFavoriteTarotistaDto } from './dto/set-favorite-tarotista.dto';
 import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
 import { UserTarotistaSubscription } from '../tarotistas/entities/user-tarotista-subscription.entity';
 import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
+import { CancelSubscriptionUseCase } from './application/use-cases/cancel-subscription.use-case';
+import { CheckSubscriptionStatusUseCase } from './application/use-cases/check-subscription-status.use-case';
 import { CreatePreapprovalResponseDto } from './application/dto/create-preapproval-response.dto';
+import { CancelSubscriptionResponseDto } from './application/dto/cancel-subscription-response.dto';
+import { SubscriptionStatusResponseDto } from './application/dto/subscription-status-response.dto';
 
 @ApiTags('subscriptions')
 @Controller('subscriptions')
@@ -32,6 +36,8 @@ export class SubscriptionsController {
   constructor(
     private readonly subscriptionsService: SubscriptionsService,
     private readonly createPreapprovalUseCase: CreatePreapprovalUseCase,
+    private readonly cancelSubscriptionUseCase: CancelSubscriptionUseCase,
+    private readonly checkSubscriptionStatusUseCase: CheckSubscriptionStatusUseCase,
   ) {}
 
   @Post('set-favorite')
@@ -137,5 +143,56 @@ export class SubscriptionsController {
       req.user.userId,
       req.user.email,
     );
+  }
+
+  @Post('cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Cancelar suscripción premium',
+    description:
+      'Cancela la suscripción de MercadoPago del usuario. El plan premium se mantiene activo hasta la fecha de expiración.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Suscripción cancelada exitosamente',
+    type: CancelSubscriptionResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'No hay suscripción activa o la suscripción ya está cancelada',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+  })
+  @ApiResponse({
+    status: 502,
+    description: 'Error al comunicarse con Mercado Pago',
+  })
+  async cancelSubscription(
+    @Request() req: { user: { userId: number } },
+  ): Promise<CancelSubscriptionResponseDto> {
+    return this.cancelSubscriptionUseCase.execute(req.user.userId);
+  }
+
+  @Get('status')
+  @ApiOperation({
+    summary: 'Consultar estado de suscripción',
+    description:
+      'Retorna el estado actual de la suscripción del usuario leyendo directamente desde la base de datos. Útil para polling post-checkout.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado de la suscripción',
+    type: SubscriptionStatusResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuario no encontrado',
+  })
+  async getSubscriptionStatus(
+    @Request() req: { user: { userId: number } },
+  ): Promise<SubscriptionStatusResponseDto> {
+    return this.checkSubscriptionStatusUseCase.execute(req.user.userId);
   }
 }
