@@ -8,6 +8,8 @@ import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { UsersModule } from '../users/users.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
+import { CancelSubscriptionUseCase } from './application/use-cases/cancel-subscription.use-case';
+import { CheckSubscriptionStatusUseCase } from './application/use-cases/check-subscription-status.use-case';
 import { ProcessSubscriptionWebhookUseCase } from './application/use-cases/process-subscription-webhook.use-case';
 import { SUBSCRIPTION_WEBHOOK_USE_CASE } from '../payments/tokens/payment.tokens';
 
@@ -21,6 +23,8 @@ import { SUBSCRIPTION_WEBHOOK_USE_CASE } from '../payments/tokens/payment.tokens
   providers: [
     SubscriptionsService,
     CreatePreapprovalUseCase,
+    CancelSubscriptionUseCase,
+    CheckSubscriptionStatusUseCase,
     ProcessSubscriptionWebhookUseCase,
     {
       provide: SUBSCRIPTION_WEBHOOK_USE_CASE,
