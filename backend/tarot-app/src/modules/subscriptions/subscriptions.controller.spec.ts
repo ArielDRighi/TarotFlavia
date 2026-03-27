@@ -11,6 +11,7 @@ import {
   SubscriptionStatus,
   UserTarotistaSubscription,
 } from '../tarotistas/entities/user-tarotista-subscription.entity';
+import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
 
 describe('SubscriptionsController', () => {
   let controller: SubscriptionsController;
@@ -27,6 +28,12 @@ describe('SubscriptionsController', () => {
             getSubscriptionInfo: jest.fn(),
             enableAllAccessMode: jest.fn(),
             resolveTarotistaForReading: jest.fn(),
+          },
+        },
+        {
+          provide: CreatePreapprovalUseCase,
+          useValue: {
+            execute: jest.fn(),
           },
         },
       ],
