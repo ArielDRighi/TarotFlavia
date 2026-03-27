@@ -1,21 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  UserPlan,
+  SubscriptionStatus,
+} from '../../../users/entities/user.entity';
 
 export class SubscriptionStatusResponseDto {
   @ApiProperty({
-    example: 'premium',
+    example: UserPlan.PREMIUM,
     description: 'Plan actual del usuario',
-    enum: ['anonymous', 'free', 'premium'],
+    enum: UserPlan,
   })
-  plan: string;
+  plan: UserPlan;
 
   @ApiProperty({
-    example: 'active',
+    example: SubscriptionStatus.ACTIVE,
     description: 'Estado de la suscripción de MercadoPago',
-    enum: ['active', 'cancelled', 'expired'],
+    enum: SubscriptionStatus,
     nullable: true,
     type: String,
   })
-  subscriptionStatus: string | null;
+  subscriptionStatus: SubscriptionStatus | null;
 
   @ApiProperty({
     example: '2026-04-30T00:00:00.000Z',

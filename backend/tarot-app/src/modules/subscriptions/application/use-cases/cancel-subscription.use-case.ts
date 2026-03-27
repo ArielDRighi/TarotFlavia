@@ -35,8 +35,10 @@ export class CancelSubscriptionUseCase {
       throw new BadRequestException('No tenés una suscripción activa');
     }
 
-    if (user.subscriptionStatus === SubscriptionStatus.CANCELLED) {
-      throw new BadRequestException('La suscripción ya está cancelada');
+    if (user.subscriptionStatus !== SubscriptionStatus.ACTIVE) {
+      throw new BadRequestException(
+        'Solo se pueden cancelar suscripciones activas',
+      );
     }
 
     // 3. Cancelar en Mercado Pago

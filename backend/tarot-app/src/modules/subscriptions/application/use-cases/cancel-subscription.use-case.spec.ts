@@ -209,7 +209,32 @@ describe('CancelSubscriptionUseCase', () => {
 
       // Act & Assert
       await expect(useCase.execute(42)).rejects.toThrow(
-        'La suscripción ya está cancelada',
+        'Solo se pueden cancelar suscripciones activas',
+      );
+    });
+
+    it('suscripción expirada (subscriptionStatus=expired) → lanza BadRequestException sin llamar a MP', async () => {
+      // Arrange
+      const expiredUser = buildUser({
+        subscriptionStatus: SubscriptionStatus.EXPIRED,
+      });
+      mockUserRepo.findById.mockResolvedValue(expiredUser);
+
+      // Act & Assert
+      await expect(useCase.execute(42)).rejects.toThrow(BadRequestException);
+      expect(mockMercadoPagoService.cancelPreapproval).not.toHaveBeenCalled();
+    });
+
+    it('suscripción expirada → mensaje de error en español', async () => {
+      // Arrange
+      const expiredUser = buildUser({
+        subscriptionStatus: SubscriptionStatus.EXPIRED,
+      });
+      mockUserRepo.findById.mockResolvedValue(expiredUser);
+
+      // Act & Assert
+      await expect(useCase.execute(42)).rejects.toThrow(
+        'Solo se pueden cancelar suscripciones activas',
       );
     });
 
