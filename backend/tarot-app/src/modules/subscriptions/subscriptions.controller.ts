@@ -21,13 +21,18 @@ import {
 import { SetFavoriteTarotistaDto } from './dto/set-favorite-tarotista.dto';
 import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
 import { UserTarotistaSubscription } from '../tarotistas/entities/user-tarotista-subscription.entity';
+import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
+import { CreatePreapprovalResponseDto } from './application/dto/create-preapproval-response.dto';
 
 @ApiTags('subscriptions')
 @Controller('subscriptions')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class SubscriptionsController {
-  constructor(private readonly subscriptionsService: SubscriptionsService) {}
+  constructor(
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly createPreapprovalUseCase: CreatePreapprovalUseCase,
+  ) {}
 
   @Post('set-favorite')
   @HttpCode(HttpStatus.OK)
@@ -103,5 +108,34 @@ export class SubscriptionsController {
       message: 'Modo all-access activado correctamente',
       subscription,
     };
+  }
+
+  @Post('create-preapproval')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Crear suscripción premium en Mercado Pago',
+    description:
+      'Inicia el flujo de suscripción premium creando un preapproval en Mercado Pago. Retorna la URL de checkout para redirigir al usuario.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Preapproval creado exitosamente',
+    type: CreatePreapprovalResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'El usuario ya tiene un plan premium activo',
+  })
+  @ApiResponse({
+    status: 502,
+    description: 'Error al comunicarse con Mercado Pago',
+  })
+  async createPreapproval(
+    @Request() req: { user: { userId: number; email: string } },
+  ): Promise<CreatePreapprovalResponseDto> {
+    return this.createPreapprovalUseCase.execute(
+      req.user.userId,
+      req.user.email,
+    );
   }
 }
