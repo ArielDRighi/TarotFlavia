@@ -3,9 +3,14 @@ import { ConfigModule } from '@nestjs/config';
 import { MercadoPagoService } from './infrastructure/services/mercadopago.service';
 import { WebhookController } from './infrastructure/controllers/webhook.controller';
 import { HolisticServicesModule } from '../holistic-services/holistic-services.module';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 @Module({
-  imports: [ConfigModule, forwardRef(() => HolisticServicesModule)],
+  imports: [
+    ConfigModule,
+    forwardRef(() => HolisticServicesModule),
+    forwardRef(() => SubscriptionsModule),
+  ],
   controllers: [WebhookController],
   providers: [MercadoPagoService],
   exports: [MercadoPagoService],

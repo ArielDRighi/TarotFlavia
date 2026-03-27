@@ -313,7 +313,7 @@ Implementar el use case que crea una suscripción de preapproval en MP y el endp
 **Prioridad:** 🔴 ALTA
 **Estimación:** 2 días
 **Dependencias:** T-BE-03 (webhook routing), T-INT-01
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** MP envía webhooks cuando el estado de una suscripción cambia (authorized, paused, cancelled) y cuando se procesan los cobros recurrentes. El backend debe actualizar el plan del usuario según estos eventos.
 
@@ -324,7 +324,7 @@ Implementar el procesamiento de webhooks de suscripción (tanto `type: "subscrip
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Crear `src/modules/subscriptions/application/use-cases/process-subscription-webhook.use-case.ts`:
+- [x] Crear `src/modules/subscriptions/application/use-cases/process-subscription-webhook.use-case.ts`:
   - **Para `type: "subscription_preapproval"`:**
     - Fetch preapproval de MP con `MercadoPagoService.getPreapproval(data.id)`
     - Extraer `userId` de `external_reference` (parsear `sub_{userId}`)
@@ -339,30 +339,30 @@ Implementar el procesamiento de webhooks de suscripción (tanto `type: "subscrip
     - Extraer `userId` de `external_reference`
     - Si `status=approved`: actualizar `planExpiresAt` al siguiente período (next_payment_date del preapproval)
     - Si `status=rejected`: log warning (MP maneja reintentos)
-- [ ] Registrar el use case como provider en `subscriptions.module.ts`
-- [ ] Conectar con el webhook controller (remover placeholder/stub de T-BE-03)
-- [ ] Validar firma `x-signature` usando `MercadoPagoService.validateSignature()` existente
+- [x] Registrar el use case como provider en `subscriptions.module.ts`
+- [x] Conectar con el webhook controller (remover placeholder/stub de T-BE-03)
+- [x] Validar firma `x-signature` usando `MercadoPagoService.validateSignature()` existente
 
 **Tests:**
-- [ ] Test: webhook `subscription_preapproval` con `status=authorized` → user se hace premium
-- [ ] Test: webhook `subscription_preapproval` con `status=cancelled` → `subscriptionStatus=cancelled`, plan sigue premium
-- [ ] Test: webhook `subscription_preapproval` con `status=paused` → sin cambio
-- [ ] Test: webhook `payment` con `external_reference=sub_123` y `status=approved` → actualiza `planExpiresAt`
-- [ ] Test: webhook `payment` con `external_reference=sub_123` y `status=rejected` → log, sin cambio de plan
-- [ ] Test: webhook duplicado (idempotencia) → no cambia estado
-- [ ] Test: `external_reference` inválido → ignora con log
-- [ ] Test: usuario no encontrado → ignora con log
-- [ ] Coverage ≥ 80%
+- [x] Test: webhook `subscription_preapproval` con `status=authorized` → user se hace premium
+- [x] Test: webhook `subscription_preapproval` con `status=cancelled` → `subscriptionStatus=cancelled`, plan sigue premium
+- [x] Test: webhook `subscription_preapproval` con `status=paused` → sin cambio
+- [x] Test: webhook `payment` con `external_reference=sub_123` y `status=approved` → actualiza `planExpiresAt`
+- [x] Test: webhook `payment` con `external_reference=sub_123` y `status=rejected` → log, sin cambio de plan
+- [x] Test: webhook duplicado (idempotencia) → no cambia estado
+- [x] Test: `external_reference` inválido → ignora con log
+- [x] Test: usuario no encontrado → ignora con log
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Webhooks de suscripción activan/desactivan plan premium correctamente
-- [ ] Cobros recurrentes (`type: "payment"` con `sub_`) actualizan `planExpiresAt`
-- [ ] Idempotencia: webhooks duplicados no causan efectos secundarios
-- [ ] Firma `x-signature` se valida
-- [ ] No se afecta el procesamiento de pagos de servicios holísticos
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] Webhooks de suscripción activan/desactivan plan premium correctamente
+- [x] Cobros recurrentes (`type: "payment"` con `sub_`) actualizan `planExpiresAt`
+- [x] Idempotencia: webhooks duplicados no causan efectos secundarios
+- [x] Firma `x-signature` se valida
+- [x] No se afecta el procesamiento de pagos de servicios holísticos
+- [x] Tests pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 

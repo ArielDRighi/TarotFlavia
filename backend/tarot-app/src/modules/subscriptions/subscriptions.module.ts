@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionsController } from './subscriptions.controller';
@@ -8,15 +8,25 @@ import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { UsersModule } from '../users/users.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
+import { ProcessSubscriptionWebhookUseCase } from './application/use-cases/process-subscription-webhook.use-case';
+import { SUBSCRIPTION_WEBHOOK_USE_CASE } from '../payments/tokens/payment.tokens';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserTarotistaSubscription, User, Tarotista]),
     UsersModule,
-    PaymentsModule,
+    forwardRef(() => PaymentsModule),
   ],
   controllers: [SubscriptionsController],
-  providers: [SubscriptionsService, CreatePreapprovalUseCase],
-  exports: [SubscriptionsService],
+  providers: [
+    SubscriptionsService,
+    CreatePreapprovalUseCase,
+    ProcessSubscriptionWebhookUseCase,
+    {
+      provide: SUBSCRIPTION_WEBHOOK_USE_CASE,
+      useExisting: ProcessSubscriptionWebhookUseCase,
+    },
+  ],
+  exports: [SubscriptionsService, SUBSCRIPTION_WEBHOOK_USE_CASE],
 })
 export class SubscriptionsModule {}
