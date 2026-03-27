@@ -157,12 +157,14 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
       expect(savedUser.planExpiresAt).toEqual(new Date(nextPaymentDate));
     });
 
-    it('debe ser idempotente: no actualizar si ya está authorized+premium', async () => {
+    it('debe ser idempotente: no actualizar si ya está authorized+premium con mismo preapprovalId y planExpiresAt', async () => {
+      const nextPaymentDate = '2026-04-26T10:00:00.000Z';
       const user = makeUser({
         id: 42,
         plan: UserPlan.PREMIUM,
         subscriptionStatus: SubscriptionStatus.ACTIVE,
         mpPreapprovalId: 'preapproval-123',
+        planExpiresAt: new Date(nextPaymentDate),
       });
 
       mockMercadoPagoService.getPreapproval.mockResolvedValue(
@@ -170,7 +172,7 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
           id: 'preapproval-123',
           status: 'authorized',
           external_reference: 'sub_42',
-          next_payment_date: '2026-04-26T10:00:00.000Z',
+          next_payment_date: nextPaymentDate,
         }),
       );
       mockUserRepo.findById.mockResolvedValue(user);
@@ -181,6 +183,39 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
       expect(result.processed).toBe(false);
       expect(result.message).toContain('duplicada');
       expect(mockUserRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('debe actualizar campos de suscripción si ya es PREMIUM+ACTIVE pero con distinto preapprovalId', async () => {
+      const nextPaymentDate = '2026-04-26T10:00:00.000Z';
+      const user = makeUser({
+        id: 42,
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
+        mpPreapprovalId: 'preapproval-OLD',
+        planExpiresAt: new Date(nextPaymentDate),
+      });
+
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-NEW',
+          status: 'authorized',
+          external_reference: 'sub_42',
+          next_payment_date: nextPaymentDate,
+        }),
+      );
+      mockUserRepo.findById.mockResolvedValue(user);
+      mockUserRepo.save.mockResolvedValue({ ...user } as User);
+
+      const payload = makePreapprovalPayload('preapproval-NEW');
+      const result = await useCase.execute(payload, xSignature, xRequestId);
+
+      expect(result.processed).toBe(true);
+      expect(mockUserRepo.save).toHaveBeenCalledTimes(1);
+      const savedUser: User = mockUserRepo.save.mock.calls[0][0];
+      expect(savedUser.mpPreapprovalId).toBe('preapproval-NEW');
+      // plan y subscriptionStatus no deben cambiar
+      expect(savedUser.plan).toBe(UserPlan.PREMIUM);
+      expect(savedUser.subscriptionStatus).toBe(SubscriptionStatus.ACTIVE);
     });
   });
 
@@ -315,6 +350,58 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
       expect(savedUser.planExpiresAt).toEqual(new Date(nextPaymentDate));
     });
 
+    it('debe ser idempotente: no guardar si planExpiresAt ya es igual al nuevo valor', async () => {
+      const nextPaymentDate = '2026-04-26T10:00:00.000Z';
+      const user = makeUser({
+        id: 42,
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
+        mpPreapprovalId: 'preapproval-123',
+        planExpiresAt: new Date(nextPaymentDate),
+      });
+
+      mockMercadoPagoService.getPayment.mockResolvedValue(
+        buildPaymentResponse({
+          id: 9003,
+          status: 'approved',
+          external_reference: 'sub_42',
+        }),
+      );
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-123',
+          status: 'authorized',
+          external_reference: 'sub_42',
+          next_payment_date: nextPaymentDate,
+        }),
+      );
+      mockUserRepo.findById.mockResolvedValue(user);
+
+      const payload = makePaymentPayload('9003', 'sub_42');
+      const result = await useCase.execute(payload, xSignature, xRequestId);
+
+      expect(result.processed).toBe(true);
+      expect(result.message).toContain('duplicado');
+      expect(mockUserRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('debe ignorar payment cuyo external_reference de MP no tiene prefijo sub_', async () => {
+      mockMercadoPagoService.getPayment.mockResolvedValue(
+        buildPaymentResponse({
+          id: 9004,
+          status: 'approved',
+          external_reference: 'holistic_service_99',
+        }),
+      );
+
+      const payload = makePaymentPayload('9004');
+      const result = await useCase.execute(payload, xSignature, xRequestId);
+
+      expect(result.processed).toBe(false);
+      expect(result.message).toContain('sub_');
+      expect(mockUserRepo.findById).not.toHaveBeenCalled();
+    });
+
     it('debe loggear y no cambiar el plan si status=rejected', async () => {
       const user = makeUser({
         id: 42,
@@ -370,6 +457,23 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
           id: 'preapproval-999',
           status: 'authorized',
           external_reference: undefined,
+        }),
+      );
+
+      const payload = makePreapprovalPayload('preapproval-999');
+      const result = await useCase.execute(payload, xSignature, xRequestId);
+
+      expect(result.processed).toBe(false);
+      expect(result.message).toContain('external_reference');
+      expect(mockUserRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('debe ignorar external_reference con formato ambiguo como sub_42abc (regex estricto)', async () => {
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-999',
+          status: 'authorized',
+          external_reference: 'sub_42abc',
         }),
       );
 

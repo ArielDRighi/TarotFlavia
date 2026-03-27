@@ -1,7 +1,7 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import type { PreApprovalResponse } from 'mercadopago/dist/clients/preApproval/commonTypes';
 import { MercadoPagoService } from '../../../payments/infrastructure/services/mercadopago.service';
-import {
+import type {
   MercadoPagoWebhookPayload,
   WebhookProcessResult,
 } from '../../../holistic-services/application/use-cases/process-mercadopago-webhook.use-case';
@@ -140,31 +140,64 @@ export class ProcessSubscriptionWebhookUseCase {
 
   /**
    * Activa el plan premium del usuario.
-   * Idempotente: si ya está ACTIVE+PREMIUM no hace nada.
+   * Idempotente: si ya está ACTIVE+PREMIUM con el mismo preapprovalId y planExpiresAt,
+   * no hace nada. Si faltan/difieren campos de suscripción, los actualiza sin reiniciar
+   * fechas de inicio ni cambiar el estado.
    */
   private async activatePremium(
     user: User,
     preapproval: PreApprovalResponse,
     preapprovalId: string,
   ): Promise<WebhookProcessResult> {
-    // Idempotencia: si ya está activo y premium, ignorar
+    const incomingNextPaymentDate = preapproval.next_payment_date
+      ? new Date(preapproval.next_payment_date)
+      : null;
+
+    // Si ya está activo y premium, validar campos de suscripción
     if (
       user.plan === UserPlan.PREMIUM &&
       user.subscriptionStatus === SubscriptionStatus.ACTIVE
     ) {
+      const hasSamePreapprovalId = user.mpPreapprovalId === preapprovalId;
+      const hasSamePlanExpiresAt =
+        !incomingNextPaymentDate ||
+        (user.planExpiresAt &&
+          user.planExpiresAt.getTime() === incomingNextPaymentDate.getTime());
+
+      // Idempotencia estricta: todo coincide — notificación duplicada real
+      if (hasSamePreapprovalId && hasSamePlanExpiresAt) {
+        this.logger.log(
+          `Usuario ${user.id} ya tiene plan premium activo — notificación duplicada`,
+        );
+        return { processed: false, message: 'Notificación duplicada' };
+      }
+
+      // El usuario ya es PREMIUM+ACTIVE pero faltan/difieren campos de suscripción:
+      // actualizarlos sin reiniciar fechas de inicio ni cambiar el estado.
+      user.mpPreapprovalId = preapprovalId;
+      if (incomingNextPaymentDate) {
+        user.planExpiresAt = incomingNextPaymentDate;
+      }
+
+      await this.userRepo.save(user);
       this.logger.log(
-        `Usuario ${user.id} ya tiene plan premium activo — notificación duplicada`,
+        `Usuario ${user.id} premium activo — campos de suscripción actualizados (preapproval: ${preapprovalId})`,
       );
-      return { processed: false, message: 'Notificación duplicada' };
+
+      return {
+        processed: true,
+        message: `Usuario ${user.id} premium actualizado con nueva información de suscripción`,
+      };
     }
 
+    // Activación completa: el usuario aún no era PREMIUM+ACTIVE
     user.plan = UserPlan.PREMIUM;
     user.subscriptionStatus = SubscriptionStatus.ACTIVE;
     user.planStartedAt = new Date();
     user.mpPreapprovalId = preapprovalId;
 
-    if (preapproval.next_payment_date) {
-      user.planExpiresAt = new Date(preapproval.next_payment_date);
+    if (incomingNextPaymentDate) {
+      user.planExpiresAt = incomingNextPaymentDate;
     }
 
     await this.userRepo.save(user);
@@ -211,6 +244,8 @@ export class ProcessSubscriptionWebhookUseCase {
 
   /**
    * Procesa webhooks de tipo payment con external_reference=sub_XXX (cobros recurrentes).
+   * Verifica el external_reference desde la API de MP (no del payload, ya que MP no lo
+   * envía en el payload en producción). Si no es sub_, devuelve processed:false sin actuar.
    * - approved → actualiza planExpiresAt con next_payment_date del preapproval
    * - rejected → log warning (MP maneja reintentos)
    */
@@ -218,6 +253,16 @@ export class ProcessSubscriptionWebhookUseCase {
     payload: MercadoPagoWebhookPayload,
   ): Promise<WebhookProcessResult> {
     const paymentId = payload.data?.id;
+
+    if (!paymentId) {
+      this.logger.warn(
+        `Webhook de pago de suscripción sin data.id — ignorando`,
+      );
+      return {
+        processed: false,
+        message: 'Pago sin data.id',
+      };
+    }
 
     let paymentStatus: string | undefined;
     let paymentExternalRef: string | undefined;
@@ -237,17 +282,16 @@ export class ProcessSubscriptionWebhookUseCase {
       };
     }
 
-    // Usar external_reference del payload si la API de MP no lo retornó
-    const externalRef =
-      paymentExternalRef ?? payload.externalReference ?? undefined;
+    // Verificar external_reference desde la API (MP no lo envía en el payload en producción)
+    const externalRef = paymentExternalRef ?? undefined;
     const userId = this.parseUserId(externalRef);
     if (userId === null) {
-      this.logger.warn(
-        `external_reference inválido o ausente en payment: "${externalRef}"`,
+      this.logger.log(
+        `Pago recibido no corresponde a suscripción (external_reference: ${externalRef}) — ignorando en flujo de suscripciones`,
       );
       return {
         processed: false,
-        message: `external_reference inválido: "${externalRef}"`,
+        message: `Pago no asociado a suscripción (external_reference sin prefijo sub_)`,
       };
     }
 
@@ -291,14 +335,31 @@ export class ProcessSubscriptionWebhookUseCase {
           user.mpPreapprovalId,
         );
         if (preapproval.next_payment_date) {
-          user.planExpiresAt = new Date(preapproval.next_payment_date);
-          await this.userRepo.save(user);
+          const nextPaymentDate = new Date(preapproval.next_payment_date);
+
+          // Evitar writes innecesarios si el valor ya es el mismo (idempotencia)
+          if (
+            !user.planExpiresAt ||
+            user.planExpiresAt.getTime() !== nextPaymentDate.getTime()
+          ) {
+            user.planExpiresAt = nextPaymentDate;
+            await this.userRepo.save(user);
+            this.logger.log(
+              `planExpiresAt actualizado para usuario ${userId}: ${preapproval.next_payment_date}`,
+            );
+            return {
+              processed: true,
+              message: `planExpiresAt actualizado para usuario ${userId}`,
+            };
+          }
+
+          // Webhook duplicado / sin cambios
           this.logger.log(
-            `planExpiresAt actualizado para usuario ${userId}: ${preapproval.next_payment_date}`,
+            `Cobro recurrente duplicado/sin cambios para usuario ${userId}: planExpiresAt ya es ${preapproval.next_payment_date}`,
           );
           return {
             processed: true,
-            message: `planExpiresAt actualizado para usuario ${userId}`,
+            message: `Cobro recurrente duplicado/sin cambios para usuario ${userId}`,
           };
         }
       } catch (error) {
@@ -327,17 +388,22 @@ export class ProcessSubscriptionWebhookUseCase {
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Parsea el userId desde un external_reference con formato "sub_{userId}".
+   * Parsea el userId desde un external_reference con formato estricto "sub_{digits}".
    * Retorna null si el formato es inválido o ausente.
    */
   private parseUserId(
     externalReference: string | undefined | null,
   ): number | null {
-    if (!externalReference || !externalReference.startsWith('sub_')) {
+    if (!externalReference) {
       return null;
     }
-    const userIdStr = externalReference.slice('sub_'.length);
-    const userId = parseInt(userIdStr, 10);
-    return isNaN(userId) ? null : userId;
+
+    const match = /^sub_(\d+)$/.exec(externalReference);
+    if (!match) {
+      return null;
+    }
+
+    const userId = Number.parseInt(match[1], 10);
+    return Number.isNaN(userId) ? null : userId;
   }
 }
