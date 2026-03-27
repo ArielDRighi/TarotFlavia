@@ -2,6 +2,8 @@ import {
   Injectable,
   BadRequestException,
   BadGatewayException,
+  InternalServerErrorException,
+  NotFoundException,
   Inject,
   Logger,
 } from '@nestjs/common';
@@ -30,8 +32,13 @@ export class CreatePreapprovalUseCase {
     // 1. Buscar usuario
     const user = await this.userRepo.findById(userId);
 
+    // Fix 1: Guard — usuario debe existir
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
     // 2. Validar que el usuario no sea ya premium
-    if (user && user.plan === UserPlan.PREMIUM) {
+    if (user.plan === UserPlan.PREMIUM) {
       throw new BadRequestException(
         'El usuario ya tiene un plan premium activo',
       );
@@ -40,6 +47,14 @@ export class CreatePreapprovalUseCase {
     // 3. Obtener configuración de entorno
     const preapprovalPlanId =
       this.configService.get<string>('MP_PREAPPROVAL_PLAN_ID') ?? '';
+
+    // Fix 2: Validar que MP_PREAPPROVAL_PLAN_ID esté configurado
+    if (!preapprovalPlanId) {
+      throw new InternalServerErrorException(
+        'MP_PREAPPROVAL_PLAN_ID no está configurado',
+      );
+    }
+
     const frontendUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3001';
     const backendUrl =
@@ -74,11 +89,33 @@ export class CreatePreapprovalUseCase {
     }
 
     // 5. Persistir mpPreapprovalId en el usuario
-    if (user) {
+    // Fix 3: Compensación — si el save falla, cancelar el preapproval creado en MP
+    try {
       user.mpPreapprovalId = preapprovalId;
       await this.userRepo.save(user);
       this.logger.log(
         `mpPreapprovalId ${preapprovalId} guardado para usuario ${userId}`,
+      );
+    } catch (saveError) {
+      this.logger.error(
+        `Error al persistir mpPreapprovalId para usuario ${userId}, intentando cancelar preapproval ${preapprovalId}`,
+        saveError instanceof Error ? saveError.stack : String(saveError),
+      );
+      try {
+        await this.mercadoPagoService.cancelPreapproval(preapprovalId);
+        this.logger.log(
+          `Preapproval ${preapprovalId} cancelado exitosamente tras error de persistencia`,
+        );
+      } catch (cancelError) {
+        this.logger.error(
+          `No se pudo cancelar el preapproval ${preapprovalId} en MP tras error de persistencia`,
+          cancelError instanceof Error
+            ? cancelError.stack
+            : String(cancelError),
+        );
+      }
+      throw new InternalServerErrorException(
+        'Error al guardar los datos de suscripción',
       );
     }
 

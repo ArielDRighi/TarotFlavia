@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, BadGatewayException } from '@nestjs/common';
+import {
+  BadRequestException,
+  BadGatewayException,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CreatePreapprovalUseCase } from './create-preapproval.use-case';
 import { MercadoPagoService } from '../../../payments/infrastructure/services/mercadopago.service';
@@ -19,9 +24,10 @@ describe('CreatePreapprovalUseCase', () => {
   };
 
   const mockMercadoPagoService: jest.Mocked<
-    Pick<MercadoPagoService, 'createPreapproval'>
+    Pick<MercadoPagoService, 'createPreapproval' | 'cancelPreapproval'>
   > = {
     createPreapproval: jest.fn(),
+    cancelPreapproval: jest.fn(),
   };
 
   const mockConfigService = {
@@ -251,6 +257,126 @@ describe('CreatePreapprovalUseCase', () => {
 
       // Assert
       expect(mockUserRepo.findById).toHaveBeenCalledWith(77);
+    });
+
+    // ─── Fix 1: user null → NotFoundException ───────────────────────────────
+
+    it('usuario no encontrado → lanza NotFoundException antes de llamar a MP', async () => {
+      // Arrange
+      mockUserRepo.findById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(useCase.execute(999, 'ghost@example.com')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockMercadoPagoService.createPreapproval).not.toHaveBeenCalled();
+    });
+
+    it('usuario no encontrado → mensaje de error claro en español', async () => {
+      // Arrange
+      mockUserRepo.findById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(useCase.execute(999, 'ghost@example.com')).rejects.toThrow(
+        'Usuario no encontrado',
+      );
+    });
+
+    // ─── Fix 2: MP_PREAPPROVAL_PLAN_ID vacío → InternalServerErrorException ──
+
+    it('MP_PREAPPROVAL_PLAN_ID no configurado → lanza InternalServerErrorException antes de llamar a MP', async () => {
+      // Arrange
+      const freeUser = buildUser({ plan: UserPlan.FREE });
+      mockUserRepo.findById.mockResolvedValue(freeUser);
+      mockConfigService.get.mockImplementation((key: string) => {
+        const envMap: Record<string, string | undefined> = {
+          MP_PREAPPROVAL_PLAN_ID: undefined,
+          FRONTEND_URL: 'http://localhost:3001',
+          BACKEND_URL: 'http://localhost:3000',
+        };
+        return envMap[key];
+      });
+
+      // Act & Assert
+      await expect(useCase.execute(42, 'test@example.com')).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      expect(mockMercadoPagoService.createPreapproval).not.toHaveBeenCalled();
+    });
+
+    it('MP_PREAPPROVAL_PLAN_ID vacío → mensaje de error claro en español', async () => {
+      // Arrange
+      const freeUser = buildUser({ plan: UserPlan.FREE });
+      mockUserRepo.findById.mockResolvedValue(freeUser);
+      mockConfigService.get.mockImplementation((key: string) => {
+        const envMap: Record<string, string | undefined> = {
+          MP_PREAPPROVAL_PLAN_ID: '',
+          FRONTEND_URL: 'http://localhost:3001',
+          BACKEND_URL: 'http://localhost:3000',
+        };
+        return envMap[key];
+      });
+
+      // Act & Assert
+      await expect(useCase.execute(42, 'test@example.com')).rejects.toThrow(
+        'MP_PREAPPROVAL_PLAN_ID no está configurado',
+      );
+    });
+
+    // ─── Fix 3: save falla → compensación cancelPreapproval ─────────────────
+
+    it('save falla → intenta cancelar el preapproval creado en MP', async () => {
+      // Arrange
+      const freeUser = buildUser({ plan: UserPlan.FREE });
+      mockUserRepo.findById.mockResolvedValue(freeUser);
+      mockMercadoPagoService.createPreapproval.mockResolvedValue({
+        preapprovalId: 'preapproval_orphan',
+        initPoint: 'https://mp.com/checkout',
+      });
+      mockUserRepo.save.mockRejectedValue(new Error('DB connection lost'));
+      mockMercadoPagoService.cancelPreapproval.mockResolvedValue(undefined);
+
+      // Act & Assert
+      await expect(useCase.execute(42, 'test@example.com')).rejects.toThrow();
+      expect(mockMercadoPagoService.cancelPreapproval).toHaveBeenCalledWith(
+        'preapproval_orphan',
+      );
+    });
+
+    it('save falla → lanza InternalServerErrorException con mensaje claro', async () => {
+      // Arrange
+      const freeUser = buildUser({ plan: UserPlan.FREE });
+      mockUserRepo.findById.mockResolvedValue(freeUser);
+      mockMercadoPagoService.createPreapproval.mockResolvedValue({
+        preapprovalId: 'preapproval_orphan',
+        initPoint: 'https://mp.com/checkout',
+      });
+      mockUserRepo.save.mockRejectedValue(new Error('DB connection lost'));
+      mockMercadoPagoService.cancelPreapproval.mockResolvedValue(undefined);
+
+      // Act & Assert
+      await expect(useCase.execute(42, 'test@example.com')).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+
+    it('save falla y cancelPreapproval también falla → sigue lanzando InternalServerErrorException', async () => {
+      // Arrange
+      const freeUser = buildUser({ plan: UserPlan.FREE });
+      mockUserRepo.findById.mockResolvedValue(freeUser);
+      mockMercadoPagoService.createPreapproval.mockResolvedValue({
+        preapprovalId: 'preapproval_orphan',
+        initPoint: 'https://mp.com/checkout',
+      });
+      mockUserRepo.save.mockRejectedValue(new Error('DB connection lost'));
+      mockMercadoPagoService.cancelPreapproval.mockRejectedValue(
+        new Error('MP cancel failed'),
+      );
+
+      // Act & Assert — debe seguir lanzando error, no quedar silencioso
+      await expect(useCase.execute(42, 'test@example.com')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 });

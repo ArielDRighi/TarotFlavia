@@ -266,7 +266,9 @@ Implementar el use case que crea una suscripción de preapproval en MP y el endp
 **Backend:**
 - [x] Crear `src/modules/subscriptions/application/use-cases/create-preapproval.use-case.ts`:
   - Recibe: `userId`, `userEmail`
-  - Valida: usuario no es ya premium, no tiene preapproval activo
+  - Valida: usuario existe (NotFoundException si no), usuario no es ya premium. No valida existencia de mpPreapprovalId porque se permite re-iniciar
+  - Valida: `MP_PREAPPROVAL_PLAN_ID` configurado (InternalServerErrorException si vacío)
+  - Compensación: si `userRepo.save` falla, cancela el preapproval creado en MP antes de lanzar error
   - Llama a `MercadoPagoService.createPreapproval()` con:
     - `preapproval_plan_id` de env var `MP_PREAPPROVAL_PLAN_ID`
     - `payer_email: userEmail`
@@ -280,13 +282,16 @@ Implementar el use case que crea una suscripción de preapproval en MP y el endp
   - `POST /subscriptions/create-preapproval`
   - Guard: `JwtAuthGuard`
   - Retorna: `{ initPoint: string }`
-- [ ] Agregar variable de entorno `MP_PREAPPROVAL_PLAN_ID` a la validación de config (puede ser opcional en desarrollo)
+- [x] Agregar variable de entorno `MP_PREAPPROVAL_PLAN_ID` a la validación de config (puede ser opcional en desarrollo)
 
 **Tests:**
 - [x] Test: usuario free crea preapproval → devuelve initPoint
 - [x] Test: usuario ya premium → 400 Bad Request
 - [x] Test: MP devuelve error → 502 Bad Gateway con mensaje claro
 - [x] Test: `external_reference` tiene formato `sub_{userId}`
+- [x] Test: usuario no encontrado → 404 NotFoundException
+- [x] Test: `MP_PREAPPROVAL_PLAN_ID` no configurado → 500 InternalServerErrorException
+- [x] Test: save falla → cancelPreapproval compensación + 500 InternalServerErrorException
 - [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
@@ -295,6 +300,9 @@ Implementar el use case que crea una suscripción de preapproval en MP y el endp
 - [x] `external_reference` usa formato `sub_{userId}` para diferenciarlo de pagos de Flavia
 - [x] `mpPreapprovalId` se persiste en User
 - [x] Validación: no permite crear si ya es premium
+- [x] Validación: usuario debe existir (NotFoundException si no)
+- [x] Validación: `MP_PREAPPROVAL_PLAN_ID` debe estar configurado
+- [x] Compensación: si save falla, se cancela el preapproval en MP
 - [x] Tests unitarios pasan
 - [x] Ciclo de calidad completo pasa
 
