@@ -617,7 +617,7 @@ Crear el hook de React Query para suscripciones, agregar endpoints al archivo ce
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 2 días
 **Dependencias:** T-FE-01
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** No existe página de pricing. Hay un componente `PlanComparison` en el home con datos hardcodeados y precio `$9.99/mes`. Necesita una página dedicada con datos dinámicos y CTA funcional.
 
@@ -628,12 +628,12 @@ Crear página standalone `/premium` con comparación de planes, precio dinámico
 #### ✅ Tareas específicas
 
 **Frontend:**
-- [ ] Agregar ruta a `ROUTES` en `src/lib/constants/routes.ts`: `PREMIUM: '/premium'`
-- [ ] Crear `src/app/premium/page.tsx` (solo importa componente, sin lógica)
-- [ ] Crear `src/components/features/premium/PremiumPage.tsx`:
-  - Fetch datos de planes desde `GET /plan-config/free` y `GET /plan-config/premium` (endpoint existente del admin, necesita validar acceso público o crear endpoint público)
+- [x] Agregar ruta a `ROUTES` en `src/lib/constants/routes.ts`: `PREMIUM: '/premium'`
+- [x] Crear `src/app/premium/page.tsx` (solo importa componente, sin lógica)
+- [x] Crear `src/components/features/premium/PremiumPage.tsx`:
+  - Fetch datos de planes desde `GET /plan-config/public` (endpoint público creado en T-FE-02)
   - Hero section: título, subtítulo
-  - Tabla comparativa de planes (reusar/extender `PlanComparison` existente pero con datos dinámicos)
+  - Tabla comparativa de planes con datos dinámicos
   - Precio del plan premium mostrado dinámicamente
   - CTA "Comenzar Premium":
     - Si usuario no autenticado → redirigir a `/registro`
@@ -641,24 +641,27 @@ Crear página standalone `/premium` con comparación de planes, precio dinámico
     - Si usuario premium → mostrar "Ya tenés Premium" con link a perfil
   - Sección FAQ con preguntas frecuentes (¿qué pasa si cancelo?, ¿cómo funciona el cobro?, etc.)
   - Garantía: "Cancelá cuando quieras, sin compromiso"
-- [ ] Agregar un endpoint público `GET /plan-config/public` en backend que retorne los planes free y premium sin requerir auth (o validar que el endpoint existente acepta requests sin auth)
+- [x] Agregar endpoint público `GET /plan-config/public` en backend (guards movidos a nivel de método, nuevo endpoint sin auth)
+- [x] Agregar `PLAN_CONFIG_PUBLIC: '/plan-config/public'` en `src/lib/api/endpoints.ts`
+- [x] Crear `src/lib/api/public-plans-api.ts` con `fetchPublicPlans()`
+- [x] Crear `src/hooks/api/usePublicPlans.ts` con `usePublicPlans()` React Query hook
 
 **Tests:**
-- [ ] Test: renderiza tabla de planes con datos
-- [ ] Test: CTA redirige a registro si no autenticado
-- [ ] Test: CTA inicia flujo MP si usuario free
-- [ ] Test: muestra "Ya tenés Premium" si usuario premium
-- [ ] Test: loading state mientras se cargan datos de planes
-- [ ] Coverage ≥ 80%
+- [x] Test: renderiza tabla de planes con datos
+- [x] Test: CTA redirige a registro si no autenticado
+- [x] Test: CTA inicia flujo MP si usuario free
+- [x] Test: muestra "Ya tenés Premium" si usuario premium
+- [x] Test: loading state mientras se cargan datos de planes
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Página `/premium` accesible y responsive
-- [ ] Datos de planes vienen de la API (no hardcodeados)
-- [ ] CTA funcional según estado del usuario
-- [ ] Sección FAQ visible
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] Página `/premium` accesible y responsive
+- [x] Datos de planes vienen de la API (no hardcodeados)
+- [x] CTA funcional según estado del usuario
+- [x] Sección FAQ visible
+- [x] Tests pasan (12/12)
+- [x] Ciclo de calidad completo pasa (format ✅ lint ✅ type-check ✅ build ✅ validate-architecture ✅)
 
 ---
 

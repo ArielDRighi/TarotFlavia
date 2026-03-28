@@ -25,6 +25,9 @@ export const ROUTES = {
   LECTURAS_PAPELERA: '/lecturas/papelera',
   LECTURA_DETAIL: (id: string) => `/lecturas/${id}`,
 
+  // Premium
+  PREMIUM: '/premium',
+
   // Marketplace
   MARKETPLACE: '/marketplace',
   TAROTISTA_PROFILE: (id: string) => `/marketplace/tarotista/${id}`,

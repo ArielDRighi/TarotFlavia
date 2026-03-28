@@ -27,12 +27,23 @@ import { AdminGuard } from '../auth/infrastructure/guards/admin.guard';
 
 @ApiTags('plan-config')
 @Controller('plan-config')
-@UseGuards(JwtAuthGuard, AdminGuard)
-@ApiBearerAuth()
 export class PlanConfigController {
   constructor(private readonly planConfigService: PlanConfigService) {}
 
+  @Get('public')
+  @ApiOperation({ summary: 'Obtener configuración pública de planes (sin autenticación)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de planes activos para mostrar al público',
+    type: [Plan],
+  })
+  async findPublic(): Promise<Plan[]> {
+    return this.planConfigService.findAll();
+  }
+
   @Get()
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener todos los planes configurados' })
   @ApiResponse({
     status: 200,
@@ -44,6 +55,8 @@ export class PlanConfigController {
   }
 
   @Get(':planType')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener un plan específico por tipo' })
   @ApiResponse({
     status: 200,
@@ -61,6 +74,8 @@ export class PlanConfigController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Crear un nuevo plan' })
   @ApiResponse({
     status: 201,
@@ -76,6 +91,8 @@ export class PlanConfigController {
   }
 
   @Put(':planType')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar un plan existente' })
   @ApiResponse({
     status: 200,
@@ -94,6 +111,8 @@ export class PlanConfigController {
   }
 
   @Delete(':planType')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar un plan' })
   @ApiResponse({

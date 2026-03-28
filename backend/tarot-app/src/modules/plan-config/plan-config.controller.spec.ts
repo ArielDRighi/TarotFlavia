@@ -37,6 +37,32 @@ describe('PlanConfigController', () => {
     jest.clearAllMocks();
   });
 
+  describe('findPublic', () => {
+    it('should return all plans without authentication', async () => {
+      const mockPlans = [
+        {
+          id: 1,
+          planType: UserPlan.FREE,
+          name: 'Plan Gratuito',
+          price: 0,
+        } as Plan,
+        {
+          id: 2,
+          planType: UserPlan.PREMIUM,
+          name: 'Plan Premium',
+          price: 9.99,
+        } as Plan,
+      ];
+
+      mockPlanConfigService.findAll.mockResolvedValue(mockPlans);
+
+      const result = await controller.findPublic();
+
+      expect(result).toEqual(mockPlans);
+      expect(service.findAll).toHaveBeenCalled();
+    });
+  });
+
   describe('findAll', () => {
     it('should return all plans', async () => {
       const mockPlans = [
