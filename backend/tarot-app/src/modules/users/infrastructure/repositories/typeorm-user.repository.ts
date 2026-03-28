@@ -1,8 +1,13 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository, DeleteResult, In, LessThan } from 'typeorm';
 import { IUserRepository } from '../../domain/interfaces/user-repository.interface';
-import { User, UserWithoutPassword } from '../../entities/user.entity';
+import {
+  User,
+  UserPlan,
+  UserWithoutPassword,
+  SubscriptionStatus,
+} from '../../entities/user.entity';
 import { UserQueryDto } from '../../application/dto/user-query.dto';
 import { UserListResponseDto } from '../../application/dto/user-list-response.dto';
 
@@ -158,6 +163,23 @@ export class TypeOrmUserRepository implements IUserRepository {
     return this.usersRepository.findOne({
       where: { id: userId },
       relations: ['readings'],
+    });
+  }
+
+  async findExpiredPremiumUsers(): Promise<User[]> {
+    // Seleccionar solo los campos necesarios para la degradación:
+    // id (para identificar), plan y subscriptionStatus (para actualizar),
+    // planExpiresAt (para logging). Se excluye password y datos sensibles.
+    return this.usersRepository.find({
+      select: ['id', 'plan', 'subscriptionStatus', 'planExpiresAt'],
+      where: {
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: In([
+          SubscriptionStatus.CANCELLED,
+          SubscriptionStatus.EXPIRED,
+        ]),
+        planExpiresAt: LessThan(new Date()),
+      },
     });
   }
 }

@@ -422,7 +422,7 @@ Implementar use cases y endpoints para cancelar suscripción y consultar estado.
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1 día
 **Dependencias:** T-INT-02 (webhook que setea planExpiresAt)
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Cuando un usuario cancela o MP cancela por cobro fallido, el plan sigue premium hasta `planExpiresAt`. Se necesita un job automático que degrade a free cuando el período expira.
 
@@ -433,30 +433,38 @@ Implementar CRON job que revise y degrade planes expirados.
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Crear `src/modules/subscriptions/application/services/subscription-cron.service.ts`:
+- [x] Crear `src/modules/subscriptions/application/services/subscription-cron.service.ts`:
   - Usar `@Cron('0 */6 * * *')` (cada 6 horas) del decorador `@nestjs/schedule`
   - Query: `WHERE plan = 'premium' AND subscriptionStatus IN ('cancelled', 'expired') AND planExpiresAt < NOW()`
   - Para cada usuario: `plan=free`, `subscriptionStatus=expired`
   - Log: cantidad de usuarios degradados por ejecución
   - Manejar errores por usuario (no detener el batch si uno falla)
-- [ ] Registrar el servicio en `subscriptions.module.ts`
-- [ ] Verificar que `ScheduleModule` está importado en el módulo root o en subscriptions
+- [x] Registrar el servicio en `subscriptions.module.ts`
+- [x] Verificar que `ScheduleModule` está importado en el módulo root o en subscriptions
+- [x] Agregar `findExpiredPremiumUsers()` a `IUserRepository` e implementación en `TypeOrmUserRepository`
 
 **Tests:**
-- [ ] Test: usuarios con plan expirado se degradan a free
-- [ ] Test: usuarios con plan activo NO se degradan
-- [ ] Test: usuarios con `subscriptionStatus=active` y `planExpiresAt` pasado NO se degradan (protección — solo `cancelled/expired`)
-- [ ] Test: error en un usuario no detiene el procesamiento del batch
-- [ ] Coverage ≥ 80%
+- [x] Test: usuarios con plan expirado se degradan a free
+- [x] Test: usuarios con plan activo NO se degradan
+- [x] Test: usuarios con `subscriptionStatus=active` y `planExpiresAt` pasado NO se degradan (protección — solo `cancelled/expired`)
+- [x] Test: error en un usuario no detiene el procesamiento del batch
+- [x] Coverage ≥ 80% (100% Stmts, 100% Branch, 100% Funcs, 100% Lines)
 
 #### 🎯 Criterios de aceptación
 
-- [ ] CRON se ejecuta cada 6 horas
-- [ ] Solo degrada usuarios con `subscriptionStatus` en `cancelled` o `expired` Y `planExpiresAt` pasado
-- [ ] Logging claro de resultados
-- [ ] No afecta usuarios con suscripción activa
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] CRON se ejecuta cada 6 horas
+- [x] Solo degrada usuarios con `subscriptionStatus` en `cancelled` o `expired` Y `planExpiresAt` pasado
+- [x] Logging claro de resultados
+- [x] No afecta usuarios con suscripción activa
+- [x] Tests pasan
+- [x] Ciclo de calidad completo pasa
+
+**Notas técnicas:**
+- PR: `feature/t-be-04-cron-plan-degradation` → `develop`
+- Archivos nuevos: `subscription-cron.service.ts`, `subscription-cron.service.spec.ts`
+- Archivos modificados: `subscriptions.module.ts`, `user-repository.interface.ts`, `typeorm-user.repository.ts`
+- 11 tests, todos verdes. Coverage: 100% Stmts/Branch/Funcs/Lines
+- `ScheduleModule` ya estaba registrado en `app.module.ts`
 
 ---
 
