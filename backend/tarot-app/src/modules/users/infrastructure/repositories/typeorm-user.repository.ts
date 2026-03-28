@@ -182,4 +182,23 @@ export class TypeOrmUserRepository implements IUserRepository {
       },
     });
   }
+
+  async findActivePremiumUsersWithPreapproval(): Promise<User[]> {
+    // Seleccionar los campos necesarios para la reconciliación:
+    // id, plan, subscriptionStatus (para detectar discrepancias),
+    // mpPreapprovalId (para consultar MP API).
+    // Se excluye password y datos sensibles.
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .select([
+        'user.id',
+        'user.plan',
+        'user.subscriptionStatus',
+        'user.mpPreapprovalId',
+        'user.planExpiresAt',
+      ])
+      .where('user.plan = :plan', { plan: UserPlan.PREMIUM })
+      .andWhere('user.mpPreapprovalId IS NOT NULL')
+      .getMany();
+  }
 }

@@ -77,4 +77,12 @@ export interface IUserRepository {
    * @returns Lista de usuarios parciales con plan premium expirado
    */
   findExpiredPremiumUsers(): Promise<User[]>;
+
+  /**
+   * Busca usuarios con plan premium activo que tienen mpPreapprovalId registrado.
+   * Usado por el CRON de reconciliación para verificar estado contra la API de MP.
+   * Condición: plan = 'premium' AND mpPreapprovalId IS NOT NULL
+   * @returns Lista de usuarios premium con preapproval registrado
+   */
+  findActivePremiumUsersWithPreapproval(): Promise<User[]>;
 }
