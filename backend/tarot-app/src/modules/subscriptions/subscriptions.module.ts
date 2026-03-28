@@ -11,6 +11,7 @@ import { CreatePreapprovalUseCase } from './application/use-cases/create-preappr
 import { CancelSubscriptionUseCase } from './application/use-cases/cancel-subscription.use-case';
 import { CheckSubscriptionStatusUseCase } from './application/use-cases/check-subscription-status.use-case';
 import { ProcessSubscriptionWebhookUseCase } from './application/use-cases/process-subscription-webhook.use-case';
+import { SubscriptionCronService } from './application/services/subscription-cron.service';
 import { SUBSCRIPTION_WEBHOOK_USE_CASE } from '../payments/tokens/payment.tokens';
 
 @Module({
@@ -26,6 +27,7 @@ import { SUBSCRIPTION_WEBHOOK_USE_CASE } from '../payments/tokens/payment.tokens
     CancelSubscriptionUseCase,
     CheckSubscriptionStatusUseCase,
     ProcessSubscriptionWebhookUseCase,
+    SubscriptionCronService,
     {
       provide: SUBSCRIPTION_WEBHOOK_USE_CASE,
       useExisting: ProcessSubscriptionWebhookUseCase,

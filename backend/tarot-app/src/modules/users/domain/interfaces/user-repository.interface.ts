@@ -68,4 +68,12 @@ export interface IUserRepository {
    * @returns Usuario con readings o null
    */
   findByIdWithReadings(userId: number): Promise<User | null>;
+
+  /**
+   * Busca usuarios con plan premium cuya suscripción expiró
+   * Condición: plan = 'premium' AND subscriptionStatus IN ('cancelled', 'expired') AND planExpiresAt < NOW()
+   * Usado por el CRON de degradación automática de planes
+   * @returns Lista de usuarios con plan premium expirado
+   */
+  findExpiredPremiumUsers(): Promise<User[]>;
 }
