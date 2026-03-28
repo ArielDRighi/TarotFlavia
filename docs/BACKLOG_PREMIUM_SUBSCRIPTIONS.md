@@ -670,7 +670,7 @@ Crear página standalone `/premium` con comparación de planes, precio dinámico
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1.5 días
 **Dependencias:** T-FE-01
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Ya existen varios componentes de conversión dispersos: `PremiumPreview` (blur overlay), `LimitReachedModal` (modal al agotar límite), `UpgradeBanner` (banner gradient). Necesitan un wrapper unificado que conecte con el flujo de suscripción MP real en vez de redirigir a `/registro`.
 
@@ -681,7 +681,7 @@ Crear componente `PremiumUpgradePrompt` que unifique los prompts de upgrade y co
 #### ✅ Tareas específicas
 
 **Frontend:**
-- [ ] Crear `src/components/features/conversion/PremiumUpgradePrompt.tsx`:
+- [x] Crear `src/components/features/conversion/PremiumUpgradePrompt.tsx`:
   - Props:
     - `feature: string` — nombre del feature bloqueado (ej: "preguntas personalizadas")
     - `variant: 'modal' | 'inline' | 'banner'` — tipo de visualización
@@ -695,28 +695,28 @@ Crear componente `PremiumUpgradePrompt` que unifique los prompts de upgrade y co
     - `modal`: dialog con beneficios + CTA (basado en `LimitReachedModal` existente)
     - `inline`: card compacta inline (basado en `PremiumPreview` existente)
     - `banner`: banner horizontal (basado en `UpgradeBanner` existente)
-- [ ] Actualizar componentes existentes para usar `PremiumUpgradePrompt` internamente:
-  - `LimitReachedModal` → usar `PremiumUpgradePrompt` variant="modal" (o hacer wrapper)
-  - `UpgradeBanner` → actualizar `onUpgradeClick` para usar flujo MP en vez de redirigir a registro
-  - `PremiumPreview` → actualizar `onUpgrade` para usar flujo MP
-- [ ] Actualizar `UpgradeModal` en readings para usar el nuevo flujo
+- [x] Actualizar componentes existentes para usar `PremiumUpgradePrompt` internamente:
+  - `LimitReachedModal` → conectado a flujo MP real via `useCreatePreapproval` (eliminado prop `onUpgrade`)
+  - `UpgradeBanner` → `onUpgradeClick` ahora opcional; flujo MP manejado internamente
+  - `PremiumPreview` → conectado a flujo MP real via `useCreatePreapproval` (eliminado prop `onUpgrade`)
+- [x] Actualizar `UpgradeModal` en readings para usar el nuevo flujo
 
 **Tests:**
-- [ ] Test: variant `modal` renderiza dialog
-- [ ] Test: variant `inline` renderiza card
-- [ ] Test: variant `banner` renderiza banner
-- [ ] Test: no renderiza si usuario es premium
-- [ ] Test: redirige a registro si no autenticado
-- [ ] Test: inicia flujo MP si usuario free
-- [ ] Coverage ≥ 80%
+- [x] Test: variant `modal` renderiza dialog
+- [x] Test: variant `inline` renderiza card
+- [x] Test: variant `banner` renderiza banner
+- [x] Test: no renderiza si usuario es premium
+- [x] Test: redirige a registro si no autenticado
+- [x] Test: inicia flujo MP si usuario free
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Componente reutilizable con 3 variantes
-- [ ] Conecta con flujo de suscripción MP real
-- [ ] Componentes existentes actualizados para usar el nuevo flujo
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] Componente reutilizable con 3 variantes
+- [x] Conecta con flujo de suscripción MP real
+- [x] Componentes existentes actualizados para usar el nuevo flujo
+- [x] Tests pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 

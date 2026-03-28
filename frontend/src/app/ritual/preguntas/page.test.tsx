@@ -31,6 +31,15 @@ vi.mock('@/hooks/utils/useUserPlanFeatures', () => ({
   useUserPlanFeatures: vi.fn(),
 }));
 
+// Mock useAuth and useCreatePreapproval used by UpgradeModal (rendered inside QuestionSelector)
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn().mockReturnValue({ user: { id: 1, plan: 'free' } }),
+}));
+
+vi.mock('@/hooks/api/useSubscription', () => ({
+  useCreatePreapproval: vi.fn().mockReturnValue({ mutate: vi.fn(), isPending: false }),
+}));
+
 // Mock data
 const mockCategory = {
   id: 1,

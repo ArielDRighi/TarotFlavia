@@ -1,24 +1,84 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
+const mockMutate = vi.fn();
+const mockRouterPush = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+}));
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn(),
+}));
+
+vi.mock('@/hooks/api/useSubscription', () => ({
+  useCreatePreapproval: vi.fn(),
+}));
+
 import PremiumPreview from './PremiumPreview';
+import { useAuth } from '@/hooks/useAuth';
+import { useCreatePreapproval } from '@/hooks/api/useSubscription';
+
+const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
+const mockUseCreatePreapproval = useCreatePreapproval as ReturnType<typeof vi.fn>;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function setupFreeUser() {
+  mockUseAuth.mockReturnValue({
+    user: { id: 1, email: 'test@test.com', name: 'Test', plan: 'free', roles: [] },
+  });
+}
+
+function setupAnonymousUser() {
+  mockUseAuth.mockReturnValue({ user: null });
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 describe('PremiumPreview', () => {
-  const mockOnUpgrade = vi.fn();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseCreatePreapproval.mockReturnValue({ mutate: mockMutate, isPending: false });
+    setupFreeUser();
+  });
 
-  it('should render preview container', () => {
+  it('should render preview container with default message', () => {
     render(
-      <PremiumPreview onUpgrade={mockOnUpgrade}>
+      <PremiumPreview>
         <div>Premium Content</div>
       </PremiumPreview>
     );
 
-    expect(screen.getByText(/desbloquea este contenido/i)).toBeInTheDocument();
+    expect(screen.getByText(/desbloquea este contenido con premium/i)).toBeInTheDocument();
+  });
+
+  it('should display custom message when provided', () => {
+    const customMessage = 'Accede a estadísticas avanzadas';
+
+    render(
+      <PremiumPreview message={customMessage}>
+        <div>Premium Stats</div>
+      </PremiumPreview>
+    );
+
+    expect(screen.getByText(customMessage)).toBeInTheDocument();
+    expect(screen.queryByText(/desbloquea este contenido/i)).not.toBeInTheDocument();
   });
 
   it('should blur children content', () => {
     render(
-      <PremiumPreview onUpgrade={mockOnUpgrade}>
+      <PremiumPreview>
         <div data-testid="premium-content">Premium Content</div>
       </PremiumPreview>
     );
@@ -27,46 +87,9 @@ describe('PremiumPreview', () => {
     expect(content).toHaveClass('blur-sm');
   });
 
-  it('should show lock icon', () => {
-    render(
-      <PremiumPreview onUpgrade={mockOnUpgrade}>
-        <div>Premium Content</div>
-      </PremiumPreview>
-    );
-
-    // Lock icon should be in the document
-    const container = screen.getByText(/desbloquea este contenido/i).closest('div');
-    expect(container).toBeInTheDocument();
-  });
-
-  it('should show upgrade CTA button', () => {
-    render(
-      <PremiumPreview onUpgrade={mockOnUpgrade}>
-        <div>Premium Content</div>
-      </PremiumPreview>
-    );
-
-    const upgradeButton = screen.getByRole('button', { name: /actualizar a premium/i });
-    expect(upgradeButton).toBeInTheDocument();
-  });
-
-  it('should call onUpgrade when clicking button', async () => {
-    const user = userEvent.setup();
-    render(
-      <PremiumPreview onUpgrade={mockOnUpgrade}>
-        <div>Premium Content</div>
-      </PremiumPreview>
-    );
-
-    const upgradeButton = screen.getByRole('button', { name: /actualizar a premium/i });
-    await user.click(upgradeButton);
-
-    expect(mockOnUpgrade).toHaveBeenCalledOnce();
-  });
-
   it('should render children content inside', () => {
     render(
-      <PremiumPreview onUpgrade={mockOnUpgrade}>
+      <PremiumPreview>
         <div>Premium Content Here</div>
       </PremiumPreview>
     );
@@ -74,28 +97,99 @@ describe('PremiumPreview', () => {
     expect(screen.getByText(/premium content here/i)).toBeInTheDocument();
   });
 
-  it('should have proper positioning for overlay', () => {
-    const { container } = render(
-      <PremiumPreview onUpgrade={mockOnUpgrade}>
+  it('should show upgrade CTA button', () => {
+    render(
+      <PremiumPreview>
         <div>Premium Content</div>
       </PremiumPreview>
     );
 
-    // Main container should have relative positioning for overlay
+    expect(screen.getByRole('button', { name: /actualizar a premium/i })).toBeInTheDocument();
+  });
+
+  it('should have proper relative positioning for overlay', () => {
+    const { container } = render(
+      <PremiumPreview>
+        <div>Premium Content</div>
+      </PremiumPreview>
+    );
+
     const mainContainer = container.querySelector('.relative');
     expect(mainContainer).toBeInTheDocument();
   });
 
-  it('should display custom message when provided', () => {
-    const customMessage = 'Accede a estadísticas avanzadas';
-
+  it('should call createPreapproval when clicking upgrade button as free user', async () => {
+    const user = userEvent.setup();
     render(
-      <PremiumPreview onUpgrade={mockOnUpgrade} message={customMessage}>
-        <div>Premium Stats</div>
+      <PremiumPreview>
+        <div>Premium Content</div>
       </PremiumPreview>
     );
 
-    expect(screen.getByText(customMessage)).toBeInTheDocument();
-    expect(screen.queryByText(/desbloquea este contenido/i)).not.toBeInTheDocument();
+    const button = screen.getByRole('button', { name: /actualizar a premium/i });
+    await user.click(button);
+
+    expect(mockMutate).toHaveBeenCalledOnce();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
+  it('should redirect to /registro when clicking upgrade as anonymous user', async () => {
+    const user = userEvent.setup();
+    setupAnonymousUser();
+    render(
+      <PremiumPreview>
+        <div>Premium Content</div>
+      </PremiumPreview>
+    );
+
+    const button = screen.getByRole('button', { name: /actualizar a premium/i });
+    await user.click(button);
+
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      expect.stringContaining('/registro?redirect=/premium')
+    );
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
+
+  it('should redirect to initPoint when createPreapproval succeeds', () => {
+    const initPoint = 'https://www.mercadopago.com/checkout/v1/redirect?pref_id=test-789';
+    mockUseCreatePreapproval.mockReturnValue({
+      mutate: vi
+        .fn()
+        .mockImplementation(
+          (_vars: undefined, options: { onSuccess?: (data: { initPoint: string }) => void }) => {
+            options?.onSuccess?.({ initPoint });
+          }
+        ),
+      isPending: false,
+    });
+
+    const originalLocation = window.location;
+    try {
+      Object.defineProperty(window, 'location', { writable: true, value: { href: '' } });
+
+      render(
+        <PremiumPreview>
+          <div>Premium Content</div>
+        </PremiumPreview>
+      );
+      screen.getByRole('button', { name: /actualizar a premium/i }).click();
+
+      expect(window.location.href).toBe(initPoint);
+    } finally {
+      Object.defineProperty(window, 'location', { writable: true, value: originalLocation });
+    }
+  });
+
+  it('should disable button while isPending is true', () => {
+    mockUseCreatePreapproval.mockReturnValue({ mutate: mockMutate, isPending: true });
+    render(
+      <PremiumPreview>
+        <div>Premium Content</div>
+      </PremiumPreview>
+    );
+
+    const button = screen.getByRole('button', { name: /cargando/i });
+    expect(button).toBeDisabled();
   });
 });
