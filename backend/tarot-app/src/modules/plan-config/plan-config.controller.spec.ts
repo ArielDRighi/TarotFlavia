@@ -38,27 +38,39 @@ describe('PlanConfigController', () => {
   });
 
   describe('findPublic', () => {
-    it('should return all plans without authentication', async () => {
-      const mockPlans = [
-        {
-          id: 1,
-          planType: UserPlan.FREE,
-          name: 'Plan Gratuito',
-          price: 0,
-        } as Plan,
-        {
-          id: 2,
-          planType: UserPlan.PREMIUM,
-          name: 'Plan Premium',
-          price: 9.99,
-        } as Plan,
-      ];
+    it('should return only active plans without authentication', async () => {
+      const activeFree = {
+        id: 1,
+        planType: UserPlan.FREE,
+        name: 'Plan Gratuito',
+        price: 0,
+        isActive: true,
+      } as Plan;
+      const activePremium = {
+        id: 2,
+        planType: UserPlan.PREMIUM,
+        name: 'Plan Premium',
+        price: 9.99,
+        isActive: true,
+      } as Plan;
+      const inactivePlan = {
+        id: 3,
+        planType: UserPlan.FREE,
+        name: 'Plan Retirado',
+        price: 0,
+        isActive: false,
+      } as Plan;
 
-      mockPlanConfigService.findAll.mockResolvedValue(mockPlans);
+      mockPlanConfigService.findAll.mockResolvedValue([
+        activeFree,
+        activePremium,
+        inactivePlan,
+      ]);
 
       const result = await controller.findPublic();
 
-      expect(result).toEqual(mockPlans);
+      expect(result).toEqual([activeFree, activePremium]);
+      expect(result).not.toContainEqual(inactivePlan);
       expect(service.findAll).toHaveBeenCalled();
     });
   });

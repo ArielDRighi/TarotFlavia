@@ -173,7 +173,7 @@ export function PremiumPage() {
               'un precio accesible'
             )}
           </p>
-          <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-card" />
+          <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-hero" />
         </div>
       </section>
 
@@ -197,11 +197,9 @@ export function PremiumPage() {
               </p>
             </CardHeader>
             <CardContent>
-              <Link href={ROUTES.REGISTER}>
-                <Button variant="outline" className="w-full" size="lg">
-                  Registrarse gratis
-                </Button>
-              </Link>
+              <Button asChild variant="outline" className="w-full" size="lg">
+                <Link href={ROUTES.REGISTER}>Registrarse gratis</Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -223,7 +221,7 @@ export function PremiumPage() {
               </p>
             </CardHeader>
             <CardContent>
-              <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-hero" />
+              <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-card" />
             </CardContent>
           </Card>
         </div>

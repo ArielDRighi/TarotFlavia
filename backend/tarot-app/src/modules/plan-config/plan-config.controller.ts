@@ -38,7 +38,8 @@ export class PlanConfigController {
     type: [Plan],
   })
   async findPublic(): Promise<Plan[]> {
-    return this.planConfigService.findAll();
+    const plans = await this.planConfigService.findAll();
+    return plans.filter((plan) => plan.isActive);
   }
 
   @Get()
