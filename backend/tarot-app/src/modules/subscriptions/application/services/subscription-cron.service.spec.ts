@@ -201,10 +201,10 @@ describe('SubscriptionCronService', () => {
       // Act
       await service.degradeExpiredPlans();
 
-      // Assert — debe haber al menos un log que mencione la cantidad
+      // Assert — debe haber al menos un log que mencione explícitamente la cantidad degradada
       const logCalls = logSpy.mock.calls.map((args) => args.join(' '));
       const hasCountLog = logCalls.some(
-        (msg) => msg.includes('2') || msg.includes('degradad'),
+        (msg) => msg.includes('2') && msg.includes('degradad'),
       );
       expect(hasCountLog).toBe(true);
     });

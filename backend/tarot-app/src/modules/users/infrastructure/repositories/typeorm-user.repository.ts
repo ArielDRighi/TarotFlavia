@@ -167,7 +167,11 @@ export class TypeOrmUserRepository implements IUserRepository {
   }
 
   async findExpiredPremiumUsers(): Promise<User[]> {
+    // Seleccionar solo los campos necesarios para la degradación:
+    // id (para identificar), plan y subscriptionStatus (para actualizar),
+    // planExpiresAt (para logging). Se excluye password y datos sensibles.
     return this.usersRepository.find({
+      select: ['id', 'plan', 'subscriptionStatus', 'planExpiresAt'],
       where: {
         plan: UserPlan.PREMIUM,
         subscriptionStatus: In([

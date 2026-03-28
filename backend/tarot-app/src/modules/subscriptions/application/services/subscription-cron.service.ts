@@ -44,10 +44,9 @@ export class SubscriptionCronService {
    * - subscriptionStatus IN ('cancelled', 'expired')
    * - planExpiresAt < NOW()
    *
-   * Cron expression: "0 * /6 * * *" (cada 6 horas)
-   * - 0 minutos
-   * - cada 6 horas (0, 6, 12, 18)
-   * - cualquier día/mes
+   * Expresión cron: '0 STEP6 * * *' donde STEP6 = cada-6-horas
+   * Formato (5 campos): minuto hora dia-mes mes dia-semana
+   * Ejecuta a las 0:00, 6:00, 12:00 y 18:00 UTC todos los días.
    */
   @Cron('0 */6 * * *', {
     name: 'subscription-plan-degradation',
