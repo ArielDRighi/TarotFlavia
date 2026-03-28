@@ -1,10 +1,11 @@
+'use client';
+
 /**
  * TanStack Query hook for public plan configuration
  *
  * Fetches plan data from the public endpoint (no authentication required).
  * Used by the /premium page to display dynamic pricing and plan features.
  */
-'use client';
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchPublicPlans } from '@/lib/api/public-plans-api';
