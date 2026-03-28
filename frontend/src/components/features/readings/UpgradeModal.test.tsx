@@ -1,12 +1,43 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Mocks must be declared before imports so Vitest hoists them
+const mockMutate = vi.fn();
+const mockRouterPush = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+}));
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: vi.fn(),
+}));
+
+vi.mock('@/hooks/api/useSubscription', () => ({
+  useCreatePreapproval: vi.fn(),
+}));
+
 import UpgradeModal from './UpgradeModal';
+import { useAuth } from '@/hooks/useAuth';
+import { useCreatePreapproval } from '@/hooks/api/useSubscription';
+
+const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
+const mockUseCreatePreapproval = useCreatePreapproval as ReturnType<typeof vi.fn>;
 
 describe('UpgradeModal', () => {
   const mockOnClose = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: FREE user
+    mockUseAuth.mockReturnValue({
+      user: { id: 1, email: 'test@test.com', name: 'Test', plan: 'free', roles: [] },
+      isAuthenticated: true,
+    });
+    mockUseCreatePreapproval.mockReturnValue({
+      mutate: mockMutate,
+      isPending: false,
+    });
   });
 
   describe('Rendering', () => {
@@ -74,18 +105,43 @@ describe('UpgradeModal', () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it('should not navigate away when clicking "Comenzar ahora" (disabled for MVP)', () => {
+    it('should enable "Comenzar ahora" CTA button for free users', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
       const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
-      expect(ctaButton).toBeDisabled();
+      expect(ctaButton).not.toBeDisabled();
     });
 
-    it('should show tooltip on disabled CTA button', () => {
+    it('should call createPreapproval mutate when clicking "Comenzar ahora" as free user', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
       const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
-      expect(ctaButton).toHaveAttribute('title');
+      fireEvent.click(ctaButton);
+
+      expect(mockMutate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should redirect to /registro when clicking CTA as anonymous user', () => {
+      mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false });
+
+      render(<UpgradeModal open={true} onClose={mockOnClose} />);
+
+      const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+      fireEvent.click(ctaButton);
+
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        expect.stringContaining('/registro')
+      );
+      expect(mockMutate).not.toHaveBeenCalled();
+    });
+
+    it('should disable CTA button while isPending is true', () => {
+      mockUseCreatePreapproval.mockReturnValue({ mutate: mockMutate, isPending: true });
+
+      render(<UpgradeModal open={true} onClose={mockOnClose} />);
+
+      const ctaButton = screen.getByRole('button', { name: /Cargando/i });
+      expect(ctaButton).toBeDisabled();
     });
   });
 

@@ -25,6 +25,9 @@ import type { NumerologyResponseDto, DayNumberResponse } from '@/types/numerolog
 import type { RitualRecommendationsResponse } from '@/types/ritual.types';
 
 // Mocks
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
 vi.mock('@/hooks/useAuth');
 vi.mock('@/hooks/utils/useUserPlanFeatures');
 vi.mock('@/hooks/api/useUser');
@@ -35,6 +38,11 @@ vi.mock('@/hooks/api/useNumerology');
 vi.mock('@/hooks/api/useSacredCalendar');
 vi.mock('@/hooks/api/useRitualRecommendations');
 vi.mock('@/hooks/api/useHolisticServices');
+
+// Mock useCreatePreapproval used by UpgradeModal (rendered inside UserDashboard via UpgradeBanner)
+vi.mock('@/hooks/api/useSubscription', () => ({
+  useCreatePreapproval: vi.fn().mockReturnValue({ mutate: vi.fn(), isPending: false }),
+}));
 
 // Helper to create AuthUser mock without limits fields
 function createMockAuthUser(overrides?: Partial<AuthUser>): AuthUser {

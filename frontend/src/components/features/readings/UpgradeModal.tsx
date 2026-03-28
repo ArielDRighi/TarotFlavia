@@ -10,6 +10,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useCreatePreapproval } from '@/hooks/api/useSubscription';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/lib/constants/routes';
+import type { CreatePreapprovalResponse } from '@/types';
 
 /**
  * Props for UpgradeModal component
@@ -76,6 +80,8 @@ const PREMIUM_BENEFITS = [
  */
 export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProps) {
   const { user } = useAuth();
+  const router = useRouter();
+  const { mutate: createPreapproval, isPending } = useCreatePreapproval();
 
   // Defensive: This modal should only be shown to FREE/ANONYMOUS users
   // If user is already PREMIUM, something went wrong - log warning
@@ -101,6 +107,18 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
   };
 
   const content = getContent();
+
+  const handleUpgradeClick = () => {
+    if (!user) {
+      router.push(`${ROUTES.REGISTER}?redirect=${ROUTES.PREMIUM}`);
+      return;
+    }
+    createPreapproval(undefined, {
+      onSuccess: (data: CreatePreapprovalResponse) => {
+        window.location.href = data.initPoint;
+      },
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -151,13 +169,13 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
         {/* CTA Buttons */}
         <div className="mt-6 flex flex-col gap-3">
           <Button
+            onClick={handleUpgradeClick}
+            disabled={isPending}
             size="lg"
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-            disabled
-            title="Próximamente disponible en el MVP"
           >
             <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
-            Comenzar ahora
+            {isPending ? 'Cargando...' : 'Comenzar ahora'}
           </Button>
 
           <button
