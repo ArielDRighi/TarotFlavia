@@ -66,4 +66,8 @@ export interface UserCapabilities {
   plan: 'anonymous' | 'free' | 'premium';
   /** Whether user is authenticated */
   isAuthenticated: boolean;
+  /** MercadoPago subscription status — null if no active subscription */
+  subscriptionStatus?: 'active' | 'cancelled' | 'expired' | null;
+  /** ISO date string when the premium plan period expires — null if no subscription */
+  planExpiresAt?: string | null;
 }

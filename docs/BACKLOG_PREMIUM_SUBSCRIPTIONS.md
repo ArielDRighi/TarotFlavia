@@ -559,7 +559,7 @@ Implementar CRON job que consulta el estado de todas las suscripciones activas e
 **Prioridad:** 🔴 ALTA
 **Estimación:** 1 día
 **Dependencias:** T-INT-01, T-INT-03 (endpoints backend)
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** El frontend necesita hooks y tipos para interactuar con los nuevos endpoints de suscripción.
 
@@ -570,7 +570,7 @@ Crear el hook de React Query para suscripciones, agregar endpoints al archivo ce
 #### ✅ Tareas específicas
 
 **Frontend:**
-- [ ] Agregar endpoints a `src/lib/api/endpoints.ts`:
+- [x] Agregar endpoints a `src/lib/api/endpoints.ts`:
   ```typescript
   SUBSCRIPTIONS: {
     ...existentes,
@@ -579,35 +579,36 @@ Crear el hook de React Query para suscripciones, agregar endpoints al archivo ce
     CANCEL: '/subscriptions/cancel',
   }
   ```
-- [ ] Crear `src/hooks/api/useSubscription.ts`:
+- [x] Crear `src/hooks/api/useSubscription.ts`:
   - `useCreatePreapproval()`: mutation que llama `POST /subscriptions/create-preapproval`, retorna `{ initPoint }`
   - `useSubscriptionStatus(options?)`: query que llama `GET /subscriptions/status`, acepta `refetchInterval` para polling
   - `useCancelSubscription()`: mutation que llama `POST /subscriptions/cancel`, invalida capabilities y subscription status on success
-- [ ] Extender tipos en `src/types/auth.types.ts`:
+- [x] Extender tipos en `src/types/auth.types.ts`:
   - `AuthUser.plan`: cambiar de `string` a `'anonymous' | 'free' | 'premium'`
   - `AuthUser.subscriptionStatus`: agregar como `'active' | 'cancelled' | 'expired' | null` (opcional)
-- [ ] Extender tipos en `src/types/capabilities.types.ts`:
-  - Agregar `subscriptionStatus: 'active' | 'cancelled' | 'expired' | null`
-  - Agregar `planExpiresAt: string | null`
-- [ ] Crear `src/types/subscription.types.ts`:
-  - `SubscriptionStatus`: `{ plan, subscriptionStatus, planExpiresAt }`
+- [x] Extender tipos en `src/types/capabilities.types.ts`:
+  - Agregar `subscriptionStatus?: 'active' | 'cancelled' | 'expired' | null`
+  - Agregar `planExpiresAt?: string | null`
+- [x] Nuevos tipos en `src/types/subscription.types.ts`:
+  - `MpSubscriptionStatus`: `{ plan, subscriptionStatus, planExpiresAt }`
   - `CreatePreapprovalResponse`: `{ initPoint: string }`
   - `CancelSubscriptionResponse`: `{ message, planExpiresAt }`
-- [ ] Exportar nuevos tipos desde `src/types/index.ts`
+  - `MpSubscriptionStatusValue`: union type de valores de estado
+- [x] Exportar nuevos tipos desde `src/types/index.ts`
 
 **Tests:**
-- [ ] Test: `useCreatePreapproval` llama al endpoint correcto
-- [ ] Test: `useSubscriptionStatus` con `refetchInterval` hace polling
-- [ ] Test: `useCancelSubscription` invalida queries on success
-- [ ] Coverage ≥ 80%
+- [x] Test: `useCreatePreapproval` llama al endpoint correcto
+- [x] Test: `useSubscriptionStatus` con `refetchInterval` hace polling
+- [x] Test: `useCancelSubscription` invalida queries on success
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Todos los endpoints de suscripción están centralizados en `API_ENDPOINTS`
-- [ ] Hooks de React Query creados y testeados
-- [ ] Tipos TypeScript extendidos y exportados
-- [ ] Sin errores de TypeScript en el build
-- [ ] Ciclo de calidad completo pasa
+- [x] Todos los endpoints de suscripción están centralizados en `API_ENDPOINTS`
+- [x] Hooks de React Query creados y testeados
+- [x] Tipos TypeScript extendidos y exportados
+- [x] Sin errores de TypeScript en el build
+- [x] Ciclo de calidad completo pasa
 
 ---
 

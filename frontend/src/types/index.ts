@@ -104,6 +104,11 @@ export type {
   SubscriptionInfo,
   SetFavoriteTarotistaDto,
   SetFavoriteTarotistaResponse,
+  // MercadoPago subscription types
+  MpSubscriptionStatusValue,
+  MpSubscriptionStatus,
+  CreatePreapprovalResponse,
+  CancelSubscriptionResponse,
 } from './subscription.types';
 
 // Horoscope Types
