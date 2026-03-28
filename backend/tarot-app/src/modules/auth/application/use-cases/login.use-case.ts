@@ -2,7 +2,10 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../../../users/users.service';
-import { UserWithoutPassword } from '../../../users/entities/user.entity';
+import {
+  UserWithoutPassword,
+  SubscriptionStatus,
+} from '../../../users/entities/user.entity';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { SecurityEventService } from '../../../security/security-event.service';
@@ -85,6 +88,7 @@ export class LoginUseCase {
       plan: string;
       profilePicture: string | null;
       birthDate: string | null;
+      subscriptionStatus: 'active' | 'cancelled' | 'expired' | null;
     };
     access_token: string;
     refresh_token: string;
@@ -158,9 +162,31 @@ export class LoginUseCase {
         plan: user.plan,
         profilePicture: user.profilePicture,
         birthDate: user.birthDate,
+        subscriptionStatus: this.mapSubscriptionStatus(user.subscriptionStatus),
       },
       access_token: this.jwtService.sign(payload),
       refresh_token: refreshToken,
     };
+  }
+
+  /**
+   * Mapea SubscriptionStatus (entity enum) al tipo de string del DTO
+   */
+  private mapSubscriptionStatus(
+    status: SubscriptionStatus | null | undefined,
+  ): 'active' | 'cancelled' | 'expired' | null {
+    if (!status) {
+      return null;
+    }
+    switch (status) {
+      case SubscriptionStatus.ACTIVE:
+        return 'active';
+      case SubscriptionStatus.CANCELLED:
+        return 'cancelled';
+      case SubscriptionStatus.EXPIRED:
+        return 'expired';
+      default:
+        return null;
+    }
   }
 }

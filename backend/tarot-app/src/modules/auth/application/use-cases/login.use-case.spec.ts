@@ -206,5 +206,49 @@ describe('LoginUseCase', () => {
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
+
+    it('should include subscriptionStatus in user response (T-BE-05)', async () => {
+      const userWithSubscription = {
+        ...mockUser,
+        subscriptionStatus: 'active',
+      };
+      usersService.findById.mockResolvedValue(
+        userWithSubscription as unknown as User,
+      );
+      usersService.update.mockResolvedValue(
+        userWithSubscription as unknown as User,
+      );
+
+      const result = await useCase.execute(
+        1,
+        'test@example.com',
+        '127.0.0.1',
+        'Mozilla',
+      );
+
+      expect(result.user).toHaveProperty('subscriptionStatus');
+    });
+
+    it('should include subscriptionStatus: null when user has no subscription (T-BE-05)', async () => {
+      const userWithoutSubscription = {
+        ...mockUser,
+        subscriptionStatus: null,
+      };
+      usersService.findById.mockResolvedValue(
+        userWithoutSubscription as unknown as User,
+      );
+      usersService.update.mockResolvedValue(
+        userWithoutSubscription as unknown as User,
+      );
+
+      const result = await useCase.execute(
+        1,
+        'test@example.com',
+        '127.0.0.1',
+        'Mozilla',
+      );
+
+      expect(result.user.subscriptionStatus).toBeNull();
+    });
   });
 });

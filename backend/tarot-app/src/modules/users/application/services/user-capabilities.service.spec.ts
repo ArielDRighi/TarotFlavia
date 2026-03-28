@@ -151,6 +151,8 @@ describe('UserCapabilitiesService', () => {
             resetAt: null,
             period: 'lifetime',
           },
+          subscriptionStatus: null,
+          planExpiresAt: null,
         });
 
         // Verify resetAt is a valid ISO date
@@ -247,6 +249,8 @@ describe('UserCapabilitiesService', () => {
             resetAt: expect.any(String),
             period: 'monthly',
           },
+          subscriptionStatus: null,
+          planExpiresAt: null,
         });
 
         expect(usersService.findById).toHaveBeenCalledWith(1);
@@ -396,6 +400,8 @@ describe('UserCapabilitiesService', () => {
             resetAt: expect.any(String),
             period: 'daily',
           },
+          subscriptionStatus: null,
+          planExpiresAt: null,
         });
       });
 
@@ -439,6 +445,128 @@ describe('UserCapabilitiesService', () => {
         await expect(service.getCapabilities(1)).rejects.toThrow(
           'Plan not found',
         );
+      });
+    });
+
+    describe('Subscription Status and Plan Expiry (T-BE-05)', () => {
+      it('should include subscriptionStatus: null for FREE user', async () => {
+        usersService.findById.mockResolvedValue(mockUser as User);
+        planConfigService.findByPlanType.mockResolvedValue(
+          mockPlanConfig as unknown as Plan,
+        );
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        expect(result.subscriptionStatus).toBeNull();
+      });
+
+      it('should include planExpiresAt: null for FREE user', async () => {
+        usersService.findById.mockResolvedValue(mockUser as User);
+        planConfigService.findByPlanType.mockResolvedValue(
+          mockPlanConfig as unknown as Plan,
+        );
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        expect(result.planExpiresAt).toBeNull();
+      });
+
+      it('should include subscriptionStatus: active for PREMIUM user with active subscription', async () => {
+        const { SubscriptionStatus } =
+          await import('../../entities/user.entity');
+        const premiumActiveUser: Partial<User> = {
+          ...mockUser,
+          plan: UserPlan.PREMIUM,
+          subscriptionStatus: SubscriptionStatus.ACTIVE,
+          planExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        };
+        usersService.findById.mockResolvedValue(premiumActiveUser as User);
+        planConfigService.findByPlanType.mockResolvedValue({
+          id: 3,
+          planType: UserPlan.PREMIUM,
+          dailyCardLimit: -1,
+          tarotReadingsLimit: 3,
+        } as unknown as Plan);
+        planConfigService.getPendulumLimit.mockResolvedValue({
+          limit: 5,
+          period: 'monthly',
+        });
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        expect(result.subscriptionStatus).toBe('active');
+      });
+
+      it('should include subscriptionStatus: cancelled for user with cancelled subscription', async () => {
+        const { SubscriptionStatus } =
+          await import('../../entities/user.entity');
+        const planExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const cancelledUser: Partial<User> = {
+          ...mockUser,
+          plan: UserPlan.PREMIUM,
+          subscriptionStatus: SubscriptionStatus.CANCELLED,
+          planExpiresAt,
+        };
+        usersService.findById.mockResolvedValue(cancelledUser as User);
+        planConfigService.findByPlanType.mockResolvedValue({
+          id: 3,
+          planType: UserPlan.PREMIUM,
+          dailyCardLimit: -1,
+          tarotReadingsLimit: 3,
+        } as unknown as Plan);
+        planConfigService.getPendulumLimit.mockResolvedValue({
+          limit: 5,
+          period: 'monthly',
+        });
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        expect(result.subscriptionStatus).toBe('cancelled');
+        expect(result.planExpiresAt).toBe(planExpiresAt.toISOString());
+      });
+
+      it('should include planExpiresAt as ISO string when set', async () => {
+        const { SubscriptionStatus } =
+          await import('../../entities/user.entity');
+        const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const premiumUser: Partial<User> = {
+          ...mockUser,
+          plan: UserPlan.PREMIUM,
+          subscriptionStatus: SubscriptionStatus.ACTIVE,
+          planExpiresAt: expiry,
+        };
+        usersService.findById.mockResolvedValue(premiumUser as User);
+        planConfigService.findByPlanType.mockResolvedValue({
+          id: 3,
+          planType: UserPlan.PREMIUM,
+          dailyCardLimit: -1,
+          tarotReadingsLimit: 3,
+        } as unknown as Plan);
+        planConfigService.getPendulumLimit.mockResolvedValue({
+          limit: 5,
+          period: 'monthly',
+        });
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        expect(result.planExpiresAt).toBe(expiry.toISOString());
+      });
+
+      it('should include subscriptionStatus: null for anonymous user', async () => {
+        const result = await service.getCapabilities(null, null);
+
+        expect(result.subscriptionStatus).toBeNull();
+        expect(result.planExpiresAt).toBeNull();
       });
     });
 
