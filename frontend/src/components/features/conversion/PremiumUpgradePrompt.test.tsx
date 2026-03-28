@@ -140,28 +140,14 @@ describe('PremiumUpgradePrompt', () => {
   describe('variant inline', () => {
     it('debe renderizar una card cuando variant es inline', () => {
       setupFreeUser();
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="tiradas avanzadas"
-          variant="inline"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="tiradas avanzadas" variant="inline" />);
 
       expect(screen.getByTestId('premium-upgrade-prompt-inline')).toBeInTheDocument();
     });
 
     it('debe mostrar el nombre del feature en la card inline', () => {
       setupFreeUser();
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="tiradas avanzadas"
-          variant="inline"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="tiradas avanzadas" variant="inline" />);
 
       // Feature name appears in both the heading and the description span
       const matches = screen.getAllByText(/tiradas avanzadas/i);
@@ -174,28 +160,14 @@ describe('PremiumUpgradePrompt', () => {
   describe('variant banner', () => {
     it('debe renderizar un banner cuando variant es banner', () => {
       setupFreeUser();
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="interpretaciones personalizadas"
-          variant="banner"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="interpretaciones personalizadas" variant="banner" />);
 
       expect(screen.getByTestId('premium-upgrade-prompt-banner')).toBeInTheDocument();
     });
 
     it('debe mostrar el nombre del feature en el banner', () => {
       setupFreeUser();
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="interpretaciones personalizadas"
-          variant="banner"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="interpretaciones personalizadas" variant="banner" />);
 
       expect(screen.getByText(/interpretaciones personalizadas/i)).toBeInTheDocument();
     });
@@ -220,28 +192,14 @@ describe('PremiumUpgradePrompt', () => {
 
     it('no debe renderizar nada si el usuario es premium (variant inline)', () => {
       setupPremiumUser();
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="tiradas avanzadas"
-          variant="inline"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="tiradas avanzadas" variant="inline" />);
 
       expect(screen.queryByTestId('premium-upgrade-prompt-inline')).not.toBeInTheDocument();
     });
 
     it('no debe renderizar nada si el usuario es premium (variant banner)', () => {
       setupPremiumUser();
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="interpretaciones"
-          variant="banner"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="interpretaciones" variant="banner" />);
 
       expect(screen.queryByTestId('premium-upgrade-prompt-banner')).not.toBeInTheDocument();
     });
@@ -272,14 +230,7 @@ describe('PremiumUpgradePrompt', () => {
     it('debe redirigir a /registro con query param si usuario no autenticado (inline)', async () => {
       const user = userEvent.setup();
       setupAnonymousUser();
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="tiradas avanzadas"
-          variant="inline"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="tiradas avanzadas" variant="inline" />);
 
       const ctaButton = screen.getByRole('button', { name: /premium/i });
       await user.click(ctaButton);
@@ -291,14 +242,7 @@ describe('PremiumUpgradePrompt', () => {
     it('debe redirigir a /registro con query param si usuario no autenticado (banner)', async () => {
       const user = userEvent.setup();
       setupAnonymousUser();
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="interpretaciones"
-          variant="banner"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="interpretaciones" variant="banner" />);
 
       const ctaButton = screen.getByRole('button', { name: /premium/i });
       await user.click(ctaButton);
@@ -343,14 +287,7 @@ describe('PremiumUpgradePrompt', () => {
         isPending: false,
       });
 
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="tiradas avanzadas"
-          variant="inline"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="tiradas avanzadas" variant="inline" />);
 
       const ctaButton = screen.getByRole('button', { name: /premium/i });
       await user.click(ctaButton);
@@ -366,14 +303,7 @@ describe('PremiumUpgradePrompt', () => {
         isPending: false,
       });
 
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="interpretaciones"
-          variant="banner"
-        />
-      );
+      render(<PremiumUpgradePrompt feature="interpretaciones" variant="banner" />);
 
       const ctaButton = screen.getByRole('button', { name: /premium/i });
       await user.click(ctaButton);
@@ -394,29 +324,31 @@ describe('PremiumUpgradePrompt', () => {
       });
 
       const originalLocation = window.location;
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: { href: '' },
-      });
+      try {
+        Object.defineProperty(window, 'location', {
+          writable: true,
+          value: { href: '' },
+        });
 
-      render(
-        <PremiumUpgradePrompt
-          open={true}
-          onClose={vi.fn()}
-          feature="preguntas personalizadas"
-          variant="modal"
-        />
-      );
+        render(
+          <PremiumUpgradePrompt
+            open={true}
+            onClose={vi.fn()}
+            feature="preguntas personalizadas"
+            variant="modal"
+          />
+        );
 
-      const ctaButton = screen.getByRole('button', { name: /premium/i });
-      await user.click(ctaButton);
+        const ctaButton = screen.getByRole('button', { name: /premium/i });
+        await user.click(ctaButton);
 
-      expect(window.location.href).toBe('https://www.mercadopago.com/checkout');
-
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: originalLocation,
-      });
+        expect(window.location.href).toBe('https://www.mercadopago.com/checkout');
+      } finally {
+        Object.defineProperty(window, 'location', {
+          writable: true,
+          value: originalLocation,
+        });
+      }
     });
 
     it('debe mostrar estado de carga mientras isPending es true', () => {

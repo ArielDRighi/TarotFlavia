@@ -695,7 +695,7 @@ Crear componente `PremiumUpgradePrompt` que unifique los prompts de upgrade y co
     - `modal`: dialog con beneficios + CTA (basado en `LimitReachedModal` existente)
     - `inline`: card compacta inline (basado en `PremiumPreview` existente)
     - `banner`: banner horizontal (basado en `UpgradeBanner` existente)
-- [x] Actualizar componentes existentes para usar `PremiumUpgradePrompt` internamente:
+- [ ] Actualizar componentes existentes para usar `PremiumUpgradePrompt` internamente:
   - `LimitReachedModal` → usar `PremiumUpgradePrompt` variant="modal" (o hacer wrapper)
   - `UpgradeBanner` → actualizar `onUpgradeClick` para usar flujo MP en vez de redirigir a registro
   - `PremiumPreview` → actualizar `onUpgrade` para usar flujo MP
@@ -714,7 +714,7 @@ Crear componente `PremiumUpgradePrompt` que unifique los prompts de upgrade y co
 
 - [x] Componente reutilizable con 3 variantes
 - [x] Conecta con flujo de suscripción MP real
-- [x] Componentes existentes actualizados para usar el nuevo flujo
+- [ ] Componentes existentes actualizados para usar el nuevo flujo
 - [x] Tests pasan
 - [x] Ciclo de calidad completo pasa
 

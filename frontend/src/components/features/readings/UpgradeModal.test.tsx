@@ -121,6 +121,40 @@ describe('UpgradeModal', () => {
       expect(mockMutate).toHaveBeenCalledTimes(1);
     });
 
+    it('should redirect to initPoint when createPreapproval succeeds', () => {
+      const initPoint = 'https://www.mercadopago.com/checkout/v1/redirect?pref_id=test-123';
+      mockUseCreatePreapproval.mockReturnValue({
+        mutate: vi
+          .fn()
+          .mockImplementation(
+            (_vars: undefined, options: { onSuccess?: (data: { initPoint: string }) => void }) => {
+              options?.onSuccess?.({ initPoint });
+            }
+          ),
+        isPending: false,
+      });
+
+      const originalLocation = window.location;
+      try {
+        Object.defineProperty(window, 'location', {
+          writable: true,
+          value: { href: '' },
+        });
+
+        render(<UpgradeModal open={true} onClose={mockOnClose} />);
+
+        const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+        fireEvent.click(ctaButton);
+
+        expect(window.location.href).toBe(initPoint);
+      } finally {
+        Object.defineProperty(window, 'location', {
+          writable: true,
+          value: originalLocation,
+        });
+      }
+    });
+
     it('should redirect to /registro when clicking CTA as anonymous user', () => {
       mockUseAuth.mockReturnValue({ user: null, isAuthenticated: false });
 
@@ -130,7 +164,7 @@ describe('UpgradeModal', () => {
       fireEvent.click(ctaButton);
 
       expect(mockRouterPush).toHaveBeenCalledWith(
-        expect.stringContaining('/registro')
+        expect.stringContaining('/registro?redirect=/premium')
       );
       expect(mockMutate).not.toHaveBeenCalled();
     });

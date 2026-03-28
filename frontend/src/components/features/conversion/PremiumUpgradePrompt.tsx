@@ -34,18 +34,44 @@ const PREMIUM_BENEFITS = [
 export type PremiumUpgradeVariant = 'modal' | 'inline' | 'banner';
 export type PremiumUpgradeTrigger = 'discovery' | 'limit-reached';
 
-export interface PremiumUpgradePromptProps {
+type BasePremiumUpgradePromptProps = {
   /** Nombre del feature bloqueado (ej: "preguntas personalizadas") */
   feature: string;
-  /** Tipo de visualización */
-  variant: PremiumUpgradeVariant;
   /** Contexto del prompt */
   trigger?: PremiumUpgradeTrigger;
-  /** Controla visibilidad del prompt (requerido para modal; ignorado en otros variants) */
-  open?: boolean;
+};
+
+type ModalPremiumUpgradePromptProps = BasePremiumUpgradePromptProps & {
+  /** Tipo de visualización */
+  variant: 'modal';
+  /** Controla visibilidad del prompt (requerido para modal) */
+  open: boolean;
   /** Callback al cerrar (requerido para modal) */
-  onClose?: () => void;
-}
+  onClose: () => void;
+};
+
+type InlinePremiumUpgradePromptProps = BasePremiumUpgradePromptProps & {
+  /** Tipo de visualización */
+  variant: 'inline';
+  /** No se usa en modo inline */
+  open?: never;
+  /** No se usa en modo inline */
+  onClose?: never;
+};
+
+type BannerPremiumUpgradePromptProps = BasePremiumUpgradePromptProps & {
+  /** Tipo de visualización */
+  variant: 'banner';
+  /** No se usa en modo banner */
+  open?: never;
+  /** No se usa en modo banner */
+  onClose?: never;
+};
+
+export type PremiumUpgradePromptProps =
+  | ModalPremiumUpgradePromptProps
+  | InlinePremiumUpgradePromptProps
+  | BannerPremiumUpgradePromptProps;
 
 // ============================================================================
 // Helpers
@@ -130,7 +156,7 @@ export default function PremiumUpgradePrompt({
   feature,
   variant,
   trigger,
-  open = true,
+  open,
   onClose,
 }: PremiumUpgradePromptProps) {
   // Hooks
@@ -165,7 +191,7 @@ export default function PremiumUpgradePrompt({
   // ── Variant: modal ─────────────────────────────────────────────────────────
   if (variant === 'modal') {
     return (
-      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()}>
+      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
         <DialogContent className="max-w-lg" data-testid="premium-upgrade-prompt-modal">
           <DialogHeader>
             <div className="bg-accent/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
@@ -190,11 +216,9 @@ export default function PremiumUpgradePrompt({
 
           <DialogFooter className="flex-col gap-3 sm:flex-col">
             <CtaButton isPending={isPending} onClick={handleUpgradeClick} />
-            {onClose && (
-              <Button variant="outline" onClick={onClose} className="w-full" size="lg">
-                Ahora no
-              </Button>
-            )}
+            <Button variant="outline" onClick={onClose} className="w-full" size="lg">
+              Ahora no
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
