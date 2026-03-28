@@ -209,15 +209,24 @@ describe('SubscriptionReconciliationService', () => {
         createPreapprovalResponse('preapproval_1', 'authorized', 'sub_1'),
       );
 
+      const warnSpy = jest
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+
       // Act
       await service.reconcileSubscriptions();
 
       // Assert — máximo 50 consultas
       expect(mockMercadoPagoService.getPreapproval).toHaveBeenCalledTimes(50);
+      // Debe advertir que hay usuarios truncados
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Rate limit alcanzado'),
+      );
     });
 
-    it('debe corregir a cancelled si MP reporta paused y el plan local está active', async () => {
-      // Arrange — paused en MP con estado local active representa discrepancia
+    it('no debe cambiar estado si MP reporta paused (MP reintenta automáticamente)', async () => {
+      // Arrange — paused en MP: según el backlog (T-INT-02) no genera cambio en DB,
+      // MP reintenta el cobro automáticamente y eventualmente resuelve a authorized o cancelled.
       const user = createPremiumUserWithPreapproval(
         5,
         'preapproval_paused',
@@ -230,13 +239,11 @@ describe('SubscriptionReconciliationService', () => {
       mockMercadoPagoService.getPreapproval.mockResolvedValue(
         createPreapprovalResponse('preapproval_paused', 'paused', 'sub_5'),
       );
-      mockUserRepository.save.mockResolvedValue({} as User);
 
       // Act
       await service.reconcileSubscriptions();
 
-      // Assert — paused en MP no requiere cambio de estado local (MP reintenta)
-      // según el backlog el estado 'paused' no cambia plan, solo se loguea
+      // Assert — paused no genera corrección en DB (sin save)
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
 

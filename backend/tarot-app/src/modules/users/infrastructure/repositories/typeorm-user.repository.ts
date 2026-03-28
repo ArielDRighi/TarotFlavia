@@ -188,6 +188,8 @@ export class TypeOrmUserRepository implements IUserRepository {
     // id, plan, subscriptionStatus (para detectar discrepancias),
     // mpPreapprovalId (para consultar MP API).
     // Se excluye password y datos sensibles.
+    // ORDER BY id garantiza un orden determinístico para que el rate limit
+    // de 50 usuarios procese siempre el mismo subconjunto y no omita usuarios al azar.
     return this.usersRepository
       .createQueryBuilder('user')
       .select([
@@ -198,7 +200,11 @@ export class TypeOrmUserRepository implements IUserRepository {
         'user.planExpiresAt',
       ])
       .where('user.plan = :plan', { plan: UserPlan.PREMIUM })
+      .andWhere('user.subscriptionStatus = :status', {
+        status: SubscriptionStatus.ACTIVE,
+      })
       .andWhere('user.mpPreapprovalId IS NOT NULL')
+      .orderBy('user.id', 'ASC')
       .getMany();
   }
 }

@@ -32,9 +32,12 @@ interface ReconciliationResult {
  * Discrepancias que corrige:
  * - subscriptionStatus=active en DB pero status=cancelled en MP → corrige a cancelled
  *
- * Discrepancias que NO corrige (requieren intervención manual o son manejadas por otros CRON):
- * - Planes expirados → manejado por SubscriptionCronService
- * - status=paused → MP reintenta automáticamente, sin cambio en DB
+ * Discrepancias que NO corrige (son manejadas por otros mecanismos):
+ * - Planes expirados → manejado por SubscriptionCronService (T-BE-04)
+ * - status=paused en MP → NO genera cambio en DB; MP reintenta el cobro automáticamente
+ *   y eventualmente resuelve a authorized o cancelled. Este comportamiento sigue la
+ *   misma lógica que el webhook handler (T-INT-02): paused es un estado transitorio.
+ *   Si MP finalmente cancela, el webhook o la próxima ejecución de este CRON lo corregirán.
  */
 @Injectable()
 export class SubscriptionReconciliationService {
@@ -81,11 +84,22 @@ export class SubscriptionReconciliationService {
       return;
     }
 
-    // Aplicar rate limit: procesar máximo MAX_RECONCILIATION_QUERIES usuarios
+    // Aplicar rate limit: procesar máximo MAX_RECONCILIATION_QUERIES usuarios.
+    // La query devuelve usuarios ordenados por id ASC para que el subconjunto
+    // sea determinístico. Los usuarios con id > MAX sean procesados en ejecuciones
+    // futuras una vez que su subscriptionStatus cambie a cancelled/expired.
     const usersToProcess = usersToReconcile.slice(
       0,
       MAX_RECONCILIATION_QUERIES,
     );
+
+    if (usersToReconcile.length > MAX_RECONCILIATION_QUERIES) {
+      this.logger.warn(
+        `Rate limit alcanzado: ${usersToReconcile.length} usuarios encontrados, ` +
+          `procesando solo los primeros ${MAX_RECONCILIATION_QUERIES} (ordenados por id ASC). ` +
+          `Los restantes ${usersToReconcile.length - MAX_RECONCILIATION_QUERIES} serán evaluados en próximas ejecuciones.`,
+      );
+    }
 
     this.logger.log(
       `Encontrados ${usersToReconcile.length} usuarios con suscripción. ` +
