@@ -236,6 +236,8 @@ export const API_ENDPOINTS = {
     // Plan Configuration
     PLAN_CONFIG: '/plan-config',
     PLAN_CONFIG_BY_TYPE: (planType: string) => `/plan-config/${planType}`,
+    // Public (no authentication required)
+    PLAN_CONFIG_PUBLIC: '/plan-config/public',
     // Security & Rate Limiting
     RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIPs
     SECURITY_EVENTS: '/admin/security/events',
