@@ -166,6 +166,19 @@ describe('subscription-mp-api', () => {
       expect(result.planExpiresAt).toBe('2026-04-28T03:00:00.000Z');
     });
 
+    it('should return null planExpiresAt when backend has no expiry date set', async () => {
+      const mockCancelResponseNullExpiry: CancelSubscriptionResponse = {
+        message: 'Suscripción cancelada exitosamente',
+        planExpiresAt: null,
+      };
+      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockCancelResponseNullExpiry });
+
+      const result = await cancelSubscription();
+
+      expect(result.message).toBe('Suscripción cancelada exitosamente');
+      expect(result.planExpiresAt).toBeNull();
+    });
+
     it('should throw error with clear message on failure', async () => {
       vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Network error'));
 

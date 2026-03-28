@@ -126,6 +126,6 @@ export interface CreatePreapprovalResponse {
 export interface CancelSubscriptionResponse {
   /** Confirmation message in Spanish */
   message: string;
-  /** ISO date string until when the premium plan remains active */
-  planExpiresAt: string;
+  /** ISO date string until when the premium plan remains active, or null if not set */
+  planExpiresAt: string | null;
 }
