@@ -6,7 +6,7 @@ import { LoginUseCase } from './login.use-case';
 import { UsersService } from '../../../users/users.service';
 import { SecurityEventService } from '../../../security/security-event.service';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
-import { User } from '../../../users/entities/user.entity';
+import { User, SubscriptionStatus } from '../../../users/entities/user.entity';
 
 jest.mock('bcryptjs');
 
@@ -210,7 +210,7 @@ describe('LoginUseCase', () => {
     it('should include subscriptionStatus in user response (T-BE-05)', async () => {
       const userWithSubscription = {
         ...mockUser,
-        subscriptionStatus: 'active',
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
       };
       usersService.findById.mockResolvedValue(
         userWithSubscription as unknown as User,
@@ -226,7 +226,7 @@ describe('LoginUseCase', () => {
         'Mozilla',
       );
 
-      expect(result.user).toHaveProperty('subscriptionStatus');
+      expect(result.user.subscriptionStatus).toBe('active');
     });
 
     it('should include subscriptionStatus: null when user has no subscription (T-BE-05)', async () => {

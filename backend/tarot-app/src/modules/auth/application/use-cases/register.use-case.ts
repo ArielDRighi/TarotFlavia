@@ -2,10 +2,11 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../../users/users.service';
 import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
-import { SubscriptionStatus } from '../../../users/entities/user.entity';
+import { SubscriptionStatusType } from '../../../users/application/dto/user-capabilities.dto';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { UserRole } from '../../../../common/enums/user-role.enum';
+import { mapSubscriptionStatus } from '../../../../common/utils';
 
 @Injectable()
 export class RegisterUseCase {
@@ -29,7 +30,7 @@ export class RegisterUseCase {
       plan: string;
       profilePicture: string | null;
       birthDate: string | null;
-      subscriptionStatus: 'active' | 'cancelled' | 'expired' | null;
+      subscriptionStatus: SubscriptionStatusType;
     };
     access_token: string;
     refresh_token: string;
@@ -76,32 +77,11 @@ export class RegisterUseCase {
         plan: user.plan,
         profilePicture: user.profilePicture,
         birthDate: user.birthDate,
-        subscriptionStatus: this.mapSubscriptionStatus(user.subscriptionStatus),
+        subscriptionStatus: mapSubscriptionStatus(user.subscriptionStatus),
       },
       access_token: this.jwtService.sign(payload),
       refresh_token: refreshToken,
       isNewUser: true,
     };
-  }
-
-  /**
-   * Mapea SubscriptionStatus (entity enum) al tipo de string del DTO
-   */
-  private mapSubscriptionStatus(
-    status: SubscriptionStatus | null | undefined,
-  ): 'active' | 'cancelled' | 'expired' | null {
-    if (!status) {
-      return null;
-    }
-    switch (status) {
-      case SubscriptionStatus.ACTIVE:
-        return 'active';
-      case SubscriptionStatus.CANCELLED:
-        return 'cancelled';
-      case SubscriptionStatus.EXPIRED:
-        return 'expired';
-      default:
-        return null;
-    }
   }
 }

@@ -9,7 +9,7 @@ import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { DailyReading } from '../../../tarot/daily-reading/entities/daily-reading.entity';
 import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
 import { UserPlanType } from '../dto/user-capabilities.dto';
-import { User, UserPlan } from '../../entities/user.entity';
+import { User, UserPlan, SubscriptionStatus } from '../../entities/user.entity';
 import { Plan } from '../../../plan-config/entities/plan.entity';
 import { UserRole } from '../../../../common/enums/user-role.enum';
 
@@ -476,8 +476,6 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should include subscriptionStatus: active for PREMIUM user with active subscription', async () => {
-        const { SubscriptionStatus } =
-          await import('../../entities/user.entity');
         const premiumActiveUser: Partial<User> = {
           ...mockUser,
           plan: UserPlan.PREMIUM,
@@ -504,8 +502,6 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should include subscriptionStatus: cancelled for user with cancelled subscription', async () => {
-        const { SubscriptionStatus } =
-          await import('../../entities/user.entity');
         const planExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         const cancelledUser: Partial<User> = {
           ...mockUser,
@@ -534,8 +530,6 @@ describe('UserCapabilitiesService', () => {
       });
 
       it('should include planExpiresAt as ISO string when set', async () => {
-        const { SubscriptionStatus } =
-          await import('../../entities/user.entity');
         const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
         const premiumUser: Partial<User> = {
           ...mockUser,

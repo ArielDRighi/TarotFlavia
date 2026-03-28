@@ -487,8 +487,8 @@ Agregar campos de suscripción a la respuesta del endpoint de capabilities y al 
 - [x] Extender el DTO de respuesta de capabilities (`GET /users/capabilities`) para incluir:
   - `subscriptionStatus: 'active' | 'cancelled' | 'expired' | null`
   - `planExpiresAt: string | null` (ISO date)
-- [x] Extender la respuesta de `LoginUseCase.execute()` y `RefreshTokenUseCase.execute()` para incluir `subscriptionStatus` en el objeto `user`
-- [x] Actualizar el tipo de `user` en las respuestas de login/register/refresh para incluir `subscriptionStatus`
+- [x] Extender la respuesta de `LoginUseCase.execute()` y `RegisterUseCase.execute()` para incluir `subscriptionStatus` en el objeto `user` (RefreshTokenUseCase no retorna `user`, solo tokens)
+- [x] Actualizar el tipo de `user` en las respuestas de login/register para incluir `subscriptionStatus`
 
 **Tests:**
 - [x] Test: capabilities de usuario premium activo incluye `subscriptionStatus: 'active'`

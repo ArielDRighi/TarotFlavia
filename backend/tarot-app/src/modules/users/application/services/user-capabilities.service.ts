@@ -10,13 +10,13 @@ import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.ent
 import {
   UserCapabilitiesDto,
   UserPlanType,
-  SubscriptionStatusType,
 } from '../dto/user-capabilities.dto';
-import { UserPlan, SubscriptionStatus } from '../../entities/user.entity';
+import { UserPlan } from '../../entities/user.entity';
 import {
   getTodayUTCDateString,
   getStartOfTodayUTC,
-} from '../../../../common/utils/date.utils';
+  mapSubscriptionStatus,
+} from '../../../../common/utils';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
 
 @Injectable()
@@ -148,7 +148,7 @@ export class UserCapabilitiesService {
         resetAt: pendulumResetAt,
         period: pendulumConfig.period,
       },
-      subscriptionStatus: this.mapSubscriptionStatus(user.subscriptionStatus),
+      subscriptionStatus: mapSubscriptionStatus(user.subscriptionStatus),
       planExpiresAt: user.planExpiresAt
         ? new Date(user.planExpiresAt).toISOString()
         : null,
@@ -262,29 +262,6 @@ export class UserCapabilitiesService {
         return UserPlanType.PREMIUM;
       default:
         return UserPlanType.FREE;
-    }
-  }
-
-  /**
-   * Mapea SubscriptionStatus (entity enum) a SubscriptionStatusType (DTO)
-   * @param status - Estado de suscripción de la entidad (puede ser null/undefined)
-   * @returns SubscriptionStatusType o null si no hay suscripción
-   */
-  private mapSubscriptionStatus(
-    status: SubscriptionStatus | null | undefined,
-  ): SubscriptionStatusType {
-    if (!status) {
-      return null;
-    }
-    switch (status) {
-      case SubscriptionStatus.ACTIVE:
-        return 'active';
-      case SubscriptionStatus.CANCELLED:
-        return 'cancelled';
-      case SubscriptionStatus.EXPIRED:
-        return 'expired';
-      default:
-        return null;
     }
   }
 }
