@@ -473,7 +473,7 @@ Implementar CRON job que revise y degrade planes expirados.
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1 día
 **Dependencias:** T-DB-01 (campos en User)
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** El frontend necesita `subscriptionStatus` y `planExpiresAt` para mostrar el estado de la suscripción en el perfil y manejar la UI de cancelación.
 
@@ -484,25 +484,25 @@ Agregar campos de suscripción a la respuesta del endpoint de capabilities y al 
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Extender el DTO de respuesta de capabilities (`GET /users/capabilities`) para incluir:
+- [x] Extender el DTO de respuesta de capabilities (`GET /users/capabilities`) para incluir:
   - `subscriptionStatus: 'active' | 'cancelled' | 'expired' | null`
   - `planExpiresAt: string | null` (ISO date)
-- [ ] Extender la respuesta de `LoginUseCase.execute()` y `RefreshTokenUseCase.execute()` para incluir `subscriptionStatus` en el objeto `user`
-- [ ] Actualizar el tipo de `user` en las respuestas de login/register/refresh para incluir `subscriptionStatus`
+- [x] Extender la respuesta de `LoginUseCase.execute()` y `RegisterUseCase.execute()` para incluir `subscriptionStatus` en el objeto `user` (RefreshTokenUseCase no retorna `user`, solo tokens)
+- [x] Actualizar el tipo de `user` en las respuestas de login/register para incluir `subscriptionStatus`
 
 **Tests:**
-- [ ] Test: capabilities de usuario premium activo incluye `subscriptionStatus: 'active'`
-- [ ] Test: capabilities de usuario free incluye `subscriptionStatus: null`
-- [ ] Test: capabilities de usuario con suscripción cancelada incluye `subscriptionStatus: 'cancelled'` y `planExpiresAt`
-- [ ] Test: login response incluye `subscriptionStatus`
-- [ ] Coverage ≥ 80%
+- [x] Test: capabilities de usuario premium activo incluye `subscriptionStatus: 'active'`
+- [x] Test: capabilities de usuario free incluye `subscriptionStatus: null`
+- [x] Test: capabilities de usuario con suscripción cancelada incluye `subscriptionStatus: 'cancelled'` y `planExpiresAt`
+- [x] Test: login response incluye `subscriptionStatus`
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] `GET /users/capabilities` retorna `subscriptionStatus` y `planExpiresAt`
-- [ ] Login/register/refresh responses incluyen `subscriptionStatus`
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] `GET /users/capabilities` retorna `subscriptionStatus` y `planExpiresAt`
+- [x] Login/register/refresh responses incluyen `subscriptionStatus`
+- [x] Tests pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 

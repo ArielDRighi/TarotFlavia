@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEnum,
@@ -120,6 +120,11 @@ export enum UserPlanType {
 }
 
 /**
+ * Tipo para el estado de suscripción del usuario (T-BE-05)
+ */
+export type SubscriptionStatusType = 'active' | 'cancelled' | 'expired' | null;
+
+/**
  * DTO que representa todas las capacidades y límites del usuario
  * Este DTO es el contrato entre backend y frontend para el sistema de capabilities
  */
@@ -212,4 +217,25 @@ export class UserCapabilitiesDto {
   @Type(() => PendulumLimitDto)
   @IsNotEmpty()
   pendulum: PendulumLimitDto;
+
+  @ApiPropertyOptional({
+    description:
+      'Estado de la suscripción de MercadoPago (null para usuarios free/anónimos)',
+    enum: ['active', 'cancelled', 'expired'],
+    example: 'active',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsIn(['active', 'cancelled', 'expired'])
+  subscriptionStatus: SubscriptionStatusType;
+
+  @ApiPropertyOptional({
+    description:
+      'Fecha de expiración del plan premium en formato ISO 8601 (null para usuarios free/anónimos)',
+    example: '2026-04-27T00:00:00.000Z',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsISO8601()
+  planExpiresAt: string | null;
 }

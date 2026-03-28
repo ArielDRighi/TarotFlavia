@@ -8,6 +8,7 @@ import { ForgotPasswordUseCase } from '../use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from '../use-cases/reset-password.use-case';
 import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
 import { User } from '../../../users/entities/user.entity';
+import { SubscriptionStatusType } from '../../../users/application/dto/user-capabilities.dto';
 
 describe('AuthOrchestratorService', () => {
   let service: AuthOrchestratorService;
@@ -27,6 +28,7 @@ describe('AuthOrchestratorService', () => {
       plan: 'free',
       profilePicture: null,
       birthDate: null,
+      subscriptionStatus: null as SubscriptionStatusType,
     },
     access_token: 'access_token',
     refresh_token: 'refresh_token',

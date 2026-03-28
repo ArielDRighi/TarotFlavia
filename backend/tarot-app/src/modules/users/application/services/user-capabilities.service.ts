@@ -15,7 +15,8 @@ import { UserPlan } from '../../entities/user.entity';
 import {
   getTodayUTCDateString,
   getStartOfTodayUTC,
-} from '../../../../common/utils/date.utils';
+  mapSubscriptionStatus,
+} from '../../../../common/utils';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
 
 @Injectable()
@@ -147,6 +148,10 @@ export class UserCapabilitiesService {
         resetAt: pendulumResetAt,
         period: pendulumConfig.period,
       },
+      subscriptionStatus: mapSubscriptionStatus(user.subscriptionStatus),
+      planExpiresAt: user.planExpiresAt
+        ? new Date(user.planExpiresAt).toISOString()
+        : null,
     };
   }
 
@@ -230,6 +235,8 @@ export class UserCapabilitiesService {
         resetAt: null,
         period: 'lifetime',
       },
+      subscriptionStatus: null,
+      planExpiresAt: null,
     };
   }
 

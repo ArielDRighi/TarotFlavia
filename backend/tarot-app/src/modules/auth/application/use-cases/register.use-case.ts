@@ -2,9 +2,11 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../../users/users.service';
 import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
+import { SubscriptionStatusType } from '../../../users/application/dto/user-capabilities.dto';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { UserRole } from '../../../../common/enums/user-role.enum';
+import { mapSubscriptionStatus } from '../../../../common/utils';
 
 @Injectable()
 export class RegisterUseCase {
@@ -28,6 +30,7 @@ export class RegisterUseCase {
       plan: string;
       profilePicture: string | null;
       birthDate: string | null;
+      subscriptionStatus: SubscriptionStatusType;
     };
     access_token: string;
     refresh_token: string;
@@ -74,6 +77,7 @@ export class RegisterUseCase {
         plan: user.plan,
         profilePicture: user.profilePicture,
         birthDate: user.birthDate,
+        subscriptionStatus: mapSubscriptionStatus(user.subscriptionStatus),
       },
       access_token: this.jwtService.sign(payload),
       refresh_token: refreshToken,

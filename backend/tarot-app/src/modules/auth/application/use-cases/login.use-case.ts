@@ -3,12 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../../../users/users.service';
 import { UserWithoutPassword } from '../../../users/entities/user.entity';
+import { SubscriptionStatusType } from '../../../users/application/dto/user-capabilities.dto';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { SecurityEventService } from '../../../security/security-event.service';
 import { SecurityEventType } from '../../../security/enums/security-event-type.enum';
 import { SecurityEventSeverity } from '../../../security/enums/security-event-severity.enum';
 import { UserRole } from '../../../../common/enums/user-role.enum';
+import { mapSubscriptionStatus } from '../../../../common/utils';
 
 @Injectable()
 export class LoginUseCase {
@@ -85,6 +87,7 @@ export class LoginUseCase {
       plan: string;
       profilePicture: string | null;
       birthDate: string | null;
+      subscriptionStatus: SubscriptionStatusType;
     };
     access_token: string;
     refresh_token: string;
@@ -158,6 +161,7 @@ export class LoginUseCase {
         plan: user.plan,
         profilePicture: user.profilePicture,
         birthDate: user.birthDate,
+        subscriptionStatus: mapSubscriptionStatus(user.subscriptionStatus),
       },
       access_token: this.jwtService.sign(payload),
       refresh_token: refreshToken,
