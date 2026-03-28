@@ -84,3 +84,48 @@ export interface SetFavoriteTarotistaResponse {
   /** Updated subscription entity */
   subscription: UserTarotistaSubscription;
 }
+
+// =============================================================================
+// MercadoPago Subscription Types (Premium plan)
+// =============================================================================
+
+/**
+ * MercadoPago subscription status values
+ * Matches backend SubscriptionStatusResponseDto
+ */
+export type MpSubscriptionStatusValue = 'active' | 'cancelled' | 'expired';
+
+/**
+ * Response from GET /subscriptions/status
+ * Contains the current plan and MercadoPago subscription state
+ */
+export interface MpSubscriptionStatus {
+  /** User's current plan */
+  plan: 'anonymous' | 'free' | 'premium';
+  /** MP subscription status — null if no subscription */
+  subscriptionStatus: MpSubscriptionStatusValue | null;
+  /** ISO date string when the current plan period expires — null if no expiry */
+  planExpiresAt: string | null;
+  /** MercadoPago preapproval ID — null if no active subscription */
+  mpPreapprovalId: string | null;
+}
+
+/**
+ * Response from POST /subscriptions/create-preapproval
+ * Contains the redirect URL to the MercadoPago checkout
+ */
+export interface CreatePreapprovalResponse {
+  /** MercadoPago checkout URL to redirect the user */
+  initPoint: string;
+}
+
+/**
+ * Response from POST /subscriptions/cancel
+ * Confirms cancellation and shows until when the plan remains active
+ */
+export interface CancelSubscriptionResponse {
+  /** Confirmation message in Spanish */
+  message: string;
+  /** ISO date string until when the premium plan remains active */
+  planExpiresAt: string;
+}

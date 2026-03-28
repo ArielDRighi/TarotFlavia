@@ -88,7 +88,7 @@ vi.mock('@/components/features/birth-chart/AISynthesis/AISynthesis', () => ({
 
 describe('BirthChartResultPage', () => {
   // Helper para crear mock de AuthUser
-  const createMockUser = (plan: string): AuthUser => ({
+  const createMockUser = (plan: 'anonymous' | 'free' | 'premium'): AuthUser => ({
     id: 1,
     email: 'test@example.com',
     name: 'Test User',

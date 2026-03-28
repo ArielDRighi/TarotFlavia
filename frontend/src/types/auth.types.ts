@@ -10,9 +10,11 @@ export interface AuthUser {
   email: string;
   name: string;
   roles: string[];
-  plan: string;
+  plan: 'anonymous' | 'free' | 'premium';
   profilePicture: string | null;
   birthDate?: string | null;
+  /** MercadoPago subscription status — null if no active subscription */
+  subscriptionStatus?: 'active' | 'cancelled' | 'expired' | null;
 }
 
 /**

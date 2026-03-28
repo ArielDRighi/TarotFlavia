@@ -249,7 +249,7 @@ describe('CartaDelDiaPage', () => {
     it('should render revealed state when daily reading exists', () => {
       // Mock PREMIUM user to see revealed card
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -268,7 +268,7 @@ describe('CartaDelDiaPage', () => {
     it('should display the card name with golden color', () => {
       // Mock PREMIUM user to see revealed card
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -291,7 +291,7 @@ describe('CartaDelDiaPage', () => {
     it('should display the interpretation', () => {
       // Mock PREMIUM user to see revealed card
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -311,7 +311,7 @@ describe('CartaDelDiaPage', () => {
     it('should show reversed indicator when card is reversed', () => {
       // Mock PREMIUM user to see revealed card
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -332,7 +332,7 @@ describe('CartaDelDiaPage', () => {
     beforeEach(() => {
       // Mock PREMIUM user so they can see revealed card and buttons
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -386,7 +386,7 @@ describe('CartaDelDiaPage', () => {
     it('should show daily card limit message for FREE users who already have a daily card', () => {
       // Mock FREE user with daily reading already created
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'FREE' }),
+        user: createMockUser({ plan: 'free' }),
         isAuthenticated: true,
         isLoading: false,
       });
@@ -478,7 +478,7 @@ describe('CartaDelDiaPage', () => {
     it('should have font-serif class on card title', () => {
       // Mock PREMIUM user to see revealed card
       mockUseAuth.mockReturnValue({
-        user: createMockUser({ plan: 'PREMIUM' }),
+        user: createMockUser({ plan: 'premium' }),
         isAuthenticated: true,
         isLoading: false,
       });

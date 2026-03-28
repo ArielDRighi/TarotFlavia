@@ -81,6 +81,10 @@ export const API_ENDPOINTS = {
   SUBSCRIPTIONS: {
     MY_SUBSCRIPTION: '/subscriptions/my-subscription',
     SET_FAVORITE: '/subscriptions/set-favorite',
+    // MercadoPago subscription endpoints
+    CREATE_PREAPPROVAL: '/subscriptions/create-preapproval',
+    STATUS: '/subscriptions/status',
+    CANCEL: '/subscriptions/cancel',
   },
 
   // Scheduling (Sessions)

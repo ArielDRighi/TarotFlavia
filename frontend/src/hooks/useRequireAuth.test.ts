@@ -21,7 +21,7 @@ const createMockUser = (overrides?: Partial<AuthUser>): AuthUser => ({
   name: 'Test User',
   email: 'test@test.com',
   roles: ['USER'],
-  plan: 'FREE',
+  plan: 'free',
   profilePicture: null,
   ...overrides,
 });
