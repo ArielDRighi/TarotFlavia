@@ -511,7 +511,7 @@ Agregar campos de suscripción a la respuesta del endpoint de capabilities y al 
 **Prioridad:** 🟢 BAJA
 **Estimación:** 1 día
 **Dependencias:** T-INT-02, T-BE-04
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Si un webhook de MP se pierde o falla, el estado en la DB puede quedar inconsistente con el estado real en MP. Un CRON diario de reconciliación detecta y corrige estas inconsistencias.
 
@@ -522,29 +522,29 @@ Implementar CRON job que consulta el estado de todas las suscripciones activas e
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Crear `src/modules/subscriptions/application/services/subscription-reconciliation.service.ts`:
+- [x] Crear `src/modules/subscriptions/application/services/subscription-reconciliation.service.ts`:
   - Usar `@Cron('0 3 * * *')` (3 AM diario)
   - Query: todos los usuarios con `mpPreapprovalId` no null y `plan=premium`
   - Para cada uno: `MercadoPagoService.getPreapproval(mpPreapprovalId)`
   - Comparar estado de MP con estado local, corregir discrepancias
   - Log detallado de correcciones realizadas
   - Rate limiting: máx 50 consultas por ejecución (respetar límites de MP API)
-- [ ] Registrar en `subscriptions.module.ts`
+- [x] Registrar en `subscriptions.module.ts`
 
 **Tests:**
-- [ ] Test: suscripción activa en DB pero cancelada en MP → se corrige a cancelled
-- [ ] Test: suscripción en DB coincide con MP → sin cambios
-- [ ] Test: error de MP API no detiene el batch
-- [ ] Coverage ≥ 80%
+- [x] Test: suscripción activa en DB pero cancelada en MP → se corrige a cancelled
+- [x] Test: suscripción en DB coincide con MP → sin cambios
+- [x] Test: error de MP API no detiene el batch
+- [x] Coverage ≥ 80% (96.87% statements)
 
 #### 🎯 Criterios de aceptación
 
-- [ ] CRON se ejecuta diariamente
-- [ ] Detecta y corrige inconsistencias entre DB y MP
-- [ ] Logging claro de discrepancias encontradas y corregidas
-- [ ] Respeta rate limits de MP API
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] CRON se ejecuta diariamente
+- [x] Detecta y corrige inconsistencias entre DB y MP
+- [x] Logging claro de discrepancias encontradas y corregidas
+- [x] Respeta rate limits de MP API
+- [x] Tests pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 
