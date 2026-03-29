@@ -67,7 +67,7 @@ const plans: Plan[] = [
     ],
     cta: {
       text: 'Comenzar Premium',
-      href: ROUTES.REGISTER,
+      href: ROUTES.PREMIUM,
     },
     recommended: true,
   },

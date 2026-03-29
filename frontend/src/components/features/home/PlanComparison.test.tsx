@@ -139,7 +139,7 @@ describe('PlanComparison', () => {
 
       const link = screen.getByRole('link', { name: /comenzar premium/i });
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute('href', '/registro');
+      expect(link).toHaveAttribute('href', '/premium');
     });
 
     it('should highlight Premium plan as recommended', () => {
