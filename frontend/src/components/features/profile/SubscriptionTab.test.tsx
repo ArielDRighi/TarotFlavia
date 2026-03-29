@@ -19,10 +19,12 @@ vi.mock('@/hooks/api/useSubscription', () => ({
   useCancelSubscription: () => mockUseCancelSubscription(),
 }));
 
-// Mock next/navigation
-const mockPush = vi.fn();
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
+// Mock toast (sonner) to verify error feedback
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
 }));
 
 // Note: Backend still sends limit fields for backward compatibility,
@@ -387,6 +389,33 @@ describe('SubscriptionTab', () => {
       await user.click(screen.getByRole('button', { name: /sí, cancelar/i }));
 
       expect(mockCancelMutate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should show error toast and keep modal open when cancellation fails', async () => {
+      const { toast } = await import('sonner');
+      const user = userEvent.setup();
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      // Simulate onError callback being called
+      mockCancelMutate.mockImplementation((_: undefined, options: { onError?: () => void }) => {
+        options.onError?.();
+      });
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      await user.click(screen.getByRole('button', { name: /cancelar suscripción/i }));
+      await user.click(screen.getByRole('button', { name: /sí, cancelar/i }));
+
+      expect(toast.error).toHaveBeenCalledWith(
+        'No se pudo cancelar la suscripción. Intentá de nuevo.'
+      );
+      // Modal should remain open on error
+      expect(screen.getByText(/¿seguro que querés cancelar/i)).toBeInTheDocument();
     });
 
     it('should close modal when "No, mantener Premium" is clicked', async () => {

@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlanBadge } from '@/components/ui/plan-badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -55,8 +55,11 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
   const subscriptionStatus = capabilities?.subscriptionStatus ?? null;
   const planExpiresAt = capabilities?.planExpiresAt ?? null;
 
-  const isPremiumActive = profile.plan === 'premium' && subscriptionStatus === 'active';
-  const isPremiumCancelled = profile.plan === 'premium' && subscriptionStatus === 'cancelled';
+  // Use capabilities.plan as primary source of truth; fall back to profile.plan while loading
+  const effectivePlan = capabilities?.plan ?? profile.plan;
+
+  const isPremiumActive = effectivePlan === 'premium' && subscriptionStatus === 'active';
+  const isPremiumCancelled = effectivePlan === 'premium' && subscriptionStatus === 'cancelled';
 
   const tarotReadingsRemaining = useMemo(() => {
     const remaining = tarotReadingsLimit - tarotReadingsUsed;
@@ -78,6 +81,9 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
     cancelSubscription(undefined, {
       onSuccess: () => {
         setShowCancelDialog(false);
+      },
+      onError: () => {
+        toast.error('No se pudo cancelar la suscripción. Intentá de nuevo.');
       },
     });
   };
@@ -242,7 +248,7 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
       )}
 
       {/* Plan Comparison — Free users only */}
-      {profile.plan === 'free' && (
+      {effectivePlan === 'free' && (
         <Card>
           <CardHeader>
             <CardTitle>Mejora tu Plan</CardTitle>
@@ -293,9 +299,9 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isCancelling}>No, mantener Premium</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelConfirm} disabled={isCancelling}>
+            <Button variant="destructive" onClick={handleCancelConfirm} disabled={isCancelling}>
               Sí, cancelar
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
