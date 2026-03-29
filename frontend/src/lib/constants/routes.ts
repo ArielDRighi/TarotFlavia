@@ -27,6 +27,7 @@ export const ROUTES = {
 
   // Premium
   PREMIUM: '/premium',
+  PREMIUM_ACTIVACION: '/premium/activacion',
 
   // Marketplace
   MARKETPLACE: '/marketplace',

@@ -726,12 +726,12 @@ Crear componente `PremiumUpgradePrompt` que unifique los prompts de upgrade y co
 
 ---
 
-### T-FE-03: Página /premium/activacion — Post-checkout con polling
+ ### T-FE-03: Página /premium/activacion — Post-checkout con polling
 
 **Prioridad:** 🔴 ALTA
 **Estimación:** 2 días
 **Dependencias:** T-FE-01 (hook useSubscription), T-INT-03 (endpoint status)
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Después de pagar en MP, el usuario es redirigido a `/premium/activacion`. Esta página debe hacer polling del estado de la suscripción hasta detectar que el plan es premium, y luego activar la UI.
 
@@ -742,9 +742,9 @@ Crear la página de activación post-checkout con polling de React Query y manej
 #### ✅ Tareas específicas
 
 **Frontend:**
-- [ ] Agregar ruta a `ROUTES`: `PREMIUM_ACTIVACION: '/premium/activacion'`
-- [ ] Crear `src/app/premium/activacion/page.tsx`
-- [ ] Crear `src/components/features/premium/ActivationPage.tsx`:
+- [x] Agregar ruta a `ROUTES`: `PREMIUM_ACTIVACION: '/premium/activacion'`
+- [x] Crear `src/app/premium/activacion/page.tsx`
+- [x] Crear `src/components/features/premium/ActivationPage.tsx`:
   - Leer query params: `?status=authorized|pending|failure&preapproval_id=X&redirect=/ruta`
   - **Estado `authorized`:**
     - Mostrar spinner con mensaje "Activando tu plan Premium..."
@@ -770,25 +770,25 @@ Crear la página de activación post-checkout con polling de React Query y manej
     - Redirigir a `/premium`
 
 **Tests:**
-- [ ] Test: status=authorized → muestra spinner, inicia polling
-- [ ] Test: polling detecta plan=premium → muestra éxito, redirige
-- [ ] Test: polling timeout (30s) → muestra mensaje de espera
-- [ ] Test: status=pending → muestra mensaje de procesamiento
-- [ ] Test: status=failure → muestra error con retry
-- [ ] Test: sin status → redirige a /premium
-- [ ] Test: actualiza Zustand store al detectar premium
-- [ ] Test: invalida capabilities query al detectar premium
-- [ ] Coverage ≥ 80%
+- [x] Test: status=authorized → muestra spinner, inicia polling
+- [x] Test: polling detecta plan=premium → muestra éxito, redirige
+- [x] Test: polling timeout (30s) → muestra mensaje de espera
+- [x] Test: status=pending → muestra mensaje de procesamiento
+- [x] Test: status=failure → muestra error con retry
+- [x] Test: sin status → redirige a /premium
+- [x] Test: actualiza Zustand store al detectar premium
+- [x] Test: invalida capabilities query al detectar premium
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Polling funciona con intervalo de 2 segundos
-- [ ] Polling se detiene al detectar premium o después de 30 segundos
-- [ ] Zustand store se actualiza correctamente
-- [ ] Capabilities se invalidan
-- [ ] Todos los estados (authorized, pending, failure) tienen UI adecuada
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] Polling funciona con intervalo de 2 segundos
+- [x] Polling se detiene al detectar premium o después de 30 segundos
+- [x] Zustand store se actualiza correctamente
+- [x] Capabilities se invalidan
+- [x] Todos los estados (authorized, pending, failure) tienen UI adecuada
+- [x] Tests pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 
