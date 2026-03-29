@@ -945,7 +945,7 @@ Actualizar todos los puntos donde se muestra un prompt de upgrade para usar `Pre
 **Prioridad:** 🟢 BAJA
 **Estimación:** 0.5 días
 **Dependencias:** Ninguna
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Las variables `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`, y `MP_PREAPPROVAL_PLAN_ID` no están documentadas en `.env.example`.
 
@@ -956,21 +956,28 @@ Agregar sección de MercadoPago al `.env.example` con todas las variables necesa
 #### ✅ Tareas específicas
 
 **Documentación:**
-- [ ] Agregar sección "MercadoPago Configuration" al `.env.example`:
+- [x] Agregar sección "MercadoPago Configuration" al `.env.example`:
   ```
   # MercadoPago Configuration
   # MP_ACCESS_TOKEN=TEST-xxx (required for payments)
   # MP_WEBHOOK_SECRET=xxx (required in production for webhook signature validation)
   # MP_PREAPPROVAL_PLAN_ID=xxx (required for premium subscriptions)
   ```
-- [ ] Agregar `BACKEND_URL` si no existe: `# BACKEND_URL=http://localhost:3000` (requerido para notification_url de webhooks)
-- [ ] Verificar que `FRONTEND_URL` ya está documentado (sí, ya existe comentado)
+- [x] Agregar `BACKEND_URL` si no existe: `# BACKEND_URL=http://localhost:3000` (requerido para notification_url de webhooks)
+- [x] Verificar que `FRONTEND_URL` ya está documentado (sí, ya existe comentado)
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Todas las variables de MP están documentadas en `.env.example`
-- [ ] Cada variable tiene descripción y ejemplo
-- [ ] Indicación de cuáles son requeridas vs opcionales
+- [x] Todas las variables de MP están documentadas en `.env.example`
+- [x] Cada variable tiene descripción y ejemplo
+- [x] Indicación de cuáles son requeridas vs opcionales
+
+**Notas técnicas:**
+- PR: `feature/t-qa-01-env-example-mp-variables` → `develop`
+- Archivos modificados: `backend/tarot-app/.env.example`
+- `FRONTEND_URL` ya existía (línea 223), se mantuvo sin cambios
+- `BACKEND_URL` agregado junto a `FRONTEND_URL` para coherencia de contexto
+- Nueva sección "MercadoPago Configuration" con 3 variables documentadas y categorizadas por obligatoriedad
 
 ---
 
