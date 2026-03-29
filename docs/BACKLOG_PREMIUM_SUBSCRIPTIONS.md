@@ -803,7 +803,7 @@ Crear la página de activación post-checkout con polling de React Query y manej
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 0.5 días
 **Dependencias:** T-FE-01 (tipos extendidos)
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** La navbar actualmente no tiene ningún link a Premium. Los usuarios free necesitan un punto de entrada visible al flujo de upgrade.
 
@@ -814,26 +814,33 @@ Agregar link/badge "Premium" en la navbar para usuarios free autenticados.
 #### ✅ Tareas específicas
 
 **Frontend:**
-- [ ] Modificar `src/components/layout/Header.tsx`:
+- [x] Modificar `src/components/layout/Header.tsx`:
   - Agregar link "Premium" visible solo cuando: `user !== null && user.plan !== 'premium'`
   - Ubicación: entre los links de navegación existentes y el `UserMenu`
   - Estilo: badge o botón sutil con icono de estrella/gema (consistente con design tokens)
   - Href: `ROUTES.PREMIUM` (`/premium`)
-- [ ] Si el usuario es premium, opcionalmente mostrar un badge sutil "Premium" junto al nombre (en `UserMenu`)
+- [x] Si el usuario es premium, opcionalmente mostrar un badge sutil "Premium" junto al nombre (en `UserMenu`)
 
 **Tests:**
-- [ ] Test: link "Premium" visible para usuario free
-- [ ] Test: link "Premium" NO visible para usuario premium
-- [ ] Test: link "Premium" NO visible para usuario anónimo (no autenticado)
-- [ ] Tests existentes de Header siguen pasando
-- [ ] Coverage ≥ 80%
+- [x] Test: link "Premium" visible para usuario free
+- [x] Test: link "Premium" NO visible para usuario premium
+- [x] Test: link "Premium" NO visible para usuario anónimo (no autenticado)
+- [x] Tests existentes de Header siguen pasando
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Link visible solo para free users autenticados
-- [ ] Link apunta a `/premium`
-- [ ] No rompe tests existentes del Header
-- [ ] Ciclo de calidad completo pasa
+- [x] Link visible solo para free users autenticados
+- [x] Link apunta a `/premium`
+- [x] No rompe tests existentes del Header
+- [x] Ciclo de calidad completo pasa
+
+**Notas técnicas:**
+- PR: `feature/t-fe-04-navbar-premium-badge` → `develop`
+- Archivos modificados: `Header.tsx`, `Header.test.tsx`
+- 34 tests, todos verdes (4 nuevos para el badge Premium)
+- Icono `Star` de lucide-react, color `text-secondary` para destacar visualmente
+- Ciclo de calidad: format ✅ lint ✅ type-check ✅ build ✅ validate-architecture ✅
 
 ---
 
