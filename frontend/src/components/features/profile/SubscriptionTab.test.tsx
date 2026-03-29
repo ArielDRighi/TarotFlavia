@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SubscriptionTab } from './SubscriptionTab';
@@ -9,6 +10,19 @@ import type { UserProfile, UserCapabilities } from '@/types';
 const mockUseUserCapabilities = vi.fn();
 vi.mock('@/hooks/api/useUserCapabilities', () => ({
   useUserCapabilities: () => mockUseUserCapabilities(),
+}));
+
+// Mock useCancelSubscription hook
+const mockCancelMutate = vi.fn();
+const mockUseCancelSubscription = vi.fn();
+vi.mock('@/hooks/api/useSubscription', () => ({
+  useCancelSubscription: () => mockUseCancelSubscription(),
+}));
+
+// Mock next/navigation
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
 }));
 
 // Note: Backend still sends limit fields for backward compatibility,
@@ -53,6 +67,8 @@ const createMockCapabilities = (
     canUseAdvancedSpreads: false,
     plan: 'free',
     isAuthenticated: true,
+    subscriptionStatus: null,
+    planExpiresAt: null,
     ...overrides,
   },
   isLoading: false,
@@ -77,6 +93,11 @@ describe('SubscriptionTab', () => {
     vi.clearAllMocks();
     // Default mock: FREE user with available readings
     mockUseUserCapabilities.mockReturnValue(createMockCapabilities());
+    // Default mock: cancel subscription not pending
+    mockUseCancelSubscription.mockReturnValue({
+      mutate: mockCancelMutate,
+      isPending: false,
+    });
   });
 
   describe('Plan Display', () => {
@@ -98,6 +119,8 @@ describe('SubscriptionTab', () => {
         createMockCapabilities({
           plan: 'premium',
           tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
         })
       );
       render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
@@ -225,7 +248,7 @@ describe('SubscriptionTab', () => {
     });
   });
 
-  describe('Plan Upgrade Section', () => {
+  describe('Plan Upgrade Section (Free user)', () => {
     it('should show upgrade section for free users', () => {
       const profile = createMockProfile({ plan: 'free' });
       render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
@@ -244,16 +267,34 @@ describe('SubscriptionTab', () => {
       expect(screen.getByText(/preguntas personalizadas/i)).toBeInTheDocument();
     });
 
-    it('should show "coming soon" message for upgrade', () => {
+    it('should show functional CTA "Mejorar mi plan" button for free users (not static text)', () => {
       const profile = createMockProfile({ plan: 'free' });
       render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
 
-      expect(screen.getByText(/próximamente: mejora de planes disponible/i)).toBeInTheDocument();
+      // Should have a link/button to /premium instead of static "Próximamente" text
+      const ctaLink = screen.getByRole('link', { name: /mejorar mi plan/i });
+      expect(ctaLink).toBeInTheDocument();
+      expect(ctaLink).toHaveAttribute('href', '/premium');
+    });
+
+    it('should NOT show static "coming soon" text for free users (replaced by CTA button)', () => {
+      const profile = createMockProfile({ plan: 'free' });
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(
+        screen.queryByText(/próximamente: mejora de planes disponible/i)
+      ).not.toBeInTheDocument();
     });
 
     it('should NOT show upgrade section for premium users', () => {
       const profile = createMockProfile({ plan: 'premium' });
-      mockUseUserCapabilities.mockReturnValue(createMockCapabilities({ plan: 'premium' }));
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
       render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
 
       expect(screen.queryByText('Mejora tu Plan')).not.toBeInTheDocument();
@@ -265,6 +306,188 @@ describe('SubscriptionTab', () => {
       render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
 
       expect(screen.queryByText('Mejora tu Plan')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Premium Active State', () => {
+    it('should show "Plan Premium — Activo" for premium active users', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(screen.getByText(/plan premium — activo/i)).toBeInTheDocument();
+    });
+
+    it('should show next billing date for premium active users', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(screen.getByText(/próximo cobro/i)).toBeInTheDocument();
+    });
+
+    it('should show "Cancelar suscripción" button for premium active users', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(screen.getByRole('button', { name: /cancelar suscripción/i })).toBeInTheDocument();
+    });
+
+    it('should open confirmation modal when cancel button is clicked', async () => {
+      const user = userEvent.setup();
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      await user.click(screen.getByRole('button', { name: /cancelar suscripción/i }));
+
+      expect(screen.getByText(/¿seguro que querés cancelar/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /sí, cancelar/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /no, mantener premium/i })).toBeInTheDocument();
+    });
+
+    it('should call useCancelSubscription mutate when confirming cancellation', async () => {
+      const user = userEvent.setup();
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      await user.click(screen.getByRole('button', { name: /cancelar suscripción/i }));
+      await user.click(screen.getByRole('button', { name: /sí, cancelar/i }));
+
+      expect(mockCancelMutate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should close modal when "No, mantener Premium" is clicked', async () => {
+      const user = userEvent.setup();
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      await user.click(screen.getByRole('button', { name: /cancelar suscripción/i }));
+      await user.click(screen.getByRole('button', { name: /no, mantener premium/i }));
+
+      await waitFor(() => {
+        expect(screen.queryByText(/¿seguro que querés cancelar/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show cancel button as disabled/loading when cancellation is pending', () => {
+      mockUseCancelSubscription.mockReturnValue({
+        mutate: mockCancelMutate,
+        isPending: true,
+      });
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      const cancelButton = screen.getByRole('button', { name: /cancelar suscripción/i });
+      expect(cancelButton).toBeDisabled();
+    });
+  });
+
+  describe('Premium Cancelled State', () => {
+    it('should show "Plan Premium — Cancelado" for cancelled subscriptions', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'cancelled',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(screen.getByText(/plan premium — cancelado/i)).toBeInTheDocument();
+    });
+
+    it('should show expiration date message for cancelled subscriptions', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'cancelled',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(screen.getByText(/tu plan premium sigue activo hasta/i)).toBeInTheDocument();
+    });
+
+    it('should show "Reactivar" button for cancelled subscriptions', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'cancelled',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      const reactivarLink = screen.getByRole('link', { name: /reactivar/i });
+      expect(reactivarLink).toBeInTheDocument();
+      expect(reactivarLink).toHaveAttribute('href', '/premium');
+    });
+
+    it('should NOT show "Cancelar suscripción" button for cancelled subscriptions', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'cancelled',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(
+        screen.queryByRole('button', { name: /cancelar suscripción/i })
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -283,7 +506,7 @@ describe('SubscriptionTab', () => {
       expect(screen.getByText('Estadísticas de Uso')).toBeInTheDocument();
     });
 
-    it('should render all sections in correct order', () => {
+    it('should render all sections in correct order for free user', () => {
       const profile = createMockProfile({ plan: 'free' });
       render(<SubscriptionTab profile={profile} />, {
         wrapper: createWrapper(),
@@ -293,6 +516,34 @@ describe('SubscriptionTab', () => {
       expect(screen.getByText('Plan Actual')).toBeInTheDocument();
       expect(screen.getByText('Estadísticas de Uso')).toBeInTheDocument();
       expect(screen.getByText('Mejora tu Plan')).toBeInTheDocument();
+    });
+
+    it('should render Mi Plan section for premium active users', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(screen.getByText('Mi Plan')).toBeInTheDocument();
+    });
+
+    it('should render Mi Plan section for premium cancelled users', () => {
+      const profile = createMockProfile({ plan: 'premium' });
+      mockUseUserCapabilities.mockReturnValue(
+        createMockCapabilities({
+          plan: 'premium',
+          subscriptionStatus: 'cancelled',
+          planExpiresAt: '2026-02-09T00:00:00Z',
+        })
+      );
+      render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
+
+      expect(screen.getByText('Mi Plan')).toBeInTheDocument();
     });
   });
 });
