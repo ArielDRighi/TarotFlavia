@@ -618,7 +618,7 @@ export function ReadingExperience({
           {/* Upgrade Banner for non-premium users */}
           {!canUseAI && (
             <div className="mt-6">
-              <UpgradeBanner onUpgradeClick={() => setShowUpgradeModal(true)} />
+              <UpgradeBanner />
             </div>
           )}
 

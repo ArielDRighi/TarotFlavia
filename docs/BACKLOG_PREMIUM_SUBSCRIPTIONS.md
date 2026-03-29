@@ -894,12 +894,12 @@ Extender `SubscriptionTab` existente con información de suscripción MP y flujo
 
 ---
 
-### T-FE-06: Integrar upgrade prompts en features premium existentes
+ ### T-FE-06: Integrar upgrade prompts en features premium existentes
 
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1.5 días
 **Dependencias:** T-UX-01 (PremiumUpgradePrompt)
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Los componentes existentes que bloquean features premium actualmente usan callbacks `onUpgrade` que redirigen a `/registro`. Necesitan conectarse con el flujo de suscripción MP real.
 
@@ -910,26 +910,27 @@ Actualizar todos los puntos donde se muestra un prompt de upgrade para usar `Pre
 #### ✅ Tareas específicas
 
 **Frontend:**
-- [ ] `ReadingExperience.tsx`: el `UpgradeBanner` y `UpgradeModal` ya existen — actualizar `onUpgradeClick` para usar flujo MP (via `PremiumUpgradePrompt` o directamente `useCreatePreapproval`)
-- [ ] `QuestionSelector.tsx`: cuando `canUseCustomQuestions=false`, mostrar `PremiumUpgradePrompt` inline
-- [ ] `SpreadSelector` (en tests): verificar que tiradas avanzadas bloqueadas muestran prompt de upgrade funcional
-- [ ] `RitualPageContent.tsx`: verificar que features premium bloqueadas usan el flujo correcto
-- [ ] `DailyLimitReachedModal.tsx` / `DailyCardLimitReached`: actualizar CTA para flujo MP
-- [ ] `PlanComparison.tsx` en home: cambiar CTA del plan Premium de `ROUTES.REGISTER` a `ROUTES.PREMIUM`
-- [ ] `LandingPage.tsx`: verificar que las secciones de pricing linkean a `/premium`
+- [x] `ReadingExperience.tsx`: el `UpgradeBanner` y `UpgradeModal` ya existen — actualizar `onUpgradeClick` para usar flujo MP (via `PremiumUpgradePrompt` o directamente `useCreatePreapproval`)
+- [x] `QuestionSelector.tsx`: cuando `canUseCustomQuestions=false`, verificar que el `UpgradeModal` ya usa flujo MP (ya correcto, sin cambios necesarios)
+- [x] `SpreadSelector` (en tests): verificar que tiradas avanzadas bloqueadas muestran prompt de upgrade funcional (ya correcto, sin cambios necesarios)
+- [x] `RitualPageContent.tsx`: verificar que features premium bloqueadas usan el flujo correcto (ya correcto, sin cambios necesarios)
+- [x] `DailyLimitReachedModal.tsx` / `DailyCardLimitReached`: verificar CTA para flujo MP (ya correcto, sin cambios necesarios)
+- [x] `PlanComparison.tsx` en home: cambiar CTA del plan Premium de `ROUTES.REGISTER` a `ROUTES.PREMIUM`
+- [x] `LandingPage.tsx`: verificar que las secciones de pricing linkean a `/premium` (ya correcto, sin cambios necesarios)
+- [x] `UpgradeBanner.tsx`: implementado `useAuth()` + `useCreatePreapproval()` internamente — anónimos → `/registro?redirect=/premium`, usuarios free → flujo MP directo
 
 **Tests:**
-- [ ] Test: cada punto de upgrade llama al flujo correcto (MP para free, registro para anónimo)
-- [ ] Test: PlanComparison CTA apunta a /premium
-- [ ] Tests existentes actualizados para reflejar nuevos comportamientos
-- [ ] Coverage ≥ 80%
+- [x] Test: cada punto de upgrade llama al flujo correcto (MP para free, registro para anónimo)
+- [x] Test: PlanComparison CTA apunta a /premium
+- [x] Tests existentes actualizados para reflejar nuevos comportamientos
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Todos los CTAs de upgrade usan el flujo correcto (no redirigen a `/registro` para usuarios free)
-- [ ] Usuarios anónimos siguen redirigiendo a `/registro`
-- [ ] Tests actualizados y pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] Todos los CTAs de upgrade usan el flujo correcto (no redirigen a `/registro` para usuarios free)
+- [x] Usuarios anónimos siguen redirigiendo a `/registro`
+- [x] Tests actualizados y pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 

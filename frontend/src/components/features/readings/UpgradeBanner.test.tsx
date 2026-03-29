@@ -147,16 +147,4 @@ describe('UpgradeBanner', () => {
     const button = screen.getByRole('button', { name: /cargando/i });
     expect(button).toBeDisabled();
   });
-
-  it('should also call optional onUpgradeClick prop when provided and user is free', async () => {
-    const user = userEvent.setup();
-    const onUpgradeClick = vi.fn();
-    render(<UpgradeBanner onUpgradeClick={onUpgradeClick} />);
-
-    const button = screen.getByRole('button', { name: /upgrade a premium/i });
-    await user.click(button);
-
-    expect(mockMutate).toHaveBeenCalledOnce();
-    expect(onUpgradeClick).toHaveBeenCalledOnce();
-  });
 });
