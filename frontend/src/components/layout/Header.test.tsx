@@ -305,6 +305,51 @@ describe('Header', () => {
     });
   });
 
+  describe('Premium Badge - T-FE-04', () => {
+    it('should show "Premium" link for authenticated free users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'free' },
+      });
+
+      render(<Header />);
+
+      const premiumLink = screen.getByRole('link', { name: /premium/i });
+      expect(premiumLink).toBeInTheDocument();
+      expect(premiumLink).toHaveAttribute('href', '/premium');
+    });
+
+    it('should NOT show "Premium" link for authenticated premium users', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'premium' },
+      });
+
+      render(<Header />);
+
+      // The UserMenu dropdown trigger (avatar) is visible, but no "Premium" nav link
+      expect(screen.queryByRole('link', { name: /^premium$/i })).not.toBeInTheDocument();
+    });
+
+    it('should NOT show "Premium" link for unauthenticated users', () => {
+      mockUseAuthStore.mockReturnValue({ user: null });
+
+      render(<Header />);
+
+      expect(screen.queryByRole('link', { name: /^premium$/i })).not.toBeInTheDocument();
+    });
+
+    it('should render "Premium" link with a star icon', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'free' },
+      });
+
+      render(<Header />);
+
+      const premiumLink = screen.getByRole('link', { name: /premium/i });
+      // Link should contain an svg (the star icon)
+      expect(premiumLink.querySelector('svg')).toBeInTheDocument();
+    });
+  });
+
   describe('Active Navigation Links', () => {
     it('should highlight Servicios link when on /servicios path', () => {
       mockUseAuthStore.mockReturnValue({ user: null });

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu } from 'lucide-react';
+import { Menu, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
 import { UserMenu } from './UserMenu';
@@ -111,6 +111,16 @@ export function Header() {
               >
                 Tirada de Tarot
               </Link>
+              {user.plan !== 'premium' && (
+                <Link
+                  href={ROUTES.PREMIUM}
+                  className="text-secondary hover:text-secondary/80 flex items-center gap-1 text-sm font-medium transition-colors"
+                  data-testid="premium-nav-link"
+                >
+                  <Star className="size-4 fill-current" aria-hidden="true" />
+                  Premium
+                </Link>
+              )}
               {/* "Explorar" link hidden in MVP - single tarotista (Flavia) */}
               {/* TODO: Enable when multiple tarotistas are supported */}
               {/* <Link
