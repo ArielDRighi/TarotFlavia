@@ -11,7 +11,7 @@ export interface PremiumPreviewProps {
   /** Content to blur (premium feature) */
   children: ReactNode;
   /** Callback when user clicks upgrade */
-  onUpgrade: () => void;
+  onUpgrade?: () => void;
   /** Optional custom message */
   message?: string;
 }

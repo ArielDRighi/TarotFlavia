@@ -2,7 +2,7 @@ import { Gem } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface UpgradeBannerProps {
-  onUpgradeClick: () => void;
+  onUpgradeClick?: () => void;
 }
 
 export default function UpgradeBanner({ onUpgradeClick }: UpgradeBannerProps) {
