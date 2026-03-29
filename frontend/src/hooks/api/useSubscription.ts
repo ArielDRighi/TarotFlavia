@@ -33,6 +33,8 @@ export const subscriptionMpQueryKeys = {
 interface UseSubscriptionStatusOptions {
   /** Interval in ms for polling — set to false to disable */
   refetchInterval?: number | false;
+  /** Whether to run the query at all — defaults to true */
+  enabled?: boolean;
 }
 
 // ============================================================================
@@ -118,6 +120,7 @@ export function useSubscriptionStatus(options?: UseSubscriptionStatusOptions) {
     queryKey: subscriptionMpQueryKeys.status,
     queryFn: getSubscriptionStatus,
     refetchInterval: options?.refetchInterval,
+    enabled: options?.enabled ?? true,
     staleTime: 0, // Always fresh for status checks
   });
 }

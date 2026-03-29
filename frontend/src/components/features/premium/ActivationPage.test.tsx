@@ -116,6 +116,88 @@ describe('ActivationPage', () => {
         expect(mockPush).toHaveBeenCalledWith('/premium');
       });
     });
+
+    it('should redirect to /premium when status param is an invalid/unknown value', async () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'unknown';
+        return null;
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/premium');
+      });
+    });
+  });
+
+  // ============================================================================
+  // Sanitización del parámetro redirect (open-redirect prevention)
+  // ============================================================================
+
+  describe('Sanitización del parámetro redirect', () => {
+    beforeEach(() => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'authorized';
+        return null;
+      });
+
+      mockUseSubscriptionStatus.mockReturnValue({
+        data: {
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-04-01T00:00:00Z',
+          mpPreapprovalId: 'mp_123',
+        },
+        isLoading: false,
+      });
+    });
+
+    it('should redirect to /perfil (fallback) when redirect param is an external URL', async () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'authorized';
+        if (key === 'redirect') return 'https://evil.com/steal';
+        return null;
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('activation-success')).toBeInTheDocument();
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/perfil');
+        expect(mockPush).not.toHaveBeenCalledWith('https://evil.com/steal');
+      });
+    });
+
+    it('should redirect to /perfil (fallback) when redirect param is a protocol-relative URL', async () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'authorized';
+        if (key === 'redirect') return '//evil.com';
+        return null;
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('activation-success')).toBeInTheDocument();
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith('/perfil');
+        expect(mockPush).not.toHaveBeenCalledWith('//evil.com');
+      });
+    });
   });
 
   // ============================================================================
@@ -141,7 +223,7 @@ describe('ActivationPage', () => {
       renderWithProviders(<ActivationPage />);
 
       expect(mockUseSubscriptionStatus).toHaveBeenCalledWith(
-        expect.objectContaining({ refetchInterval: 2000 })
+        expect.objectContaining({ refetchInterval: 2000, enabled: true })
       );
     });
 
@@ -353,7 +435,7 @@ describe('ActivationPage', () => {
       renderWithProviders(<ActivationPage />);
 
       expect(mockUseSubscriptionStatus).toHaveBeenCalledWith(
-        expect.objectContaining({ refetchInterval: false })
+        expect.objectContaining({ refetchInterval: false, enabled: false })
       );
     });
   });
@@ -397,7 +479,7 @@ describe('ActivationPage', () => {
       renderWithProviders(<ActivationPage />);
 
       expect(mockUseSubscriptionStatus).toHaveBeenCalledWith(
-        expect.objectContaining({ refetchInterval: false })
+        expect.objectContaining({ refetchInterval: false, enabled: false })
       );
     });
   });

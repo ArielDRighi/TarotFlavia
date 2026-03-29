@@ -17,7 +17,25 @@ import { ROUTES } from '@/lib/constants/routes';
 const POLLING_INTERVAL_MS = 2000;
 const POLLING_TIMEOUT_MS = 30000;
 
-type CheckoutStatus = 'authorized' | 'pending' | 'failure';
+const VALID_CHECKOUT_STATUSES = ['authorized', 'pending', 'failure'] as const;
+type CheckoutStatus = (typeof VALID_CHECKOUT_STATUSES)[number];
+
+/** Parse and validate the status query param — returns null for missing/invalid values */
+function parseCheckoutStatus(raw: string | null): CheckoutStatus | null {
+  if (raw === null) return null;
+  if ((VALID_CHECKOUT_STATUSES as readonly string[]).includes(raw)) {
+    return raw as CheckoutStatus;
+  }
+  return null;
+}
+
+/** Sanitize redirect path to prevent open-redirect attacks */
+function sanitizeRedirectPath(raw: string | null): string {
+  if (raw && raw.startsWith('/') && !raw.startsWith('//') && !raw.includes('://')) {
+    return raw;
+  }
+  return ROUTES.PERFIL;
+}
 
 // ============================================================================
 // Sub-components
@@ -142,8 +160,8 @@ export function ActivationPage() {
   const invalidateCapabilities = useInvalidateCapabilities();
   const { user, setUser } = useAuthStore();
 
-  const status = searchParams.get('status') as CheckoutStatus | null;
-  const redirectPath = searchParams.get('redirect');
+  const status = parseCheckoutStatus(searchParams.get('status'));
+  const redirectPath = sanitizeRedirectPath(searchParams.get('redirect'));
 
   const [activationState, setActivationState] = useState<ActivationState>(() => {
     if (!status) return 'loading'; // will redirect immediately
@@ -159,12 +177,13 @@ export function ActivationPage() {
   // Polling is active only while in 'loading' state for an 'authorized' checkout
   const pollingActive = status === 'authorized' && activationState === 'loading';
 
-  // Subscription status polling
+  // Subscription status polling — only enabled for authorized + loading flow
   const { data: subscriptionStatus } = useSubscriptionStatus({
+    enabled: pollingActive,
     refetchInterval: pollingActive ? POLLING_INTERVAL_MS : false,
   });
 
-  // Redirect if no status param
+  // Redirect if no status param (or invalid status)
   useEffect(() => {
     if (!status) {
       router.push(ROUTES.PREMIUM);
@@ -220,9 +239,8 @@ export function ActivationPage() {
   useEffect(() => {
     if (activationState !== 'success') return;
 
-    const destination = redirectPath ?? ROUTES.PERFIL;
     const redirectTimer = setTimeout(() => {
-      router.push(destination);
+      router.push(redirectPath);
     }, 3000);
 
     return () => clearTimeout(redirectTimer);
