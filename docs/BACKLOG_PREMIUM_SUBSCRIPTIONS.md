@@ -849,7 +849,7 @@ Agregar link/badge "Premium" en la navbar para usuarios free autenticados.
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1.5 días
 **Dependencias:** T-FE-01 (hook useSubscription), T-BE-05 (capabilities extendidas)
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Existe `SubscriptionTab` en el perfil que muestra el plan actual y estadísticas de uso. Necesita extenderse para mostrar estado de suscripción y permitir cancelación.
 
@@ -860,7 +860,7 @@ Extender `SubscriptionTab` existente con información de suscripción MP y flujo
 #### ✅ Tareas específicas
 
 **Frontend:**
-- [ ] Modificar `src/components/features/profile/SubscriptionTab.tsx`:
+- [x] Modificar `src/components/features/profile/SubscriptionTab.tsx`:
   - **Usuario free:** mantener sección actual "Mejora tu Plan" pero cambiar CTA de texto estático ("Próximamente") a botón funcional que redirige a `/premium`
   - **Usuario premium activo (`subscriptionStatus=active`):**
     - Mostrar: "Plan Premium — Activo"
@@ -874,23 +874,23 @@ Extender `SubscriptionTab` existente con información de suscripción MP y flujo
     - Texto: "¿Seguro que querés cancelar? Tu plan Premium seguirá activo hasta {fecha}. Después volverás al plan gratuito."
     - Botón "Sí, cancelar" → llama `useCancelSubscription()`
     - Botón "No, mantener Premium"
-- [ ] Leer `subscriptionStatus` y `planExpiresAt` desde capabilities (fuente de verdad)
+- [x] Leer `subscriptionStatus` y `planExpiresAt` desde capabilities (fuente de verdad)
 
 **Tests:**
-- [ ] Test: usuario free → muestra CTA "Mejorar mi plan" funcional
-- [ ] Test: usuario premium activo → muestra estado y fecha de cobro
-- [ ] Test: usuario premium activo → botón cancelar abre modal
-- [ ] Test: confirmar cancelación → llama al endpoint y muestra estado cancelado
-- [ ] Test: usuario premium cancelado → muestra fecha de expiración y botón reactivar
-- [ ] Coverage ≥ 80%
+- [x] Test: usuario free → muestra CTA "Mejorar mi plan" funcional
+- [x] Test: usuario premium activo → muestra estado y fecha de cobro
+- [x] Test: usuario premium activo → botón cancelar abre modal
+- [x] Test: confirmar cancelación → llama al endpoint y muestra estado cancelado
+- [x] Test: usuario premium cancelado → muestra fecha de expiración y botón reactivar
+- [x] Coverage ≥ 80%
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Los tres estados (free, premium active, premium cancelled) se muestran correctamente
-- [ ] Cancelación funciona con modal de confirmación
-- [ ] Datos vienen de capabilities (single source of truth)
-- [ ] Tests pasan
-- [ ] Ciclo de calidad completo pasa
+- [x] Los tres estados (free, premium active, premium cancelled) se muestran correctamente
+- [x] Cancelación funciona con modal de confirmación
+- [x] Datos vienen de capabilities (single source of truth)
+- [x] Tests pasan
+- [x] Ciclo de calidad completo pasa
 
 ---
 
