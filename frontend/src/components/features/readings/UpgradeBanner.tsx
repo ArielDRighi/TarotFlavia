@@ -8,12 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
 import { ROUTES } from '@/lib/constants/routes';
 
-interface UpgradeBannerProps {
-  /** Optional callback called in addition to the internal MP flow (free users only) */
-  onUpgradeClick?: () => void;
-}
-
-export default function UpgradeBanner({ onUpgradeClick }: UpgradeBannerProps) {
+export default function UpgradeBanner() {
   const router = useRouter();
   const { user } = useAuth();
   const { mutate: createPreapproval, isPending } = useCreatePreapproval();
@@ -31,10 +26,7 @@ export default function UpgradeBanner({ onUpgradeClick }: UpgradeBannerProps) {
         window.location.href = initPoint;
       },
     });
-
-    // Call optional callback if provided
-    onUpgradeClick?.();
-  }, [user, router, createPreapproval, onUpgradeClick]);
+  }, [user, router, createPreapproval]);
 
   return (
     <div

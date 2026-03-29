@@ -47,11 +47,11 @@ vi.mock('react-markdown', () => ({
 
 // Mock UpgradeBanner
 vi.mock('./UpgradeBanner', () => ({
-  default: function MockUpgradeBanner({ onUpgradeClick }: { onUpgradeClick: () => void }) {
+  default: function MockUpgradeBanner() {
     return (
       <div data-testid="upgrade-banner">
         <p>💎 Desbloquea interpretaciones personalizadas</p>
-        <button onClick={onUpgradeClick}>Upgrade a Premium</button>
+        <button>Upgrade a Premium</button>
       </div>
     );
   },

@@ -1,13 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { WelcomeHeader } from './WelcomeHeader';
 import { QuickActions } from './QuickActions';
 import { DidYouKnowSection } from './DidYouKnowSection';
 import { StatsSection } from './StatsSection';
 import UpgradeBanner from '@/components/features/readings/UpgradeBanner';
-import UpgradeModal from '@/components/features/readings/UpgradeModal';
 import { HoroscopeWidget } from '@/components/features/horoscope';
 import { ChineseHoroscopeWidget } from '@/components/features/chinese-horoscope';
 import { NumerologyWidget } from '@/components/features/numerology';
@@ -41,11 +39,6 @@ import { MyServicesWidget } from './MyServicesWidget';
  */
 export function UserDashboard() {
   const { isPremium } = useUserPlanFeatures();
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-
-  const handleUpgradeClick = () => {
-    setIsUpgradeModalOpen(true);
-  };
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -69,7 +62,7 @@ export function UserDashboard() {
             <MyServicesWidget />
 
             {/* Upgrade Banner - Only for non-Premium users */}
-            {!isPremium && <UpgradeBanner onUpgradeClick={handleUpgradeClick} />}
+            {!isPremium && <UpgradeBanner />}
           </div>
 
           {/* Right column (1/3 width) */}
@@ -94,9 +87,6 @@ export function UserDashboard() {
           </div>
         </div>
       </div>
-
-      {/* Upgrade Modal */}
-      <UpgradeModal open={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
     </div>
   );
 }

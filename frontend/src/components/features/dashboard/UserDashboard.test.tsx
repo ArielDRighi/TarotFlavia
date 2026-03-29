@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { UserDashboard } from './UserDashboard';
 import * as useAuthModule from '@/hooks/useAuth';
 import * as useUserPlanFeaturesModule from '@/hooks/utils/useUserPlanFeatures';
@@ -402,7 +402,7 @@ describe('UserDashboard', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should open UpgradeModal when upgrade banner is clicked', () => {
+  it('should render UpgradeBanner button that initiates MP flow (not open modal)', () => {
     const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -429,16 +429,13 @@ describe('UserDashboard', () => {
 
     render(<UserDashboard />);
 
-    // Click on upgrade banner
-    const upgradeButton = screen.getByText(/Upgrade a Premium/i);
-    fireEvent.click(upgradeButton);
-
-    // Modal should be visible
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText(/Desbloquea todo el potencial del Tarot/i)).toBeInTheDocument();
+    // UpgradeBanner handles its own MP flow internally — no modal is opened from UserDashboard
+    const upgradeButton = screen.getByRole('button', { name: /upgrade a premium/i });
+    expect(upgradeButton).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('should close UpgradeModal when close button is clicked', async () => {
+  it('should NOT render UpgradeModal (modal removed — UpgradeBanner handles MP flow directly)', () => {
     const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -463,22 +460,10 @@ describe('UserDashboard', () => {
       isAnonymous: false,
     });
 
-    const { container } = render(<UserDashboard />);
+    render(<UserDashboard />);
 
-    // Open modal
-    const upgradeButton = screen.getByText(/Upgrade a Premium/i);
-    fireEvent.click(upgradeButton);
-
-    // Modal is open
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-
-    // Press Escape to close modal
-    fireEvent.keyDown(container, { key: 'Escape', code: 'Escape', keyCode: 27 });
-
-    // Modal should be closed
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
+    // No modal in the DOM — UpgradeBanner calls createPreapproval directly
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   // TASK-110: Tests for HoroscopeWidget integration
