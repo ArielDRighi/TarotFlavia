@@ -8,7 +8,7 @@
 - [Endpoints Principales](#endpoints-principales)
   - [Autenticación](#autenticación)
   - [Usuarios](#usuarios)
-  - [Suscripciones](#suscripciones)
+  - [Suscripciones](#suscripciones) (favoritos, all-access, **MP Premium: create-preapproval, cancel, status**)
   - [Lecturas de Tarot](#lecturas-de-tarot)
   - [Cartas](#cartas)
   - [Tiradas (Spreads)](#tiradas-spreads)
@@ -525,6 +525,123 @@ curl -X POST http://localhost:3000/api/subscriptions/enable-all-access \
 ```bash
 http POST http://localhost:3000/api/subscriptions/enable-all-access \
   Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+---
+
+#### 💎 Crear Preapproval — Iniciar Suscripción Premium
+
+Crea una suscripción de preapproval en Mercado Pago y retorna la URL de checkout para redirigir al usuario.
+
+**Restricción:** Solo disponible para usuarios `free` autenticados. Usuarios ya `premium` reciben `400 Bad Request`.
+
+```http
+POST /api/subscriptions/create-preapproval
+Authorization: Bearer <token>
+```
+
+**Response: `201 Created`**
+
+```json
+{
+  "initPoint": "https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_id=..."
+}
+```
+
+**Errores:**
+
+- `400 Bad Request` — Usuario ya es premium
+  ```json
+  { "statusCode": 400, "message": "User is already premium", "error": "Bad Request" }
+  ```
+- `404 Not Found` — Usuario no encontrado
+  ```json
+  { "statusCode": 404, "message": "User not found", "error": "Not Found" }
+  ```
+- `500 Internal Server Error` — Variable de entorno `MP_PREAPPROVAL_PLAN_ID` no configurada
+  ```json
+  { "statusCode": 500, "message": "MP_PREAPPROVAL_PLAN_ID is not configured", "error": "Internal Server Error" }
+  ```
+- `502 Bad Gateway` — Error al comunicarse con la API de Mercado Pago
+
+**Ejemplo cURL:**
+
+```bash
+curl -X POST http://localhost:3000/api/subscriptions/create-preapproval \
+  -H "Authorization: Bearer <token>"
+```
+
+---
+
+#### ❌ Cancelar Suscripción Premium
+
+Cancela la suscripción activa del usuario en Mercado Pago y actualiza el estado en la DB. El plan `premium` se mantiene activo hasta `planExpiresAt`.
+
+```http
+POST /api/subscriptions/cancel
+Authorization: Bearer <token>
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "message": "Suscripción cancelada exitosamente",
+  "planExpiresAt": "2026-04-30T03:00:00.000Z"
+}
+```
+
+**Errores:**
+
+- `400 Bad Request` — Usuario no tiene suscripción activa o ya está cancelada
+  ```json
+  { "statusCode": 400, "message": "No active subscription found", "error": "Bad Request" }
+  ```
+- `502 Bad Gateway` — Error al cancelar en la API de Mercado Pago
+
+**Ejemplo cURL:**
+
+```bash
+curl -X POST http://localhost:3000/api/subscriptions/cancel \
+  -H "Authorization: Bearer <token>"
+```
+
+---
+
+#### 📊 Consultar Estado de Suscripción Premium
+
+Retorna el estado actual de la suscripción directamente desde la DB (sin caché). Usado principalmente para polling post-checkout en `/premium/activacion`.
+
+```http
+GET /api/subscriptions/status
+Authorization: Bearer <token>
+```
+
+**Response: `200 OK`**
+
+```json
+{
+  "plan": "premium",
+  "subscriptionStatus": "active",
+  "planExpiresAt": "2026-04-30T03:00:00.000Z",
+  "mpPreapprovalId": "2c938084..."
+}
+```
+
+**Valores posibles:**
+
+| Campo | Valores |
+|-------|---------|
+| `plan` | `"free"` \| `"premium"` |
+| `subscriptionStatus` | `"active"` \| `"cancelled"` \| `"expired"` \| `null` |
+| `planExpiresAt` | ISO date string \| `null` |
+| `mpPreapprovalId` | string \| `null` |
+
+**Ejemplo cURL:**
+
+```bash
+curl -X GET http://localhost:3000/api/subscriptions/status \
+  -H "Authorization: Bearer <token>"
 ```
 
 ---
