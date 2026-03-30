@@ -1057,31 +1057,31 @@ Crear un script CLI o documentar el proceso manual para crear el plan de preappr
 
 ---
 
-### T-QA-04: Tests E2E del flujo completo de upgrade (frontend)
+ ### T-QA-04: Tests E2E del flujo completo de upgrade (frontend)
 
 **Prioridad:** 🟢 BAJA
 **Estimación:** 1.5 días
 **Dependencias:** T-FE-03, T-FE-05, T-FE-06
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Validar el flujo completo desde la perspectiva del usuario: ver CTA → ir a /premium → crear suscripción → volver a /premium/activacion → ver éxito.
 
 #### ✅ Tareas específicas
 
 **Frontend:**
-- [ ] Test E2E (Playwright): usuario free navega a `/premium`, ve tabla de planes
-- [ ] Test E2E: click en "Comenzar Premium" redirige a MP (mock de MP en test — verificar que `window.location` cambia a URL de MP)
-- [ ] Test E2E: usuario llega a `/premium/activacion?status=authorized`, polling detecta premium, muestra éxito
-- [ ] Test E2E: usuario en perfil ve estado de suscripción correcto
-- [ ] Test E2E: usuario cancela suscripción desde perfil, ve confirmación
-- [ ] Test E2E: upgrade prompts en readings funcionan correctamente
+- [x] Test E2E (Playwright): usuario free navega a `/premium`, ve tabla de planes
+- [x] Test E2E: click en "Comenzar Premium" redirige a MP (mock de MP en test — verificar que `window.location` cambia a URL de MP)
+- [x] Test E2E: usuario llega a `/premium/activacion?status=authorized`, polling detecta premium, muestra éxito
+- [x] Test E2E: usuario en perfil ve estado de suscripción correcto
+- [x] Test E2E: usuario cancela suscripción desde perfil, ve confirmación
+- [x] Test E2E: upgrade prompts en readings funcionan correctamente
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Flujo de upgrade completo testeado con Playwright
-- [ ] Flujo de cancelación testeado
-- [ ] Upgrade prompts en features premium testeados
-- [ ] Tests pasan en CI
+- [x] Flujo de upgrade completo testeado con Playwright
+- [x] Flujo de cancelación testeado
+- [x] Upgrade prompts en features premium testeados
+- [x] Tests pasan en CI
 
 ---
 
