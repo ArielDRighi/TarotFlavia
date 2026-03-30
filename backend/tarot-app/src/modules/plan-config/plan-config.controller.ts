@@ -31,7 +31,9 @@ export class PlanConfigController {
   constructor(private readonly planConfigService: PlanConfigService) {}
 
   @Get('public')
-  @ApiOperation({ summary: 'Obtener configuración pública de planes (sin autenticación)' })
+  @ApiOperation({
+    summary: 'Obtener configuración pública de planes (sin autenticación)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de planes activos para mostrar al público',
