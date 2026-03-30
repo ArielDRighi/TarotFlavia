@@ -986,7 +986,7 @@ Agregar sección de MercadoPago al `.env.example` con todas las variables necesa
 **Prioridad:** 🟢 BAJA
 **Estimación:** 0.5 días
 **Dependencias:** T-BE-02 (payments module)
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** El plan de preapproval en MP debe crearse una vez manualmente o vía script. El ID resultante se guarda como variable de entorno `MP_PREAPPROVAL_PLAN_ID`.
 
@@ -997,7 +997,7 @@ Crear un script CLI o documentar el proceso manual para crear el plan de preappr
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Crear `scripts/create-mp-preapproval-plan.ts`:
+- [x] Crear `scripts/create-mp-preapproval-plan.ts`:
   - Lee `MP_ACCESS_TOKEN` del `.env`
   - Crea plan de preapproval en MP con:
     - `reason`: "Auguria Premium"
@@ -1007,14 +1007,25 @@ Crear un script CLI o documentar el proceso manual para crear el plan de preappr
     - `auto_recurring.currency_id`: "ARS"
   - Imprime el `preapproval_plan_id` resultante
   - Instrucciones para guardar en `.env` como `MP_PREAPPROVAL_PLAN_ID`
-- [ ] Agregar npm script: `"mp:create-plan": "ts-node scripts/create-mp-preapproval-plan.ts"`
-- [ ] Documentar en README o en el propio script cómo usarlo
+- [x] Agregar npm script: `"mp:create-plan": "ts-node -r tsconfig-paths/register scripts/create-mp-preapproval-plan.ts"`
+- [x] Documentado en el propio script con JSDoc y ejemplos de uso
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Script ejecutable que crea plan en MP y muestra el ID
-- [ ] Documentación clara del proceso
-- [ ] Precio configurable por argumento
+- [x] Script ejecutable que crea plan en MP y muestra el ID
+- [x] Documentación clara del proceso
+- [x] Precio configurable por argumento
+
+**Notas técnicas:**
+- PR: `feature/t-qa-02-mp-create-plan-script` → `develop`
+- Archivo nuevo: `backend/tarot-app/scripts/create-mp-preapproval-plan.ts`
+- Archivo modificado: `backend/tarot-app/package.json` (nuevo script `mp:create-plan`)
+- Usa `PreApprovalPlan` del SDK de MercadoPago directamente (sin NestFactory)
+- Carga `.env` con `dotenv` de forma standalone
+- Detecta entorno sandbox vs producción según prefijo del token (`TEST-`)
+- Argumentos CLI: `--amount=<ARS>` (default 2999), `--reason=<texto>` (default "Auguria Premium")
+- `back_url` usa `FRONTEND_URL` del `.env` o fallback a `http://localhost:3001/premium`
+- Ciclo de calidad: format ✅ lint ✅ build ✅
 
 ---
 
