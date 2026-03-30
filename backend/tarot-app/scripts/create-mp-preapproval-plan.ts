@@ -11,10 +11,12 @@
  * Uso:
  *   npm run mp:create-plan
  *   npm run mp:create-plan -- --amount=2999
+ *   npm run mp:create-plan -- --amount 2999
  *   npm run mp:create-plan -- --amount=4999 --reason="Auguria Premium Anual"
+ *   npm run mp:create-plan -- --amount 4999 --reason "Auguria Premium Anual"
  *
  * Argumentos opcionales:
- *   --amount=<número>   Precio mensual en ARS (por defecto: 2999)
+ *   --amount=<número>   Precio mensual en ARS (por defecto: 2999) — formatos: --amount=2999 o --amount 2999
  *   --reason=<texto>    Nombre/descripción del plan (por defecto: "Auguria Premium")
  *
  * Resultado:
@@ -39,6 +41,8 @@ interface ScriptOptions {
   reason: string;
 }
 
+const KNOWN_KEYS = new Set(['amount', 'reason']);
+
 function parseArgs(): ScriptOptions {
   const args = process.argv.slice(2);
   const options: ScriptOptions = {
@@ -46,19 +50,59 @@ function parseArgs(): ScriptOptions {
     reason: 'Auguria Premium',
   };
 
-  for (const arg of args) {
-    if (!arg.startsWith('--')) continue;
+  let i = 0;
+  while (i < args.length) {
+    const arg = args[i];
+
+    if (!arg.startsWith('--')) {
+      console.error(
+        `❌ Argumento desconocido: "${arg}". Solo se aceptan flags con --key=value o --key value.`,
+      );
+      process.exit(1);
+    }
 
     const withoutDashes = arg.slice(2);
     const eqIndex = withoutDashes.indexOf('=');
-    if (eqIndex === -1) continue;
 
-    const key = withoutDashes.slice(0, eqIndex);
-    const value = withoutDashes.slice(eqIndex + 1);
+    let key: string;
+    let value: string;
+
+    if (eqIndex !== -1) {
+      // Formato --key=value
+      key = withoutDashes.slice(0, eqIndex);
+      value = withoutDashes.slice(eqIndex + 1);
+      i++;
+    } else {
+      // Formato --key value
+      key = withoutDashes;
+      const next = args[i + 1];
+      if (next === undefined || next.startsWith('--')) {
+        console.error(
+          `❌ El argumento --${key} requiere un valor (ej: --${key}=<valor> o --${key} <valor>).`,
+        );
+        process.exit(1);
+      }
+      value = next;
+      i += 2;
+    }
+
+    if (!KNOWN_KEYS.has(key)) {
+      console.error(
+        `❌ Argumento desconocido: "--${key}". Los argumentos válidos son: --amount, --reason.`,
+      );
+      process.exit(1);
+    }
 
     if (key === 'amount') {
-      const parsed = parseInt(value, 10);
-      if (isNaN(parsed) || parsed <= 0) {
+      // Validación estricta: solo enteros positivos sin caracteres extra
+      if (!/^\d+$/.test(value)) {
+        console.error(
+          `❌ Argumento inválido para --amount: "${value}". Debe ser un número entero positivo (sin decimales ni caracteres extra).`,
+        );
+        process.exit(1);
+      }
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed) || parsed <= 0) {
         console.error(
           `❌ Argumento inválido para --amount: "${value}". Debe ser un número entero positivo.`,
         );
@@ -160,15 +204,39 @@ async function createPreapprovalPlan(): Promise<void> {
   );
 }
 
+interface MpApiError {
+  status?: number;
+  statusCode?: number;
+  response?: { status?: number };
+}
+
+function extractHttpStatus(error: unknown): number | null {
+  if (error !== null && typeof error === 'object') {
+    const e = error as MpApiError;
+    const status = e.status ?? e.statusCode ?? e.response?.status;
+    if (typeof status === 'number' && Number.isFinite(status)) {
+      return status;
+    }
+  }
+  // Fallback: buscar el código en el mensaje de texto
+  if (error instanceof Error) {
+    const match = /\b(4\d{2}|5\d{2})\b/.exec(error.message);
+    if (match) return Number(match[1]);
+  }
+  return null;
+}
+
 createPreapprovalPlan().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
   console.error('❌ Error al crear el plan en MercadoPago:', message);
 
-  if (error instanceof Error && error.message.includes('401')) {
+  const httpStatus = extractHttpStatus(error);
+
+  if (httpStatus === 401) {
     console.error(
       '\n💡 Error de autenticación (401). Verificá que MP_ACCESS_TOKEN sea válido.',
     );
-  } else if (error instanceof Error && error.message.includes('400')) {
+  } else if (httpStatus === 400) {
     console.error('\n💡 Error de parámetros (400). Verificá los argumentos del script.');
   }
 
