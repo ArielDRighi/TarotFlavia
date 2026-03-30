@@ -2,7 +2,7 @@
 
 ## Estado
 
-**Propuesto** — 2026-03-23
+**Aceptado** — 2026-03-30 (implementación completa: T-BE-01 → T-QA-05)
 
 ---
 

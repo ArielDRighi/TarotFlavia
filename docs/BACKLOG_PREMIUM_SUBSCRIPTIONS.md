@@ -1090,20 +1090,20 @@ Crear un script CLI o documentar el proceso manual para crear el plan de preappr
 **Prioridad:** 🟢 BAJA
 **Estimación:** 0.5 días
 **Dependencias:** Todas las tareas anteriores
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** La documentación del proyecto necesita reflejar los nuevos módulos, endpoints, y flujos.
 
 #### ✅ Tareas específicas
 
 **Documentación:**
-- [ ] Actualizar `backend/tarot-app/docs/API_DOCUMENTATION.md`: agregar endpoints de suscripción (create-preapproval, cancel, status)
-- [ ] Actualizar `backend/tarot-app/docs/ARCHITECTURE.md`: agregar `payments.module` al diagrama de módulos
-- [ ] Actualizar `ROUTES` y endpoints en docs si hay alguna referencia
-- [ ] Marcar ADR como "Aceptado" en `docs/ADR_SUBSCRIPTION_PREMIUM_FLOW.md`
+- [x] Actualizar `backend/tarot-app/docs/API_DOCUMENTATION.md`: agregar endpoints de suscripción (create-preapproval, cancel, status)
+- [x] Actualizar `backend/tarot-app/docs/ARCHITECTURE.md`: agregar `payments.module` al diagrama de módulos
+- [x] Actualizar `ROUTES` y endpoints en docs si hay alguna referencia
+- [x] Marcar ADR como "Aceptado" en `docs/ADR_SUBSCRIPTION_PREMIUM_FLOW.md`
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Documentación refleja la arquitectura actual
-- [ ] Endpoints nuevos documentados
-- [ ] ADR marcado como aceptado
+- [x] Documentación refleja la arquitectura actual
+- [x] Endpoints nuevos documentados
+- [x] ADR marcado como aceptado

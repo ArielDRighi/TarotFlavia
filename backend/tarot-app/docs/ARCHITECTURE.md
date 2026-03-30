@@ -36,7 +36,8 @@ src/modules/
 ├── ai-usage/           # Monitoreo de uso de IA
 ├── scheduling/         # Programación de sesiones
 ├── security/           # Eventos de seguridad
-├── subscriptions/      # Gestión de suscripciones
+├── payments/           # Módulo compartido de pagos (MercadoPago, webhook router)
+├── subscriptions/      # Gestión de suscripciones premium MP
 └── plan-config/        # Configuración de planes
 ```
 
@@ -271,11 +272,69 @@ readings/
 | **plan-config**     | 4        | ~350   | Configuración de planes   |
 | **health**          | 4        | ~300   | Health checks del sistema |
 
-### Módulos con Capas (Nuevos)
+### Módulos con Capas (Nuevos — Suscripciones Premium)
 
-| Módulo         | Archivos | Líneas | Razón                                           |
-| -------------- | -------- | ------ | ----------------------------------------------- |
-| **tarotistas** | 15+      | ~2500  | Gestión completa: CRUD, config IA, aplicaciones |
+| Módulo            | Archivos | Razón                                                             |
+| ----------------- | -------- | ----------------------------------------------------------------- |
+| **payments**      | 5+       | Módulo compartido: `MercadoPagoService` + `WebhookController` router |
+| **subscriptions** | 15+      | Use cases: `CreatePreapproval`, `ProcessSubscriptionWebhook`, `CancelSubscription`, `CheckStatus` + 2 CRON services |
+
+**Estructura de `payments.module`:**
+
+```
+payments/
+├── payments.module.ts
+├── infrastructure/
+│   ├── controllers/
+│   │   └── webhook.controller.ts        # Router: payment vs subscription_preapproval
+│   └── services/
+│       └── mercadopago.service.ts       # Movido desde holistic-services; incluye PreApproval API
+└── tokens/
+    └── payment.tokens.ts                # Tokens de inyección para use cases opcionales
+```
+
+**Estructura de `subscriptions.module` (ampliada):**
+
+```
+subscriptions/
+├── subscriptions.module.ts
+├── subscriptions.controller.ts          # POST create-preapproval, POST cancel, GET status (en la raíz)
+├── subscriptions.service.ts
+├── application/
+│   ├── use-cases/
+│   │   ├── create-preapproval.use-case.ts
+│   │   ├── process-subscription-webhook.use-case.ts
+│   │   ├── cancel-subscription.use-case.ts
+│   │   └── check-subscription-status.use-case.ts
+│   ├── services/
+│   │   ├── subscription-cron.service.ts          # CRON cada 6h: degrada planes expirados
+│   │   └── subscription-reconciliation.service.ts # CRON 3AM: reconcilia con MP API
+│   └── dto/
+│       ├── create-preapproval-response.dto.ts
+│       ├── cancel-subscription-response.dto.ts
+│       └── subscription-status-response.dto.ts
+└── dto/
+    └── set-favorite-tarotista.dto.ts
+```
+
+**Flujo de webhook (routing):**
+
+> **Nota:** Mercado Pago solo envía `type` y `data.id` en el payload estándar del webhook.
+> El campo `external_reference` **no** llega en el payload — el routing definitivo se realiza
+> consultando la API de MP con `data.id` para obtener `payment.external_reference`.
+
+```
+POST /api/v1/webhooks/mercadopago
+  ├── type: "payment"
+  │     → Se consulta payment.external_reference vía API de MP
+  │       ├── external_reference numérico → ProcessMercadoPagoWebhookUseCase (holistic-services)
+  │       └── external_reference "sub_{userId}" → ProcessSubscriptionWebhookUseCase (suscripciones)
+  └── type: "subscription_preapproval"
+        → ProcessSubscriptionWebhookUseCase (cambios de estado del preapproval)
+```
+
+---
+
 
 **Estructura del módulo tarotistas:**
 
@@ -713,7 +772,7 @@ npm run test:cov
 
 ## Migración y Evolución
 
-### Estado Actual (Diciembre 2025)
+### Estado Actual (Marzo 2026)
 
 **Completadas:**
 
@@ -728,6 +787,11 @@ npm run test:cov
 - ✅ Monitoreo de uso de IA (ai-usage)
 - ✅ Sistema de eventos de seguridad
 - ✅ Circuit breaker para proveedores de IA
+- ✅ `payments.module` compartido con `MercadoPagoService` (PreApproval + Checkout Pro) y webhook router
+- ✅ Suscripciones Premium MP: create-preapproval, webhook processing, cancel, status polling
+- ✅ CRON de degradación automática de planes expirados (cada 6h)
+- ✅ CRON de reconciliación con MP API (diario 3AM)
+- ✅ `JwtStrategy` lee plan/roles/isAdmin desde DB (no JWT payload)
 
 **Pendientes/Futuras:**
 
