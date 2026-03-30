@@ -8,6 +8,11 @@
 // Configurar flag de integration testing para que TypeORM use la BD de integración
 process.env.INTEGRATION_TESTING = 'true';
 
+// Deshabilitar validación de firma de webhook en tests de integración.
+// Si MP_WEBHOOK_SECRET estuviera definido en CI, validateSignature rechazaría
+// todos los webhooks que envían x-signature vacío.
+process.env.MP_WEBHOOK_SECRET = '';
+
 // Configurar variables de base de datos de integración
 process.env.TAROT_INTEGRATION_DB_HOST =
   process.env.TAROT_INTEGRATION_DB_HOST || 'localhost';
@@ -21,9 +26,14 @@ process.env.TAROT_INTEGRATION_DB_PASSWORD =
 process.env.TAROT_INTEGRATION_DB_NAME =
   process.env.TAROT_INTEGRATION_DB_NAME || 'tarot_integration';
 
-console.log(
-  '[Setup Integration Env] Integration Testing environment configured',
-);
-console.log(
-  `[Setup Integration Env] Database: ${process.env.TAROT_INTEGRATION_DB_NAME} on port ${process.env.TAROT_INTEGRATION_DB_PORT}`,
-);
+if (
+  process.env.VERBOSE_TESTS === 'true' ||
+  process.env.DEBUG_TESTS === 'true'
+) {
+  console.log(
+    '[Setup Integration Env] Integration Testing environment configured',
+  );
+  console.log(
+    `[Setup Integration Env] Database: ${process.env.TAROT_INTEGRATION_DB_NAME} on port ${process.env.TAROT_INTEGRATION_DB_PORT}`,
+  );
+}

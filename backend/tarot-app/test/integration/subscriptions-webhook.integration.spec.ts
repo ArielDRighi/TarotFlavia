@@ -429,18 +429,29 @@ describe('Subscriptions Webhook → Activation Integration Tests', () => {
       expect(testUser.plan).toBe(UserPlan.FREE);
       expect(testUser.mpPreapprovalId).toBeNull();
 
+      // Mock de MP: getPayment retorna pago con external_reference numérico (no sub_)
+      // Necesario porque ProcessMercadoPagoWebhookUseCase siempre consulta el pago
+      // antes de leer external_reference. Sin mock dispararía una llamada real a la API de MP.
+      const mockPayment = buildMockPayment({
+        id: 12345,
+        status: 'approved',
+        external_reference: '9876', // numérico, no "sub_"
+      });
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment);
+
       // ACT: simular webhook de pago holístico con external_reference numérico
       // El WebhookController enruta este tipo al HolisticServicesOrchestratorService
-      // No mockeamos MercadoPago porque el holistic controller tiene su propio mock path,
-      // pero verificamos que el routing funciona devolviendo 200.
       const webhookPayload = {
         type: 'payment',
         data: { id: '12345' },
         externalReference: '9876', // numérico, no "sub_"
       };
 
-      // El webhook debe responder 200 (el holistic service puede fallar internamente,
-      // pero el controller NO debe desviar el pago a suscripciones)
+      // El webhook debe responder 200 (el holistic service puede fallar internamente
+      // al no encontrar la compra en la BD de integración, pero el controller NO debe
+      // desviar el pago a suscripciones)
       await request(app.getHttpServer())
         .post('/webhooks/mercadopago')
         .set('x-signature', '')
