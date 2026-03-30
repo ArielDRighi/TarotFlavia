@@ -536,11 +536,11 @@ Crea una suscripción de preapproval en Mercado Pago y retorna la URL de checkou
 **Restricción:** Solo disponible para usuarios `free` autenticados. Usuarios ya `premium` reciben `400 Bad Request`.
 
 ```http
-POST /api/subscriptions/create-preapproval
+POST /api/v1/subscriptions/create-preapproval
 Authorization: Bearer <token>
 ```
 
-**Response: `201 Created`**
+**Response: `200 OK`**
 
 ```json
 {
@@ -550,24 +550,24 @@ Authorization: Bearer <token>
 
 **Errores:**
 
-- `400 Bad Request` — Usuario ya es premium
+- `400 Bad Request` — Usuario ya tiene un plan premium activo
   ```json
-  { "statusCode": 400, "message": "User is already premium", "error": "Bad Request" }
+  { "statusCode": 400, "message": "El usuario ya tiene un plan premium activo", "error": "Bad Request" }
   ```
 - `404 Not Found` — Usuario no encontrado
   ```json
-  { "statusCode": 404, "message": "User not found", "error": "Not Found" }
+  { "statusCode": 404, "message": "Usuario no encontrado", "error": "Not Found" }
   ```
 - `500 Internal Server Error` — Variable de entorno `MP_PREAPPROVAL_PLAN_ID` no configurada
   ```json
-  { "statusCode": 500, "message": "MP_PREAPPROVAL_PLAN_ID is not configured", "error": "Internal Server Error" }
+  { "statusCode": 500, "message": "MP_PREAPPROVAL_PLAN_ID no está configurado", "error": "Internal Server Error" }
   ```
 - `502 Bad Gateway` — Error al comunicarse con la API de Mercado Pago
 
 **Ejemplo cURL:**
 
 ```bash
-curl -X POST http://localhost:3000/api/subscriptions/create-preapproval \
+curl -X POST http://localhost:3000/api/v1/subscriptions/create-preapproval \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -578,7 +578,7 @@ curl -X POST http://localhost:3000/api/subscriptions/create-preapproval \
 Cancela la suscripción activa del usuario en Mercado Pago y actualiza el estado en la DB. El plan `premium` se mantiene activo hasta `planExpiresAt`.
 
 ```http
-POST /api/subscriptions/cancel
+POST /api/v1/subscriptions/cancel
 Authorization: Bearer <token>
 ```
 
@@ -593,16 +593,20 @@ Authorization: Bearer <token>
 
 **Errores:**
 
-- `400 Bad Request` — Usuario no tiene suscripción activa o ya está cancelada
+- `400 Bad Request` — El usuario no tiene suscripción activa
   ```json
-  { "statusCode": 400, "message": "No active subscription found", "error": "Bad Request" }
+  { "statusCode": 400, "message": "No tenés una suscripción activa", "error": "Bad Request" }
+  ```
+- `400 Bad Request` — La suscripción ya fue cancelada previamente
+  ```json
+  { "statusCode": 400, "message": "Solo se pueden cancelar suscripciones activas", "error": "Bad Request" }
   ```
 - `502 Bad Gateway` — Error al cancelar en la API de Mercado Pago
 
 **Ejemplo cURL:**
 
 ```bash
-curl -X POST http://localhost:3000/api/subscriptions/cancel \
+curl -X POST http://localhost:3000/api/v1/subscriptions/cancel \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -613,7 +617,7 @@ curl -X POST http://localhost:3000/api/subscriptions/cancel \
 Retorna el estado actual de la suscripción directamente desde la DB (sin caché). Usado principalmente para polling post-checkout en `/premium/activacion`.
 
 ```http
-GET /api/subscriptions/status
+GET /api/v1/subscriptions/status
 Authorization: Bearer <token>
 ```
 
@@ -640,7 +644,7 @@ Authorization: Bearer <token>
 **Ejemplo cURL:**
 
 ```bash
-curl -X GET http://localhost:3000/api/subscriptions/status \
+curl -X GET http://localhost:3000/api/v1/subscriptions/status \
   -H "Authorization: Bearer <token>"
 ```
 

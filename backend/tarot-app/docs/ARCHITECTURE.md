@@ -298,8 +298,8 @@ payments/
 ```
 subscriptions/
 ├── subscriptions.module.ts
-├── domain/
-│   └── interfaces/
+├── subscriptions.controller.ts          # POST create-preapproval, POST cancel, GET status (en la raíz)
+├── subscriptions.service.ts
 ├── application/
 │   ├── use-cases/
 │   │   ├── create-preapproval.use-case.ts
@@ -313,19 +313,22 @@ subscriptions/
 │       ├── create-preapproval-response.dto.ts
 │       ├── cancel-subscription-response.dto.ts
 │       └── subscription-status-response.dto.ts
-└── infrastructure/
-    └── controllers/
-        └── subscription.controller.ts   # POST create-preapproval, POST cancel, GET status
+└── dto/
+    └── set-favorite-tarotista.dto.ts
 ```
 
 **Flujo de webhook (routing):**
 
+> **Nota:** Mercado Pago solo envía `type` y `data.id` en el payload estándar del webhook.
+> El campo `external_reference` **no** llega en el payload — el routing definitivo se realiza
+> consultando la API de MP con `data.id` para obtener `payment.external_reference`.
+
 ```
 POST /api/v1/webhooks/mercadopago
-  ├── type: "payment" + external_reference numérico
-  │     → ProcessMercadoPagoWebhookUseCase (holistic-services, pagos de Flavia)
-  ├── type: "payment" + external_reference "sub_{userId}"
-  │     → ProcessSubscriptionWebhookUseCase (suscripciones premium)
+  ├── type: "payment"
+  │     → Se consulta payment.external_reference vía API de MP
+  │       ├── external_reference numérico → ProcessMercadoPagoWebhookUseCase (holistic-services)
+  │       └── external_reference "sub_{userId}" → ProcessSubscriptionWebhookUseCase (suscripciones)
   └── type: "subscription_preapproval"
         → ProcessSubscriptionWebhookUseCase (cambios de estado del preapproval)
 ```
