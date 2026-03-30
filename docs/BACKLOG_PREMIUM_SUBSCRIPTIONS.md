@@ -1034,26 +1034,26 @@ Crear un script CLI o documentar el proceso manual para crear el plan de preappr
 **Prioridad:** 🟡 MEDIA
 **Estimación:** 1.5 días
 **Dependencias:** T-INT-02, T-INT-03
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 **Contexto:** Los tests unitarios de cada use case están incluidos en sus tareas respectivas. Se necesitan tests de integración que validen el flujo end-to-end: webhook recibido → plan actualizado → endpoint status retorna premium.
 
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Test de integración: simular webhook `subscription_preapproval` con `status=authorized` → verificar que `GET /subscriptions/status` retorna `plan=premium`
-- [ ] Test de integración: simular webhook `payment` con `external_reference=sub_X` y `status=approved` → verificar que `planExpiresAt` se actualiza
-- [ ] Test de integración: simular cancelación → webhook `subscription_preapproval` con `status=cancelled` → verificar que plan sigue premium pero `subscriptionStatus=cancelled`
-- [ ] Test de integración: simular que CRON corre después de `planExpiresAt` → verificar que plan se degrada a free
-- [ ] Test: webhook de pago de servicio holístico con `external_reference` numérico → sigue procesándose normalmente (no regresión)
+- [x] Test de integración: simular webhook `subscription_preapproval` con `status=authorized` → verificar que `GET /subscriptions/status` retorna `plan=premium`
+- [x] Test de integración: simular webhook `payment` con `external_reference=sub_X` y `status=approved` → verificar que `planExpiresAt` se actualiza
+- [x] Test de integración: simular cancelación → webhook `subscription_preapproval` con `status=cancelled` → verificar que plan sigue premium pero `subscriptionStatus=cancelled`
+- [x] Test de integración: simular que CRON corre después de `planExpiresAt` → verificar que plan se degrada a free
+- [x] Test: webhook de pago de servicio holístico con `external_reference` numérico → sigue procesándose normalmente (no regresión)
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Flujo completo de activación testeado end-to-end
-- [ ] Flujo de cancelación testeado end-to-end
-- [ ] Flujo de degradación por CRON testeado
-- [ ] No regresión en pagos de servicios holísticos
-- [ ] Coverage ≥ 80%
+- [x] Flujo completo de activación testeado end-to-end
+- [x] Flujo de cancelación testeado end-to-end
+- [x] Flujo de degradación por CRON testeado
+- [x] No regresión en pagos de servicios holísticos
+- [x] Coverage ≥ 80%
 
 ---
 

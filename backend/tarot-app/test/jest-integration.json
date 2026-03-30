@@ -7,6 +7,9 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "globalSetup": "<rootDir>/setup-integration-db.ts",
+  "setupFiles": ["<rootDir>/setup-integration-env.ts"],
+  "maxWorkers": 1,
+  "forceExit": true,
   "collectCoverageFrom": [
     "../src/**/*.ts",
     "!../src/**/*.spec.ts",
