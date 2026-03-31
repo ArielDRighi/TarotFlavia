@@ -1,0 +1,64 @@
+# Dependencies (installed during build)
+node_modules
+backend/tarot-app/node_modules
+frontend/node_modules
+
+# Build output
+backend/tarot-app/dist
+frontend/.next
+frontend/out
+
+# Git
+.git
+.github
+.gitignore
+
+# Documentation
+docs
+*.md
+!backend/tarot-app/package.json
+!frontend/package.json
+!package.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+backend/tarot-app/.env
+backend/tarot-app/.env.*
+frontend/.env.local
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.e2e-spec.ts
+**/test/
+**/coverage/
+**/__tests__/
+**/playwright-report/
+**/.playwright-mcp/
+
+# IDE & OS
+.vscode
+.idea
+*.swp
+*.swo
+Thumbs.db
+.DS_Store
+
+# Logs & temp
+**/logs/
+**/*.log
+**/*.sql
+**/server.pid
+**/*.tsbuildinfo
+
+# Docker
+docker-compose*.yml
+
+# Claude/AI config
+.claude
+.agents
+CLAUDE.md
+AGENTS.md

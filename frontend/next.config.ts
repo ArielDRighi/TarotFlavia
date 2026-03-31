@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
 
+  // Standalone output for optimized Docker production images
+  output: 'standalone',
+
   // Image optimization configuration
   images: {
     // Remote patterns for external images
