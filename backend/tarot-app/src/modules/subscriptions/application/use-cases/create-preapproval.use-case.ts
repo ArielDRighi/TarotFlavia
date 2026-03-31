@@ -45,23 +45,17 @@ export class CreatePreapprovalUseCase {
     }
 
     // 3. Obtener configuración de entorno
-    const preapprovalPlanId =
-      this.configService.get<string>('MP_PREAPPROVAL_PLAN_ID') ?? '';
-
-    // Fix 2: Validar que MP_PREAPPROVAL_PLAN_ID esté configurado
-    if (!preapprovalPlanId) {
-      throw new InternalServerErrorException(
-        'MP_PREAPPROVAL_PLAN_ID no está configurado',
-      );
-    }
-
     const frontendUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3001';
     const backendUrl =
       this.configService.get<string>('BACKEND_URL') ?? 'http://localhost:3000';
 
     const externalReference = `sub_${userId}`;
-    const backUrl = `${frontendUrl}/premium/activacion`;
+    // MP requires HTTPS for back_url; use BACKEND_URL (ngrok) as base in dev
+    const backUrlBase = frontendUrl.startsWith('https')
+      ? frontendUrl
+      : backendUrl;
+    const backUrl = `${backUrlBase}/premium/activacion`;
     const notificationUrl = `${backendUrl}/api/v1/webhooks/mercadopago`;
 
     // 4. Crear preapproval en Mercado Pago
@@ -70,7 +64,13 @@ export class CreatePreapprovalUseCase {
 
     try {
       const result = await this.mercadoPagoService.createPreapproval({
-        preapprovalPlanId,
+        reason: 'Auguria Premium',
+        autoRecurring: {
+          frequency: 1,
+          frequencyType: 'months',
+          transactionAmount: 2999,
+          currencyId: 'ARS',
+        },
         payerEmail: userEmail,
         externalReference,
         backUrl,
@@ -79,9 +79,10 @@ export class CreatePreapprovalUseCase {
       preapprovalId = result.preapprovalId;
       initPoint = result.initPoint;
     } catch (error) {
+      const errorDetail =
+        error instanceof Error ? error.stack : JSON.stringify(error, null, 2);
       this.logger.error(
-        `Error al crear preapproval en MP para usuario ${userId}`,
-        error instanceof Error ? error.stack : String(error),
+        `Error al crear preapproval en MP para usuario ${userId}: ${errorDetail}`,
       );
       throw new BadGatewayException(
         'Error al crear la suscripción en Mercado Pago',

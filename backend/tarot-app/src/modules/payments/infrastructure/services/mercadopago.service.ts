@@ -29,8 +29,14 @@ export interface CreatePreferenceParams {
 }
 
 export interface CreatePreapprovalParams {
-  preapprovalPlanId: string;
-  payerEmail: string;
+  reason: string;
+  autoRecurring: {
+    frequency: number;
+    frequencyType: 'months' | 'days';
+    transactionAmount: number;
+    currencyId: string;
+  };
+  payerEmail?: string;
   externalReference: string;
   backUrl: string;
   notificationUrl: string;
@@ -177,11 +183,18 @@ export class MercadoPagoService {
     const preApprovalClient = new PreApproval(this.client);
 
     const body: PreApprovalRequest & { notification_url: string } = {
-      preapproval_plan_id: params.preapprovalPlanId,
-      payer_email: params.payerEmail,
+      reason: params.reason,
+      auto_recurring: {
+        frequency: params.autoRecurring.frequency,
+        frequency_type: params.autoRecurring.frequencyType,
+        transaction_amount: params.autoRecurring.transactionAmount,
+        currency_id: params.autoRecurring.currencyId,
+      },
+      ...(params.payerEmail ? { payer_email: params.payerEmail } : {}),
       external_reference: params.externalReference,
       back_url: params.backUrl,
       notification_url: params.notificationUrl,
+      status: 'pending',
     };
 
     const response: PreApprovalResponse = await preApprovalClient.create({

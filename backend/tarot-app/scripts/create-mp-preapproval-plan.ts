@@ -133,11 +133,14 @@ async function createPreapprovalPlan(): Promise<void> {
     console.error(
       '   Asegurate de tener una línea como: MP_ACCESS_TOKEN=TEST-xxx...',
     );
-    console.error('   en backend/tarot-app/.env antes de ejecutar este script.');
+    console.error(
+      '   en backend/tarot-app/.env antes de ejecutar este script.',
+    );
     process.exit(1);
   }
 
-  const isTestToken = accessToken.startsWith('TEST-');
+  const isTestToken =
+    accessToken.startsWith('TEST-') || accessToken.startsWith('APP_USR-');
   const environment = isTestToken ? 'Sandbox (TEST)' : 'Producción';
 
   console.log('🚀 Creando plan de preapproval en MercadoPago...\n');
@@ -162,9 +165,9 @@ async function createPreapprovalPlan(): Promise<void> {
       transaction_amount: options.amount,
       currency_id: 'ARS',
     },
-    back_url: process.env.FRONTEND_URL
-      ? `${process.env.FRONTEND_URL}/premium`
-      : 'http://localhost:3001/premium',
+    back_url: process.env.BACKEND_URL
+      ? `${process.env.FRONTEND_URL ?? process.env.BACKEND_URL}/premium`
+      : 'https://auguria.com.ar/premium',
   };
 
   const response = await planClient.create({ body });
@@ -191,17 +194,13 @@ async function createPreapprovalPlan(): Promise<void> {
     console.log(`   Creado:         ${response.date_created}`);
   }
 
-  console.log(
-    '\n────────────────────────────────────────────────────────────',
-  );
+  console.log('\n────────────────────────────────────────────────────────────');
   console.log('📋 PRÓXIMO PASO — Agregar el ID al archivo .env:\n');
   console.log(`   MP_PREAPPROVAL_PLAN_ID=${response.id}\n`);
   console.log(
     'Luego reiniciá el servidor (npm run start:dev) para que tome el nuevo valor.',
   );
-  console.log(
-    '────────────────────────────────────────────────────────────\n',
-  );
+  console.log('────────────────────────────────────────────────────────────\n');
 }
 
 interface MpApiError {
@@ -229,6 +228,19 @@ function extractHttpStatus(error: unknown): number | null {
 createPreapprovalPlan().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
   console.error('❌ Error al crear el plan en MercadoPago:', message);
+  if (error && typeof error === 'object' && 'cause' in error) {
+    console.error(
+      '   Causa:',
+      JSON.stringify((error as Record<string, unknown>).cause, null, 2),
+    );
+  }
+  if (error && typeof error === 'object') {
+    try {
+      console.error('   Detalle completo:', JSON.stringify(error, null, 2));
+    } catch {
+      /* circular */
+    }
+  }
 
   const httpStatus = extractHttpStatus(error);
 
@@ -237,7 +249,9 @@ createPreapprovalPlan().catch((error: unknown) => {
       '\n💡 Error de autenticación (401). Verificá que MP_ACCESS_TOKEN sea válido.',
     );
   } else if (httpStatus === 400) {
-    console.error('\n💡 Error de parámetros (400). Verificá los argumentos del script.');
+    console.error(
+      '\n💡 Error de parámetros (400). Verificá los argumentos del script.',
+    );
   }
 
   process.exit(1);
