@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
   BadGatewayException,
-  NotFoundException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CreatePreapprovalUseCase } from './create-preapproval.use-case';
@@ -61,7 +61,6 @@ describe('CreatePreapprovalUseCase', () => {
     // Configurar variables de entorno por defecto
     mockConfigService.get.mockImplementation((key: string) => {
       const envMap: Record<string, string> = {
-        MP_PREAPPROVAL_PLAN_ID: 'plan_test_123',
         FRONTEND_URL: 'http://localhost:3001',
         BACKEND_URL: 'http://localhost:3000',
       };
@@ -130,10 +129,16 @@ describe('CreatePreapprovalUseCase', () => {
 
       // Assert
       expect(mockMercadoPagoService.createPreapproval).toHaveBeenCalledWith({
-        preapprovalPlanId: 'plan_test_123',
+        reason: 'Auguria Premium',
+        autoRecurring: {
+          frequency: 1,
+          frequencyType: 'months',
+          transactionAmount: 2999,
+          currencyId: 'ARS',
+        },
         payerEmail: 'user99@example.com',
         externalReference: 'sub_99',
-        backUrl: 'http://localhost:3001/premium/activacion',
+        backUrl: 'http://localhost:3000/premium/activacion',
         notificationUrl: 'http://localhost:3000/api/v1/webhooks/mercadopago',
       });
     });
@@ -282,44 +287,32 @@ describe('CreatePreapprovalUseCase', () => {
       );
     });
 
-    // ─── Fix 2: MP_PREAPPROVAL_PLAN_ID vacío → InternalServerErrorException ──
+    // ─── Plan constants: inline preapproval uses centralized constants ─────────
 
-    it('MP_PREAPPROVAL_PLAN_ID no configurado → lanza InternalServerErrorException antes de llamar a MP', async () => {
+    it('usa las constantes del plan (reason, frequency, amount, currency)', async () => {
       // Arrange
       const freeUser = buildUser({ plan: UserPlan.FREE });
       mockUserRepo.findById.mockResolvedValue(freeUser);
-      mockConfigService.get.mockImplementation((key: string) => {
-        const envMap: Record<string, string | undefined> = {
-          MP_PREAPPROVAL_PLAN_ID: undefined,
-          FRONTEND_URL: 'http://localhost:3001',
-          BACKEND_URL: 'http://localhost:3000',
-        };
-        return envMap[key];
+      mockMercadoPagoService.createPreapproval.mockResolvedValue({
+        preapprovalId: 'preapproval_constants_test',
+        initPoint: 'https://mp.com/checkout',
       });
+      mockUserRepo.save.mockResolvedValue(freeUser);
 
-      // Act & Assert
-      await expect(useCase.execute(42, 'test@example.com')).rejects.toThrow(
-        InternalServerErrorException,
-      );
-      expect(mockMercadoPagoService.createPreapproval).not.toHaveBeenCalled();
-    });
+      // Act
+      await useCase.execute(42, 'test@example.com');
 
-    it('MP_PREAPPROVAL_PLAN_ID vacío → mensaje de error claro en español', async () => {
-      // Arrange
-      const freeUser = buildUser({ plan: UserPlan.FREE });
-      mockUserRepo.findById.mockResolvedValue(freeUser);
-      mockConfigService.get.mockImplementation((key: string) => {
-        const envMap: Record<string, string | undefined> = {
-          MP_PREAPPROVAL_PLAN_ID: '',
-          FRONTEND_URL: 'http://localhost:3001',
-          BACKEND_URL: 'http://localhost:3000',
-        };
-        return envMap[key];
-      });
-
-      // Act & Assert
-      await expect(useCase.execute(42, 'test@example.com')).rejects.toThrow(
-        'MP_PREAPPROVAL_PLAN_ID no está configurado',
+      // Assert — valores provienen de PREAPPROVAL_PLAN constants
+      expect(mockMercadoPagoService.createPreapproval).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reason: 'Auguria Premium',
+          autoRecurring: expect.objectContaining({
+            frequency: 1,
+            frequencyType: 'months',
+            transactionAmount: 2999,
+            currencyId: 'ARS',
+          }),
+        }),
       );
     });
 
