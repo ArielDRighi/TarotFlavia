@@ -13,6 +13,7 @@ import { UserPlan } from '../../../users/entities/user.entity';
 import { CreatePreapprovalResponseDto } from '../dto/create-preapproval-response.dto';
 import { USER_REPOSITORY } from '../../../users/domain/interfaces/repository.tokens';
 import { IUserRepository } from '../../../users/domain/interfaces/user-repository.interface';
+import { PREAPPROVAL_PLAN } from '../constants/preapproval-plan.constants';
 
 @Injectable()
 export class CreatePreapprovalUseCase {
@@ -64,12 +65,12 @@ export class CreatePreapprovalUseCase {
 
     try {
       const result = await this.mercadoPagoService.createPreapproval({
-        reason: 'Auguria Premium',
+        reason: PREAPPROVAL_PLAN.REASON,
         autoRecurring: {
-          frequency: 1,
-          frequencyType: 'months',
-          transactionAmount: 2999,
-          currencyId: 'ARS',
+          frequency: PREAPPROVAL_PLAN.FREQUENCY,
+          frequencyType: PREAPPROVAL_PLAN.FREQUENCY_TYPE,
+          transactionAmount: PREAPPROVAL_PLAN.TRANSACTION_AMOUNT,
+          currencyId: PREAPPROVAL_PLAN.CURRENCY_ID,
         },
         payerEmail: userEmail,
         externalReference,

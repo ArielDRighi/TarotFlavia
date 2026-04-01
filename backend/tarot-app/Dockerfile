@@ -23,6 +23,10 @@ COPY backend/tarot-app/ ./backend/tarot-app/
 WORKDIR /app/backend/tarot-app
 RUN npm run build
 
+# Prune devDependencies before copying to production stage
+WORKDIR /app
+RUN npm prune --omit=dev -w backend/tarot-app
+
 # ── Stage 2: Production ────────────────────────────────────────
 FROM node:20-alpine
 

@@ -264,7 +264,13 @@ describe('MercadoPagoService', () => {
 
   describe('createPreapproval', () => {
     const params: CreatePreapprovalParams = {
-      preapprovalPlanId: 'plan_test_123',
+      reason: 'Auguria Premium',
+      autoRecurring: {
+        frequency: 1,
+        frequencyType: 'months',
+        transactionAmount: 2999,
+        currencyId: 'ARS',
+      },
       payerEmail: 'user@test.com',
       externalReference: 'sub_42',
       backUrl: 'http://localhost:3001/premium/activacion',
@@ -298,9 +304,15 @@ describe('MercadoPagoService', () => {
       expect(mockPreApprovalCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({
-            external_reference: 'sub_42',
-            preapproval_plan_id: 'plan_test_123',
+            reason: 'Auguria Premium',
+            auto_recurring: expect.objectContaining({
+              frequency: 1,
+              frequency_type: 'months',
+              transaction_amount: 2999,
+              currency_id: 'ARS',
+            }),
             payer_email: 'user@test.com',
+            external_reference: 'sub_42',
             back_url: 'http://localhost:3001/premium/activacion',
             notification_url:
               'http://localhost:3000/api/v1/webhooks/mercadopago',

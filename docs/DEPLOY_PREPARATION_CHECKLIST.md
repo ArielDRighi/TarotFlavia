@@ -1,4 +1,4 @@
-# Preparacion del Proyecto para Deploy
+# Preparación del Proyecto para Deploy
 
 **Fecha:** 2026-03-31
 **Estado:** Pendiente
@@ -8,13 +8,13 @@
 
 ## Resumen Ejecutivo
 
-El proyecto esta funcionalmente listo pero tiene deuda tecnica acumulada: archivos temporales, documentos obsoletos, falta de Dockerfiles, y configuraciones hardcodeadas para localhost. Este documento lista **todo lo que hay que hacer** organizado por prioridad.
+El proyecto esta funcionalmente listo pero tiene deuda técnica acumulada: archivos temporales, documentos obsoletos, falta de Dockerfiles, y configuraciónes hardcodeadas para localhost. Este documento lista **todo lo que hay que hacer** organizado por prioridad.
 
 ---
 
 ## P0 — CRITICO (bloquea deploy)
 
-### 1. Crear Dockerfiles de produccion
+### 1. Crear Dockerfiles de producción
 
 No existen Dockerfiles para ninguno de los dos servicios. Railway puede buildear sin ellos (usa Nixpacks), pero tener Dockerfiles propios da control y reproducibilidad.
 
@@ -41,9 +41,9 @@ El `.env` del backend contiene API keys reales (Groq, Gemini, MercadoPago, JWT s
 - `MP_WEBHOOK_SECRET`
 - `TAROT_DB_PASSWORD`
 
-### 3. Eliminar fallbacks a localhost en codigo de produccion
+### 3. Eliminar fallbacks a localhost en codigo de producción
 
-Multiples archivos tienen `localhost` como fallback cuando falta una variable de entorno. En produccion esto causa errores silenciosos.
+Multiples archivos tienen `localhost` como fallback cuando falta una variable de entorno. En producción esto causa errores silenciosos.
 
 **Backend — archivos afectados:**
 
@@ -54,7 +54,7 @@ Multiples archivos tienen `localhost` como fallback cuando falta una variable de
 - [ ] `backend/tarot-app/src/modules/holistic-services/application/use-cases/process-mercadopago-webhook.use-case.ts` — localhost fallback
 - [ ] `backend/tarot-app/src/main.ts` (linea ~112) — Swagger server URL hardcodeada
 
-**Accion:** Cambiar los defaults de localhost por variables de entorno requeridas. Si la variable no existe en produccion, el servicio debe fallar al arrancar con un error claro, no usar localhost silenciosamente.
+**Acción:** Cambiar los defaults de localhost por variables de entorno requeridas. Si la variable no existe en producción, el servicio debe fallar al arrancar con un error claro, no usar localhost silenciosamente.
 
 **Frontend — archivos afectados:**
 
@@ -144,7 +144,7 @@ Agregar entradas faltantes:
 
 ---
 
-## P2 — MEDIO (recomendado antes de produccion)
+## P2 — MEDIO (recomendado antes de producción)
 
 ### 8. Limpiar console.log/console.error del frontend
 
@@ -161,9 +161,9 @@ Agregar entradas faltantes:
 - [ ] `frontend/src/components/features/contact/ContactForm.tsx:59,69`
 - [ ] `frontend/src/lib/utils/chinese-zodiac.ts:227`
 
-### 9. Resolver TODOs criticos del frontend
+### 9. Resolver TODOs críticos del frontend
 
-Paginas con contenido placeholder que no deberian estar en produccion:
+Paginas con contenido placeholder que no deberían estar en producción:
 
 - [ ] `frontend/src/app/privacidad/page.tsx` — "TODO: Reemplazar con contenido legal real"
 - [ ] `frontend/src/app/terminos/page.tsx` — "TODO: Reemplazar con contenido legal real"
@@ -209,7 +209,7 @@ No existe archivo de licencia en el repositorio. Si el proyecto va a ser publico
 
 ### 14. Considerar error tracking
 
-Para produccion, reemplazar console.error con un servicio como Sentry:
+Para producción, reemplazar console.error con un servicio como Sentry:
 
 - [ ] Evaluar Sentry free tier (5K events/mes gratis)
 - [ ] Agregar `NEXT_PUBLIC_SENTRY_DSN` y `SENTRY_DSN` a .env.example
@@ -217,11 +217,11 @@ Para produccion, reemplazar console.error con un servicio como Sentry:
 ### 15. Documentar proceso de deploy
 
 - [ ] Agregar seccion de deployment al README.md
-- [ ] Documentar variables de entorno requeridas para produccion
+- [ ] Documentar variables de entorno requeridas para producción
 
 ### 16. Seguridad de tokens en frontend
 
-Los tokens JWT se guardan en `localStorage` (vulnerable a XSS). Para produccion considerar migrar a `httpOnly cookies` (requiere cambios en backend).
+Los tokens JWT se guardan en `localStorage` (vulnerable a XSS). Para producción considerar migrar a `httpOnly cookies` (requiere cambios en backend).
 
 - [ ] Evaluar migracion a httpOnly cookies
 
@@ -229,7 +229,7 @@ Los tokens JWT se guardan en `localStorage` (vulnerable a XSS). Para produccion 
 
 ## Resumen de Impacto
 
-| Accion | Archivos afectados | Espacio liberado | Tiempo estimado |
+| Acción | Archivos afectados | Espacio liberado | Tiempo estimado |
 |--------|-------------------|-----------------|-----------------|
 | Eliminar docs raiz | 17 archivos | ~430KB | 15 min |
 | Eliminar archivos temp backend | 9 archivos | ~1MB | 15 min |
@@ -249,6 +249,6 @@ Los tokens JWT se guardan en `localStorage` (vulnerable a XSS). Para produccion 
 2. **Eliminar todos los archivos innecesarios** (una sola branch de limpieza)
 3. **Actualizar .gitignore** para prevenir futuros archivos basura
 4. **Eliminar localhost fallbacks** del codigo
-5. **Crear Dockerfiles** de produccion
-6. **Limpiar console.logs** y resolver TODOs criticos
+5. **Crear Dockerfiles** de producción
+6. **Limpiar console.logs** y resolver TODOs críticos
 7. **Desplegar en Railway** siguiendo el ADR

@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-03-31
 **Estado:** Propuesta
-**Contexto:** Seleccionar plataforma de hosting para staging (y futura produccion) de Auguria
+**Contexto:** Seleccionar plataforma de hosting para staging (y futura producción) de Auguria
 
 ---
 
@@ -22,18 +22,18 @@ Auguria es un monorepo con:
 |-----------|---------|
 | Usuarios | 4 testers |
 | Disponibilidad | 24/7 |
-| Acceso | Privado (no publico) |
+| Acceso | Privado (no público) |
 | MercadoPago | Modo sandbox activo |
 | Webhooks MP | Necesita URL publica para recibir notificaciones |
-| CI/CD | Deploy automatico desde `main` |
-| Experiencia DevOps | Minima — se prioriza simplicidad |
-| Evolucion | Este staging sera base para produccion |
+| CI/CD | Deploy automático desde `main` |
+| Experiencia DevOps | Mínima — se prioriza simplicidad |
+| Evolución | Este staging sera base para producción |
 
 ### Dependencias de infraestructura
 
 | Componente | Requerido | Notas |
 |------------|-----------|-------|
-| PostgreSQL 16 | Si | ~29 tablas, migraciones TypeORM |
+| PostgreSQL 16 | Si | ~29 tablas, migraciónes TypeORM |
 | Node.js 20 | Si | Backend + Frontend |
 | Dominio custom + SSL | Si | Ya tienen dominio propio |
 | Cron/Scheduler | Si | NestJS @nestjs/schedule (se ejecuta dentro del proceso) |
@@ -43,11 +43,11 @@ Auguria es un monorepo con:
 
 ---
 
-## Opciones Evaluadas
+## Opciónes Evaluadas
 
-### Opcion A: Railway (RECOMENDADA)
+### Opción A: Railway (RECOMENDADA)
 
-**Railway** es un PaaS que permite desplegar servicios desde GitHub con deploy automatico, sin configuracion de servidores.
+**Railway** es un PaaS que permite desplegar servicios desde GitHub con deploy automático, sin configuración de servidores.
 
 | Componente | Especificacion | Costo estimado |
 |------------|---------------|----------------|
@@ -60,28 +60,28 @@ Auguria es un monorepo con:
 **Pros:**
 - Deploy desde GitHub en un click (conectas repo y listo)
 - PostgreSQL managed incluido (backup, monitoring)
-- Variables de entorno faciles de configurar por UI
-- Dominio custom + SSL automatico
-- Deploy automatico al hacer push a `main`
+- Variables de entorno fáciles de configurar por UI
+- Dominio custom + SSL automático
+- Deploy automático al hacer push a `main`
 - Logs en tiempo real desde el dashboard
 - Los cron jobs de NestJS funcionan directamente (corren dentro del proceso)
 - URL publica para webhooks de MercadoPago
-- Escala facilmente a produccion sin migrar
+- Escala fácilmente a producción sin migrar
 
 **Contras:**
-- No tiene restriccion de acceso nativa (necesitas implementar proteccion a nivel app o usar un middleware)
+- No tiene restricción de acceso nativa (necesitas implementar proteccion a nivel app o usar un middleware)
 - Si el consumo crece, los costos suben (pay-per-use)
 
 **Restriccion de acceso para staging:**
-- Opcion 1: Variable de entorno `STAGING_PASSWORD` + middleware en NestJS/Next.js que pida password
-- Opcion 2: El frontend ya tiene autenticacion — no registrar usuarios publicos (solo crear 4 cuentas manualmente via seed/API)
-- Opcion 3: Cloudflare Access (gratis hasta 50 usuarios) como proxy delante de Railway
+- Opción 1: Variable de entorno `STAGING_PASSWORD` + middleware en NestJS/Next.js que pida password
+- Opción 2: El frontend ya tiene autenticación — no registrar usuarios públicos (solo crear 4 cuentas manualmente via seed/API)
+- Opción 3: Cloudflare Access (gratis hasta 50 usuarios) como proxy delante de Railway
 
 **Setup estimado:** 1-2 horas
 
 ---
 
-### Opcion B: Render
+### Opción B: Render
 
 **Render** es un PaaS similar a Railway con pricing fijo por servicio.
 
@@ -97,8 +97,8 @@ Auguria es un monorepo con:
 - Interfaz muy intuitiva, similar a Railway
 - Pricing predecible (fijo, no por uso)
 - PostgreSQL managed incluido
-- Deploy automatico desde GitHub
-- Dominio custom + SSL automatico
+- Deploy automático desde GitHub
+- Dominio custom + SSL automático
 
 **Contras:**
 - Mas caro que Railway para este caso de uso
@@ -110,7 +110,7 @@ Auguria es un monorepo con:
 
 ---
 
-### Opcion C: Vercel (frontend) + Railway (backend + DB)
+### Opción C: Vercel (frontend) + Railway (backend + DB)
 
 **Arquitectura hibrida:** frontend en Vercel (optimizado para Next.js) y backend en Railway.
 
@@ -130,14 +130,14 @@ Auguria es un monorepo con:
 - Dos plataformas separadas = mas complejidad operativa
 - Vercel Hobby es solo para uso no comercial (necesitas Pro)
 - Vercel Pro es $20/seat — se encarece con mas miembros
-- CORS y networking entre plataformas requiere configuracion adicional
+- CORS y networking entre plataformas requiere configuración adicional
 - Mayor superficie de debugging cuando algo falla
 
 **Setup estimado:** 2-3 horas
 
 ---
 
-### Opcion D: Coolify en Hetzner VPS
+### Opción D: Coolify en Hetzner VPS
 
 **Coolify** es un PaaS open-source auto-hosteado que instalas en tu propio VPS.
 
@@ -154,8 +154,8 @@ Auguria es un monorepo con:
 - Control total sobre la infraestructura
 - Sin limites de uso — todo corre en tu VPS
 - Coolify tiene UI similar a Railway/Render
-- Deploy automatico desde GitHub
-- SSL automatico via Let's Encrypt
+- Deploy automático desde GitHub
+- SSL automático via Let's Encrypt
 - Un solo servidor = networking simple
 
 **Contras:**
@@ -165,13 +165,13 @@ Auguria es un monorepo con:
 - 4GB RAM puede quedar justo con NestJS + Next.js + PostgreSQL corriendo juntos
 - Requiere mas setup inicial (~3-4 horas) y conocimiento basico de SSH/Docker
 - Debugging mas dificil sin soporte del proveedor
-- Para escalar a produccion, probablemente necesites migrar a un VPS mas grande o a un PaaS
+- Para escalar a producción, probablemente necesites migrar a un VPS mas grande o a un PaaS
 
 **Setup estimado:** 3-4 horas
 
 ---
 
-### Opcion E: DigitalOcean App Platform
+### Opción E: DigitalOcean App Platform
 
 | Componente | Especificacion | Costo estimado |
 |------------|---------------|----------------|
@@ -184,7 +184,7 @@ Auguria es un monorepo con:
 - Pricing claro y predecible
 - Buena documentacion
 - PostgreSQL managed con backups
-- Deploy automatico desde GitHub
+- Deploy automático desde GitHub
 
 **Contras:**
 - Interfaz menos moderna que Railway/Render
@@ -196,7 +196,7 @@ Auguria es un monorepo con:
 
 ---
 
-### Opcion F: Fly.io
+### Opción F: Fly.io
 
 | Componente | Especificacion | Costo estimado |
 |------------|---------------|----------------|
@@ -215,7 +215,7 @@ Auguria es un monorepo con:
 - Fly Postgres es self-managed (tu responsabilidad)
 - Managed Postgres empieza en $38/mes (caro)
 - CLI-first (menos UI amigable)
-- Configuracion mas compleja (fly.toml, etc.)
+- Configuración mas compleja (fly.toml, etc.)
 - Curva de aprendizaje mas alta que Railway/Render
 - No ideal para poca experiencia DevOps
 
@@ -238,25 +238,25 @@ Auguria es un monorepo con:
 
 ---
 
-## Decision: Railway (Opcion A)
+## Decisión: Railway (Opción A)
 
-### Justificacion
+### Justificación
 
-1. **Minima friccion:** Railway esta disenado para devs con poca experiencia DevOps. Conectas GitHub, configuras variables de entorno, y tenes deploy automatico.
+1. **Mínima fricción:** Railway esta disenado para devs con poca experiencia DevOps. Conectas GitHub, configuras variables de entorno, y tenes deploy automático.
 
 2. **Todo en un lugar:** Backend, frontend y PostgreSQL en la misma plataforma. Sin networking entre servicios distintos.
 
-3. **Costo razonable:** ~$20-25/mes, donde el credito de $20 del plan Pro cubre la mayor parte del uso. Para staging con 4 usuarios, el consumo sera bajo.
+3. **Costo razónable:** ~$20-25/mes, donde el credito de $20 del plan Pro cubre la mayor parte del uso. Para staging con 4 usuarios, el consumo sera bajo.
 
-4. **Path a produccion claro:** Cuando esten listos para produccion, solo necesitan crear un nuevo environment en Railway (o escalar los recursos del existente). No hay migracion.
+4. **Path a producción claro:** Cuando esten listos para producción, solo necesitan crear un nuevo environment en Railway (o escalar los recursos del existente). No hay migración.
 
-5. **Webhooks de MercadoPago:** Railway genera URLs publicas automaticamente, lo que permite recibir webhooks de MP en modo sandbox sin configuracion adicional.
+5. **Webhooks de MercadoPago:** Railway genera URLs publicas automáticamente, lo que permite recibir webhooks de MP en modo sandbox sin configuración adicional.
 
 6. **Cron jobs:** Los scheduled tasks de `@nestjs/schedule` corren dentro del proceso NestJS — no se necesita infraestructura adicional.
 
 ### Por que no las otras
 
-| Opcion | Razon de descarte |
+| Opción | Razón de descarte |
 |--------|-------------------|
 | **Render** | Mas caro ($33-40/mes) por funcionalidad similar. Fee por usuario encarece. |
 | **Vercel + Railway** | Dos plataformas = complejidad innecesaria. El frontend no necesita edge/ISR por ahora. |
@@ -277,7 +277,7 @@ Auguria es un monorepo con:
    - Servicio 2: Backend NestJS (apuntar a `backend/tarot-app/`, branch `main`)
    - Servicio 3: Frontend Next.js (apuntar a `frontend/`, branch `main`)
 
-### Fase 2: Configuracion (~1 hora)
+### Fase 2: Configuración (~1 hora)
 
 4. **Variables de entorno del backend:**
    ```
@@ -308,7 +308,7 @@ Auguria es un monorepo con:
    FRONTEND_URL=https://staging.tudominio.com
    CORS_ORIGINS=https://staging.tudominio.com
    
-   # Email (opcional — usar Mailtrap para staging)
+   # Email (opciónal — usar Mailtrap para staging)
    SMTP_HOST=smtp.mailtrap.io
    SMTP_PORT=587
    SMTP_USER=<mailtrap user>
@@ -326,15 +326,15 @@ Auguria es un monorepo con:
 6. **Dominio custom:**
    - Configurar `staging.tudominio.com` → frontend
    - Configurar `backend-staging.tudominio.com` → backend
-   - Railway genera certificados SSL automaticamente
+   - Railway genera certificados SSL automáticamente
 
 ### Fase 3: CI/CD
 
-7. **Deploy automatico:** Railway detecta pushes a `main` y redespliega automaticamente. No necesitas GitHub Actions adicionales para el deploy.
+7. **Deploy automático:** Railway detecta pushes a `main` y redespliega automáticamente. No necesitas GitHub Actions adicionales para el deploy.
 
 ### Fase 4: Restriccion de acceso
 
-8. **Opcion recomendada — Cloudflare Access (gratis):**
+8. **Opción recomendada — Cloudflare Access (gratis):**
    - Mover DNS a Cloudflare (gratis)
    - Crear Access Policy: solo permitir los 4 emails del equipo
    - Cualquier persona que acceda vera una pantalla de login de Cloudflare antes de llegar a la app
@@ -342,7 +342,7 @@ Auguria es un monorepo con:
 
 ### Fase 5: Seed y testing
 
-9. Ejecutar migraciones: `npm run migration:run`
+9. Ejecutar migraciónes: `npm run migration:run`
 10. Crear 4 cuentas de usuario para el equipo
 11. Configurar webhook de MP sandbox apuntando a `https://backend-staging.tudominio.com/api/payments/webhook`
 12. Testear flujo completo: registro → login → lectura tarot → suscripcion premium → pago MP sandbox
@@ -355,7 +355,7 @@ Auguria es un monorepo con:
 |------|----------|-----------|
 | **Staging (ahora)** | Railway Pro | ~$20-25 |
 | **Staging + Cloudflare** | Railway Pro + Cloudflare Free | ~$20-25 |
-| **Produccion (futuro)** | Railway Pro (mas recursos) | ~$30-60 (estimado) |
+| **Producción (futuro)** | Railway Pro (mas recursos) | ~$30-60 (estimado) |
 
 ### Costos fijos externos (no dependen de la plataforma)
 
@@ -364,7 +364,7 @@ Auguria es un monorepo con:
 | Dominio | ~$10-15/ano | Ya lo tienen |
 | Groq API | Gratis | Free tier: 14,400 req/dia |
 | Gemini API | Gratis | Free tier: 1,500 req/dia |
-| MercadoPago | Gratis (sandbox) | En produccion: comision por transaccion |
+| MercadoPago | Gratis (sandbox) | En producción: comision por transaccion |
 | Mailtrap | Gratis | Free tier: 500 emails/mes |
 | Cloudflare | Gratis | Free tier: 50 usuarios Access |
 
@@ -372,9 +372,9 @@ Auguria es un monorepo con:
 
 ## Escalabilidad a Largo Plazo
 
-Railway es la opcion correcta para staging y produccion inicial, pero **no es ideal para alta escala (millones de visitas/mes)**. Sus limitaciones principales a gran escala son:
+Railway es la opción correcta para staging y producción inicial, pero **no es ideal para alta escala (millones de visitas/mes)**. Sus limitaciones principales a gran escala son:
 
-- **Sin auto-scaling horizontal** — se puede escalar verticalmente (mas CPU/RAM) pero no lanzar multiples instancias automaticamente segun demanda
+- **Sin auto-scaling horizontal** — se puede escalar verticalmente (mas CPU/RAM) pero no lanzar multiples instancias automáticamente segun demanda
 - **Sin load balancer nativo** entre multiples instancias del mismo servicio
 - **Costos se disparan** — el modelo pay-per-use se vuelve caro vs infraestructura dedicada
 - **Sin CDN integrado** — se necesitaria Cloudflare u otro CDN de todas formas
@@ -385,13 +385,13 @@ Railway es la opcion correcta para staging y produccion inicial, pero **no es id
 | Fase | Escala | Plataforma | Costo estimado |
 |------|--------|-----------|----------------|
 | Staging | 4 usuarios | Railway | ~$20-25/mes |
-| Produccion inicial | 1K-50K visitas/mes | Railway | ~$30-60/mes |
+| Producción inicial | 1K-50K visitas/mes | Railway | ~$30-60/mes |
 | Crecimiento | 50K-500K visitas/mes | AWS/GCP con containers | ~$100-300/mes |
 | Alta escala | 1M+ visitas/mes | AWS ECS/EKS o GCP Cloud Run | ~$300-1000+/mes |
 
 ### Por que no es un problema empezar con Railway
 
-La migracion futura no es traumatica porque:
+La migración futura no es traumatica porque:
 1. La app ya es containerizable (NestJS + Next.js estandar)
 2. La base de datos se migra con `pg_dump`/`pg_restore`
 3. Las variables de entorno son las mismas en cualquier plataforma
@@ -406,7 +406,7 @@ Optimizar para millones de visitas hoy seria over-engineering. Cuando el trafico
 | Riesgo | Probabilidad | Mitigacion |
 |--------|-------------|------------|
 | Costo Railway crece inesperadamente | Baja | Configurar alertas de billing. Con 4 usuarios el consumo sera minimo. |
-| PostgreSQL sin backups automaticos en Railway | Baja | Railway incluye backups diarios en el plan Pro. |
+| PostgreSQL sin backups automáticos en Railway | Baja | Railway incluye backups diarios en el plan Pro. |
 | Caida del servicio | Baja | Railway tiene 99.9% uptime SLA en Pro. Para staging es aceptable. |
 | Cold starts | Media | Railway mantiene servicios activos en plan pago (no hay cold starts). |
 
