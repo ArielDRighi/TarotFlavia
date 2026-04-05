@@ -2,9 +2,11 @@
 
 import { Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toast } from '@/hooks/utils/useToast';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
+import { ROUTES } from '@/lib/constants/routes';
 import type { ReactNode } from 'react';
 
 /**
@@ -37,12 +39,15 @@ export default function PremiumPreview({
 
   const handleUpgrade = () => {
     if (!user) {
-      router.push(`/registro?redirect=/premium`);
+      router.push(`${ROUTES.REGISTER}?redirect=${ROUTES.PREMIUM}`);
       return;
     }
     createPreapproval(undefined, {
       onSuccess: (data: { initPoint: string }) => {
         window.location.href = data.initPoint;
+      },
+      onError: () => {
+        toast.error('Error al procesar la suscripción. Por favor intentá de nuevo.');
       },
     });
   };

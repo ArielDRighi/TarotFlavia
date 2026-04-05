@@ -81,7 +81,8 @@ export class EmailService {
     resetToken: string,
   ): Promise<void> {
     try {
-      const resetUrl = `${this.configService.get<string>('FRONTEND_URL')}/reset-password?token=${resetToken}`;
+      const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
+      const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
       await this.mailerService.sendMail({
         to,

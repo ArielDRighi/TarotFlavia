@@ -219,7 +219,7 @@ export class AIQuotaService {
   ): Promise<void> {
     try {
       const quota = AI_MONTHLY_QUOTAS[user.plan];
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL') ?? '';
+      const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
       const resetDate = this.getNextResetDate();
 
       await this.emailService.sendQuotaWarningEmail(user.email, {
@@ -250,7 +250,7 @@ export class AIQuotaService {
   private async sendQuotaLimitReachedEmail(user: User): Promise<void> {
     try {
       const quota = AI_MONTHLY_QUOTAS[user.plan];
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL') ?? '';
+      const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
       const resetDate = this.getNextResetDate();
 
       await this.emailService.sendQuotaLimitReachedEmail(user.email, {

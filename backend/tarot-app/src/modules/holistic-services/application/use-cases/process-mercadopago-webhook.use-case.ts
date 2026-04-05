@@ -191,7 +191,8 @@ export class ProcessMercadoPagoWebhookUseCase {
       const user = purchase.user;
       const service = purchase.holisticService;
       if (user?.email && service) {
-        const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+        const frontendUrl =
+          this.configService.getOrThrow<string>('FRONTEND_URL');
         const bookingUrl = `${frontendUrl}/servicios/reservar/${purchase.id}`;
         const rawWhatsapp = service.whatsappNumber ?? '';
         const whatsappNumberForLink = rawWhatsapp.replace(/\D/g, '');

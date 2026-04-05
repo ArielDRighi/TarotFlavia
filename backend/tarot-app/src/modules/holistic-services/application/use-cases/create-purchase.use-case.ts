@@ -81,8 +81,8 @@ export class CreatePurchaseUseCase {
     let initPoint: string | null = null;
 
     try {
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-      const backendUrl = this.configService.get<string>('BACKEND_URL');
+      const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
+      const backendUrl = this.configService.getOrThrow<string>('BACKEND_URL');
 
       const mpResult = await this.mercadoPagoService.createPreference({
         purchaseId: purchase.id,
