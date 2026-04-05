@@ -1,7 +1,7 @@
 # ADR: Estrategia de Deployment para Staging
 
 **Fecha:** 2026-03-31
-**Estado:** Propuesta
+**Estado:** ✅ Aceptado — Railway seleccionado como plataforma de staging
 **Contexto:** Seleccionar plataforma de hosting para staging (y futura producción) de Auguria
 
 ---

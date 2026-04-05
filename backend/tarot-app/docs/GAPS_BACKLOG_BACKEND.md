@@ -121,7 +121,7 @@ Modificar el endpoint `GET /readings` para aplicar límite de resultados según 
 **Prioridad:** 🔴 P0 - CRÍTICO
 **Estimación:** 16 horas
 **Dependencias:** Decisiones de diseño (frontend TASK-GAP-003)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Branch sugerida:** `feature/GAP-102-mercadopago-subscriptions`
 
 #### 📋 Descripción
@@ -252,7 +252,7 @@ Crear módulo completo de subscripciones que integre Mercado Pago para manejar u
 **Prioridad:** 🔴 P0 - CRÍTICO
 **Estimación:** 4 horas
 **Dependencias:** TASK-GAP-102
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Branch sugerida:** `feature/GAP-103-subscription-scheduler`
 
 #### 📋 Descripción
@@ -409,7 +409,7 @@ Validar mediante tests E2E que los límites de tiradas de tarot funcionan correc
 **Prioridad:** 🟢 P2 - MEJORA FUTURA
 **Estimación:** 8 horas
 **Dependencias:** Panel admin frontend (futuro)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA — módulo `plan-config` implementado
 **Branch sugerida:** `feature/GAP-105-configurable-limits`
 
 #### 📋 Descripción
@@ -490,28 +490,21 @@ Migrar límites de planes (daily readings, daily cards, historial) desde constan
 
 ## 📋 RESUMEN DE PRIORIDADES
 
-### 🔴 P0 - CRÍTICO (Bloqueantes para monetización)
-1. **TASK-GAP-102:** Integración Mercado Pago (16h)
-2. **TASK-GAP-103:** Scheduler de suscripciones (4h)
-3. **TASK-GAP-104:** Validar límites de tiradas (2h)
+### ✅ COMPLETADAS
+- **TASK-GAP-102:** Integración Mercado Pago — `src/modules/subscriptions/`
+- **TASK-GAP-103:** Scheduler de suscripciones — `subscription-cron.service.ts`
+- **TASK-GAP-105:** Límites configurables en DB — `src/modules/plan-config/`
 
-### 🟡 P1 - IMPORTANTE (Post-MVP)
-4. **TASK-GAP-101:** Límite de historial por plan (4h)
-
-### 🟢 P2 - MEJORA FUTURA
-5. **TASK-GAP-105:** Límites configurables en DB (8h)
-
-**Total estimado P0:** 22 horas (~3 días)
-**Total estimado P1:** 4 horas
-**Total estimado P2:** 8 horas
+### ⏳ PENDIENTES
+- **TASK-GAP-101 (P1):** Límite de historial por plan (4h)
+- **TASK-GAP-104 (P0):** Validar y documentar límites de tiradas con tests E2E (2h)
 
 ---
 
 ## 📝 NOTAS FINALES
 
-- **Mercado Pago** es el único bloqueante crítico real
-- **Scheduler de suscripciones** es necesario para no perder revenue
-- **Validación de límites** es documentación, no nuevo código
-- **Límites configurables** es mejora futura, no urgente
+- Los 3 GAPs críticos de monetización están implementados
+- Quedan pendientes validaciones con tests E2E y límite de historial FREE
+- **Límites configurables** implementados via `plan-config` module
 
-**Última actualización:** 2026-01-07
+**Última actualización:** 2026-04-05

@@ -4,6 +4,7 @@
 > **Branch:** `fix/birth-chart-orbsystem-pipeline`
 > **Prioridad:** Alta — afecta corrección astronómica de cartas históricas
 > **Fecha:** 2026-02-24
+> **Estado:** ✅ COMPLETADA — orbSystem desacoplado del pipeline de cálculo, bug UTC corregido
 
 ---
 

@@ -2,16 +2,16 @@
 
 ## 📊 Coverage Metrics Actual
 
-**Estado actual del proyecto (Noviembre 2025):**
+**Estado actual del proyecto (Abril 2026):**
 
 ```
-Statements   : 73.8%  (4261/5773)
-Branches     : 58.3%  (821/1408)
-Functions    : 66.28% (580/875)
-Lines        : 73.62% (3994/5425)
+Statements   : 83.75% (11930/14244)
+Branches     : 64.42% (2365/3671)
+Functions    : 73.99% (1616/2184)
+Lines        : 83.60% (11179/13371)
 ```
 
-**Tests totales:** 1,482 tests pasando (110 suites)
+**Tests totales:** 4,252 tests pasando (297 suites)
 
 ---
 
@@ -34,10 +34,10 @@ Configurados en `package.json`:
 
 **Criterios:**
 
-- ✅ **Statements:** 70% mínimo (actual: 73.8%)
-- ✅ **Branches:** 55% mínimo (actual: 58.3%)
-- ✅ **Functions:** 65% mínimo (actual: 66.28%)
-- ✅ **Lines:** 70% mínimo (actual: 73.62%)
+- ✅ **Statements:** 70% mínimo (actual: 83.75%)
+- ✅ **Branches:** 55% mínimo (actual: 64.42%)
+- ✅ **Functions:** 65% mínimo (actual: 73.99%)
+- ✅ **Lines:** 70% mínimo (actual: 83.60%)
 
 **Nota:** Los thresholds están configurados **ligeramente por debajo** del coverage actual para permitir pequeñas fluctuaciones sin romper CI. Se recomienda **nunca bajar** de estos valores.
 
@@ -221,20 +221,17 @@ function calculate(x: number, y: number) {
 
 ### Prioridades para Aumentar Coverage
 
-1. **Branches (58.3% → 65%)**
+1. **Branches (64.42% → 70%)** — única métrica por debajo del 70%
 
    - Agregar tests para else clauses
    - Probar todos los casos de switch
    - Cubrir operadores ternarios
 
-2. **Functions (66.28% → 75%)**
+2. **Functions (73.99% → 80%)**
 
-   - Identificar funciones sin tests
-   - Agregar tests para métodos edge
+   - Identificar funciones sin tests en módulos nuevos
 
-3. **Lines/Statements (73% → 80%)**
-   - Cubrir bloques de código no ejecutados
-   - Agregar tests para error handling
+3. **Statements/Lines (83%+)** — ✅ Meta de largo plazo ya alcanzada
 
 ### Comandos Útiles
 
@@ -344,23 +341,17 @@ test:
 
 ## 🎯 Roadmap de Coverage
 
-### Corto Plazo (1-2 meses)
+### Corto Plazo
 
-- [ ] Branches: 58% → 65% (+7%)
-- [ ] Functions: 66% → 70% (+4%)
-- [ ] Mantener Statements/Lines ≥73%
+- [ ] Branches: 64% → 70% (+6%)
+- [ ] Functions: 74% → 80% (+6%)
 
-### Mediano Plazo (3-6 meses)
+### Largo Plazo
 
-- [ ] Branches: 65% → 70% (+5%)
-- [ ] Functions: 70% → 75% (+5%)
-- [ ] Statements/Lines: 73% → 80% (+7%)
-
-### Largo Plazo (6-12 meses)
-
-- [ ] Todas las métricas ≥80%
-- [ ] Archivos críticos ≥90%
+- [x] Statements ≥80% — ✅ Alcanzado (83.75%)
+- [x] Lines ≥80% — ✅ Alcanzado (83.60%)
 - [ ] Mutation testing implementado
+- [ ] Archivos críticos ≥90%
 
 ---
 
@@ -421,5 +412,5 @@ npx jest --testTimeout=10000
 
 ---
 
-**Última actualización:** 2025-11-20  
-**Coverage actual:** 73.8% statements | 58.3% branches | 66.28% functions | 73.62% lines
+**Última actualización:** 2026-04-05  
+**Coverage actual:** 83.75% statements | 64.42% branches | 73.99% functions | 83.60% lines

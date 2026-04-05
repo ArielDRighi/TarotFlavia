@@ -1033,5 +1033,5 @@ npm install --save-dev nodemon
 ---
 
 **Versión**: 1.1.0  
-**Última actualización**: Diciembre 2025  
+**Última actualización**: Abril 2026  
 **Próxima revisión**: Al agregar nuevas herramientas de desarrollo

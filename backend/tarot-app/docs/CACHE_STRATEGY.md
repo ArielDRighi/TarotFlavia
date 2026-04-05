@@ -1,6 +1,6 @@
 # Caché de Interpretaciones - Estrategia y Plan de Migración
 
-## Estado Actual: Caché In-Memory (MVP)
+## Estado Actual: Caché In-Memory (Single Instance)
 
 La implementación actual utiliza `@nestjs/cache-manager` con caché en memoria, que es suficiente para el MVP por las siguientes razones:
 
@@ -298,6 +298,6 @@ CacheModule.register({
 
 ---
 
-**Última actualización:** Diciembre 2025  
-**Versión:** 1.0.0  
+**Última actualización:** Abril 2026  
+**Versión:** 1.1.0  
 **Relacionado:** [ARCHITECTURE.md](./ARCHITECTURE.md)

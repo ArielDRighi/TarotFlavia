@@ -588,6 +588,31 @@ npm run db:reset
 
 ---
 
+## 🐛 Scripts SQL de Debug
+
+Scripts SQL para consultas directas a la base de datos durante desarrollo. Ubicados en `scripts/debug/`:
+
+| Script | Propósito |
+|--------|-----------|
+| `reset-limits-anonymous.sql` | Resetear límites de usuarios anónimos |
+| `reset-limits-free.sql` | Resetear límites de usuarios FREE |
+| `reset-limits-premium.sql` | Resetear límites de usuarios PREMIUM |
+| `reset-all-limits.sql` | Resetear límites de todos los usuarios |
+| `reset-test-users-limits.sql` | Resetear límites de usuarios de prueba |
+| `clean-test-user.sql` | Limpiar datos de un usuario de prueba |
+| `check-birth-chart.sql` | Verificar datos de carta natal |
+| `verify-cards-content.sql` | Verificar contenido de cartas |
+
+**Cómo ejecutar:**
+
+```bash
+docker exec tarot-postgres-db psql -U tarotflavia_user -d tarot_db -f scripts/debug/reset-limits-free.sql
+```
+
+> Estos scripts son para uso local únicamente. No ejecutar en producción.
+
+---
+
 ## 📚 Documentación Relacionada
 
 - [SEEDERS_GUIDE.md](./SEEDERS_GUIDE.md) - Guía detallada de seeders
@@ -654,5 +679,5 @@ npm run db:e2e:reset:win    # En lugar de db:e2e:reset
 
 ---
 
-**Última actualización:** Noviembre 2025  
+**Última actualización:** Abril 2026  
 **Mantenido por:** Equipo Auguria

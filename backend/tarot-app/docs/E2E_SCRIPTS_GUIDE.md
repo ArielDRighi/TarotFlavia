@@ -585,6 +585,6 @@ npm run db:e2e:reset
 
 ---
 
-**Última actualización:** 2025-01-05  
+**Última actualización:** 2026-04-05  
 **Versión:** 1.0.0  
 **Ver también:** `TESTING_DATABASE.md` para arquitectura y troubleshooting detallado

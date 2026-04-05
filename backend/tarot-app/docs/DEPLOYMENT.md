@@ -19,39 +19,76 @@
 
 ## Overview
 
-Esta guía cubre el deployment completo de TarotFlavia en diferentes plataformas de hosting, desde MVP hasta producción escalada.
+Esta guía cubre el deployment completo de TarotFlavia. El proyecto incluye Dockerfiles listos para producción — el método recomendado es **Docker + VPS** o cualquier plataforma que soporte contenedores.
 
 ### Stack de Deployment
 
 ```
 ┌─────────────────────────────────────────────┐
-│  FRONTEND (React/Vite)                      │
-│  Deploy: Vercel/Netlify                     │
-│  Costo: $0 (Free Tier)                      │
+│  FRONTEND (Next.js)                         │
+│  Deploy: Docker (VPS) o Vercel              │
+│  Puerto: 3001                               │
 └─────────────────────────────────────────────┘
                     ↓ API calls
 ┌─────────────────────────────────────────────┐
 │  BACKEND (NestJS)                           │
-│  Deploy: Render/Railway                     │
-│  Costo: $7-10/mes (Starter Plan)            │
-│                                             │
-│  Caché: In-Memory (incluido, $0)           │
-│  ❌ NO usar Redis aún                       │
+│  Deploy: Docker (VPS) o Render/Railway      │
+│  Puerto: 3000                               │
+│  Caché: In-Memory (sin Redis por ahora)     │
 └─────────────────────────────────────────────┘
                     ↓ queries
 ┌─────────────────────────────────────────────┐
-│  DATABASE (PostgreSQL)                      │
-│  Deploy: Render/Railway                     │
-│  Costo: $7-10/mes (256MB-1GB)              │
-└─────────────────────────────────────────────┘
-                    +
-┌─────────────────────────────────────────────┐
-│  OPENAI API                                 │
-│  Costo: ~$5-20/mes (según uso)             │
-│  Estimación: $0.15 por 1M tokens input     │
+│  DATABASE (PostgreSQL 16)                   │
+│  Deploy: Docker (VPS) o managed             │
+│  Costo: $7-15/mes (256MB-1GB)              │
 └─────────────────────────────────────────────┘
 
-TOTAL MVP: $20-40/mes
+TOTAL estimado: $20-40/mes
+```
+
+---
+
+## 🐳 Deployment con Docker (Recomendado)
+
+El proyecto incluye `Dockerfile` para backend y frontend en sus respectivas carpetas.
+
+### Variables de Entorno Requeridas (Producción)
+
+```bash
+# Backend (.env)
+NODE_ENV=production
+DATABASE_URL=postgresql://user:password@host:5432/tarot_db
+JWT_SECRET=<secreto-seguro>
+JWT_REFRESH_SECRET=<secreto-seguro>
+FRONTEND_URL=https://tudominio.com
+BACKEND_URL=https://api.tudominio.com
+GROQ_API_KEY=<tu-key>
+MP_ACCESS_TOKEN=<mercadopago-token>
+MP_WEBHOOK_SECRET=<webhook-secret>
+SMTP_HOST=<smtp-host>
+SMTP_PORT=587
+SMTP_USER=<email>
+SMTP_PASS=<password>
+EMAIL_FROM=noreply@tudominio.com
+
+# Frontend (.env.local)
+NEXT_PUBLIC_API_URL=https://api.tudominio.com/api/v1
+NEXT_PUBLIC_APP_URL=https://tudominio.com
+NEXT_PUBLIC_APP_ENV=production
+```
+
+### Build y Deploy Manual
+
+```bash
+# Backend
+cd backend/tarot-app
+docker build -t auguria-backend .
+docker run -p 3000:3000 --env-file .env auguria-backend
+
+# Frontend
+cd frontend
+docker build -t auguria-frontend .
+docker run -p 3001:3001 --env-file .env.local auguria-frontend
 ```
 
 ---
