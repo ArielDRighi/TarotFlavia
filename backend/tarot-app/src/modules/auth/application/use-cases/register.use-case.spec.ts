@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { RegisterUseCase } from './register.use-case';
 import { UsersService } from '../../../users/users.service';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
@@ -12,6 +13,7 @@ describe('RegisterUseCase', () => {
   let usersService: jest.Mocked<UsersService>;
   let jwtService: jest.Mocked<JwtService>;
   let refreshTokenRepository: Record<string, jest.Mock>;
+  let configServiceGet: jest.Mock;
 
   const mockUser = {
     id: 1,
@@ -30,6 +32,8 @@ describe('RegisterUseCase', () => {
   };
 
   beforeEach(async () => {
+    configServiceGet = jest.fn().mockReturnValue(undefined); // no whitelist by default
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterUseCase,
@@ -38,12 +42,19 @@ describe('RegisterUseCase', () => {
           useValue: {
             create: jest.fn(),
             findById: jest.fn(),
+            getTarotistaByUserId: jest.fn().mockResolvedValue(null),
           },
         },
         {
           provide: JwtService,
           useValue: {
             sign: jest.fn().mockReturnValue('access_token'),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: configServiceGet,
           },
         },
         {
@@ -130,6 +141,84 @@ describe('RegisterUseCase', () => {
       );
 
       expect(result.isNewUser).toBe(true);
+    });
+
+    describe('registration whitelist', () => {
+      it('should allow registration when REGISTRATION_WHITELIST is not set', async () => {
+        configServiceGet.mockReturnValue(undefined);
+        usersService.create.mockResolvedValue(mockUser);
+        usersService.findById.mockResolvedValue(mockUser);
+
+        const result = await useCase.execute(
+          createUserDto,
+          '127.0.0.1',
+          'Mozilla',
+        );
+
+        expect(result.user.email).toBe('newuser@example.com');
+      });
+
+      it('should allow registration when email is in whitelist', async () => {
+        configServiceGet.mockReturnValue(
+          'newuser@example.com,other@example.com',
+        );
+        usersService.create.mockResolvedValue(mockUser);
+        usersService.findById.mockResolvedValue(mockUser);
+
+        const result = await useCase.execute(
+          createUserDto,
+          '127.0.0.1',
+          'Mozilla',
+        );
+
+        expect(result.user.email).toBe('newuser@example.com');
+      });
+
+      it('should allow registration case-insensitively when email is in whitelist', async () => {
+        configServiceGet.mockReturnValue(
+          'NEWUSER@EXAMPLE.COM,other@example.com',
+        );
+        usersService.create.mockResolvedValue(mockUser);
+        usersService.findById.mockResolvedValue(mockUser);
+
+        const result = await useCase.execute(
+          createUserDto,
+          '127.0.0.1',
+          'Mozilla',
+        );
+
+        expect(result.user.email).toBe('newuser@example.com');
+      });
+
+      it('should throw ForbiddenException when email is NOT in whitelist', async () => {
+        configServiceGet.mockReturnValue(
+          'allowed@example.com,other@example.com',
+        );
+
+        await expect(
+          useCase.execute(createUserDto, '127.0.0.1', 'Mozilla'),
+        ).rejects.toThrow(ForbiddenException);
+      });
+
+      it('should throw ForbiddenException with descriptive message when blocked', async () => {
+        configServiceGet.mockReturnValue('allowed@example.com');
+
+        await expect(
+          useCase.execute(createUserDto, '127.0.0.1', 'Mozilla'),
+        ).rejects.toThrow(
+          'El registro está restringido. Si creés que deberías tener acceso, contactá al administrador.',
+        );
+      });
+
+      it('should not call usersService.create when email is blocked by whitelist', async () => {
+        configServiceGet.mockReturnValue('allowed@example.com');
+
+        await expect(
+          useCase.execute(createUserDto, '127.0.0.1', 'Mozilla'),
+        ).rejects.toThrow(ForbiddenException);
+
+        expect(usersService.create).not.toHaveBeenCalled();
+      });
     });
   });
 });

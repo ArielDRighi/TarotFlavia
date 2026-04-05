@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import {
   DailyReadingController,
   DailyReadingPublicController,
@@ -203,6 +204,10 @@ describe('DailyReadingPublicController - Anonymous Usage', () => {
         {
           provide: DailyReadingService,
           useValue: mockDailyReadingService,
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue(undefined) },
         },
       ],
     })

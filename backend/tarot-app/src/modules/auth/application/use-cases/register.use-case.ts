@@ -1,5 +1,11 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ForbiddenException,
+  Inject,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../../users/users.service';
 import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
 import { SubscriptionStatusType } from '../../../users/application/dto/user-capabilities.dto';
@@ -13,6 +19,7 @@ export class RegisterUseCase {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
   ) {}
@@ -36,6 +43,19 @@ export class RegisterUseCase {
     refresh_token: string;
     isNewUser: boolean;
   }> {
+    // Staging whitelist: when REGISTRATION_WHITELIST is set, only listed emails can register
+    const whitelist = this.configService.get<string>('REGISTRATION_WHITELIST');
+    if (whitelist) {
+      const allowedEmails = whitelist
+        .split(',')
+        .map((e) => e.trim().toLowerCase());
+      if (!allowedEmails.includes(createUserDto.email.toLowerCase())) {
+        throw new ForbiddenException(
+          'El registro está restringido. Si creés que deberías tener acceso, contactá al administrador.',
+        );
+      }
+    }
+
     const createdUser = await this.usersService.create(createUserDto);
 
     // Fetch complete user data including password for refresh token generation

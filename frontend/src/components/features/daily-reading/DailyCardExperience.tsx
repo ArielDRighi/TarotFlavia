@@ -23,6 +23,8 @@ import { cn } from '@/lib/utils';
 import { getSessionFingerprint } from '@/lib/utils/fingerprint';
 import type { DailyReading, ReadingCard } from '@/types';
 
+const isAnonymousAccessEnabled = process.env.NEXT_PUBLIC_ANONYMOUS_ACCESS_ENABLED !== 'false';
+
 /**
  * Transform DailyReading card to ReadingCard format for TarotCard component
  * Defined outside component as it doesn't depend on component state
@@ -207,6 +209,23 @@ export function DailyCardExperience() {
   // NOTE: Regenerate functionality removed - not part of business model
   // All users (FREE/PREMIUM) get 1 daily card per day
   // PREMIUM gets AI interpretation but same limit (1/day)
+
+  // Staging: when anonymous access is disabled, redirect unauthenticated users to login
+  if (!isAnonymousAccessEnabled && !isAuthenticated) {
+    return (
+      <div className="flex w-full flex-col items-center gap-6 text-center">
+        <p className="text-text-secondary text-lg">
+          Iniciá sesión para acceder a tu lectura de tarot.
+        </p>
+        <div className="flex gap-3">
+          <Button onClick={() => router.push('/login')}>Iniciar sesión</Button>
+          <Button variant="outline" onClick={() => router.push('/registro')}>
+            Registrarse
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // CRITICAL: Show skeleton while loading capabilities OR if capabilities not loaded yet
   // This prevents showing the card before we know if user has reached limit
