@@ -61,8 +61,8 @@ export function AISynthesis({
 
       // Guardar referencia al nuevo timeout
       copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error('Error copying to clipboard:', error);
+    } catch {
+      // Clipboard copy failed silently
     }
   };
 

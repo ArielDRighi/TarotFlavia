@@ -45,7 +45,7 @@ export function ContactForm() {
     },
   });
 
-  const onSubmit = async (data: ContactFormData) => {
+  const onSubmit = async () => {
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
@@ -56,8 +56,6 @@ export function ContactForm() {
       // Simulación de envío
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      console.log('Form data:', data);
-
       setSubmitStatus('success');
       reset(); // Limpiar formulario
 
@@ -65,8 +63,7 @@ export function ContactForm() {
       setTimeout(() => {
         setSubmitStatus('idle');
       }, 5000);
-    } catch (error) {
-      console.error('Error submitting form:', error);
+    } catch {
       setSubmitStatus('error');
 
       // Reset error status después de 5 segundos

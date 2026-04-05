@@ -81,7 +81,7 @@ export class EmailService {
     resetToken: string,
   ): Promise<void> {
     try {
-      const resetUrl = `${this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+      const resetUrl = `${this.configService.get<string>('FRONTEND_URL')}/reset-password?token=${resetToken}`;
 
       await this.mailerService.sendMail({
         to,
