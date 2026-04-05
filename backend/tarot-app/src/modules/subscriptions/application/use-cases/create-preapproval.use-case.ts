@@ -52,11 +52,7 @@ export class CreatePreapprovalUseCase {
       this.configService.get<string>('BACKEND_URL') ?? 'http://localhost:3000';
 
     const externalReference = `sub_${userId}`;
-    // MP requires HTTPS for back_url; use BACKEND_URL (ngrok) as base in dev
-    const backUrlBase = frontendUrl.startsWith('https')
-      ? frontendUrl
-      : backendUrl;
-    const backUrl = `${backUrlBase}/premium/activacion`;
+    const backUrl = `${frontendUrl}/premium/activacion?status=authorized`;
     const notificationUrl = `${backendUrl}/api/v1/webhooks/mercadopago`;
 
     // 4. Crear preapproval en Mercado Pago

@@ -442,7 +442,6 @@ export function ReadingExperience({
       if (error instanceof DOMException && error.name === 'AbortError') {
         return;
       }
-      console.error('Error sharing reading:', error);
       toast.error('Error al compartir');
     } finally {
       setIsSharing(false);

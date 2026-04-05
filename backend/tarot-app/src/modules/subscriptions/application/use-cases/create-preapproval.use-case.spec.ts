@@ -138,7 +138,7 @@ describe('CreatePreapprovalUseCase', () => {
         },
         payerEmail: 'user99@example.com',
         externalReference: 'sub_99',
-        backUrl: 'http://localhost:3000/premium/activacion',
+        backUrl: 'http://localhost:3001/premium/activacion?status=authorized',
         notificationUrl: 'http://localhost:3000/api/v1/webhooks/mercadopago',
       });
     });

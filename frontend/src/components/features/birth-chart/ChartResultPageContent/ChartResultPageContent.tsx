@@ -88,8 +88,8 @@ export function ChartResultPageContent() {
         text: `Mi Big Three: Sol en ${chartResult.bigThree.sun.signName}, Luna en ${chartResult.bigThree.moon.signName}, Ascendente en ${chartResult.bigThree.ascendant.signName}`,
         url: window.location.href,
       });
-    } catch (error) {
-      console.error('Error sharing:', error);
+    } catch {
+      // Sharing failed silently
     }
   };
 

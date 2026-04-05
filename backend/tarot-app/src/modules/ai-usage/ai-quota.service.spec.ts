@@ -68,12 +68,15 @@ describe('AIQuotaService', () => {
       sendQuotaLimitReachedEmail: jest.fn(),
     };
 
+    const mockConfigGet = jest.fn((key: string) => {
+      if (key === 'AI_QUOTA_FREE_MONTHLY') return 100;
+      if (key === 'AI_QUOTA_PREMIUM_MONTHLY') return -1;
+      if (key === 'FRONTEND_URL') return 'http://localhost:3001';
+      return undefined;
+    });
     const mockConfigService = {
-      get: jest.fn((key: string) => {
-        if (key === 'AI_QUOTA_FREE_MONTHLY') return 100;
-        if (key === 'AI_QUOTA_PREMIUM_MONTHLY') return -1;
-        return undefined;
-      }),
+      get: mockConfigGet,
+      getOrThrow: mockConfigGet,
     };
 
     const module: TestingModule = await Test.createTestingModule({

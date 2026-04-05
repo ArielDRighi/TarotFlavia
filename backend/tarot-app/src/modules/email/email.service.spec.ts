@@ -30,6 +30,7 @@ describe('EmailService', () => {
 
   const mockConfigService = {
     get: mockConfigGet,
+    getOrThrow: mockConfigGet,
   };
 
   beforeEach(async () => {

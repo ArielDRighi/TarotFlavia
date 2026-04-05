@@ -30,6 +30,16 @@ npm-*.log
 validation-*.txt
 before-validation.txt
 test-output.txt
+test-output.*
+
+# Runtime files
+server.pid
+
+# ESLint reports
+eslint-any-report.txt
+
+# SQL debug scripts
+*.sql
 
 # Backup files
 *.bak

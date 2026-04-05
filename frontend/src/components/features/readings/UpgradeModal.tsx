@@ -83,14 +83,6 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
   const router = useRouter();
   const { mutate: createPreapproval, isPending } = useCreatePreapproval();
 
-  // Defensive: This modal should only be shown to FREE/ANONYMOUS users
-  // If user is already PREMIUM, something went wrong - log warning
-  if (open && user?.plan?.toUpperCase() === 'PREMIUM') {
-    console.warn(
-      '⚠️ UpgradeModal shown to PREMIUM user - should use DailyLimitReachedModal instead'
-    );
-  }
-
   // Custom title and description based on reason
   const getContent = () => {
     if (reason === 'limit-reached') {

@@ -168,7 +168,6 @@ export function ReadingsHistory() {
         return;
       }
 
-      console.error('Error sharing reading:', error);
       toast.error('Error al compartir');
     }
   }, []);
