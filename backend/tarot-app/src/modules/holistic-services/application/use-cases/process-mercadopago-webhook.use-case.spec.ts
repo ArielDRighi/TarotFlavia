@@ -136,7 +136,9 @@ describe('ProcessMercadoPagoWebhookUseCase', () => {
       sendHolisticServiceConfirmation: jest.fn().mockResolvedValue(undefined),
     };
 
-    const mockConfigServiceFn = jest.fn().mockReturnValue('http://localhost:3001');
+    const mockConfigServiceFn = jest
+      .fn()
+      .mockReturnValue('http://localhost:3001');
     const mockConfigService = {
       get: mockConfigServiceFn,
       getOrThrow: mockConfigServiceFn,
