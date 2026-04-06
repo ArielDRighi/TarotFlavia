@@ -6,7 +6,7 @@ import { RefreshToken } from '../../entities/refresh-token.entity';
 import { User } from '../../../users/entities/user.entity';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
 import * as crypto from 'crypto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class TypeOrmRefreshTokenRepository implements IRefreshTokenRepository {
