@@ -493,7 +493,7 @@ describe('EnvironmentVariables', () => {
   });
 
   describe('CORS Configuration', () => {
-    it('should accept valid CORS_ORIGINS URLs', async () => {
+    it('should accept valid CORS_ORIGIN URL', async () => {
       const envConfig = plainToClass(EnvironmentVariables, {
         POSTGRES_HOST: 'localhost',
         POSTGRES_PORT: '5432',
@@ -503,16 +503,16 @@ describe('EnvironmentVariables', () => {
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
         GROQ_API_KEY: 'gsk_test',
-        CORS_ORIGINS: 'http://localhost:3000,https://app.example.com',
+        CORS_ORIGIN: 'http://localhost:3000,https://app.example.com',
       });
 
       const errors = await validate(envConfig);
-      const corsError = errors.find((e) => e.property === 'CORS_ORIGINS');
+      const corsError = errors.find((e) => e.property === 'CORS_ORIGIN');
 
       expect(corsError).toBeUndefined();
     });
 
-    it('should use default CORS_ORIGINS if not provided', () => {
+    it('should use default CORS_ORIGIN if not provided', () => {
       const envConfig = plainToClass(EnvironmentVariables, {
         POSTGRES_HOST: 'localhost',
         POSTGRES_PORT: '5432',
@@ -524,10 +524,10 @@ describe('EnvironmentVariables', () => {
         GROQ_API_KEY: 'gsk_test',
       });
 
-      expect(envConfig.CORS_ORIGINS).toBe('http://localhost:3000');
+      expect(envConfig.CORS_ORIGIN).toBe('http://localhost:3000');
     });
 
-    it('should use default CORS_ORIGINS when empty string is provided', () => {
+    it('should use default CORS_ORIGIN when empty string is provided', () => {
       const envConfig = plainToClass(EnvironmentVariables, {
         POSTGRES_HOST: 'localhost',
         POSTGRES_PORT: '5432',
@@ -537,10 +537,10 @@ describe('EnvironmentVariables', () => {
         JWT_SECRET: 'a'.repeat(32),
         JWT_EXPIRES_IN: '1h',
         GROQ_API_KEY: 'gsk_test',
-        CORS_ORIGINS: '',
+        CORS_ORIGIN: '',
       });
 
-      expect(envConfig.CORS_ORIGINS).toBe('http://localhost:3000');
+      expect(envConfig.CORS_ORIGIN).toBe('http://localhost:3000');
     });
   });
 

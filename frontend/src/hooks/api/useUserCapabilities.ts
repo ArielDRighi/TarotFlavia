@@ -61,7 +61,7 @@ export const capabilitiesQueryKeys = {
  * }
  * ```
  */
-export function useUserCapabilities() {
+export function useUserCapabilities(options?: { enabled?: boolean }) {
   return useQuery<UserCapabilities>({
     queryKey: capabilitiesQueryKeys.capabilities,
     queryFn: async () => {
@@ -73,6 +73,7 @@ export function useUserCapabilities() {
       });
       return response.data;
     },
+    enabled: options?.enabled !== false,
     staleTime: 0, // Always revalidate for fresh data
     refetchOnWindowFocus: true, // Refresh when user returns to tab
     refetchOnMount: true, // Refresh when component mounts

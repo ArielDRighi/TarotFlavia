@@ -10,7 +10,9 @@ import {
   HttpStatus,
   Body,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiTags,
   ApiOperation,
@@ -329,7 +331,10 @@ export class DailyReadingController {
 @ApiTags('Daily Card - Public')
 @Controller('public/daily-reading')
 export class DailyReadingPublicController {
-  constructor(private readonly dailyReadingService: DailyReadingService) {}
+  constructor(
+    private readonly dailyReadingService: DailyReadingService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post()
   @UseGuards(CheckUsageLimitGuard)
@@ -362,6 +367,16 @@ export class DailyReadingPublicController {
   async generateAnonymousDailyCard(
     @Body() dto: CreateAnonymousDailyReadingDto,
   ): Promise<DailyReadingResponseDto> {
+    // Staging: disable anonymous access when ANONYMOUS_ACCESS_ENABLED=false
+    const anonymousEnabled = this.configService.get<string>(
+      'ANONYMOUS_ACCESS_ENABLED',
+    );
+    if (anonymousEnabled === 'false') {
+      throw new ForbiddenException(
+        'El acceso anónimo está deshabilitado en este entorno.',
+      );
+    }
+
     const tarotistaId = DEFAULT_TAROTISTA_ID;
 
     const dailyReading =

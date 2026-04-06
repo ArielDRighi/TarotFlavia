@@ -73,7 +73,7 @@ describe('env-validator', () => {
 
     expect(result.NODE_ENV).toBe('development');
     expect(result.PORT).toBe(3000);
-    expect(result.CORS_ORIGINS).toBe('http://localhost:3000');
+    expect(result.CORS_ORIGIN).toBe('http://localhost:3000');
     expect(result.RATE_LIMIT_TTL).toBe(60);
     expect(result.RATE_LIMIT_MAX).toBe(100);
     expect(result.GROQ_MODEL).toBe('llama-3.3-70b-versatile');
@@ -92,7 +92,7 @@ describe('env-validator', () => {
       GROQ_API_KEY: 'gsk_test',
       NODE_ENV: 'production',
       PORT: '8080',
-      CORS_ORIGINS: 'https://example.com',
+      CORS_ORIGIN: 'https://example.com',
       RATE_LIMIT_TTL: '120',
       RATE_LIMIT_MAX: '200',
       GROQ_MODEL: 'llama-3.2-90b-text-preview',
@@ -103,7 +103,7 @@ describe('env-validator', () => {
 
     expect(result.NODE_ENV).toBe('production');
     expect(result.PORT).toBe(8080);
-    expect(result.CORS_ORIGINS).toBe('https://example.com');
+    expect(result.CORS_ORIGIN).toBe('https://example.com');
     expect(result.RATE_LIMIT_TTL).toBe(120);
     expect(result.RATE_LIMIT_MAX).toBe(200);
     expect(result.GROQ_MODEL).toBe('llama-3.2-90b-text-preview');

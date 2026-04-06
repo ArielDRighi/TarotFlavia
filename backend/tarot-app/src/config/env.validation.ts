@@ -190,7 +190,7 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   @Transform(({ value }) => (value ? String(value) : 'http://localhost:3000'))
-  CORS_ORIGINS: string = 'http://localhost:3000';
+  CORS_ORIGIN: string = 'http://localhost:3000';
 
   // =============================================================================
   // RATE LIMITING CONFIGURATION
@@ -243,4 +243,16 @@ export class EnvironmentVariables {
   @IsOptional()
   @Transform(({ value }) => (value ? String(value) : 'http://localhost:3000'))
   FRONTEND_URL: string = 'http://localhost:3000';
+
+  // =============================================================================
+  // STAGING ACCESS CONTROL (Optional)
+  // =============================================================================
+
+  @IsString()
+  @IsOptional()
+  REGISTRATION_WHITELIST?: string;
+
+  @IsString()
+  @IsOptional()
+  ANONYMOUS_ACCESS_ENABLED?: string;
 }

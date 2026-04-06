@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ForbiddenException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   DailyReadingController,
   DailyReadingPublicController,
@@ -204,6 +206,10 @@ describe('DailyReadingPublicController - Anonymous Usage', () => {
           provide: DailyReadingService,
           useValue: mockDailyReadingService,
         },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue(undefined) },
+        },
       ],
     })
       .overrideGuard(CheckUsageLimitGuard)
@@ -214,6 +220,44 @@ describe('DailyReadingPublicController - Anonymous Usage', () => {
       DailyReadingPublicController,
     );
     dailyReadingService = module.get<DailyReadingService>(DailyReadingService);
+  });
+
+  describe('Anonymous access disabled (ANONYMOUS_ACCESS_ENABLED=false)', () => {
+    it('should throw ForbiddenException and not call service when anonymous access is disabled', async () => {
+      const mockDailyReadingServiceDisabled = {
+        generateAnonymousDailyCard: jest.fn(),
+      };
+
+      const moduleDisabled: TestingModule = await Test.createTestingModule({
+        controllers: [DailyReadingPublicController],
+        providers: [
+          {
+            provide: DailyReadingService,
+            useValue: mockDailyReadingServiceDisabled,
+          },
+          {
+            provide: ConfigService,
+            useValue: { get: jest.fn().mockReturnValue('false') },
+          },
+        ],
+      })
+        .overrideGuard(CheckUsageLimitGuard)
+        .useValue({ canActivate: () => true })
+        .compile();
+
+      const disabledController =
+        moduleDisabled.get<DailyReadingPublicController>(
+          DailyReadingPublicController,
+        );
+      const dto = { fingerprint: 'test-fingerprint' };
+
+      await expect(
+        disabledController.generateAnonymousDailyCard(dto),
+      ).rejects.toThrow(ForbiddenException);
+      expect(
+        mockDailyReadingServiceDisabled.generateAnonymousDailyCard,
+      ).not.toHaveBeenCalled();
+    });
   });
 
   describe('Anonymous daily card generation', () => {

@@ -23,6 +23,8 @@ import { cn } from '@/lib/utils';
 import { getSessionFingerprint } from '@/lib/utils/fingerprint';
 import type { DailyReading, ReadingCard } from '@/types';
 
+const isAnonymousAccessEnabled = process.env.NEXT_PUBLIC_ANONYMOUS_ACCESS_ENABLED !== 'false';
+
 /**
  * Transform DailyReading card to ReadingCard format for TarotCard component
  * Defined outside component as it doesn't depend on component state
@@ -74,12 +76,15 @@ export function DailyCardExperience() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
 
+  // When anonymous access is disabled and user is not authenticated, skip all backend requests
+  const shouldFetch = isAnonymousAccessEnabled || isAuthenticated;
+
   // Fetch user capabilities - SINGLE SOURCE OF TRUTH for limits
-  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
+  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities({ enabled: shouldFetch });
   const invalidateCapabilities = useInvalidateCapabilities();
 
   // Fetch share text from backend (with automatic fallback if error)
-  const { data: shareTextData } = useDailyShareText();
+  const { data: shareTextData } = useDailyShareText({ enabled: shouldFetch });
 
   // Extract boolean flags from capabilities
   const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
@@ -207,6 +212,23 @@ export function DailyCardExperience() {
   // NOTE: Regenerate functionality removed - not part of business model
   // All users (FREE/PREMIUM) get 1 daily card per day
   // PREMIUM gets AI interpretation but same limit (1/day)
+
+  // Staging: when anonymous access is disabled, show restricted access UI with CTAs
+  if (!isAnonymousAccessEnabled && !isAuthenticated) {
+    return (
+      <div className="flex w-full flex-col items-center gap-6 text-center">
+        <p className="text-text-secondary text-lg">
+          Iniciá sesión para acceder a tu lectura de tarot.
+        </p>
+        <div className="flex gap-3">
+          <Button onClick={() => router.push(ROUTES.LOGIN)}>Iniciar sesión</Button>
+          <Button variant="outline" onClick={() => router.push(ROUTES.REGISTER)}>
+            Registrarse
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // CRITICAL: Show skeleton while loading capabilities OR if capabilities not loaded yet
   // This prevents showing the card before we know if user has reached limit
