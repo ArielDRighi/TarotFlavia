@@ -46,7 +46,7 @@ export function PlanDistributionChart({ data }: PlanDistributionChartProps) {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => `${value} usuarios`} />
+              <Tooltip formatter={(value) => `${value} usuarios`} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
