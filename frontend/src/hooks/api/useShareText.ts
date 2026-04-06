@@ -42,10 +42,11 @@ export function useReadingShareText(readingId: number) {
  * Hook to fetch formatted share text for today's daily reading
  * @returns Query result with share text data
  */
-export function useDailyShareText() {
+export function useDailyShareText(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: shareTextQueryKeys.daily(),
     queryFn: getDailyShareText,
+    enabled: options?.enabled !== false,
     staleTime: 5 * 60 * 1000, // 5 minutes - daily reading doesn't change frequently
   });
 }

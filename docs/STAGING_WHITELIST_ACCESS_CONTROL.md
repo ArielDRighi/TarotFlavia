@@ -101,8 +101,8 @@ Los errores 403 del backend ya se muestran automáticamente via `toast.error()` 
 
 Cuando `NEXT_PUBLIC_ANONYMOUS_ACCESS_ENABLED === 'false'` y el usuario no está autenticado:
 - Se renderiza un bloque de acceso restringido en lugar de la carta
-- Botones de CTA hacia `/login` y `/registro`
-- No se hace fetch al backend
+- Botones de CTA hacia `/login` y `/registro` (no hay redirección automática)
+- No se hace fetch al backend (los queries están deshabilitados con `enabled: false`)
 
 ---
 
@@ -128,7 +128,7 @@ Cuando `NEXT_PUBLIC_ANONYMOUS_ACCESS_ENABLED === 'false'` y el usuario no está 
 
 | Escenario | Resultado esperado |
 |---|---|
-| Carta del día sin login (frontend) | ❌ Redirige a /login con mensaje |
+| Carta del día sin login (frontend) | ❌ Muestra pantalla de acceso restringido con CTAs hacia /login y /registro |
 | Carta del día sin login (API directa) | ❌ 403 del endpoint `/public/daily-reading` |
 | Carta del día con login | ✅ Funciona normalmente |
 
@@ -172,7 +172,7 @@ NEXT_PUBLIC_ANONYMOUS_ACCESS_ENABLED=true
 - [x] Frontend muestra aviso cuando `NEXT_PUBLIC_REGISTRATION_WHITELIST_ACTIVE=true`
 - [x] Errores 403 se muestran via toast con el mensaje del backend
 - [x] Acceso anónimo se deshabilita con `ANONYMOUS_ACCESS_ENABLED=false`
-- [x] Frontend redirige a login cuando `NEXT_PUBLIC_ANONYMOUS_ACCESS_ENABLED=false`
+- [x] Frontend muestra pantalla de acceso restringido con CTAs cuando `NEXT_PUBLIC_ANONYMOUS_ACCESS_ENABLED=false`
 - [x] Todo es reversible con variables de entorno
 - [x] Ningún código existente fue eliminado — solo condicionado
 - [x] Variables documentadas en `.env.example`

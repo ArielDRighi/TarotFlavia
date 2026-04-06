@@ -76,12 +76,15 @@ export function DailyCardExperience() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
 
+  // When anonymous access is disabled and user is not authenticated, skip all backend requests
+  const shouldFetch = isAnonymousAccessEnabled || isAuthenticated;
+
   // Fetch user capabilities - SINGLE SOURCE OF TRUTH for limits
-  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
+  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities({ enabled: shouldFetch });
   const invalidateCapabilities = useInvalidateCapabilities();
 
   // Fetch share text from backend (with automatic fallback if error)
-  const { data: shareTextData } = useDailyShareText();
+  const { data: shareTextData } = useDailyShareText({ enabled: shouldFetch });
 
   // Extract boolean flags from capabilities
   const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
@@ -210,7 +213,7 @@ export function DailyCardExperience() {
   // All users (FREE/PREMIUM) get 1 daily card per day
   // PREMIUM gets AI interpretation but same limit (1/day)
 
-  // Staging: when anonymous access is disabled, redirect unauthenticated users to login
+  // Staging: when anonymous access is disabled, show restricted access UI with CTAs
   if (!isAnonymousAccessEnabled && !isAuthenticated) {
     return (
       <div className="flex w-full flex-col items-center gap-6 text-center">
@@ -218,8 +221,8 @@ export function DailyCardExperience() {
           Iniciá sesión para acceder a tu lectura de tarot.
         </p>
         <div className="flex gap-3">
-          <Button onClick={() => router.push('/login')}>Iniciar sesión</Button>
-          <Button variant="outline" onClick={() => router.push('/registro')}>
+          <Button onClick={() => router.push(ROUTES.LOGIN)}>Iniciar sesión</Button>
+          <Button variant="outline" onClick={() => router.push(ROUTES.REGISTER)}>
             Registrarse
           </Button>
         </div>
