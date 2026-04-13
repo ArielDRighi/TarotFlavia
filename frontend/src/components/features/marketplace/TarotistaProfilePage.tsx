@@ -11,6 +11,7 @@ import { Star, Sparkles, Calendar, MessageSquare } from 'lucide-react';
 import { useTarotistaDetail } from '@/hooks/api/useTarotistas';
 import { getInitials } from '@/lib/utils/text';
 import { SPECIALTY_COLORS, DEFAULT_SPECIALTY_COLOR } from '@/lib/constants/marketplace';
+import { ROUTES } from '@/lib/constants/routes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -139,7 +140,7 @@ export function TarotistaProfilePage({ id }: TarotistaProfilePageProps) {
   // ============================================================================
 
   const handleConsultarTarot = () => {
-    router.push(`/ritual?tarotistaId=${id}`);
+    router.push(ROUTES.TAROT_WITH_TAROTISTA(id));
   };
 
   const handleVerDisponibilidad = () => {

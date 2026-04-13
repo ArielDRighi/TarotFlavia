@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Plus, History, Sparkles, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
+import { ROUTES } from '@/lib/constants/routes';
 
 /**
  * Quick action card component
@@ -75,7 +76,7 @@ function QuickActionCard({
  * Quick Actions component for user dashboard
  *
  * Displays action cards for:
- * - Nueva Lectura (primary) - Routes to /ritual for PREMIUM, /ritual/tirada for FREE
+ * - Nueva Lectura (primary) - Routes to /tarot for PREMIUM, /tarot/tirada for FREE
  * - Historial de Lecturas
  * - Carta del Día
  *
@@ -88,7 +89,7 @@ export function QuickActions() {
   const { user } = useAuthStore();
 
   // Free users skip category/question selection and go directly to spreads; premium users start at category selection flow
-  const newReadingHref = user?.plan === 'premium' ? '/ritual' : '/ritual/tirada';
+  const newReadingHref = user?.plan === 'premium' ? ROUTES.TAROT : ROUTES.TAROT_TIRADA;
 
   return (
     <div className="grid gap-4 md:grid-cols-3">

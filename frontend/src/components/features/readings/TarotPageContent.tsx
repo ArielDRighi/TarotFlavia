@@ -10,9 +10,9 @@ import { CategorySelector } from './CategorySelector';
 import { ReadingLimitReached } from './ReadingLimitReached';
 
 /**
- * RitualPageContent Component
+ * TarotPageContent Component
  *
- * Business logic component for ritual page.
+ * Business logic component for tarot page.
  * Handles routing logic and conditional rendering based on user capabilities.
  *
  * PLAN-BASED BEHAVIOR:
@@ -23,7 +23,7 @@ import { ReadingLimitReached } from './ReadingLimitReached';
  * - Users who reached their tarot reading limit see ReadingLimitReached modal
  * - Prevents poor UX where user selects category/question before seeing limit (TASK-REFACTOR-011)
  */
-export function RitualPageContent() {
+export function TarotPageContent() {
   const { user } = useAuth();
   const { data: capabilities, isLoading: isCapabilitiesLoading } = useUserCapabilities();
   const router = useRouter();

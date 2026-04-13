@@ -29,7 +29,7 @@ describe('QuickActions', () => {
   });
 
   describe('Conditional Routing based on User Plan', () => {
-    it('should link "Nueva Lectura" to /ritual/tirada for FREE users', () => {
+    it('should link "Nueva Lectura" to /tarot/tirada for FREE users', () => {
       mockUseAuthStore.mockReturnValue({
         user: {
           id: 1,
@@ -42,10 +42,10 @@ describe('QuickActions', () => {
       render(<QuickActions />);
 
       const newReadingButton = screen.getByText('Nueva Lectura');
-      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual/tirada');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot/tirada');
     });
 
-    it('should link "Nueva Lectura" to /ritual for PREMIUM users', () => {
+    it('should link "Nueva Lectura" to /tarot for PREMIUM users', () => {
       mockUseAuthStore.mockReturnValue({
         user: {
           id: 2,
@@ -58,10 +58,10 @@ describe('QuickActions', () => {
       render(<QuickActions />);
 
       const newReadingButton = screen.getByText('Nueva Lectura');
-      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot');
     });
 
-    it('should default to /ritual/tirada when user is null', () => {
+    it('should default to /tarot/tirada when user is null', () => {
       mockUseAuthStore.mockReturnValue({
         user: null,
         isAuthenticated: false,
@@ -70,10 +70,10 @@ describe('QuickActions', () => {
       render(<QuickActions />);
 
       const newReadingButton = screen.getByText('Nueva Lectura');
-      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual/tirada');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot/tirada');
     });
 
-    it('should default to /ritual/tirada when user plan is undefined', () => {
+    it('should default to /tarot/tirada when user plan is undefined', () => {
       mockUseAuthStore.mockReturnValue({
         user: {
           id: 3,
@@ -86,7 +86,7 @@ describe('QuickActions', () => {
       render(<QuickActions />);
 
       const newReadingButton = screen.getByText('Nueva Lectura');
-      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/ritual/tirada');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot/tirada');
     });
   });
 

@@ -17,6 +17,7 @@ import { shouldUseNativeShare } from '@/lib/utils/device';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
+import { ROUTES } from '@/lib/constants/routes';
 import { TarotCard } from './TarotCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -449,7 +450,7 @@ export function ReadingExperience({
   }, [readingResult]);
 
   const handleNewReading = useCallback(() => {
-    router.push('/ritual');
+    router.push(ROUTES.TAROT);
   }, [router]);
 
   const handleRetry = useCallback(() => {
@@ -479,7 +480,7 @@ export function ReadingExperience({
         <div className="mx-auto max-w-4xl">
           <ErrorDisplay
             message="Tirada no encontrada. Selecciona una tirada válida."
-            onRetry={() => router.push('/ritual')}
+            onRetry={() => router.push(ROUTES.TAROT)}
           />
         </div>
       </div>

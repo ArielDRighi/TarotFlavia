@@ -80,7 +80,9 @@ export function DailyCardExperience() {
   const shouldFetch = isAnonymousAccessEnabled || isAuthenticated;
 
   // Fetch user capabilities - SINGLE SOURCE OF TRUTH for limits
-  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities({ enabled: shouldFetch });
+  const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities({
+    enabled: shouldFetch,
+  });
   const invalidateCapabilities = useInvalidateCapabilities();
 
   // Fetch share text from backend (with automatic fallback if error)

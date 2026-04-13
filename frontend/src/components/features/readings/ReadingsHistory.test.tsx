@@ -185,7 +185,7 @@ describe('ReadingsHistory', () => {
       expect(screen.getByText(/tu destino aún no ha sido revelado/i)).toBeInTheDocument();
     });
 
-    it('should navigate to /ritual when CTA button is clicked', async () => {
+    it('should navigate to /tarot when CTA button is clicked', async () => {
       vi.mocked(useReadingsModule.useMyReadings).mockReturnValue({
         data: mockEmptyPaginatedReadings,
         isLoading: false,
@@ -199,7 +199,7 @@ describe('ReadingsHistory', () => {
       const ctaButton = screen.getByRole('button', { name: /hacer mi primera lectura/i });
       await userEvent.click(ctaButton);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual');
+      expect(mockPush).toHaveBeenCalledWith('/tarot');
     });
   });
 

@@ -145,7 +145,7 @@ describe('CategorySelector', () => {
       render(<CategorySelector />);
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
+        expect(mockReplace).toHaveBeenCalledWith('/tarot/tirada');
       });
     });
 
@@ -290,7 +290,7 @@ describe('CategorySelector', () => {
       const categoryCard = screen.getAllByTestId('category-card')[0];
       categoryCard.click();
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=1');
+      expect(mockPush).toHaveBeenCalledWith('/tarot/preguntas?categoryId=1');
     });
 
     it('should use correct category ID in navigation', () => {
@@ -305,11 +305,11 @@ describe('CategorySelector', () => {
 
       // Click first category
       categoryCards[0].click();
-      expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=1');
+      expect(mockPush).toHaveBeenCalledWith('/tarot/preguntas?categoryId=1');
 
       // Click second category
       categoryCards[1].click();
-      expect(mockPush).toHaveBeenCalledWith('/ritual/preguntas?categoryId=2');
+      expect(mockPush).toHaveBeenCalledWith('/tarot/preguntas?categoryId=2');
     });
   });
 });
