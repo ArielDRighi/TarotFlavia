@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CardsController } from './cards.controller';
 import { CardsService } from './cards.service';
 import { CardMeaningService } from './card-meaning.service';
+import { CardFreeInterpretationService } from './card-free-interpretation.service';
 import { TarotCard } from './entities/tarot-card.entity';
 import { CardFreeInterpretation } from './entities/card-free-interpretation.entity';
 import { TarotDeck } from '../decks/entities/tarot-deck.entity';
@@ -23,6 +24,7 @@ import { CARD_FREE_INTERPRETATION_REPOSITORY } from './domain/interfaces/card-fr
   providers: [
     CardsService,
     CardMeaningService,
+    CardFreeInterpretationService,
     {
       provide: CARD_FREE_INTERPRETATION_REPOSITORY,
       useClass: TypeOrmCardFreeInterpretationRepository,
@@ -31,6 +33,7 @@ import { CARD_FREE_INTERPRETATION_REPOSITORY } from './domain/interfaces/card-fr
   exports: [
     CardsService,
     CardMeaningService,
+    CardFreeInterpretationService,
     TypeOrmModule,
     CARD_FREE_INTERPRETATION_REPOSITORY,
   ],

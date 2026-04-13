@@ -18,6 +18,7 @@ import { PredefinedQuestionsService } from '../../../../predefined-questions/pre
 import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
 import { RevenueCalculationService } from '../../../../tarotistas/services/revenue-calculation.service';
 import { SubscriptionType } from '../../../../tarotistas/entities/user-tarotista-subscription.entity';
+import { CardFreeInterpretationService } from '../../../cards/card-free-interpretation.service';
 
 @Injectable()
 export class CreateReadingUseCase {
@@ -34,6 +35,7 @@ export class CreateReadingUseCase {
     private readonly predefinedQuestionsService: PredefinedQuestionsService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly revenueCalculationService: RevenueCalculationService,
+    private readonly cardFreeInterpretationService: CardFreeInterpretationService,
   ) {}
 
   async execute(
@@ -70,6 +72,14 @@ export class CreateReadingUseCase {
 
     // Validar que el usuario tiene acceso al spread según su plan
     this.validator.validateSpreadAccess(user.plan, spread.requiredPlan);
+
+    // Validar acceso a la categoría si se proporciona (solo relevante para usuarios FREE)
+    if (createReadingDto.categoryId) {
+      await this.validator.validateCategoryAccess(
+        user.plan,
+        createReadingDto.categoryId,
+      );
+    }
 
     // Determinar tipo de pregunta
     const questionType = createReadingDto.predefinedQuestionId
@@ -172,6 +182,29 @@ export class CreateReadingUseCase {
             'No se pudo generar la interpretación automáticamente. El error ha sido registrado. Por favor, intenta regenerar más tarde.',
         });
       }
+    }
+
+    // T-FR-B02: Flujo FREE — buscar interpretaciones pre-escritas si se proporcionó categoryId
+    if (createReadingDto.categoryId) {
+      const freeInterpretations =
+        await this.cardFreeInterpretationService.findByCardsAndCategory(
+          cards,
+          createReadingDto.cardPositions,
+          createReadingDto.categoryId,
+        );
+
+      const updatedReading = await this.readingRepo.update(reading.id, {
+        freeInterpretations,
+      });
+
+      // Calcular y registrar revenue para lecturas FREE con categoría
+      await this.calculateRevenueForReading(
+        updatedReading,
+        tarotistaId,
+        user.id,
+      );
+
+      return updatedReading;
     }
 
     // Calcular y registrar revenue para lecturas sin interpretación también

@@ -13,6 +13,7 @@ import {
   ValidationArguments,
   ValidateIf,
   MinLength,
+  IsPositive,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -174,4 +175,15 @@ export class CreateReadingDto {
   @IsOptional()
   @Validate(HasQuestionConstraint)
   useAI?: boolean;
+
+  @ApiProperty({
+    example: 1,
+    description:
+      'ID de la categoría elegida (requerido para usuarios FREE con interpretación pre-escrita)',
+    required: false,
+  })
+  @IsInt()
+  @IsPositive()
+  @IsOptional()
+  categoryId?: number;
 }
