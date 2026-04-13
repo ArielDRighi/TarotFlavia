@@ -12,6 +12,7 @@ import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { PlanConfigService } from '../../../../plan-config/plan-config.service';
 import { CategoriesService } from '../../../../categories/categories.service';
+import { TarotCard } from '../../../cards/entities/tarot-card.entity';
 
 @Injectable()
 export class ReadingValidatorService {
@@ -283,6 +284,31 @@ export class ReadingValidatorService {
 
       throw new ForbiddenException(
         `Los usuarios ${planNames[userPlan]} solo pueden acceder a las categorías: ${ReadingValidatorService.FREE_ALLOWED_CATEGORY_SLUGS.join(', ')}`,
+      );
+    }
+  }
+
+  /**
+   * Validate that a user can only use Major Arcana cards if they are on FREE or ANONYMOUS plan.
+   * PREMIUM users can use any cards from the full 78-card deck.
+   *
+   * @param userPlan - The user's subscription plan
+   * @param cards - The cards selected for the reading
+   * @throws ForbiddenException if FREE/ANONYMOUS user tries to use minor arcana cards
+   */
+  validateDeckAccess(userPlan: UserPlan, cards: TarotCard[]): void {
+    // PREMIUM has unrestricted access to all cards
+    if (userPlan === UserPlan.PREMIUM) {
+      return;
+    }
+
+    const hasMinorArcana = cards.some(
+      (card) => card.category !== 'arcanos_mayores',
+    );
+
+    if (hasMinorArcana) {
+      throw new ForbiddenException(
+        'El plan FREE solo permite cartas de Arcanos Mayores',
       );
     }
   }

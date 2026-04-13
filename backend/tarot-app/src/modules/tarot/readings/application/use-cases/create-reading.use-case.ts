@@ -97,6 +97,9 @@ export class CreateReadingUseCase {
     // Obtener las cartas antes de crear la lectura (esto también valida que existan)
     const cards = await this.cardsService.findByIds(createReadingDto.cardIds);
 
+    // T-FR-B03: Validar que FREE/ANONYMOUS solo use Arcanos Mayores
+    this.validator.validateDeckAccess(user.plan, cards);
+
     // Crear la lectura primero sin interpretación
     const reading = await this.readingRepo.create({
       predefinedQuestionId: createReadingDto.predefinedQuestionId || null,

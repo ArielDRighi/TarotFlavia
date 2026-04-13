@@ -110,6 +110,7 @@ describe('CreateReadingUseCase', () => {
             validateUser: jest.fn(),
             validateSpreadAccess: jest.fn(),
             validateCategoryAccess: jest.fn(),
+            validateDeckAccess: jest.fn(),
           },
         },
         {
@@ -1114,6 +1115,109 @@ describe('CreateReadingUseCase', () => {
         expect.not.objectContaining({ interpretation: expect.anything() }),
       );
       expect(result.interpretation).toBeNull();
+    });
+  });
+
+  describe('execute - deck access validation (T-FR-B03)', () => {
+    const mockFreeUser: User = {
+      id: 200,
+      email: 'free@example.com',
+      plan: UserPlan.FREE,
+    } as User;
+
+    const majorArcanaCards = [
+      { id: 1, name: 'El Loco', category: 'arcanos_mayores' },
+      { id: 2, name: 'El Mago', category: 'arcanos_mayores' },
+    ] as unknown as TarotCard[];
+
+    const mixedCards = [
+      { id: 1, name: 'El Loco', category: 'arcanos_mayores' },
+      { id: 22, name: 'As de Bastos', category: 'bastos' },
+    ] as unknown as TarotCard[];
+
+    const mockDtoFree: CreateReadingDto = {
+      deckId: 1,
+      spreadId: 1,
+      cardIds: [1, 2],
+      cardPositions: [
+        { cardId: 1, position: 'past', isReversed: false },
+        { cardId: 2, position: 'present', isReversed: false },
+      ],
+      useAI: false,
+    };
+
+    it('should call validateDeckAccess with user plan and cards', async () => {
+      const mockReading = createMockReading({ user: mockFreeUser });
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+
+      await useCase.execute(mockFreeUser, mockDtoFree);
+
+      expect(validator.validateDeckAccess).toHaveBeenCalledWith(
+        UserPlan.FREE,
+        majorArcanaCards,
+      );
+    });
+
+    it('should throw ForbiddenException when FREE user sends minor arcana cards', async () => {
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mixedCards);
+      validator.validateDeckAccess.mockImplementation(() => {
+        throw new ForbiddenException(
+          'El plan FREE solo permite cartas de Arcanos Mayores',
+        );
+      });
+
+      await expect(useCase.execute(mockFreeUser, mockDtoFree)).rejects.toThrow(
+        ForbiddenException,
+      );
+      await expect(useCase.execute(mockFreeUser, mockDtoFree)).rejects.toThrow(
+        'El plan FREE solo permite cartas de Arcanos Mayores',
+      );
+    });
+
+    it('should call validateDeckAccess before creating the reading', async () => {
+      const callOrder: string[] = [];
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      validator.validateDeckAccess.mockImplementation(() => {
+        callOrder.push('validateDeckAccess');
+      });
+      readingRepo.create.mockImplementation(() => {
+        callOrder.push('repoCreate');
+        return Promise.resolve(createMockReading({ user: mockFreeUser }));
+      });
+
+      await useCase.execute(mockFreeUser, mockDtoFree);
+
+      const deckIdx = callOrder.indexOf('validateDeckAccess');
+      const createIdx = callOrder.indexOf('repoCreate');
+      expect(deckIdx).toBeGreaterThanOrEqual(0);
+      expect(createIdx).toBeGreaterThan(deckIdx);
+    });
+
+    it('should still call validateDeckAccess for PREMIUM users (no restriction expected)', async () => {
+      const premiumDto: CreateReadingDto = { ...mockDtoFree, useAI: false };
+      const mockReading = createMockReading();
+      validator.validateUser.mockResolvedValue(mockUser); // PREMIUM
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+
+      await useCase.execute(mockUser, premiumDto);
+
+      expect(validator.validateDeckAccess).toHaveBeenCalledWith(
+        UserPlan.PREMIUM,
+        majorArcanaCards,
+      );
     });
   });
 });
