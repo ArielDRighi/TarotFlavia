@@ -16,7 +16,7 @@ export class TypeOrmCardFreeInterpretationRepository implements ICardFreeInterpr
     orientations: ('upright' | 'reversed')[],
     categoryId: number,
   ): Promise<CardFreeInterpretation[]> {
-    if (cardIds.length === 0) {
+    if (cardIds.length === 0 || orientations.length === 0) {
       return [];
     }
 

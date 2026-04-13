@@ -160,5 +160,12 @@ describe('TypeOrmCardFreeInterpretationRepository', () => {
       expect(result).toEqual([]);
       expect(mockTypeOrmRepo.find).not.toHaveBeenCalled();
     });
+
+    it('debería manejar array de orientations vacío retornando array vacío', async () => {
+      const result = await repository.findByCardsAndCategory([1, 2], [], 1);
+
+      expect(result).toEqual([]);
+      expect(mockTypeOrmRepo.find).not.toHaveBeenCalled();
+    });
   });
 });

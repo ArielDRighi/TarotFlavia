@@ -27,7 +27,20 @@ const THRESHOLD_LINES = 1500;
 // T-FR-B01 introduces domain/ (entity, repository interface) and infrastructure/ (TypeORM repository)
 // but the application/ layer (use cases, orchestrator) is added in subsequent FREE reading tasks.
 // Target: Remove exception once application/ folder is introduced (T-FR-B02+).
-const MODULES_PENDING_LAYERS = new Set(['encyclopedia', 'holistic-services', 'subscriptions', 'tarot/cards']);
+const MODULES_PENDING_LAYERS_TODOS = new Map([
+  ['encyclopedia', 'ARCH-ENCYCLOPEDIA-LAYERS'],
+  ['holistic-services', 'ARCH-HOLISTIC-SERVICES-LAYERS'],
+  ['subscriptions', 'ARCH-SUBSCRIPTIONS-LAYERS'],
+  ['tarot/cards', 'ARCH-TAROT-CARDS-LAYERS'],
+]);
+const MODULES_PENDING_LAYERS = new Set(MODULES_PENDING_LAYERS_TODOS.keys());
+
+function getPendingLayersTodoReference(moduleName) {
+  const todoTag = MODULES_PENDING_LAYERS_TODOS.get(moduleName);
+  return todoTag
+    ? `See: TODO[${todoTag}] in validate-architecture.js`
+    : 'See: pending layered-architecture refactor TODO in validate-architecture.js';
+}
 
 let exitCode = 0;
 
@@ -168,7 +181,7 @@ function validateModule(moduleName, modulePath) {
         `   Note: This module is under active development and pending layered architecture`,
       );
       console.log(
-        `   See: TODO[ARCH-ENCYCLOPEDIA-LAYERS] in validate-architecture.js`,
+        `   ${getPendingLayersTodoReference(moduleName)}`,
       );
     } else {
       console.log(

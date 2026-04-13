@@ -41,6 +41,8 @@ describe('CardsService', () => {
     readings: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    dailyFreeUpright: null,
+    dailyFreeReversed: null,
   };
 
   const mockDeck: TarotDeck = {

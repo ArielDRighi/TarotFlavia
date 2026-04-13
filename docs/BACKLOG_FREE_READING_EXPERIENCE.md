@@ -467,7 +467,7 @@ Crear la estructura de datos para las interpretaciones pre-escritas de usuarios 
 
 - [x] Crear migración `CreateCardFreeInterpretations` que cree la tabla con FKs (ON DELETE CASCADE a `tarot_card`, RESTRICT a `reading_category`)
 - [x] Crear migración `AddDailyFreeFieldsToTarotCard` que agregue las dos columnas nullable
-- [x] Crear migración `AddFreeInterpretationsToTarotReading` que agregue columna `free_interpretations jsonb NULL`
+- [x] Crear migración `AddFreeInterpretationsToTarotReading` que agregue campo `freeInterpretations` de tipo `jsonb` nullable
 - [x] Las tres migraciones reversibles (método `down()` implementado)
 
 **Repositorio:**
