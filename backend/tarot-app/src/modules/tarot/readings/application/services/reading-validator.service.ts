@@ -275,8 +275,14 @@ export class ReadingValidatorService {
         category.slug,
       )
     ) {
+      const planNames = {
+        [UserPlan.ANONYMOUS]: 'anónimo',
+        [UserPlan.FREE]: 'gratuito',
+        [UserPlan.PREMIUM]: 'premium',
+      };
+
       throw new ForbiddenException(
-        `Los usuarios ${userPlan} solo pueden acceder a las categorías: ${ReadingValidatorService.FREE_ALLOWED_CATEGORY_SLUGS.join(', ')}`,
+        `Los usuarios ${planNames[userPlan]} solo pueden acceder a las categorías: ${ReadingValidatorService.FREE_ALLOWED_CATEGORY_SLUGS.join(', ')}`,
       );
     }
   }

@@ -9,7 +9,7 @@ import { IReadingRepository } from '../../domain/interfaces/reading-repository.i
 import { ReadingValidatorService } from '../services/reading-validator.service';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
 import { TarotReading } from '../../entities/tarot-reading.entity';
-import { User } from '../../../../users/entities/user.entity';
+import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { InterpretationsService } from '../../../interpretations/interpretations.service';
 import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
@@ -185,7 +185,8 @@ export class CreateReadingUseCase {
     }
 
     // T-FR-B02: Flujo FREE — buscar interpretaciones pre-escritas si se proporcionó categoryId
-    if (createReadingDto.categoryId) {
+    // Solo aplica a usuarios FREE/ANONYMOUS; PREMIUM nunca recibe freeInterpretations
+    if (createReadingDto.categoryId && user.plan !== UserPlan.PREMIUM) {
       const freeInterpretations =
         await this.cardFreeInterpretationService.findByCardsAndCategory(
           cards,

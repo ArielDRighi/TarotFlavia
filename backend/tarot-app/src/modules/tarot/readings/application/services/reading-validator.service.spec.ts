@@ -912,6 +912,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       await expect(
         service.validateCategoryAccess(UserPlan.FREE, 4),
       ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 4),
+      ).rejects.toThrow(
+        'Los usuarios gratuito solo pueden acceder a las categorías: amor, salud, dinero',
+      );
     });
 
     it('should throw ForbiddenException when FREE user accesses "espiritual" category', async () => {
@@ -942,6 +947,11 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       await expect(
         service.validateCategoryAccess(UserPlan.ANONYMOUS, 4),
       ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.validateCategoryAccess(UserPlan.ANONYMOUS, 4),
+      ).rejects.toThrow(
+        'Los usuarios anónimo solo pueden acceder a las categorías: amor, salud, dinero',
+      );
     });
 
     it('should allow PREMIUM user to access any category (trabajo)', async () => {

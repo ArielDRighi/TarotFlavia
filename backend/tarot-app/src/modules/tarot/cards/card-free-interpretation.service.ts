@@ -44,9 +44,12 @@ export class CardFreeInterpretationService {
       p.isReversed ? 'reversed' : 'upright',
     );
 
+    const uniqueCardIds = Array.from(new Set(cardIds));
+    const uniqueOrientations = Array.from(new Set(orientations));
+
     const interpretations = await this.repo.findByCardsAndCategory(
-      cardIds,
-      orientations,
+      uniqueCardIds,
+      uniqueOrientations,
       categoryId,
     );
 

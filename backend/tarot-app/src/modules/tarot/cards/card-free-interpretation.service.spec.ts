@@ -108,7 +108,7 @@ describe('CardFreeInterpretationService', () => {
       expect(result[2]).toEqual({ content: 'El Sol en amor...' });
     });
 
-    it('debería llamar al repositorio con los cardIds, orientaciones y categoryId correctos', async () => {
+    it('debería llamar al repositorio con los cardIds, orientaciones y categoryId correctos (deduplicados)', async () => {
       mockRepo.findByCardsAndCategory.mockResolvedValue([]);
 
       await service.findByCardsAndCategory(
@@ -117,9 +117,34 @@ describe('CardFreeInterpretationService', () => {
         categoryId,
       );
 
+      // cardIds [1,3,7] ya son únicos; orientaciones ['upright','reversed','upright'] → dedup → ['upright','reversed']
       expect(mockRepo.findByCardsAndCategory).toHaveBeenCalledWith(
         [1, 3, 7],
-        ['upright', 'reversed', 'upright'],
+        ['upright', 'reversed'],
+        categoryId,
+      );
+    });
+
+    it('debería deduplicar cardIds duplicados antes de llamar al repositorio', async () => {
+      const cardsWithDup = [buildCard(1), buildCard(1), buildCard(3)];
+      const positionsWithDup: CardPosition[] = [
+        { cardId: 1, position: 'primera', isReversed: false },
+        { cardId: 1, position: 'segunda', isReversed: false },
+        { cardId: 3, position: 'tercera', isReversed: false },
+      ];
+
+      mockRepo.findByCardsAndCategory.mockResolvedValue([]);
+
+      await service.findByCardsAndCategory(
+        cardsWithDup,
+        positionsWithDup,
+        categoryId,
+      );
+
+      // cardIds [1,1,3] → dedup → [1,3]; orientaciones ['upright','upright','upright'] → dedup → ['upright']
+      expect(mockRepo.findByCardsAndCategory).toHaveBeenCalledWith(
+        [1, 3],
+        ['upright'],
         categoryId,
       );
     });

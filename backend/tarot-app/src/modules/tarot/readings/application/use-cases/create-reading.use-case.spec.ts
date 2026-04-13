@@ -1059,6 +1059,31 @@ describe('CreateReadingUseCase', () => {
       expect(readingRepo.create).not.toHaveBeenCalled();
     });
 
+    it('should NOT call cardFreeInterpretationService when PREMIUM user sends categoryId (guard plan)', async () => {
+      const premiumDtoWithCategory: CreateReadingDto = {
+        ...mockDto,
+        useAI: false,
+        categoryId: 1,
+      };
+      const mockReading = createMockReading();
+
+      validator.validateUser.mockResolvedValue(mockUser);
+      validator.validateCategoryAccess.mockResolvedValue(undefined);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mockCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+
+      const result = await useCase.execute(mockUser, premiumDtoWithCategory);
+
+      // PREMIUM nunca debe recibir freeInterpretations aunque envíe categoryId
+      expect(
+        cardFreeInterpretationService.findByCardsAndCategory,
+      ).not.toHaveBeenCalled();
+      expect(readingRepo.update).not.toHaveBeenCalled();
+      expect(result).toEqual(mockReading);
+    });
+
     it('should NOT touch the interpretation field in the FREE flow', async () => {
       const mockReading = createMockReading({
         user: mockFreeUser,
