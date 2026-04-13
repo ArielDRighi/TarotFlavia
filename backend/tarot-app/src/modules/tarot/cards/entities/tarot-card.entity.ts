@@ -108,6 +108,26 @@ export class TarotCard {
   @Column()
   deckId: number;
 
+  @ApiProperty({
+    example: 'Hoy la energía del Loco te acompaña...',
+    description:
+      'Interpretación pre-escrita para carta del día FREE (orientación derecha)',
+    required: false,
+    nullable: true,
+  })
+  @Column({ type: 'text', nullable: true })
+  dailyFreeUpright: string | null;
+
+  @ApiProperty({
+    example: 'Hoy el Loco invertido te pide prudencia...',
+    description:
+      'Interpretación pre-escrita para carta del día FREE (orientación invertida)',
+    required: false,
+    nullable: true,
+  })
+  @Column({ type: 'text', nullable: true })
+  dailyFreeReversed: string | null;
+
   @ManyToOne('TarotDeck', 'cards', { eager: true })
   @JoinColumn({ name: 'deckId' })
   deck: ITarotDeck;

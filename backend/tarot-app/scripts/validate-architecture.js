@@ -23,7 +23,11 @@ const THRESHOLD_LINES = 1500;
 // controller, service, module and spec files at the flat level. Full domain/application/infrastructure
 // layers will be applied in a dedicated refactor task after the premium subscription flow is complete.
 // Target: Apply layers once T-BE-04, T-BE-05, T-BE-06 are implemented (Q2 2026).
-const MODULES_PENDING_LAYERS = new Set(['encyclopedia', 'holistic-services', 'subscriptions']);
+// TODO[ARCH-TAROT-CARDS-LAYERS]: Temporary exception for tarot/cards module.
+// T-FR-B01 introduces domain/ (entity, repository interface) and infrastructure/ (TypeORM repository)
+// but the application/ layer (use cases, orchestrator) is added in subsequent FREE reading tasks.
+// Target: Remove exception once application/ folder is introduced (T-FR-B02+).
+const MODULES_PENDING_LAYERS = new Set(['encyclopedia', 'holistic-services', 'subscriptions', 'tarot/cards']);
 
 let exitCode = 0;
 

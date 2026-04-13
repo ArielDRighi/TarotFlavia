@@ -373,7 +373,7 @@ CARTA DEL DÍA:
 | ID       | Tarea                                                              | Tipo     | Prioridad   | Estimación |
 | -------- | ------------------------------------------------------------------ | -------- | ----------- | ---------- |
 | T-FR-P01 | Rename de rutas `/ritual` → `/tarot` + redirects                   | Frontend | ✅ COMPLETADA | 0.5 días   |
-| T-FR-B01 | Capa de dominio: Migración, entidad y campos nuevos                | Backend  | 🔴 CRÍTICA | 2 días     |
+| T-FR-B01 | Capa de dominio: Migración, entidad y campos nuevos                | Backend  | ✅ COMPLETADA | 2 días     |
 | T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | 🔴 CRÍTICA | 3 días     |
 | T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | 🔴 CRÍTICA | 2 días     |
 | T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | 🟡 ALTA    | 1 día      |
@@ -436,7 +436,7 @@ CARTA DEL DÍA:
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** Ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003, HUS-004 (capa de datos)
 
 #### 📋 Descripción
@@ -449,42 +449,42 @@ Crear la estructura de datos para las interpretaciones pre-escritas de usuarios 
 
 **Entidad CardFreeInterpretation:**
 
-- [ ] Crear entidad `CardFreeInterpretation` en `modules/tarot/cards/entities/card-free-interpretation.entity.ts` con campos: `id`, `cardId` (FK `tarot_card`), `categoryId` (FK `reading_category`), `orientation` ('upright' | 'reversed'), `content` (text), `createdAt`, `updatedAt`
-- [ ] Decorador `@Unique(['cardId', 'categoryId', 'orientation'])` para evitar duplicados
-- [ ] Relaciones ManyToOne con `TarotCard` y `ReadingCategory`
-- [ ] Índices apropiados en `cardId` y `categoryId`
+- [x] Crear entidad `CardFreeInterpretation` en `modules/tarot/cards/entities/card-free-interpretation.entity.ts` con campos: `id`, `cardId` (FK `tarot_card`), `categoryId` (FK `reading_category`), `orientation` ('upright' | 'reversed'), `content` (text), `createdAt`, `updatedAt`
+- [x] Decorador `@Unique(['cardId', 'categoryId', 'orientation'])` para evitar duplicados
+- [x] Relaciones ManyToOne con `TarotCard` y `ReadingCategory`
+- [x] Índices apropiados en `cardId` y `categoryId`
 
 **Modificación de TarotCard:**
 
-- [ ] Agregar campos `dailyFreeUpright: string | null` y `dailyFreeReversed: string | null` (type: `text`, nullable: `true`) a `TarotCard` entity ([tarot-card.entity.ts](backend/tarot-app/src/modules/tarot/cards/entities/tarot-card.entity.ts))
+- [x] Agregar campos `dailyFreeUpright: string | null` y `dailyFreeReversed: string | null` (type: `text`, nullable: `true`) a `TarotCard` entity ([tarot-card.entity.ts](backend/tarot-app/src/modules/tarot/cards/entities/tarot-card.entity.ts))
 
 **Modificación de TarotReading:**
 
-- [ ] Agregar campo `freeInterpretations: Record<number, { content: string }> | null` (type: `jsonb`, nullable: `true`) a `TarotReading` entity ([tarot-reading.entity.ts:160](backend/tarot-app/src/modules/tarot/readings/entities/tarot-reading.entity.ts#L160)) — estructura indexada por `position` de la lectura
-- [ ] Decorar con `@ApiProperty` apropiado para que aparezca en Swagger y en el response (no hay DTO de response: la entidad es el contrato — verificado)
+- [x] Agregar campo `freeInterpretations: Record<number, { content: string }> | null` (type: `jsonb`, nullable: `true`) a `TarotReading` entity ([tarot-reading.entity.ts:160](backend/tarot-app/src/modules/tarot/readings/entities/tarot-reading.entity.ts#L160)) — estructura indexada por `position` de la lectura
+- [x] Decorar con `@ApiProperty` apropiado para que aparezca en Swagger y en el response (no hay DTO de response: la entidad es el contrato — verificado)
 
 **Migración:**
 
-- [ ] Crear migración `CreateCardFreeInterpretations` que cree la tabla con FKs (ON DELETE CASCADE a `tarot_card`, RESTRICT a `reading_category`)
-- [ ] Crear migración `AddDailyFreeFieldsToTarotCard` que agregue las dos columnas nullable
-- [ ] Crear migración `AddFreeInterpretationsToTarotReading` que agregue columna `free_interpretations jsonb NULL`
-- [ ] Las tres migraciones reversibles (método `down()` implementado)
+- [x] Crear migración `CreateCardFreeInterpretations` que cree la tabla con FKs (ON DELETE CASCADE a `tarot_card`, RESTRICT a `reading_category`)
+- [x] Crear migración `AddDailyFreeFieldsToTarotCard` que agregue las dos columnas nullable
+- [x] Crear migración `AddFreeInterpretationsToTarotReading` que agregue columna `free_interpretations jsonb NULL`
+- [x] Las tres migraciones reversibles (método `down()` implementado)
 
 **Repositorio:**
 
-- [ ] Crear interface `ICardFreeInterpretationRepository` con método `findByCardsAndCategory(cardIds: number[], orientations: ('upright' | 'reversed')[], categoryId: number): Promise<CardFreeInterpretation[]>`
-- [ ] Crear implementación TypeORM
-- [ ] Token de inyección para DI
-- [ ] Tests unitarios con mock de TypeORM
+- [x] Crear interface `ICardFreeInterpretationRepository` con método `findByCardsAndCategory(cardIds: number[], orientations: ('upright' | 'reversed')[], categoryId: number): Promise<CardFreeInterpretation[]>`
+- [x] Crear implementación TypeORM
+- [x] Token de inyección para DI
+- [x] Tests unitarios con mock de TypeORM
 
 #### 🎯 Criterios de aceptación
 
-- [ ] La migración se aplica correctamente y es reversible
-- [ ] La entidad `CardFreeInterpretation` respeta el unique compuesto
-- [ ] Los campos `dailyFreeUpright/Reversed` son `nullable: true` para no romper datos existentes
-- [ ] `npm run build` compila sin errores
-- [ ] Coverage ≥ 80% en los archivos nuevos
-- [ ] `validate-architecture.js` pasa sin errores
+- [x] La migración se aplica correctamente y es reversible
+- [x] La entidad `CardFreeInterpretation` respeta el unique compuesto
+- [x] Los campos `dailyFreeUpright/Reversed` son `nullable: true` para no romper datos existentes
+- [x] `npm run build` compila sin errores
+- [x] Coverage ≥ 80% en los archivos nuevos
+- [x] `validate-architecture.js` pasa sin errores
 
 ---
 
