@@ -290,7 +290,7 @@ describe('QuestionSelector', () => {
       fireEvent.click(continueButton);
 
       // Should navigate to tirada with questionId
-      expect(mockPush).toHaveBeenCalledWith('/ritual/tirada?categoryId=1&questionId=1');
+      expect(mockPush).toHaveBeenCalledWith('/tarot/tirada?categoryId=1&questionId=1');
     });
 
     it('should allow PREMIUM users to type custom question', async () => {

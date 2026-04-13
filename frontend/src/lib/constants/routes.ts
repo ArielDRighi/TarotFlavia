@@ -49,6 +49,18 @@ export const ROUTES = {
   SERVICIO_RESERVAR: (purchaseId: number) => `/servicios/reservar/${purchaseId}`,
   MIS_SERVICIOS: '/mis-servicios',
 
+  // Tarot Reading Flow
+  TAROT: '/tarot',
+  TAROT_TIRADA: '/tarot/tirada',
+  TAROT_PREGUNTAS: '/tarot/preguntas',
+  TAROT_LECTURA: '/tarot/lectura',
+  TAROT_PREGUNTAS_BY_CATEGORY: (categoryId: number) => `/tarot/preguntas?categoryId=${categoryId}`,
+  TAROT_TIRADA_BY_CATEGORY: (categoryId: number) => `/tarot/tirada?categoryId=${categoryId}`,
+  TAROT_TIRADA_WITH_QUESTION: (categoryId: number, questionId: number) =>
+    `/tarot/tirada?categoryId=${categoryId}&questionId=${questionId}`,
+  TAROT_LECTURA_BY_SPREAD: (spreadId: number) => `/tarot/lectura?spreadId=${spreadId}`,
+  TAROT_WITH_TAROTISTA: (tarotistaId: number | string) => `/tarot?tarotistaId=${tarotistaId}`,
+
   // Rituals
   RITUALES: '/rituales',
   RITUAL_DETAIL: (slug: string) => `/rituales/${slug}`,

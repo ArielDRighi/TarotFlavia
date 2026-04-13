@@ -679,7 +679,7 @@ describe('ReadingExperience', () => {
       const newReadingButton = screen.getByRole('button', { name: /Nueva Lectura/i });
       fireEvent.click(newReadingButton);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual');
+      expect(mockPush).toHaveBeenCalledWith('/tarot');
     });
 
     it.skip('should NOT show "Nueva Lectura" button when FREE user has reached daily limit', async () => {

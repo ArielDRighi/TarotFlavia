@@ -217,7 +217,7 @@ describe('TarotistaProfilePage', () => {
     // Click the button
     await user.click(button);
 
-    expect(mockPush).toHaveBeenCalledWith('/ritual?tarotistaId=1');
+    expect(mockPush).toHaveBeenCalledWith('/tarot?tarotistaId=1');
   });
 
   it('should navigate to booking page when "Ver disponibilidad" is clicked', async () => {

@@ -8,6 +8,7 @@ import { Check, ChevronRight, Sparkles, MessageCircle } from 'lucide-react';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { usePredefinedQuestions, useCategories } from '@/hooks/api/useReadings';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
+import { ROUTES } from '@/lib/constants/routes';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -136,7 +137,7 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
 
   const handleContinueWithPredefined = useCallback(() => {
     if (selectedQuestionId && categoryId) {
-      router.push(`/ritual/tirada?categoryId=${categoryId}&questionId=${selectedQuestionId}`);
+      router.push(ROUTES.TAROT_TIRADA_WITH_QUESTION(Number(categoryId), selectedQuestionId));
     }
   }, [selectedQuestionId, categoryId, router]);
 
@@ -148,7 +149,9 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
 
     if (hasCustomQuestion && categoryId) {
       const encodedQuestion = encodeURIComponent(customQuestion.trim());
-      router.push(`/ritual/tirada?categoryId=${categoryId}&customQuestion=${encodedQuestion}`);
+      router.push(
+        `${ROUTES.TAROT_TIRADA}?categoryId=${categoryId}&customQuestion=${encodedQuestion}`
+      );
     }
   }, [canUseCustomQuestions, hasCustomQuestion, categoryId, customQuestion, router]);
 
@@ -159,7 +162,7 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
   }, [canUseCustomQuestions]);
 
   const handleBackToCategories = useCallback(() => {
-    router.push('/ritual');
+    router.push(ROUTES.TAROT);
   }, [router]);
 
   // Handle missing categoryId
@@ -184,8 +187,8 @@ export function QuestionSelector({ categoryId }: QuestionSelectorProps) {
       <div className="mx-auto max-w-2xl">
         {/* Breadcrumb */}
         <nav className="text-text-muted mb-6 flex items-center gap-2 text-sm">
-          <Link href="/ritual" className="hover:text-primary transition-colors">
-            Ritual
+          <Link href={ROUTES.TAROT} className="hover:text-primary transition-colors">
+            Tarot
           </Link>
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
           <span className="text-text-primary">{category?.name || 'Amor'}</span>

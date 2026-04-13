@@ -106,7 +106,7 @@ export function Header() {
           {user && (
             <>
               <Link
-                href="/ritual"
+                href={ROUTES.TAROT}
                 className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
               >
                 Tirada de Tarot

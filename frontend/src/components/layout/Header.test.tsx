@@ -148,7 +148,7 @@ describe('Header', () => {
 
       const link = screen.getByRole('link', { name: /tirada de tarot/i });
       expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute('href', '/ritual');
+      expect(link).toHaveAttribute('href', '/tarot');
     });
 
     it('should NOT show "Explorar" link (MVP: single tarotista)', () => {

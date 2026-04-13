@@ -14,6 +14,7 @@ import {
 
 import { useCategories } from '@/hooks/api/useReadings';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
+import { ROUTES } from '@/lib/constants/routes';
 import { Card, CardContent } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -123,7 +124,7 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
  *
  * ACCESS CONTROL:
  * - Only PREMIUM users can access category selection
- * - FREE and ANONYMOUS users are automatically redirected to /ritual/tirada
+ * - FREE and ANONYMOUS users are automatically redirected to /tarot/tirada
  * - Users who reached their tarot reading limit are redirected to home with limit message
  *
  * REFACTORED:
@@ -150,7 +151,7 @@ export function CategorySelector() {
   // Redirect FREE/ANONYMOUS users to spread selector (they can't use categories)
   useEffect(() => {
     if (!canUseCustomQuestions && !isLoading && canCreateTarotReading) {
-      router.replace('/ritual/tirada');
+      router.replace(ROUTES.TAROT_TIRADA);
     }
   }, [canUseCustomQuestions, isLoading, canCreateTarotReading, router]);
 
@@ -181,7 +182,7 @@ export function CategorySelector() {
   }
 
   const handleCategoryClick = (categoryId: number) => {
-    router.push(`/ritual/preguntas?categoryId=${categoryId}`);
+    router.push(ROUTES.TAROT_PREGUNTAS_BY_CATEGORY(categoryId));
   };
 
   return (

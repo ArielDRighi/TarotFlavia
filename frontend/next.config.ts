@@ -61,10 +61,23 @@ const nextConfig: NextConfig = {
   ],
 
   // Redirects: legacy /enciclopedia/[slug] → /enciclopedia/tarot/[slug]
+  // + legacy /ritual/* → /tarot/*
   redirects: async () => [
     {
       source: '/enciclopedia/:slug((?!tarot|astrologia|guias|elementos).*)',
       destination: '/enciclopedia/tarot/:slug',
+      permanent: true,
+    },
+    // Redirect /ritual (exact) → /tarot
+    {
+      source: '/ritual',
+      destination: '/tarot',
+      permanent: true,
+    },
+    // Redirect /ritual/:path* → /tarot/:path*
+    {
+      source: '/ritual/:path*',
+      destination: '/tarot/:path*',
       permanent: true,
     },
   ],

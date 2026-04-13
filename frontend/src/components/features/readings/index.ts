@@ -12,4 +12,5 @@ export { ReadingsHistory } from './ReadingsHistory';
 export { ReadingDetail, type ReadingDetailProps } from './ReadingDetail';
 export { SharedReadingView, type SharedReadingViewProps } from './SharedReadingView';
 export { CategorySelector } from './CategorySelector';
+export { TarotPageContent } from './TarotPageContent';
 export { RitualPageContent } from './RitualPageContent';

@@ -372,7 +372,7 @@ CARTA DEL DÍA:
 
 | ID       | Tarea                                                              | Tipo     | Prioridad   | Estimación |
 | -------- | ------------------------------------------------------------------ | -------- | ----------- | ---------- |
-| T-FR-P01 | Rename de rutas `/ritual` → `/tarot` + redirects                   | Frontend | 🔴 CRÍTICA | 0.5 días   |
+| T-FR-P01 | Rename de rutas `/ritual` → `/tarot` + redirects                   | Frontend | ✅ COMPLETADA | 0.5 días   |
 | T-FR-B01 | Capa de dominio: Migración, entidad y campos nuevos                | Backend  | 🔴 CRÍTICA | 2 días     |
 | T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | 🔴 CRÍTICA | 3 días     |
 | T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | 🔴 CRÍTICA | 2 días     |
@@ -397,20 +397,15 @@ CARTA DEL DÍA:
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 0.5 días (3-4h — verificado por grep: ~7 archivos en `app/ritual/`, ~5 `router.push/replace`, ~8 `href`, ~15 tests)
 **Dependencias:** Ninguna
-**Estado:** ⏳ PENDIENTE
-**Cubre HUS:** HUS-001
-
-#### 📋 Descripción
-
-Renombrar todas las rutas relacionadas a la tirada de tarot de `/ritual/**` a `/tarot/**`. La ruta actual colisiona semánticamente con la actividad existente "Rituales" (`/rituales/**`). Se deben agregar redirects permanentes para mantener compatibilidad con links externos indexados.
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Actualizar `frontend/src/lib/constants/routes.ts`: renombrar claves y valores `RITUAL*` → `TAROT*` (ej: `RITUAL_TIRADA: '/ritual/tirada'` → `TAROT_TIRADA: '/tarot/tirada'`)
-- [ ] Mover físicamente carpetas del App Router: `app/ritual/**` → `app/tarot/**`
-- [ ] Actualizar todas las llamadas `router.replace('/ritual/...')` y `router.push('/ritual/...')` en el código (buscar exhaustivamente)
-- [ ] Renombrar componentes relacionados: `RitualPageContent` → `TarotPageContent`
-- [ ] Agregar redirects 301 en `next.config.js`:
+- [x] Actualizar `frontend/src/lib/constants/routes.ts`: renombrar claves y valores `RITUAL*` → `TAROT*` (ej: `RITUAL_TIRADA: '/ritual/tirada'` → `TAROT_TIRADA: '/tarot/tirada'`)
+- [x] Mover físicamente carpetas del App Router: `app/ritual/**` → `app/tarot/**`
+- [x] Actualizar todas las llamadas `router.replace('/ritual/...')` y `router.push('/ritual/...')` en el código (buscar exhaustivamente)
+- [x] Renombrar componentes relacionados: `RitualPageContent` → `TarotPageContent`
+- [x] Agregar redirects 301 en `next.config.js`:
   ```js
   async redirects() {
     return [
@@ -419,16 +414,16 @@ Renombrar todas las rutas relacionadas a la tirada de tarot de `/ritual/**` a `/
     ];
   }
   ```
-- [ ] Actualizar tests que dependan de las rutas antiguas
-- [ ] Verificar links en Header, Footer, emails transaccionales y documentación
+- [x] Actualizar tests que dependan de las rutas antiguas
+- [x] Verificar links en Header, Footer, emails transaccionales y documentación
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Navegando a `/tarot`, `/tarot/tirada`, `/tarot/preguntas`, `/tarot/lectura` se ve el contenido correcto
-- [ ] Navegando a `/ritual/*` se redirige permanentemente al equivalente en `/tarot/*`
-- [ ] No quedan referencias hardcodeadas a `/ritual` en el código (grep limpio)
-- [ ] Los tests pasan y `npm run build` compila sin errores
-- [ ] `npm run type-check` y `npm run lint:fix` pasan
+- [x] Navegando a `/tarot`, `/tarot/tirada`, `/tarot/preguntas`, `/tarot/lectura` se ve el contenido correcto
+- [x] Navegando a `/ritual/*` se redirige permanentemente al equivalente en `/tarot/*`
+- [x] No quedan referencias hardcodeadas a `/ritual` en el código (grep limpio)
+- [x] Los tests pasan y `npm run build` compila sin errores
+- [x] `npm run type-check` y `npm run lint:fix` pasan
 
 ---
 

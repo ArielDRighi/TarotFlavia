@@ -178,7 +178,7 @@ describe('SpreadSelector', () => {
 
       render(<SpreadSelector categoryId="1" questionId="1" customQuestion={null} />);
 
-      expect(screen.getByText(/ritual/i)).toBeInTheDocument();
+      expect(screen.getByText(/tarot/i)).toBeInTheDocument();
       expect(screen.getByText(/pregunta/i)).toBeInTheDocument();
       expect(screen.getByText(/tipo de tirada/i)).toBeInTheDocument();
     });
@@ -192,7 +192,7 @@ describe('SpreadSelector', () => {
 
       render(<SpreadSelector categoryId={null} questionId={null} customQuestion={null} />);
 
-      expect(screen.getByText(/ritual/i)).toBeInTheDocument();
+      expect(screen.getByText(/tarot/i)).toBeInTheDocument();
       expect(screen.queryByText(/pregunta/i)).not.toBeInTheDocument();
       expect(screen.getByText(/tipo de tirada/i)).toBeInTheDocument();
     });
@@ -333,7 +333,7 @@ describe('SpreadSelector', () => {
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith(
-          '/ritual/lectura?spreadId=1&categoryId=1&questionId=5'
+          '/tarot/lectura?spreadId=1&categoryId=1&questionId=5'
         );
       });
     });
@@ -358,7 +358,7 @@ describe('SpreadSelector', () => {
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith(
-          '/ritual/lectura?spreadId=2&categoryId=1&customQuestion=Mi%20pregunta%20personalizada'
+          '/tarot/lectura?spreadId=2&categoryId=1&customQuestion=Mi%20pregunta%20personalizada'
         );
       });
     });
@@ -377,7 +377,7 @@ describe('SpreadSelector', () => {
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith(
-          '/ritual/lectura?spreadId=1&categoryId=3&questionId=7'
+          '/tarot/lectura?spreadId=1&categoryId=3&questionId=7'
         );
       });
     });
@@ -396,7 +396,7 @@ describe('SpreadSelector', () => {
       fireEvent.click(selectButtons[0]); // Select first spread (id: 1)
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/ritual/lectura?spreadId=1');
+        expect(mockPush).toHaveBeenCalledWith('/tarot/lectura?spreadId=1');
       });
 
       // Should NOT include categoryId or questionId
@@ -538,7 +538,7 @@ describe('SpreadSelector', () => {
         fireEvent.click(selectButtons[0]); // Select first spread (id: 1)
 
         await waitFor(() => {
-          expect(mockPush).toHaveBeenCalledWith('/ritual/lectura?spreadId=1');
+          expect(mockPush).toHaveBeenCalledWith('/tarot/lectura?spreadId=1');
         });
 
         // Should NOT include categoryId or questionId

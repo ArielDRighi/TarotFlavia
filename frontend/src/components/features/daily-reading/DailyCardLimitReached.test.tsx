@@ -115,14 +115,14 @@ describe('DailyCardLimitReached', () => {
       expect(mockPush).toHaveBeenCalledWith('/historial');
     });
 
-    test('should navigate to /ritual when "Nueva lectura" button is clicked', async () => {
+    test('should navigate to /tarot when "Nueva lectura" button is clicked', async () => {
       const user = userEvent.setup();
       render(<DailyCardLimitReached />);
 
       const newReadingButton = screen.getByRole('button', { name: /Nueva lectura/i });
       await user.click(newReadingButton);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual');
+      expect(mockPush).toHaveBeenCalledWith('/tarot');
     });
 
     test('should navigate to /planes when "Actualizar a Premium" button is clicked', async () => {
