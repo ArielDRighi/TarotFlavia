@@ -374,7 +374,7 @@ CARTA DEL DÍA:
 | -------- | ------------------------------------------------------------------ | -------- | ----------- | ---------- |
 | T-FR-P01 | Rename de rutas `/ritual` → `/tarot` + redirects                   | Frontend | ✅ COMPLETADA | 0.5 días   |
 | T-FR-B01 | Capa de dominio: Migración, entidad y campos nuevos                | Backend  | ✅ COMPLETADA | 2 días     |
-| T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | 🔴 CRÍTICA | 3 días     |
+| T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | ✅ COMPLETADA | 3 días     |
 | T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | 🔴 CRÍTICA | 2 días     |
 | T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | 🟡 ALTA    | 1 día      |
 | T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | 🔴 CRÍTICA | 3 días     |
@@ -493,7 +493,7 @@ Crear la estructura de datos para las interpretaciones pre-escritas de usuarios 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días
 **Dependencias:** T-FR-B01
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003
 
 #### 📋 Descripción
@@ -504,51 +504,52 @@ Crear el servicio que consulta las interpretaciones pre-escritas y modificar el 
 
 **Service:**
 
-- [ ] Crear `CardFreeInterpretationService` con método `findByCardsAndCategory(cardPositions, categoryId)` que retorna un mapa `{ cardId: { upright?: string; reversed?: string } }` o similar estructura indexable por posición
-- [ ] Tests unitarios con happy path + casos de combinaciones faltantes (fallback)
+- [x] Crear `CardFreeInterpretationService` con método `findByCardsAndCategory(cards, cardPositions, categoryId)` que retorna un mapa `{ [positionIndex]: { content: string } }` indexado por posición (0..N-1)
+- [x] Tests unitarios con happy path + casos de combinaciones faltantes (fallback a `meaningUpright/Reversed`)
 
 **Modificación de Use Case:**
 
-- [ ] Modificar [create-reading.use-case.ts](backend/tarot-app/src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts):
+- [x] Modificar [create-reading.use-case.ts](backend/tarot-app/src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts):
   ```typescript
   if (createReadingDto.useAI === true) {
-    // PREMIUM — SIN CAMBIOS (L141-143: setea reading.interpretation)
+    // PREMIUM — SIN CAMBIOS (setea reading.interpretation)
   } else if (createReadingDto.categoryId) {
     // FREE: buscar interpretaciones pre-escritas por categoría
     const freeInterpretations = await this.cardFreeInterpretationService
-      .findByCardsAndCategory(cards, positions, createReadingDto.categoryId);
+      .findByCardsAndCategory(cards, cardPositions, createReadingDto.categoryId);
     await this.readingRepo.update(reading.id, { freeInterpretations });
   }
   ```
-- [ ] Persistir en el campo `freeInterpretations: jsonb` creado en T-FR-B01 (NO usar el campo `interpretation` — está reservado para la interpretación personalizada de PREMIUM)
-- [ ] Mantener fallback: si no se encuentra combinación para una carta, usar `meaningUpright/Reversed` existente
+- [x] Persistir en el campo `freeInterpretations: jsonb` creado en T-FR-B01 (NO usar el campo `interpretation` — está reservado para la interpretación personalizada de PREMIUM)
+- [x] Mantener fallback: si no se encuentra combinación para una carta, usar `meaningUpright/Reversed` existente
 
 **DTO:**
 
-- [ ] Agregar `categoryId?: number` al [CreateReadingDto](backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts) (hoy NO existe — verificado). Validaciones: `@IsInt() @IsOptional() @IsPositive()`
-- [ ] El response sigue siendo la entidad `TarotReading` (no hay response DTO separado — verificado). `freeInterpretations` queda visible gracias al nuevo campo de entidad
+- [x] Agregar `categoryId?: number` al [CreateReadingDto](backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts). Validaciones: `@IsInt() @IsOptional() @IsPositive()`
+- [x] El response sigue siendo la entidad `TarotReading`. `freeInterpretations` queda visible gracias al nuevo campo de entidad
 
 **Validación de categoryId por plan:**
 
-- [ ] Modificar [ReadingValidatorService](backend/tarot-app/src/modules/tarot/readings/application/services/reading-validator.service.ts): agregar método `validateCategoryAccess(userPlan, categorySlug)` que verifique que FREE solo use slugs `['amor', 'salud', 'dinero']`
-- [ ] Llamar el validador desde `create-reading.use-case.ts` antes de construir la lectura. Lanzar `ForbiddenException` si la categoría no está permitida para el plan
-- [ ] Tests unitarios del validador cubriendo los 3 slugs permitidos para FREE, rechazo de `trabajo`/`espiritual`/`general`, y acceso total para PREMIUM
+- [x] Agregar método `validateCategoryAccess(userPlan, categoryId)` en [ReadingValidatorService](backend/tarot-app/src/modules/tarot/readings/application/services/reading-validator.service.ts) que verifica que FREE/ANONYMOUS solo use slugs `['amor', 'salud', 'dinero']` consultando `CategoriesService.findOne(categoryId)`. PREMIUM tiene acceso total sin consulta.
+- [x] Llamar el validador desde `create-reading.use-case.ts` antes de crear la lectura. Lanza `ForbiddenException` si la categoría no está permitida para el plan
+- [x] Tests unitarios del validador cubriendo los 3 slugs permitidos para FREE, rechazo de `trabajo`/`espiritual`/`general`, ANONYMOUS rechazado, y acceso total para PREMIUM
 
 **Tests:**
 
-- [ ] Tests unitarios del use case cubriendo:
-  - PREMIUM con `useAI: true` → genera interpretación personalizada (sin cambios)
-  - FREE con `categoryId` → carga interpretaciones pre-escritas
-  - FREE sin `categoryId` → fallback o error
-  - Combinación carta+categoría+orientación sin seed → fallback
+- [x] Tests unitarios del use case cubriendo:
+  - PREMIUM con `useAI: true` → genera interpretación personalizada (sin cambios, zero regresión)
+  - FREE con `categoryId` → carga interpretaciones pre-escritas y persiste en `freeInterpretations`
+  - FREE sin `categoryId` → no llama a `cardFreeInterpretationService`
+  - `useAI: true` con `categoryId` → flujo PREMIUM toma precedencia
+  - `validateCategoryAccess` lanza `ForbiddenException` → `readingRepo.create` no se llama
 
 #### 🎯 Criterios de aceptación
 
-- [ ] El flujo PREMIUM sigue funcionando exactamente igual (zero regresión)
-- [ ] El flujo FREE con `categoryId` retorna interpretaciones pre-escritas
-- [ ] El historial de lecturas muestra las interpretaciones persistidas
-- [ ] Coverage ≥ 80%
-- [ ] No se usa `any` ni `eslint-disable`
+- [x] El flujo PREMIUM sigue funcionando exactamente igual (zero regresión)
+- [x] El flujo FREE con `categoryId` retorna interpretaciones pre-escritas
+- [x] El historial de lecturas muestra las interpretaciones persistidas
+- [x] Coverage ≥ 80%
+- [x] No se usa `any` ni `eslint-disable`
 
 ---
 

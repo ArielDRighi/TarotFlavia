@@ -11,6 +11,8 @@ import { ReadingValidatorService } from './reading-validator.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { PlanConfigService } from '../../../../plan-config/plan-config.service';
+import { CategoriesService } from '../../../../categories/categories.service';
+import { ReadingCategory } from '../../../../categories/entities/reading-category.entity';
 
 // Helper types for test cases
 type PartialUser = Partial<User> & { id: number; plan?: UserPlan | null };
@@ -36,6 +38,10 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     getReadingsLimit: jest.fn(),
   };
 
+  const mockCategoriesService = {
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,6 +57,10 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
         {
           provide: PlanConfigService,
           useValue: mockPlanConfigService,
+        },
+        {
+          provide: CategoriesService,
+          useValue: mockCategoriesService,
         },
       ],
     }).compile();
@@ -859,6 +869,121 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       expect(() =>
         service.validateSpreadAccess(UserPlan.ANONYMOUS, UserPlan.PREMIUM),
       ).toThrow('Esta tirada requiere plan premium');
+    });
+  });
+
+  describe('validateCategoryAccess', () => {
+    const mockFreeCategory = (slug: string): ReadingCategory =>
+      ({ id: 1, slug, name: slug, isActive: true }) as ReadingCategory;
+
+    it('should allow FREE user to access "amor" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(mockFreeCategory('amor'));
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 1),
+      ).resolves.not.toThrow();
+    });
+
+    it('should allow FREE user to access "salud" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('salud'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 2),
+      ).resolves.not.toThrow();
+    });
+
+    it('should allow FREE user to access "dinero" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('dinero'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 3),
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw ForbiddenException when FREE user accesses "trabajo" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('trabajo'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 4),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 4),
+      ).rejects.toThrow(
+        'Los usuarios gratuito solo pueden acceder a las categorías: amor, salud, dinero',
+      );
+    });
+
+    it('should throw ForbiddenException when FREE user accesses "espiritual" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('espiritual'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 5),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw ForbiddenException when FREE user accesses "general" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('general'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 6),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw ForbiddenException when ANONYMOUS user accesses a restricted category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('trabajo'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.ANONYMOUS, 4),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.validateCategoryAccess(UserPlan.ANONYMOUS, 4),
+      ).rejects.toThrow(
+        'Los usuarios anónimo solo pueden acceder a las categorías: amor, salud, dinero',
+      );
+    });
+
+    it('should allow PREMIUM user to access any category (trabajo)', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('trabajo'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.PREMIUM, 4),
+      ).resolves.not.toThrow();
+
+      expect(mockCategoriesService.findOne).not.toHaveBeenCalled();
+    });
+
+    it('should allow PREMIUM user to access any category (espiritual)', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('espiritual'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.PREMIUM, 5),
+      ).resolves.not.toThrow();
+    });
+
+    it('should propagate NotFoundException when category does not exist', async () => {
+      mockCategoriesService.findOne.mockRejectedValue(
+        new NotFoundException('Categoría con ID 999 no encontrada'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 999),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

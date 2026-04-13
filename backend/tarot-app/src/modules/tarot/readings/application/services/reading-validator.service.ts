@@ -11,15 +11,23 @@ import { Repository } from 'typeorm';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { PlanConfigService } from '../../../../plan-config/plan-config.service';
+import { CategoriesService } from '../../../../categories/categories.service';
 
 @Injectable()
 export class ReadingValidatorService {
+  private static readonly FREE_ALLOWED_CATEGORY_SLUGS: string[] = [
+    'amor',
+    'salud',
+    'dinero',
+  ];
+
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     @InjectRepository(TarotReading)
     private readonly readingRepo: Repository<TarotReading>,
     private readonly planConfigService: PlanConfigService,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   /**
@@ -237,6 +245,44 @@ export class ReadingValidatorService {
 
       throw new ForbiddenException(
         `Esta tirada requiere plan ${planNames[spreadRequiredPlan]}. Tu plan actual es ${planNames[userPlan]}`,
+      );
+    }
+  }
+
+  /**
+   * Validate that a user has access to a specific reading category.
+   * PREMIUM users have access to all categories.
+   * FREE and ANONYMOUS users can only access: 'amor', 'salud', 'dinero'.
+   *
+   * @param userPlan - The user's subscription plan
+   * @param categoryId - The ID of the category to validate access for
+   * @throws ForbiddenException if user doesn't have access to the category
+   * @throws NotFoundException if category doesn't exist (propagated from CategoriesService)
+   */
+  async validateCategoryAccess(
+    userPlan: UserPlan,
+    categoryId: number,
+  ): Promise<void> {
+    // PREMIUM has unrestricted access — no DB call needed
+    if (userPlan === UserPlan.PREMIUM) {
+      return;
+    }
+
+    const category = await this.categoriesService.findOne(categoryId);
+
+    if (
+      !ReadingValidatorService.FREE_ALLOWED_CATEGORY_SLUGS.includes(
+        category.slug,
+      )
+    ) {
+      const planNames = {
+        [UserPlan.ANONYMOUS]: 'anónimo',
+        [UserPlan.FREE]: 'gratuito',
+        [UserPlan.PREMIUM]: 'premium',
+      };
+
+      throw new ForbiddenException(
+        `Los usuarios ${planNames[userPlan]} solo pueden acceder a las categorías: ${ReadingValidatorService.FREE_ALLOWED_CATEGORY_SLUGS.join(', ')}`,
       );
     }
   }
