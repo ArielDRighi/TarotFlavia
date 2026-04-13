@@ -178,7 +178,24 @@ describe('SpreadSelectorPage', () => {
     const mockSearchParams = new URLSearchParams('');
     (useSearchParams as Mock).mockReturnValue(mockSearchParams);
     (useAuthStore as unknown as Mock).mockReturnValue({
-      user: { ...mockUser, plan: 'PREMIUM' },
+      user: { ...mockUser, plan: 'premium' },
+    });
+
+    // Mock PREMIUM capabilities
+    (useUserCapabilities as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
+        plan: 'premium',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+      error: null,
     });
 
     render(<SpreadSelectorPage />);

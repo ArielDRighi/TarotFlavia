@@ -2,7 +2,9 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { ReadingExperience } from '@/components/features/readings/ReadingExperience';
+import { ROUTES } from '@/lib/constants/routes';
 
 /**
  * Inner component that uses useSearchParams
@@ -19,9 +21,9 @@ function LecturaPageContent() {
       <div className="bg-bg-main flex min-h-screen items-center justify-center">
         <div className="text-center">
           <p className="text-text-muted mb-4">Selecciona una tirada primero.</p>
-          <a href="/tarot/tirada" className="text-primary hover:underline">
+          <Link href={ROUTES.TAROT_TIRADA} className="text-primary hover:underline">
             Volver a selección de tirada
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -31,7 +33,7 @@ function LecturaPageContent() {
     <ReadingExperience
       spreadId={Number(spreadId)}
       questionId={questionId ? Number(questionId) : null}
-      customQuestion={customQuestion ? decodeURIComponent(customQuestion) : null}
+      customQuestion={customQuestion ?? null}
     />
   );
 }

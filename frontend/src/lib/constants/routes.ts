@@ -59,7 +59,7 @@ export const ROUTES = {
   TAROT_TIRADA_WITH_QUESTION: (categoryId: number, questionId: number) =>
     `/tarot/tirada?categoryId=${categoryId}&questionId=${questionId}`,
   TAROT_LECTURA_BY_SPREAD: (spreadId: number) => `/tarot/lectura?spreadId=${spreadId}`,
-  TAROT_WITH_TAROTISTA: (tarotistaId: number | string) => `/tarot?tarotistaId=${tarotistaId}`,
+  TAROT_WITH_TAROTISTA: (tarotistaId: number) => `/tarot?tarotistaId=${tarotistaId}`,
 
   // Rituals
   RITUALES: '/rituales',

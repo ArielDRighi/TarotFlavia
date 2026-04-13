@@ -30,7 +30,7 @@ describe('Page Metadata Exports', () => {
   });
 
   describe('Layout Metadata', () => {
-    it('tarot layout should export ritualMetadata', async () => {
+    it('tarot layout should export tarotMetadata', async () => {
       const tarotLayout = await import('@/app/tarot/layout');
       expect(tarotLayout.metadata).toBeDefined();
       expect((tarotLayout.metadata as Metadata).title).toBe('Tirada de Tarot');
