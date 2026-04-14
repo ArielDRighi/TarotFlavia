@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   NotFoundException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,6 +23,8 @@ import { getTodayUTCDateString } from '../../../common/utils/date.utils';
 
 @Injectable()
 export class DailyReadingService {
+  private readonly logger = new Logger(DailyReadingService.name);
+
   constructor(
     @InjectRepository(DailyReading)
     private readonly dailyReadingRepository: Repository<DailyReading>,
@@ -94,10 +97,15 @@ export class DailyReadingService {
     // TASK-007: Ya determinamos el plan arriba para verificar límites
     // userPlan ya está definido
 
-    // Seleccionar carta aleatoria
-    const { card, isReversed } = await this.selectRandomCard();
+    // T-FR-B03: Seleccionar carta aleatoria
+    // FREE/ANONYMOUS → solo Arcanos Mayores (22 cartas)
+    // PREMIUM → mazo completo (78 cartas)
+    const onlyMajorArcana = userPlan !== UserPlan.PREMIUM;
+    const { card, isReversed } = await this.selectRandomCard(onlyMajorArcana);
 
-    // TASK-007: Generar interpretación solo si el usuario es PREMIUM
+    // T-FR-B03: Generar interpretación según plan del usuario
+    // PREMIUM → interpretación personalizada con IA
+    // FREE/ANONYMOUS → texto pre-escrito dailyFreeUpright/Reversed (con fallback a meaningUpright/Reversed)
     let interpretation: string | null = null;
     if (userPlan === UserPlan.PREMIUM) {
       interpretation =
@@ -106,6 +114,23 @@ export class DailyReadingService {
           isReversed,
           tarotistaId,
         );
+    } else {
+      // FREE/ANONYMOUS: usar campos pre-escritos, con fallback
+      const freeText = isReversed
+        ? card.dailyFreeReversed
+        : card.dailyFreeUpright;
+
+      if (freeText) {
+        interpretation = freeText;
+      } else {
+        // Fallback: sin seed aún, usar keywords técnicos
+        this.logger.warn(
+          `dailyFree${isReversed ? 'Reversed' : 'Upright'} is null for card ${card.id} (${card.name}). Falling back to meaning${isReversed ? 'Reversed' : 'Upright'}.`,
+        );
+        interpretation = isReversed
+          ? card.meaningReversed
+          : card.meaningUpright;
+      }
     }
 
     // Guardar en daily_reading
@@ -213,10 +238,24 @@ export class DailyReadingService {
       );
     }
 
-    // Seleccionar carta aleatoria
-    const { card, isReversed } = await this.selectRandomCard();
+    // T-FR-B03: Seleccionar carta aleatoria — solo Arcanos Mayores para anónimos
+    const { card, isReversed } = await this.selectRandomCard(true);
 
-    // NO generar interpretación IA para usuarios anónimos
+    // T-FR-B03: Usar texto pre-escrito dailyFreeUpright/Reversed, con fallback a meaningUpright/Reversed
+    const freeText = isReversed
+      ? card.dailyFreeReversed
+      : card.dailyFreeUpright;
+    let interpretation: string | null;
+
+    if (freeText) {
+      interpretation = freeText;
+    } else {
+      this.logger.warn(
+        `dailyFree${isReversed ? 'Reversed' : 'Upright'} is null for card ${card.id} (${card.name}). Falling back to meaning${isReversed ? 'Reversed' : 'Upright'}.`,
+      );
+      interpretation = isReversed ? card.meaningReversed : card.meaningUpright;
+    }
+
     // Guardar en daily_reading
     const dailyReading = this.dailyReadingRepository.create({
       userId: null,
@@ -224,7 +263,7 @@ export class DailyReadingService {
       tarotistaId,
       cardId: card.id,
       isReversed,
-      interpretation: null, // Sin IA para anónimos
+      interpretation,
       readingDate: todayStr as unknown as Date,
       wasRegenerated: false,
     });
@@ -365,23 +404,35 @@ export class DailyReadingService {
   }
 
   /**
-   * Selecciona una carta aleatoria del mazo
-   * Incluye probabilidad 50% de que esté invertida
+   * Selecciona una carta aleatoria del mazo.
+   * Incluye probabilidad 50% de que esté invertida.
+   *
+   * @param onlyMajorArcana - Si true, selecciona solo entre los 22 Arcanos Mayores (para FREE/anónimos)
    */
-  private async selectRandomCard(): Promise<{
+  private async selectRandomCard(onlyMajorArcana: boolean = false): Promise<{
     card: TarotCard;
     isReversed: boolean;
   }> {
-    const totalCards = await this.tarotCardRepository.count();
+    const totalCards = await this.tarotCardRepository.count(
+      onlyMajorArcana ? { where: { category: 'arcanos_mayores' } } : undefined,
+    );
+
     const randomIndex = Math.floor(Math.random() * totalCards);
     const isReversed = Math.random() < 0.5;
 
-    const card = await this.tarotCardRepository
+    const cardQueryBuilder = this.tarotCardRepository
       .createQueryBuilder('card')
       .orderBy('card.id', 'ASC')
       .skip(randomIndex)
-      .take(1)
-      .getOne();
+      .take(1);
+
+    if (onlyMajorArcana) {
+      cardQueryBuilder.where('card.category = :category', {
+        category: 'arcanos_mayores',
+      });
+    }
+
+    const card = await cardQueryBuilder.getOne();
 
     if (!card) {
       throw new InternalServerErrorException(

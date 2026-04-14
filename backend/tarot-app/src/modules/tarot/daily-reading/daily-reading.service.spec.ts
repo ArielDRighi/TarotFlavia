@@ -879,37 +879,85 @@ describe('DailyReadingService', () => {
     });
 
     it('should generate a random daily card for anonymous user', async () => {
+      // T-FR-B03: anonymous users now receive pre-written dailyFreeUpright/Reversed interpretation
+      // (fallback to meaningUpright/Reversed when dailyFreeUpright/Reversed is null)
       mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
-      mockCardRepo.count.mockResolvedValue(78);
+      mockCardRepo.count.mockResolvedValue(22); // T-FR-B03: only major arcana (22 cards)
       mockCardQueryBuilder.getOne.mockResolvedValue({
         id: 5,
         name: 'El Hierofante',
         meaningUpright: 'Sabiduría y tradición',
         meaningReversed: 'Rebelión contra normas',
+        dailyFreeUpright: null, // no pre-written text → fallback to meaningUpright/Reversed
+        dailyFreeReversed: null,
       });
 
-      const savedReading = {
-        id: 1,
-        anonymousFingerprint: fingerprint,
-        userId: null,
-        cardId: 5,
-        isReversed: false,
-        interpretation: null,
-        readingDate: new Date().toISOString().split('T')[0],
-        wasRegenerated: false,
-      };
+      // isReversed depends on Math.random; accept either orientation
+      const uprightInterpretation = 'Sabiduría y tradición';
+      const reversedInterpretation = 'Rebelión contra normas';
 
-      mockDailyReadingRepo.create.mockReturnValue(savedReading);
-      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
-      mockDailyReadingRepo.findOne.mockResolvedValue({
-        ...savedReading,
-        card: {
-          id: 5,
-          name: 'El Hierofante',
-          meaningUpright: 'Sabiduría y tradición',
-          meaningReversed: 'Rebelión contra normas',
-        },
-      });
+      mockDailyReadingRepo.create.mockImplementation(
+        (data: {
+          anonymousFingerprint: string;
+          userId: null;
+          cardId: number;
+          isReversed: boolean;
+          interpretation: string;
+          readingDate: string;
+          tarotistaId: number;
+          wasRegenerated: boolean;
+        }) => data,
+      );
+      mockDailyReadingRepo.save.mockImplementation(
+        (data: {
+          anonymousFingerprint: string;
+          userId: null;
+          cardId: number;
+          isReversed: boolean;
+          interpretation: string;
+          readingDate: string;
+          tarotistaId: number;
+          wasRegenerated: boolean;
+        }) => Promise.resolve({ id: 1, ...data }),
+      );
+      mockDailyReadingRepo.findOne.mockImplementation(
+        async () =>
+          ({
+            id: 1,
+            anonymousFingerprint: fingerprint,
+            userId: null,
+            cardId: 5,
+            isReversed: false,
+            interpretation: uprightInterpretation,
+            readingDate: new Date().toISOString().split('T')[0],
+            wasRegenerated: false,
+            card: {
+              id: 5,
+              name: 'El Hierofante',
+              meaningUpright: 'Sabiduría y tradición',
+              meaningReversed: 'Rebelión contra normas',
+              dailyFreeUpright: null,
+              dailyFreeReversed: null,
+            },
+          }) as unknown as Promise<{
+            id: number;
+            anonymousFingerprint: string;
+            userId: null;
+            cardId: number;
+            isReversed: boolean;
+            interpretation: string;
+            readingDate: string;
+            wasRegenerated: boolean;
+            card: {
+              id: number;
+              name: string;
+              meaningUpright: string;
+              meaningReversed: string;
+              dailyFreeUpright: null;
+              dailyFreeReversed: null;
+            };
+          }>,
+      );
 
       const result = await service.generateAnonymousDailyCard(
         fingerprint,
@@ -919,14 +967,22 @@ describe('DailyReadingService', () => {
       expect(result).toBeDefined();
       expect(result.anonymousFingerprint).toBe(fingerprint);
       expect(result.userId).toBeNull();
-      expect(result.interpretation).toBeNull();
-      expect(mockDailyReadingRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          anonymousFingerprint: fingerprint,
-          userId: null,
-          interpretation: null,
-        }),
+      // T-FR-B03: interpretation is now pre-written text (or fallback), NOT null
+      expect(result.interpretation).not.toBeNull();
+
+      // Verify create was called with a non-null interpretation (upright or reversed fallback)
+      const createCall = mockDailyReadingRepo.create.mock
+        .calls[0][0] as unknown as {
+        anonymousFingerprint: string;
+        userId: null;
+        interpretation: string;
+      };
+      expect(createCall.anonymousFingerprint).toBe(fingerprint);
+      expect(createCall.userId).toBeNull();
+      expect([uprightInterpretation, reversedInterpretation]).toContain(
+        createCall.interpretation,
       );
+
       expect(
         mockInterpretationsService.generateDailyCardInterpretation,
       ).not.toHaveBeenCalled();
@@ -1058,6 +1114,426 @@ describe('DailyReadingService', () => {
 
       // Different fingerprints can get different cards
       expect(result1.card.id).not.toBe(result2.card.id);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // T-FR-B03: selectRandomCard con filtro de Arcanos Mayores
+  // -----------------------------------------------------------------------
+  describe('generateDailyCard - T-FR-B03: major arcana filter + dailyFreeUpright/Reversed', () => {
+    const userId = 1;
+    const tarotistaId = 1;
+
+    const majorArcanaCard = {
+      id: 5,
+      name: 'La Justicia',
+      category: 'arcanos_mayores',
+      dailyFreeUpright: 'Hoy la energía de La Justicia te acompaña...',
+      dailyFreeReversed: 'Hoy La Justicia invertida te pide...',
+      meaningUpright: 'Equilibrio y verdad',
+      meaningReversed: 'Injusticia o deshonestidad',
+    };
+
+    beforeEach(() => {
+      mockPlanConfigService.findByPlanType.mockResolvedValue({
+        planType: UserPlan.FREE,
+        dailyCardLimit: 1,
+        tarotReadingsLimit: 3,
+      });
+      mockUsageLimitsService.checkLimit.mockResolvedValue(true);
+    });
+
+    it('should filter cards by arcanos_mayores when FREE user generates daily card', async () => {
+      const mockFreeUser = {
+        id: userId,
+        email: 'free@test.com',
+        plan: UserPlan.FREE,
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      // FREE: count only returns 22 (arcanos_mayores)
+      mockCardRepo.count.mockResolvedValue(22);
+      mockCardQueryBuilder.getOne.mockResolvedValue(majorArcanaCard);
+
+      const savedReading = {
+        id: 1,
+        userId,
+        tarotistaId,
+        cardId: majorArcanaCard.id,
+        isReversed: false,
+        interpretation: majorArcanaCard.dailyFreeUpright,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: majorArcanaCard,
+      });
+
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockFreeUser,
+      );
+
+      // Verify the query builder was called with arcanos_mayores filter
+      expect(mockCardQueryBuilder.where).toHaveBeenCalledWith(
+        expect.stringContaining('category'),
+        expect.objectContaining({ category: 'arcanos_mayores' }),
+      );
+      // Verify interpretation is from dailyFreeUpright
+      expect(result.interpretation).toBe(majorArcanaCard.dailyFreeUpright);
+    });
+
+    it('should use dailyFreeUpright when FREE user card is not reversed', async () => {
+      const mockFreeUser = {
+        id: userId,
+        email: 'free@test.com',
+        plan: UserPlan.FREE,
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(22);
+
+      // Force isReversed = false
+      jest
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.1) // randomIndex → small
+        .mockReturnValueOnce(0.9); // isReversed → false (>= 0.5)
+
+      mockCardQueryBuilder.getOne.mockResolvedValue(majorArcanaCard);
+
+      const savedReading = {
+        id: 1,
+        userId,
+        tarotistaId,
+        cardId: majorArcanaCard.id,
+        isReversed: false,
+        interpretation: majorArcanaCard.dailyFreeUpright,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: majorArcanaCard,
+      });
+
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockFreeUser,
+      );
+
+      expect(result.interpretation).toBe(majorArcanaCard.dailyFreeUpright);
+
+      jest.spyOn(Math, 'random').mockRestore();
+    });
+
+    it('should use dailyFreeReversed when FREE user card is reversed', async () => {
+      const mockFreeUser = {
+        id: userId,
+        email: 'free@test.com',
+        plan: UserPlan.FREE,
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(22);
+
+      // Force isReversed = true (random < 0.5)
+      jest
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.1) // randomIndex
+        .mockReturnValueOnce(0.2); // isReversed = true (< 0.5)
+
+      mockCardQueryBuilder.getOne.mockResolvedValue(majorArcanaCard);
+
+      const savedReading = {
+        id: 2,
+        userId,
+        tarotistaId,
+        cardId: majorArcanaCard.id,
+        isReversed: true,
+        interpretation: majorArcanaCard.dailyFreeReversed,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: majorArcanaCard,
+      });
+
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockFreeUser,
+      );
+
+      expect(result.interpretation).toBe(majorArcanaCard.dailyFreeReversed);
+
+      jest.spyOn(Math, 'random').mockRestore();
+    });
+
+    it('should fallback to meaningUpright when dailyFreeUpright is null', async () => {
+      const cardWithNullDaily = {
+        ...majorArcanaCard,
+        dailyFreeUpright: null,
+        dailyFreeReversed: null,
+      };
+
+      const mockFreeUser = {
+        id: userId,
+        email: 'free@test.com',
+        plan: UserPlan.FREE,
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(22);
+
+      // Force isReversed = false
+      jest
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.1)
+        .mockReturnValueOnce(0.9);
+
+      mockCardQueryBuilder.getOne.mockResolvedValue(cardWithNullDaily);
+
+      const savedReading = {
+        id: 3,
+        userId,
+        tarotistaId,
+        cardId: cardWithNullDaily.id,
+        isReversed: false,
+        interpretation: cardWithNullDaily.meaningUpright,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: cardWithNullDaily,
+      });
+
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockFreeUser,
+      );
+
+      // Fallback to meaningUpright since dailyFreeUpright is null
+      expect(result.interpretation).toBe(cardWithNullDaily.meaningUpright);
+
+      jest.spyOn(Math, 'random').mockRestore();
+    });
+
+    it('should NOT use dailyFreeUpright for PREMIUM users (uses AI instead)', async () => {
+      const mockPremiumUser = {
+        id: userId,
+        email: 'premium@test.com',
+        plan: UserPlan.PREMIUM,
+      };
+
+      mockPlanConfigService.findByPlanType.mockResolvedValue({
+        planType: UserPlan.PREMIUM,
+        dailyCardLimit: -1,
+        tarotReadingsLimit: -1,
+      });
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      // PREMIUM: count returns all 78 cards
+      mockCardRepo.count.mockResolvedValue(78);
+      mockCardQueryBuilder.getOne.mockResolvedValue(majorArcanaCard);
+
+      const aiInterpretation =
+        '**Energía del Día**: interpretación personalizada';
+      mockInterpretationsService.generateDailyCardInterpretation.mockResolvedValue(
+        aiInterpretation,
+      );
+
+      const savedReading = {
+        id: 4,
+        userId,
+        tarotistaId,
+        cardId: majorArcanaCard.id,
+        isReversed: false,
+        interpretation: aiInterpretation,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: majorArcanaCard,
+      });
+
+      const result = await service.generateDailyCard(
+        userId,
+        tarotistaId,
+        mockPremiumUser,
+      );
+
+      // PREMIUM should use AI, not dailyFreeUpright
+      expect(
+        mockInterpretationsService.generateDailyCardInterpretation,
+      ).toHaveBeenCalled();
+      expect(result.interpretation).toBe(aiInterpretation);
+      // PREMIUM should NOT filter by arcanos_mayores
+      expect(mockCardQueryBuilder.where).not.toHaveBeenCalledWith(
+        expect.stringContaining('category'),
+        expect.anything(),
+      );
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // T-FR-B03: generateAnonymousDailyCard con filtro arcanos mayores
+  // -----------------------------------------------------------------------
+  describe('generateAnonymousDailyCard - T-FR-B03: major arcana filter + dailyFreeUpright/Reversed', () => {
+    const tarotistaId = 1;
+    const fingerprint = 'anon-fp-b03';
+
+    const majorArcanaCard = {
+      id: 3,
+      name: 'La Emperatriz',
+      category: 'arcanos_mayores',
+      dailyFreeUpright: 'Hoy la energía de La Emperatriz te acompaña...',
+      dailyFreeReversed: 'Hoy La Emperatriz invertida te pide...',
+      meaningUpright: 'Abundancia y fertilidad',
+      meaningReversed: 'Bloqueo creativo',
+    };
+
+    it('should filter cards by arcanos_mayores for anonymous users', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(22);
+      mockCardQueryBuilder.getOne.mockResolvedValue(majorArcanaCard);
+
+      const savedReading = {
+        id: 1,
+        anonymousFingerprint: fingerprint,
+        userId: null,
+        cardId: majorArcanaCard.id,
+        isReversed: false,
+        interpretation: majorArcanaCard.dailyFreeUpright,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: majorArcanaCard,
+      });
+
+      const result = await service.generateAnonymousDailyCard(
+        fingerprint,
+        tarotistaId,
+      );
+
+      // Should filter by arcanos_mayores
+      expect(mockCardQueryBuilder.where).toHaveBeenCalledWith(
+        expect.stringContaining('category'),
+        expect.objectContaining({ category: 'arcanos_mayores' }),
+      );
+      // Should use dailyFreeUpright (not null)
+      expect(result.interpretation).toBe(majorArcanaCard.dailyFreeUpright);
+    });
+
+    it('should use dailyFreeReversed for anonymous user with reversed card', async () => {
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(22);
+
+      // Force isReversed = true
+      jest
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.1)
+        .mockReturnValueOnce(0.2);
+
+      mockCardQueryBuilder.getOne.mockResolvedValue(majorArcanaCard);
+
+      const savedReading = {
+        id: 2,
+        anonymousFingerprint: fingerprint,
+        userId: null,
+        cardId: majorArcanaCard.id,
+        isReversed: true,
+        interpretation: majorArcanaCard.dailyFreeReversed,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: majorArcanaCard,
+      });
+
+      const result = await service.generateAnonymousDailyCard(
+        fingerprint,
+        tarotistaId,
+      );
+
+      expect(result.interpretation).toBe(majorArcanaCard.dailyFreeReversed);
+
+      jest.spyOn(Math, 'random').mockRestore();
+    });
+
+    it('should fallback to meaningUpright when dailyFreeUpright is null for anonymous user', async () => {
+      const cardWithNullDaily = {
+        ...majorArcanaCard,
+        dailyFreeUpright: null,
+        dailyFreeReversed: null,
+      };
+
+      mockDailyReadingQueryBuilder.getOne.mockResolvedValue(null);
+      mockCardRepo.count.mockResolvedValue(22);
+
+      jest
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.1)
+        .mockReturnValueOnce(0.9); // not reversed
+
+      mockCardQueryBuilder.getOne.mockResolvedValue(cardWithNullDaily);
+
+      const savedReading = {
+        id: 3,
+        anonymousFingerprint: fingerprint,
+        userId: null,
+        cardId: cardWithNullDaily.id,
+        isReversed: false,
+        interpretation: cardWithNullDaily.meaningUpright,
+        readingDate: new Date().toISOString().split('T')[0],
+        wasRegenerated: false,
+      };
+
+      mockDailyReadingRepo.create.mockReturnValue(savedReading);
+      mockDailyReadingRepo.save.mockResolvedValue(savedReading);
+      mockDailyReadingRepo.findOne.mockResolvedValue({
+        ...savedReading,
+        card: cardWithNullDaily,
+      });
+
+      const result = await service.generateAnonymousDailyCard(
+        fingerprint,
+        tarotistaId,
+      );
+
+      expect(result.interpretation).toBe(cardWithNullDaily.meaningUpright);
+
+      jest.spyOn(Math, 'random').mockRestore();
     });
   });
 });

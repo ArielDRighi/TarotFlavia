@@ -375,7 +375,7 @@ CARTA DEL DÍA:
 | T-FR-P01 | Rename de rutas `/ritual` → `/tarot` + redirects                   | Frontend | ✅ COMPLETADA | 0.5 días   |
 | T-FR-B01 | Capa de dominio: Migración, entidad y campos nuevos                | Backend  | ✅ COMPLETADA | 2 días     |
 | T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | ✅ COMPLETADA | 3 días     |
-| T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | 🔴 CRÍTICA | 2 días     |
+| T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | ✅ COMPLETADA | 2 días     |
 | T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | 🟡 ALTA    | 1 día      |
 | T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | 🔴 CRÍTICA | 3 días     |
 | T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | 🔴 CRÍTICA | 2 días     |
@@ -558,7 +558,7 @@ Crear el servicio que consulta las interpretaciones pre-escritas y modificar el 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-FR-B01
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-004, HUS-005
 
 #### 📋 Descripción
@@ -569,31 +569,31 @@ Agregar validación de seguridad backend que impida a usuarios FREE usar Arcanos
 
 **Validación de Mazo (create-reading):**
 
-- [ ] En `create-reading.use-case.ts` (o `ReadingValidatorService`), si `!useAI`, verificar que todas las cartas tengan `category === 'arcanos_mayores'`
-- [ ] Lanzar `ForbiddenException('El plan FREE solo permite cartas de Arcanos Mayores')` si la validación falla
-- [ ] Tests unitarios con intento malicioso (FREE enviando IDs de arcanos menores)
+- [x] En `create-reading.use-case.ts` (o `ReadingValidatorService`), si `!useAI`, verificar que todas las cartas tengan `category === 'arcanos_mayores'`
+- [x] Lanzar `ForbiddenException('El plan FREE solo permite cartas de Arcanos Mayores')` si la validación falla
+- [x] Tests unitarios con intento malicioso (FREE enviando IDs de arcanos menores)
 
 **Modificación de DailyReadingService:**
 
-- [ ] Modificar `selectRandomCard()` en `daily-reading.service.ts`: aceptar parámetro `onlyMajorArcana: boolean`; si `true`, filtrar query por `category: 'arcanos_mayores'`
-- [ ] En el método que orquesta la carta del día: si el usuario es FREE/anónimo → `onlyMajorArcana: true`
-- [ ] Retornar `card.dailyFreeUpright` o `card.dailyFreeReversed` como `interpretation` cuando el usuario no accede a interpretación personalizada (antes retornaba `null` o `meaningUpright`)
-- [ ] Fallback: si `dailyFreeUpright/Reversed` es `null` (aún sin seed), usar `meaningUpright/Reversed` con log warning
+- [x] Modificar `selectRandomCard()` en `daily-reading.service.ts`: aceptar parámetro `onlyMajorArcana: boolean`; si `true`, filtrar query por `category: 'arcanos_mayores'`
+- [x] En el método que orquesta la carta del día: si el usuario es FREE/anónimo → `onlyMajorArcana: true`
+- [x] Retornar `card.dailyFreeUpright` o `card.dailyFreeReversed` como `interpretation` cuando el usuario no accede a interpretación personalizada (antes retornaba `null` o `meaningUpright`)
+- [x] Fallback: si `dailyFreeUpright/Reversed` es `null` (aún sin seed), usar `meaningUpright/Reversed` con log warning
 
 **Tests:**
 
-- [ ] Tests unitarios: usuario anónimo → solo arcanos mayores + texto `dailyFreeUpright`
-- [ ] Tests: usuario FREE → igual que anónimo
-- [ ] Tests: usuario PREMIUM → mazo completo + interpretación personalizada
-- [ ] Tests: fallback cuando `dailyFreeUpright` es `null`
+- [x] Tests unitarios: usuario anónimo → solo arcanos mayores + texto `dailyFreeUpright`
+- [x] Tests: usuario FREE → igual que anónimo
+- [x] Tests: usuario PREMIUM → mazo completo + interpretación personalizada
+- [x] Tests: fallback cuando `dailyFreeUpright` es `null`
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Un cliente malicioso FREE no puede obtener lectura con arcanos menores (403)
-- [ ] Carta del día para FREE/anónimo siempre es un arcano mayor
-- [ ] Carta del día para FREE/anónimo muestra el texto `dailyFreeUpright/Reversed`
-- [ ] El flujo PREMIUM sigue generando interpretación personalizada sin cambios
-- [ ] Coverage ≥ 80%
+- [x] Un cliente malicioso FREE no puede obtener lectura con arcanos menores (403)
+- [x] Carta del día para FREE/anónimo siempre es un arcano mayor
+- [x] Carta del día para FREE/anónimo muestra el texto `dailyFreeUpright/Reversed`
+- [x] El flujo PREMIUM sigue generando interpretación personalizada sin cambios
+- [x] Coverage ≥ 80%
 
 ---
 

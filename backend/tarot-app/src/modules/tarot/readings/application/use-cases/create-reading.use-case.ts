@@ -49,8 +49,8 @@ export class CreateReadingUseCase {
       );
     }
 
-    // Validar usuario
-    await this.validator.validateUser(user.id);
+    // Validar usuario — capturar el User completo desde BD (incluye plan real)
+    const validatedUser = await this.validator.validateUser(user.id);
 
     // Validar que el deck existe
     const deck = await this.decksService.findDeckById(createReadingDto.deckId);
@@ -71,12 +71,15 @@ export class CreateReadingUseCase {
     }
 
     // Validar que el usuario tiene acceso al spread según su plan
-    this.validator.validateSpreadAccess(user.plan, spread.requiredPlan);
+    this.validator.validateSpreadAccess(
+      validatedUser.plan,
+      spread.requiredPlan,
+    );
 
     // Validar acceso a la categoría si se proporciona (solo relevante para usuarios FREE)
     if (createReadingDto.categoryId) {
       await this.validator.validateCategoryAccess(
-        user.plan,
+        validatedUser.plan,
         createReadingDto.categoryId,
       );
     }
@@ -96,6 +99,9 @@ export class CreateReadingUseCase {
 
     // Obtener las cartas antes de crear la lectura (esto también valida que existan)
     const cards = await this.cardsService.findByIds(createReadingDto.cardIds);
+
+    // T-FR-B03: Validar que FREE/ANONYMOUS solo use Arcanos Mayores
+    this.validator.validateDeckAccess(validatedUser.plan, cards);
 
     // Crear la lectura primero sin interpretación
     const reading = await this.readingRepo.create({
@@ -186,7 +192,10 @@ export class CreateReadingUseCase {
 
     // T-FR-B02: Flujo FREE — buscar interpretaciones pre-escritas si se proporcionó categoryId
     // Solo aplica a usuarios FREE/ANONYMOUS; PREMIUM nunca recibe freeInterpretations
-    if (createReadingDto.categoryId && user.plan !== UserPlan.PREMIUM) {
+    if (
+      createReadingDto.categoryId &&
+      validatedUser.plan !== UserPlan.PREMIUM
+    ) {
       const freeInterpretations =
         await this.cardFreeInterpretationService.findByCardsAndCategory(
           cards,
