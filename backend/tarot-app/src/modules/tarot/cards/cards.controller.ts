@@ -37,7 +37,7 @@ export class CardsController {
     name: 'category',
     required: false,
     description:
-      'Filtrar cartas por categoría (ej: arcanos_mayores). Sin filtro retorna las 78 cartas.',
+      'Filtrar cartas por categoría (ej: arcanos_mayores). Sin filtro retorna todas las cartas disponibles.',
     example: 'arcanos_mayores',
   })
   @ApiResponse({
@@ -45,9 +45,12 @@ export class CardsController {
     description: 'Lista de cartas (todas o filtradas por categoría)',
     type: [TarotCard],
   })
-  async getAllCards(@Query('category') category?: string) {
-    if (category) {
-      return this.cardsService.findByCategory(category);
+  async getAllCards(@Query('category') category?: string | string[]) {
+    const normalizedCategory = Array.isArray(category)
+      ? category[0].trim()
+      : category?.trim();
+    if (normalizedCategory) {
+      return this.cardsService.findByCategory(normalizedCategory);
     }
     return this.cardsService.findAll();
   }

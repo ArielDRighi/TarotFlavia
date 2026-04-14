@@ -111,6 +111,44 @@ describe('CardsController', () => {
       expect(mockCardsService.findAll).toHaveBeenCalled();
       expect(mockCardsService.findByCategory).not.toHaveBeenCalled();
     });
+
+    it('should return all cards when category is whitespace only', async () => {
+      const cards = [mockCard];
+      mockCardsService.findAll.mockResolvedValue(cards);
+
+      const result = await controller.getAllCards('   ');
+
+      expect(result).toEqual(cards);
+      expect(mockCardsService.findAll).toHaveBeenCalled();
+      expect(mockCardsService.findByCategory).not.toHaveBeenCalled();
+    });
+
+    it('should use first element and trim when category is an array', async () => {
+      const majorArcanaCards = [mockCard];
+      mockCardsService.findByCategory.mockResolvedValue(majorArcanaCards);
+
+      const result = await controller.getAllCards([
+        '  arcanos_mayores  ',
+        'arcanos_menores',
+      ]);
+
+      expect(result).toEqual(majorArcanaCards);
+      expect(mockCardsService.findByCategory).toHaveBeenCalledWith(
+        'arcanos_mayores',
+      );
+      expect(mockCardsService.findAll).not.toHaveBeenCalled();
+    });
+
+    it('should return all cards when category array has only empty first element', async () => {
+      const cards = [mockCard];
+      mockCardsService.findAll.mockResolvedValue(cards);
+
+      const result = await controller.getAllCards(['', 'arcanos_mayores']);
+
+      expect(result).toEqual(cards);
+      expect(mockCardsService.findAll).toHaveBeenCalled();
+      expect(mockCardsService.findByCategory).not.toHaveBeenCalled();
+    });
   });
 
   describe('getCardById', () => {
