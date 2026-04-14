@@ -254,6 +254,45 @@ describe('CardsService', () => {
     });
   });
 
+  describe('findByCategory', () => {
+    it('should return cards filtered by category', async () => {
+      const majorArcanaCards = [mockCard];
+      mockCardRepository.find.mockResolvedValue(majorArcanaCards);
+
+      const result = await service.findByCategory('arcanos_mayores');
+
+      expect(result).toEqual(majorArcanaCards);
+      expect(mockCardRepository.find).toHaveBeenCalledWith({
+        where: { category: 'arcanos_mayores' },
+      });
+    });
+
+    it('should return empty array when no cards match the category', async () => {
+      mockCardRepository.find.mockResolvedValue([]);
+
+      const result = await service.findByCategory('categoria_inexistente');
+
+      expect(result).toEqual([]);
+      expect(mockCardRepository.find).toHaveBeenCalledWith({
+        where: { category: 'categoria_inexistente' },
+      });
+    });
+
+    it('should return 22 cards when filtering by arcanos_mayores', async () => {
+      const majorArcanaCards = Array.from({ length: 22 }, (_, i) => ({
+        ...mockCard,
+        id: i + 1,
+        name: `Arcano ${i}`,
+        category: 'arcanos_mayores',
+      }));
+      mockCardRepository.find.mockResolvedValue(majorArcanaCards);
+
+      const result = await service.findByCategory('arcanos_mayores');
+
+      expect(result).toHaveLength(22);
+    });
+  });
+
   describe('remove', () => {
     it('should delete a card', async () => {
       mockCardRepository.delete.mockResolvedValue({ affected: 1 });

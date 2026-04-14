@@ -48,6 +48,7 @@ describe('CardsController', () => {
     findAll: jest.fn(),
     findById: jest.fn(),
     findByDeck: jest.fn(),
+    findByCategory: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
@@ -76,14 +77,39 @@ describe('CardsController', () => {
   });
 
   describe('getAllCards', () => {
-    it('should return an array of cards', async () => {
+    it('should return an array of cards when no category filter', async () => {
       const cards = [mockCard];
       mockCardsService.findAll.mockResolvedValue(cards);
 
-      const result = await controller.getAllCards();
+      const result = await controller.getAllCards(undefined);
 
       expect(result).toEqual(cards);
       expect(mockCardsService.findAll).toHaveBeenCalled();
+      expect(mockCardsService.findByCategory).not.toHaveBeenCalled();
+    });
+
+    it('should return filtered cards when category query param is provided', async () => {
+      const majorArcanaCards = [mockCard];
+      mockCardsService.findByCategory.mockResolvedValue(majorArcanaCards);
+
+      const result = await controller.getAllCards('arcanos_mayores');
+
+      expect(result).toEqual(majorArcanaCards);
+      expect(mockCardsService.findByCategory).toHaveBeenCalledWith(
+        'arcanos_mayores',
+      );
+      expect(mockCardsService.findAll).not.toHaveBeenCalled();
+    });
+
+    it('should return all cards when category is empty string', async () => {
+      const cards = [mockCard];
+      mockCardsService.findAll.mockResolvedValue(cards);
+
+      const result = await controller.getAllCards('');
+
+      expect(result).toEqual(cards);
+      expect(mockCardsService.findAll).toHaveBeenCalled();
+      expect(mockCardsService.findByCategory).not.toHaveBeenCalled();
     });
   });
 

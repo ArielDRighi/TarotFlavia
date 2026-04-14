@@ -61,6 +61,8 @@ export interface UserCapabilities {
   canUseCustomQuestions: boolean;
   /** Can use advanced spreads 5+ cards (premium only) */
   canUseAdvancedSpreads: boolean;
+  /** Can use the full 78-card deck (premium only) */
+  canUseFullDeck: boolean;
 
   /** User's current plan */
   plan: 'anonymous' | 'free' | 'premium';

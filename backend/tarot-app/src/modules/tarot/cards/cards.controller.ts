@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   Request,
   ParseIntPipe,
@@ -17,6 +18,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { CardsService } from './cards.service';
@@ -31,12 +33,22 @@ export class CardsController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todas las cartas' })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    description:
+      'Filtrar cartas por categoría (ej: arcanos_mayores). Sin filtro retorna las 78 cartas.',
+    example: 'arcanos_mayores',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de todas las cartas',
+    description: 'Lista de cartas (todas o filtradas por categoría)',
     type: [TarotCard],
   })
-  async getAllCards() {
+  async getAllCards(@Query('category') category?: string) {
+    if (category) {
+      return this.cardsService.findByCategory(category);
+    }
     return this.cardsService.findAll();
   }
 

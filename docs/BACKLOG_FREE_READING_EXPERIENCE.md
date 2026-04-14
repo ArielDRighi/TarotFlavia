@@ -376,7 +376,7 @@ CARTA DEL DÍA:
 | T-FR-B01 | Capa de dominio: Migración, entidad y campos nuevos                | Backend  | ✅ COMPLETADA | 2 días     |
 | T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | ✅ COMPLETADA | 3 días     |
 | T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | ✅ COMPLETADA | 2 días     |
-| T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | 🟡 ALTA    | 1 día      |
+| T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | ✅ COMPLETADA | 1 día      |
 | T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | 🔴 CRÍTICA | 3 días     |
 | T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | 🔴 CRÍTICA | 2 días     |
 | T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | 🔴 CRÍTICA | 2 días     |
@@ -604,7 +604,7 @@ Agregar validación de seguridad backend que impida a usuarios FREE usar Arcanos
 **Prioridad:** 🟡 ALTA
 **Estimación:** 1 día
 **Dependencias:** Ninguna (puede hacerse en paralelo con B01-B03)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-005 (prerequisito backend de T-FR-F04)
 
 #### 📋 Descripción
@@ -615,27 +615,27 @@ Agregar la capability explícita `canUseFullDeck` al `UserCapabilitiesService` y
 
 **Capability:**
 
-- [ ] Agregar campo `canUseFullDeck: boolean` al [UserCapabilitiesDto](backend/tarot-app/src/modules/users/application/dto/user-capabilities.dto.ts)
-- [ ] En [UserCapabilitiesService.getCapabilities()](backend/tarot-app/src/modules/users/application/services/user-capabilities.service.ts): setear `canUseFullDeck = plan === UserPlanType.PREMIUM`
-- [ ] Tests unitarios: FREE/anónimo → `false`, PREMIUM → `true`
+- [x] Agregar campo `canUseFullDeck: boolean` al [UserCapabilitiesDto](backend/tarot-app/src/modules/users/application/dto/user-capabilities.dto.ts)
+- [x] En [UserCapabilitiesService.getCapabilities()](backend/tarot-app/src/modules/users/application/services/user-capabilities.service.ts): setear `canUseFullDeck = plan === UserPlanType.PREMIUM`
+- [x] Tests unitarios: FREE/anónimo → `false`, PREMIUM → `true`
 
 **Endpoint de cartas:**
 
-- [ ] Modificar [cards.controller.ts:32](backend/tarot-app/src/modules/tarot/cards/cards.controller.ts#L32) — agregar query param `@Query('category') category?: string` al `GET /cards`
-- [ ] Agregar método `findByCategory(category: string)` en [cards.service.ts](backend/tarot-app/src/modules/tarot/cards/cards.service.ts)
-- [ ] Documentar con `@ApiQuery({ name: 'category', required: false, example: 'arcanos_mayores' })`
-- [ ] Tests unitarios + E2E: `GET /cards?category=arcanos_mayores` retorna 22 cartas; sin filtro retorna 78
+- [x] Modificar [cards.controller.ts:32](backend/tarot-app/src/modules/tarot/cards/cards.controller.ts#L32) — agregar query param `@Query('category') category?: string` al `GET /cards`
+- [x] Agregar método `findByCategory(category: string)` en [cards.service.ts](backend/tarot-app/src/modules/tarot/cards/cards.service.ts)
+- [x] Documentar con `@ApiQuery({ name: 'category', required: false, example: 'arcanos_mayores' })`
+- [x] Tests unitarios + E2E: `GET /cards?category=arcanos_mayores` retorna 22 cartas; sin filtro retorna 78
 
 **Frontend:**
 
-- [ ] Actualizar type `UserCapabilities` en frontend para incluir `canUseFullDeck`
+- [x] Actualizar type `UserCapabilities` en frontend para incluir `canUseFullDeck`
 
 #### 🎯 Criterios de aceptación
 
-- [ ] `canUseFullDeck` aparece en el response de `/users/capabilities`
-- [ ] `GET /cards?category=arcanos_mayores` retorna solo los 22 Arcanos Mayores
-- [ ] `GET /cards` sin query sigue retornando las 78 cartas (sin regresión)
-- [ ] Coverage ≥ 80%
+- [x] `canUseFullDeck` aparece en el response de `/users/capabilities`
+- [x] `GET /cards?category=arcanos_mayores` retorna solo los 22 Arcanos Mayores
+- [x] `GET /cards` sin query sigue retornando las 78 cartas (sin regresión)
+- [x] Coverage ≥ 80%
 
 ---
 
