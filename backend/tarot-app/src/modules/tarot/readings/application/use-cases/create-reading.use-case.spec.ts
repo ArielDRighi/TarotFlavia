@@ -1173,10 +1173,9 @@ describe('CreateReadingUseCase', () => {
         );
       });
 
-      await expect(useCase.execute(mockFreeUser, mockDtoFree)).rejects.toThrow(
-        ForbiddenException,
-      );
-      await expect(useCase.execute(mockFreeUser, mockDtoFree)).rejects.toThrow(
+      const executionPromise = useCase.execute(mockFreeUser, mockDtoFree);
+      await expect(executionPromise).rejects.toThrow(ForbiddenException);
+      await expect(executionPromise).rejects.toThrow(
         'El plan FREE solo permite cartas de Arcanos Mayores',
       );
     });
