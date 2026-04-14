@@ -193,6 +193,15 @@ export class UserCapabilitiesDto {
   canUseAdvancedSpreads: boolean;
 
   @ApiProperty({
+    description:
+      'Indica si el usuario puede usar el mazo completo de 78 cartas (solo PREMIUM). FREE y anónimo solo pueden usar los 22 Arcanos Mayores.',
+    example: false,
+  })
+  @IsBoolean()
+  @IsNotEmpty()
+  canUseFullDeck: boolean;
+
+  @ApiProperty({
     description: 'Plan actual del usuario',
     enum: UserPlanType,
     example: UserPlanType.FREE,

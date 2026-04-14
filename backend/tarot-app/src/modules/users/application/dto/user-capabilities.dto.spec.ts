@@ -122,6 +122,7 @@ describe('UserCapabilitiesDto', () => {
       dto.canUseAI = false;
       dto.canUseCustomQuestions = false;
       dto.canUseAdvancedSpreads = false;
+      dto.canUseFullDeck = false;
       dto.plan = UserPlanType.FREE;
       dto.isAuthenticated = true;
 
@@ -158,6 +159,7 @@ describe('UserCapabilitiesDto', () => {
       dto.canUseAI = true;
       dto.canUseCustomQuestions = true;
       dto.canUseAdvancedSpreads = true;
+      dto.canUseFullDeck = true;
       dto.plan = UserPlanType.PREMIUM;
       dto.isAuthenticated = true;
 
@@ -194,6 +196,7 @@ describe('UserCapabilitiesDto', () => {
       dto.canUseAI = false;
       dto.canUseCustomQuestions = false;
       dto.canUseAdvancedSpreads = false;
+      dto.canUseFullDeck = false;
       dto.plan = UserPlanType.ANONYMOUS;
       dto.isAuthenticated = false;
 

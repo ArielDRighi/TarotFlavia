@@ -138,6 +138,7 @@ export class UserCapabilitiesService {
       canUseAI: user.plan === UserPlan.PREMIUM,
       canUseCustomQuestions: user.plan === UserPlan.PREMIUM,
       canUseAdvancedSpreads: user.plan === UserPlan.PREMIUM,
+      canUseFullDeck: user.plan === UserPlan.PREMIUM,
       plan: this.mapUserPlanToType(user.plan),
       isAuthenticated: true,
       pendulum: {
@@ -226,6 +227,7 @@ export class UserCapabilitiesService {
       canUseAI: false,
       canUseCustomQuestions: false,
       canUseAdvancedSpreads: false,
+      canUseFullDeck: false,
       plan: UserPlanType.ANONYMOUS,
       isAuthenticated: false,
       pendulum: {
