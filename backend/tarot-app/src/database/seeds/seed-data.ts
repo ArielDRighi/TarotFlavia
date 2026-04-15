@@ -25,6 +25,7 @@ import { seedEncyclopediaTarotCards } from './encyclopedia-tarot-cards.seeder';
 import { seedEncyclopediaArticles } from './encyclopedia-articles.seeder';
 import { seedSacredCalendar } from './sacred-calendar.seeder';
 import { seedBirthChartInterpretations } from './birth-chart-interpretations.seeder';
+import { seedCardFreeInterpretations } from './card-free-interpretations.seeder';
 import { SacredCalendarService } from '../../modules/rituals/application/services/sacred-calendar.service';
 import { LunarPhaseService } from '../../modules/rituals/application/services/lunar-phase.service';
 import { SacredEvent } from '../../modules/rituals/entities/sacred-event.entity';
@@ -131,6 +132,9 @@ async function bootstrap() {
 
     // Seed Birth Chart Interpretations (natal chart texts)
     await seedBirthChartInterpretations(dataSource);
+
+    // Seed Card Free Interpretations (132 texts: 22 Major Arcana × 3 categories × 2 orientations)
+    await seedCardFreeInterpretations(dataSource);
 
     console.log('\n✨ ¡Datos iniciales cargados con éxito!');
   } catch (error) {
