@@ -134,7 +134,14 @@ async function bootstrap() {
     await seedBirthChartInterpretations(dataSource);
 
     // Seed Card Free Interpretations (132 texts: 22 Major Arcana × 3 categories × 2 orientations)
-    await seedCardFreeInterpretations(dataSource);
+    try {
+      await seedCardFreeInterpretations(dataSource);
+    } catch (error) {
+      console.warn(
+        '⚠️  Card Free Interpretations seeding skipped:',
+        error instanceof Error ? error.message : String(error),
+      );
+    }
 
     console.log('\n✨ ¡Datos iniciales cargados con éxito!');
   } catch (error) {

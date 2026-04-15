@@ -43,9 +43,9 @@ const MAJOR_ARCANA_CARDS: Partial<TarotCard>[] = [
 ];
 
 const FREE_CATEGORIES: Partial<ReadingCategory>[] = [
-  { id: 1, slug: 'amor' },
-  { id: 2, slug: 'salud' },
-  { id: 3, slug: 'dinero' },
+  { id: 1, slug: 'amor-relaciones' },
+  { id: 2, slug: 'salud-bienestar' },
+  { id: 3, slug: 'dinero-finanzas' },
 ];
 
 function buildMockQueryBuilder(): jest.Mocked<
@@ -142,7 +142,11 @@ describe('seedCardFreeInterpretations', () => {
       const cardSlugs = [
         ...new Set(CARD_FREE_INTERPRETATIONS.map((d) => d.cardSlug)),
       ];
-      const expectedCategories = ['amor', 'salud', 'dinero'] as const;
+      const expectedCategories = [
+        'amor-relaciones',
+        'salud-bienestar',
+        'dinero-finanzas',
+      ] as const;
 
       for (const slug of cardSlugs) {
         const categoriesForCard = CARD_FREE_INTERPRETATIONS.filter(
@@ -159,7 +163,11 @@ describe('seedCardFreeInterpretations', () => {
       const cardSlugs = [
         ...new Set(CARD_FREE_INTERPRETATIONS.map((d) => d.cardSlug)),
       ];
-      const categories = ['amor', 'salud', 'dinero'] as const;
+      const categories = [
+        'amor-relaciones',
+        'salud-bienestar',
+        'dinero-finanzas',
+      ] as const;
 
       for (const slug of cardSlugs) {
         for (const cat of categories) {
@@ -195,7 +203,11 @@ describe('seedCardFreeInterpretations', () => {
     });
 
     it('should only use valid category slugs', () => {
-      const validSlugs = new Set(['amor', 'salud', 'dinero']);
+      const validSlugs = new Set([
+        'amor-relaciones',
+        'salud-bienestar',
+        'dinero-finanzas',
+      ]);
       for (const data of CARD_FREE_INTERPRETATIONS) {
         expect(validSlugs.has(data.categorySlug)).toBe(true);
       }
@@ -303,12 +315,16 @@ describe('seedCardFreeInterpretations', () => {
       ).rejects.toThrow('No Major Arcana cards found');
     });
 
-    it('should throw if no FREE categories found', async () => {
+    it('should warn and return early if no FREE categories found', async () => {
       const mockDs = buildMockDataSource({ categories: [] });
 
       await expect(
         seedCardFreeInterpretations(mockDs as unknown as DataSource),
-      ).rejects.toThrow('No FREE categories found');
+      ).resolves.toBeUndefined();
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('No FREE categories found'),
+      );
     });
   });
 
@@ -316,11 +332,11 @@ describe('seedCardFreeInterpretations', () => {
 
   describe('partial categories (missing one)', () => {
     it('should warn and skip records when a category is missing', async () => {
-      // Only amor and salud — dinero is missing
+      // Only amor-relaciones and salud-bienestar — dinero-finanzas is missing
       const mockDs = buildMockDataSource({
         categories: [
-          { id: 1, slug: 'amor' },
-          { id: 2, slug: 'salud' },
+          { id: 1, slug: 'amor-relaciones' },
+          { id: 2, slug: 'salud-bienestar' },
         ],
       });
       const interpretationRepo = mockDs.getRepository!(

@@ -17,9 +17,9 @@ import { TarotCard } from '../../../cards/entities/tarot-card.entity';
 @Injectable()
 export class ReadingValidatorService {
   private static readonly FREE_ALLOWED_CATEGORY_SLUGS: string[] = [
-    'amor',
-    'salud',
-    'dinero',
+    'amor-relaciones',
+    'salud-bienestar',
+    'dinero-finanzas',
   ];
 
   constructor(
@@ -253,7 +253,7 @@ export class ReadingValidatorService {
   /**
    * Validate that a user has access to a specific reading category.
    * PREMIUM users have access to all categories.
-   * FREE and ANONYMOUS users can only access: 'amor', 'salud', 'dinero'.
+   * FREE and ANONYMOUS users can only access: 'amor-relaciones', 'salud-bienestar', 'dinero-finanzas'.
    *
    * @param userPlan - The user's subscription plan
    * @param categoryId - The ID of the category to validate access for

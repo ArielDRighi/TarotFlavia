@@ -17,7 +17,7 @@ import { CARD_FREE_INTERPRETATIONS } from '../../modules/tarot/cards/seeds/card-
  *
  * Requires:
  *  - TarotCard table populated (run tarot-cards.seeder first)
- *  - ReadingCategory table populated with slugs: 'amor', 'salud', 'dinero'
+ *  - ReadingCategory table populated with slugs: 'amor-relaciones', 'salud-bienestar', 'dinero-finanzas'
  */
 export async function seedCardFreeInterpretations(
   dataSource: DataSource,
@@ -35,7 +35,7 @@ export async function seedCardFreeInterpretations(
   // Load all Major Arcana cards (name → id map)
   const majorArcanaCards = await cardRepo.find({
     where: { category: 'arcanos_mayores' },
-    select: ['id', 'name', 'number'],
+    select: ['id', 'name'],
   });
 
   if (majorArcanaCards.length === 0) {
@@ -53,17 +53,23 @@ export async function seedCardFreeInterpretations(
     cardSlugToId.set(slug, card.id);
   }
 
-  // Load FREE-allowed categories: amor, salud, dinero
-  const FREE_CATEGORY_SLUGS = ['amor', 'salud', 'dinero'] as const;
+  // Load FREE-allowed categories: amor-relaciones, salud-bienestar, dinero-finanzas
+  const FREE_CATEGORY_SLUGS = [
+    'amor-relaciones',
+    'salud-bienestar',
+    'dinero-finanzas',
+  ] as const;
   const categories = await categoryRepo.find({
     where: FREE_CATEGORY_SLUGS.map((slug) => ({ slug })),
     select: ['id', 'slug'],
   });
 
   if (categories.length === 0) {
-    throw new Error(
-      'No FREE categories found (amor, salud, dinero). Run reading-categories seeder first.',
+    console.warn(
+      '⚠️  No FREE categories found (amor-relaciones, salud-bienestar, dinero-finanzas). ' +
+        'Run reading-categories seeder first. Skipping card free interpretations seeding.',
     );
+    return;
   }
 
   const categorySlugToId = new Map<string, number>();
