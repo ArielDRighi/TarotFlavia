@@ -877,17 +877,19 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     const mockFreeCategory = (slug: string): ReadingCategory =>
       ({ id: 1, slug, name: slug, isActive: true }) as ReadingCategory;
 
-    it('should allow FREE user to access "amor" category', async () => {
-      mockCategoriesService.findOne.mockResolvedValue(mockFreeCategory('amor'));
+    it('should allow FREE user to access "amor-relaciones" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('amor-relaciones'),
+      );
 
       await expect(
         service.validateCategoryAccess(UserPlan.FREE, 1),
       ).resolves.not.toThrow();
     });
 
-    it('should allow FREE user to access "salud" category', async () => {
+    it('should allow FREE user to access "salud-bienestar" category', async () => {
       mockCategoriesService.findOne.mockResolvedValue(
-        mockFreeCategory('salud'),
+        mockFreeCategory('salud-bienestar'),
       );
 
       await expect(
@@ -895,9 +897,9 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       ).resolves.not.toThrow();
     });
 
-    it('should allow FREE user to access "dinero" category', async () => {
+    it('should allow FREE user to access "dinero-finanzas" category', async () => {
       mockCategoriesService.findOne.mockResolvedValue(
-        mockFreeCategory('dinero'),
+        mockFreeCategory('dinero-finanzas'),
       );
 
       await expect(
@@ -916,7 +918,7 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       await expect(
         service.validateCategoryAccess(UserPlan.FREE, 4),
       ).rejects.toThrow(
-        'Los usuarios gratuito solo pueden acceder a las categorías: amor, salud, dinero',
+        'Los usuarios gratuito solo pueden acceder a las categorías: amor-relaciones, salud-bienestar, dinero-finanzas',
       );
     });
 
@@ -951,7 +953,7 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       await expect(
         service.validateCategoryAccess(UserPlan.ANONYMOUS, 4),
       ).rejects.toThrow(
-        'Los usuarios anónimo solo pueden acceder a las categorías: amor, salud, dinero',
+        'Los usuarios anónimo solo pueden acceder a las categorías: amor-relaciones, salud-bienestar, dinero-finanzas',
       );
     });
 

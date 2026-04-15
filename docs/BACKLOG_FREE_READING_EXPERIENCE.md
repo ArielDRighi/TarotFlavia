@@ -377,7 +377,7 @@ CARTA DEL DÍA:
 | T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | ✅ COMPLETADA | 3 días     |
 | T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | ✅ COMPLETADA | 2 días     |
 | T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | ✅ COMPLETADA | 1 día      |
-| T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | 🔴 CRÍTICA | 3 días     |
+| T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | ✅ COMPLETADA | 3 días     |
 | T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | 🔴 CRÍTICA | 2 días     |
 | T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | 🔴 CRÍTICA | 2 días     |
 | T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | 🔴 CRÍTICA | 2 días     |
@@ -650,7 +650,7 @@ Agregar la capability explícita `canUseFullDeck` al `UserCapabilitiesService` y
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días (generación + revisión humana)
 **Dependencias:** T-FR-B01 (tabla creada)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003
 
 #### 📋 Descripción
@@ -659,10 +659,10 @@ Generar los **132 textos** para la tabla `card_free_interpretation`: **22 Arcano
 
 #### ✅ Tareas específicas
 
-- [ ] Ejecutar el prompt maestro (abajo) en Claude y/o Gemini para cada carta
-- [ ] Consolidar outputs en `backend/tarot-app/src/modules/tarot/cards/seeds/card-free-interpretations.data.ts` como array de objetos `{ cardSlug, categorySlug, orientation, content }`
-- [ ] Script de seed idempotente que inserta los registros (upsert por `cardId + categoryId + orientation`)
-- [ ] Revisión humana (checklist): tono cálido, 2-3 oraciones, sin clichés, coherente con `meaningUpright/Reversed`
+- [x] Ejecutar el prompt maestro (abajo) en Claude y/o Gemini para cada carta
+- [x] Consolidar outputs en `backend/tarot-app/src/modules/tarot/cards/seeds/card-free-interpretations.data.ts` como array de objetos `{ cardSlug, categorySlug, orientation, content }`
+- [x] Script de seed idempotente que inserta los registros (upsert por `cardId + categoryId + orientation`)
+- [x] Revisión humana (checklist): tono cálido, 2-3 oraciones, sin clichés, coherente con `meaningUpright/Reversed`
 
 ---
 
@@ -724,11 +724,11 @@ Ahora generá los 6 textos para la carta `{{CARD_NAME}}`.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Los 132 textos están generados y revisados por un humano
-- [ ] El seed es idempotente (re-ejecutable sin duplicar)
-- [ ] Cada texto respeta la longitud (2-3 oraciones, ~50 palabras)
-- [ ] El tono es consistente entre todas las cartas
-- [ ] No hay mezcla entre categorías (un texto de "amor" no habla de dinero)
+- [x] Los 132 textos están generados y revisados por un humano
+- [x] El seed es idempotente (re-ejecutable sin duplicar)
+- [x] Cada texto respeta la longitud (2-3 oraciones, ~50 palabras)
+- [x] El tono es consistente entre todas las cartas
+- [x] No hay mezcla entre categorías (un texto de "amor" no habla de dinero)
 
 ---
 
