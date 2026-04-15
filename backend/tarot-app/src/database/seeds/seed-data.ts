@@ -26,6 +26,7 @@ import { seedEncyclopediaArticles } from './encyclopedia-articles.seeder';
 import { seedSacredCalendar } from './sacred-calendar.seeder';
 import { seedBirthChartInterpretations } from './birth-chart-interpretations.seeder';
 import { seedCardFreeInterpretations } from './card-free-interpretations.seeder';
+import { seedDailyFreeInterpretations } from './daily-free-interpretations.seeder';
 import { SacredCalendarService } from '../../modules/rituals/application/services/sacred-calendar.service';
 import { LunarPhaseService } from '../../modules/rituals/application/services/lunar-phase.service';
 import { SacredEvent } from '../../modules/rituals/entities/sacred-event.entity';
@@ -139,6 +140,16 @@ async function bootstrap() {
     } catch (error) {
       console.warn(
         '⚠️  Card Free Interpretations seeding skipped:',
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+
+    // Seed Daily Free Interpretations (44 texts: 22 Major Arcana × 2 orientations)
+    try {
+      await seedDailyFreeInterpretations(dataSource);
+    } catch (error) {
+      console.warn(
+        '⚠️  Daily Free Interpretations seeding skipped:',
         error instanceof Error ? error.message : String(error),
       );
     }
