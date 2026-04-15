@@ -3,6 +3,7 @@ import { TarotCard } from '../../modules/tarot/cards/entities/tarot-card.entity'
 import { CardFreeInterpretation } from '../../modules/tarot/cards/entities/card-free-interpretation.entity';
 import { ReadingCategory } from '../../modules/categories/entities/reading-category.entity';
 import { CARD_FREE_INTERPRETATIONS } from '../../modules/tarot/cards/seeds/card-free-interpretations.data';
+import { buildCardSlug } from './seed-slug.helper';
 
 /**
  * T-FR-S01: Seed Card Free Interpretations
@@ -143,30 +144,4 @@ export async function seedCardFreeInterpretations(
     console.log(`   • Warnings (unknown card slug): ${warnings}`);
   }
   console.log(`   • Total records in DB: ${totalInDb}`);
-}
-
-/**
- * Converts a card name to the slug used in CARD_FREE_INTERPRETATIONS data.
- *
- * Rules:
- *  - Lowercase
- *  - Replace spaces and special characters with hyphens
- *  - Remove double hyphens
- *  - Normalize accent marks
- *
- * Examples:
- *   'El Loco'              → 'el-loco'
- *   'La Sacerdotisa'       → 'la-sacerdotisa'
- *   'El Papa (El Hierofante)' → 'el-papa-el-hierofante'
- *   'La Rueda de la Fortuna'  → 'la-rueda-de-la-fortuna'
- */
-function buildCardSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // remove accent marks
-    .replace(/[()]/g, '') // remove parentheses
-    .replace(/\s+/g, '-') // spaces → hyphens
-    .replace(/-+/g, '-') // collapse multiple hyphens
-    .replace(/^-|-$/g, ''); // trim leading/trailing hyphens
 }
