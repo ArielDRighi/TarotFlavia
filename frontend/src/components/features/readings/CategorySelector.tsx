@@ -9,6 +9,7 @@ import {
   Activity,
   Sparkles,
   Star,
+  ArrowRight,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -16,6 +17,7 @@ import { useCategories } from '@/hooks/api/useReadings';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { ROUTES } from '@/lib/constants/routes';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
@@ -117,22 +119,64 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
 }
 
 /**
+ * Banner shown to FREE users inviting them to upgrade to Premium.
+ */
+function FreeUpgradeBanner() {
+  const router = useRouter();
+
+  return (
+    <div
+      data-testid="free-upgrade-banner"
+      className="border-secondary/30 bg-secondary/5 mt-6 flex flex-col items-center gap-3 rounded-lg border p-4 text-center"
+    >
+      <p className="text-muted-foreground text-sm">¿Querés más categorías? Actualizá a Premium.</p>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => router.push(ROUTES.PREMIUM)}
+        className="gap-2"
+      >
+        Ver Premium
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </Button>
+    </div>
+  );
+}
+
+// ============================================================================
+// Props
+// ============================================================================
+
+interface CategorySelectorProps {
+  /**
+   * When provided, activates FREE mode: only categories whose slug is in this
+   * array are displayed, and clicking a category navigates directly to
+   * /tarot/tirada (skipping the questions step).
+   *
+   * Set to the 3 allowed FREE slugs: ['amor-relaciones', 'salud-bienestar', 'dinero-finanzas']
+   */
+  freeModeCategories?: string[];
+}
+
+/**
  * Category Selector Component
  *
  * Displays categories in a responsive grid with icons and hover effects.
  * Uses capabilities system to control access based on user plan.
  *
  * ACCESS CONTROL:
- * - Only PREMIUM users can access category selection
- * - FREE and ANONYMOUS users are automatically redirected to /tarot/tirada
- * - Users who reached their tarot reading limit are redirected to home with limit message
+ * - PREMIUM users see the full category list and go to /tarot/preguntas on click
+ * - FREE users: pass freeModeCategories to show only 3 categories and route
+ *   directly to /tarot/tirada (no questions step)
+ * - Users who reached their tarot reading limit are redirected to home
  *
  * REFACTORED:
  * - Uses useUserCapabilities() as single source of truth (TASK-REFACTOR-007)
  * - Replaced direct user.plan checks with capabilities.canUseCustomQuestions
  * - Added limit validation to prevent poor UX (TASK-REFACTOR-011)
+ * - Added freeModeCategories prop for FREE plan support (T-FR-F01)
  */
-export function CategorySelector() {
+export function CategorySelector({ freeModeCategories }: CategorySelectorProps = {}) {
   const { data: capabilities, isLoading: isLoadingCapabilities } = useUserCapabilities();
   const { data: categories, isLoading: isCategoriesLoading, error, refetch } = useCategories();
   const router = useRouter();
@@ -141,6 +185,9 @@ export function CategorySelector() {
   const canUseCustomQuestions = capabilities?.canUseCustomQuestions ?? false;
   const canCreateTarotReading = capabilities?.canCreateTarotReading ?? false;
 
+  // Determine if FREE mode is active via the prop
+  const isFreeMode = freeModeCategories !== undefined && freeModeCategories.length > 0;
+
   // Redirect to home if user reached tarot reading limit
   useEffect(() => {
     if (!canCreateTarotReading && !isLoading) {
@@ -148,12 +195,13 @@ export function CategorySelector() {
     }
   }, [canCreateTarotReading, isLoading, router]);
 
-  // Redirect FREE/ANONYMOUS users to spread selector (they can't use categories)
+  // Redirect FREE/ANONYMOUS users to spread selector ONLY when not in free mode
+  // (i.e. when CategorySelector is used without freeModeCategories prop — legacy behavior)
   useEffect(() => {
-    if (!canUseCustomQuestions && !isLoading && canCreateTarotReading) {
+    if (!isFreeMode && !canUseCustomQuestions && !isLoading && canCreateTarotReading) {
       router.replace(ROUTES.TAROT_TIRADA);
     }
-  }, [canUseCustomQuestions, isLoading, canCreateTarotReading, router]);
+  }, [isFreeMode, canUseCustomQuestions, isLoading, canCreateTarotReading, router]);
 
   // Show loading state while checking capabilities
   if (isLoading) {
@@ -176,13 +224,30 @@ export function CategorySelector() {
     );
   }
 
-  // Redirect happens in useEffect, return null while redirecting
-  if (!canUseCustomQuestions || !canCreateTarotReading) {
+  // In FREE mode, do NOT gate on canUseCustomQuestions — the selector is always shown
+  // In standard mode, guard against non-PREMIUM access
+  if (!isFreeMode && (!canUseCustomQuestions || !canCreateTarotReading)) {
     return null;
   }
 
+  // In FREE mode, also check that the user can still create readings
+  if (isFreeMode && !canCreateTarotReading) {
+    return null;
+  }
+
+  // Filter categories to only allowed slugs when in FREE mode
+  const visibleCategories = isFreeMode
+    ? (categories ?? []).filter((cat) => freeModeCategories.includes(cat.slug))
+    : (categories ?? []);
+
   const handleCategoryClick = (categoryId: number) => {
-    router.push(ROUTES.TAROT_PREGUNTAS_BY_CATEGORY(categoryId));
+    if (isFreeMode) {
+      // FREE mode: skip questions, go directly to tirada
+      router.push(ROUTES.TAROT_TIRADA_BY_CATEGORY(categoryId));
+    } else {
+      // PREMIUM mode: go to questions first
+      router.push(ROUTES.TAROT_PREGUNTAS_BY_CATEGORY(categoryId));
+    }
   };
 
   return (
@@ -201,7 +266,7 @@ export function CategorySelector() {
         )}
 
         {/* Empty State */}
-        {!error && categories?.length === 0 && (
+        {!error && visibleCategories.length === 0 && (
           <EmptyState
             icon={<Star />}
             title="Sin categorías"
@@ -210,12 +275,12 @@ export function CategorySelector() {
         )}
 
         {/* Categories Grid */}
-        {!error && categories && categories.length > 0 && (
+        {!error && visibleCategories.length > 0 && (
           <div
             data-testid="categories-grid"
             className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
           >
-            {categories.map((category) => (
+            {visibleCategories.map((category) => (
               <CategoryCard
                 key={category.id}
                 category={category}
@@ -224,6 +289,9 @@ export function CategorySelector() {
             ))}
           </div>
         )}
+
+        {/* FREE mode upgrade banner */}
+        {isFreeMode && <FreeUpgradeBanner />}
       </div>
     </div>
   );

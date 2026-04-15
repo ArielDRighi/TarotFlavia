@@ -67,6 +67,7 @@ const createMockCapabilities = (
     canUseAI: false,
     canUseCustomQuestions: false,
     canUseAdvancedSpreads: false,
+    canUseFullDeck: false,
     plan: 'free',
     isAuthenticated: true,
     subscriptionStatus: null,

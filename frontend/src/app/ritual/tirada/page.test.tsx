@@ -120,7 +120,7 @@ describe('SpreadSelectorPage', () => {
 
     // Verify breadcrumb link includes categoryId for PREMIUM users
     const questionLink = screen.getByRole('link', { name: /pregunta/i });
-    expect(questionLink).toHaveAttribute('href', '/ritual/preguntas?categoryId=1');
+    expect(questionLink).toHaveAttribute('href', '/tarot/preguntas?categoryId=1');
   });
 
   it('should pass questionId from search params', () => {
