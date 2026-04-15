@@ -378,7 +378,7 @@ CARTA DEL DÍA:
 | T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | ✅ COMPLETADA | 2 días     |
 | T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | ✅ COMPLETADA | 1 día      |
 | T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | ✅ COMPLETADA | 3 días     |
-| T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | 🔴 CRÍTICA | 2 días     |
+| T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | ✅ COMPLETADA | 2 días     |
 | T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | 🔴 CRÍTICA | 2 días     |
 | T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | 🔴 CRÍTICA | 2 días     |
 | T-FR-F03 | Frontend: DailyCardExperience con texto de energía diaria          | Frontend | 🔴 CRÍTICA | 2 días     |
@@ -737,18 +737,13 @@ Ahora generá los 6 textos para la carta `{{CARD_NAME}}`.
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días (generación + revisión humana)
 **Dependencias:** T-FR-B01 (campos agregados)
-**Estado:** ⏳ PENDIENTE
-**Cubre HUS:** HUS-004
-
-#### 📋 Descripción
-
-Generar los **44 textos** para los campos `dailyFreeUpright` / `dailyFreeReversed` de `TarotCard`: **22 Arcanos Mayores × 2 orientaciones**. Tono distinto: energía del día, presente, menciona brevemente los 3 temas (amor, bienestar, dinero) en un solo texto.
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Ejecutar el prompt maestro (abajo) en Claude y/o Gemini para cada carta
-- [ ] Consolidar outputs y crear migración de datos que haga UPDATE en `tarot_card` por slug
-- [ ] Revisión humana: tono "energía diaria", menciona los 3 temas brevemente
+- [x] Ejecutar el prompt maestro (abajo) en Claude y/o Gemini para cada carta
+- [x] Consolidar outputs y crear migración de datos que haga UPDATE en `tarot_card` por slug
+- [x] Revisión humana: tono "energía diaria", menciona los 3 temas brevemente
 
 ---
 
@@ -800,11 +795,11 @@ Ahora generá los 2 textos para la carta `{{CARD_NAME}}`.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Los 44 textos están generados y revisados
-- [ ] Cada texto menciona los 3 temas (amor, bienestar, dinero) brevemente
-- [ ] El tono es de "energía presente" (no atemporal como las tiradas)
-- [ ] La migración de datos es reversible
-- [ ] Fallback a `meaningUpright/Reversed` cuando `dailyFreeUpright/Reversed` es null funciona correctamente
+- [x] Los 44 textos están generados y revisados
+- [x] Cada texto menciona los 3 temas (amor, bienestar, dinero) brevemente
+- [x] El tono es de "energía presente" (no atemporal como las tiradas)
+- [x] La migración de datos es reversible
+- [x] Fallback a `meaningUpright/Reversed` cuando `dailyFreeUpright/Reversed` es null funciona correctamente
 
 ---
 
