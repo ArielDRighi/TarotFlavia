@@ -229,6 +229,7 @@ const mockReadingDetail: ReadingDetail = {
   question: '¿Qué debo esperar en el amor?',
   cards: mockReadingCards,
   interpretation: mockInterpretation,
+  freeInterpretations: null,
   createdAt: '2025-12-07T10:00:00Z',
   shareToken: null,
 };
@@ -263,6 +264,10 @@ vi.mock('@/hooks/api/useReadings', () => ({
   useShareReading: () => ({
     mutate: mockShareReading,
     isPending: false,
+  }),
+  useCategories: () => ({
+    data: [{ id: 1, name: 'Amor', slug: 'amor' }],
+    isLoading: false,
   }),
 }));
 

@@ -14,6 +14,7 @@ function LecturaPageContent() {
   const spreadId = searchParams.get('spreadId');
   const questionId = searchParams.get('questionId');
   const customQuestion = searchParams.get('customQuestion');
+  const categoryId = searchParams.get('categoryId');
 
   // Validate spreadId is present
   if (!spreadId) {
@@ -34,6 +35,7 @@ function LecturaPageContent() {
       spreadId={Number(spreadId)}
       questionId={questionId ? Number(questionId) : null}
       customQuestion={customQuestion ?? null}
+      categoryId={categoryId ? Number(categoryId) : null}
     />
   );
 }
