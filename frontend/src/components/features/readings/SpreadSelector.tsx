@@ -182,13 +182,13 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
       // Build navigation URL
       let url = ROUTES.TAROT_LECTURA_BY_SPREAD(spreadId);
 
-      // Only add question params for PREMIUM users
+      // Add categoryId if present (for both FREE and PREMIUM users)
+      if (categoryId) {
+        url += `&categoryId=${categoryId}`;
+      }
+
+      // Add question params only for PREMIUM users
       if (isPremium) {
-        // Add categoryId if present
-        if (categoryId) {
-          url += `&categoryId=${categoryId}`;
-        }
-        // Add questionId or customQuestion if present
         if (questionId) {
           url += `&questionId=${questionId}`;
         } else if (customQuestion) {

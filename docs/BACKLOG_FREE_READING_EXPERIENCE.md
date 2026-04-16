@@ -380,7 +380,7 @@ CARTA DEL DÍA:
 | T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | ✅ COMPLETADA | 3 días     |
 | T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | ✅ COMPLETADA | 2 días     |
 | T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | ✅ COMPLETADA | 2 días     |
-| T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | 🔴 CRÍTICA | 2 días     |
+| T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | ✅ COMPLETADA | 2 días     |
 | T-FR-F03 | Frontend: DailyCardExperience con texto de energía diaria          | Frontend | 🔴 CRÍTICA | 2 días     |
 | T-FR-F04 | Frontend: Deck filtrado a Arcanos Mayores para FREE                | Frontend | 🟡 ALTA    | 2 días     |
 
@@ -849,23 +849,19 @@ Modificar `CategorySelector` para soportar un modo FREE con filtrado a 3 categor
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-FR-B02 (backend retorna `freeInterpretations`)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003, HUS-006
-
-#### 📋 Descripción
-
-Modificar la sección de resultados de lectura (`InterpretationSection` en `ReadingExperience.tsx`) para que, cuando el response trae `freeInterpretations`, renderice los textos amigables pre-escritos en lugar de los `meaningUpright/Reversed` crudos. Incluir el banner de upgrade a Premium al final.
 
 #### ✅ Tareas específicas
 
-- [ ] Actualizar tipos TypeScript: agregar `freeInterpretations?: ...` al tipo `Reading`
-- [ ] Modificar `InterpretationSection` (`ReadingExperience.tsx` L164-229):
+- [x] Actualizar tipos TypeScript: agregar `freeInterpretations?: ...` al tipo `Reading`
+- [x] Modificar `InterpretationSection` (`ReadingExperience.tsx` L164-229):
   - Si `reading.freeInterpretations` está presente, usar esos textos por carta/orientación
   - Mostrar el nombre de la categoría elegida con ícono en el encabezado (ej: ❤️ Tu Lectura de Amor)
   - Fallback: si falta combinación, usar `meaningUpright/Reversed` existente con mensaje discreto
-- [ ] Crear componente `FreeReadingUpgradeBanner` (reutilizable): título, descripción, botón CTA a `/premium`
-- [ ] Renderizar `FreeReadingUpgradeBanner` al final de la sección cuando el usuario es FREE
-- [ ] Tests unitarios:
+- [x] Crear componente `FreeReadingUpgradeBanner` (reutilizable): título, descripción, botón CTA a `/premium`
+- [x] Renderizar `FreeReadingUpgradeBanner` al final de la sección cuando el usuario es FREE
+- [x] Tests unitarios:
   - `InterpretationSection` muestra textos pre-escritos cuando `freeInterpretations` está presente
   - Muestra el nombre+ícono de la categoría correctamente
   - Fallback a `meaningUpright/Reversed` cuando falta combinación
@@ -873,11 +869,11 @@ Modificar la sección de resultados de lectura (`InterpretationSection` en `Read
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Usuario FREE ve los textos amigables pre-escritos en el resultado
-- [ ] Usuario PREMIUM sigue viendo la interpretación personalizada (sin regresión)
-- [ ] Banner de upgrade visible solo para FREE
-- [ ] Fallback razonable cuando falta seed
-- [ ] Texto user-facing en español
+- [x] Usuario FREE ve los textos amigables pre-escritos en el resultado
+- [x] Usuario PREMIUM sigue viendo la interpretación personalizada (sin regresión)
+- [x] Banner de upgrade visible solo para FREE
+- [x] Fallback razonable cuando falta seed
+- [x] Texto user-facing en español
 
 ---
 

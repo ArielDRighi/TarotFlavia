@@ -155,6 +155,14 @@ export interface Reading {
 }
 
 /**
+ * Free interpretation content for a single card position.
+ * Maps position index (1-based) to the pre-written text.
+ */
+export interface FreeInterpretationEntry {
+  content: string;
+}
+
+/**
  * Full reading detail
  */
 export interface ReadingDetail {
@@ -170,6 +178,17 @@ export interface ReadingDetail {
    * - An Interpretation object (structured format)
    */
   interpretation: Interpretation | string | null;
+  /**
+   * Pre-written interpretations for FREE users, indexed by card position (1-based).
+   * Present when the reading was created with a categoryId by a FREE user.
+   * null/undefined for PREMIUM readings (which use `interpretation` instead).
+   */
+  freeInterpretations?: Record<number, FreeInterpretationEntry> | null;
+  /**
+   * Name of the category chosen by the FREE user (e.g. "Amor y Relaciones").
+   * Provided by the backend for display purposes; absent for PREMIUM readings.
+   */
+  categoryName?: string | null;
   createdAt: string;
   deletedAt?: string | null;
   shareToken?: string | null;
@@ -219,6 +238,13 @@ export interface CreateReadingDto {
    * @default undefined
    */
   useAI?: boolean;
+  /**
+   * ID de la categoría elegida por el usuario FREE.
+   * Cuando está presente, el backend buscará interpretaciones pre-escritas
+   * en card_free_interpretation para esa combinación carta+categoría+orientación.
+   * Solo relevante cuando useAI === false (FREE users).
+   */
+  categoryId?: number;
 }
 
 // ============================================================================

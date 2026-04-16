@@ -43,13 +43,13 @@ vi.mock('react-markdown', () => ({
   },
 }));
 
-// Mock UpgradeBanner
-vi.mock('./UpgradeBanner', () => ({
-  default: function MockUpgradeBanner() {
+// Mock FreeReadingUpgradeBanner
+vi.mock('./FreeReadingUpgradeBanner', () => ({
+  default: function MockFreeReadingUpgradeBanner() {
     return (
-      <div data-testid="upgrade-banner">
-        <p>💎 Desbloquea interpretaciones personalizadas</p>
-        <button>Upgrade a Premium</button>
+      <div data-testid="free-reading-upgrade-banner">
+        <p>Con Premium obtenés una interpretación personalizada</p>
+        <button>Conocer Premium</button>
       </div>
     );
   },
@@ -367,7 +367,7 @@ describe('ReadingExperience - useAI flag (TASK-006)', () => {
       fireEvent.click(revealButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('upgrade-banner')).toBeInTheDocument();
+        expect(screen.getByTestId('free-reading-upgrade-banner')).toBeInTheDocument();
       });
     });
 
@@ -403,7 +403,7 @@ describe('ReadingExperience - useAI flag (TASK-006)', () => {
         expect(screen.getByRole('heading', { name: /Tu lectura del Tarot/i })).toBeInTheDocument();
       });
 
-      expect(screen.queryByTestId('upgrade-banner')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('free-reading-upgrade-banner')).not.toBeInTheDocument();
     });
   });
 });

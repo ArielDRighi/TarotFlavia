@@ -229,6 +229,7 @@ const mockReadingDetail: ReadingDetail = {
   question: '¿Qué debo esperar en el amor?',
   cards: mockReadingCards,
   interpretation: mockInterpretation,
+  freeInterpretations: null,
   createdAt: '2025-12-07T10:00:00Z',
   shareToken: null,
 };
