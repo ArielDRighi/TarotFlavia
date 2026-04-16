@@ -237,7 +237,7 @@ export function CategorySelector({ freeModeCategories }: CategorySelectorProps =
 
   // Filter categories to only allowed slugs when in FREE mode
   const visibleCategories = isFreeMode
-    ? (categories ?? []).filter((cat) => freeModeCategories.includes(cat.slug))
+    ? (categories ?? []).filter((cat) => (freeModeCategories ?? []).includes(cat.slug))
     : (categories ?? []);
 
   const handleCategoryClick = (categoryId: number) => {
