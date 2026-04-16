@@ -116,8 +116,8 @@ describe('TarotPage', () => {
     });
   });
 
-  describe('FREE User Redirection', () => {
-    it('should redirect FREE users to /tarot/tirada', async () => {
+  describe('FREE User - Category Selector with freeModeCategories', () => {
+    it('should show CategorySelector for FREE users who can create readings (no redirect)', async () => {
       (useAuth as Mock).mockReturnValue({
         user: { id: 1, plan: 'free' },
         isAuthenticated: true,
@@ -134,12 +134,11 @@ describe('TarotPage', () => {
 
       render(<TarotPage />);
 
-      await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/tarot/tirada');
-      });
+      expect(screen.getByTestId('category-selector')).toBeInTheDocument();
+      expect(mockReplace).not.toHaveBeenCalled();
     });
 
-    it('should redirect when user can create readings but not use custom questions', async () => {
+    it('should NOT redirect FREE users who can create readings but lack custom questions', async () => {
       (useAuth as Mock).mockReturnValue({
         user: { id: 2, plan: 'free' },
         isAuthenticated: true,
@@ -157,8 +156,9 @@ describe('TarotPage', () => {
       render(<TarotPage />);
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/tarot/tirada');
+        expect(mockReplace).not.toHaveBeenCalled();
       });
+      expect(screen.getByTestId('category-selector')).toBeInTheDocument();
     });
   });
 

@@ -79,6 +79,7 @@ describe('useUserCapabilities', () => {
       canUseAI: false,
       canUseCustomQuestions: false,
       canUseAdvancedSpreads: false,
+      canUseFullDeck: false,
       plan: 'anonymous',
       isAuthenticated: false,
     };
@@ -108,6 +109,7 @@ describe('useUserCapabilities', () => {
       canUseAI: false,
       canUseCustomQuestions: false,
       canUseAdvancedSpreads: false,
+      canUseFullDeck: false,
       plan: 'free',
       isAuthenticated: true,
     };
@@ -137,6 +139,7 @@ describe('useUserCapabilities', () => {
       canUseAI: true,
       canUseCustomQuestions: true,
       canUseAdvancedSpreads: true,
+      canUseFullDeck: true,
       plan: 'premium',
       isAuthenticated: true,
     };
@@ -310,6 +313,7 @@ describe('useUserCapabilities', () => {
         canUseAI: false,
         canUseCustomQuestions: false,
         canUseAdvancedSpreads: false,
+        canUseFullDeck: false,
         plan: 'free',
         isAuthenticated: true,
       };

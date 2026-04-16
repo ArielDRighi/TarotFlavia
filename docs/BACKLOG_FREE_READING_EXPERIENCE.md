@@ -379,7 +379,7 @@ CARTA DEL DÍA:
 | T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | ✅ COMPLETADA | 1 día      |
 | T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | ✅ COMPLETADA | 3 días     |
 | T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | ✅ COMPLETADA | 2 días     |
-| T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | 🔴 CRÍTICA | 2 días     |
+| T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | ✅ COMPLETADA | 2 días     |
 | T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | 🔴 CRÍTICA | 2 días     |
 | T-FR-F03 | Frontend: DailyCardExperience con texto de energía diaria          | Frontend | 🔴 CRÍTICA | 2 días     |
 | T-FR-F04 | Frontend: Deck filtrado a Arcanos Mayores para FREE                | Frontend | 🟡 ALTA    | 2 días     |
@@ -812,7 +812,7 @@ Ahora generá los 2 textos para la carta `{{CARD_NAME}}`.
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-FR-P01 (rename de rutas), T-FR-B02 (backend listo)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-002
 
 #### 📋 Descripción
@@ -821,26 +821,26 @@ Modificar `CategorySelector` para soportar un modo FREE con filtrado a 3 categor
 
 #### ✅ Tareas específicas
 
-- [ ] Modificar `CategorySelector.tsx`: agregar prop `freeModeCategories?: string[]` que filtra `categories` por slugs antes de renderizar
-- [ ] Si `freeModeCategories` está presente, modificar `handleCategoryClick` para navegar a `/tarot/tirada?categoryId=X` (en lugar de `/tarot/preguntas?categoryId=X`)
-- [ ] Agregar banner/CTA en modo FREE: _"¿Querés más categorías? Actualizá a Premium."_
-- [ ] Modificar `RitualPageContent.tsx` (renombrar a `TarotPageContent`):
+- [x] Modificar `CategorySelector.tsx`: agregar prop `freeModeCategories?: string[]` que filtra `categories` por slugs antes de renderizar
+- [x] Si `freeModeCategories` está presente, modificar `handleCategoryClick` para navegar a `/tarot/tirada?categoryId=X` (en lugar de `/tarot/preguntas?categoryId=X`)
+- [x] Agregar banner/CTA en modo FREE: _"¿Querés más categorías? Actualizá a Premium."_
+- [x] Modificar `RitualPageContent.tsx` (renombrar a `TarotPageContent`):
   - Eliminar el `useEffect` que hace `router.replace('/tarot/tirada')` para FREE
-  - Renderizar `<CategorySelector freeModeCategories={['amor', 'salud', 'dinero']} />` (slugs — el nombre visible se resuelve desde `reading_category`) cuando `!canUseCustomQuestions && canCreateTarotReading`
+  - Renderizar `<CategorySelector freeModeCategories={['amor-relaciones', 'salud-bienestar', 'dinero-finanzas']} />` cuando `!canUseCustomQuestions && canCreateTarotReading`
   - Mantener `<CategorySelector />` sin filtro para PREMIUM
-- [ ] Tests unitarios:
+- [x] Tests unitarios:
   - CategorySelector en modo FREE muestra solo 3 categorías
   - CategorySelector en modo FREE navega a `/tarot/tirada?...` al elegir categoría
   - CategorySelector sin `freeModeCategories` muestra las 6 (sin regresión)
-  - RitualPageContent renderiza el selector filtrado para FREE
+  - TarotPageContent renderiza el selector filtrado para FREE
 
 #### 🎯 Criterios de aceptación
 
-- [ ] FREE ve 3 categorías (Amor y Relaciones, Salud y Bienestar, Dinero y Finanzas) con sus íconos — mismos nombres que PREMIUM
-- [ ] PREMIUM ve las 6 categorías (sin regresión)
-- [ ] FREE navega directo a `/tarot/tirada?categoryId=X` (sin pasar por preguntas)
-- [ ] El banner de upgrade se muestra para FREE
-- [ ] Coverage ≥ 80%, build y type-check pasan
+- [x] FREE ve 3 categorías (Amor y Relaciones, Salud y Bienestar, Dinero y Finanzas) con sus íconos — mismos nombres que PREMIUM
+- [x] PREMIUM ve las 6 categorías (sin regresión)
+- [x] FREE navega directo a `/tarot/tirada?categoryId=X` (sin pasar por preguntas)
+- [x] El banner de upgrade se muestra para FREE
+- [x] Coverage ≥ 80%, build y type-check pasan
 
 ---
 

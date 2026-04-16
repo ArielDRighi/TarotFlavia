@@ -2,6 +2,7 @@
  * Tests for CategorySelector component
  *
  * Component refactored to use capabilities system (TASK-REFACTOR-007)
+ * Extended with FREE mode support (T-FR-F01)
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -75,6 +76,67 @@ const mockCategories: Category[] = [
     isActive: true,
   },
 ];
+
+/** 6 categorías simulando el catálogo completo */
+const mockAllCategories: Category[] = [
+  {
+    id: 1,
+    slug: 'amor-relaciones',
+    name: 'Amor y Relaciones',
+    description: 'Test category',
+    color: '#FF69B4',
+    icon: 'heart',
+    isActive: true,
+  },
+  {
+    id: 2,
+    slug: 'carrera-trabajo',
+    name: 'Carrera y Trabajo',
+    description: 'Test category',
+    color: '#4169E1',
+    icon: 'briefcase',
+    isActive: true,
+  },
+  {
+    id: 3,
+    slug: 'dinero-finanzas',
+    name: 'Dinero y Finanzas',
+    description: 'Test category',
+    color: '#28A745',
+    icon: 'dollar',
+    isActive: true,
+  },
+  {
+    id: 4,
+    slug: 'salud-bienestar',
+    name: 'Salud y Bienestar',
+    description: 'Test category',
+    color: '#FD7E14',
+    icon: 'activity',
+    isActive: true,
+  },
+  {
+    id: 5,
+    slug: 'crecimiento-espiritual',
+    name: 'Crecimiento Espiritual',
+    description: 'Test category',
+    color: '#6F42C1',
+    icon: 'sparkles',
+    isActive: true,
+  },
+  {
+    id: 6,
+    slug: 'consulta-general',
+    name: 'Consulta General',
+    description: 'Test category',
+    color: '#FFC107',
+    icon: 'star',
+    isActive: true,
+  },
+];
+
+/** Slugs permitidos para usuarios FREE */
+const FREE_MODE_SLUGS = ['amor-relaciones', 'salud-bienestar', 'dinero-finanzas'];
 
 // ============================================================================
 // Setup Helpers
@@ -310,6 +372,128 @@ describe('CategorySelector', () => {
       // Click second category
       categoryCards[1].click();
       expect(mockPush).toHaveBeenCalledWith('/tarot/preguntas?categoryId=2');
+    });
+  });
+
+  // ==========================================================================
+  // FREE Mode — Filtering Tests
+  // ==========================================================================
+
+  describe('FREE Mode — Filtering', () => {
+    it('should show only 3 categories when freeModeCategories prop is provided', () => {
+      setupMocks({
+        capabilities: createMockPremiumCapabilities(),
+        categories: mockAllCategories,
+      });
+
+      render(<CategorySelector freeModeCategories={FREE_MODE_SLUGS} />);
+
+      const categoryCards = screen.getAllByTestId('category-card');
+      expect(categoryCards).toHaveLength(3);
+    });
+
+    it('should display only the allowed FREE categories by slug', () => {
+      setupMocks({
+        capabilities: createMockPremiumCapabilities(),
+        categories: mockAllCategories,
+      });
+
+      render(<CategorySelector freeModeCategories={FREE_MODE_SLUGS} />);
+
+      expect(screen.getByText('Amor y Relaciones')).toBeInTheDocument();
+      expect(screen.getByText('Salud y Bienestar')).toBeInTheDocument();
+      expect(screen.getByText('Dinero y Finanzas')).toBeInTheDocument();
+
+      // Categorías no permitidas para FREE no deben aparecer
+      expect(screen.queryByText('Carrera y Trabajo')).not.toBeInTheDocument();
+      expect(screen.queryByText('Crecimiento Espiritual')).not.toBeInTheDocument();
+      expect(screen.queryByText('Consulta General')).not.toBeInTheDocument();
+    });
+
+    it('should show all 6 categories when freeModeCategories prop is NOT provided (no regression)', () => {
+      setupMocks({
+        capabilities: createMockPremiumCapabilities(),
+        categories: mockAllCategories,
+      });
+
+      render(<CategorySelector />);
+
+      const categoryCards = screen.getAllByTestId('category-card');
+      expect(categoryCards).toHaveLength(6);
+    });
+
+    it('should show upgrade banner when freeModeCategories prop is provided', () => {
+      setupMocks({
+        capabilities: createMockPremiumCapabilities(),
+        categories: mockAllCategories,
+      });
+
+      render(<CategorySelector freeModeCategories={FREE_MODE_SLUGS} />);
+
+      expect(screen.getByTestId('free-upgrade-banner')).toBeInTheDocument();
+      expect(screen.getByText('¿Querés más categorías? Actualizá a Premium.')).toBeInTheDocument();
+    });
+
+    it('should NOT show upgrade banner when freeModeCategories prop is NOT provided', () => {
+      setupMocks({
+        capabilities: createMockPremiumCapabilities(),
+        categories: mockAllCategories,
+      });
+
+      render(<CategorySelector />);
+
+      expect(screen.queryByTestId('free-upgrade-banner')).not.toBeInTheDocument();
+    });
+  });
+
+  // ==========================================================================
+  // FREE Mode — Navigation Tests
+  // ==========================================================================
+
+  describe('FREE Mode — Navigation', () => {
+    it('should navigate to /tarot/tirada?categoryId=X when FREE mode and category is clicked', () => {
+      const { mockPush } = setupMocks({
+        capabilities: createMockFreeCapabilities(),
+        categories: mockAllCategories,
+      });
+
+      render(<CategorySelector freeModeCategories={FREE_MODE_SLUGS} />);
+
+      const categoryCard = screen.getAllByTestId('category-card')[0];
+      categoryCard.click();
+
+      // FREE mode navega a tirada (sin pasar por preguntas)
+      expect(mockPush).toHaveBeenCalledWith('/tarot/tirada?categoryId=1');
+    });
+
+    it('should navigate to correct categoryId for each FREE category', () => {
+      const { mockPush } = setupMocks({
+        capabilities: createMockFreeCapabilities(),
+        categories: mockAllCategories,
+      });
+
+      render(<CategorySelector freeModeCategories={FREE_MODE_SLUGS} />);
+
+      const categoryCards = screen.getAllByTestId('category-card');
+      expect(categoryCards).toHaveLength(3);
+
+      // Clic en "Amor y Relaciones" (id=1)
+      categoryCards[0].click();
+      expect(mockPush).toHaveBeenCalledWith('/tarot/tirada?categoryId=1');
+    });
+
+    it('should NOT redirect FREE user to /tarot/tirada (no redirect effect) when freeModeCategories is provided', async () => {
+      const { mockReplace } = setupMocks({
+        capabilities: createMockFreeCapabilities(),
+        categories: mockAllCategories,
+      });
+
+      render(<CategorySelector freeModeCategories={FREE_MODE_SLUGS} />);
+
+      // Con freeModeCategories, el selector se muestra sin redirigir
+      await waitFor(() => {
+        expect(mockReplace).not.toHaveBeenCalled();
+      });
     });
   });
 });

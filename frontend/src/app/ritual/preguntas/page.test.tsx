@@ -167,7 +167,7 @@ describe('QuestionsPage', () => {
     it('should render the breadcrumb with category name', () => {
       render(<QuestionsPage />);
 
-      expect(screen.getByText(/ritual/i)).toBeInTheDocument();
+      expect(screen.getByText(/tarot/i)).toBeInTheDocument();
       // Use a more specific selector to find category name in breadcrumb
       const breadcrumb = screen.getByRole('navigation');
       expect(breadcrumb).toHaveTextContent('Amor');
@@ -644,8 +644,8 @@ describe('QuestionsPage', () => {
     it('should have back link to tarot page in breadcrumb', () => {
       render(<QuestionsPage />);
 
-      const ritualLink = screen.getByRole('link', { name: /ritual/i });
-      expect(ritualLink).toHaveAttribute('href', '/tarot');
+      const tarotLink = screen.getByRole('link', { name: /tarot/i });
+      expect(tarotLink).toHaveAttribute('href', '/tarot');
     });
   });
 });
