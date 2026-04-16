@@ -209,6 +209,10 @@ vi.mock('@/hooks/api/useReadings', () => ({
     mutate: vi.fn(),
     isPending: false,
   }),
+  useCategories: () => ({
+    data: [{ id: 1, name: 'Amor', slug: 'amor' }],
+    isLoading: false,
+  }),
 }));
 
 // Mock toast
@@ -313,7 +317,9 @@ describe('ReadingExperience - Upgrade Banner for FREE users', () => {
       { timeout: 10000 }
     );
 
-    expect(screen.getByText(/Con Premium obtenés una interpretación personalizada/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Con Premium obtenés una interpretación personalizada/i)
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /conocer premium/i })).toBeInTheDocument();
   }, 15000); // Timeout de 15 segundos para el test
 

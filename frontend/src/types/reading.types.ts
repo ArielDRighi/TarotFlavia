@@ -185,8 +185,11 @@ export interface ReadingDetail {
    */
   freeInterpretations?: Record<number, FreeInterpretationEntry> | null;
   /**
-   * Name of the category chosen by the FREE user (e.g. "Amor y Relaciones").
-   * Provided by the backend for display purposes; absent for PREMIUM readings.
+   * Display name of the category chosen by the FREE user (e.g. "Amor y Relaciones").
+   * This field is NOT guaranteed by the current backend contract and may be absent even
+   * when a reading has a category. Prefer deriving the display name on the frontend from
+   * categoryId and the categories catalog; this field is kept only for forward compatibility
+   * with any future backend responses that may include it.
    */
   categoryName?: string | null;
   createdAt: string;

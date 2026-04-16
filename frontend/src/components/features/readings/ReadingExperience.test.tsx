@@ -265,6 +265,10 @@ vi.mock('@/hooks/api/useReadings', () => ({
     mutate: mockShareReading,
     isPending: false,
   }),
+  useCategories: () => ({
+    data: [{ id: 1, name: 'Amor', slug: 'amor' }],
+    isLoading: false,
+  }),
 }));
 
 // Mock auth store - mutable para tests

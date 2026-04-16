@@ -48,18 +48,6 @@ vi.mock('react-markdown', () => ({
   },
 }));
 
-// Mock UpgradeBanner (existing one — NOT the new FreeReadingUpgradeBanner)
-vi.mock('./UpgradeBanner', () => ({
-  default: function MockUpgradeBanner() {
-    return (
-      <div data-testid="upgrade-banner">
-        <p>💎 Desbloquea interpretaciones personalizadas</p>
-        <button>Upgrade a Premium</button>
-      </div>
-    );
-  },
-}));
-
 // Mock UpgradeModal
 vi.mock('./UpgradeModal', () => ({
   default: function MockUpgradeModal({
@@ -279,6 +267,10 @@ const mockCreateReadingMutateAsync = vi.fn();
 vi.mock('@/hooks/api/useReadings', () => ({
   useMyAvailableSpreads: () => ({ data: [mockSpread], isLoading: false }),
   usePredefinedQuestions: () => ({ data: mockPredefinedQuestions, isLoading: false }),
+  useCategories: () => ({
+    data: [{ id: 1, name: 'Amor', slug: 'amor' }],
+    isLoading: false,
+  }),
   useCreateReading: () => ({
     mutate: vi.fn(),
     mutateAsync: mockCreateReadingMutateAsync,
@@ -495,7 +487,9 @@ describe('InterpretationSection — FREE con freeInterpretations', () => {
 
       expect(screen.getByTestId('markdown-content')).toBeInTheDocument();
       // The markdown content itself contains "Interpretación personalizada"
-      expect(screen.getByTestId('markdown-content').textContent).toMatch(/Interpretación personalizada/i);
+      expect(screen.getByTestId('markdown-content').textContent).toMatch(
+        /Interpretación personalizada/i
+      );
     });
 
     it('NO debería mostrar FreeReadingUpgradeBanner para PREMIUM', async () => {

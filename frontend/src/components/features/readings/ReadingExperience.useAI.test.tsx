@@ -195,6 +195,10 @@ vi.mock('@/hooks/api/useReadings', () => ({
     mutate: vi.fn(),
     isPending: false,
   }),
+  useCategories: () => ({
+    data: [{ id: 1, name: 'Amor', slug: 'amor' }],
+    isLoading: false,
+  }),
 }));
 
 vi.mock('@/stores/authStore', () => ({

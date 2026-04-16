@@ -10,6 +10,7 @@ import {
   usePredefinedQuestions,
   useCreateReading,
   useRegenerateInterpretation,
+  useCategories,
 } from '@/hooks/api/useReadings';
 import { getShareText } from '@/lib/api/readings-api';
 import { toast } from '@/hooks/utils/useToast';
@@ -304,6 +305,7 @@ export function ReadingExperience({
   // API Hooks
   const { data: spreads, isLoading: isSpreadsLoading } = useMyAvailableSpreads();
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
+  const { data: categories } = useCategories();
   const { data: capabilities } = useUserCapabilities();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
@@ -335,6 +337,12 @@ export function ReadingExperience({
   const cardsCount = spread?.cardCount ?? 0;
   // More robust isPremium check - ensure user and plan exist
   const isPremium = Boolean(user?.plan) && user?.plan?.toUpperCase() === 'PREMIUM';
+
+  // Derive category name client-side (backend does not serialize categoryName in the response)
+  const resolvedCategoryName =
+    categoryId != null
+      ? (categories?.find((c) => c.id === categoryId)?.name ?? readingResult?.categoryName ?? null)
+      : (readingResult?.categoryName ?? null);
 
   // Display the actual question text
   // For FREE users without question, show "Lectura general" instead of "Tu pregunta al tarot"
@@ -667,7 +675,7 @@ export function ReadingExperience({
             interpretation={getGeneralInterpretation(readingResult.interpretation)}
             cards={readingResult.cards}
             freeInterpretations={readingResult.freeInterpretations}
-            categoryName={readingResult.categoryName}
+            categoryName={resolvedCategoryName}
           />
 
           {/* Upgrade Banner for non-premium users */}
