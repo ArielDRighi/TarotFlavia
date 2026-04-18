@@ -18,6 +18,7 @@ import { shouldUseNativeShare } from '@/lib/utils/device';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
+import { useTarotDeck } from '@/hooks/api/useTarotDeck';
 import { ROUTES } from '@/lib/constants/routes';
 import { TarotCard } from './TarotCard';
 import { Button } from '@/components/ui/button';
@@ -61,9 +62,6 @@ const LOADING_MESSAGES = [
 ];
 
 const LOADING_MESSAGE_INTERVAL = 2000;
-
-/** Total number of cards in a tarot deck */
-const DECK_SIZE = 78;
 
 /** Default deck ID (Rider-Waite) */
 const DEFAULT_DECK_ID = 1;
@@ -307,6 +305,7 @@ export function ReadingExperience({
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
   const { data: categories } = useCategories();
   const { data: capabilities } = useUserCapabilities();
+  const { cardIndices } = useTarotDeck();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
     useRegenerateInterpretation();
@@ -605,13 +604,13 @@ export function ReadingExperience({
               data-testid="card-selection-grid"
               className="grid grid-cols-6 justify-items-center gap-1 sm:grid-cols-8 sm:gap-2 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-13"
             >
-              {Array.from({ length: DECK_SIZE }).map((_, index) => {
-                const isSelected = selectedCards.has(index);
+              {cardIndices.map((cardIndex) => {
+                const isSelected = selectedCards.has(cardIndex);
                 const canSelect = selectedCards.size < cardsCount || isSelected;
 
                 return (
                   <div
-                    key={index}
+                    key={cardIndex}
                     data-testid="selectable-card"
                     role="button"
                     tabIndex={canSelect ? 0 : -1}
@@ -620,9 +619,9 @@ export function ReadingExperience({
                       canSelect ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
                       isSelected && 'ring-primary z-10 scale-110 ring-2 ring-offset-1'
                     )}
-                    onClick={() => handleCardClick(index)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    aria-label={`Carta ${index + 1}${isSelected ? ' - seleccionada' : ''}`}
+                    onClick={() => handleCardClick(cardIndex)}
+                    onKeyDown={(e) => handleKeyDown(cardIndex, e)}
+                    aria-label={`Carta ${cardIndex + 1}${isSelected ? ' - seleccionada' : ''}`}
                     aria-pressed={isSelected}
                     aria-disabled={!canSelect}
                   >
