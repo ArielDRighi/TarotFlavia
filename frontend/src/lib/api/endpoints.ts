@@ -19,6 +19,12 @@ export const API_ENDPOINTS = {
     BASE: '/categories',
   },
 
+  // Tarot Cards (deck for readings)
+  CARDS: {
+    BASE: '/cards',
+    BY_CATEGORY: (category: string) => `/cards?category=${category}`,
+  },
+
   // Predefined Questions
   PREDEFINED_QUESTIONS: {
     BASE: '/predefined-questions',

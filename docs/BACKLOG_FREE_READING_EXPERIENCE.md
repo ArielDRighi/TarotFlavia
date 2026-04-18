@@ -382,7 +382,7 @@ CARTA DEL DÍA:
 | T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | ✅ COMPLETADA | 2 días     |
 | T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | ✅ COMPLETADA | 2 días     |
 | T-FR-F03 | Frontend: DailyCardExperience con texto de energía diaria          | Frontend | ✅ COMPLETADA | 2 días     |
-| T-FR-F04 | Frontend: Deck filtrado a Arcanos Mayores para FREE                | Frontend | 🟡 ALTA    | 2 días     |
+| T-FR-F04 | Frontend: Deck filtrado a Arcanos Mayores para FREE                | Frontend | ✅ COMPLETADA | 2 días     |
 
 **Estimación total:** ~21.5 días de desarrollo (incluye TDD + ciclos de calidad + generación de contenido)
 
@@ -917,7 +917,7 @@ Modificar `DailyCardExperience` para que muestre el texto único de "energía di
 **Prioridad:** 🟡 ALTA
 **Estimación:** 2 días
 **Dependencias:** T-FR-B03, **T-FR-B04** (endpoint y capability deben existir antes)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-005
 
 #### 📋 Descripción
@@ -928,20 +928,20 @@ Filtrar el mazo de cartas mostrado en el flujo de selección (`ReadingExperience
 
 #### ✅ Tareas específicas
 
-- [ ] Identificar el punto de fetch del deck en `ReadingExperience` (hoy posiblemente inline o vía endpoint encyclopedia)
-- [ ] Crear/modificar hook `useTarotDeck(options: { onlyMajorArcana?: boolean })` que consuma `GET /cards?category=arcanos_mayores` cuando corresponda
-- [ ] En `ReadingExperience`: pasar `onlyMajorArcana: !capabilities.canUseFullDeck` al hook
-- [ ] Tests unitarios:
+- [x] Identificar el punto de fetch del deck en `ReadingExperience` (hoy posiblemente inline o vía endpoint encyclopedia)
+- [x] Crear/modificar hook `useTarotDeck(options: { onlyMajorArcana?: boolean })` que consuma `GET /cards?category=arcanos_mayores` cuando corresponda
+- [x] En `ReadingExperience`: pasar `onlyMajorArcana: !capabilities.canUseFullDeck` al hook
+- [x] Tests unitarios:
   - FREE ve mazo de 22 cartas
   - PREMIUM ve mazo de 78 cartas
   - La selección funciona correctamente con deck reducido
 
 #### 🎯 Criterios de aceptación
 
-- [ ] FREE solo ve los 22 Arcanos Mayores en la selección
-- [ ] PREMIUM ve las 78 cartas
-- [ ] No se rompe el flujo de selección existente
-- [ ] Coverage ≥ 80%
+- [x] FREE solo ve los 22 Arcanos Mayores en la selección
+- [x] PREMIUM ve las 78 cartas
+- [x] No se rompe el flujo de selección existente
+- [x] Coverage ≥ 80%
 
 ---
 

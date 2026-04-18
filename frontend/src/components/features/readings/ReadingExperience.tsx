@@ -18,6 +18,7 @@ import { shouldUseNativeShare } from '@/lib/utils/device';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
+import { useTarotDeck } from '@/hooks/api/useTarotDeck';
 import { ROUTES } from '@/lib/constants/routes';
 import { TarotCard } from './TarotCard';
 import { Button } from '@/components/ui/button';
@@ -61,9 +62,6 @@ const LOADING_MESSAGES = [
 ];
 
 const LOADING_MESSAGE_INTERVAL = 2000;
-
-/** Total number of cards in a tarot deck */
-const DECK_SIZE = 78;
 
 /** Default deck ID (Rider-Waite) */
 const DEFAULT_DECK_ID = 1;
@@ -307,6 +305,7 @@ export function ReadingExperience({
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
   const { data: categories } = useCategories();
   const { data: capabilities } = useUserCapabilities();
+  const { cardIndices } = useTarotDeck();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
     useRegenerateInterpretation();
@@ -605,7 +604,7 @@ export function ReadingExperience({
               data-testid="card-selection-grid"
               className="grid grid-cols-6 justify-items-center gap-1 sm:grid-cols-8 sm:gap-2 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-13"
             >
-              {Array.from({ length: DECK_SIZE }).map((_, index) => {
+              {Array.from({ length: cardIndices.length }).map((_, index) => {
                 const isSelected = selectedCards.has(index);
                 const canSelect = selectedCards.size < cardsCount || isSelected;
 
