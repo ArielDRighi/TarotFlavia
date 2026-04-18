@@ -117,7 +117,7 @@ describe('useTarotDeck', () => {
   });
 
   describe('Loading state', () => {
-    it('should return full deck (78) while capabilities are loading (safe default)', () => {
+    it('should return restricted deck (22) while capabilities are loading', () => {
       mockUseUserCapabilities.mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -125,8 +125,10 @@ describe('useTarotDeck', () => {
 
       const { result } = renderHook(() => useTarotDeck(), { wrapper: createWrapper() });
 
-      // Default to full deck while loading to avoid premature restriction
-      expect(result.current.deckSize).toBe(78);
+      // Default to restricted deck while loading to prevent FREE/anonymous users
+      // from temporarily seeing or selecting cards beyond index 21
+      expect(result.current.deckSize).toBe(22);
+      expect(result.current.isRestricted).toBe(true);
     });
   });
 });

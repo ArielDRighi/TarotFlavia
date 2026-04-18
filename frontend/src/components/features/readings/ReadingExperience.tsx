@@ -604,13 +604,13 @@ export function ReadingExperience({
               data-testid="card-selection-grid"
               className="grid grid-cols-6 justify-items-center gap-1 sm:grid-cols-8 sm:gap-2 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-13"
             >
-              {Array.from({ length: cardIndices.length }).map((_, index) => {
-                const isSelected = selectedCards.has(index);
+              {cardIndices.map((cardIndex) => {
+                const isSelected = selectedCards.has(cardIndex);
                 const canSelect = selectedCards.size < cardsCount || isSelected;
 
                 return (
                   <div
-                    key={index}
+                    key={cardIndex}
                     data-testid="selectable-card"
                     role="button"
                     tabIndex={canSelect ? 0 : -1}
@@ -619,9 +619,9 @@ export function ReadingExperience({
                       canSelect ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
                       isSelected && 'ring-primary z-10 scale-110 ring-2 ring-offset-1'
                     )}
-                    onClick={() => handleCardClick(index)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    aria-label={`Carta ${index + 1}${isSelected ? ' - seleccionada' : ''}`}
+                    onClick={() => handleCardClick(cardIndex)}
+                    onKeyDown={(e) => handleKeyDown(cardIndex, e)}
+                    aria-label={`Carta ${cardIndex + 1}${isSelected ? ' - seleccionada' : ''}`}
                     aria-pressed={isSelected}
                     aria-disabled={!canSelect}
                   >

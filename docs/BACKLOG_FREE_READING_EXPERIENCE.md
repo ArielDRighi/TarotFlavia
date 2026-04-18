@@ -928,9 +928,9 @@ Filtrar el mazo de cartas mostrado en el flujo de selección (`ReadingExperience
 
 #### ✅ Tareas específicas
 
-- [x] Identificar el punto de fetch del deck en `ReadingExperience` (hoy posiblemente inline o vía endpoint encyclopedia)
-- [x] Crear/modificar hook `useTarotDeck(options: { onlyMajorArcana?: boolean })` que consuma `GET /cards?category=arcanos_mayores` cuando corresponda
-- [x] En `ReadingExperience`: pasar `onlyMajorArcana: !capabilities.canUseFullDeck` al hook
+- [x] Identificar el punto de fetch del deck en `ReadingExperience` (el mazo se representaba localmente como `DECK_SIZE = 78` — sin fetch al backend)
+- [x] Crear hook `useTarotDeck()` que calcula `cardIndices` localmente según `canUseFullDeck` (sin fetch — FREE/anónimo: índices 0-21, PREMIUM: índices 0-77)
+- [x] En `ReadingExperience`: reemplazar `DECK_SIZE = 78` por `useTarotDeck()`, iterar sobre `cardIndices` directamente
 - [x] Tests unitarios:
   - FREE ve mazo de 22 cartas
   - PREMIUM ve mazo de 78 cartas

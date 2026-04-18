@@ -32,20 +32,23 @@ export interface TarotDeckResult {
  * Hook that returns the available deck indices for the current user.
  *
  * Uses `canUseFullDeck` capability from the backend to determine the deck size.
- * While capabilities are loading, defaults to the full deck to avoid premature restriction.
+ * While capabilities are loading or unknown, defaults to the restricted deck (Major Arcana)
+ * to prevent FREE/anonymous users from temporarily seeing or selecting cards beyond index 21.
  *
  * @example
  * ```tsx
  * const { cardIndices, deckSize, isRestricted } = useTarotDeck();
- * // Render deckSize cards; use cardIndices to map to cardId (index + 1)
+ * // Iterate over cardIndices directly; cardId = cardIndex + 1
  * ```
  */
 export function useTarotDeck(): TarotDeckResult {
   const { data: capabilities } = useUserCapabilities();
 
   return useMemo(() => {
-    // While loading or no data: default to full deck (safe — backend validates anyway)
-    const canUseFullDeck = capabilities?.canUseFullDeck ?? true;
+    // While loading or no data: default to restricted deck (Major Arcana only).
+    // This prevents FREE/anonymous users from temporarily seeing/selecting cards > index 21
+    // before capabilities resolve. The backend validates selection server-side anyway.
+    const canUseFullDeck = capabilities?.canUseFullDeck ?? false;
 
     const size = canUseFullDeck ? FULL_DECK_SIZE : MAJOR_ARCANA_COUNT;
     const indices = Array.from({ length: size }, (_, i) => i);
