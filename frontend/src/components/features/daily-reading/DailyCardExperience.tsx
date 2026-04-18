@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { ShareButton } from '@/components/features/shared/ShareButton';
+import FreeReadingUpgradeBanner from '@/components/features/readings/FreeReadingUpgradeBanner';
 import { AnonymousLimitReached } from './AnonymousLimitReached';
 import { DailyCardLimitReached } from './DailyCardLimitReached';
 import {
@@ -90,6 +91,7 @@ export function DailyCardExperience() {
 
   // Extract boolean flags from capabilities
   const canCreateDailyReading = capabilities?.canCreateDailyReading ?? false;
+  const canUseAI = capabilities?.canUseAI ?? false;
 
   // Fetch today's reading ONLY if user can still create (hasn't reached limit)
   // MODELO_NEGOCIO_DEFINIDO: "Si reingresa tras consumir límite → Modal inmediato"
@@ -345,9 +347,9 @@ export function DailyCardExperience() {
             )}
           </div>
 
-          {/* Interpretation (authenticated users) or Card Meaning (anonymous users) */}
-          {currentReading?.interpretation ? (
-            // Authenticated users: Full interpretation
+          {/* Interpretation: diferenciado por plan */}
+          {canUseAI && currentReading?.interpretation ? (
+            // PREMIUM: interpretación personalizada y profunda
             <div
               data-testid="interpretation-section"
               className="bg-surface shadow-soft w-full max-w-lg rounded-xl p-6"
@@ -356,8 +358,18 @@ export function DailyCardExperience() {
                 {currentReading.interpretation}
               </p>
             </div>
+          ) : !canUseAI && currentReading?.interpretation ? (
+            // FREE / anónimo con texto de energía diaria (dailyFreeUpright/Reversed)
+            <div
+              data-testid="daily-energy-interpretation"
+              className="bg-surface shadow-soft w-full max-w-lg rounded-xl p-6"
+            >
+              <p className="text-text-primary leading-relaxed whitespace-pre-line">
+                {currentReading.interpretation}
+              </p>
+            </div>
           ) : currentReading?.cardMeaning ? (
-            // Anonymous users: Card meaning from DB
+            // Fallback: sin seed aún — muestra significado DB
             <div
               data-testid="card-meaning-section"
               className="bg-surface shadow-soft w-full max-w-lg rounded-xl p-6"
@@ -366,25 +378,30 @@ export function DailyCardExperience() {
             </div>
           ) : null}
 
-          {/* Anonymous User CTA (shown when no interpretation) */}
-          {!isAuthenticated && currentReading?.cardMeaning && (
-            <div
-              data-testid="anonymous-cta"
-              className="bg-primary/5 border-primary/20 w-full max-w-lg rounded-xl border p-6 text-center"
-            >
-              <p className="text-text-primary mb-4 font-medium">
-                ¿Te gustó? Regístrate gratis para obtener lecturas completas
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-                <Button onClick={() => router.push(ROUTES.REGISTER)} size="lg">
-                  Crear cuenta gratis
-                </Button>
-                <Button onClick={() => router.push(ROUTES.LOGIN)} variant="outline" size="lg">
-                  Iniciar sesión
-                </Button>
+          {/* Banner de upgrade para FREE y anónimos (HUS-006) */}
+          {!canUseAI && currentReading && <FreeReadingUpgradeBanner />}
+
+          {/* Anonymous User CTA (shown when anonymous user has any reading result) */}
+          {!isAuthenticated &&
+            currentReading &&
+            (currentReading.cardMeaning ?? currentReading.interpretation) && (
+              <div
+                data-testid="anonymous-cta"
+                className="bg-primary/5 border-primary/20 w-full max-w-lg rounded-xl border p-6 text-center"
+              >
+                <p className="text-text-primary mb-4 font-medium">
+                  ¿Te gustó? Regístrate gratis para obtener lecturas completas
+                </p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                  <Button onClick={() => router.push(ROUTES.REGISTER)} size="lg">
+                    Crear cuenta gratis
+                  </Button>
+                  <Button onClick={() => router.push(ROUTES.LOGIN)} variant="outline" size="lg">
+                    Iniciar sesión
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Share Button - available for all users with a reading */}
           {currentReading && (

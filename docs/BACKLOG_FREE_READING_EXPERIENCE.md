@@ -381,7 +381,7 @@ CARTA DEL DÍA:
 | T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | ✅ COMPLETADA | 2 días     |
 | T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | ✅ COMPLETADA | 2 días     |
 | T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | ✅ COMPLETADA | 2 días     |
-| T-FR-F03 | Frontend: DailyCardExperience con texto de energía diaria          | Frontend | 🔴 CRÍTICA | 2 días     |
+| T-FR-F03 | Frontend: DailyCardExperience con texto de energía diaria          | Frontend | ✅ COMPLETADA | 2 días     |
 | T-FR-F04 | Frontend: Deck filtrado a Arcanos Mayores para FREE                | Frontend | 🟡 ALTA    | 2 días     |
 
 **Estimación total:** ~21.5 días de desarrollo (incluye TDD + ciclos de calidad + generación de contenido)
@@ -882,7 +882,7 @@ Modificar `CategorySelector` para soportar un modo FREE con filtrado a 3 categor
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-FR-B03 (backend retorna `dailyFreeUpright/Reversed`)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-004, HUS-006
 
 #### 📋 Descripción
@@ -891,24 +891,24 @@ Modificar `DailyCardExperience` para que muestre el texto único de "energía di
 
 #### ✅ Tareas específicas
 
-- [ ] Actualizar tipos: el response de carta del día incluye `interpretation: string` (ya existente, ahora poblado con `dailyFreeUpright/Reversed`)
-- [ ] Modificar `DailyCardExperience.tsx`:
+- [x] Actualizar tipos: el response de carta del día incluye `interpretation: string` (ya existente, ahora poblado con `dailyFreeUpright/Reversed`)
+- [x] Modificar `DailyCardExperience.tsx`:
   - Renderizar el texto como un bloque único (no 3 secciones temáticas)
   - Encabezado: "🌟 Tu Carta del Día" + nombre de la carta + orientación
   - Incluir `FreeReadingUpgradeBanner` al final (para FREE/anónimo)
   - Para PREMIUM: mantener el layout actual con la interpretación personalizada
-- [ ] Fallback visual si `interpretation` es null (texto mínimo + keywords)
-- [ ] Tests unitarios:
+- [x] Fallback visual si `interpretation` es null (texto mínimo + keywords)
+- [x] Tests unitarios:
   - FREE/anónimo ve el texto único de energía diaria
   - PREMIUM ve la interpretación personalizada (sin regresión)
   - Banner upgrade visible para FREE/anónimo
 
 #### 🎯 Criterios de aceptación
 
-- [ ] FREE/anónimo ve el texto único de energía diaria
-- [ ] PREMIUM ve la interpretación personalizada y profunda (sin regresión)
-- [ ] El layout es claro, no dividido por categorías
-- [ ] Banner upgrade visible para no-Premium
+- [x] FREE/anónimo ve el texto único de energía diaria
+- [x] PREMIUM ve la interpretación personalizada y profunda (sin regresión)
+- [x] El layout es claro, no dividido por categorías
+- [x] Banner upgrade visible para no-Premium
 
 ---
 
