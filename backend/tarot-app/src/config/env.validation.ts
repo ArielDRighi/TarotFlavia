@@ -25,23 +25,23 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
-  POSTGRES_HOST: string;
+  POSTGRES_HOST!: string;
 
   @IsPort()
   @Transform(({ value }) => String(value))
-  POSTGRES_PORT: string;
+  POSTGRES_PORT!: string;
 
   @IsString()
   @IsNotEmpty()
-  POSTGRES_USER: string;
+  POSTGRES_USER!: string;
 
   @IsString()
   @IsNotEmpty()
-  POSTGRES_PASSWORD: string;
+  POSTGRES_PASSWORD!: string;
 
   @IsString()
   @IsNotEmpty()
-  POSTGRES_DB: string;
+  POSTGRES_DB!: string;
 
   // =============================================================================
   // DATABASE POOLING CONFIGURATION (Optional)
@@ -59,7 +59,7 @@ export class EnvironmentVariables {
     }
     return Number(value);
   })
-  DB_POOL_SIZE: number;
+  DB_POOL_SIZE!: number;
 
   @IsInt()
   @Min(1000)
@@ -67,7 +67,7 @@ export class EnvironmentVariables {
   @IsOptional()
   @Type(() => Number)
   @Transform(({ value }) => (value ? Number(value) : 5000))
-  DB_MAX_QUERY_TIME: number;
+  DB_MAX_QUERY_TIME!: number;
 
   @IsInt()
   @Min(5000)
@@ -75,7 +75,7 @@ export class EnvironmentVariables {
   @IsOptional()
   @Type(() => Number)
   @Transform(({ value }) => (value ? Number(value) : 30000))
-  DB_CONNECTION_TIMEOUT: number;
+  DB_CONNECTION_TIMEOUT!: number;
 
   // =============================================================================
   // JWT CONFIGURATION
@@ -86,11 +86,11 @@ export class EnvironmentVariables {
   @MinLength(32, {
     message: 'JWT_SECRET must be at least 32 characters long for security',
   })
-  JWT_SECRET: string;
+  JWT_SECRET!: string;
 
   @IsString()
   @IsNotEmpty()
-  JWT_EXPIRES_IN: string;
+  JWT_EXPIRES_IN!: string;
 
   // =============================================================================
   // REFRESH TOKEN CONFIGURATION
@@ -120,7 +120,7 @@ export class EnvironmentVariables {
   @Matches(/^gsk_/, {
     message: 'GROQ_API_KEY must start with "gsk_"',
   })
-  GROQ_API_KEY: string;
+  GROQ_API_KEY!: string;
 
   @IsOptional()
   @IsString()
