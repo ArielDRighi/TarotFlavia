@@ -235,11 +235,6 @@ function InterpretationSection({
                           ? card.meaningReversed
                           : card.meaningUpright}
                     </p>
-                    {card.keywords && (
-                      <p className="text-text-muted mt-2 text-sm italic">
-                        Palabras clave: {card.keywords}
-                      </p>
-                    )}
                   </div>
                 );
               })}
@@ -255,15 +250,10 @@ function InterpretationSection({
                       <span className="text-text-muted ml-2 text-sm">(Invertida)</span>
                     )}
                   </h3>
-                  <p className="text-text-muted mb-2 text-sm font-medium">{card.position}</p>
+                  <p className="text-text-muted mb-2 text-sm font-medium">{card.positionName}</p>
                   <p className="text-text-primary leading-relaxed">
                     {card.isReversed ? card.meaningReversed : card.meaningUpright}
                   </p>
-                  {card.keywords && (
-                    <p className="text-text-muted mt-2 text-sm italic">
-                      Palabras clave: {card.keywords}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>

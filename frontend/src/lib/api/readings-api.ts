@@ -159,6 +159,7 @@ interface ApiReadingResponse {
     isReversed: boolean;
   }>;
   interpretation: string | null;
+  freeInterpretations?: Record<number, { content: string }> | null;
   createdAt: string;
   deletedAt?: string | null;
   sharedToken?: string | null;
@@ -204,6 +205,7 @@ function transformReadingResponse(raw: ApiReadingResponse): ReadingDetail {
     question: raw.customQuestion || raw.question || '',
     cards: transformedCards,
     interpretation: raw.interpretation,
+    freeInterpretations: raw.freeInterpretations ?? null,
     createdAt: raw.createdAt,
     deletedAt: raw.deletedAt,
     shareToken: raw.sharedToken,
