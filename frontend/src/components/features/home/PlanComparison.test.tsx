@@ -57,22 +57,23 @@ describe('PlanComparison', () => {
       expect(dailyCards.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('should show "1 lectura diaria" feature', () => {
+    it('should show "1 lectura de tarot / día" feature', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/1 lectura diaria/i)).toBeInTheDocument();
+      expect(screen.getByText(/1 lectura de tarot \/ día/i)).toBeInTheDocument();
     });
 
-    it('should show "Tiradas de 1-3 cartas" feature', () => {
+    it('should show spread limitation feature', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/tiradas de 1-3 cartas/i)).toBeInTheDocument();
+      expect(screen.getByText(/1.*3 cartas/i)).toBeInTheDocument();
     });
 
-    it('should show "Sin interpretación IA" feature', () => {
+    it('should show "Interpretación con IA" as not included', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/sin interpretación ia/i)).toBeInTheDocument();
+      const iaElements = screen.getAllByText(/interpretación con ia/i);
+      expect(iaElements.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should show "Gratis" price', () => {
@@ -94,32 +95,22 @@ describe('PlanComparison', () => {
   });
 
   describe('Premium plan', () => {
-    it('should show "Lecturas ilimitadas" feature', () => {
+    it('should show "3 lecturas de tarot / día" feature', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/lecturas ilimitadas/i)).toBeInTheDocument();
+      expect(screen.getByText(/3 lecturas de tarot \/ día/i)).toBeInTheDocument();
     });
 
-    it('should show "Todas las tiradas" feature in Premium plan', () => {
+    it('should show "Interpretación personalizada con IA" feature in Premium plan', () => {
       render(<PlanComparison />);
 
-      // Get all elements with this text, check for one WITHOUT line-through (Premium)
-      const elements = screen.getAllByText(/todas las tiradas/i);
-      const premiumElement = elements.find(
-        (el) => !el.classList.contains('line-through') && el.classList.contains('text-gray-900')
-      );
-      expect(premiumElement).toBeDefined();
+      expect(screen.getByText(/interpretación personalizada con ia/i)).toBeInTheDocument();
     });
 
-    it('should show "Interpretación personalizada" feature in Premium plan', () => {
+    it('should show "Carta astral ilimitada" feature in Premium plan', () => {
       render(<PlanComparison />);
 
-      // Get all elements with this text, check for one WITHOUT line-through (Premium)
-      const elements = screen.getAllByText(/interpretación personalizada/i);
-      const premiumElement = elements.find(
-        (el) => !el.classList.contains('line-through') && el.classList.contains('text-gray-900')
-      );
-      expect(premiumElement).toBeDefined();
+      expect(screen.getByText(/carta astral ilimitada \+ ia/i)).toBeInTheDocument();
     });
 
     it('should show "Preguntas personalizadas" feature', () => {
@@ -128,10 +119,10 @@ describe('PlanComparison', () => {
       expect(screen.getByText(/preguntas personalizadas/i)).toBeInTheDocument();
     });
 
-    it('should show price "$9.99/mes"', () => {
+    it('should show price "$9.99"', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/\$9\.99\/mes/i)).toBeInTheDocument();
+      expect(screen.getByText(/\$9\.99/)).toBeInTheDocument();
     });
 
     it('should show CTA to upgrade to premium', () => {

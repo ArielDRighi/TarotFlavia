@@ -8,7 +8,7 @@ describe('LandingPage', () => {
 
     // Verificar que todas las secciones están presentes
     expect(
-      screen.getByRole('heading', { name: /auguria.*descubre tu destino/i })
+      screen.getByRole('heading', { name: /descubre tu destino/i, level: 1 })
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /prueba sin compromiso/i })).toBeInTheDocument();
     expect(
@@ -33,7 +33,7 @@ describe('LandingPage', () => {
     const firstSection = container.querySelector('main > section:first-child');
     const heroHeading = firstSection?.querySelector('h1');
 
-    expect(heroHeading).toHaveTextContent(/auguria.*descubre tu destino/i);
+    expect(heroHeading).toHaveTextContent(/descubre tu destino/i);
   });
 
   it('should be accessible with proper heading hierarchy', () => {
@@ -51,15 +51,10 @@ describe('LandingPage', () => {
   it('should render all CTAs', () => {
     render(<LandingPage />);
 
-    // Hero CTAs
-    expect(
-      screen.getByRole('link', { name: /^ver mi carta del día gratis$/i })
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^crear cuenta gratis$/i })).toBeInTheDocument();
-
-    // Try without register section has its own CTA (case insensitive)
+    // Hero CTAs - "carta del día gratis" may appear in multiple sections
     const dailyCardLinks = screen.getAllByRole('link', { name: /carta del día gratis/i });
     expect(dailyCardLinks.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole('link', { name: /^crear cuenta gratis$/i })).toBeInTheDocument();
 
     // HowItWorks CTA
     expect(screen.getByRole('link', { name: /comienza tu viaje/i })).toBeInTheDocument();

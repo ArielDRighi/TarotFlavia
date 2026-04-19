@@ -23,6 +23,14 @@
   --color-secondary: #d69e2e; /* Dorado Mate - Bordes, iconos especiales */
   --color-accent-success: #48bb78; /* Verde - Confirmaciones */
 
+  /* Hero & Dark Sections */
+  --color-bg-hero: #1a0a2e; /* Noche Profunda — hero background */
+  --color-bg-hero-mid: #2d1b69; /* Índigo Oscuro — hero gradient mid */
+  --color-bg-section-dark: #1e1145; /* Sección oscura alternativa */
+  --color-text-on-dark: #f9f7f2; /* Texto sobre fondos oscuros */
+  --color-text-on-dark-muted: rgba(249, 247, 242, 0.72); /* Texto suave sobre oscuros */
+  --color-secondary-glow: rgba(214, 158, 46, 0.25); /* Glow dorado para efectos */
+
   /* ===========================================
      SHADOWS - Soft shadow for cards
      =========================================== */
@@ -330,4 +338,57 @@ body {
 
 .animate-pendulum-circular {
   animation: pendulum-circular 2s linear infinite;
+}
+
+/* ===========================================
+   Landing Page Animations
+   =========================================== */
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-12px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-6px) rotate(-1deg);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes shimmer-gold {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+.animate-shimmer-gold {
+  background: linear-gradient(90deg, #d69e2e 0%, #f6d860 40%, #d69e2e 60%, #b7791f 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-gold 3s linear infinite;
 }

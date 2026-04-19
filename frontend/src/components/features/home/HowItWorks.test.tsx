@@ -28,9 +28,7 @@ describe('HowItWorks', () => {
     it('should show step description', () => {
       render(<HowItWorks />);
 
-      expect(
-        screen.getByText(/elige una categoría y selecciona tu pregunta o crea una personalizada/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/selecciona una categoría y elige la pregunta/i)).toBeInTheDocument();
     });
   });
 
@@ -46,7 +44,7 @@ describe('HowItWorks', () => {
       render(<HowItWorks />);
 
       expect(
-        screen.getByText(/elige el tipo de tirada según tu plan y selecciona tus cartas/i)
+        screen.getByText(/elige el tipo de tirada según tu plan y deja que la intuición/i)
       ).toBeInTheDocument();
     });
   });
@@ -63,7 +61,7 @@ describe('HowItWorks', () => {
       render(<HowItWorks />);
 
       expect(
-        screen.getByText(/obtén tu interpretación personalizada según tu plan/i)
+        screen.getByText(/obtén una interpretación personalizada que conecta las cartas/i)
       ).toBeInTheDocument();
     });
   });
