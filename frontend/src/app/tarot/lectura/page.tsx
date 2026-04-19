@@ -14,7 +14,6 @@ function LecturaPageContent() {
   const spreadId = searchParams.get('spreadId');
   const questionId = searchParams.get('questionId');
   const customQuestion = searchParams.get('customQuestion');
-  const decodedCustomQuestion = customQuestion ? decodeURIComponent(customQuestion) : null;
   const categoryId = searchParams.get('categoryId');
 
   // Validate spreadId is present
@@ -35,7 +34,7 @@ function LecturaPageContent() {
     <ReadingExperience
       spreadId={Number(spreadId)}
       questionId={questionId ? Number(questionId) : null}
-      customQuestion={decodedCustomQuestion}
+      customQuestion={customQuestion ?? null}
       categoryId={categoryId ? Number(categoryId) : null}
     />
   );
