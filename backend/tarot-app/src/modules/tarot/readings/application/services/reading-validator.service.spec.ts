@@ -11,6 +11,9 @@ import { ReadingValidatorService } from './reading-validator.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { PlanConfigService } from '../../../../plan-config/plan-config.service';
+import { CategoriesService } from '../../../../categories/categories.service';
+import { ReadingCategory } from '../../../../categories/entities/reading-category.entity';
+import { TarotCard } from '../../../cards/entities/tarot-card.entity';
 
 // Helper types for test cases
 type PartialUser = Partial<User> & { id: number; plan?: UserPlan | null };
@@ -36,6 +39,10 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
     getReadingsLimit: jest.fn(),
   };
 
+  const mockCategoriesService = {
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,6 +58,10 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
         {
           provide: PlanConfigService,
           useValue: mockPlanConfigService,
+        },
+        {
+          provide: CategoriesService,
+          useValue: mockCategoriesService,
         },
       ],
     }).compile();
@@ -859,6 +870,236 @@ describe('ReadingValidatorService - BUG HUNTING', () => {
       expect(() =>
         service.validateSpreadAccess(UserPlan.ANONYMOUS, UserPlan.PREMIUM),
       ).toThrow('Esta tirada requiere plan premium');
+    });
+  });
+
+  describe('validateCategoryAccess', () => {
+    const mockFreeCategory = (slug: string): ReadingCategory =>
+      ({ id: 1, slug, name: slug, isActive: true }) as ReadingCategory;
+
+    it('should allow FREE user to access "amor-relaciones" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('amor-relaciones'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 1),
+      ).resolves.not.toThrow();
+    });
+
+    it('should allow FREE user to access "salud-bienestar" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('salud-bienestar'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 2),
+      ).resolves.not.toThrow();
+    });
+
+    it('should allow FREE user to access "dinero-finanzas" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('dinero-finanzas'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 3),
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw ForbiddenException when FREE user accesses "trabajo" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('trabajo'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 4),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 4),
+      ).rejects.toThrow(
+        'Los usuarios gratuito solo pueden acceder a las categorías: amor-relaciones, salud-bienestar, dinero-finanzas',
+      );
+    });
+
+    it('should throw ForbiddenException when FREE user accesses "espiritual" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('espiritual'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 5),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw ForbiddenException when FREE user accesses "general" category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('general'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 6),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw ForbiddenException when ANONYMOUS user accesses a restricted category', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('trabajo'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.ANONYMOUS, 4),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.validateCategoryAccess(UserPlan.ANONYMOUS, 4),
+      ).rejects.toThrow(
+        'Los usuarios anónimo solo pueden acceder a las categorías: amor-relaciones, salud-bienestar, dinero-finanzas',
+      );
+    });
+
+    it('should allow PREMIUM user to access any category (trabajo)', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('trabajo'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.PREMIUM, 4),
+      ).resolves.not.toThrow();
+
+      expect(mockCategoriesService.findOne).not.toHaveBeenCalled();
+    });
+
+    it('should allow PREMIUM user to access any category (espiritual)', async () => {
+      mockCategoriesService.findOne.mockResolvedValue(
+        mockFreeCategory('espiritual'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.PREMIUM, 5),
+      ).resolves.not.toThrow();
+    });
+
+    it('should propagate NotFoundException when category does not exist', async () => {
+      mockCategoriesService.findOne.mockRejectedValue(
+        new NotFoundException('Categoría con ID 999 no encontrada'),
+      );
+
+      await expect(
+        service.validateCategoryAccess(UserPlan.FREE, 999),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('validateDeckAccess', () => {
+    const mockMajorArcanaCard = (id: number): TarotCard =>
+      ({
+        id,
+        name: `Arcano Mayor ${id}`,
+        category: 'arcanos_mayores',
+      }) as TarotCard;
+
+    const mockMinorArcanaCard = (
+      id: number,
+      category: string = 'bastos',
+    ): TarotCard =>
+      ({
+        id,
+        name: `Arcano Menor ${id}`,
+        category,
+      }) as TarotCard;
+
+    it('should allow PREMIUM user to use any cards (major arcana only)', () => {
+      const cards = [mockMajorArcanaCard(1), mockMajorArcanaCard(2)];
+
+      expect(() =>
+        service.validateDeckAccess(UserPlan.PREMIUM, cards),
+      ).not.toThrow();
+    });
+
+    it('should allow PREMIUM user to use minor arcana cards', () => {
+      const cards = [
+        mockMajorArcanaCard(1),
+        mockMinorArcanaCard(2, 'bastos'),
+        mockMinorArcanaCard(3, 'copas'),
+      ];
+
+      expect(() =>
+        service.validateDeckAccess(UserPlan.PREMIUM, cards),
+      ).not.toThrow();
+    });
+
+    it('should allow FREE user to use only major arcana cards', () => {
+      const cards = [mockMajorArcanaCard(1), mockMajorArcanaCard(2)];
+
+      expect(() =>
+        service.validateDeckAccess(UserPlan.FREE, cards),
+      ).not.toThrow();
+    });
+
+    it('should throw ForbiddenException when FREE user tries to use a minor arcana card (bastos)', () => {
+      const cards = [mockMajorArcanaCard(1), mockMinorArcanaCard(2, 'bastos')];
+
+      expect(() => service.validateDeckAccess(UserPlan.FREE, cards)).toThrow(
+        ForbiddenException,
+      );
+      expect(() => service.validateDeckAccess(UserPlan.FREE, cards)).toThrow(
+        'El plan FREE solo permite cartas de Arcanos Mayores',
+      );
+    });
+
+    it('should throw ForbiddenException when FREE user tries to use a minor arcana card (copas)', () => {
+      const cards = [mockMinorArcanaCard(1, 'copas')];
+
+      expect(() => service.validateDeckAccess(UserPlan.FREE, cards)).toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('should throw ForbiddenException when FREE user tries to use a minor arcana card (espadas)', () => {
+      const cards = [mockMajorArcanaCard(1), mockMinorArcanaCard(2, 'espadas')];
+
+      expect(() => service.validateDeckAccess(UserPlan.FREE, cards)).toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('should throw ForbiddenException when FREE user tries to use a minor arcana card (oros)', () => {
+      const cards = [mockMinorArcanaCard(1, 'oros'), mockMajorArcanaCard(2)];
+
+      expect(() => service.validateDeckAccess(UserPlan.FREE, cards)).toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('should throw ForbiddenException when ANONYMOUS user tries to use minor arcana cards', () => {
+      const cards = [mockMinorArcanaCard(1, 'bastos')];
+
+      expect(() =>
+        service.validateDeckAccess(UserPlan.ANONYMOUS, cards),
+      ).toThrow(ForbiddenException);
+      expect(() =>
+        service.validateDeckAccess(UserPlan.ANONYMOUS, cards),
+      ).toThrow('El plan FREE solo permite cartas de Arcanos Mayores');
+    });
+
+    it('should allow ANONYMOUS user to use only major arcana cards', () => {
+      const cards = [mockMajorArcanaCard(1), mockMajorArcanaCard(2)];
+
+      expect(() =>
+        service.validateDeckAccess(UserPlan.ANONYMOUS, cards),
+      ).not.toThrow();
+    });
+
+    it('should throw ForbiddenException when all cards are minor arcana (malicious FREE user)', () => {
+      const cards = [
+        mockMinorArcanaCard(1, 'bastos'),
+        mockMinorArcanaCard(2, 'copas'),
+        mockMinorArcanaCard(3, 'espadas'),
+      ];
+
+      expect(() => service.validateDeckAccess(UserPlan.FREE, cards)).toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

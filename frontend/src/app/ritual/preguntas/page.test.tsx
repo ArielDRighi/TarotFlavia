@@ -167,7 +167,7 @@ describe('QuestionsPage', () => {
     it('should render the breadcrumb with category name', () => {
       render(<QuestionsPage />);
 
-      expect(screen.getByText(/ritual/i)).toBeInTheDocument();
+      expect(screen.getByText(/tarot/i)).toBeInTheDocument();
       // Use a more specific selector to find category name in breadcrumb
       const breadcrumb = screen.getByRole('navigation');
       expect(breadcrumb).toHaveTextContent('Amor');
@@ -231,7 +231,7 @@ describe('QuestionsPage', () => {
       const backButton = screen.getByRole('button', { name: /volver a categorías/i });
       fireEvent.click(backButton);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual');
+      expect(mockPush).toHaveBeenCalledWith('/tarot');
     });
   });
 
@@ -401,7 +401,7 @@ describe('QuestionsPage', () => {
       fireEvent.click(continueButton);
 
       expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining('/ritual/tirada?categoryId=1&questionId=1')
+        expect.stringContaining('/tarot/tirada?categoryId=1&questionId=1')
       );
     });
 
@@ -556,7 +556,7 @@ describe('QuestionsPage', () => {
       fireEvent.click(useMyQuestionBtn);
 
       expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining('/ritual/tirada?categoryId=1&customQuestion=')
+        expect.stringContaining('/tarot/tirada?categoryId=1&customQuestion=')
       );
     });
 
@@ -641,11 +641,11 @@ describe('QuestionsPage', () => {
       });
     });
 
-    it('should have back link to ritual page in breadcrumb', () => {
+    it('should have back link to tarot page in breadcrumb', () => {
       render(<QuestionsPage />);
 
-      const ritualLink = screen.getByRole('link', { name: /ritual/i });
-      expect(ritualLink).toHaveAttribute('href', '/ritual');
+      const tarotLink = screen.getByRole('link', { name: /tarot/i });
+      expect(tarotLink).toHaveAttribute('href', '/tarot');
     });
   });
 });

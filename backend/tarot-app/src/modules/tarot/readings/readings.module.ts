@@ -23,6 +23,7 @@ import { SubscriptionsModule } from '../../subscriptions/subscriptions.module';
 import { TarotistasModule } from '../../tarotistas/tarotistas.module';
 import { PlanConfigModule } from '../../plan-config/plan-config.module';
 import { UsersModule } from '../../users/users.module';
+import { CategoriesModule } from '../../categories/categories.module';
 
 // ==================== Clean Architecture ====================
 // Repositories
@@ -64,6 +65,7 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     TarotistasModule,
     PlanConfigModule,
     UsersModule,
+    CategoriesModule,
   ],
   controllers: [
     ReadingsController,

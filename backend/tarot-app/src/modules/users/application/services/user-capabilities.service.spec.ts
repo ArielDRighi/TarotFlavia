@@ -142,6 +142,7 @@ describe('UserCapabilitiesService', () => {
           canUseAI: false,
           canUseCustomQuestions: false,
           canUseAdvancedSpreads: false,
+          canUseFullDeck: false,
           plan: UserPlanType.ANONYMOUS,
           isAuthenticated: false,
           pendulum: {
@@ -240,6 +241,7 @@ describe('UserCapabilitiesService', () => {
           canUseAI: false,
           canUseCustomQuestions: false,
           canUseAdvancedSpreads: false,
+          canUseFullDeck: false,
           plan: UserPlanType.FREE,
           isAuthenticated: true,
           pendulum: {
@@ -338,6 +340,62 @@ describe('UserCapabilitiesService', () => {
       });
     });
 
+    describe('canUseFullDeck capability', () => {
+      it('should return canUseFullDeck: false for FREE user', async () => {
+        usersService.findById.mockResolvedValue(mockUser as User);
+        planConfigService.findByPlanType.mockResolvedValue(
+          mockPlanConfig as unknown as Plan,
+        );
+        planConfigService.getPendulumLimit.mockResolvedValue({
+          limit: 3,
+          period: 'monthly',
+        });
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        expect(result.canUseFullDeck).toBe(false);
+      });
+
+      it('should return canUseFullDeck: true for PREMIUM user', async () => {
+        const premiumUser = { ...mockUser, plan: UserPlan.PREMIUM };
+        usersService.findById.mockResolvedValue(premiumUser as User);
+        planConfigService.findByPlanType.mockResolvedValue({
+          id: 3,
+          planType: UserPlan.PREMIUM,
+          dailyCardLimit: -1,
+          tarotReadingsLimit: 3,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as unknown as Plan);
+        planConfigService.getPendulumLimit.mockResolvedValue({
+          limit: 1,
+          period: 'daily',
+        });
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+        tarotReadingRepository.count.mockResolvedValue(0);
+
+        const result = await service.getCapabilities(1);
+
+        expect(result.canUseFullDeck).toBe(true);
+      });
+
+      it('should return canUseFullDeck: false for anonymous user', async () => {
+        const result = await service.getCapabilities(null, null);
+
+        expect(result.canUseFullDeck).toBe(false);
+      });
+
+      it('should return canUseFullDeck: false for anonymous user with fingerprint', async () => {
+        mockQueryBuilder.getOne.mockResolvedValue(null);
+
+        const result = await service.getCapabilities(null, 'fingerprint123');
+
+        expect(result.canUseFullDeck).toBe(false);
+      });
+    });
+
     describe('PREMIUM User', () => {
       const premiumUser = {
         ...mockUser,
@@ -391,6 +449,7 @@ describe('UserCapabilitiesService', () => {
           canUseAI: true,
           canUseCustomQuestions: true,
           canUseAdvancedSpreads: true,
+          canUseFullDeck: true,
           plan: UserPlanType.PREMIUM,
           isAuthenticated: true,
           pendulum: {

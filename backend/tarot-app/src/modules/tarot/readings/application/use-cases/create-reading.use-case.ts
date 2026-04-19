@@ -9,7 +9,7 @@ import { IReadingRepository } from '../../domain/interfaces/reading-repository.i
 import { ReadingValidatorService } from '../services/reading-validator.service';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
 import { TarotReading } from '../../entities/tarot-reading.entity';
-import { User } from '../../../../users/entities/user.entity';
+import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { InterpretationsService } from '../../../interpretations/interpretations.service';
 import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
@@ -18,6 +18,7 @@ import { PredefinedQuestionsService } from '../../../../predefined-questions/pre
 import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
 import { RevenueCalculationService } from '../../../../tarotistas/services/revenue-calculation.service';
 import { SubscriptionType } from '../../../../tarotistas/entities/user-tarotista-subscription.entity';
+import { CardFreeInterpretationService } from '../../../cards/card-free-interpretation.service';
 
 @Injectable()
 export class CreateReadingUseCase {
@@ -34,6 +35,7 @@ export class CreateReadingUseCase {
     private readonly predefinedQuestionsService: PredefinedQuestionsService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly revenueCalculationService: RevenueCalculationService,
+    private readonly cardFreeInterpretationService: CardFreeInterpretationService,
   ) {}
 
   async execute(
@@ -47,8 +49,8 @@ export class CreateReadingUseCase {
       );
     }
 
-    // Validar usuario
-    await this.validator.validateUser(user.id);
+    // Validar usuario — capturar el User completo desde BD (incluye plan real)
+    const validatedUser = await this.validator.validateUser(user.id);
 
     // Validar que el deck existe
     const deck = await this.decksService.findDeckById(createReadingDto.deckId);
@@ -69,7 +71,18 @@ export class CreateReadingUseCase {
     }
 
     // Validar que el usuario tiene acceso al spread según su plan
-    this.validator.validateSpreadAccess(user.plan, spread.requiredPlan);
+    this.validator.validateSpreadAccess(
+      validatedUser.plan,
+      spread.requiredPlan,
+    );
+
+    // Validar acceso a la categoría si se proporciona (solo relevante para usuarios FREE)
+    if (createReadingDto.categoryId) {
+      await this.validator.validateCategoryAccess(
+        validatedUser.plan,
+        createReadingDto.categoryId,
+      );
+    }
 
     // Determinar tipo de pregunta
     const questionType = createReadingDto.predefinedQuestionId
@@ -86,6 +99,9 @@ export class CreateReadingUseCase {
 
     // Obtener las cartas antes de crear la lectura (esto también valida que existan)
     const cards = await this.cardsService.findByIds(createReadingDto.cardIds);
+
+    // T-FR-B03: Validar que FREE/ANONYMOUS solo use Arcanos Mayores
+    this.validator.validateDeckAccess(validatedUser.plan, cards);
 
     // Crear la lectura primero sin interpretación
     const reading = await this.readingRepo.create({
@@ -172,6 +188,33 @@ export class CreateReadingUseCase {
             'No se pudo generar la interpretación automáticamente. El error ha sido registrado. Por favor, intenta regenerar más tarde.',
         });
       }
+    }
+
+    // T-FR-B02: Flujo FREE — buscar interpretaciones pre-escritas si se proporcionó categoryId
+    // Solo aplica a usuarios FREE/ANONYMOUS; PREMIUM nunca recibe freeInterpretations
+    if (
+      createReadingDto.categoryId &&
+      validatedUser.plan !== UserPlan.PREMIUM
+    ) {
+      const freeInterpretations =
+        await this.cardFreeInterpretationService.findByCardsAndCategory(
+          cards,
+          createReadingDto.cardPositions,
+          createReadingDto.categoryId,
+        );
+
+      const updatedReading = await this.readingRepo.update(reading.id, {
+        freeInterpretations,
+      });
+
+      // Calcular y registrar revenue para lecturas FREE con categoría
+      await this.calculateRevenueForReading(
+        updatedReading,
+        tarotistaId,
+        user.id,
+      );
+
+      return updatedReading;
     }
 
     // Calcular y registrar revenue para lecturas sin interpretación también

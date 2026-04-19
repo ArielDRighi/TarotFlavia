@@ -39,6 +39,7 @@ export type {
   Reading,
   ReadingCard,
   ReadingDetail,
+  FreeInterpretationEntry,
   TrashedReading,
   CardPositionDto,
   CreateReadingDto,

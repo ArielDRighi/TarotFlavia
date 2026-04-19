@@ -10,6 +10,7 @@ import {
   usePredefinedQuestions,
   useCreateReading,
   useRegenerateInterpretation,
+  useCategories,
 } from '@/hooks/api/useReadings';
 import { getShareText } from '@/lib/api/readings-api';
 import { toast } from '@/hooks/utils/useToast';
@@ -17,11 +18,13 @@ import { shouldUseNativeShare } from '@/lib/utils/device';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
+import { useTarotDeck } from '@/hooks/api/useTarotDeck';
+import { ROUTES } from '@/lib/constants/routes';
 import { TarotCard } from './TarotCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
-import UpgradeBanner from './UpgradeBanner';
+import FreeReadingUpgradeBanner from './FreeReadingUpgradeBanner';
 import UpgradeModal from './UpgradeModal';
 import DailyLimitReachedModal from './DailyLimitReachedModal';
 import { cn } from '@/lib/utils';
@@ -31,6 +34,7 @@ import type {
   CreateReadingDto,
   CardPositionDto,
   Interpretation,
+  FreeInterpretationEntry,
 } from '@/types';
 
 // ============================================================================
@@ -59,9 +63,6 @@ const LOADING_MESSAGES = [
 
 const LOADING_MESSAGE_INTERVAL = 2000;
 
-/** Total number of cards in a tarot deck */
-const DECK_SIZE = 78;
-
 /** Default deck ID (Rider-Waite) */
 const DEFAULT_DECK_ID = 1;
 
@@ -78,6 +79,8 @@ export interface ReadingExperienceProps {
   questionId: number | null;
   /** Custom question from URL params (for premium users) */
   customQuestion: string | null;
+  /** Category ID from URL params (for FREE users with pre-written interpretations) */
+  categoryId?: number | null;
 }
 
 // ============================================================================
@@ -159,9 +162,16 @@ function ResultCard({ card, index }: ResultCardProps) {
 interface InterpretationSectionProps {
   interpretation: string;
   cards: ReadingCard[];
+  freeInterpretations: Record<number, FreeInterpretationEntry> | null | undefined;
+  categoryName?: string | null;
 }
 
-function InterpretationSection({ interpretation, cards }: InterpretationSectionProps) {
+function InterpretationSection({
+  interpretation,
+  cards,
+  freeInterpretations,
+  categoryName,
+}: InterpretationSectionProps) {
   // Check if interpretation seems truncated (ends mid-word or mid-sentence)
   const seemsTruncated =
     interpretation &&
@@ -171,12 +181,22 @@ function InterpretationSection({ interpretation, cards }: InterpretationSectionP
     !interpretation.trim().endsWith('"') &&
     interpretation.length > 100;
 
+  // Build header title:
+  // - PREMIUM with AI interpretation → "Interpretación Personalizada"
+  // - FREE with category → "Tu Lectura de {categoryName}"
+  // - FREE without category (fallback) → "Significado de las Cartas"
+  const headerTitle = interpretation
+    ? 'Interpretación Personalizada'
+    : categoryName
+      ? `Tu Lectura de ${categoryName}`
+      : 'Significado de las Cartas';
+
   return (
     <Card className="mt-8">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-serif text-2xl">
           <Sparkles className="text-primary h-6 w-6" />
-          {interpretation ? 'Interpretación Personalizada' : 'Significado de las Cartas'}
+          {headerTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -194,8 +214,38 @@ function InterpretationSection({ interpretation, cards }: InterpretationSectionP
                 </p>
               )}
             </>
+          ) : freeInterpretations ? (
+            // Para usuarios FREE con categoría: textos pre-escritos por posición
+            <div className="space-y-6">
+              {cards.map((card) => {
+                const freeEntry = freeInterpretations[card.position];
+                return (
+                  <div key={card.id} className="border-b pb-4 last:border-b-0">
+                    <h3 className="text-primary mb-2 font-serif text-lg font-semibold">
+                      {card.name}
+                      {card.isReversed && (
+                        <span className="text-text-muted ml-2 text-sm">(Invertida)</span>
+                      )}
+                    </h3>
+                    <p className="text-text-muted mb-2 text-sm font-medium">{card.positionName}</p>
+                    <p className="text-text-primary leading-relaxed">
+                      {freeEntry
+                        ? freeEntry.content
+                        : card.isReversed
+                          ? card.meaningReversed
+                          : card.meaningUpright}
+                    </p>
+                    {card.keywords && (
+                      <p className="text-text-muted mt-2 text-sm italic">
+                        Palabras clave: {card.keywords}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           ) : cards && cards.length > 0 ? (
-            // Para usuarios FREE: Significado de cada carta desde DB
+            // Para usuarios FREE sin categoría: Significado de cada carta desde DB (fallback)
             <div className="space-y-6">
               {cards.map((card) => (
                 <div key={card.id} className="border-b pb-4 last:border-b-0">
@@ -244,6 +294,7 @@ export function ReadingExperience({
   spreadId,
   questionId,
   customQuestion,
+  categoryId = null,
 }: ReadingExperienceProps) {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -252,7 +303,9 @@ export function ReadingExperience({
   // API Hooks
   const { data: spreads, isLoading: isSpreadsLoading } = useMyAvailableSpreads();
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
+  const { data: categories } = useCategories();
   const { data: capabilities } = useUserCapabilities();
+  const { cardIndices } = useTarotDeck();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
     useRegenerateInterpretation();
@@ -283,6 +336,12 @@ export function ReadingExperience({
   const cardsCount = spread?.cardCount ?? 0;
   // More robust isPremium check - ensure user and plan exist
   const isPremium = Boolean(user?.plan) && user?.plan?.toUpperCase() === 'PREMIUM';
+
+  // Derive category name client-side (backend does not serialize categoryName in the response)
+  const resolvedCategoryName =
+    categoryId != null
+      ? (categories?.find((c) => c.id === categoryId)?.name ?? readingResult?.categoryName ?? null)
+      : (readingResult?.categoryName ?? null);
 
   // Display the actual question text
   // For FREE users without question, show "Lectura general" instead of "Tu pregunta al tarot"
@@ -371,6 +430,7 @@ export function ReadingExperience({
         cardPositions,
         ...(questionId ? { predefinedQuestionId: questionId } : {}),
         ...(customQuestion ? { customQuestion } : {}),
+        ...(categoryId ? { categoryId } : {}),
         // TASK-006: Send useAI flag based on user plan
         // - PREMIUM: useAI: true (generates personalized interpretation)
         // - FREE/ANONYMOUS: useAI: false (basic card meanings from DB)
@@ -407,6 +467,7 @@ export function ReadingExperience({
     spreadId,
     questionId,
     customQuestion,
+    categoryId,
     createReading,
     canUseAI,
     isPremium,
@@ -449,7 +510,7 @@ export function ReadingExperience({
   }, [readingResult]);
 
   const handleNewReading = useCallback(() => {
-    router.push('/ritual');
+    router.push(ROUTES.TAROT);
   }, [router]);
 
   const handleRetry = useCallback(() => {
@@ -479,7 +540,7 @@ export function ReadingExperience({
         <div className="mx-auto max-w-4xl">
           <ErrorDisplay
             message="Tirada no encontrada. Selecciona una tirada válida."
-            onRetry={() => router.push('/ritual')}
+            onRetry={() => router.push(ROUTES.TAROT)}
           />
         </div>
       </div>
@@ -543,13 +604,13 @@ export function ReadingExperience({
               data-testid="card-selection-grid"
               className="grid grid-cols-6 justify-items-center gap-1 sm:grid-cols-8 sm:gap-2 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-13"
             >
-              {Array.from({ length: DECK_SIZE }).map((_, index) => {
-                const isSelected = selectedCards.has(index);
+              {cardIndices.map((cardIndex) => {
+                const isSelected = selectedCards.has(cardIndex);
                 const canSelect = selectedCards.size < cardsCount || isSelected;
 
                 return (
                   <div
-                    key={index}
+                    key={cardIndex}
                     data-testid="selectable-card"
                     role="button"
                     tabIndex={canSelect ? 0 : -1}
@@ -558,9 +619,9 @@ export function ReadingExperience({
                       canSelect ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
                       isSelected && 'ring-primary z-10 scale-110 ring-2 ring-offset-1'
                     )}
-                    onClick={() => handleCardClick(index)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    aria-label={`Carta ${index + 1}${isSelected ? ' - seleccionada' : ''}`}
+                    onClick={() => handleCardClick(cardIndex)}
+                    onKeyDown={(e) => handleKeyDown(cardIndex, e)}
+                    aria-label={`Carta ${cardIndex + 1}${isSelected ? ' - seleccionada' : ''}`}
                     aria-pressed={isSelected}
                     aria-disabled={!canSelect}
                   >
@@ -612,14 +673,12 @@ export function ReadingExperience({
           <InterpretationSection
             interpretation={getGeneralInterpretation(readingResult.interpretation)}
             cards={readingResult.cards}
+            freeInterpretations={readingResult.freeInterpretations}
+            categoryName={resolvedCategoryName}
           />
 
           {/* Upgrade Banner for non-premium users */}
-          {!canUseAI && (
-            <div className="mt-6">
-              <UpgradeBanner />
-            </div>
-          )}
+          {!canUseAI && <FreeReadingUpgradeBanner />}
 
           {/* Action Buttons */}
           <div className="mt-8 flex flex-wrap justify-center gap-4">

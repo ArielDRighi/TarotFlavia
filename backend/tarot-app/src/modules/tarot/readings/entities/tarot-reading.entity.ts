@@ -189,6 +189,17 @@ export class TarotReading {
   interpretations: ITarotInterpretation[];
 
   @ApiProperty({
+    example:
+      '{ "1": { "content": "El Loco te invita..." }, "2": { "content": "La Torre indica..." } }',
+    description:
+      'Interpretaciones pre-escritas por posición para lecturas FREE (indexadas por posición numérica)',
+    required: false,
+    nullable: true,
+  })
+  @Column({ type: 'jsonb', nullable: true })
+  freeInterpretations: Record<number, { content: string }> | null;
+
+  @ApiProperty({
     example: 'abc123xyz',
     description: 'Token único para compartir la lectura públicamente',
     required: false,

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CreateReadingUseCase } from './create-reading.use-case';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
@@ -10,6 +10,7 @@ import { DecksService } from '../../../decks/decks.service';
 import { PredefinedQuestionsService } from '../../../../predefined-questions/predefined-questions.service';
 import { SubscriptionsService } from '../../../../subscriptions/subscriptions.service';
 import { RevenueCalculationService } from '../../../../tarotistas/services/revenue-calculation.service';
+import { CardFreeInterpretationService } from '../../../cards/card-free-interpretation.service';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
@@ -29,6 +30,7 @@ describe('CreateReadingUseCase', () => {
   let predefinedQuestionsService: jest.Mocked<PredefinedQuestionsService>;
   let subscriptionsService: jest.Mocked<SubscriptionsService>;
   let _revenueCalculationService: jest.Mocked<RevenueCalculationService>;
+  let cardFreeInterpretationService: jest.Mocked<CardFreeInterpretationService>;
 
   const mockUser: User = {
     id: 100,
@@ -79,6 +81,7 @@ describe('CreateReadingUseCase', () => {
       cards: mockCards,
       cardPositions: mockDto.cardPositions,
       interpretation: null,
+      freeInterpretations: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       regenerationCount: 0,
@@ -106,6 +109,8 @@ describe('CreateReadingUseCase', () => {
           useValue: {
             validateUser: jest.fn(),
             validateSpreadAccess: jest.fn(),
+            validateCategoryAccess: jest.fn(),
+            validateDeckAccess: jest.fn(),
           },
         },
         {
@@ -161,6 +166,12 @@ describe('CreateReadingUseCase', () => {
             recordRevenue: jest.fn().mockResolvedValue(undefined),
           },
         },
+        {
+          provide: CardFreeInterpretationService,
+          useValue: {
+            findByCardsAndCategory: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -173,6 +184,7 @@ describe('CreateReadingUseCase', () => {
     decksService = module.get(DecksService);
     predefinedQuestionsService = module.get(PredefinedQuestionsService);
     subscriptionsService = module.get(SubscriptionsService);
+    cardFreeInterpretationService = module.get(CardFreeInterpretationService);
   });
 
   afterEach(() => {
@@ -891,6 +903,319 @@ describe('CreateReadingUseCase', () => {
         mockUser.id,
         mockReading.id,
         1,
+      );
+    });
+  });
+
+  describe('FREE flow with categoryId (T-FR-B02)', () => {
+    const mockFreeUser: User = {
+      id: 200,
+      email: 'free@example.com',
+      plan: UserPlan.FREE,
+    } as User;
+
+    const mockFreeDto: CreateReadingDto = {
+      deckId: 1,
+      spreadId: 1,
+      cardIds: [1, 2, 3],
+      cardPositions: [
+        { cardId: 1, position: 'past', isReversed: false },
+        { cardId: 2, position: 'present', isReversed: false },
+        { cardId: 3, position: 'future', isReversed: true },
+      ],
+      customQuestion: '¿Cómo va mi relación?',
+      useAI: false,
+      categoryId: 1,
+    };
+
+    const mockFreeInterpretationsMap = {
+      0: { content: 'Interpretación para carta 1 upright en amor' },
+      1: { content: 'Interpretación para carta 2 upright en amor' },
+      2: { content: 'Interpretación para carta 3 reversed en amor' },
+    };
+
+    it('should call validateCategoryAccess when categoryId is provided', async () => {
+      const mockReading = createMockReading({ user: mockFreeUser });
+      const mockUpdatedReading = createMockReading({
+        user: mockFreeUser,
+        freeInterpretations: mockFreeInterpretationsMap,
+      });
+
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      validator.validateCategoryAccess.mockResolvedValue(undefined);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mockCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+      cardFreeInterpretationService.findByCardsAndCategory.mockResolvedValue(
+        mockFreeInterpretationsMap,
+      );
+      readingRepo.update.mockResolvedValue(mockUpdatedReading);
+
+      await useCase.execute(mockFreeUser, mockFreeDto);
+
+      expect(validator.validateCategoryAccess).toHaveBeenCalledWith(
+        UserPlan.FREE,
+        1,
+      );
+    });
+
+    it('should call cardFreeInterpretationService and persist freeInterpretations', async () => {
+      const mockReading = createMockReading({ user: mockFreeUser });
+      const mockUpdatedReading = createMockReading({
+        user: mockFreeUser,
+        freeInterpretations: mockFreeInterpretationsMap,
+      });
+
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      validator.validateCategoryAccess.mockResolvedValue(undefined);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mockCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+      cardFreeInterpretationService.findByCardsAndCategory.mockResolvedValue(
+        mockFreeInterpretationsMap,
+      );
+      readingRepo.update.mockResolvedValue(mockUpdatedReading);
+
+      const result = await useCase.execute(mockFreeUser, mockFreeDto);
+
+      expect(
+        cardFreeInterpretationService.findByCardsAndCategory,
+      ).toHaveBeenCalledWith(mockCards, mockFreeDto.cardPositions, 1);
+      expect(readingRepo.update).toHaveBeenCalledWith(mockReading.id, {
+        freeInterpretations: mockFreeInterpretationsMap,
+      });
+      expect(result).toEqual(mockUpdatedReading);
+    });
+
+    it('should NOT call cardFreeInterpretationService when categoryId is absent', async () => {
+      const dtoCategoryAbsent: CreateReadingDto = {
+        ...mockFreeDto,
+        categoryId: undefined,
+      };
+      const mockReading = createMockReading({ user: mockFreeUser });
+
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mockCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+
+      await useCase.execute(mockFreeUser, dtoCategoryAbsent);
+
+      expect(
+        cardFreeInterpretationService.findByCardsAndCategory,
+      ).not.toHaveBeenCalled();
+      expect(validator.validateCategoryAccess).not.toHaveBeenCalled();
+      expect(readingRepo.update).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call cardFreeInterpretationService when useAI is true (PREMIUM flow takes precedence)', async () => {
+      const dtoPremiumAI: CreateReadingDto = {
+        ...mockFreeDto,
+        useAI: true,
+        categoryId: 1,
+      };
+      const mockReading = createMockReading();
+      const mockUpdatedReading = createMockReading({
+        interpretation: 'AI interpretation',
+      });
+
+      validator.validateUser.mockResolvedValue(mockUser);
+      validator.validateCategoryAccess.mockResolvedValue(undefined);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mockCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+      interpretationsService.generateInterpretation.mockResolvedValue({
+        interpretation: 'AI interpretation',
+        fromCache: false,
+      });
+      readingRepo.update.mockResolvedValue(mockUpdatedReading);
+
+      await useCase.execute(mockUser, dtoPremiumAI);
+
+      expect(
+        cardFreeInterpretationService.findByCardsAndCategory,
+      ).not.toHaveBeenCalled();
+      expect(interpretationsService.generateInterpretation).toHaveBeenCalled();
+    });
+
+    it('should propagate ForbiddenException from validateCategoryAccess', async () => {
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      validator.validateCategoryAccess.mockRejectedValue(
+        new ForbiddenException(
+          'Los usuarios free solo pueden acceder a las categorías: amor, salud, dinero',
+        ),
+      );
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mockCards);
+
+      await expect(useCase.execute(mockFreeUser, mockFreeDto)).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      expect(readingRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call cardFreeInterpretationService when PREMIUM user sends categoryId (guard plan)', async () => {
+      const premiumDtoWithCategory: CreateReadingDto = {
+        ...mockDto,
+        useAI: false,
+        categoryId: 1,
+      };
+      const mockReading = createMockReading();
+
+      validator.validateUser.mockResolvedValue(mockUser);
+      validator.validateCategoryAccess.mockResolvedValue(undefined);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mockCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+
+      const result = await useCase.execute(mockUser, premiumDtoWithCategory);
+
+      // PREMIUM nunca debe recibir freeInterpretations aunque envíe categoryId
+      expect(
+        cardFreeInterpretationService.findByCardsAndCategory,
+      ).not.toHaveBeenCalled();
+      expect(readingRepo.update).not.toHaveBeenCalled();
+      expect(result).toEqual(mockReading);
+    });
+
+    it('should NOT touch the interpretation field in the FREE flow', async () => {
+      const mockReading = createMockReading({
+        user: mockFreeUser,
+        interpretation: null,
+      });
+      const mockUpdatedReading = createMockReading({
+        user: mockFreeUser,
+        interpretation: null,
+        freeInterpretations: mockFreeInterpretationsMap,
+      });
+
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      validator.validateCategoryAccess.mockResolvedValue(undefined);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mockCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+      cardFreeInterpretationService.findByCardsAndCategory.mockResolvedValue(
+        mockFreeInterpretationsMap,
+      );
+      readingRepo.update.mockResolvedValue(mockUpdatedReading);
+
+      const result = await useCase.execute(mockFreeUser, mockFreeDto);
+
+      // Only freeInterpretations should be updated — not interpretation
+      expect(readingRepo.update).toHaveBeenCalledWith(
+        mockReading.id,
+        expect.not.objectContaining({ interpretation: expect.anything() }),
+      );
+      expect(result.interpretation).toBeNull();
+    });
+  });
+
+  describe('execute - deck access validation (T-FR-B03)', () => {
+    const mockFreeUser: User = {
+      id: 200,
+      email: 'free@example.com',
+      plan: UserPlan.FREE,
+    } as User;
+
+    const majorArcanaCards = [
+      { id: 1, name: 'El Loco', category: 'arcanos_mayores' },
+      { id: 2, name: 'El Mago', category: 'arcanos_mayores' },
+    ] as unknown as TarotCard[];
+
+    const mixedCards = [
+      { id: 1, name: 'El Loco', category: 'arcanos_mayores' },
+      { id: 22, name: 'As de Bastos', category: 'bastos' },
+    ] as unknown as TarotCard[];
+
+    const mockDtoFree: CreateReadingDto = {
+      deckId: 1,
+      spreadId: 1,
+      cardIds: [1, 2],
+      cardPositions: [
+        { cardId: 1, position: 'past', isReversed: false },
+        { cardId: 2, position: 'present', isReversed: false },
+      ],
+      useAI: false,
+    };
+
+    it('should call validateDeckAccess with user plan and cards', async () => {
+      const mockReading = createMockReading({ user: mockFreeUser });
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+
+      await useCase.execute(mockFreeUser, mockDtoFree);
+
+      expect(validator.validateDeckAccess).toHaveBeenCalledWith(
+        UserPlan.FREE,
+        majorArcanaCards,
+      );
+    });
+
+    it('should throw ForbiddenException when FREE user sends minor arcana cards', async () => {
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(mixedCards);
+      validator.validateDeckAccess.mockImplementation(() => {
+        throw new ForbiddenException(
+          'El plan FREE solo permite cartas de Arcanos Mayores',
+        );
+      });
+
+      const executionPromise = useCase.execute(mockFreeUser, mockDtoFree);
+      await expect(executionPromise).rejects.toThrow(ForbiddenException);
+      await expect(executionPromise).rejects.toThrow(
+        'El plan FREE solo permite cartas de Arcanos Mayores',
+      );
+    });
+
+    it('should call validateDeckAccess before creating the reading', async () => {
+      const callOrder: string[] = [];
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      validator.validateDeckAccess.mockImplementation(() => {
+        callOrder.push('validateDeckAccess');
+      });
+      readingRepo.create.mockImplementation(() => {
+        callOrder.push('repoCreate');
+        return Promise.resolve(createMockReading({ user: mockFreeUser }));
+      });
+
+      await useCase.execute(mockFreeUser, mockDtoFree);
+
+      const deckIdx = callOrder.indexOf('validateDeckAccess');
+      const createIdx = callOrder.indexOf('repoCreate');
+      expect(deckIdx).toBeGreaterThanOrEqual(0);
+      expect(createIdx).toBeGreaterThan(deckIdx);
+    });
+
+    it('should still call validateDeckAccess for PREMIUM users (no restriction expected)', async () => {
+      const premiumDto: CreateReadingDto = { ...mockDtoFree, useAI: false };
+      const mockReading = createMockReading();
+      validator.validateUser.mockResolvedValue(mockUser); // PREMIUM
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      readingRepo.create.mockResolvedValue(mockReading);
+
+      await useCase.execute(mockUser, premiumDto);
+
+      expect(validator.validateDeckAccess).toHaveBeenCalledWith(
+        UserPlan.PREMIUM,
+        majorArcanaCards,
       );
     });
   });

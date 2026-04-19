@@ -25,6 +25,8 @@ describe('CardMeaningService', () => {
     readings: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    dailyFreeUpright: null,
+    dailyFreeReversed: null,
   };
 
   const mockCustomMeaning: TarotistaCardMeaning = {

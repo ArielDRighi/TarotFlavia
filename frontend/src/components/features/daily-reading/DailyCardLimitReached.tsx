@@ -6,6 +6,7 @@ import { Calendar, History, Sparkles, Crown, CalendarHeart, Bell, Wand2 } from '
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
 import { PREMIUM_BENEFITS } from '@/lib/constants';
+import { ROUTES } from '@/lib/constants/routes';
 import {
   Card,
   CardContent,
@@ -49,7 +50,7 @@ export function DailyCardLimitReached() {
   };
 
   const handleCreateReading = () => {
-    router.push('/ritual');
+    router.push(ROUTES.TAROT);
   };
 
   const handleUpgradePremium = () => {

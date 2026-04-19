@@ -372,17 +372,17 @@ CARTA DEL DÍA:
 
 | ID       | Tarea                                                              | Tipo     | Prioridad   | Estimación |
 | -------- | ------------------------------------------------------------------ | -------- | ----------- | ---------- |
-| T-FR-P01 | Rename de rutas `/ritual` → `/tarot` + redirects                   | Frontend | 🔴 CRÍTICA | 0.5 días   |
-| T-FR-B01 | Capa de dominio: Migración, entidad y campos nuevos                | Backend  | 🔴 CRÍTICA | 2 días     |
-| T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | 🔴 CRÍTICA | 3 días     |
-| T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | 🔴 CRÍTICA | 2 días     |
-| T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | 🟡 ALTA    | 1 día      |
-| T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | 🔴 CRÍTICA | 3 días     |
-| T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | 🔴 CRÍTICA | 2 días     |
-| T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | 🔴 CRÍTICA | 2 días     |
-| T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | 🔴 CRÍTICA | 2 días     |
-| T-FR-F03 | Frontend: DailyCardExperience con texto de energía diaria          | Frontend | 🔴 CRÍTICA | 2 días     |
-| T-FR-F04 | Frontend: Deck filtrado a Arcanos Mayores para FREE                | Frontend | 🟡 ALTA    | 2 días     |
+| T-FR-P01 | Rename de rutas `/ritual` → `/tarot` + redirects                   | Frontend | ✅ COMPLETADA | 0.5 días   |
+| T-FR-B01 | Capa de dominio: Migración, entidad y campos nuevos                | Backend  | ✅ COMPLETADA | 2 días     |
+| T-FR-B02 | Capa de aplicación: Service, Repository y modificación de use case | Backend  | ✅ COMPLETADA | 3 días     |
+| T-FR-B03 | Validación de mazo FREE + modificación de daily-reading            | Backend  | ✅ COMPLETADA | 2 días     |
+| T-FR-B04 | Capability `canUseFullDeck` + endpoint `GET /cards?category=`      | Backend  | ✅ COMPLETADA | 1 día      |
+| T-FR-S01 | Seed de tiradas — 132 prompts para Claude/Gemini                   | Content  | ✅ COMPLETADA | 3 días     |
+| T-FR-S02 | Seed de carta del día — 44 prompts para Claude/Gemini              | Content  | ✅ COMPLETADA | 2 días     |
+| T-FR-F01 | Frontend: CategorySelector con modo Free + routing                 | Frontend | ✅ COMPLETADA | 2 días     |
+| T-FR-F02 | Frontend: InterpretationSection con textos pre-escritos + CTA      | Frontend | ✅ COMPLETADA | 2 días     |
+| T-FR-F03 | Frontend: DailyCardExperience con texto de energía diaria          | Frontend | ✅ COMPLETADA | 2 días     |
+| T-FR-F04 | Frontend: Deck filtrado a Arcanos Mayores para FREE                | Frontend | ✅ COMPLETADA | 2 días     |
 
 **Estimación total:** ~21.5 días de desarrollo (incluye TDD + ciclos de calidad + generación de contenido)
 
@@ -397,20 +397,15 @@ CARTA DEL DÍA:
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 0.5 días (3-4h — verificado por grep: ~7 archivos en `app/ritual/`, ~5 `router.push/replace`, ~8 `href`, ~15 tests)
 **Dependencias:** Ninguna
-**Estado:** ⏳ PENDIENTE
-**Cubre HUS:** HUS-001
-
-#### 📋 Descripción
-
-Renombrar todas las rutas relacionadas a la tirada de tarot de `/ritual/**` a `/tarot/**`. La ruta actual colisiona semánticamente con la actividad existente "Rituales" (`/rituales/**`). Se deben agregar redirects permanentes para mantener compatibilidad con links externos indexados.
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Actualizar `frontend/src/lib/constants/routes.ts`: renombrar claves y valores `RITUAL*` → `TAROT*` (ej: `RITUAL_TIRADA: '/ritual/tirada'` → `TAROT_TIRADA: '/tarot/tirada'`)
-- [ ] Mover físicamente carpetas del App Router: `app/ritual/**` → `app/tarot/**`
-- [ ] Actualizar todas las llamadas `router.replace('/ritual/...')` y `router.push('/ritual/...')` en el código (buscar exhaustivamente)
-- [ ] Renombrar componentes relacionados: `RitualPageContent` → `TarotPageContent`
-- [ ] Agregar redirects 301 en `next.config.js`:
+- [x] Actualizar `frontend/src/lib/constants/routes.ts`: renombrar claves y valores `RITUAL*` → `TAROT*` (ej: `RITUAL_TIRADA: '/ritual/tirada'` → `TAROT_TIRADA: '/tarot/tirada'`)
+- [x] Mover físicamente carpetas del App Router: `app/ritual/**` → `app/tarot/**`
+- [x] Actualizar todas las llamadas `router.replace('/ritual/...')` y `router.push('/ritual/...')` en el código (buscar exhaustivamente)
+- [x] Renombrar componentes relacionados: `RitualPageContent` → `TarotPageContent`
+- [x] Agregar redirects 301 en `next.config.js`:
   ```js
   async redirects() {
     return [
@@ -419,16 +414,16 @@ Renombrar todas las rutas relacionadas a la tirada de tarot de `/ritual/**` a `/
     ];
   }
   ```
-- [ ] Actualizar tests que dependan de las rutas antiguas
-- [ ] Verificar links en Header, Footer, emails transaccionales y documentación
+- [x] Actualizar tests que dependan de las rutas antiguas
+- [x] Verificar links en Header, Footer, emails transaccionales y documentación
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Navegando a `/tarot`, `/tarot/tirada`, `/tarot/preguntas`, `/tarot/lectura` se ve el contenido correcto
-- [ ] Navegando a `/ritual/*` se redirige permanentemente al equivalente en `/tarot/*`
-- [ ] No quedan referencias hardcodeadas a `/ritual` en el código (grep limpio)
-- [ ] Los tests pasan y `npm run build` compila sin errores
-- [ ] `npm run type-check` y `npm run lint:fix` pasan
+- [x] Navegando a `/tarot`, `/tarot/tirada`, `/tarot/preguntas`, `/tarot/lectura` se ve el contenido correcto
+- [x] Navegando a `/ritual/*` se redirige permanentemente al equivalente en `/tarot/*`
+- [x] No quedan referencias hardcodeadas a `/ritual` en el código (grep limpio)
+- [x] Los tests pasan y `npm run build` compila sin errores
+- [x] `npm run type-check` y `npm run lint:fix` pasan
 
 ---
 
@@ -441,7 +436,7 @@ Renombrar todas las rutas relacionadas a la tirada de tarot de `/ritual/**` a `/
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** Ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003, HUS-004 (capa de datos)
 
 #### 📋 Descripción
@@ -454,42 +449,42 @@ Crear la estructura de datos para las interpretaciones pre-escritas de usuarios 
 
 **Entidad CardFreeInterpretation:**
 
-- [ ] Crear entidad `CardFreeInterpretation` en `modules/tarot/cards/entities/card-free-interpretation.entity.ts` con campos: `id`, `cardId` (FK `tarot_card`), `categoryId` (FK `reading_category`), `orientation` ('upright' | 'reversed'), `content` (text), `createdAt`, `updatedAt`
-- [ ] Decorador `@Unique(['cardId', 'categoryId', 'orientation'])` para evitar duplicados
-- [ ] Relaciones ManyToOne con `TarotCard` y `ReadingCategory`
-- [ ] Índices apropiados en `cardId` y `categoryId`
+- [x] Crear entidad `CardFreeInterpretation` en `modules/tarot/cards/entities/card-free-interpretation.entity.ts` con campos: `id`, `cardId` (FK `tarot_card`), `categoryId` (FK `reading_category`), `orientation` ('upright' | 'reversed'), `content` (text), `createdAt`, `updatedAt`
+- [x] Decorador `@Unique(['cardId', 'categoryId', 'orientation'])` para evitar duplicados
+- [x] Relaciones ManyToOne con `TarotCard` y `ReadingCategory`
+- [x] Índices apropiados en `cardId` y `categoryId`
 
 **Modificación de TarotCard:**
 
-- [ ] Agregar campos `dailyFreeUpright: string | null` y `dailyFreeReversed: string | null` (type: `text`, nullable: `true`) a `TarotCard` entity ([tarot-card.entity.ts](backend/tarot-app/src/modules/tarot/cards/entities/tarot-card.entity.ts))
+- [x] Agregar campos `dailyFreeUpright: string | null` y `dailyFreeReversed: string | null` (type: `text`, nullable: `true`) a `TarotCard` entity ([tarot-card.entity.ts](backend/tarot-app/src/modules/tarot/cards/entities/tarot-card.entity.ts))
 
 **Modificación de TarotReading:**
 
-- [ ] Agregar campo `freeInterpretations: Record<number, { content: string }> | null` (type: `jsonb`, nullable: `true`) a `TarotReading` entity ([tarot-reading.entity.ts:160](backend/tarot-app/src/modules/tarot/readings/entities/tarot-reading.entity.ts#L160)) — estructura indexada por `position` de la lectura
-- [ ] Decorar con `@ApiProperty` apropiado para que aparezca en Swagger y en el response (no hay DTO de response: la entidad es el contrato — verificado)
+- [x] Agregar campo `freeInterpretations: Record<number, { content: string }> | null` (type: `jsonb`, nullable: `true`) a `TarotReading` entity ([tarot-reading.entity.ts:160](backend/tarot-app/src/modules/tarot/readings/entities/tarot-reading.entity.ts#L160)) — estructura indexada por `position` de la lectura
+- [x] Decorar con `@ApiProperty` apropiado para que aparezca en Swagger y en el response (no hay DTO de response: la entidad es el contrato — verificado)
 
 **Migración:**
 
-- [ ] Crear migración `CreateCardFreeInterpretations` que cree la tabla con FKs (ON DELETE CASCADE a `tarot_card`, RESTRICT a `reading_category`)
-- [ ] Crear migración `AddDailyFreeFieldsToTarotCard` que agregue las dos columnas nullable
-- [ ] Crear migración `AddFreeInterpretationsToTarotReading` que agregue columna `free_interpretations jsonb NULL`
-- [ ] Las tres migraciones reversibles (método `down()` implementado)
+- [x] Crear migración `CreateCardFreeInterpretations` que cree la tabla con FKs (ON DELETE CASCADE a `tarot_card`, RESTRICT a `reading_category`)
+- [x] Crear migración `AddDailyFreeFieldsToTarotCard` que agregue las dos columnas nullable
+- [x] Crear migración `AddFreeInterpretationsToTarotReading` que agregue campo `freeInterpretations` de tipo `jsonb` nullable
+- [x] Las tres migraciones reversibles (método `down()` implementado)
 
 **Repositorio:**
 
-- [ ] Crear interface `ICardFreeInterpretationRepository` con método `findByCardsAndCategory(cardIds: number[], orientations: ('upright' | 'reversed')[], categoryId: number): Promise<CardFreeInterpretation[]>`
-- [ ] Crear implementación TypeORM
-- [ ] Token de inyección para DI
-- [ ] Tests unitarios con mock de TypeORM
+- [x] Crear interface `ICardFreeInterpretationRepository` con método `findByCardsAndCategory(cardIds: number[], orientations: ('upright' | 'reversed')[], categoryId: number): Promise<CardFreeInterpretation[]>`
+- [x] Crear implementación TypeORM
+- [x] Token de inyección para DI
+- [x] Tests unitarios con mock de TypeORM
 
 #### 🎯 Criterios de aceptación
 
-- [ ] La migración se aplica correctamente y es reversible
-- [ ] La entidad `CardFreeInterpretation` respeta el unique compuesto
-- [ ] Los campos `dailyFreeUpright/Reversed` son `nullable: true` para no romper datos existentes
-- [ ] `npm run build` compila sin errores
-- [ ] Coverage ≥ 80% en los archivos nuevos
-- [ ] `validate-architecture.js` pasa sin errores
+- [x] La migración se aplica correctamente y es reversible
+- [x] La entidad `CardFreeInterpretation` respeta el unique compuesto
+- [x] Los campos `dailyFreeUpright/Reversed` son `nullable: true` para no romper datos existentes
+- [x] `npm run build` compila sin errores
+- [x] Coverage ≥ 80% en los archivos nuevos
+- [x] `validate-architecture.js` pasa sin errores
 
 ---
 
@@ -498,7 +493,7 @@ Crear la estructura de datos para las interpretaciones pre-escritas de usuarios 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días
 **Dependencias:** T-FR-B01
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003
 
 #### 📋 Descripción
@@ -509,51 +504,52 @@ Crear el servicio que consulta las interpretaciones pre-escritas y modificar el 
 
 **Service:**
 
-- [ ] Crear `CardFreeInterpretationService` con método `findByCardsAndCategory(cardPositions, categoryId)` que retorna un mapa `{ cardId: { upright?: string; reversed?: string } }` o similar estructura indexable por posición
-- [ ] Tests unitarios con happy path + casos de combinaciones faltantes (fallback)
+- [x] Crear `CardFreeInterpretationService` con método `findByCardsAndCategory(cards, cardPositions, categoryId)` que retorna un mapa `{ [positionIndex]: { content: string } }` indexado por posición (0..N-1)
+- [x] Tests unitarios con happy path + casos de combinaciones faltantes (fallback a `meaningUpright/Reversed`)
 
 **Modificación de Use Case:**
 
-- [ ] Modificar [create-reading.use-case.ts](backend/tarot-app/src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts):
+- [x] Modificar [create-reading.use-case.ts](backend/tarot-app/src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts):
   ```typescript
   if (createReadingDto.useAI === true) {
-    // PREMIUM — SIN CAMBIOS (L141-143: setea reading.interpretation)
+    // PREMIUM — SIN CAMBIOS (setea reading.interpretation)
   } else if (createReadingDto.categoryId) {
     // FREE: buscar interpretaciones pre-escritas por categoría
     const freeInterpretations = await this.cardFreeInterpretationService
-      .findByCardsAndCategory(cards, positions, createReadingDto.categoryId);
+      .findByCardsAndCategory(cards, cardPositions, createReadingDto.categoryId);
     await this.readingRepo.update(reading.id, { freeInterpretations });
   }
   ```
-- [ ] Persistir en el campo `freeInterpretations: jsonb` creado en T-FR-B01 (NO usar el campo `interpretation` — está reservado para la interpretación personalizada de PREMIUM)
-- [ ] Mantener fallback: si no se encuentra combinación para una carta, usar `meaningUpright/Reversed` existente
+- [x] Persistir en el campo `freeInterpretations: jsonb` creado en T-FR-B01 (NO usar el campo `interpretation` — está reservado para la interpretación personalizada de PREMIUM)
+- [x] Mantener fallback: si no se encuentra combinación para una carta, usar `meaningUpright/Reversed` existente
 
 **DTO:**
 
-- [ ] Agregar `categoryId?: number` al [CreateReadingDto](backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts) (hoy NO existe — verificado). Validaciones: `@IsInt() @IsOptional() @IsPositive()`
-- [ ] El response sigue siendo la entidad `TarotReading` (no hay response DTO separado — verificado). `freeInterpretations` queda visible gracias al nuevo campo de entidad
+- [x] Agregar `categoryId?: number` al [CreateReadingDto](backend/tarot-app/src/modules/tarot/readings/dto/create-reading.dto.ts). Validaciones: `@IsInt() @IsOptional() @IsPositive()`
+- [x] El response sigue siendo la entidad `TarotReading`. `freeInterpretations` queda visible gracias al nuevo campo de entidad
 
 **Validación de categoryId por plan:**
 
-- [ ] Modificar [ReadingValidatorService](backend/tarot-app/src/modules/tarot/readings/application/services/reading-validator.service.ts): agregar método `validateCategoryAccess(userPlan, categorySlug)` que verifique que FREE solo use slugs `['amor', 'salud', 'dinero']`
-- [ ] Llamar el validador desde `create-reading.use-case.ts` antes de construir la lectura. Lanzar `ForbiddenException` si la categoría no está permitida para el plan
-- [ ] Tests unitarios del validador cubriendo los 3 slugs permitidos para FREE, rechazo de `trabajo`/`espiritual`/`general`, y acceso total para PREMIUM
+- [x] Agregar método `validateCategoryAccess(userPlan, categoryId)` en [ReadingValidatorService](backend/tarot-app/src/modules/tarot/readings/application/services/reading-validator.service.ts) que verifica que FREE/ANONYMOUS solo use slugs `['amor', 'salud', 'dinero']` consultando `CategoriesService.findOne(categoryId)`. PREMIUM tiene acceso total sin consulta.
+- [x] Llamar el validador desde `create-reading.use-case.ts` antes de crear la lectura. Lanza `ForbiddenException` si la categoría no está permitida para el plan
+- [x] Tests unitarios del validador cubriendo los 3 slugs permitidos para FREE, rechazo de `trabajo`/`espiritual`/`general`, ANONYMOUS rechazado, y acceso total para PREMIUM
 
 **Tests:**
 
-- [ ] Tests unitarios del use case cubriendo:
-  - PREMIUM con `useAI: true` → genera interpretación personalizada (sin cambios)
-  - FREE con `categoryId` → carga interpretaciones pre-escritas
-  - FREE sin `categoryId` → fallback o error
-  - Combinación carta+categoría+orientación sin seed → fallback
+- [x] Tests unitarios del use case cubriendo:
+  - PREMIUM con `useAI: true` → genera interpretación personalizada (sin cambios, zero regresión)
+  - FREE con `categoryId` → carga interpretaciones pre-escritas y persiste en `freeInterpretations`
+  - FREE sin `categoryId` → no llama a `cardFreeInterpretationService`
+  - `useAI: true` con `categoryId` → flujo PREMIUM toma precedencia
+  - `validateCategoryAccess` lanza `ForbiddenException` → `readingRepo.create` no se llama
 
 #### 🎯 Criterios de aceptación
 
-- [ ] El flujo PREMIUM sigue funcionando exactamente igual (zero regresión)
-- [ ] El flujo FREE con `categoryId` retorna interpretaciones pre-escritas
-- [ ] El historial de lecturas muestra las interpretaciones persistidas
-- [ ] Coverage ≥ 80%
-- [ ] No se usa `any` ni `eslint-disable`
+- [x] El flujo PREMIUM sigue funcionando exactamente igual (zero regresión)
+- [x] El flujo FREE con `categoryId` retorna interpretaciones pre-escritas
+- [x] El historial de lecturas muestra las interpretaciones persistidas
+- [x] Coverage ≥ 80%
+- [x] No se usa `any` ni `eslint-disable`
 
 ---
 
@@ -562,7 +558,7 @@ Crear el servicio que consulta las interpretaciones pre-escritas y modificar el 
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-FR-B01
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-004, HUS-005
 
 #### 📋 Descripción
@@ -573,31 +569,31 @@ Agregar validación de seguridad backend que impida a usuarios FREE usar Arcanos
 
 **Validación de Mazo (create-reading):**
 
-- [ ] En `create-reading.use-case.ts` (o `ReadingValidatorService`), si `!useAI`, verificar que todas las cartas tengan `category === 'arcanos_mayores'`
-- [ ] Lanzar `ForbiddenException('El plan FREE solo permite cartas de Arcanos Mayores')` si la validación falla
-- [ ] Tests unitarios con intento malicioso (FREE enviando IDs de arcanos menores)
+- [x] En `create-reading.use-case.ts` (o `ReadingValidatorService`), si `!useAI`, verificar que todas las cartas tengan `category === 'arcanos_mayores'`
+- [x] Lanzar `ForbiddenException('El plan FREE solo permite cartas de Arcanos Mayores')` si la validación falla
+- [x] Tests unitarios con intento malicioso (FREE enviando IDs de arcanos menores)
 
 **Modificación de DailyReadingService:**
 
-- [ ] Modificar `selectRandomCard()` en `daily-reading.service.ts`: aceptar parámetro `onlyMajorArcana: boolean`; si `true`, filtrar query por `category: 'arcanos_mayores'`
-- [ ] En el método que orquesta la carta del día: si el usuario es FREE/anónimo → `onlyMajorArcana: true`
-- [ ] Retornar `card.dailyFreeUpright` o `card.dailyFreeReversed` como `interpretation` cuando el usuario no accede a interpretación personalizada (antes retornaba `null` o `meaningUpright`)
-- [ ] Fallback: si `dailyFreeUpright/Reversed` es `null` (aún sin seed), usar `meaningUpright/Reversed` con log warning
+- [x] Modificar `selectRandomCard()` en `daily-reading.service.ts`: aceptar parámetro `onlyMajorArcana: boolean`; si `true`, filtrar query por `category: 'arcanos_mayores'`
+- [x] En el método que orquesta la carta del día: si el usuario es FREE/anónimo → `onlyMajorArcana: true`
+- [x] Retornar `card.dailyFreeUpright` o `card.dailyFreeReversed` como `interpretation` cuando el usuario no accede a interpretación personalizada (antes retornaba `null` o `meaningUpright`)
+- [x] Fallback: si `dailyFreeUpright/Reversed` es `null` (aún sin seed), usar `meaningUpright/Reversed` con log warning
 
 **Tests:**
 
-- [ ] Tests unitarios: usuario anónimo → solo arcanos mayores + texto `dailyFreeUpright`
-- [ ] Tests: usuario FREE → igual que anónimo
-- [ ] Tests: usuario PREMIUM → mazo completo + interpretación personalizada
-- [ ] Tests: fallback cuando `dailyFreeUpright` es `null`
+- [x] Tests unitarios: usuario anónimo → solo arcanos mayores + texto `dailyFreeUpright`
+- [x] Tests: usuario FREE → igual que anónimo
+- [x] Tests: usuario PREMIUM → mazo completo + interpretación personalizada
+- [x] Tests: fallback cuando `dailyFreeUpright` es `null`
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Un cliente malicioso FREE no puede obtener lectura con arcanos menores (403)
-- [ ] Carta del día para FREE/anónimo siempre es un arcano mayor
-- [ ] Carta del día para FREE/anónimo muestra el texto `dailyFreeUpright/Reversed`
-- [ ] El flujo PREMIUM sigue generando interpretación personalizada sin cambios
-- [ ] Coverage ≥ 80%
+- [x] Un cliente malicioso FREE no puede obtener lectura con arcanos menores (403)
+- [x] Carta del día para FREE/anónimo siempre es un arcano mayor
+- [x] Carta del día para FREE/anónimo muestra el texto `dailyFreeUpright/Reversed`
+- [x] El flujo PREMIUM sigue generando interpretación personalizada sin cambios
+- [x] Coverage ≥ 80%
 
 ---
 
@@ -608,7 +604,7 @@ Agregar validación de seguridad backend que impida a usuarios FREE usar Arcanos
 **Prioridad:** 🟡 ALTA
 **Estimación:** 1 día
 **Dependencias:** Ninguna (puede hacerse en paralelo con B01-B03)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-005 (prerequisito backend de T-FR-F04)
 
 #### 📋 Descripción
@@ -619,27 +615,27 @@ Agregar la capability explícita `canUseFullDeck` al `UserCapabilitiesService` y
 
 **Capability:**
 
-- [ ] Agregar campo `canUseFullDeck: boolean` al [UserCapabilitiesDto](backend/tarot-app/src/modules/users/application/dto/user-capabilities.dto.ts)
-- [ ] En [UserCapabilitiesService.getCapabilities()](backend/tarot-app/src/modules/users/application/services/user-capabilities.service.ts): setear `canUseFullDeck = plan === UserPlanType.PREMIUM`
-- [ ] Tests unitarios: FREE/anónimo → `false`, PREMIUM → `true`
+- [x] Agregar campo `canUseFullDeck: boolean` al [UserCapabilitiesDto](backend/tarot-app/src/modules/users/application/dto/user-capabilities.dto.ts)
+- [x] En [UserCapabilitiesService.getCapabilities()](backend/tarot-app/src/modules/users/application/services/user-capabilities.service.ts): setear `canUseFullDeck = plan === UserPlanType.PREMIUM`
+- [x] Tests unitarios: FREE/anónimo → `false`, PREMIUM → `true`
 
 **Endpoint de cartas:**
 
-- [ ] Modificar [cards.controller.ts:32](backend/tarot-app/src/modules/tarot/cards/cards.controller.ts#L32) — agregar query param `@Query('category') category?: string` al `GET /cards`
-- [ ] Agregar método `findByCategory(category: string)` en [cards.service.ts](backend/tarot-app/src/modules/tarot/cards/cards.service.ts)
-- [ ] Documentar con `@ApiQuery({ name: 'category', required: false, example: 'arcanos_mayores' })`
-- [ ] Tests unitarios + E2E: `GET /cards?category=arcanos_mayores` retorna 22 cartas; sin filtro retorna 78
+- [x] Modificar [cards.controller.ts:32](backend/tarot-app/src/modules/tarot/cards/cards.controller.ts#L32) — agregar query param `@Query('category') category?: string` al `GET /cards`
+- [x] Agregar método `findByCategory(category: string)` en [cards.service.ts](backend/tarot-app/src/modules/tarot/cards/cards.service.ts)
+- [x] Documentar con `@ApiQuery({ name: 'category', required: false, example: 'arcanos_mayores' })`
+- [x] Tests unitarios + E2E: `GET /cards?category=arcanos_mayores` retorna 22 cartas; sin filtro retorna 78
 
 **Frontend:**
 
-- [ ] Actualizar type `UserCapabilities` en frontend para incluir `canUseFullDeck`
+- [x] Actualizar type `UserCapabilities` en frontend para incluir `canUseFullDeck`
 
 #### 🎯 Criterios de aceptación
 
-- [ ] `canUseFullDeck` aparece en el response de `/users/capabilities`
-- [ ] `GET /cards?category=arcanos_mayores` retorna solo los 22 Arcanos Mayores
-- [ ] `GET /cards` sin query sigue retornando las 78 cartas (sin regresión)
-- [ ] Coverage ≥ 80%
+- [x] `canUseFullDeck` aparece en el response de `/users/capabilities`
+- [x] `GET /cards?category=arcanos_mayores` retorna solo los 22 Arcanos Mayores
+- [x] `GET /cards` sin query sigue retornando las 78 cartas (sin regresión)
+- [x] Coverage ≥ 80%
 
 ---
 
@@ -654,7 +650,7 @@ Agregar la capability explícita `canUseFullDeck` al `UserCapabilitiesService` y
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 3 días (generación + revisión humana)
 **Dependencias:** T-FR-B01 (tabla creada)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003
 
 #### 📋 Descripción
@@ -663,10 +659,10 @@ Generar los **132 textos** para la tabla `card_free_interpretation`: **22 Arcano
 
 #### ✅ Tareas específicas
 
-- [ ] Ejecutar el prompt maestro (abajo) en Claude y/o Gemini para cada carta
-- [ ] Consolidar outputs en `backend/tarot-app/src/modules/tarot/cards/seeds/card-free-interpretations.data.ts` como array de objetos `{ cardSlug, categorySlug, orientation, content }`
-- [ ] Script de seed idempotente que inserta los registros (upsert por `cardId + categoryId + orientation`)
-- [ ] Revisión humana (checklist): tono cálido, 2-3 oraciones, sin clichés, coherente con `meaningUpright/Reversed`
+- [x] Ejecutar el prompt maestro (abajo) en Claude y/o Gemini para cada carta
+- [x] Consolidar outputs en `backend/tarot-app/src/modules/tarot/cards/seeds/card-free-interpretations.data.ts` como array de objetos `{ cardSlug, categorySlug, orientation, content }`
+- [x] Script de seed idempotente que inserta los registros (upsert por `cardId + categoryId + orientation`)
+- [x] Revisión humana (checklist): tono cálido, 2-3 oraciones, sin clichés, coherente con `meaningUpright/Reversed`
 
 ---
 
@@ -728,11 +724,11 @@ Ahora generá los 6 textos para la carta `{{CARD_NAME}}`.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Los 132 textos están generados y revisados por un humano
-- [ ] El seed es idempotente (re-ejecutable sin duplicar)
-- [ ] Cada texto respeta la longitud (2-3 oraciones, ~50 palabras)
-- [ ] El tono es consistente entre todas las cartas
-- [ ] No hay mezcla entre categorías (un texto de "amor" no habla de dinero)
+- [x] Los 132 textos están generados y revisados por un humano
+- [x] El seed es idempotente (re-ejecutable sin duplicar)
+- [x] Cada texto respeta la longitud (2-3 oraciones, ~50 palabras)
+- [x] El tono es consistente entre todas las cartas
+- [x] No hay mezcla entre categorías (un texto de "amor" no habla de dinero)
 
 ---
 
@@ -741,18 +737,13 @@ Ahora generá los 6 textos para la carta `{{CARD_NAME}}`.
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días (generación + revisión humana)
 **Dependencias:** T-FR-B01 (campos agregados)
-**Estado:** ⏳ PENDIENTE
-**Cubre HUS:** HUS-004
-
-#### 📋 Descripción
-
-Generar los **44 textos** para los campos `dailyFreeUpright` / `dailyFreeReversed` de `TarotCard`: **22 Arcanos Mayores × 2 orientaciones**. Tono distinto: energía del día, presente, menciona brevemente los 3 temas (amor, bienestar, dinero) en un solo texto.
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Ejecutar el prompt maestro (abajo) en Claude y/o Gemini para cada carta
-- [ ] Consolidar outputs y crear migración de datos que haga UPDATE en `tarot_card` por slug
-- [ ] Revisión humana: tono "energía diaria", menciona los 3 temas brevemente
+- [x] Ejecutar el prompt maestro (abajo) en Claude y/o Gemini para cada carta
+- [x] Consolidar outputs y crear migración de datos que haga UPDATE en `tarot_card` por slug
+- [x] Revisión humana: tono "energía diaria", menciona los 3 temas brevemente
 
 ---
 
@@ -804,11 +795,11 @@ Ahora generá los 2 textos para la carta `{{CARD_NAME}}`.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Los 44 textos están generados y revisados
-- [ ] Cada texto menciona los 3 temas (amor, bienestar, dinero) brevemente
-- [ ] El tono es de "energía presente" (no atemporal como las tiradas)
-- [ ] La migración de datos es reversible
-- [ ] Fallback a `meaningUpright/Reversed` cuando `dailyFreeUpright/Reversed` es null funciona correctamente
+- [x] Los 44 textos están generados y revisados
+- [x] Cada texto menciona los 3 temas (amor, bienestar, dinero) brevemente
+- [x] El tono es de "energía presente" (no atemporal como las tiradas)
+- [x] La migración de datos es reversible
+- [x] Fallback a `meaningUpright/Reversed` cuando `dailyFreeUpright/Reversed` es null funciona correctamente
 
 ---
 
@@ -821,7 +812,7 @@ Ahora generá los 2 textos para la carta `{{CARD_NAME}}`.
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-FR-P01 (rename de rutas), T-FR-B02 (backend listo)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-002
 
 #### 📋 Descripción
@@ -830,26 +821,26 @@ Modificar `CategorySelector` para soportar un modo FREE con filtrado a 3 categor
 
 #### ✅ Tareas específicas
 
-- [ ] Modificar `CategorySelector.tsx`: agregar prop `freeModeCategories?: string[]` que filtra `categories` por slugs antes de renderizar
-- [ ] Si `freeModeCategories` está presente, modificar `handleCategoryClick` para navegar a `/tarot/tirada?categoryId=X` (en lugar de `/tarot/preguntas?categoryId=X`)
-- [ ] Agregar banner/CTA en modo FREE: _"¿Querés más categorías? Actualizá a Premium."_
-- [ ] Modificar `RitualPageContent.tsx` (renombrar a `TarotPageContent`):
+- [x] Modificar `CategorySelector.tsx`: agregar prop `freeModeCategories?: string[]` que filtra `categories` por slugs antes de renderizar
+- [x] Si `freeModeCategories` está presente, modificar `handleCategoryClick` para navegar a `/tarot/tirada?categoryId=X` (en lugar de `/tarot/preguntas?categoryId=X`)
+- [x] Agregar banner/CTA en modo FREE: _"¿Querés más categorías? Actualizá a Premium."_
+- [x] Modificar `RitualPageContent.tsx` (renombrar a `TarotPageContent`):
   - Eliminar el `useEffect` que hace `router.replace('/tarot/tirada')` para FREE
-  - Renderizar `<CategorySelector freeModeCategories={['amor', 'salud', 'dinero']} />` (slugs — el nombre visible se resuelve desde `reading_category`) cuando `!canUseCustomQuestions && canCreateTarotReading`
+  - Renderizar `<CategorySelector freeModeCategories={['amor-relaciones', 'salud-bienestar', 'dinero-finanzas']} />` cuando `!canUseCustomQuestions && canCreateTarotReading`
   - Mantener `<CategorySelector />` sin filtro para PREMIUM
-- [ ] Tests unitarios:
+- [x] Tests unitarios:
   - CategorySelector en modo FREE muestra solo 3 categorías
   - CategorySelector en modo FREE navega a `/tarot/tirada?...` al elegir categoría
   - CategorySelector sin `freeModeCategories` muestra las 6 (sin regresión)
-  - RitualPageContent renderiza el selector filtrado para FREE
+  - TarotPageContent renderiza el selector filtrado para FREE
 
 #### 🎯 Criterios de aceptación
 
-- [ ] FREE ve 3 categorías (Amor y Relaciones, Salud y Bienestar, Dinero y Finanzas) con sus íconos — mismos nombres que PREMIUM
-- [ ] PREMIUM ve las 6 categorías (sin regresión)
-- [ ] FREE navega directo a `/tarot/tirada?categoryId=X` (sin pasar por preguntas)
-- [ ] El banner de upgrade se muestra para FREE
-- [ ] Coverage ≥ 80%, build y type-check pasan
+- [x] FREE ve 3 categorías (Amor y Relaciones, Salud y Bienestar, Dinero y Finanzas) con sus íconos — mismos nombres que PREMIUM
+- [x] PREMIUM ve las 6 categorías (sin regresión)
+- [x] FREE navega directo a `/tarot/tirada?categoryId=X` (sin pasar por preguntas)
+- [x] El banner de upgrade se muestra para FREE
+- [x] Coverage ≥ 80%, build y type-check pasan
 
 ---
 
@@ -858,23 +849,19 @@ Modificar `CategorySelector` para soportar un modo FREE con filtrado a 3 categor
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-FR-B02 (backend retorna `freeInterpretations`)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-003, HUS-006
-
-#### 📋 Descripción
-
-Modificar la sección de resultados de lectura (`InterpretationSection` en `ReadingExperience.tsx`) para que, cuando el response trae `freeInterpretations`, renderice los textos amigables pre-escritos en lugar de los `meaningUpright/Reversed` crudos. Incluir el banner de upgrade a Premium al final.
 
 #### ✅ Tareas específicas
 
-- [ ] Actualizar tipos TypeScript: agregar `freeInterpretations?: ...` al tipo `Reading`
-- [ ] Modificar `InterpretationSection` (`ReadingExperience.tsx` L164-229):
+- [x] Actualizar tipos TypeScript: agregar `freeInterpretations?: ...` al tipo `Reading`
+- [x] Modificar `InterpretationSection` (`ReadingExperience.tsx` L164-229):
   - Si `reading.freeInterpretations` está presente, usar esos textos por carta/orientación
   - Mostrar el nombre de la categoría elegida con ícono en el encabezado (ej: ❤️ Tu Lectura de Amor)
   - Fallback: si falta combinación, usar `meaningUpright/Reversed` existente con mensaje discreto
-- [ ] Crear componente `FreeReadingUpgradeBanner` (reutilizable): título, descripción, botón CTA a `/premium`
-- [ ] Renderizar `FreeReadingUpgradeBanner` al final de la sección cuando el usuario es FREE
-- [ ] Tests unitarios:
+- [x] Crear componente `FreeReadingUpgradeBanner` (reutilizable): título, descripción, botón CTA a `/premium`
+- [x] Renderizar `FreeReadingUpgradeBanner` al final de la sección cuando el usuario es FREE
+- [x] Tests unitarios:
   - `InterpretationSection` muestra textos pre-escritos cuando `freeInterpretations` está presente
   - Muestra el nombre+ícono de la categoría correctamente
   - Fallback a `meaningUpright/Reversed` cuando falta combinación
@@ -882,11 +869,11 @@ Modificar la sección de resultados de lectura (`InterpretationSection` en `Read
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Usuario FREE ve los textos amigables pre-escritos en el resultado
-- [ ] Usuario PREMIUM sigue viendo la interpretación personalizada (sin regresión)
-- [ ] Banner de upgrade visible solo para FREE
-- [ ] Fallback razonable cuando falta seed
-- [ ] Texto user-facing en español
+- [x] Usuario FREE ve los textos amigables pre-escritos en el resultado
+- [x] Usuario PREMIUM sigue viendo la interpretación personalizada (sin regresión)
+- [x] Banner de upgrade visible solo para FREE
+- [x] Fallback razonable cuando falta seed
+- [x] Texto user-facing en español
 
 ---
 
@@ -895,7 +882,7 @@ Modificar la sección de resultados de lectura (`InterpretationSection` en `Read
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** T-FR-B03 (backend retorna `dailyFreeUpright/Reversed`)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-004, HUS-006
 
 #### 📋 Descripción
@@ -904,24 +891,24 @@ Modificar `DailyCardExperience` para que muestre el texto único de "energía di
 
 #### ✅ Tareas específicas
 
-- [ ] Actualizar tipos: el response de carta del día incluye `interpretation: string` (ya existente, ahora poblado con `dailyFreeUpright/Reversed`)
-- [ ] Modificar `DailyCardExperience.tsx`:
+- [x] Actualizar tipos: el response de carta del día incluye `interpretation: string` (ya existente, ahora poblado con `dailyFreeUpright/Reversed`)
+- [x] Modificar `DailyCardExperience.tsx`:
   - Renderizar el texto como un bloque único (no 3 secciones temáticas)
   - Encabezado: "🌟 Tu Carta del Día" + nombre de la carta + orientación
   - Incluir `FreeReadingUpgradeBanner` al final (para FREE/anónimo)
   - Para PREMIUM: mantener el layout actual con la interpretación personalizada
-- [ ] Fallback visual si `interpretation` es null (texto mínimo + keywords)
-- [ ] Tests unitarios:
+- [x] Fallback visual si `interpretation` es null (texto mínimo + keywords)
+- [x] Tests unitarios:
   - FREE/anónimo ve el texto único de energía diaria
   - PREMIUM ve la interpretación personalizada (sin regresión)
   - Banner upgrade visible para FREE/anónimo
 
 #### 🎯 Criterios de aceptación
 
-- [ ] FREE/anónimo ve el texto único de energía diaria
-- [ ] PREMIUM ve la interpretación personalizada y profunda (sin regresión)
-- [ ] El layout es claro, no dividido por categorías
-- [ ] Banner upgrade visible para no-Premium
+- [x] FREE/anónimo ve el texto único de energía diaria
+- [x] PREMIUM ve la interpretación personalizada y profunda (sin regresión)
+- [x] El layout es claro, no dividido por categorías
+- [x] Banner upgrade visible para no-Premium
 
 ---
 
@@ -930,7 +917,7 @@ Modificar `DailyCardExperience` para que muestre el texto único de "energía di
 **Prioridad:** 🟡 ALTA
 **Estimación:** 2 días
 **Dependencias:** T-FR-B03, **T-FR-B04** (endpoint y capability deben existir antes)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre HUS:** HUS-005
 
 #### 📋 Descripción
@@ -941,20 +928,20 @@ Filtrar el mazo de cartas mostrado en el flujo de selección (`ReadingExperience
 
 #### ✅ Tareas específicas
 
-- [ ] Identificar el punto de fetch del deck en `ReadingExperience` (hoy posiblemente inline o vía endpoint encyclopedia)
-- [ ] Crear/modificar hook `useTarotDeck(options: { onlyMajorArcana?: boolean })` que consuma `GET /cards?category=arcanos_mayores` cuando corresponda
-- [ ] En `ReadingExperience`: pasar `onlyMajorArcana: !capabilities.canUseFullDeck` al hook
-- [ ] Tests unitarios:
+- [x] Identificar el punto de fetch del deck en `ReadingExperience` (el mazo se representaba localmente como `DECK_SIZE = 78` — sin fetch al backend)
+- [x] Crear hook `useTarotDeck()` que calcula `cardIndices` localmente según `canUseFullDeck` (sin fetch — FREE/anónimo: índices 0-21, PREMIUM: índices 0-77)
+- [x] En `ReadingExperience`: reemplazar `DECK_SIZE = 78` por `useTarotDeck()`, iterar sobre `cardIndices` directamente
+- [x] Tests unitarios:
   - FREE ve mazo de 22 cartas
   - PREMIUM ve mazo de 78 cartas
   - La selección funciona correctamente con deck reducido
 
 #### 🎯 Criterios de aceptación
 
-- [ ] FREE solo ve los 22 Arcanos Mayores en la selección
-- [ ] PREMIUM ve las 78 cartas
-- [ ] No se rompe el flujo de selección existente
-- [ ] Coverage ≥ 80%
+- [x] FREE solo ve los 22 Arcanos Mayores en la selección
+- [x] PREMIUM ve las 78 cartas
+- [x] No se rompe el flujo de selección existente
+- [x] Coverage ≥ 80%
 
 ---
 

@@ -34,6 +34,9 @@ import { seedPendulumInterpretations } from '../src/database/seeds/pendulum-inte
 import { seedEncyclopediaTarotCards } from '../src/database/seeds/encyclopedia-tarot-cards.seeder';
 import { seedEncyclopediaArticles } from '../src/database/seeds/encyclopedia-articles.seeder';
 import { seedHolisticServices } from '../src/database/seeds/holistic-services.seeder';
+import { seedBirthChartInterpretations } from '../src/database/seeds/birth-chart-interpretations.seeder';
+import { seedCardFreeInterpretations } from '../src/database/seeds/card-free-interpretations.seeder';
+import { seedDailyFreeInterpretations } from '../src/database/seeds/daily-free-interpretations.seeder';
 
 interface SeederStep {
   name: string;
@@ -202,6 +205,27 @@ async function bootstrap() {
         dependencies: [],
         execute: async () => {
           await seedHolisticServices(holisticServiceRepository);
+        },
+      },
+      {
+        name: 'Birth Chart Interpretations',
+        dependencies: [],
+        execute: async () => {
+          await seedBirthChartInterpretations(dataSource);
+        },
+      },
+      {
+        name: 'Card Free Interpretations',
+        dependencies: ['Tarot Cards', 'Reading Categories'],
+        execute: async () => {
+          await seedCardFreeInterpretations(dataSource);
+        },
+      },
+      {
+        name: 'Daily Free Interpretations',
+        dependencies: ['Tarot Cards'],
+        execute: async () => {
+          await seedDailyFreeInterpretations(dataSource);
         },
       },
     ];

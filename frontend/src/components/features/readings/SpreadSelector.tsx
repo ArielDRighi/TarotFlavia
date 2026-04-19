@@ -8,6 +8,7 @@ import { ChevronRight, Clock, Layers } from 'lucide-react';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useMyAvailableSpreads } from '@/hooks/api/useReadings';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
+import { ROUTES } from '@/lib/constants/routes';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -179,15 +180,15 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
   const handleSpreadSelect = useCallback(
     (spreadId: number) => {
       // Build navigation URL
-      let url = `/ritual/lectura?spreadId=${spreadId}`;
+      let url = ROUTES.TAROT_LECTURA_BY_SPREAD(spreadId);
 
-      // Only add question params for PREMIUM users
+      // Add categoryId if present (for both FREE and PREMIUM users)
+      if (categoryId) {
+        url += `&categoryId=${categoryId}`;
+      }
+
+      // Add question params only for PREMIUM users
       if (isPremium) {
-        // Add categoryId if present
-        if (categoryId) {
-          url += `&categoryId=${categoryId}`;
-        }
-        // Add questionId or customQuestion if present
         if (questionId) {
           url += `&questionId=${questionId}`;
         } else if (customQuestion) {
@@ -214,8 +215,8 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
       <div className="mx-auto max-w-4xl">
         {/* Breadcrumb */}
         <nav className="text-text-muted mb-6 flex items-center gap-2 text-sm">
-          <Link href="/ritual" className="hover:text-primary transition-colors">
-            Ritual
+          <Link href={ROUTES.TAROT} className="hover:text-primary transition-colors">
+            Tarot
           </Link>
           {/* Show question step only for PREMIUM users */}
           {isPremium && hasQuestion && (
@@ -223,7 +224,9 @@ export function SpreadSelector({ categoryId, questionId, customQuestion }: Sprea
               <ChevronRight className="h-4 w-4" aria-hidden="true" />
               <Link
                 href={
-                  categoryId ? `/ritual/preguntas?categoryId=${categoryId}` : '/ritual/preguntas'
+                  categoryId
+                    ? ROUTES.TAROT_PREGUNTAS_BY_CATEGORY(Number(categoryId))
+                    : ROUTES.TAROT_PREGUNTAS
                 }
                 className="hover:text-primary transition-colors"
               >

@@ -10,6 +10,7 @@ import { useReadingDetail, useSpreads } from '@/hooks/api/useReadings';
 import { useReadingShareText } from '@/hooks/api/useShareText';
 import { toast } from '@/hooks/utils/useToast';
 import { shouldUseNativeShare } from '@/lib/utils/device';
+import { ROUTES } from '@/lib/constants/routes';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -316,7 +317,7 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
   };
 
   const handleNewReading = () => {
-    router.push('/ritual');
+    router.push(ROUTES.TAROT);
   };
 
   // Loading state

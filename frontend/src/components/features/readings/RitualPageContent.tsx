@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
+import { ROUTES } from '@/lib/constants/routes';
 import { CategorySelector } from './CategorySelector';
 import { ReadingLimitReached } from './ReadingLimitReached';
 
@@ -15,7 +16,7 @@ import { ReadingLimitReached } from './ReadingLimitReached';
  * Handles routing logic and conditional rendering based on user capabilities.
  *
  * PLAN-BASED BEHAVIOR:
- * - FREE users: Automatically redirected to /ritual/tirada (no category selection)
+ * - FREE users: Automatically redirected to /tarot/tirada (no category selection)
  * - PREMIUM users: Select category first, then proceed to questions
  *
  * LIMIT VALIDATION:
@@ -33,7 +34,7 @@ export function RitualPageContent() {
   // Redirect to spread selector if FREE/ANONYMOUS and can create readings
   useEffect(() => {
     if (!isCapabilitiesLoading && user && canCreateTarotReading && !canUseCustomQuestions) {
-      router.replace('/ritual/tirada');
+      router.replace(ROUTES.TAROT_TIRADA);
     }
   }, [isCapabilitiesLoading, user, canCreateTarotReading, canUseCustomQuestions, router]);
 

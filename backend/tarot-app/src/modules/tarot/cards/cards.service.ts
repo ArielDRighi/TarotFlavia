@@ -65,6 +65,12 @@ export class CardsService {
     });
   }
 
+  async findByCategory(category: string): Promise<TarotCard[]> {
+    return this.cardRepository.find({
+      where: { category },
+    });
+  }
+
   async create(createCardDto: CreateCardDto): Promise<TarotCard> {
     // Verificar que el mazo existe
     const deck = await this.deckRepository.findOne({

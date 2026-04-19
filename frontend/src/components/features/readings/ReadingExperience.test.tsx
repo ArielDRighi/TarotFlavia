@@ -81,6 +81,12 @@ vi.mock('@/hooks/api/useUserCapabilities', () => ({
   useUserCapabilities: () => mockUseUserCapabilities(),
 }));
 
+// Mock useTarotDeck
+const mockUseTarotDeck = vi.fn();
+vi.mock('@/hooks/api/useTarotDeck', () => ({
+  useTarotDeck: () => mockUseTarotDeck(),
+}));
+
 // Mock getShareText from readings-api
 const mockGetShareText = vi.fn().mockResolvedValue({ text: 'Mocked share text' });
 vi.mock('@/lib/api/readings-api', () => ({
@@ -229,6 +235,7 @@ const mockReadingDetail: ReadingDetail = {
   question: '¿Qué debo esperar en el amor?',
   cards: mockReadingCards,
   interpretation: mockInterpretation,
+  freeInterpretations: null,
   createdAt: '2025-12-07T10:00:00Z',
   shareToken: null,
 };
@@ -263,6 +270,10 @@ vi.mock('@/hooks/api/useReadings', () => ({
   useShareReading: () => ({
     mutate: mockShareReading,
     isPending: false,
+  }),
+  useCategories: () => ({
+    data: [{ id: 1, name: 'Amor', slug: 'amor' }],
+    isLoading: false,
   }),
 }));
 
@@ -329,6 +340,13 @@ describe('ReadingExperience', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCreateReadingMutateAsync.mockReset();
+
+    // Default mock for useTarotDeck: full deck (PREMIUM default)
+    mockUseTarotDeck.mockReturnValue({
+      deckSize: 78,
+      cardIndices: Array.from({ length: 78 }, (_, i) => i),
+      isRestricted: false,
+    });
 
     // Default mock: FREE user with available readings
     mockUseUserCapabilities.mockReturnValue({
@@ -679,7 +697,7 @@ describe('ReadingExperience', () => {
       const newReadingButton = screen.getByRole('button', { name: /Nueva Lectura/i });
       fireEvent.click(newReadingButton);
 
-      expect(mockPush).toHaveBeenCalledWith('/ritual');
+      expect(mockPush).toHaveBeenCalledWith('/tarot');
     });
 
     it.skip('should NOT show "Nueva Lectura" button when FREE user has reached daily limit', async () => {
@@ -923,6 +941,108 @@ describe('ReadingExperience', () => {
 
       // El banner NO debe aparecer para usuarios premium
       expect(screen.queryByTestId('upgrade-banner')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Deck filtrado: FREE solo ve Arcanos Mayores', () => {
+    it('should display only 22 cards for FREE user (Arcanos Mayores)', () => {
+      mockUseTarotDeck.mockReturnValue({
+        deckSize: 22,
+        cardIndices: Array.from({ length: 22 }, (_, i) => i),
+        isRestricted: true,
+      });
+      // canUseFullDeck: false for FREE
+      mockUseUserCapabilities.mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: false,
+          canUseCustomQuestions: false,
+          canUseAdvancedSpreads: false,
+          canUseFullDeck: false,
+          plan: 'free',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
+
+      const cards = screen.getAllByTestId('selectable-card');
+      expect(cards).toHaveLength(22);
+    });
+
+    it('should display 78 cards for PREMIUM user (full deck)', () => {
+      mockUseTarotDeck.mockReturnValue({
+        deckSize: 78,
+        cardIndices: Array.from({ length: 78 }, (_, i) => i),
+        isRestricted: false,
+      });
+      mockUseUserCapabilities.mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: true,
+          canUseCustomQuestions: true,
+          canUseAdvancedSpreads: true,
+          canUseFullDeck: true,
+          plan: 'premium',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
+
+      const cards = screen.getAllByTestId('selectable-card');
+      expect(cards).toHaveLength(78);
+    });
+
+    it('should allow selecting cards and revealing when FREE deck has 22 cards', async () => {
+      mockUseTarotDeck.mockReturnValue({
+        deckSize: 22,
+        cardIndices: Array.from({ length: 22 }, (_, i) => i),
+        isRestricted: true,
+      });
+      mockUseUserCapabilities.mockReturnValue({
+        data: {
+          dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          tarotReadings: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+          canCreateDailyReading: true,
+          canCreateTarotReading: true,
+          canUseAI: false,
+          canUseCustomQuestions: false,
+          canUseAdvancedSpreads: false,
+          canUseFullDeck: false,
+          plan: 'free',
+          isAuthenticated: true,
+        },
+        isLoading: false,
+      });
+      mockCreateReadingMutateAsync.mockResolvedValue(mockReadingDetail);
+
+      renderWithProviders(<ReadingExperience spreadId={1} questionId={1} customQuestion={null} />);
+
+      // 1-card spread, FREE deck of 22 cards
+      const cards = screen.getAllByTestId('selectable-card');
+      expect(cards).toHaveLength(22);
+
+      fireEvent.click(cards[0]);
+
+      const revealButton = screen.getByRole('button', { name: /Revelar mi destino/i });
+      fireEvent.click(revealButton);
+
+      await waitFor(() => {
+        expect(mockCreateReadingMutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({
+            cardIds: expect.arrayContaining([1]), // index 0 → cardId 1 (El Loco / Arcano Mayor)
+          })
+        );
+      });
     });
   });
 });

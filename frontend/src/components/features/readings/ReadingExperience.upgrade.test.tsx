@@ -45,14 +45,13 @@ vi.mock('react-markdown', () => ({
   },
 }));
 
-// Mock UpgradeBanner — T-FE-06: no longer receives onUpgradeClick from ReadingExperience;
-// handles the MP flow internally
-vi.mock('./UpgradeBanner', () => ({
-  default: function MockUpgradeBanner() {
+// Mock FreeReadingUpgradeBanner
+vi.mock('./FreeReadingUpgradeBanner', () => ({
+  default: function MockFreeReadingUpgradeBanner() {
     return (
-      <div data-testid="upgrade-banner">
-        <p>💎 Desbloquea interpretaciones personalizadas</p>
-        <button>Upgrade a Premium</button>
+      <div data-testid="free-reading-upgrade-banner">
+        <p>Con Premium obtenés una interpretación personalizada y profunda</p>
+        <button>Conocer Premium</button>
       </div>
     );
   },
@@ -210,6 +209,10 @@ vi.mock('@/hooks/api/useReadings', () => ({
     mutate: vi.fn(),
     isPending: false,
   }),
+  useCategories: () => ({
+    data: [{ id: 1, name: 'Amor', slug: 'amor' }],
+    isLoading: false,
+  }),
 }));
 
 // Mock toast
@@ -309,13 +312,15 @@ describe('ReadingExperience - Upgrade Banner for FREE users', () => {
 
     await waitFor(
       () => {
-        expect(screen.getByTestId('upgrade-banner')).toBeInTheDocument();
+        expect(screen.getByTestId('free-reading-upgrade-banner')).toBeInTheDocument();
       },
       { timeout: 10000 }
     );
 
-    expect(screen.getByText(/desbloquea interpretaciones personalizadas/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /upgrade a premium/i })).toBeInTheDocument();
+    expect(
+      screen.getByText(/Con Premium obtenés una interpretación personalizada/i)
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /conocer premium/i })).toBeInTheDocument();
   }, 15000); // Timeout de 15 segundos para el test
 
   it('should NOT open upgrade modal when clicking banner button (UpgradeBanner handles MP flow internally)', async () => {
@@ -330,12 +335,12 @@ describe('ReadingExperience - Upgrade Banner for FREE users', () => {
     fireEvent.click(revealButton);
 
     await waitFor(() => {
-      expect(screen.getByTestId('upgrade-banner')).toBeInTheDocument();
+      expect(screen.getByTestId('free-reading-upgrade-banner')).toBeInTheDocument();
     });
 
     // Banner button click should NOT open ReadingExperience's UpgradeModal
-    // UpgradeBanner handles its own MP flow internally
-    const upgradeButton = screen.getByRole('button', { name: /upgrade a premium/i });
+    // FreeReadingUpgradeBanner handles its own navigation internally
+    const upgradeButton = screen.getByRole('button', { name: /conocer premium/i });
     fireEvent.click(upgradeButton);
 
     // UpgradeModal should NOT appear from banner click

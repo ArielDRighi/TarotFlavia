@@ -7,6 +7,7 @@ import { Search, Layers, ChevronDown, Grid3x3, List, Sun } from 'lucide-react';
 import { startOfWeek, startOfMonth, isAfter, isSameDay } from 'date-fns';
 
 import { useMyReadings } from '@/hooks/api/useReadings';
+import { ROUTES } from '@/lib/constants/routes';
 import { getShareText } from '@/lib/api/readings-api';
 import { shouldUseNativeShare } from '@/lib/utils/device';
 import { ReadingCard } from '@/components/features/readings/ReadingCard';
@@ -187,7 +188,7 @@ export function ReadingsHistory() {
 
   // Navigate to ritual page
   const handleMakeFirstReading = () => {
-    router.push('/ritual');
+    router.push(ROUTES.TAROT);
   };
 
   // Get current filter labels
