@@ -86,16 +86,18 @@ describe('LecturaPage', () => {
 
   it('should pass customQuestion to ReadingExperience', () => {
     mockSearchParams.set('spreadId', '2');
-    mockSearchParams.set('customQuestion', encodeURIComponent('¿Encontraré el amor?'));
+    // URLSearchParams.get() already returns decoded values
+    mockSearchParams.set('customQuestion', '¿Encontraré el amor?');
 
     renderWithProviders(<LecturaPage />);
 
     expect(screen.getByTestId('custom-question')).toHaveTextContent('¿Encontraré el amor?');
   });
 
-  it('should decode customQuestion from URL', () => {
+  it('should pass customQuestion with special characters to ReadingExperience', () => {
     mockSearchParams.set('spreadId', '2');
-    mockSearchParams.set('customQuestion', '%C2%BFQu%C3%A9%20pasa%20con%20mi%20trabajo%3F');
+    // URLSearchParams.get() already returns decoded values
+    mockSearchParams.set('customQuestion', '¿Qué pasa con mi trabajo?');
 
     renderWithProviders(<LecturaPage />);
 
