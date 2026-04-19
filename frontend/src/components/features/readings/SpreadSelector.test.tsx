@@ -382,7 +382,7 @@ describe('SpreadSelector', () => {
       });
     });
 
-    it('should navigate WITHOUT categoryId or questionId for FREE users even if they exist in props', async () => {
+    it('should navigate WITH categoryId but WITHOUT questionId for FREE users', async () => {
       (useUserCapabilities as Mock).mockReturnValue({
         data: mockFreeCapabilities,
         isLoading: false,
@@ -396,11 +396,10 @@ describe('SpreadSelector', () => {
       fireEvent.click(selectButtons[0]); // Select first spread (id: 1)
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/tarot/lectura?spreadId=1');
+        expect(mockPush).toHaveBeenCalledWith('/tarot/lectura?spreadId=1&categoryId=1');
       });
 
-      // Should NOT include categoryId or questionId
-      expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('categoryId'));
+      // Should NOT include questionId (FREE users don't use custom questions)
       expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('questionId'));
     });
   });

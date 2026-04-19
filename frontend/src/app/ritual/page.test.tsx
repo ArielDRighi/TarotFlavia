@@ -117,7 +117,7 @@ describe('RitualPage', () => {
   });
 
   describe('FREE User Redirection', () => {
-    it('should redirect FREE users to /ritual/tirada', async () => {
+    it('should redirect FREE users to /tarot/tirada', async () => {
       (useAuth as Mock).mockReturnValue({
         user: { id: 1, plan: 'free' },
         isAuthenticated: true,
@@ -135,7 +135,7 @@ describe('RitualPage', () => {
       render(<RitualPage />);
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
+        expect(mockReplace).toHaveBeenCalledWith('/tarot/tirada');
       });
     });
 
@@ -157,7 +157,7 @@ describe('RitualPage', () => {
       render(<RitualPage />);
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/ritual/tirada');
+        expect(mockReplace).toHaveBeenCalledWith('/tarot/tirada');
       });
     });
   });
