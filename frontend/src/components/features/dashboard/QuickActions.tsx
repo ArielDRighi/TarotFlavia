@@ -76,7 +76,7 @@ function QuickActionCard({
  * Quick Actions component for user dashboard
  *
  * Displays action cards for:
- * - Nueva Lectura (primary) - Routes to /tarot for PREMIUM, /tarot/tirada for FREE
+ * - Nueva Lectura (primary) - Routes to /tarot (category selection) for all users
  * - Historial de Lecturas
  * - Carta del Día
  *
@@ -88,8 +88,8 @@ function QuickActionCard({
 export function QuickActions() {
   const { user } = useAuthStore();
 
-  // Free users skip category/question selection and go directly to spreads; premium users start at category selection flow
-  const newReadingHref = user?.plan === 'premium' ? ROUTES.TAROT : ROUTES.TAROT_TIRADA;
+  // Both FREE and PREMIUM users start at category selection; CategorySelector handles plan-specific filtering
+  const newReadingHref = ROUTES.TAROT;
 
   return (
     <div className="grid gap-4 md:grid-cols-3">

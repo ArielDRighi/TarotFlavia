@@ -29,7 +29,7 @@ describe('QuickActions', () => {
   });
 
   describe('Conditional Routing based on User Plan', () => {
-    it('should link "Nueva Lectura" to /tarot/tirada for FREE users', () => {
+    it('should link "Nueva Lectura" to /tarot for FREE users', () => {
       mockUseAuthStore.mockReturnValue({
         user: {
           id: 1,
@@ -42,7 +42,7 @@ describe('QuickActions', () => {
       render(<QuickActions />);
 
       const newReadingButton = screen.getByText('Nueva Lectura');
-      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot/tirada');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot');
     });
 
     it('should link "Nueva Lectura" to /tarot for PREMIUM users', () => {
@@ -61,7 +61,7 @@ describe('QuickActions', () => {
       expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot');
     });
 
-    it('should default to /tarot/tirada when user is null', () => {
+    it('should default to /tarot when user is null', () => {
       mockUseAuthStore.mockReturnValue({
         user: null,
         isAuthenticated: false,
@@ -70,10 +70,10 @@ describe('QuickActions', () => {
       render(<QuickActions />);
 
       const newReadingButton = screen.getByText('Nueva Lectura');
-      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot/tirada');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot');
     });
 
-    it('should default to /tarot/tirada when user plan is undefined', () => {
+    it('should default to /tarot when user plan is undefined', () => {
       mockUseAuthStore.mockReturnValue({
         user: {
           id: 3,
@@ -86,7 +86,7 @@ describe('QuickActions', () => {
       render(<QuickActions />);
 
       const newReadingButton = screen.getByText('Nueva Lectura');
-      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot/tirada');
+      expect(newReadingButton.closest('a')).toHaveAttribute('href', '/tarot');
     });
   });
 
