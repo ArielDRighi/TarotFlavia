@@ -8,6 +8,9 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 import helmet from 'helmet';
 
+// Force UTC timezone for consistent timestamps across all environments
+process.env.TZ = 'UTC';
+
 async function bootstrap() {
   // Explicitly load .env file
   const envPath = path.resolve(process.cwd(), '.env');
@@ -42,6 +45,10 @@ async function bootstrap() {
 
   // Log startup with custom logger
   loggerService.log('Application is starting...', 'Bootstrap');
+  loggerService.log(
+    `Server timezone: TZ=${process.env.TZ}, Date: ${new Date().toISOString()}`,
+    'Bootstrap',
+  );
 
   // Configure security headers with Helmet (TASK-048-a)
   app.use(
