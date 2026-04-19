@@ -62,10 +62,29 @@ interface RelatedArticleItemProps {
   article: ArticleSummary;
 }
 
+/**
+ * Resolves the correct encyclopedia route for an article based on its category.
+ */
+function getArticleRoute(article: ArticleSummary): string {
+  switch (article.category) {
+    case ArticleCategory.ZODIAC_SIGN:
+      return ROUTES.ENCICLOPEDIA_SIGNO(article.slug);
+    case ArticleCategory.PLANET:
+      return ROUTES.ENCICLOPEDIA_PLANETA(article.slug);
+    case ArticleCategory.ASTROLOGICAL_HOUSE:
+      return ROUTES.ENCICLOPEDIA_CASA(article.slug);
+    case ArticleCategory.ELEMENT:
+    case ArticleCategory.MODALITY:
+      return ROUTES.ENCICLOPEDIA_ELEMENTO(article.slug);
+    default:
+      return ROUTES.ENCICLOPEDIA_GUIA(article.slug);
+  }
+}
+
 function RelatedArticleItem({ article }: RelatedArticleItemProps) {
   return (
     <Link
-      href={ROUTES.ENCICLOPEDIA_CARD(article.slug)}
+      href={getArticleRoute(article)}
       data-testid="related-article-item"
       className="bg-card hover:bg-accent flex items-center gap-3 rounded-lg border p-3 transition-colors"
     >
