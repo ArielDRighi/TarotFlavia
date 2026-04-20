@@ -17,7 +17,7 @@ describe('PremiumBenefitsSection', () => {
   it('should render premium interpretations benefit', () => {
     render(<PremiumBenefitsSection />);
 
-    const interpretationsBenefit = screen.getByText(/interpretaciones profundas con ia/i);
+    const interpretationsBenefit = screen.getByText(/interpretaciones profundas y personalizadas/i);
 
     expect(interpretationsBenefit).toBeInTheDocument();
   });
@@ -57,7 +57,7 @@ describe('PremiumBenefitsSection', () => {
   it('should display pricing information', () => {
     render(<PremiumBenefitsSection />);
 
-    const pricing = screen.getByText(/\$9\.99/);
+    const pricing = screen.getByText(/\$7\.000/);
 
     expect(pricing).toBeInTheDocument();
   });

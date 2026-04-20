@@ -6,7 +6,7 @@ import { Sparkles, Layers, MessageSquare, BarChart3, ShieldOff, Crown } from 'lu
 const benefits = [
   {
     icon: Sparkles,
-    title: 'Interpretaciones profundas con IA',
+    title: 'Interpretaciones profundas y personalizadas',
     description: 'Análisis detallados adaptados a tu situación personal y las cartas que elegiste.',
   },
   {
@@ -113,7 +113,7 @@ export function PremiumBenefitsSection() {
         <div className="text-center">
           <div className="mb-2 flex items-baseline justify-center gap-1">
             <span className="font-serif text-5xl font-bold" style={{ color: '#d69e2e' }}>
-              $9.99
+              $7.000
             </span>
             <span className="font-sans text-lg" style={{ color: 'rgba(249, 247, 242, 0.55)' }}>
               / mes

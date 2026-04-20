@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/constants/routes';
@@ -17,21 +18,38 @@ const decorativeStars = [
 
 export function HeroSection() {
   return (
-    <section
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20"
-      style={{
-        background: 'linear-gradient(160deg, #1a0a2e 0%, #2d1b69 45%, #1a0a2e 100%)',
-      }}
-    >
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20">
+      {/* Background image */}
+      <Image
+        src="/images/hero-bg.webp"
+        alt=""
+        fill
+        className="object-cover"
+        priority
+        aria-hidden="true"
+      />
+
       {/* Overlay gradient para asegurar legibilidad */}
       <div
         className="absolute inset-0 z-0"
         style={{
           background:
-            'radial-gradient(ellipse at center top, rgba(128, 90, 213, 0.3) 0%, transparent 60%), radial-gradient(ellipse at bottom right, rgba(214, 158, 46, 0.15) 0%, transparent 50%)',
+            'linear-gradient(160deg, rgba(26, 10, 46, 0.55) 0%, rgba(45, 27, 105, 0.45) 45%, rgba(26, 10, 46, 0.55) 100%), radial-gradient(ellipse at center top, rgba(128, 90, 213, 0.3) 0%, transparent 60%), radial-gradient(ellipse at bottom right, rgba(214, 158, 46, 0.15) 0%, transparent 50%)',
         }}
         aria-hidden="true"
       />
+
+      {/* Brand logo — top left */}
+      <div className="absolute top-6 left-6 z-10 md:top-8 md:left-10">
+        <Image
+          src="/images/logo-auguria.webp"
+          alt="Auguria"
+          width={655}
+          height={386}
+          className="h-20 w-auto drop-shadow-lg md:h-26"
+          priority
+        />
+      </div>
 
       {/* Decorative stars */}
       {decorativeStars.map((star, i) => (
@@ -90,7 +108,7 @@ export function HeroSection() {
           style={{ color: 'rgba(249, 247, 242, 0.75)' }}
         >
           Lecturas personalizadas que iluminan tu camino. Desde la carta del día hasta
-          interpretaciones profundas con IA, encuentra las respuestas que buscas.
+          interpretaciones profundas y detalladas, encuentra las respuestas que buscas.
         </p>
 
         {/* CTAs */}

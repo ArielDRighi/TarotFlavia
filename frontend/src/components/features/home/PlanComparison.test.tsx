@@ -69,10 +69,10 @@ describe('PlanComparison', () => {
       expect(screen.getByText(/1.*3 cartas/i)).toBeInTheDocument();
     });
 
-    it('should show "Interpretación con IA" as not included', () => {
+    it('should show "Interpretación personalizada" as not included', () => {
       render(<PlanComparison />);
 
-      const iaElements = screen.getAllByText(/interpretación con ia/i);
+      const iaElements = screen.getAllByText(/interpretación personalizada/i);
       expect(iaElements.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -101,16 +101,16 @@ describe('PlanComparison', () => {
       expect(screen.getByText(/3 lecturas de tarot \/ día/i)).toBeInTheDocument();
     });
 
-    it('should show "Interpretación personalizada con IA" feature in Premium plan', () => {
+    it('should show "Interpretación personalizada y profunda" feature in Premium plan', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/interpretación personalizada con ia/i)).toBeInTheDocument();
+      expect(screen.getByText(/interpretación personalizada y profunda/i)).toBeInTheDocument();
     });
 
     it('should show "Carta astral ilimitada" feature in Premium plan', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/carta astral ilimitada \+ ia/i)).toBeInTheDocument();
+      expect(screen.getByText(/carta astral ilimitada y detallada/i)).toBeInTheDocument();
     });
 
     it('should show "Preguntas personalizadas" feature', () => {
@@ -119,10 +119,10 @@ describe('PlanComparison', () => {
       expect(screen.getByText(/preguntas personalizadas/i)).toBeInTheDocument();
     });
 
-    it('should show price "$9.99"', () => {
+    it('should show price "$7.000"', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/\$9\.99/)).toBeInTheDocument();
+      expect(screen.getByText(/\$7\.000/)).toBeInTheDocument();
     });
 
     it('should show CTA to upgrade to premium', () => {

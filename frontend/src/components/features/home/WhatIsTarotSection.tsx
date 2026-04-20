@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export function WhatIsTarotSection() {
   return (
     <section className="bg-bg-main px-4 py-16 md:py-24">
@@ -12,35 +14,20 @@ export function WhatIsTarotSection() {
           </div>
 
           <div className="grid items-center gap-12 md:grid-cols-2">
-            {/* Image placeholder */}
+            {/* Image */}
             <div
               data-testid="tarot-cards-illustration"
               className="relative aspect-square overflow-hidden rounded-2xl shadow-xl"
               style={{
-                background: 'linear-gradient(135deg, #2d1b69 0%, #1a0a2e 100%)',
                 border: '1px solid rgba(214, 158, 46, 0.2)',
               }}
             >
-              {/* Placeholder visual hasta que el usuario provea la imagen */}
-              <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
-                <div
-                  className="font-serif text-8xl font-light"
-                  style={{ color: 'rgba(214, 158, 46, 0.4)' }}
-                >
-                  🃏
-                </div>
-                <p className="font-sans text-sm" style={{ color: 'rgba(249, 247, 242, 0.3)' }}>
-                  Imagen de tarot aquí
-                </p>
-              </div>
-              {/* Cuando el usuario provea la imagen, reemplazar el div de arriba con:
               <Image
-                src="/images/tarot-spread.webp"
-                alt="Distribución de cartas de tarot"
+                src="/images/tarot-cards.webp"
+                alt="Cartas de tarot con diseños místicos"
                 fill
                 className="object-cover"
               />
-              */}
             </div>
 
             {/* Content */}
@@ -81,9 +68,9 @@ export function WhatIsTarotSection() {
               </div>
 
               <p className="text-text-muted font-sans text-base leading-relaxed">
-                En Auguria, combinamos la sabiduría tradicional del tarot con inteligencia
-                artificial para ofrecerte interpretaciones profundas y personalizadas que te ayuden
-                en tu camino de autoconocimiento.
+                En Auguria, combinamos la sabiduría tradicional del tarot con tecnología moderna
+                para ofrecerte interpretaciones profundas y personalizadas que te ayuden en tu
+                camino de autoconocimiento.
               </p>
             </div>
           </div>

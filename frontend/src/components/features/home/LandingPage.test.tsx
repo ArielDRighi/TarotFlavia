@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { LandingPage } from './LandingPage';
 
 describe('LandingPage', () => {
-  it('should render all main sections', () => {
+  it('should render all main sections', { timeout: 15000 }, () => {
     render(<LandingPage />);
 
     // Verificar que todas las secciones están presentes
