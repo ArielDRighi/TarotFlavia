@@ -45,23 +45,23 @@ describe('Header', () => {
   });
 
   describe('Logo', () => {
-    it('should render logo with "Tarot" text', () => {
+    it('should render logo with "Auguria" text', () => {
       render(<Header />);
 
-      expect(screen.getByText('Tarot')).toBeInTheDocument();
+      expect(screen.getByText('Auguria')).toBeInTheDocument();
     });
 
     it('should render logo with serif font', () => {
       render(<Header />);
 
-      const logo = screen.getByText('Tarot');
+      const logo = screen.getByText('Auguria');
       expect(logo).toHaveClass('font-serif');
     });
 
     it('should render logo as a link to home', () => {
       render(<Header />);
 
-      const logoLink = screen.getByRole('link', { name: /^tarot$/i });
+      const logoLink = screen.getByRole('link', { name: /^auguria$/i });
       expect(logoLink).toHaveAttribute('href', '/');
     });
   });

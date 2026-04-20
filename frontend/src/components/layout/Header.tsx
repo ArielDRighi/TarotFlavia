@@ -39,7 +39,7 @@ export function Header() {
 
         {/* Logo - centered on mobile, left on desktop */}
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
-          <span className="text-primary font-serif text-2xl font-semibold">Tarot</span>
+          <span className="text-primary font-serif text-2xl font-semibold">Auguria</span>
         </Link>
 
         {/* Desktop navigation */}

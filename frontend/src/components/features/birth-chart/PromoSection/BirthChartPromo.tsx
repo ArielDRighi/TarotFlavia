@@ -10,6 +10,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Star, Sparkles, Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -40,11 +41,11 @@ export function BirthChartPromo({ variant = 'section', className }: BirthChartPr
                 Nuevo
               </Badge>
 
-              <h2 className="font-serif text-4xl font-bold text-gray-900 md:text-5xl dark:text-white">
+              <h2 className="text-text-primary font-serif text-4xl font-bold md:text-5xl">
                 Carta Astral Personalizada
               </h2>
 
-              <p className="text-lg text-gray-600 md:text-xl dark:text-gray-300">
+              <p className="text-text-muted text-lg md:text-xl">
                 Descubre el mapa del cielo en el momento exacto de tu nacimiento. Conoce tus
                 posiciones planetarias, aspectos y cómo influyen en tu personalidad.
               </p>
@@ -54,20 +55,20 @@ export function BirthChartPromo({ variant = 'section', className }: BirthChartPr
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                <span className="text-gray-700 dark:text-gray-300">
+                <span className="text-text-primary">
                   Posiciones planetarias exactas al momento de tu nacimiento
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                <span className="text-gray-700 dark:text-gray-300">
+                <span className="text-text-primary">
                   Interpretación de aspectos y su influencia en tu vida
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="text-primary mt-1 h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  Síntesis personalizada con IA para usuarios Premium
+                <span className="text-text-primary">
+                  Síntesis personalizada y detallada para usuarios Premium
                 </span>
               </li>
             </ul>
@@ -81,21 +82,13 @@ export function BirthChartPromo({ variant = 'section', className }: BirthChartPr
           </div>
 
           {/* Visual decorativo */}
-          <div className="bg-primary/5 relative flex items-center justify-center rounded-3xl p-12 lg:h-[400px]">
-            <div className="relative">
-              {/* Icono central grande */}
-              <div className="bg-primary/10 mx-auto flex h-32 w-32 items-center justify-center rounded-full">
-                <Star className="text-primary h-16 w-16" aria-hidden="true" />
-              </div>
-
-              {/* Iconos orbitales decorativos */}
-              <div className="absolute top-0 -left-8 animate-pulse">
-                <Sparkles className="text-primary/60 h-8 w-8" aria-hidden="true" />
-              </div>
-              <div className="absolute -right-8 bottom-0 animate-pulse delay-300">
-                <Sparkles className="text-primary/60 h-8 w-8" aria-hidden="true" />
-              </div>
-            </div>
+          <div className="relative overflow-hidden rounded-3xl lg:h-[400px]">
+            <Image
+              src="/images/birth-chart-promo.webp"
+              alt="Carta astral con constelaciones y símbolos astrológicos"
+              fill
+              className="object-cover"
+            />
           </div>
         </div>
       </section>

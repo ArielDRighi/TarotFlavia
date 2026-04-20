@@ -39,7 +39,7 @@ describe('BirthChartPromo', () => {
 
       expect(screen.getByText(/posiciones planetarias exactas/i)).toBeInTheDocument();
       expect(screen.getByText(/interpretación de aspectos/i)).toBeInTheDocument();
-      expect(screen.getByText(/síntesis personalizada con ia/i)).toBeInTheDocument();
+      expect(screen.getByText(/síntesis personalizada y detallada/i)).toBeInTheDocument();
     });
 
     it('should have data-testid="birth-chart-promo-hero"', () => {

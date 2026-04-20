@@ -7,25 +7,26 @@ describe('HeroSection', () => {
     render(<HeroSection />);
 
     const headline = screen.getByRole('heading', {
-      name: /auguria.*descubre tu destino a través del tarot/i,
       level: 1,
     });
 
     expect(headline).toBeInTheDocument();
+    expect(headline).toHaveTextContent(/descubre tu destino/i);
+    expect(headline).toHaveTextContent(/a través del tarot/i);
   });
 
   it('should render subheadline with value proposition', () => {
     render(<HeroSection />);
 
-    const subheadline = screen.getByText(/lecturas de tarot personalizadas/i);
+    const subheadline = screen.getByText(/lecturas personalizadas que iluminan tu camino/i);
 
     expect(subheadline).toBeInTheDocument();
   });
 
-  it('should render primary CTA button "Ver mi carta del día gratis"', () => {
+  it('should render primary CTA button "Carta del día gratis"', () => {
     render(<HeroSection />);
 
-    const primaryCTA = screen.getByRole('link', { name: /ver mi carta del día gratis/i });
+    const primaryCTA = screen.getByRole('link', { name: /carta del día gratis/i });
 
     expect(primaryCTA).toBeInTheDocument();
     expect(primaryCTA).toHaveAttribute('href', '/carta-del-dia');
@@ -40,12 +41,10 @@ describe('HeroSection', () => {
     expect(secondaryCTA).toHaveAttribute('href', '/registro');
   });
 
-  it('should render hero image with alt text', () => {
+  it('should render eyebrow text with spiritual guide message', () => {
     render(<HeroSection />);
 
-    const heroImage = screen.getByRole('img', { name: /cartas de tarot/i });
-
-    expect(heroImage).toBeInTheDocument();
+    expect(screen.getByText(/tu guía espiritual/i)).toBeInTheDocument();
   });
 
   it('should have proper semantic structure with section tag', () => {
