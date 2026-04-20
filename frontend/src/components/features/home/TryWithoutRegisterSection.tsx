@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Clock } from 'lucide-react';
+import { Sparkles, Clock, Star, Sun, Moon } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/routes';
 
 // Key for tracking if anonymous user consumed their daily card
@@ -37,37 +38,94 @@ export function TryWithoutRegisterSection() {
   const [limitReached] = useState(() => checkDailyCardConsumed());
 
   return (
-    <section className="container mx-auto px-4 py-12 md:py-16">
-      <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:border-purple-800 dark:from-purple-950/20 dark:to-pink-950/20">
-        <CardContent className="flex flex-col items-center p-8 text-center md:p-12">
+    <section className="bg-bg-main px-4 py-16 md:py-24">
+      <Card
+        className="relative container mx-auto overflow-hidden border-0 shadow-lg"
+        style={{
+          background: 'linear-gradient(135deg, #f2eef9 0%, #fdf6e7 100%)',
+        }}
+      >
+        {/* Background image — incense fills entire card, cropped naturally by container */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          <Image
+            src="/images/incense-bg.webp"
+            alt=""
+            fill
+            sizes="(max-width: 1280px) 100vw, 1280px"
+            className="object-cover object-bottom"
+            style={{ mixBlendMode: 'multiply', opacity: 0.3 }}
+            aria-hidden="true"
+          />
+        </div>
+
+        {/* Decorative elements */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <Star
+            className="absolute right-10 bottom-8 h-4 w-4 opacity-10"
+            style={{ color: '#d69e2e' }}
+          />
+          <Sun
+            className="absolute bottom-10 left-12 h-5 w-5 opacity-10"
+            style={{ color: '#d69e2e' }}
+          />
+          <Sparkles
+            className="absolute top-1/2 left-6 h-4 w-4 -translate-y-1/2 opacity-10"
+            style={{ color: '#805ad5' }}
+          />
+          <Sparkles
+            className="absolute top-1/2 right-6 h-4 w-4 -translate-y-1/2 opacity-10"
+            style={{ color: '#d69e2e' }}
+          />
+        </div>
+
+        <CardContent className="relative flex flex-col items-center p-10 text-center md:p-16">
           {/* Icon */}
           <div
             data-testid="try-without-register-icon"
-            className="mb-6 rounded-full bg-purple-100 p-4 dark:bg-purple-900/30"
+            className="mb-6 rounded-full p-4"
+            style={{ background: 'rgba(128, 90, 213, 0.1)' }}
           >
             {limitReached ? (
-              <Clock className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              <Clock className="text-primary h-8 w-8" />
             ) : (
-              <Sparkles className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              <Sparkles className="text-primary h-8 w-8" />
             )}
           </div>
 
           {/* Title */}
-          <h2 className="mb-4 font-serif text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">
+          <h2 className="text-text-primary mb-4 font-serif text-3xl font-light md:text-4xl">
             {limitReached ? 'Límite Diario Alcanzado' : 'Prueba sin compromiso'}
           </h2>
 
           {/* Description */}
-          <p className="mb-6 max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+          <p className="text-text-muted mb-6 max-w-2xl font-sans text-lg">
             {limitReached
               ? 'Ya has visto tu carta del día. El límite se restablecerá en 24 horas. Regístrate gratis para obtener más lecturas diarias.'
               : '1 carta aleatoria sin necesidad de registrarte. Experimenta la magia del tarot de forma inmediata.'}
           </p>
 
+          {/* Feature highlights */}
+          {!limitReached && (
+            <div className="mb-8 flex flex-wrap items-center justify-center gap-4 text-sm">
+              <span className="text-text-muted flex items-center gap-1.5 rounded-full bg-white/60 px-3 py-1.5">
+                <Star className="h-3.5 w-3.5" style={{ color: '#d69e2e' }} />
+                Sin registro
+              </span>
+              <span className="text-text-muted flex items-center gap-1.5 rounded-full bg-white/60 px-3 py-1.5">
+                <Sparkles className="h-3.5 w-3.5" style={{ color: '#805ad5' }} />
+                Resultado inmediato
+              </span>
+              <span className="text-text-muted flex items-center gap-1.5 rounded-full bg-white/60 px-3 py-1.5">
+                <Moon className="h-3.5 w-3.5" style={{ color: '#805ad5' }} />
+                <span>1 vez al día</span>
+              </span>
+            </div>
+          )}
+
           {/* CTA Button */}
           {limitReached ? (
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700">
+              <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
                 <Link href={ROUTES.REGISTER}>Crear Cuenta Gratis</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
@@ -75,7 +133,7 @@ export function TryWithoutRegisterSection() {
               </Button>
             </div>
           ) : (
-            <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700">
+            <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
               <Link href={ROUTES.CARTA_DEL_DIA}>Carta del Día Gratis</Link>
             </Button>
           )}

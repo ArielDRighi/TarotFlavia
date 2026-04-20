@@ -17,7 +17,7 @@ describe('PremiumBenefitsSection', () => {
   it('should render premium interpretations benefit', () => {
     render(<PremiumBenefitsSection />);
 
-    const interpretationsBenefit = screen.getByText(/interpretaciones personalizadas y profundas/i);
+    const interpretationsBenefit = screen.getByText(/interpretaciones profundas y personalizadas/i);
 
     expect(interpretationsBenefit).toBeInTheDocument();
   });
@@ -41,7 +41,7 @@ describe('PremiumBenefitsSection', () => {
   it('should render statistics benefit', () => {
     render(<PremiumBenefitsSection />);
 
-    const statsBenefit = screen.getByText(/estadísticas avanzadas/i);
+    const statsBenefit = screen.getByText(/historial y estadísticas/i);
 
     expect(statsBenefit).toBeInTheDocument();
   });
@@ -57,7 +57,7 @@ describe('PremiumBenefitsSection', () => {
   it('should display pricing information', () => {
     render(<PremiumBenefitsSection />);
 
-    const pricing = screen.getByText(/\$9\.99\/mes/i);
+    const pricing = screen.getByText(/\$7\.000/);
 
     expect(pricing).toBeInTheDocument();
   });
@@ -79,11 +79,11 @@ describe('PremiumBenefitsSection', () => {
     expect(section).toBeInTheDocument();
   });
 
-  it('should render exactly 5 benefit items', () => {
+  it('should render exactly 6 benefit items', () => {
     const { container } = render(<PremiumBenefitsSection />);
 
     const benefitItems = container.querySelectorAll('[data-testid="benefit-item"]');
 
-    expect(benefitItems).toHaveLength(5);
+    expect(benefitItems).toHaveLength(6);
   });
 });
