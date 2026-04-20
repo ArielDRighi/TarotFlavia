@@ -116,7 +116,8 @@ export function TryWithoutRegisterSection() {
                 Resultado inmediato
               </span>
               <span className="text-text-muted flex items-center gap-1.5 rounded-full bg-white/60 px-3 py-1.5">
-                <Moon className="h-3.5 w-3.5" style={{ color: '#805ad5' }} />1 vez al día
+                <Moon className="h-3.5 w-3.5" style={{ color: '#805ad5' }} />
+                <span>1 vez al día</span>
               </span>
             </div>
           )}

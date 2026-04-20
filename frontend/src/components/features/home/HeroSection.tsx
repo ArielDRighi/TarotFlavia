@@ -46,7 +46,7 @@ export function HeroSection() {
           alt="Auguria"
           width={655}
           height={386}
-          className="h-20 w-auto drop-shadow-lg md:h-26"
+          className="h-20 w-auto drop-shadow-lg md:h-[6.5rem]"
           priority
         />
       </div>
