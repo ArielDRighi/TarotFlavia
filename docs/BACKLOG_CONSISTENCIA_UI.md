@@ -290,18 +290,18 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 
 ## Índice de Tareas Técnicas
 
-| ID | Tarea | Prioridad | Estimación | Dependencias |
-| --- | --- | --- | --- | --- |
+| ID | Tarea | Prioridad | Estimación | Dependencias | Estado |
+| --- | --- | --- | --- | --- | --- |
 | T-UI-01 | Migrar loading states a `<Spinner>` | 🔴 Crítica | 1 día | — | ✅ COMPLETADA |
-| T-UI-02 | Migrar empty states a `<EmptyState>` | 🔴 Crítica | 1.5 días | — |
-| T-UI-03 | Migrar error states a `<ErrorDisplay>` y unificar copy "Intentar de nuevo" | 🔴 Crítica | 1 día | — |
-| T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — |
-| T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) |
-| T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — |
-| T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — |
-| T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 |
-| T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — |
-| T-UI-10 | Renombrar/unificar uso de "Próximamente" | 🟢 Baja | 0.25 día | — |
+| T-UI-02 | Migrar empty states a `<EmptyState>` | 🔴 Crítica | 1.5 días | — | ⏳ PENDIENTE |
+| T-UI-03 | Migrar error states a `<ErrorDisplay>` y unificar copy "Intentar de nuevo" | 🔴 Crítica | 1 día | — | ⏳ PENDIENTE |
+| T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — | ⏳ PENDIENTE |
+| T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ⏳ PENDIENTE |
+| T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ⏳ PENDIENTE |
+| T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ⏳ PENDIENTE |
+| T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ⏳ PENDIENTE |
+| T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — | ⏳ PENDIENTE |
+| T-UI-10 | Renombrar/unificar uso de "Próximamente" | 🟢 Baja | 0.25 día | — | ⏳ PENDIENTE |
 
 **Estimación total:** ~8.5 días.
 
@@ -325,13 +325,13 @@ Reemplazar todos los `<p>Cargando...</p>`, `<div className="animate-pulse">Carga
 
 #### ✅ Tareas específicas
 
-- [x] [`BookingPage.tsx:86`](../frontend/src/components/features/marketplace/BookingPage.tsx#L86) — reemplazar `<p>Cargando...</p>` por `<Spinner size="md" text="Cargando..." />`.
-- [x] [`BookingCalendar.tsx:233`](../frontend/src/components/features/marketplace/BookingCalendar.tsx#L233) — `<Spinner size="sm" text="Cargando horarios disponibles..." />` (mantener los `<Skeleton>` previos solo si aplica jerarquía visual).
-- [x] [`tarotistas/[id]/reservar/page.tsx:28`](../frontend/src/app/tarotistas/[id]/reservar/page.tsx#L28) — `<Spinner />`.
-- [x] [`SacredEventsWidget.tsx:127-132`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L127-L132) — quitar `animate-pulse` envolvente, usar `<Spinner size="md" text="Cargando eventos..." />` (preserva el feel del widget si se desea, pero alineado al primitivo).
-- [x] [`ReadingExperience.tsx:522`](../frontend/src/components/features/readings/ReadingExperience.tsx#L522) — reemplazar `<div className="animate-pulse">Cargando...</div>`.
-- [x] [`CacheManagementContent.tsx:134`](../frontend/src/components/features/admin/CacheManagementContent.tsx#L134) — `<Spinner />` con padding del contenedor.
-- [x] [`AnimalHoroscopePage.tsx:118`](../frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx#L118).
+- [x] [`BookingPage.tsx`](../frontend/src/components/features/marketplace/BookingPage.tsx) — reemplazar `<p>Cargando...</p>` por `<Spinner size="md" text="Cargando..." />`.
+- [x] [`BookingCalendar.tsx`](../frontend/src/components/features/marketplace/BookingCalendar.tsx) — `<Spinner size="sm" text="Cargando horarios disponibles..." />` (mantener los `<Skeleton>` previos solo si aplica jerarquía visual).
+- [x] [`tarotistas/[id]/reservar/page.tsx`](../frontend/src/app/tarotistas/%5Bid%5D/reservar/page.tsx) — `<Spinner />`.
+- [x] [`SacredEventsWidget.tsx`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx) — quitar `animate-pulse` envolvente, usar `<Spinner size="md" text="Cargando eventos..." />` (preserva el feel del widget si se desea, pero alineado al primitivo).
+- [x] [`ReadingExperience.tsx`](../frontend/src/components/features/readings/ReadingExperience.tsx) — reemplazar `<div className="animate-pulse">Cargando...</div>`.
+- [x] [`CacheManagementContent.tsx`](../frontend/src/components/features/admin/CacheManagementContent.tsx) — `<Spinner />` con padding del contenedor.
+- [x] [`AnimalHoroscopePage.tsx`](../frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx).
 - [x] Auditar otros usos de `Cargando` con grep `Cargando` (excluyendo tests y `loading.tsx`) y migrar.
 - [x] Si en algún lugar el botón muestra texto "Cargando..." durante mutación (ej: `UpgradeModal:170`, `UpgradeBanner:53`), considerar reemplazar por `<Spinner size="sm" />` dentro del `<Button disabled>` — decisión: copys en botones de mutación NO se migran (son labels de estado, no loading states de página).
 
