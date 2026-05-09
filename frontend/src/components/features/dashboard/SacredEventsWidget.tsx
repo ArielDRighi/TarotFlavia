@@ -4,6 +4,7 @@ import { CalendarHeart, Moon, Sun, Sparkles, ChevronRight, Zap } from 'lucide-re
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { useTodayEvents, useUpcomingEvents } from '@/hooks/api/useSacredCalendar';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
@@ -124,11 +125,8 @@ export function SacredEventsWidget() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="py-8 text-center">
-          <div className="animate-pulse">
-            <CalendarHeart className="mx-auto mb-2 h-12 w-12 text-purple-300" />
-            <p className="text-sm text-gray-500">Cargando eventos...</p>
-          </div>
+        <div className="py-8">
+          <Spinner size="md" text="Cargando eventos..." />
         </div>
       )}
 

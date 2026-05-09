@@ -13,6 +13,7 @@ import { useHolisticServiceAvailability } from '@/hooks/api/useHolisticServices'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import {
   format,
   addMonths,
@@ -230,7 +231,7 @@ export function BookingCalendar({
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
-              <p className="text-sm text-gray-500">Cargando horarios disponibles...</p>
+              <Spinner size="sm" text="Cargando horarios disponibles..." />
             </div>
           )}
 

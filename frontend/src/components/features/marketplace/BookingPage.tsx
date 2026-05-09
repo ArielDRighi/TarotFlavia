@@ -35,6 +35,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 import type { BookSessionDto, Session } from '@/types/session.types';
 
@@ -83,7 +84,7 @@ export function BookingPage({ tarotistaId }: BookingPageProps) {
         <Skeleton className="mb-4 h-6 w-64" />
         <Skeleton className="mb-8 h-24 w-full" />
         <Skeleton className="h-96 w-full" />
-        <p className="mt-4 text-center text-sm text-gray-500">Cargando...</p>
+        <Spinner size="md" text="Cargando..." className="mt-4" />
       </div>
     );
   }
