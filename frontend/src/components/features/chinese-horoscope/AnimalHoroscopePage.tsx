@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Spinner } from '@/components/ui/spinner';
 import {
   ChineseHoroscopeDetail,
   ChineseAnimalSelector,
@@ -115,7 +116,9 @@ export function AnimalHoroscopePage() {
       {element && (
         <>
           {isLoading ? (
-            <div className="py-8 text-center">Cargando horóscopo...</div>
+            <div className="py-8">
+              <Spinner size="md" text="Cargando horóscopo..." />
+            </div>
           ) : error ? (
             <div className="py-8 text-center">
               <p className="text-muted-foreground">Horóscopo no disponible para {currentYear}</p>

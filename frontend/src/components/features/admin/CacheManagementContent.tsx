@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { RefreshCw, Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Select,
   SelectContent,
@@ -131,7 +132,11 @@ export function CacheManagementContent() {
   }
 
   if (isLoading || !analytics) {
-    return <div className="py-12 text-center">Cargando...</div>;
+    return (
+      <div className="py-12">
+        <Spinner size="md" text="Cargando..." />
+      </div>
+    );
   }
 
   const tarotistas = tarotistasResponse?.data || [];
@@ -336,9 +341,7 @@ export function CacheManagementContent() {
         </Card>
       )}
 
-      {warmingLoading && (
-        <p className="text-muted-foreground text-center">Cargando warming status...</p>
-      )}
+      {warmingLoading && <Spinner size="sm" text="Cargando warming status..." />}
       {warmingError && (
         <p className="text-destructive text-center">Error al cargar warming status</p>
       )}
