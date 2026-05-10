@@ -26,7 +26,7 @@ El sistema de diseño ya provee primitivos reutilizables en `src/components/ui/`
 | --- | --- | --- |
 | Fuente de verdad para loading/empty/error | **Componentes en `components/ui/`** | Ya existen, testeados y documentados |
 | Estilos de banners/alertas | **`<Alert>` de shadcn** con variantes | Variantes tipadas y accesibles |
-| Skeletons | **`<Skeleton>` de `components/ui/skeleton.tsx`** | Token visual (`bg-muted`) ya alineado |
+| Skeletons | **`<Skeleton>` de `components/ui/skeleton.tsx`** | Token visual (`bg-accent`) ya alineado |
 | Mensajes transitorios | **`toast.*` (Sonner)** | Patrón establecido en `authStore` |
 | Mensajes persistentes | **`<Alert>` inline** | Permanecen visibles |
 | Copy de CTAs Premium | **Constantes en `lib/constants/`** | Evita drift de copy |
@@ -518,7 +518,7 @@ Existen 6 copys distintos para la misma acción ("Comenzar ahora", "Upgrade a Pr
 
 #### 📋 Descripción
 
-Reemplazar `<div className="animate-pulse rounded bg-gray-200 ..." />` y derivados por `<Skeleton>` de [`components/ui/skeleton.tsx`](../frontend/src/components/ui/skeleton.tsx). El componente ya usa `bg-muted` (token correcto del design system).
+Reemplazar `<div className="animate-pulse rounded bg-gray-200 ..." />` y derivados por `<Skeleton>` de [`components/ui/skeleton.tsx`](../frontend/src/components/ui/skeleton.tsx). El componente ya usa `bg-accent` (token aplicado internamente por el componente).
 
 #### ✅ Tareas específicas
 
