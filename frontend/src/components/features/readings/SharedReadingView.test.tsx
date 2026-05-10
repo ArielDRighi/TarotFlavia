@@ -117,7 +117,7 @@ El Loco y el Mago juntos indican un nuevo comienzo lleno de potencial.`,
     render(<SharedReadingView {...defaultProps} />);
 
     expect(screen.getByText('¿Quieres tu propia lectura?')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /crear mi cuenta gratis/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /crear cuenta gratis/i })).toHaveAttribute(
       'href',
       '/registro'
     );

@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/stores/authStore';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 /**
  * UserMenu component
@@ -30,7 +31,7 @@ export function UserMenu() {
           <Link href="/login">Iniciar Sesión</Link>
         </Button>
         <Button variant="default" asChild>
-          <Link href="/registro">Registrarse</Link>
+          <Link href="/registro">{CTA_AUTH.REGISTER}</Link>
         </Button>
       </div>
     );
