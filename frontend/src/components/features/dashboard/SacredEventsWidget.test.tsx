@@ -316,7 +316,7 @@ describe('SacredEventsWidget', () => {
       renderComponent();
 
       expect(screen.getByText('Desbloquea el calendario completo')).toBeInTheDocument();
-      expect(screen.getByText('Mejorar a Premium')).toBeInTheDocument();
+      expect(screen.getByText('Upgrade a Premium')).toBeInTheDocument();
     });
 
     it('should hide upsell section for premium users', () => {
@@ -328,7 +328,7 @@ describe('SacredEventsWidget', () => {
       renderComponent();
 
       expect(screen.queryByText('Desbloquea el calendario completo')).not.toBeInTheDocument();
-      expect(screen.queryByText('Mejorar a Premium')).not.toBeInTheDocument();
+      expect(screen.queryByText('Upgrade a Premium')).not.toBeInTheDocument();
     });
   });
 
@@ -418,7 +418,7 @@ describe('SacredEventsWidget', () => {
 
       renderComponent();
 
-      const link = screen.getByText('Mejorar a Premium').closest('a');
+      const link = screen.getByText('Upgrade a Premium').closest('a');
       expect(link).toHaveAttribute('href', '/premium');
     });
   });

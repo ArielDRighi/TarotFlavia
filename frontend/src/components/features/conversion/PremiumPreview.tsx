@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
 import { ROUTES } from '@/lib/constants/routes';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import type { ReactNode } from 'react';
 
 /**
@@ -77,7 +78,7 @@ export default function PremiumPreview({
             className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
             size="lg"
           >
-            {isPending ? 'Cargando...' : 'Actualizar a Premium'}
+            {isPending ? 'Cargando...' : CTA_PREMIUM.PURCHASE}
           </Button>
         </div>
       </div>

@@ -72,7 +72,7 @@ describe('UpgradeModal', () => {
     it('should render CTA button', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      expect(screen.getByRole('button', { name: /Comenzar ahora/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Mejorar a Premium/i })).toBeInTheDocument();
     });
 
     it('should render "Más información" link', () => {
@@ -105,17 +105,17 @@ describe('UpgradeModal', () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it('should enable "Comenzar ahora" CTA button for free users', () => {
+    it('should enable "Mejorar a Premium" CTA button for free users', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+      const ctaButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
       expect(ctaButton).not.toBeDisabled();
     });
 
-    it('should call createPreapproval mutate when clicking "Comenzar ahora" as free user', () => {
+    it('should call createPreapproval mutate when clicking "Mejorar a Premium" as free user', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+      const ctaButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
       fireEvent.click(ctaButton);
 
       expect(mockMutate).toHaveBeenCalledTimes(1);
@@ -143,7 +143,7 @@ describe('UpgradeModal', () => {
 
         render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-        const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+        const ctaButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
         fireEvent.click(ctaButton);
 
         expect(window.location.href).toBe(initPoint);
@@ -160,7 +160,7 @@ describe('UpgradeModal', () => {
 
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+      const ctaButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
       fireEvent.click(ctaButton);
 
       expect(mockRouterPush).toHaveBeenCalledWith(

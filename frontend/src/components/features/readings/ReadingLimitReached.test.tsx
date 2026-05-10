@@ -68,7 +68,7 @@ describe('ReadingLimitReached', () => {
   it('should render upgrade premium button', () => {
     render(<ReadingLimitReached />);
 
-    const upgradeButton = screen.getByRole('button', { name: /Actualizar a Premium/i });
+    const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
     expect(upgradeButton).toBeInTheDocument();
   });
 
@@ -90,7 +90,7 @@ describe('ReadingLimitReached', () => {
     const user = userEvent.setup();
     render(<ReadingLimitReached />);
 
-    const upgradeButton = screen.getByRole('button', { name: /Actualizar a Premium/i });
+    const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
     await user.click(upgradeButton);
 
     expect(mockPush).toHaveBeenCalledWith('/planes');
@@ -126,7 +126,7 @@ describe('ReadingLimitReached', () => {
   it('should have primary button styling on upgrade button', () => {
     render(<ReadingLimitReached />);
 
-    const upgradeButton = screen.getByRole('button', { name: /Actualizar a Premium/i });
+    const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
     expect(upgradeButton).toHaveClass('bg-gradient-to-r', 'from-purple-600', 'to-amber-600');
   });
 

@@ -5,6 +5,7 @@ import { Calendar, History, Crown, Sparkles } from 'lucide-react';
 
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import {
   Card,
   CardContent,
@@ -133,7 +134,7 @@ export function ReadingLimitReached() {
           size="lg"
         >
           <Crown className="h-4 w-4" />
-          Actualizar a Premium
+          {CTA_PREMIUM.LIMIT_REACHED}
         </Button>
         <div className="flex w-full flex-col gap-2 sm:flex-row">
           <Button
