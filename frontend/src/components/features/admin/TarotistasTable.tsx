@@ -24,7 +24,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Eye, Settings, Ban, RefreshCw, BarChart3 } from 'lucide-react';
+import { MoreHorizontal, Eye, Settings, Ban, RefreshCw, BarChart3, Users } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { AdminTarotista } from '@/types/admin-tarotistas.types';
 
 interface TarotistasTableProps {
@@ -49,9 +50,11 @@ const formatRating = (value: number | null) => {
 export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) {
   if (tarotistas.length === 0) {
     return (
-      <div className="border-border bg-bg-main rounded-lg border p-8 text-center">
-        <p className="text-muted-foreground">No hay tarotistas para mostrar</p>
-      </div>
+      <EmptyState
+        icon={<Users />}
+        title="Sin tarotistas"
+        message="No hay tarotistas para mostrar"
+      />
     );
   }
 

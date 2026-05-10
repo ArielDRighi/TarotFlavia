@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useTodayEvents, useUpcomingEvents } from '@/hooks/api/useSacredCalendar';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
@@ -139,10 +140,12 @@ export function SacredEventsWidget() {
 
       {/* Empty State */}
       {!isLoading && !hasError && !hasAnyEvents && (
-        <div className="py-8 text-center">
-          <CalendarHeart className="mx-auto mb-2 h-12 w-12 text-gray-300" />
-          <p className="text-sm text-gray-500">No hay eventos próximos en el calendario sagrado.</p>
-        </div>
+        <EmptyState
+          icon={<CalendarHeart />}
+          title="Sin eventos próximos"
+          message="No hay eventos próximos en el calendario sagrado."
+          className="py-4"
+        />
       )}
 
       {/* Content */}

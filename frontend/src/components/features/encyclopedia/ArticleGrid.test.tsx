@@ -105,10 +105,11 @@ describe('ArticleGrid', () => {
     });
 
     it('debe aplicar className personalizado en estado vacío', () => {
-      render(<ArticleGrid articles={[]} className="empty-class" />);
+      const { container } = render(<ArticleGrid articles={[]} className="empty-class" />);
 
-      const emptyDiv = screen.getByText('No se encontraron artículos').closest('div');
-      expect(emptyDiv).toHaveClass('empty-class');
+      // EmptyState recibe className y lo aplica en su div raíz (primer hijo del container)
+      const emptyContainer = container.firstChild;
+      expect(emptyContainer).toHaveClass('empty-class');
     });
   });
 });

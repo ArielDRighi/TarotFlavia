@@ -12,7 +12,7 @@
 'use client';
 
 import Link from 'next/link';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Globe } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import {
   PLANETS,
@@ -123,9 +124,11 @@ export function PlanetPositionsTable({
   // Empty state
   if (allPositions.length === 0) {
     const emptyContent = (
-      <div className="border-border bg-bg-main rounded-lg border p-8 text-center">
-        <p className="text-muted-foreground">No hay datos de posiciones planetarias</p>
-      </div>
+      <EmptyState
+        icon={<Globe />}
+        title="Sin datos planetarios"
+        message="No hay datos de posiciones planetarias"
+      />
     );
 
     return showCard ? (

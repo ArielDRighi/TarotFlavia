@@ -2,6 +2,7 @@
 
 import { CardThumbnail } from './CardThumbnail';
 import { EncyclopediaSkeleton } from './EncyclopediaSkeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import type { CardSummary } from '@/types/encyclopedia.types';
 
@@ -50,7 +51,7 @@ export function CardGrid({
   }
 
   if (cards.length === 0) {
-    return <div className="text-muted-foreground py-12 text-center">{emptyMessage}</div>;
+    return <EmptyState className="py-12" title="Sin resultados" message={emptyMessage} />;
   }
 
   return (

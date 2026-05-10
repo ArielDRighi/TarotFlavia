@@ -13,6 +13,7 @@ import { TarotistasTable } from './TarotistasTable';
 import { ApplicationCard } from './ApplicationCard';
 import { Pagination } from './Pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useAdminTarotistas, useTarotistaApplications } from '@/hooks/api/useAdminTarotistas';
 import {
   useDeactivateTarotista,
@@ -222,9 +223,7 @@ export function TarotistasManagementContent() {
               )}
             </>
           ) : (
-            <div className="border-border bg-bg-main rounded-lg border p-8 text-center">
-              <p className="text-muted-foreground">No hay tarotistas registrados</p>
-            </div>
+            <EmptyState title="Sin tarotistas" message="No hay tarotistas registrados" />
           )}
         </TabsContent>
 

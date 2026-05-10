@@ -24,8 +24,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Ban, Shield, CreditCard } from 'lucide-react';
+import { MoreHorizontal, Ban, Shield, CreditCard, Users } from 'lucide-react';
 import { parseTimestamp } from '@/lib/utils/date';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { AdminUser } from '@/types/admin-users.types';
 import type { UserPlan, UserRole } from '@/types/user.types';
 
@@ -61,9 +62,7 @@ function getRoleVariant(role: UserRole): 'default' | 'secondary' | 'outline' {
 export function UsersTable({ users, onAction }: UsersTableProps) {
   if (users.length === 0) {
     return (
-      <div className="border-border bg-bg-main rounded-lg border p-8 text-center">
-        <p className="text-muted-foreground">No hay usuarios para mostrar</p>
-      </div>
+      <EmptyState icon={<Users />} title="Sin usuarios" message="No hay usuarios para mostrar" />
     );
   }
 
