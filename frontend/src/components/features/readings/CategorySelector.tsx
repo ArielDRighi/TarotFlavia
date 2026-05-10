@@ -20,6 +20,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types';
 
@@ -65,10 +66,10 @@ const categoryIconColors: Record<string, string> = {
  */
 function SkeletonCategoryCard() {
   return (
-    <div data-testid="skeleton-card" className="bg-card animate-pulse rounded-lg border p-6">
+    <div data-testid="skeleton-card" className="rounded-lg border p-6">
       <div className="flex flex-col items-center gap-4">
-        <div className="h-16 w-16 rounded-full bg-gray-200" />
-        <div className="h-6 w-24 rounded bg-gray-200" />
+        <Skeleton className="h-16 w-16 rounded-full" />
+        <Skeleton className="h-6 w-24" />
       </div>
     </div>
   );
