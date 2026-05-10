@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { toast } from 'sonner';
 import type { BookSessionDto, Session } from '@/types/session.types';
 
@@ -71,7 +72,12 @@ interface BookingPageProps {
 export function BookingPage({ tarotistaId }: BookingPageProps) {
   const router = useRouter();
 
-  const { data: tarotista, isLoading: isTarotistaLoading, error } = useTarotistaDetail(tarotistaId);
+  const {
+    data: tarotista,
+    isLoading: isTarotistaLoading,
+    error,
+    refetch,
+  } = useTarotistaDetail(tarotistaId);
   const { mutate: bookSession, isPending: isBooking } = useBookSession();
 
   const [confirmationData, setConfirmationData] = useState<Session | null>(null);
@@ -94,11 +100,13 @@ export function BookingPage({ tarotistaId }: BookingPageProps) {
     return (
       <div className="container py-8">
         <Card>
-          <CardContent className="p-8 text-center">
-            <p className="text-red-600">Error al cargar el tarotista</p>
-            <Button variant="outline" className="mt-4" onClick={() => router.push('/explorar')}>
-              Volver a explorar
-            </Button>
+          <CardContent className="p-8">
+            <ErrorDisplay message="Error al cargar el tarotista" onRetry={() => void refetch()} />
+            <div className="mt-2 flex justify-center">
+              <Button variant="outline" onClick={() => router.push('/explorar')}>
+                Volver a explorar
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

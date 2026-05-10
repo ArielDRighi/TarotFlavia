@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import {
   format,
   addMonths,
@@ -88,6 +89,7 @@ export function BookingCalendar({
     data: authenticatedSlots,
     isLoading: isLoadingAuthenticated,
     isError: isErrorAuthenticated,
+    refetch: refetchAuthenticated,
   } = useAvailableSlots(tarotistaId, !usePublicSlots ? selectedDate : '', selectedDuration);
 
   // Fetch slots via public endpoint (service detail page with serviceSlug)
@@ -95,10 +97,12 @@ export function BookingCalendar({
     data: publicAvailability,
     isLoading: isLoadingPublic,
     isError: isErrorPublic,
+    refetch: refetchPublic,
   } = useHolisticServiceAvailability(serviceSlug ?? '', usePublicSlots ? selectedDate : '');
   const slots = usePublicSlots ? (publicAvailability?.slots ?? undefined) : authenticatedSlots;
   const isLoading = usePublicSlots ? isLoadingPublic : isLoadingAuthenticated;
   const isError = usePublicSlots ? isErrorPublic : isErrorAuthenticated;
+  const refetchSlots = usePublicSlots ? refetchPublic : refetchAuthenticated;
 
   // Navigation
   const handlePrevMonth = () => {
@@ -237,7 +241,11 @@ export function BookingCalendar({
           )}
 
           {!isLoading && isError && (
-            <p className="text-sm text-red-600">Error al cargar horarios disponibles</p>
+            <ErrorDisplay
+              message="Error al cargar horarios disponibles"
+              onRetry={() => refetchSlots()}
+              className="py-4"
+            />
           )}
 
           {!isLoading && !isError && slots && slots.length === 0 && (

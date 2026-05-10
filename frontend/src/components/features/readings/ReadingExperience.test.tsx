@@ -845,7 +845,7 @@ describe('ReadingExperience', () => {
       fireEvent.click(revealButton);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /Reintentar/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /intentar de nuevo/i })).toBeInTheDocument();
       });
     });
   });

@@ -512,7 +512,7 @@ describe('ReadingsHistory', () => {
 
       renderWithProviders(<ReadingsHistory />);
 
-      const retryButton = screen.getByRole('button', { name: /reintentar/i });
+      const retryButton = screen.getByRole('button', { name: /intentar de nuevo/i });
       await userEvent.click(retryButton);
 
       expect(mockRefetch).toHaveBeenCalled();

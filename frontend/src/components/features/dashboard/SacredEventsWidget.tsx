@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { useTodayEvents, useUpcomingEvents } from '@/hooks/api/useSacredCalendar';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
@@ -87,12 +88,18 @@ export function SacredEventsWidget() {
   const { user } = useAuthStore();
   const isPremium = user?.plan === 'premium';
 
-  const { data: todayEvents, isLoading: todayLoading, error: todayError } = useTodayEvents();
+  const {
+    data: todayEvents,
+    isLoading: todayLoading,
+    error: todayError,
+    refetch: refetchToday,
+  } = useTodayEvents();
 
   const {
     data: upcomingEventsData,
     isLoading: upcomingLoading,
     error: upcomingError,
+    refetch: refetchUpcoming,
   } = useUpcomingEvents(30);
 
   const isLoading = todayLoading || upcomingLoading;
@@ -133,9 +140,14 @@ export function SacredEventsWidget() {
 
       {/* Error State */}
       {hasError && !isLoading && (
-        <div className="py-8 text-center">
-          <p className="text-sm text-red-600">Error al cargar eventos. Inténtalo de nuevo.</p>
-        </div>
+        <ErrorDisplay
+          message="Error al cargar eventos"
+          onRetry={() => {
+            void refetchToday();
+            void refetchUpcoming();
+          }}
+          className="py-4"
+        />
       )}
 
       {/* Empty State */}
