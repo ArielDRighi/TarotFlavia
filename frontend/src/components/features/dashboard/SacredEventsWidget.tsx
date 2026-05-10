@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorDisplay } from '@/components/ui/error-display';
-import { PremiumUpsellCard } from '@/components/ui/PremiumUpsellCard';
+import { PremiumUpsellCard } from '@/components/ui/premium-upsell-card';
 import { useTodayEvents, useUpcomingEvents } from '@/hooks/api/useSacredCalendar';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';

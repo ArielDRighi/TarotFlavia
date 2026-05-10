@@ -116,7 +116,7 @@ export default function DailyLimitReachedModal({
 
         {/* Info Message */}
         <Alert variant="info">
-          <Calendar className="h-5 w-5" aria-hidden="true" />
+          <Calendar aria-hidden="true" />
           <AlertTitle>Tu límite se reinicia mañana</AlertTitle>
           <AlertDescription>
             Vuelve cada día para disfrutar de nuevas lecturas de tarot

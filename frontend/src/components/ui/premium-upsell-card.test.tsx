@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { PremiumUpsellCard } from './PremiumUpsellCard';
+import { PremiumUpsellCard } from './premium-upsell-card';
 
 describe('PremiumUpsellCard', () => {
   it('should render title', () => {

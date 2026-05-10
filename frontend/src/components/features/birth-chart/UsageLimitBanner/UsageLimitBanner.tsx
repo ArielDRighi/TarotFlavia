@@ -105,7 +105,7 @@ export function UsageLimitBanner({
   const alertVariant = isExhausted ? 'destructive' : isLow ? 'warning' : 'default';
 
   return (
-    <Alert variant={alertVariant} className={cn('relative', className)}>
+    <Alert variant={alertVariant} className={cn('relative grid-cols-1', className)}>
       {/* Botón cerrar */}
       {showDismiss && onDismiss && (
         <button

@@ -193,7 +193,12 @@ export function ServiceBookingPage({ purchaseId }: ServiceBookingPageProps) {
       <div data-testid="service-booking-page" className="bg-bg-main min-h-screen px-4 py-8 md:px-8">
         <div className="mx-auto max-w-2xl">
           <h1 className="mb-6 font-serif text-3xl font-semibold">Reservar Sesión</h1>
-          <Alert data-testid="payment-pending-notice" variant="warning">
+          <Alert
+            data-testid="payment-pending-notice"
+            variant="warning"
+            role="status"
+            aria-live="polite"
+          >
             <AlertDescription>
               Tu pago aún está siendo verificado. Te notificaremos cuando puedas reservar tu turno.
             </AlertDescription>
