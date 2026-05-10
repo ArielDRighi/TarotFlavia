@@ -396,10 +396,10 @@ Reemplazar los `<p className="text-red-600">Error al cargar...</p>` y los bloque
 
 #### ✅ Tareas específicas
 
-- [x] [`marketplace/BookingPage.tsx:97`](../frontend/src/components/features/marketplace/BookingPage.tsx#L97) — usar `<ErrorDisplay message="Error al cargar el tarotista" onRetry={...} />` y mantener el botón "Volver a explorar" como secundario fuera del componente si se desea.
+- [x] [`marketplace/BookingPage.tsx:97`](../frontend/src/components/features/marketplace/BookingPage.tsx#L97) — usar `<ErrorDisplay message="Error al cargar el tarotista" onRetry={() => void refetch()} />` y mantener el botón "Volver a explorar" como CTA secundario semánticamente distinto.
 - [x] [`marketplace/BookingCalendar.tsx:238`](../frontend/src/components/features/marketplace/BookingCalendar.tsx#L238) — `<ErrorDisplay message="Error al cargar horarios disponibles" onRetry={refetch} />`.
 - [x] [`dashboard/SacredEventsWidget.tsx:137-139`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L137-L139).
-- [x] [`admin/CacheManagementContent.tsx:124-129`](../frontend/src/components/features/admin/CacheManagementContent.tsx#L124-L129) — reemplazar el bloque (`<p text-destructive>` + botón "Reintentar") por `<ErrorDisplay onRetry={refetch} message="Error al cargar datos de caché" />`.
+- [x] [`admin/CacheManagementContent.tsx:124-129`](../frontend/src/components/features/admin/CacheManagementContent.tsx#L124-L129) — reemplazar el bloque (`<p text-destructive>` + botón "Reintentar") por `<ErrorDisplay onRetry={refetch} message="Error al cargar datos de caché" />`. También migrado `warmingError` inline al final del render.
 - [x] [`readings/ReadingExperience.tsx:702`](../frontend/src/components/features/readings/ReadingExperience.tsx#L702) — sustituir botón "Reintentar" por flujo con `<ErrorDisplay>`.
 - [x] **Decisión de copy:** copy canónico confirmado: "Intentar de nuevo". Tests actualizados:
   - [`src/app/historial/page.test.tsx:797`](../frontend/src/app/historial/page.test.tsx#L797) — cambiado `/reintentar/i` por `/intentar de nuevo/i`.
@@ -407,8 +407,9 @@ Reemplazar los `<p className="text-red-600">Error al cargar...</p>` y los bloque
 
 #### 🎯 Criterios de aceptación
 
-- [x] No quedan `<p className="text-red-600">Error...</p>` inline en componentes de feature.
-- [x] El copy del retry es **uniforme** en toda la app: "Intentar de nuevo".
+- [x] No quedan `<p className="text-red-600">Error...</p>` ni `<p className="text-destructive">Error...</p>` inline en los 6 componentes del scope de esta tarea. *(Componentes fuera de scope — `DailyCardExperience`, `ServiciosPage`, `ActivationPage`, `StatsSection`, `MyServicesWidget` — quedan pendientes para iteración futura.)*
+- [x] El copy del retry es **uniforme** en todos los componentes migrados: "Intentar de nuevo".
+- [x] `onRetry` semánticamente correcto: ejecuta `refetch()` real, no navegación.
 - [x] Tests actualizados al copy canónico, todos pasando.
 - [x] Ciclo de calidad pasa.
 

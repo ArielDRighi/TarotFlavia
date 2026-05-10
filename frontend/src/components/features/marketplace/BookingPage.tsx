@@ -72,7 +72,12 @@ interface BookingPageProps {
 export function BookingPage({ tarotistaId }: BookingPageProps) {
   const router = useRouter();
 
-  const { data: tarotista, isLoading: isTarotistaLoading, error } = useTarotistaDetail(tarotistaId);
+  const {
+    data: tarotista,
+    isLoading: isTarotistaLoading,
+    error,
+    refetch,
+  } = useTarotistaDetail(tarotistaId);
   const { mutate: bookSession, isPending: isBooking } = useBookSession();
 
   const [confirmationData, setConfirmationData] = useState<Session | null>(null);
@@ -96,10 +101,7 @@ export function BookingPage({ tarotistaId }: BookingPageProps) {
       <div className="container py-8">
         <Card>
           <CardContent className="p-8">
-            <ErrorDisplay
-              message="Error al cargar el tarotista"
-              onRetry={() => router.push('/explorar')}
-            />
+            <ErrorDisplay message="Error al cargar el tarotista" onRetry={() => void refetch()} />
             <div className="mt-2 flex justify-center">
               <Button variant="outline" onClick={() => router.push('/explorar')}>
                 Volver a explorar

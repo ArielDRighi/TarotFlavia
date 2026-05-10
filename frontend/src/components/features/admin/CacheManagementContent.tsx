@@ -348,7 +348,10 @@ export function CacheManagementContent() {
 
       {warmingLoading && <Spinner size="sm" text="Cargando warming status..." />}
       {warmingError && (
-        <p className="text-destructive text-center">Error al cargar warming status</p>
+        <ErrorDisplay
+          message="Error al cargar warming status"
+          onRetry={() => void refetchWarming()}
+        />
       )}
     </div>
   );
