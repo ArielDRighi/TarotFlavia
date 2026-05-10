@@ -59,8 +59,9 @@ describe('LandingPage', () => {
     // HowItWorks CTA
     expect(screen.getByRole('link', { name: /comienza tu viaje/i })).toBeInTheDocument();
 
-    // Premium CTA
-    expect(screen.getByRole('link', { name: /actualizar a premium/i })).toBeInTheDocument();
+    // Premium CTA (puede aparecer en múltiples secciones: PremiumBenefitsSection, PlanComparison, etc.)
+    const premiumLinks = screen.getAllByRole('link', { name: /comenzar premium/i });
+    expect(premiumLinks.length).toBeGreaterThanOrEqual(1);
   });
 
   it('should render BirthChartPromo section', () => {

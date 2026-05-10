@@ -76,10 +76,10 @@ describe('DailyCardLimitReached', () => {
       expect(screen.getByRole('button', { name: /Nueva lectura/i })).toBeInTheDocument();
     });
 
-    test('should render "Actualizar a Premium" button', () => {
+    test('should render "Mejorar a Premium" button', () => {
       render(<DailyCardLimitReached />);
 
-      expect(screen.getByRole('button', { name: /Actualizar a Premium/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Mejorar a Premium/i })).toBeInTheDocument();
     });
 
     test('should render Premium benefits list', () => {
@@ -125,11 +125,11 @@ describe('DailyCardLimitReached', () => {
       expect(mockPush).toHaveBeenCalledWith('/tarot');
     });
 
-    test('should navigate to /planes when "Actualizar a Premium" button is clicked', async () => {
+    test('should navigate to /planes when "Mejorar a Premium" button is clicked', async () => {
       const user = userEvent.setup();
       render(<DailyCardLimitReached />);
 
-      const upgradeButton = screen.getByRole('button', { name: /Actualizar a Premium/i });
+      const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
       await user.click(upgradeButton);
 
       expect(mockPush).toHaveBeenCalledWith('/planes');

@@ -104,7 +104,7 @@ describe('PremiumPreview', () => {
       </PremiumPreview>
     );
 
-    expect(screen.getByRole('button', { name: /actualizar a premium/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /comenzar premium/i })).toBeInTheDocument();
   });
 
   it('should have proper relative positioning for overlay', () => {
@@ -126,7 +126,7 @@ describe('PremiumPreview', () => {
       </PremiumPreview>
     );
 
-    const button = screen.getByRole('button', { name: /actualizar a premium/i });
+    const button = screen.getByRole('button', { name: /comenzar premium/i });
     await user.click(button);
 
     expect(mockMutate).toHaveBeenCalledOnce();
@@ -142,7 +142,7 @@ describe('PremiumPreview', () => {
       </PremiumPreview>
     );
 
-    const button = screen.getByRole('button', { name: /actualizar a premium/i });
+    const button = screen.getByRole('button', { name: /comenzar premium/i });
     await user.click(button);
 
     expect(mockRouterPush).toHaveBeenCalledWith(
@@ -173,7 +173,7 @@ describe('PremiumPreview', () => {
           <div>Premium Content</div>
         </PremiumPreview>
       );
-      screen.getByRole('button', { name: /actualizar a premium/i }).click();
+      screen.getByRole('button', { name: /comenzar premium/i }).click();
 
       expect(window.location.href).toBe(initPoint);
     } finally {

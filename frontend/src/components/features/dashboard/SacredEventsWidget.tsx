@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
 import { SacredEventType, ImportanceLevel, IMPORTANCE_INFO, type SacredEvent } from '@/types';
 import { parseDateString } from '@/lib/utils/date';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { differenceInCalendarDays } from 'date-fns';
 
 const EVENT_ICONS: Record<SacredEventType, React.ComponentType<{ className?: string }>> = {
@@ -202,7 +203,7 @@ export function SacredEventsWidget() {
             title="Desbloquea el calendario completo"
             description="Accede a todos los eventos sagrados del año y planifica tus rituales con anticipación."
             href="/premium"
-            ctaLabel="Mejorar a Premium"
+            ctaLabel={CTA_PREMIUM.UPSELL_SOFT}
           />
         </div>
       )}

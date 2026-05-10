@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 
 /**
  * Props for LimitReachedModal component
@@ -102,7 +103,7 @@ export default function LimitReachedModal({
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
             size="lg"
           >
-            Actualizar a Premium
+            {CTA_PREMIUM.LIMIT_REACHED}
           </Button>
           <Button variant="outline" onClick={onClose} className="w-full" size="lg">
             Volver mañana

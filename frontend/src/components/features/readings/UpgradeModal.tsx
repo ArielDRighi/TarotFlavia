@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants/routes';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import type { CreatePreapprovalResponse } from '@/types';
 
 /**
@@ -167,7 +168,11 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
           >
             <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
-            {isPending ? 'Cargando...' : 'Comenzar ahora'}
+            {isPending
+              ? 'Cargando...'
+              : reason === 'limit-reached'
+                ? CTA_PREMIUM.LIMIT_REACHED
+                : CTA_PREMIUM.PURCHASE}
           </Button>
 
           <button

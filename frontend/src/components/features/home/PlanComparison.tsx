@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/constants/routes';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { Check, X, Star } from 'lucide-react';
 
 interface PlanFeature {
@@ -71,7 +72,7 @@ const plans: Plan[] = [
       { text: '3 consultas péndulo / día', included: true },
       { text: 'Compartir lecturas e historial completo', included: true },
     ],
-    cta: { text: 'Comenzar Premium', href: ROUTES.PREMIUM },
+    cta: { text: CTA_PREMIUM.PURCHASE, href: ROUTES.PREMIUM },
     recommended: true,
   },
 ];

@@ -296,7 +296,7 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | T-UI-02 | Migrar empty states a `<EmptyState>` | 🔴 Crítica | 1.5 días | — | ✅ COMPLETADA |
 | T-UI-03 | Migrar error states a `<ErrorDisplay>` y unificar copy "Intentar de nuevo" | 🔴 Crítica | 1 día | — | ✅ COMPLETADA |
 | T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — | ⏳ PENDIENTE |
-| T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ⏳ PENDIENTE |
+| T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ✅ COMPLETADA |
 | T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ⏳ PENDIENTE |
 | T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ⏳ PENDIENTE |
 | T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ⏳ PENDIENTE |
@@ -466,7 +466,7 @@ Unificar los 6 patrones de markup de banners (`bg-yellow-50`, `bg-red-50`, `bg-g
 **Prioridad:** 🟡 ALTA
 **Estimación:** 0.5 día
 **Dependencias:** decisión de producto sobre copy canónico
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-005
 
 #### 📋 Descripción
@@ -479,26 +479,28 @@ Existen 6 copys distintos para la misma acción ("Comenzar ahora", "Upgrade a Pr
 
 #### ✅ Tareas específicas
 
-- [ ] Reunión/Slack con PO para fijar copy por contexto.
-- [ ] Crear `lib/constants/cta-copy.ts` exportando `CTA_PREMIUM = { PURCHASE: '...', LIMIT_REACHED: '...', UPSELL_SOFT: '...' }`.
-- [ ] Migrar archivos:
-  - [`UpgradeModal.tsx:170`](../frontend/src/components/features/readings/UpgradeModal.tsx#L170)
-  - [`UpgradeBanner.tsx:53`](../frontend/src/components/features/readings/UpgradeBanner.tsx#L53)
-  - [`PremiumUpgradePrompt.tsx:109,274`](../frontend/src/components/features/conversion/PremiumUpgradePrompt.tsx#L109)
-  - [`PremiumPreview.tsx:80`](../frontend/src/components/features/conversion/PremiumPreview.tsx#L80)
-  - [`DailyCardLimitReached.tsx:236`](../frontend/src/components/features/daily-reading/DailyCardLimitReached.tsx#L236)
-  - [`ReadingLimitReached.tsx:136`](../frontend/src/components/features/readings/ReadingLimitReached.tsx#L136)
-  - [`SacredEventsWidget.tsx:205`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L205)
-  - [`PremiumPage.tsx:131`](../frontend/src/components/features/premium/PremiumPage.tsx#L131)
-  - [`PlanComparison.tsx:74`](../frontend/src/components/features/home/PlanComparison.tsx#L74)
-- [ ] Actualizar tests que asuman copy específico.
+- [x] Reunión/Slack con PO para fijar copy por contexto.
+- [x] Crear `lib/constants/cta-copy.ts` exportando `CTA_PREMIUM = { PURCHASE: 'Comenzar Premium', LIMIT_REACHED: 'Mejorar a Premium', UPSELL_SOFT: 'Upgrade a Premium' }`.
+- [x] Migrar archivos:
+  - [`UpgradeModal.tsx`](../frontend/src/components/features/readings/UpgradeModal.tsx)
+  - [`UpgradeBanner.tsx`](../frontend/src/components/features/readings/UpgradeBanner.tsx)
+  - [`PremiumUpgradePrompt.tsx`](../frontend/src/components/features/conversion/PremiumUpgradePrompt.tsx)
+  - [`PremiumPreview.tsx`](../frontend/src/components/features/conversion/PremiumPreview.tsx)
+  - [`DailyCardLimitReached.tsx`](../frontend/src/components/features/daily-reading/DailyCardLimitReached.tsx)
+  - [`ReadingLimitReached.tsx`](../frontend/src/components/features/readings/ReadingLimitReached.tsx)
+  - [`SacredEventsWidget.tsx`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx)
+  - [`PremiumPage.tsx`](../frontend/src/components/features/premium/PremiumPage.tsx)
+  - [`PlanComparison.tsx`](../frontend/src/components/features/home/PlanComparison.tsx)
+  - [`LimitReachedModal.tsx`](../frontend/src/components/features/conversion/LimitReachedModal.tsx)
+  - [`PremiumBenefitsSection.tsx`](../frontend/src/components/features/home/PremiumBenefitsSection.tsx)
+- [x] Actualizar tests que asuman copy específico (8 archivos de tests).
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Existe `lib/constants/cta-copy.ts` con copys documentados.
-- [ ] No queda ningún CTA Premium con literal hardcoded en componentes de feature.
-- [ ] El producto valida el copy final.
-- [ ] Ciclo de calidad pasa.
+- [x] Existe `lib/constants/cta-copy.ts` con copys documentados.
+- [x] No queda ningún CTA Premium con literal hardcoded en componentes de feature.
+- [x] El producto valida el copy final.
+- [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados
 
