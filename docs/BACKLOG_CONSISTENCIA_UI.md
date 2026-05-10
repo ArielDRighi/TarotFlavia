@@ -424,7 +424,7 @@ Reemplazar los `<p className="text-red-600">Error al cargar...</p>` y los bloque
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 2 días
 **Dependencias:** ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-004
 
 #### 📋 Descripción
@@ -433,27 +433,27 @@ Unificar los 6 patrones de markup de banners (`bg-yellow-50`, `bg-red-50`, `bg-g
 
 #### ✅ Tareas específicas
 
-- [ ] **Extender `<Alert>` con variantes** (en `components/ui/alert.tsx`): `default | info | success | warning | destructive`. Mapear cada una a tokens de color (no `bg-red-50` hardcoded — usar `bg-destructive/10`, `bg-amber-500/10`, `bg-emerald-500/10`, etc.).
-- [ ] Migrar **error banners admin**:
+- [x] **Extender `<Alert>` con variantes** (en `components/ui/alert.tsx`): `default | info | success | warning | destructive`. Mapear cada una a tokens de color (no `bg-red-50` hardcoded — usar `bg-destructive/10`, `bg-amber-500/10`, `bg-emerald-500/10`, etc.).
+- [x] Migrar **error banners admin**:
   - [`app/admin/page.tsx:44`](../frontend/src/app/admin/page.tsx#L44)
   - [`PlatformMetricsContent.tsx:90`](../frontend/src/components/features/admin/PlatformMetricsContent.tsx#L90)
   - [`AgendaManagementContent.tsx:263`](../frontend/src/components/features/admin/AgendaManagementContent.tsx#L263)
   - [`UsersManagementContent.tsx:123`](../frontend/src/components/features/admin/UsersManagementContent.tsx#L123)
   → `<Alert variant="destructive">`.
 - [ ] Migrar **success banner** [`ContactForm.tsx:149`](../frontend/src/components/features/contact/ContactForm.tsx#L149) → ver T-UI-09 (mejor a toast).
-- [ ] Migrar **warning banners**:
+- [x] Migrar **warning banners**:
   - [`holistic-services/ServiceBookingPage.tsx:197`](../frontend/src/components/features/holistic-services/ServiceBookingPage.tsx#L197)
   - [`birth-chart/UsageLimitBanner.tsx:47`](../frontend/src/components/features/birth-chart/UsageLimitBanner/UsageLimitBanner.tsx#L47)
   → `<Alert variant="warning">`.
-- [ ] **Banners upsell premium con gradiente** ([`SacredEventsWidget.tsx:189`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L189), [`DailyLimitReachedModal.tsx:106`](../frontend/src/components/features/readings/DailyLimitReachedModal.tsx#L106)): crear componente dedicado `<PremiumUpsellCard>` reutilizable (NO un `<Alert>`, son CTAs de conversión, no notificaciones).
+- [x] **Banners upsell premium con gradiente** ([`SacredEventsWidget.tsx:189`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L189), [`DailyLimitReachedModal.tsx:106`](../frontend/src/components/features/readings/DailyLimitReachedModal.tsx#L106)): crear componente dedicado `<PremiumUpsellCard>` reutilizable (NO un `<Alert>`, son CTAs de conversión, no notificaciones). Info message en DailyLimitReachedModal migrado a `<Alert variant="info">`.
 - [ ] Disclaimers `<div bg-yellow-50>` → ver T-UI-08.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] `<Alert>` expone al menos `info`, `success`, `warning`, `destructive` con tokens del design system.
-- [ ] No quedan banners con `bg-red-50`, `bg-green-50`, `bg-yellow-50`, `bg-amber-50` hardcoded en componentes de feature (excepción: `<PremiumUpsellCard>` con gradiente intencional).
-- [ ] Migración cubierta por tests (visual + a11u: cada variante tiene `role="alert"` apropiado).
-- [ ] Ciclo de calidad pasa.
+- [x] `<Alert>` expone al menos `info`, `success`, `warning`, `destructive` con tokens del design system.
+- [x] No quedan banners con `bg-red-50`, `bg-green-50`, `bg-yellow-50`, `bg-amber-50` hardcoded en componentes de feature (excepción: `<PremiumUpsellCard>` con gradiente intencional).
+- [x] Migración cubierta por tests (visual + a11u: cada variante tiene `role="alert"` apropiado).
+- [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados
 

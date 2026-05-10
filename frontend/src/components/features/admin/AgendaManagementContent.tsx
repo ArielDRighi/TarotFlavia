@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Form,
   FormControl,
@@ -260,11 +261,11 @@ export function AgendaManagementContent() {
               ))}
             </div>
           ) : availabilityError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-              <p className="text-red-700">
+            <Alert variant="destructive">
+              <AlertDescription>
                 Error al cargar la disponibilidad. Por favor, intenta de nuevo.
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
           ) : (
             <>
               <WeeklyScheduleGrid

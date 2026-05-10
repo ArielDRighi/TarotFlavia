@@ -1,12 +1,12 @@
 'use client';
 
-import { CalendarHeart, Moon, Sun, Sparkles, ChevronRight, Zap } from 'lucide-react';
+import { CalendarHeart, Moon, Sun, Sparkles, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorDisplay } from '@/components/ui/error-display';
+import { PremiumUpsellCard } from '@/components/ui/PremiumUpsellCard';
 import { useTodayEvents, useUpcomingEvents } from '@/hooks/api/useSacredCalendar';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
@@ -198,28 +198,12 @@ export function SacredEventsWidget() {
       {/* Premium Upsell for Free Users */}
       {!isPremium && !isLoading && (
         <div className="mt-4 border-t border-gray-200 pt-4">
-          <div className="flex items-start gap-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-3">
-            <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-purple-600" />
-            <div className="min-w-0 flex-1">
-              <p className="mb-1 text-sm font-medium text-gray-900">
-                Desbloquea el calendario completo
-              </p>
-              <p className="mb-2 text-xs text-gray-600">
-                Accede a todos los eventos sagrados del año y planifica tus rituales con
-                anticipación.
-              </p>
-              <Button
-                asChild
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Link href="/premium">
-                  Mejorar a Premium
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
+          <PremiumUpsellCard
+            title="Desbloquea el calendario completo"
+            description="Accede a todos los eventos sagrados del año y planifica tus rituales con anticipación."
+            href="/premium"
+            ctaLabel="Mejorar a Premium"
+          />
         </div>
       )}
     </Card>

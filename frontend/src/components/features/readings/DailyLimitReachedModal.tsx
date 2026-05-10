@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -114,17 +115,13 @@ export default function DailyLimitReachedModal({
         </div>
 
         {/* Info Message */}
-        <div className="rounded-lg bg-blue-50 p-4">
-          <div className="flex items-start gap-3">
-            <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-            <div>
-              <p className="text-sm font-semibold text-blue-900">Tu límite se reinicia mañana</p>
-              <p className="mt-1 text-sm text-blue-700">
-                Vuelve cada día para disfrutar de nuevas lecturas de tarot
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert variant="info">
+          <Calendar className="h-5 w-5" aria-hidden="true" />
+          <AlertTitle>Tu límite se reinicia mañana</AlertTitle>
+          <AlertDescription>
+            Vuelve cada día para disfrutar de nuevas lecturas de tarot
+          </AlertDescription>
+        </Alert>
 
         {/* CTA Buttons */}
         <div className="mt-6 flex flex-col gap-3">
