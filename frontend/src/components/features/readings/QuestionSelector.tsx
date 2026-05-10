@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PremiumBadge } from '@/components/features/readings/PremiumBadge';
@@ -27,10 +28,10 @@ const MAX_CUSTOM_QUESTION_LENGTH = 500;
  */
 function SkeletonQuestionCard() {
   return (
-    <div data-testid="skeleton-card" className="bg-card animate-pulse rounded-lg border p-4">
+    <div data-testid="skeleton-card" className="rounded-lg border p-4">
       <div className="flex items-center gap-3">
-        <div className="h-4 w-4 rounded bg-gray-200" />
-        <div className="h-5 flex-1 rounded bg-gray-200" />
+        <Skeleton className="h-4 w-4" />
+        <Skeleton className="h-5 flex-1" />
       </div>
     </div>
   );

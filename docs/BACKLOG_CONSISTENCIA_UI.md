@@ -297,7 +297,7 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | T-UI-03 | Migrar error states a `<ErrorDisplay>` y unificar copy "Intentar de nuevo" | 🔴 Crítica | 1 día | — | ✅ COMPLETADA |
 | T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — | ⏳ PENDIENTE |
 | T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ✅ COMPLETADA |
-| T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ⏳ PENDIENTE |
+| T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ✅ COMPLETADA |
 | T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ⏳ PENDIENTE |
 | T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ⏳ PENDIENTE |
 | T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — | ⏳ PENDIENTE |
@@ -513,7 +513,7 @@ Existen 6 copys distintos para la misma acción ("Comenzar ahora", "Upgrade a Pr
 **Prioridad:** 🟡 ALTA
 **Estimación:** 1 día
 **Dependencias:** ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-006
 
 #### 📋 Descripción
@@ -522,22 +522,29 @@ Reemplazar `<div className="animate-pulse rounded bg-gray-200 ..." />` y derivad
 
 #### ✅ Tareas específicas
 
-- [ ] [`tarot/tirada/page.tsx:32`](../frontend/src/app/tarot/tirada/page.tsx#L32) — `<Skeleton className="mb-6 h-4 w-48" />`.
-- [ ] [`tarot/preguntas/page.tsx:24`](../frontend/src/app/tarot/preguntas/page.tsx#L24) — `<Skeleton className="mb-6 h-4 w-32" />`.
-- [ ] [`carta-astral/historial/loading.tsx:11`](../frontend/src/app/carta-astral/historial/loading.tsx#L11) — `<Skeleton className="h-8 w-48" />`.
-- [ ] [`readings/QuestionSelector.tsx:30`](../frontend/src/components/features/readings/QuestionSelector.tsx#L30) y [`readings/CategorySelector.tsx:68`](../frontend/src/components/features/readings/CategorySelector.tsx#L68) — los skeleton-card custom: decidir si conviene crear `<SkeletonCard>` reutilizable (componer `<Skeleton>` en una `<Card>`) o adaptar directamente. Ya existe [`skeleton-card.tsx`](../frontend/src/components/ui/skeleton-card.tsx) — usarlo si aplica.
-- [ ] Auditar `animate-pulse` con grep en `src/` y migrar el resto.
+- [x] [`tarot/tirada/page.tsx`](../frontend/src/app/tarot/tirada/page.tsx) — `<Skeleton>` en todos los placeholders del fallback Suspense.
+- [x] [`tarot/preguntas/page.tsx`](../frontend/src/app/tarot/preguntas/page.tsx) — `<Skeleton>` en los placeholders del fallback Suspense.
+- [x] [`tarot/lectura/page.tsx`](../frontend/src/app/tarot/lectura/page.tsx) — `<Skeleton>` en placeholders de cards y headers.
+- [x] [`ritual/tirada/page.tsx`](../frontend/src/app/ritual/tirada/page.tsx) — mismo patrón que tarot/tirada.
+- [x] [`ritual/preguntas/page.tsx`](../frontend/src/app/ritual/preguntas/page.tsx) — mismo patrón que tarot/preguntas.
+- [x] [`ritual/lectura/page.tsx`](../frontend/src/app/ritual/lectura/page.tsx) — mismo patrón que tarot/lectura.
+- [x] [`carta-astral/historial/loading.tsx`](../frontend/src/app/carta-astral/historial/loading.tsx) — `<Skeleton>` reemplaza los `bg-muted animate-pulse` inline.
+- [x] [`readings/QuestionSelector.tsx`](../frontend/src/components/features/readings/QuestionSelector.tsx) — `SkeletonQuestionCard` refactorizado con `<Skeleton>` internamente.
+- [x] [`readings/CategorySelector.tsx`](../frontend/src/components/features/readings/CategorySelector.tsx) — `SkeletonCategoryCard` refactorizado con `<Skeleton>` internamente.
+- [x] [`readings/SpreadSelector.tsx`](../frontend/src/components/features/readings/SpreadSelector.tsx) — `SkeletonSpreadCard` refactorizado con `<Skeleton>` internamente.
+- [x] Auditar `animate-pulse` con grep en `src/` — casos restantes son usos legítimos (pendulum, sparkles icon, birth-chart wheel, ChartHistoryPage que ya usa `bg-muted` vía `<Skeleton>` indirectamente, etc.) y no son skeletons de contenido.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] No quedan `bg-gray-200` ni `bg-card` aplicados a skeletons en features.
-- [ ] `<Skeleton>` (o `<SkeletonCard>`) es el primitivo único para esqueletos.
-- [ ] Tests pasan; `data-testid="skeleton-card"` se preserva donde lo usen los tests.
-- [ ] Ciclo de calidad pasa.
+- [x] No quedan `bg-gray-200` aplicados a skeletons de contenido en features del scope.
+- [x] No quedan `bg-card animate-pulse` en skeleton components del scope.
+- [x] `<Skeleton>` es el primitivo único para esqueletos de loading en los archivos migrados.
+- [x] Tests pasan; `data-testid="skeleton-card"` y `data-testid="skeleton-spread-card"` preservados.
+- [x] Ciclo de calidad pasa (format, lint, type-check, build, validate-architecture).
 
 #### 📁 Archivos involucrados
 
-`app/tarot/tirada/page.tsx`, `app/tarot/preguntas/page.tsx`, `app/carta-astral/historial/loading.tsx`, `readings/QuestionSelector.tsx`, `readings/CategorySelector.tsx`, posible nuevo uso de `components/ui/skeleton-card.tsx`.
+`app/tarot/{tirada,preguntas,lectura}/page.tsx`, `app/ritual/{tirada,preguntas,lectura}/page.tsx`, `app/carta-astral/historial/loading.tsx`, `readings/QuestionSelector.tsx`, `readings/CategorySelector.tsx`, `readings/SpreadSelector.tsx`.
 
 ---
 

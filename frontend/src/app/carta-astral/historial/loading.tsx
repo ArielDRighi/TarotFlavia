@@ -1,4 +1,5 @@
 import { SavedChartCardSkeleton } from '@/components/features/birth-chart/SavedChartCard/SavedChartCard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Loading state para página de historial
@@ -8,13 +9,13 @@ export default function HistorialLoading() {
   return (
     <div className="container mx-auto max-w-7xl p-6">
       <div className="mb-6 flex items-center justify-between">
-        <div className="bg-muted h-8 w-48 animate-pulse rounded" />
-        <div className="bg-muted h-10 w-32 animate-pulse rounded" />
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-10 w-32" />
       </div>
 
       <div className="mb-6 flex gap-4">
-        <div className="bg-muted h-10 w-full max-w-sm animate-pulse rounded" />
-        <div className="bg-muted h-10 w-40 animate-pulse rounded" />
+        <Skeleton className="h-10 w-full max-w-sm" />
+        <Skeleton className="h-10 w-40" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

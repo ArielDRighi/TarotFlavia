@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { ReadingLimitReached } from '@/components/features/readings/ReadingLimitReached';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { Spread } from '@/types';
 
@@ -22,20 +23,20 @@ import type { Spread } from '@/types';
  */
 function SkeletonSpreadCard() {
   return (
-    <div data-testid="skeleton-spread-card" className="bg-card animate-pulse rounded-lg border p-6">
+    <div data-testid="skeleton-spread-card" className="rounded-lg border p-6">
       <div className="mb-4 flex items-center justify-between">
-        <div className="h-6 w-32 rounded bg-gray-200" />
-        <div className="h-6 w-20 rounded bg-gray-200" />
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-6 w-20" />
       </div>
       <div className="mb-4 space-y-2">
-        <div className="h-4 w-full rounded bg-gray-200" />
-        <div className="h-4 w-2/3 rounded bg-gray-200" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
       </div>
       <div className="mb-4 flex items-center gap-4">
-        <div className="h-4 w-16 rounded bg-gray-200" />
-        <div className="h-4 w-16 rounded bg-gray-200" />
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-4 w-16" />
       </div>
-      <div className="h-10 w-full rounded bg-gray-200" />
+      <Skeleton className="h-10 w-full" />
     </div>
   );
 }
