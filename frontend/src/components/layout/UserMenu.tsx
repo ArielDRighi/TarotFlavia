@@ -28,7 +28,7 @@ export function UserMenu() {
     return (
       <div className="flex items-center gap-2">
         <Button variant="outline" asChild>
-          <Link href="/login">Iniciar Sesión</Link>
+          <Link href="/login">{CTA_AUTH.LOGIN}</Link>
         </Button>
         <Button variant="default" asChild>
           <Link href="/registro">{CTA_AUTH.REGISTER}</Link>

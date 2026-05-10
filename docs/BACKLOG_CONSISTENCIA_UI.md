@@ -579,8 +579,10 @@ Hoy conviven 4 variantes para la misma acción ("Crear Cuenta", "Crear Cuenta Gr
 
 #### 🎯 Criterios de aceptación
 
-- [x] Solo existen los 3 copys consensuados en componentes de feature.
-- [x] Constante única consumida desde todos los CTAs de auth.
+- [x] Constante `CTA_AUTH` definida y consumida en los CTAs migrados en este task.
+- [x] CTAs migrados: `UserMenu` (LOGIN + REGISTER), `SharedReadingView` (REGISTER_CONVERSION), `compartida/[token]/page.tsx` (REGISTER_CONVERSION).
+- [ ] CTAs pendientes de migración futura: `DailyCardExperience.tsx` ("Registrarse"), `PlanComparison.tsx` ("Registrarse gratis"), `PremiumPage.tsx` ("Registrarse gratis"), `PendulumLimitBanner.tsx` ("Registrarse").
+- [x] Tests de los componentes migrados usan `CTA_AUTH` como fuente de verdad (no strings literales).
 - [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados

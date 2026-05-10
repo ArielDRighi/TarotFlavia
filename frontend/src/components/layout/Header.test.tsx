@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Header } from './Header';
 import * as nextNavigation from 'next/navigation';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -116,7 +117,7 @@ describe('Header', () => {
     it('should show "Crear cuenta" button when not authenticated', () => {
       render(<Header />);
 
-      const registerButton = screen.getByRole('link', { name: /crear cuenta/i });
+      const registerButton = screen.getByRole('link', { name: CTA_AUTH.REGISTER });
       expect(registerButton).toBeInTheDocument();
       expect(registerButton).toHaveAttribute('href', '/registro');
     });
@@ -124,7 +125,7 @@ describe('Header', () => {
     it('should render "Crear cuenta" as primary button (more prominent)', () => {
       render(<Header />);
 
-      const registerButton = screen.getByRole('link', { name: /crear cuenta/i });
+      const registerButton = screen.getByRole('link', { name: CTA_AUTH.REGISTER });
       // Primary button has bg-primary class, outline button has border-input class
       // Crear cuenta should be primary (default variant), NOT outline
       expect(registerButton).toHaveClass('bg-primary');
@@ -176,7 +177,7 @@ describe('Header', () => {
     it('should NOT show "Crear cuenta" button when authenticated', () => {
       render(<Header />);
 
-      expect(screen.queryByRole('link', { name: /crear cuenta/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: CTA_AUTH.REGISTER })).not.toBeInTheDocument();
     });
   });
 
