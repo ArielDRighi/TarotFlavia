@@ -69,9 +69,9 @@ describe('RitualGrid', () => {
     it('should render EmptyState component when rituals array is empty', () => {
       render(<RitualGrid rituals={[]} />);
 
-      // EmptyState renders the message inside a <p> element
-      const emptyMessage = screen.getByText('No se encontraron rituales');
-      expect(emptyMessage.tagName).toBe('P');
+      // EmptyState renders title as heading and message as text
+      expect(screen.getByRole('heading', { name: 'Sin resultados' })).toBeInTheDocument();
+      expect(screen.getByText('No se encontraron rituales')).toBeInTheDocument();
     });
 
     it('should not show empty message when isLoading is true', () => {

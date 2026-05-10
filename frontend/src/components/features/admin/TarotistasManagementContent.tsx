@@ -261,9 +261,7 @@ export function TarotistasManagementContent() {
               )}
             </>
           ) : (
-            <div className="border-border bg-bg-main rounded-lg border p-8 text-center">
-              <p className="text-muted-foreground">No hay aplicaciones pendientes</p>
-            </div>
+            <EmptyState title="Sin aplicaciones" message="No hay aplicaciones pendientes" />
           )}
         </TabsContent>
       </Tabs>

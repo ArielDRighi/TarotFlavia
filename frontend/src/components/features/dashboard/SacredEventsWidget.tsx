@@ -141,7 +141,6 @@ export function SacredEventsWidget() {
       {/* Empty State */}
       {!isLoading && !hasError && !hasAnyEvents && (
         <EmptyState
-          icon={<CalendarHeart />}
           title="Sin eventos próximos"
           message="No hay eventos próximos en el calendario sagrado."
           className="py-4"

@@ -54,6 +54,7 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
         icon={<Users />}
         title="Sin tarotistas"
         message="No hay tarotistas para mostrar"
+        className="rounded-lg border"
       />
     );
   }

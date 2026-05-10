@@ -62,7 +62,12 @@ function getRoleVariant(role: UserRole): 'default' | 'secondary' | 'outline' {
 export function UsersTable({ users, onAction }: UsersTableProps) {
   if (users.length === 0) {
     return (
-      <EmptyState icon={<Users />} title="Sin usuarios" message="No hay usuarios para mostrar" />
+      <EmptyState
+        icon={<Users />}
+        title="Sin usuarios"
+        message="No hay usuarios para mostrar"
+        className="rounded-lg border"
+      />
     );
   }
 

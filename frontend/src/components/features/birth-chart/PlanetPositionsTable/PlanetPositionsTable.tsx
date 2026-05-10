@@ -123,24 +123,27 @@ export function PlanetPositionsTable({
 
   // Empty state
   if (allPositions.length === 0) {
-    const emptyContent = (
-      <EmptyState
-        icon={<Globe />}
-        title="Sin datos planetarios"
-        message="No hay datos de posiciones planetarias"
-      />
-    );
-
     return showCard ? (
       <Card>
         <CardHeader>
           <CardTitle>Posiciones Planetarias</CardTitle>
           <CardDescription>Ubicación de cada planeta en tu carta natal</CardDescription>
         </CardHeader>
-        <CardContent>{emptyContent}</CardContent>
+        <CardContent>
+          <EmptyState
+            icon={<Globe />}
+            title="Sin datos planetarios"
+            message="No hay datos de posiciones planetarias"
+          />
+        </CardContent>
       </Card>
     ) : (
-      emptyContent
+      <EmptyState
+        icon={<Globe />}
+        title="Sin datos planetarios"
+        message="No hay datos de posiciones planetarias"
+        className="rounded-lg border"
+      />
     );
   }
 

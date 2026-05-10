@@ -7,7 +7,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAvailableSlots } from '@/hooks/api/useAvailableSlots';
 import { useHolisticServiceAvailability } from '@/hooks/api/useHolisticServices';
 import { Button } from '@/components/ui/button';
@@ -242,7 +242,6 @@ export function BookingCalendar({
 
           {!isLoading && !isError && slots && slots.length === 0 && (
             <EmptyState
-              icon={<Clock />}
               title="Sin horarios"
               message="No hay horarios disponibles para esta fecha"
               className="py-4"
