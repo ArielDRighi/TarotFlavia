@@ -11,6 +11,7 @@ import { usePlatformMetrics } from '@/hooks/api/usePlatformMetrics';
 import { MetricsPeriod } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Select,
   SelectContent,
@@ -87,9 +88,11 @@ export function PlatformMetricsContent() {
 
       {/* Error State */}
       {error && (
-        <div className="mb-8 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-          Error al cargar métricas. Por favor, intenta de nuevo.
-        </div>
+        <Alert variant="destructive" className="mb-8">
+          <AlertDescription>
+            Error al cargar métricas. Por favor, intenta de nuevo.
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Cards de Métricas Principales */}

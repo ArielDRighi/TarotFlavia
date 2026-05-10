@@ -13,6 +13,7 @@ import { RecentReadingsTable } from '@/components/features/admin/RecentReadingsT
 import { useDashboardStats } from '@/hooks/api/useDashboardStats';
 import { useDashboardCharts } from '@/hooks/api/useDashboardCharts';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { transformStatsToMetrics } from '@/lib/utils/dashboard-utils';
 
 /**
@@ -41,9 +42,11 @@ export default function AdminDashboardPage() {
         {isLoadingStats ? (
           <StatsCardsSkeleton />
         ) : statsError ? (
-          <div className="col-span-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            Error al cargar estadísticas. Por favor, intenta de nuevo.
-          </div>
+          <Alert variant="destructive" className="col-span-4">
+            <AlertDescription>
+              Error al cargar estadísticas. Por favor, intenta de nuevo.
+            </AlertDescription>
+          </Alert>
         ) : stats ? (
           <>
             {(() => {
@@ -80,9 +83,11 @@ export default function AdminDashboardPage() {
         {isLoadingCharts ? (
           <Skeleton className="h-[400px]" />
         ) : chartsError ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            Error al cargar gráfico de lecturas. Por favor, intenta de nuevo.
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>
+              Error al cargar gráfico de lecturas. Por favor, intenta de nuevo.
+            </AlertDescription>
+          </Alert>
         ) : charts ? (
           <DailyReadingsChart data={charts.readingsPerDay} />
         ) : null}
@@ -91,9 +96,11 @@ export default function AdminDashboardPage() {
         {isLoadingStats ? (
           <Skeleton className="h-[400px]" />
         ) : statsError ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            Error al cargar distribución de planes. Por favor, intenta de nuevo.
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>
+              Error al cargar distribución de planes. Por favor, intenta de nuevo.
+            </AlertDescription>
+          </Alert>
         ) : stats?.users?.planDistribution && Array.isArray(stats.users.planDistribution) ? (
           <PlanDistributionChart data={stats.users.planDistribution} />
         ) : (

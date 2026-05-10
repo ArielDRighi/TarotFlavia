@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Alert } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
 interface UsageLimitBannerProps {
@@ -101,16 +102,10 @@ export function UsageLimitBanner({
   }
 
   // Variante full (banner completo)
+  const alertVariant = isExhausted ? 'destructive' : isLow ? 'warning' : 'default';
+
   return (
-    <div
-      className={cn(
-        'relative rounded-lg border p-4',
-        isExhausted && 'bg-destructive/5 border-destructive/30',
-        isLow && !isExhausted && 'border-amber-500/30 bg-amber-500/5',
-        !isLow && !isExhausted && 'bg-primary/5 border-primary/30',
-        className
-      )}
-    >
+    <Alert variant={alertVariant} className={cn('relative grid-cols-1', className)}>
       {/* Botón cerrar */}
       {showDismiss && onDismiss && (
         <button
@@ -216,6 +211,6 @@ export function UsageLimitBanner({
           </div>
         )}
       </div>
-    </div>
+    </Alert>
   );
 }

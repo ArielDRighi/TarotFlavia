@@ -14,6 +14,7 @@ import { Pagination } from './Pagination';
 import { ChangePlanModal } from './ChangePlanModal';
 import { BanUserModal } from './BanUserModal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAdminUsers } from '@/hooks/api/useAdminUsers';
 import { useBanUser, useUnbanUser, useUpdateUserPlan } from '@/hooks/api/useAdminUserActions';
 import type { AdminUser, UserFilters } from '@/types/admin-users.types';
@@ -120,9 +121,9 @@ export function UsersManagementContent() {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center text-red-800">
-        Error al cargar usuarios. Por favor, intenta de nuevo.
-      </div>
+      <Alert variant="destructive">
+        <AlertDescription>Error al cargar usuarios. Por favor, intenta de nuevo.</AlertDescription>
+      </Alert>
     );
   }
 
