@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import {
   Select,
   SelectContent,
@@ -123,12 +124,11 @@ export function CacheManagementContent() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-destructive mb-4">Error al cargar datos de caché</p>
-        <Button onClick={() => refetch()} variant="outline">
-          Reintentar
-        </Button>
-      </div>
+      <ErrorDisplay
+        message="Error al cargar datos de caché"
+        onRetry={() => refetch()}
+        className="py-12"
+      />
     );
   }
 

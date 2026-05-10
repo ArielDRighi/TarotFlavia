@@ -700,9 +700,6 @@ export function ReadingExperience({
       {state === 'error' && (
         <div className="mx-auto max-w-4xl py-12 text-center">
           <ErrorDisplay message={error || 'Error al crear la lectura'} onRetry={handleRetry} />
-          <Button variant="outline" onClick={handleRetry} className="mt-4">
-            Reintentar
-          </Button>
         </div>
       )}
 

@@ -294,7 +294,7 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | --- | --- | --- | --- | --- | --- |
 | T-UI-01 | Migrar loading states a `<Spinner>` | 🔴 Crítica | 1 día | — | ✅ COMPLETADA |
 | T-UI-02 | Migrar empty states a `<EmptyState>` | 🔴 Crítica | 1.5 días | — | ✅ COMPLETADA |
-| T-UI-03 | Migrar error states a `<ErrorDisplay>` y unificar copy "Intentar de nuevo" | 🔴 Crítica | 1 día | — | ⏳ PENDIENTE |
+| T-UI-03 | Migrar error states a `<ErrorDisplay>` y unificar copy "Intentar de nuevo" | 🔴 Crítica | 1 día | — | ✅ COMPLETADA |
 | T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — | ⏳ PENDIENTE |
 | T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ⏳ PENDIENTE |
 | T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ⏳ PENDIENTE |
@@ -387,7 +387,7 @@ Reemplazar los `<p className="text-muted-foreground py-8 text-center">No hay X</
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 1 día
 **Dependencias:** ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-003
 
 #### 📋 Descripción
@@ -396,21 +396,21 @@ Reemplazar los `<p className="text-red-600">Error al cargar...</p>` y los bloque
 
 #### ✅ Tareas específicas
 
-- [ ] [`marketplace/BookingPage.tsx:97`](../frontend/src/components/features/marketplace/BookingPage.tsx#L97) — usar `<ErrorDisplay message="Error al cargar el tarotista" onRetry={...} />` y mantener el botón "Volver a explorar" como secundario fuera del componente si se desea.
-- [ ] [`marketplace/BookingCalendar.tsx:238`](../frontend/src/components/features/marketplace/BookingCalendar.tsx#L238) — `<ErrorDisplay message="Error al cargar horarios disponibles" onRetry={refetch} />`.
-- [ ] [`dashboard/SacredEventsWidget.tsx:137-139`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L137-L139).
-- [ ] [`admin/CacheManagementContent.tsx:124-129`](../frontend/src/components/features/admin/CacheManagementContent.tsx#L124-L129) — reemplazar el bloque (`<p text-destructive>` + botón "Reintentar") por `<ErrorDisplay onRetry={refetch} message="Error al cargar datos de caché" />`.
-- [ ] [`readings/ReadingExperience.tsx:702`](../frontend/src/components/features/readings/ReadingExperience.tsx#L702) — sustituir botón "Reintentar" por flujo con `<ErrorDisplay>`.
-- [ ] **Decisión de copy:** confirmar con producto que el CTA es "Intentar de nuevo" (lo que dice el componente canónico) y NO "Reintentar". Actualizar tests:
-  - [`src/app/historial/page.test.tsx:797`](../frontend/src/app/historial/page.test.tsx#L797) — cambiar `/reintentar/i` por `/intentar de nuevo/i`.
-  - Resto de tests que asumen "Reintentar" deben migrarse.
+- [x] [`marketplace/BookingPage.tsx:97`](../frontend/src/components/features/marketplace/BookingPage.tsx#L97) — usar `<ErrorDisplay message="Error al cargar el tarotista" onRetry={...} />` y mantener el botón "Volver a explorar" como secundario fuera del componente si se desea.
+- [x] [`marketplace/BookingCalendar.tsx:238`](../frontend/src/components/features/marketplace/BookingCalendar.tsx#L238) — `<ErrorDisplay message="Error al cargar horarios disponibles" onRetry={refetch} />`.
+- [x] [`dashboard/SacredEventsWidget.tsx:137-139`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L137-L139).
+- [x] [`admin/CacheManagementContent.tsx:124-129`](../frontend/src/components/features/admin/CacheManagementContent.tsx#L124-L129) — reemplazar el bloque (`<p text-destructive>` + botón "Reintentar") por `<ErrorDisplay onRetry={refetch} message="Error al cargar datos de caché" />`.
+- [x] [`readings/ReadingExperience.tsx:702`](../frontend/src/components/features/readings/ReadingExperience.tsx#L702) — sustituir botón "Reintentar" por flujo con `<ErrorDisplay>`.
+- [x] **Decisión de copy:** copy canónico confirmado: "Intentar de nuevo". Tests actualizados:
+  - [`src/app/historial/page.test.tsx:797`](../frontend/src/app/historial/page.test.tsx#L797) — cambiado `/reintentar/i` por `/intentar de nuevo/i`.
+  - Resto de tests migrados.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] No quedan `<p className="text-red-600">Error...</p>` inline en componentes de feature.
-- [ ] El copy del retry es **uniforme** en toda la app: "Intentar de nuevo".
-- [ ] Tests actualizados al copy canónico, todos pasando.
-- [ ] Ciclo de calidad pasa.
+- [x] No quedan `<p className="text-red-600">Error...</p>` inline en componentes de feature.
+- [x] El copy del retry es **uniforme** en toda la app: "Intentar de nuevo".
+- [x] Tests actualizados al copy canónico, todos pasando.
+- [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados
 
