@@ -1,5 +1,5 @@
 /**
- * Copys canónicos para CTAs de upgrade a Premium.
+ * Textos canónicos para CTAs de upgrade a Premium.
  *
  * Contextos:
  * - PURCHASE: Compra inicial desde la página de planes / comparativa / prompt de conversión.
