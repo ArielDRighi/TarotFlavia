@@ -107,8 +107,9 @@ describe('ArticleGrid', () => {
     it('debe aplicar className personalizado en estado vacío', () => {
       render(<ArticleGrid articles={[]} className="empty-class" />);
 
-      const emptyDiv = screen.getByText('No se encontraron artículos').closest('div');
-      expect(emptyDiv).toHaveClass('empty-class');
+      // EmptyState renders title as heading — its container receives the className
+      const heading = screen.getByRole('heading', { name: 'Sin resultados' });
+      expect(heading.closest('.empty-class')).toBeInTheDocument();
     });
   });
 });

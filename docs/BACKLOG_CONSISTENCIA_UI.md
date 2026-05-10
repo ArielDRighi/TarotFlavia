@@ -293,7 +293,7 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | ID | Tarea | Prioridad | Estimación | Dependencias | Estado |
 | --- | --- | --- | --- | --- | --- |
 | T-UI-01 | Migrar loading states a `<Spinner>` | 🔴 Crítica | 1 día | — | ✅ COMPLETADA |
-| T-UI-02 | Migrar empty states a `<EmptyState>` | 🔴 Crítica | 1.5 días | — | ⏳ PENDIENTE |
+| T-UI-02 | Migrar empty states a `<EmptyState>` | 🔴 Crítica | 1.5 días | — | ✅ COMPLETADA |
 | T-UI-03 | Migrar error states a `<ErrorDisplay>` y unificar copy "Intentar de nuevo" | 🔴 Crítica | 1 día | — | ⏳ PENDIENTE |
 | T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — | ⏳ PENDIENTE |
 | T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ⏳ PENDIENTE |
@@ -352,7 +352,7 @@ Reemplazar todos los `<p>Cargando...</p>`, `<div className="animate-pulse">Carga
 **Prioridad:** 🔴 CRÍTICA
 **Estimación:** 1.5 días
 **Dependencias:** ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-002
 
 #### 📋 Descripción
@@ -361,20 +361,20 @@ Reemplazar los `<p className="text-muted-foreground py-8 text-center">No hay X</
 
 #### ✅ Tareas específicas
 
-- [ ] [`admin/CacheManagementContent.tsx:172`](../frontend/src/components/features/admin/CacheManagementContent.tsx#L172) — `EmptyState` con icono `Database`/`Inbox`, title "Sin caché aún", message "No hay combinaciones cacheadas".
-- [ ] [`admin/RateLimitingTab.tsx:109,142`](../frontend/src/components/features/admin/RateLimitingTab.tsx#L109) — dos empty states (violaciones, IPs).
-- [ ] [`admin/TarotistasTable.tsx:53`](../frontend/src/components/features/admin/TarotistasTable.tsx#L53), [`UsersTable.tsx:65`](../frontend/src/components/features/admin/UsersTable.tsx#L65), [`TarotistasManagementContent.tsx:226`](../frontend/src/components/features/admin/TarotistasManagementContent.tsx#L226).
-- [ ] [`marketplace/BookingCalendar.tsx:242`](../frontend/src/components/features/marketplace/BookingCalendar.tsx#L242) — empty state en sub-sección de horarios; quizá conviene dejar un mensaje compacto y NO un `EmptyState` grande (decidir con diseño).
-- [ ] [`birth-chart/PlanetPositionsTable.tsx:127`](../frontend/src/components/features/birth-chart/PlanetPositionsTable/PlanetPositionsTable.tsx#L127).
-- [ ] [`encyclopedia/ArticleGrid.tsx:58`](../frontend/src/components/features/encyclopedia/ArticleGrid.tsx#L58), [`encyclopedia/CardGrid.tsx:53`](../frontend/src/components/features/encyclopedia/CardGrid.tsx#L53), [`rituals/RitualGrid.tsx:53`](../frontend/src/components/features/rituals/RitualGrid.tsx#L53) — los tres aceptan prop `emptyMessage`; refactor para que internamente rendericen `<EmptyState>`.
-- [ ] [`dashboard/SacredEventsWidget.tsx:144-147`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L144-L147) — el widget ya tiene icono + texto, migrar a `<EmptyState>` con tamaño compacto si el `EmptyState` permite, o dejar la composición pero usar tipografía/spacing del componente.
+- [x] [`admin/CacheManagementContent.tsx:172`](../frontend/src/components/features/admin/CacheManagementContent.tsx#L172) — `EmptyState` con icono `Database`/`Inbox`, title "Sin caché aún", message "No hay combinaciones cacheadas".
+- [x] [`admin/RateLimitingTab.tsx:109,142`](../frontend/src/components/features/admin/RateLimitingTab.tsx#L109) — dos empty states (violaciones, IPs).
+- [x] [`admin/TarotistasTable.tsx:53`](../frontend/src/components/features/admin/TarotistasTable.tsx#L53), [`UsersTable.tsx:65`](../frontend/src/components/features/admin/UsersTable.tsx#L65), [`TarotistasManagementContent.tsx:226`](../frontend/src/components/features/admin/TarotistasManagementContent.tsx#L226).
+- [x] [`marketplace/BookingCalendar.tsx:242`](../frontend/src/components/features/marketplace/BookingCalendar.tsx#L242) — `EmptyState` compacto con icono `Clock` y `className="py-4"`.
+- [x] [`birth-chart/PlanetPositionsTable.tsx:127`](../frontend/src/components/features/birth-chart/PlanetPositionsTable/PlanetPositionsTable.tsx#L127).
+- [x] [`encyclopedia/ArticleGrid.tsx:58`](../frontend/src/components/features/encyclopedia/ArticleGrid.tsx#L58), [`encyclopedia/CardGrid.tsx:53`](../frontend/src/components/features/encyclopedia/CardGrid.tsx#L53), [`rituals/RitualGrid.tsx:53`](../frontend/src/components/features/rituals/RitualGrid.tsx#L53) — los tres aceptan prop `emptyMessage`; refactor para que internamente rendericen `<EmptyState>`.
+- [x] [`dashboard/SacredEventsWidget.tsx:144-147`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L144-L147) — migrado a `<EmptyState>` con icono `CalendarHeart` y `className="py-4"`.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Ningún archivo de feature renderiza `<p className="text-muted-foreground py-8 text-center">No hay …</p>`.
-- [ ] Las grids genéricas (`ArticleGrid`, `CardGrid`, `RitualGrid`) consumen `<EmptyState>` y conservan la prop `emptyMessage` que pasa a `message`.
-- [ ] Tests siguen pasando; agregar tests de empty state donde no existan.
-- [ ] Ciclo de calidad pasa.
+- [x] Ningún archivo de feature renderiza `<p className="text-muted-foreground py-8 text-center">No hay …</p>`.
+- [x] Las grids genéricas (`ArticleGrid`, `CardGrid`, `RitualGrid`) consumen `<EmptyState>` y conservan la prop `emptyMessage` que pasa a `message`.
+- [x] Tests siguen pasando; agregar tests de empty state donde no existan.
+- [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados
 

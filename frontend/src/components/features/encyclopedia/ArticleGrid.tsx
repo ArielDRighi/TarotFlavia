@@ -2,6 +2,7 @@
 
 import { ArticleCard } from './ArticleCard';
 import { ArticleSkeleton } from './ArticleSkeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
 import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 
@@ -55,7 +56,11 @@ export function ArticleGrid({
 
   if (articles.length === 0) {
     return (
-      <div className={cn('text-muted-foreground py-12 text-center', className)}>{emptyMessage}</div>
+      <EmptyState
+        className={cn('py-12', className)}
+        title="Sin resultados"
+        message={emptyMessage}
+      />
     );
   }
 

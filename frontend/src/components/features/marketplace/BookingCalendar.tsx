@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   format,
   addMonths,
@@ -240,7 +241,11 @@ export function BookingCalendar({
           )}
 
           {!isLoading && !isError && slots && slots.length === 0 && (
-            <p className="text-sm text-gray-500">No hay horarios disponibles para esta fecha</p>
+            <EmptyState
+              title="Sin horarios"
+              message="No hay horarios disponibles para esta fecha"
+              className="py-4"
+            />
           )}
 
           {!isLoading && !isError && slots && slots.length > 0 && (

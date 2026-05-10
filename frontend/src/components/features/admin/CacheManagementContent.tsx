@@ -10,10 +10,11 @@
 'use client';
 
 import { useState } from 'react';
-import { RefreshCw, Trash2, Play } from 'lucide-react';
+import { RefreshCw, Trash2, Play, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Select,
   SelectContent,
@@ -174,7 +175,11 @@ export function CacheManagementContent() {
         </CardHeader>
         <CardContent>
           {analytics.topCombinations.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">No hay combinaciones cacheadas</p>
+            <EmptyState
+              icon={<Database />}
+              title="Sin caché aún"
+              message="No hay combinaciones cacheadas"
+            />
           ) : (
             <Table>
               <TableHeader>

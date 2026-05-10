@@ -12,6 +12,7 @@ import { parseTimestamp } from '@/lib/utils/date';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ShieldOff, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
@@ -106,7 +107,11 @@ export function RateLimitingTab() {
         </CardHeader>
         <CardContent>
           {!data?.violations || data.violations.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">No hay violaciones registradas</p>
+            <EmptyState
+              icon={<ShieldOff />}
+              title="Sin violaciones"
+              message="No hay violaciones registradas"
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -139,7 +144,11 @@ export function RateLimitingTab() {
         </CardHeader>
         <CardContent>
           {!data?.blockedIPs || data.blockedIPs.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">No hay IPs bloqueadas</p>
+            <EmptyState
+              icon={<Globe />}
+              title="Sin IPs bloqueadas"
+              message="No hay IPs bloqueadas"
+            />
           ) : (
             <Table>
               <TableHeader>
