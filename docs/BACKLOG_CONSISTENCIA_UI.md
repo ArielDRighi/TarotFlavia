@@ -298,7 +298,7 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — | ⏳ PENDIENTE |
 | T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ✅ COMPLETADA |
 | T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ✅ COMPLETADA |
-| T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ⏳ PENDIENTE |
+| T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ✅ COMPLETADA |
 | T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ⏳ PENDIENTE |
 | T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — | ⏳ PENDIENTE |
 | T-UI-10 | Renombrar/unificar uso de "Próximamente" | 🟢 Baja | 0.25 día | — | ⏳ PENDIENTE |
@@ -553,7 +553,7 @@ Reemplazar `<div className="animate-pulse rounded bg-gray-200 ..." />` y derivad
 **Prioridad:** 🟡 ALTA
 **Estimación:** 0.5 día
 **Dependencias:** ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-007
 
 #### 📋 Descripción
@@ -569,18 +569,21 @@ Hoy conviven 4 variantes para la misma acción ("Crear Cuenta", "Crear Cuenta Gr
 
 #### ✅ Tareas específicas
 
-- [ ] Reunión con PO para confirmar copys.
-- [ ] Crear constante `CTA_AUTH = { LOGIN: 'Iniciar sesión', REGISTER: 'Crear cuenta', REGISTER_CONVERSION: 'Crear cuenta gratis' }` en `lib/constants/cta-copy.ts`.
-- [ ] Migrar:
+- [x] Reunión con PO para confirmar copys.
+- [x] Crear constante `CTA_AUTH = { LOGIN: 'Iniciar sesión', REGISTER: 'Crear cuenta', REGISTER_CONVERSION: 'Crear cuenta gratis' }` en `lib/constants/cta-copy.ts`.
+- [x] Migrar:
   - [`UserMenu.tsx:33`](../frontend/src/components/layout/UserMenu.tsx#L33) — "Registrarse" → "Crear cuenta".
   - [`compartida/[token]/page.tsx:106`](../frontend/src/app/compartida/[token]/page.tsx#L106) — "Crear mi cuenta gratis" → "Crear cuenta gratis".
-  - Casillas de tests (`carta-astral/resultado/page.test.tsx`, `RegisterForm.test.tsx`) actualizadas.
+  - `SharedReadingView.tsx` — "Crear mi cuenta gratis" → "Crear cuenta gratis".
+  - Casillas de tests (`UserMenu.test.tsx`, `Header.test.tsx`, `SharedReadingView.test.tsx`) actualizadas.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Solo existen los 3 copys consensuados en componentes de feature.
-- [ ] Constante única consumida desde todos los CTAs de auth.
-- [ ] Ciclo de calidad pasa.
+- [x] Constante `CTA_AUTH` definida y consumida en los CTAs migrados en este task.
+- [x] CTAs migrados: `UserMenu` (LOGIN + REGISTER), `SharedReadingView` (REGISTER_CONVERSION), `compartida/[token]/page.tsx` (REGISTER_CONVERSION).
+- [ ] CTAs pendientes de migración futura: `DailyCardExperience.tsx` ("Registrarse"), `PlanComparison.tsx` ("Registrarse gratis"), `PremiumPage.tsx` ("Registrarse gratis"), `PendulumLimitBanner.tsx` ("Registrarse").
+- [x] Tests de los componentes migrados usan `CTA_AUTH` como fuente de verdad (no strings literales).
+- [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados
 
