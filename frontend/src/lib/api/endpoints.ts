@@ -245,7 +245,7 @@ export const API_ENDPOINTS = {
     // Public (no authentication required)
     PLAN_CONFIG_PUBLIC: '/plan-config/public',
     // Security & Rate Limiting
-    RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIPs
+    RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIps
     SECURITY_EVENTS: '/admin/security/events',
     // TODO: Backend endpoints pendientes
     // BLOCK_IP: '/admin/security/block-ip',

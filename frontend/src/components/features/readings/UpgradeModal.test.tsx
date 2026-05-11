@@ -17,12 +17,18 @@ vi.mock('@/hooks/api/useSubscription', () => ({
   useCreatePreapproval: vi.fn(),
 }));
 
+vi.mock('@/hooks/api/usePublicPlans', () => ({
+  usePublicPlans: vi.fn(),
+}));
+
 import UpgradeModal from './UpgradeModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
+import { usePublicPlans } from '@/hooks/api/usePublicPlans';
 
 const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
 const mockUseCreatePreapproval = useCreatePreapproval as ReturnType<typeof vi.fn>;
+const mockUsePublicPlans = usePublicPlans as ReturnType<typeof vi.fn>;
 
 describe('UpgradeModal', () => {
   const mockOnClose = vi.fn();
@@ -37,6 +43,14 @@ describe('UpgradeModal', () => {
     mockUseCreatePreapproval.mockReturnValue({
       mutate: mockMutate,
       isPending: false,
+    });
+    mockUsePublicPlans.mockReturnValue({
+      data: [
+        { id: 1, planType: 'free', name: 'Plan Gratis', price: 0 },
+        { id: 2, planType: 'premium', name: 'Plan Premium', price: 7000 },
+      ],
+      isLoading: false,
+      isError: false,
     });
   });
 
@@ -65,7 +79,7 @@ describe('UpgradeModal', () => {
     it('should render pricing information', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      expect(screen.getByText(/9\.99/)).toBeInTheDocument();
+      expect(screen.getByText(/7\.000/)).toBeInTheDocument();
       expect(screen.getByText(/mes/i)).toBeInTheDocument();
     });
 

@@ -44,7 +44,7 @@ describe('Plans Seeder', () => {
         id: 3,
         planType: UserPlan.PREMIUM,
         name: 'Plan Premium',
-        price: 9.99,
+        price: 7000,
         readingsLimit: 3,
         aiQuotaMonthly: 100,
       },
@@ -98,7 +98,7 @@ describe('Plans Seeder', () => {
       expect.objectContaining({
         planType: UserPlan.PREMIUM,
         name: 'Plan Premium',
-        price: 9.99,
+        price: 7000,
         readingsLimit: 4,
         aiQuotaMonthly: 100,
         allowCustomQuestions: true,

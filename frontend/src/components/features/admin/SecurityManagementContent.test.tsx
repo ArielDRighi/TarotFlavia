@@ -29,7 +29,7 @@ describe('SecurityManagementContent', () => {
     vi.mocked(useAdminSecurity.useRateLimitData).mockReturnValue({
       data: {
         violations: [],
-        blockedIPs: [],
+        blockedIps: [],
         stats: {
           totalViolations: 0,
           totalBlockedIps: 0,

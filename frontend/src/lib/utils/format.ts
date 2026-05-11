@@ -46,6 +46,20 @@ export function formatPrice(amount: number, currency = 'EUR'): string {
   }).format(amount);
 }
 
+const arsPriceFormatter = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS',
+  maximumFractionDigits: 0,
+});
+
+/**
+ * Format a price as Argentine Pesos without decimals (e.g. 7000 → "$ 7.000").
+ * Use as the canonical price formatter for Premium pricing across the app.
+ */
+export function formatPriceArs(amount: number): string {
+  return arsPriceFormatter.format(amount);
+}
+
 /**
  * Truncate text with ellipsis
  */

@@ -13,6 +13,7 @@ import { useCreatePreapproval } from '@/hooks/api/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 import { ROUTES } from '@/lib/constants/routes';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { formatPriceArs } from '@/lib/utils/format';
 import type { PlanConfig } from '@/types/admin.types';
 
 // ============================================================================
@@ -131,7 +132,9 @@ function PremiumCtaButton({ premiumPlan, testId }: PremiumCtaButtonProps) {
     >
       {isPending ? 'Redirigiendo...' : CTA_PREMIUM.PURCHASE}
       {premiumPlan && !isPending && (
-        <span className="ml-2 text-sm opacity-80">${premiumPlan.price.toFixed(2)}/mes</span>
+        <span className="ml-2 text-sm opacity-80">
+          {formatPriceArs(premiumPlan.price)}/mes
+        </span>
       )}
     </Button>
   );
@@ -168,7 +171,7 @@ export function PremiumPage() {
             más por{' '}
             {premiumPlan ? (
               <span className="font-bold text-purple-600 dark:text-purple-400">
-                ${premiumPlan.price.toFixed(2)}/mes
+                {formatPriceArs(premiumPlan.price)}/mes
               </span>
             ) : (
               'un precio accesible'
@@ -214,7 +217,7 @@ export function PremiumPage() {
                 {premiumPlan?.name ?? 'Premium'}
               </h3>
               <p className="mb-4 text-4xl font-bold text-purple-600 dark:text-purple-400">
-                {premiumPlan ? `$${premiumPlan.price.toFixed(2)}` : '---'}
+                {premiumPlan ? formatPriceArs(premiumPlan.price) : '---'}
                 <span className="text-lg font-normal">/mes</span>
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">

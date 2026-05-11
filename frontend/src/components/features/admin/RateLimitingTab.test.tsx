@@ -30,15 +30,15 @@ describe('RateLimitingTab', () => {
       data: {
         violations: [
           {
-            ipAddress: '192.168.1.1',
+            ip: '192.168.1.1',
             count: 10,
             firstViolation: '2024-01-01T10:00:00Z',
             lastViolation: '2024-01-01T11:00:00Z',
           },
         ],
-        blockedIPs: [
+        blockedIps: [
           {
-            ipAddress: '10.0.0.1',
+            ip: '10.0.0.1',
             reason: 'Excessive violations',
             blockedAt: '2024-01-01T12:00:00Z',
             expiresAt: '2024-01-08T12:00:00Z',

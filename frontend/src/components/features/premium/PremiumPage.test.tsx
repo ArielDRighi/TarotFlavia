@@ -38,7 +38,7 @@ const mockPremiumPlan: PlanConfig = {
   planType: 'premium',
   name: 'Plan Premium',
   description: 'Acceso completo a todas las funciones',
-  price: 9.99,
+  price: 7000,
   readingsLimit: -1,
   aiQuotaMonthly: -1,
   allowCustomQuestions: true,
@@ -139,7 +139,7 @@ describe('PremiumPage', () => {
       renderWithProviders(<PremiumPage />);
 
       // Price appears in multiple places (hero text, plan card, button); getAllByText is correct here
-      const priceElements = screen.getAllByText(/9\.99/);
+      const priceElements = screen.getAllByText(/7\.000/);
       expect(priceElements.length).toBeGreaterThan(0);
     });
 

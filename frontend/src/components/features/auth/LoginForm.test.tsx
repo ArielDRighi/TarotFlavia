@@ -86,9 +86,9 @@ describe('LoginForm', () => {
     it('should render register link', () => {
       render(<LoginForm />);
 
-      const registerLink = screen.getByText(/crear cuenta nueva/i);
+      const registerLink = screen.getByRole('link', { name: /crear cuenta/i });
       expect(registerLink).toBeInTheDocument();
-      expect(registerLink.closest('a')).toHaveAttribute('href', '/registro');
+      expect(registerLink).toHaveAttribute('href', '/registro');
     });
   });
 
