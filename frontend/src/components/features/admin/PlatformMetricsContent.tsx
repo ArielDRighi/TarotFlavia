@@ -12,6 +12,7 @@ import { MetricsPeriod } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -123,7 +124,9 @@ export function PlatformMetricsContent() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-gray-500">Próximamente</p>
+                <p className="text-xs text-gray-500">
+                  <Badge variant="secondary">Próximamente</Badge>
+                </p>
               </CardContent>
             </Card>
 
