@@ -24,7 +24,7 @@ export default function TerminosPage() {
 
         {/* Content */}
         <div className="rounded-lg border p-6">
-          <div className="prose prose-purple dark:prose-invert max-w-none space-y-6">
+          <div className="prose prose-purple max-w-none space-y-6">
             <section>
               <h2 className="font-serif text-2xl font-semibold">1. Aceptación de Términos</h2>
               <p className="text-text-secondary">

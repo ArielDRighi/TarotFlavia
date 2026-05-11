@@ -607,16 +607,16 @@ Las páginas `contacto`, `terminos` y `privacidad` repiten textualmente el mismo
 
 - [x] Decidir: ¿componente nuevo `<DisclaimerBanner>` o uso directo de `<Alert variant="info">`?
 - [x] Migrar:
-  - [`app/contacto/page.tsx:42`](../frontend/src/app/contacto/page.tsx#L42)
-  - [`app/terminos/page.tsx:115`](../frontend/src/app/terminos/page.tsx#L115)
-  - [`app/privacidad/page.tsx:152`](../frontend/src/app/privacidad/page.tsx#L152)
+  - `app/contacto/page.tsx`
+  - `app/terminos/page.tsx`
+  - `app/privacidad/page.tsx`
 - [x] Eliminar `bg-yellow-50` hardcoded.
 
 #### 🎯 Criterios de aceptación
 
 - [x] Las tres páginas legales usan el mismo componente.
 - [x] Visualmente idénticas en light mode (único modo soportado).
-- [x] Aprovechar la migración para eliminar las clases `dark:*` legacy presentes en estos `<div>`.
+- [x] Aprovechar la migración para eliminar las clases `dark:*` legacy presentes en estas páginas (`dark:bg-yellow-950/20`, `dark:bg-purple-950/20`, `dark:prose-invert`).
 - [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados

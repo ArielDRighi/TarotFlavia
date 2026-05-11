@@ -27,7 +27,7 @@ export default function ContactoPage() {
         </div>
 
         {/* Alternative Contact Info */}
-        <div className="rounded-lg bg-purple-50 p-6 dark:bg-purple-950/20">
+        <div className="rounded-lg bg-purple-50 p-6">
           <h2 className="text-text-primary mb-3 font-semibold">Otras formas de contacto</h2>
           <div className="text-text-secondary space-y-2 text-sm">
             <p>

@@ -15,9 +15,14 @@ describe('DisclaimerBanner', () => {
     expect(strong.tagName).toBe('STRONG');
   });
 
-  it('should use Alert with info variant (role="alert")', () => {
+  it('should render as an alert (role="alert")', () => {
     render(<DisclaimerBanner message="Mensaje de prueba." />);
     expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('should apply info variant styles (text-blue-800 class)', () => {
+    render(<DisclaimerBanner message="Mensaje de prueba." />);
+    expect(screen.getByRole('alert')).toHaveClass('text-blue-800');
   });
 
   it('should render an Info icon', () => {
