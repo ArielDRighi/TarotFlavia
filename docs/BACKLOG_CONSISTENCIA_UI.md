@@ -300,7 +300,7 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ✅ COMPLETADA |
 | T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ✅ COMPLETADA |
 | T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ✅ COMPLETADA |
-| T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — | ⏳ PENDIENTE |
+| T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — | ✅ COMPLETADA |
 | T-UI-10 | Renombrar/unificar uso de "Próximamente" | 🟢 Baja | 0.25 día | — | ⏳ PENDIENTE |
 
 **Estimación total:** ~8.5 días.
@@ -630,7 +630,7 @@ Las páginas `contacto`, `terminos` y `privacidad` repiten textualmente el mismo
 **Prioridad:** 🟢 MEDIA
 **Estimación:** 0.25 día
 **Dependencias:** ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-009
 
 #### 📋 Descripción
@@ -639,16 +639,16 @@ Las páginas `contacto`, `terminos` y `privacidad` repiten textualmente el mismo
 
 #### ✅ Tareas específicas
 
-- [ ] [`contact/ContactForm.tsx:149`](../frontend/src/components/features/contact/ContactForm.tsx#L149) — eliminar el banner, usar `toast.success('¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.')`.
-- [ ] Resetear el form tras éxito (si no lo hace).
-- [ ] Actualizar tests del form para verificar el toast (no el banner).
+- [x] [`contact/ContactForm.tsx:149`](../frontend/src/components/features/contact/ContactForm.tsx#L149) — eliminar el banner, usar `toast.success('¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.')`.
+- [x] Resetear el form tras éxito (ya lo hacía; confirmado).
+- [x] Actualizar tests del form para verificar el toast (no el banner). Errores usan `<Alert variant="destructive">` (persistente).
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Éxito del form se comunica vía toast.
-- [ ] Errores siguen mostrándose como `<Alert variant="destructive">` (mensaje persistente).
-- [ ] Tests actualizados.
-- [ ] Ciclo de calidad pasa.
+- [x] Éxito del form se comunica vía toast.
+- [x] Errores siguen mostrándose como `<Alert variant="destructive">` (mensaje persistente).
+- [x] Tests actualizados.
+- [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados
 

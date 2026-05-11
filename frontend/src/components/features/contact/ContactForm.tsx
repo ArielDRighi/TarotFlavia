@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, MessageSquare, User } from 'lucide-react';
+import { toast } from 'sonner';
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,7 +30,7 @@ import { contactFormSchema, type ContactFormData } from '@/lib/validations/conta
  */
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [hasError, setHasError] = useState(false);
 
   const {
     register,
@@ -47,7 +49,7 @@ export function ContactForm() {
 
   const onSubmit = async () => {
     setIsSubmitting(true);
-    setSubmitStatus('idle');
+    setHasError(false);
 
     try {
       // TODO: Implementar envío real al backend
@@ -56,20 +58,10 @@ export function ContactForm() {
       // Simulación de envío
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      setSubmitStatus('success');
+      toast.success('¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.');
       reset(); // Limpiar formulario
-
-      // Reset status después de 5 segundos
-      setTimeout(() => {
-        setSubmitStatus('idle');
-      }, 5000);
     } catch {
-      setSubmitStatus('error');
-
-      // Reset error status después de 5 segundos
-      setTimeout(() => {
-        setSubmitStatus('idle');
-      }, 5000);
+      setHasError(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -143,30 +135,13 @@ export function ContactForm() {
         {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
       </Button>
 
-      {/* Success Message */}
-      {submitStatus === 'success' && (
-        <div
-          className="rounded-lg bg-green-50 p-4 dark:bg-green-950/20"
-          role="alert"
-          aria-live="polite"
-        >
-          <p className="text-sm text-green-800 dark:text-green-200">
-            ¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.
-          </p>
-        </div>
-      )}
-
       {/* Error Message */}
-      {submitStatus === 'error' && (
-        <div
-          className="rounded-lg bg-red-50 p-4 dark:bg-red-950/20"
-          role="alert"
-          aria-live="polite"
-        >
-          <p className="text-sm text-red-800 dark:text-red-200">
+      {hasError && (
+        <Alert variant="destructive" role="alert" aria-live="polite">
+          <AlertDescription>
             Hubo un error al enviar tu mensaje. Por favor, intenta nuevamente.
-          </p>
-        </div>
+          </AlertDescription>
+        </Alert>
       )}
     </form>
   );
