@@ -52,6 +52,7 @@ vi.mock('@/components/ui/card', () => ({
 
 vi.mock('lucide-react', () => ({
   RotateCcw: () => <span data-testid="retrograde-icon">↺</span>,
+  Globe: () => <span data-testid="globe-icon" />,
 }));
 
 describe('PlanetPositionsTable', () => {

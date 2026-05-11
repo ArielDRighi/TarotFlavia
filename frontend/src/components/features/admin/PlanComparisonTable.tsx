@@ -13,7 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Check, X } from 'lucide-react';
+import { Check, X, Layers } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { PlanConfig, PlanType } from '@/types/admin.types';
 import { cn } from '@/lib/utils';
 
@@ -86,9 +87,12 @@ function formatValue(
 export function PlanComparisonTable({ plans }: PlanComparisonTableProps) {
   if (!plans || plans.length === 0) {
     return (
-      <div className="rounded-lg border p-8 text-center text-gray-500">
-        No hay planes disponibles para comparar
-      </div>
+      <EmptyState
+        icon={<Layers />}
+        title="Sin planes"
+        message="No hay planes disponibles para comparar"
+        className="rounded-lg border"
+      />
     );
   }
 

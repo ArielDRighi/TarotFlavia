@@ -6,6 +6,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { BarChart3 } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { PlanDistributionDto } from '@/types/admin.types';
 
 interface PlanDistributionChartProps {
@@ -25,9 +27,12 @@ export function PlanDistributionChart({ data }: PlanDistributionChartProps) {
       </CardHeader>
       <CardContent>
         {planData.length === 0 ? (
-          <div className="text-muted-foreground flex h-[300px] items-center justify-center">
-            No hay datos disponibles
-          </div>
+          <EmptyState
+            icon={<BarChart3 />}
+            title="Sin datos de planes"
+            message="No hay datos de distribución disponibles"
+            className="h-[300px]"
+          />
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>

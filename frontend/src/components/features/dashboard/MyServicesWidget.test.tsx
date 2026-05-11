@@ -91,7 +91,7 @@ describe('MyServicesWidget', () => {
     expect(screen.getByText('No se pudieron cargar tus servicios.')).toBeInTheDocument();
 
     const { default: userEvent } = await import('@testing-library/user-event');
-    await userEvent.click(screen.getByRole('button', { name: /reintentar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /intentar de nuevo/i }));
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 

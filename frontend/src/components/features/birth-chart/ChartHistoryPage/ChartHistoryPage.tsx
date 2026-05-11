@@ -16,6 +16,7 @@ import {
   SavedChartCardSkeleton,
 } from '@/components/features/birth-chart/SavedChartCard/SavedChartCard';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -260,7 +261,7 @@ export function ChartHistoryPage() {
           title="Error al cargar historial"
           message="No se pudo cargar el historial de cartas. Por favor, intenta de nuevo."
           action={{
-            label: 'Reintentar',
+            label: 'Intentar de nuevo',
             onClick: () => window.location.reload(),
           }}
         />
@@ -273,13 +274,13 @@ export function ChartHistoryPage() {
     return (
       <div data-testid="chart-history-page" className="container mx-auto max-w-7xl p-6">
         <div className="mb-6 flex items-center justify-between">
-          <div className="bg-muted h-8 w-48 animate-pulse rounded" />
-          <div className="bg-muted h-10 w-32 animate-pulse rounded" />
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
         </div>
 
         <div className="mb-6 flex gap-4">
-          <div className="bg-muted h-10 w-full max-w-sm animate-pulse rounded" />
-          <div className="bg-muted h-10 w-40 animate-pulse rounded" />
+          <Skeleton className="h-10 w-full max-w-sm" />
+          <Skeleton className="h-10 w-40" />
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

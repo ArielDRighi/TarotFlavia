@@ -135,7 +135,7 @@ describe('ErrorState', () => {
     it('should not render retry button when onRetry is not provided', () => {
       render(<ErrorState message="Error" />);
 
-      expect(screen.queryByRole('button', { name: /reintentar/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /intentar de nuevo/i })).not.toBeInTheDocument();
     });
 
     it('should render retry button when onRetry is provided', () => {
@@ -173,7 +173,7 @@ describe('ErrorState', () => {
     it('should show correct retry button text in inline variant', () => {
       render(<ErrorState variant="inline" message="Error" onRetry={() => {}} />);
 
-      expect(screen.getByRole('button', { name: /Reintentar/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /intentar de nuevo/i })).toBeInTheDocument();
     });
   });
 

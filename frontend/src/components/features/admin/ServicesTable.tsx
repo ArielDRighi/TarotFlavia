@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Pencil } from 'lucide-react';
+import { Pencil, ShoppingBag } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { HolisticServiceAdmin } from '@/types';
 
 // ============================================================================
@@ -43,12 +44,13 @@ interface ServicesTableProps {
 export function ServicesTable({ services, onEdit }: ServicesTableProps) {
   if (services.length === 0) {
     return (
-      <div
+      <EmptyState
         data-testid="services-table"
-        className="border-border bg-bg-main rounded-lg border p-8 text-center"
-      >
-        <p className="text-muted-foreground">No hay servicios registrados</p>
-      </div>
+        icon={<ShoppingBag />}
+        title="Sin servicios"
+        message="No hay servicios registrados"
+        className="rounded-lg border"
+      />
     );
   }
 

@@ -219,13 +219,9 @@ export function ServiceBookingPage({ purchaseId }: ServiceBookingPageProps) {
         </p>
 
         {bookingError && (
-          <div
-            data-testid="booking-error-message"
-            className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-800"
-            role="alert"
-          >
-            <p className="text-sm leading-relaxed">{bookingError}</p>
-          </div>
+          <Alert variant="destructive" data-testid="booking-error-message">
+            <AlertDescription>{bookingError}</AlertDescription>
+          </Alert>
         )}
 
         <BookingCalendar

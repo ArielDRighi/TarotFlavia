@@ -1,10 +1,10 @@
 'use client';
 
-import { BarChart3, BookOpen, RefreshCw } from 'lucide-react';
+import { BarChart3, BookOpen } from 'lucide-react';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { ErrorDisplay } from '@/components/ui/error-display';
 
 /**
  * Stat card component
@@ -18,16 +18,14 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, description }: StatCardProps) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
-        <div className="text-purple-600 dark:text-purple-400">{icon}</div>
+    <div className="flex items-start gap-3 rounded-lg border border-gray-200 p-4">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+        <div className="text-purple-600">{icon}</div>
       </div>
       <div className="flex-1">
-        <p className="text-sm text-gray-600 dark:text-gray-400">{label}</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
-        {description && (
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">{description}</p>
-        )}
+        <p className="text-sm text-gray-600">{label}</p>
+        <p className="text-2xl font-bold text-gray-900">{value}</p>
+        {description && <p className="mt-1 text-xs text-gray-500">{description}</p>}
       </div>
     </div>
   );
@@ -69,20 +67,12 @@ export function StatsSection() {
         <CardHeader>
           <CardTitle className="font-serif text-xl">Tus Estadísticas</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-red-600">
-            No pudimos cargar tus estadísticas. Por favor, intenta nuevamente.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            className="gap-2"
+        <CardContent>
+          <ErrorDisplay
             data-testid="retry-button"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Reintentar
-          </Button>
+            message="No pudimos cargar tus estadísticas. Por favor, intenta nuevamente."
+            onRetry={() => refetch()}
+          />
         </CardContent>
       </Card>
     );
