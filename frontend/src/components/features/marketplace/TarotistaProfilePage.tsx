@@ -344,7 +344,7 @@ export function TarotistaProfilePage({ id }: TarotistaProfilePageProps) {
             <div className="py-8 text-center text-gray-500">
               <MessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-300" />
               <p>
-                Las reseñas están <Badge variant="secondary">Próximamente</Badge>
+                Las reseñas estarán disponibles <Badge variant="secondary">Próximamente</Badge>
               </p>
             </div>
           </CardContent>

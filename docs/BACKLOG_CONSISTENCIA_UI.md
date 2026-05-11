@@ -674,7 +674,7 @@ Esto es ambiguo: el usuario puede leer "Próximamente" en el dashboard y pensar 
 
 #### ✅ Tareas específicas
 
-- [x] Renombrar [`SacredEventsWidget.tsx:174`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L174) de `Próximamente` → `Próximos eventos` (o `Próximos`).
+- [x] Renombrar [`SacredEventsWidget.tsx`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx) de `Próximamente` → `Próximos eventos` (o `Próximos`).
 - [x] Crear pequeño `<ComingSoonBadge>` o usar `<Badge variant="secondary">Próximamente</Badge>` para los placeholders de features no implementadas:
   - [`profile/SettingsTab.tsx:59,71`](../frontend/src/components/features/profile/SettingsTab.tsx#L59)
   - [`marketplace/TarotistaProfilePage.tsx:346`](../frontend/src/components/features/marketplace/TarotistaProfilePage.tsx#L346)
