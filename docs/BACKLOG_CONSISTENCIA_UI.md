@@ -299,7 +299,7 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ✅ COMPLETADA |
 | T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ✅ COMPLETADA |
 | T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ✅ COMPLETADA |
-| T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ⏳ PENDIENTE |
+| T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ✅ COMPLETADA |
 | T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — | ⏳ PENDIENTE |
 | T-UI-10 | Renombrar/unificar uso de "Próximamente" | 🟢 Baja | 0.25 día | — | ⏳ PENDIENTE |
 
@@ -596,7 +596,7 @@ Hoy conviven 4 variantes para la misma acción ("Crear Cuenta", "Crear Cuenta Gr
 **Prioridad:** 🟢 MEDIA
 **Estimación:** 0.5 día
 **Dependencias:** T-UI-04 (variante `info` en `<Alert>`)
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-008
 
 #### 📋 Descripción
@@ -605,19 +605,19 @@ Las páginas `contacto`, `terminos` y `privacidad` repiten textualmente el mismo
 
 #### ✅ Tareas específicas
 
-- [ ] Decidir: ¿componente nuevo `<DisclaimerBanner>` o uso directo de `<Alert variant="info">`?
-- [ ] Migrar:
-  - [`app/contacto/page.tsx:42`](../frontend/src/app/contacto/page.tsx#L42)
-  - [`app/terminos/page.tsx:115`](../frontend/src/app/terminos/page.tsx#L115)
-  - [`app/privacidad/page.tsx:152`](../frontend/src/app/privacidad/page.tsx#L152)
-- [ ] Eliminar `bg-yellow-50` hardcoded.
+- [x] Decidir: ¿componente nuevo `<DisclaimerBanner>` o uso directo de `<Alert variant="info">`?
+- [x] Migrar:
+  - `app/contacto/page.tsx`
+  - `app/terminos/page.tsx`
+  - `app/privacidad/page.tsx`
+- [x] Eliminar `bg-yellow-50` hardcoded.
 
 #### 🎯 Criterios de aceptación
 
-- [ ] Las tres páginas legales usan el mismo componente.
-- [ ] Visualmente idénticas en light mode (único modo soportado).
-- [ ] Aprovechar la migración para eliminar las clases `dark:*` legacy presentes en estos `<div>`.
-- [ ] Ciclo de calidad pasa.
+- [x] Las tres páginas legales usan el mismo componente.
+- [x] Visualmente idénticas en light mode (único modo soportado).
+- [x] Aprovechar la migración para eliminar las clases `dark:*` legacy presentes en estas páginas (`dark:bg-yellow-950/20`, `dark:bg-purple-950/20`, `dark:prose-invert`).
+- [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados
 
