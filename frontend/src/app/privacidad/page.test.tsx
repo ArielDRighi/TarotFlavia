@@ -85,10 +85,9 @@ describe('PrivacidadPage', () => {
     expect(screen.getByText(/Solicitar la eliminación de tus datos/i)).toBeInTheDocument();
   });
 
-  it('should have disclaimer in yellow background', () => {
-    const { container } = render(<PrivacidadPage />);
-    const disclaimer = container.querySelector('.bg-yellow-50');
-    expect(disclaimer).toBeInTheDocument();
+  it('should render the disclaimer banner', () => {
+    render(<PrivacidadPage />);
+    expect(screen.getByTestId('disclaimer-banner')).toBeInTheDocument();
   });
 
   it('should mention data security measures', () => {

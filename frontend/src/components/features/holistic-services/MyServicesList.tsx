@@ -167,7 +167,7 @@ function PurchaseCard({ purchase }: PurchaseCardProps) {
           href={purchase.initPoint as string}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg border border-amber-400 bg-amber-50 px-3 py-1.5 text-sm text-amber-800 hover:bg-amber-100"
+          className="inline-flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-800 hover:bg-amber-500/20"
           data-testid={`retry-payment-link-${purchase.id}`}
         >
           <CreditCard className="h-4 w-4" />
