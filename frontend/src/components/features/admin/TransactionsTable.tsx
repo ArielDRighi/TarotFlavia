@@ -19,6 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Receipt, SearchX } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import { formatTimestampLocalized } from '@/lib/utils/date';
 import type { ServicePurchase, PurchaseStatus } from '@/types';
 
@@ -109,12 +111,13 @@ export function TransactionsTable({ purchases }: TransactionsTableProps) {
   // ---- Empty state ----
   if (purchases.length === 0) {
     return (
-      <div
+      <EmptyState
         data-testid="transactions-table"
-        className="border-border bg-bg-main rounded-lg border p-8 text-center"
-      >
-        <p className="text-muted-foreground">No hay transacciones registradas</p>
-      </div>
+        icon={<Receipt />}
+        title="Sin transacciones"
+        message="No hay transacciones registradas"
+        className="rounded-lg border"
+      />
     );
   }
 
@@ -168,11 +171,12 @@ export function TransactionsTable({ purchases }: TransactionsTableProps) {
 
       {/* Tabla */}
       {filtered.length === 0 ? (
-        <div className="border-border rounded-lg border p-6 text-center">
-          <p className="text-muted-foreground text-sm">
-            No hay transacciones que coincidan con los filtros
-          </p>
-        </div>
+        <EmptyState
+          icon={<SearchX />}
+          title="Sin resultados"
+          message="No hay transacciones que coincidan con los filtros"
+          className="rounded-lg border"
+        />
       ) : (
         <Table>
           <TableHeader>

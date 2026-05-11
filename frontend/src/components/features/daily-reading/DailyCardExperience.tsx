@@ -7,6 +7,7 @@ import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { TarotCard } from '@/components/features/readings/TarotCard';
 import { ShareButton } from '@/components/features/shared/ShareButton';
 import FreeReadingUpgradeBanner from '@/components/features/readings/FreeReadingUpgradeBanner';
@@ -278,12 +279,10 @@ export function DailyCardExperience() {
   // Show error state (but not for 403/limit related, already handled above)
   if (error && !isAnonymousLimitReached && !isAuthenticatedLimitReached) {
     return (
-      <div className="text-center" role="alert">
-        <p className="text-destructive">Error al cargar tu carta del día</p>
-        <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
-          Reintentar
-        </Button>
-      </div>
+      <ErrorDisplay
+        message="Error al cargar tu carta del día"
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 

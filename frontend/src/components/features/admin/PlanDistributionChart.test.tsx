@@ -26,7 +26,7 @@ describe('PlanDistributionChart', () => {
     render(<PlanDistributionChart data={[]} />);
 
     expect(screen.getByText('Distribución por Plan')).toBeInTheDocument();
-    expect(screen.getByText('No hay datos disponibles')).toBeInTheDocument();
+    expect(screen.getByText('No hay datos de distribución disponibles')).toBeInTheDocument();
   });
 
   it('should render chart with data points', () => {
@@ -40,6 +40,6 @@ describe('PlanDistributionChart', () => {
     render(<PlanDistributionChart data={mockData} />);
 
     // Verifica que no muestra el mensaje de "No hay datos"
-    expect(screen.queryByText('No hay datos disponibles')).not.toBeInTheDocument();
+    expect(screen.queryByText('No hay datos de distribución disponibles')).not.toBeInTheDocument();
   });
 });

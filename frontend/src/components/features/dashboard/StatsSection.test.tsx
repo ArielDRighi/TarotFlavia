@@ -93,7 +93,7 @@ describe('StatsSection', () => {
 
     render(<StatsSection />);
 
-    const retryButton = screen.getByTestId('retry-button');
+    const retryButton = screen.getByRole('button', { name: /intentar de nuevo/i });
     fireEvent.click(retryButton);
 
     expect(mockRefetch).toHaveBeenCalledTimes(1);

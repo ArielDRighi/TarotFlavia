@@ -14,6 +14,8 @@ import { useDashboardStats } from '@/hooks/api/useDashboardStats';
 import { useDashboardCharts } from '@/hooks/api/useDashboardCharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/empty-state';
+import { BarChart3, BookOpen } from 'lucide-react';
 import { transformStatsToMetrics } from '@/lib/utils/dashboard-utils';
 
 /**
@@ -104,9 +106,12 @@ export default function AdminDashboardPage() {
         ) : stats?.users?.planDistribution && Array.isArray(stats.users.planDistribution) ? (
           <PlanDistributionChart data={stats.users.planDistribution} />
         ) : (
-          <div className="border-border bg-bg-main flex h-[400px] items-center justify-center rounded-lg border">
-            <p className="text-text-secondary">No hay datos de distribución disponibles</p>
-          </div>
+          <EmptyState
+            icon={<BarChart3 />}
+            title="Sin datos"
+            message="No hay datos de distribución disponibles"
+            className="border-border bg-bg-main h-[400px] rounded-lg border"
+          />
         )}
       </div>
 
@@ -118,9 +123,12 @@ export default function AdminDashboardPage() {
         ) : stats?.recentReadings ? (
           <RecentReadingsTable readings={stats.recentReadings} />
         ) : (
-          <div className="text-muted-foreground rounded-lg border p-8 text-center">
-            No hay lecturas recientes disponibles
-          </div>
+          <EmptyState
+            icon={<BookOpen />}
+            title="Sin lecturas recientes"
+            message="No hay lecturas recientes disponibles"
+            className="rounded-lg border"
+          />
         )}
       </div>
     </div>

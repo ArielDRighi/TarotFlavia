@@ -10,6 +10,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -153,11 +154,11 @@ export function HolisticServicesManagement() {
               ))}
             </div>
           ) : servicesError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-              <p className="text-red-700">
+            <Alert variant="destructive">
+              <AlertDescription>
                 Error al cargar servicios. Por favor, intenta de nuevo.
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
           ) : (
             <ServicesTable services={services ?? []} onEdit={handleEditService} />
           )}
@@ -174,11 +175,11 @@ export function HolisticServicesManagement() {
               ))}
             </div>
           ) : purchasesError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-              <p className="text-red-700">
+            <Alert variant="destructive">
+              <AlertDescription>
                 Error al cargar historial de transacciones. Por favor, intenta de nuevo.
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
           ) : (
             <TransactionsTable purchases={allPurchases ?? []} />
           )}

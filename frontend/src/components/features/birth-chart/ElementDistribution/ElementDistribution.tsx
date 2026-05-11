@@ -252,7 +252,9 @@ export function ElementDistribution({
             <span>.</span>
           </p>
         ) : (
-          <p className="text-muted-foreground text-sm">No hay datos de distribución disponibles.</p>
+          <p className="text-muted-foreground text-sm" data-testid="element-distribution-empty">
+            No hay datos de distribución disponibles.
+          </p>
         )}
       </div>
     </TooltipProvider>

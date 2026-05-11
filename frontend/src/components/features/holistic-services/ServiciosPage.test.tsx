@@ -164,7 +164,7 @@ describe('ServiciosPage', () => {
     render(<ServiciosPage />, { wrapper });
 
     expect(screen.getByTestId('servicios-error-state')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /intentar de nuevo/i })).toBeInTheDocument();
   });
 
   it('should call refetch when retry button is clicked', async () => {
@@ -179,7 +179,7 @@ describe('ServiciosPage', () => {
 
     render(<ServiciosPage />, { wrapper });
 
-    await userEvent.click(screen.getByRole('button', { name: /reintentar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /intentar de nuevo/i }));
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 

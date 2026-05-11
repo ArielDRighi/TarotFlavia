@@ -51,7 +51,7 @@ export function ErrorState({
                   className="h-3 w-3 animate-spin"
                 />
               ) : (
-                'Reintentar'
+                'Intentar de nuevo'
               )}
             </Button>
           )}
@@ -86,7 +86,7 @@ export function ErrorState({
                 className="mr-2 h-4 w-4 animate-spin"
               />
             )}
-            Reintentar
+            Intentar de nuevo
           </Button>
         )}
       </div>

@@ -459,7 +459,7 @@ describe('ActivationPage', () => {
       expect(screen.getByText(/hubo un problema con tu pago/i)).toBeInTheDocument();
     });
 
-    it('should render "Reintentar" button that navigates to /premium', async () => {
+    it('should render "Intentar de nuevo" button that navigates to /premium', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
       renderWithProviders(<ActivationPage />);
 

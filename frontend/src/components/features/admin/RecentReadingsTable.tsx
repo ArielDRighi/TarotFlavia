@@ -11,6 +11,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { BookOpen } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { RecentReadingDto } from '@/types/admin.types';
 import { cn } from '@/lib/utils';
 
@@ -74,9 +76,12 @@ function StatusBadge({ status }: { status: string }) {
 export function RecentReadingsTable({ readings }: RecentReadingsTableProps) {
   if (readings.length === 0) {
     return (
-      <div className="text-muted-foreground rounded-lg border p-8 text-center">
-        No hay lecturas recientes
-      </div>
+      <EmptyState
+        icon={<BookOpen />}
+        title="Sin lecturas recientes"
+        message="No hay lecturas recientes"
+        className="rounded-lg border"
+      />
     );
   }
 
