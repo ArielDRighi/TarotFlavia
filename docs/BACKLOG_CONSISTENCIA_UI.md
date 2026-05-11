@@ -295,15 +295,16 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | T-UI-01 | Migrar loading states a `<Spinner>` | 🔴 Crítica | 1 día | — | ✅ COMPLETADA |
 | T-UI-02 | Migrar empty states a `<EmptyState>` | 🔴 Crítica | 1.5 días | — | ✅ COMPLETADA |
 | T-UI-03 | Migrar error states a `<ErrorDisplay>` y unificar copy "Intentar de nuevo" | 🔴 Crítica | 1 día | — | ✅ COMPLETADA |
-| T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — | ⏳ PENDIENTE |
+| T-UI-04 | Refactor banners/alerts a `<Alert>` con variantes | 🔴 Crítica | 2 días | — | ✅ COMPLETADA |
 | T-UI-05 | Unificar copy de CTAs Premium (constante única) | 🟡 Alta | 0.5 día | T-UI-04 (idealmente) | ✅ COMPLETADA |
 | T-UI-06 | Migrar skeletons inline a `<Skeleton>` | 🟡 Alta | 1 día | — | ✅ COMPLETADA |
 | T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ✅ COMPLETADA |
 | T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ✅ COMPLETADA |
 | T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — | ✅ COMPLETADA |
 | T-UI-10 | Renombrar/unificar uso de "Próximamente" | 🟢 Baja | 0.25 día | — | ✅ COMPLETADA |
+| T-UI-11 | Barrido residual de patrones legacy fuera del scope inicial | 🟡 Alta | 1.5 días | T-UI-01..10 | ⏳ PENDIENTE |
 
-**Estimación total:** ~8.5 días.
+**Estimación total:** ~10 días.
 
 ---
 
@@ -692,6 +693,88 @@ Esto es ambiguo: el usuario puede leer "Próximamente" en el dashboard y pensar 
 
 ---
 
+### T-UI-11: Barrido residual de patrones legacy fuera del scope inicial
+
+**Prioridad:** 🟡 ALTA
+**Estimación:** 1.5 días
+**Dependencias:** T-UI-01 a T-UI-10 (todas COMPLETADAS — los primitivos y constantes ya existen)
+**Estado:** ⏳ PENDIENTE
+**Cubre INC:** INC-002, INC-003, INC-004, INC-006 (archivos no listados en la auditoría inicial)
+
+#### 📋 Descripción
+
+Durante la verificación de T-UI-01..10 se encontraron ~25 ubicaciones adicionales que **no estaban en el scope original** de la auditoría pero replican los mismos patrones legacy que ya fueron unificados. Esta tarea cierra el círculo: aplica los primitivos del design system (`<EmptyState>`, `<ErrorDisplay>`, `<Alert>`, `<Skeleton>`) a todos los archivos restantes para alcanzar **consistencia real en toda la app** (criterio aspiracional de T-UI-03 que aún no se cumple por estar fuera de scope: "El copy del retry es uniforme en toda la app").
+
+#### ✅ Tareas específicas
+
+**1. Empty states inline residuales → `<EmptyState>` (INC-002):**
+
+- [ ] [`app/admin/page.tsx:108`](../frontend/src/app/admin/page.tsx#L108) → "No hay datos de distribución disponibles"
+- [ ] [`app/admin/page.tsx:122`](../frontend/src/app/admin/page.tsx#L122) → "No hay lecturas recientes disponibles"
+- [ ] [`components/features/holistic-services/ServiciosPage.tsx:81`](../frontend/src/components/features/holistic-services/ServiciosPage.tsx#L81) → "No hay servicios disponibles en este momento."
+- [ ] [`components/features/admin/PlanDistributionChart.tsx:29`](../frontend/src/components/features/admin/PlanDistributionChart.tsx#L29) → "No hay datos disponibles"
+- [ ] [`components/features/admin/DailyReadingsChart.tsx:33`](../frontend/src/components/features/admin/DailyReadingsChart.tsx#L33) → "No hay datos disponibles"
+- [ ] [`components/features/admin/RecentReadingsTable.tsx:78`](../frontend/src/components/features/admin/RecentReadingsTable.tsx#L78) → "No hay lecturas recientes"
+- [ ] [`components/features/admin/ServicesTable.tsx:50`](../frontend/src/components/features/admin/ServicesTable.tsx#L50) → "No hay servicios registrados"
+- [ ] [`components/features/admin/TransactionsTable.tsx:116`](../frontend/src/components/features/admin/TransactionsTable.tsx#L116), [`:173`](../frontend/src/components/features/admin/TransactionsTable.tsx#L173) → 2 mensajes ("No hay transacciones registradas" / "No hay transacciones que coincidan con los filtros")
+- [ ] [`components/features/admin/PlanComparisonTable.tsx:90`](../frontend/src/components/features/admin/PlanComparisonTable.tsx#L90) → "No hay planes disponibles para comparar"
+- [ ] [`components/features/birth-chart/ElementDistribution/ElementDistribution.tsx:255`](../frontend/src/components/features/birth-chart/ElementDistribution/ElementDistribution.tsx#L255) → "No hay datos de distribución disponibles."
+
+**2. Botones "Reintentar" → migrar a `<ErrorDisplay onRetry={...}>` o renombrar a "Intentar de nuevo" (INC-003, criterio uniformidad):**
+
+- [ ] [`components/features/daily-reading/DailyCardExperience.tsx:284`](../frontend/src/components/features/daily-reading/DailyCardExperience.tsx#L284)
+- [ ] [`components/features/dashboard/MyServicesWidget.tsx:112`](../frontend/src/components/features/dashboard/MyServicesWidget.tsx#L112)
+- [ ] [`components/features/dashboard/StatsSection.tsx:84`](../frontend/src/components/features/dashboard/StatsSection.tsx#L84)
+- [ ] [`components/features/birth-chart/ChartHistoryPage/ChartHistoryPage.tsx:263`](../frontend/src/components/features/birth-chart/ChartHistoryPage/ChartHistoryPage.tsx#L263) (label de action)
+- [ ] [`components/features/birth-chart/ErrorState/ErrorState.tsx:54,89`](../frontend/src/components/features/birth-chart/ErrorState/ErrorState.tsx#L54) — componente custom; alinear copy a "Intentar de nuevo" o componer sobre `<ErrorDisplay>`.
+- [ ] [`components/features/premium/ActivationPage.tsx:139`](../frontend/src/components/features/premium/ActivationPage.tsx#L139)
+- [ ] [`components/features/holistic-services/ServiciosPage.tsx:70`](../frontend/src/components/features/holistic-services/ServiciosPage.tsx#L70)
+- [ ] Actualizar tests asociados (`ErrorState.test.tsx`, `ActivationPage.test.tsx`) para buscar el copy unificado.
+
+**3. Banners inline `bg-red-50` / `bg-amber-50` / `bg-green-50` → `<Alert variant="...">` (INC-004):**
+
+- [ ] [`components/features/admin/AgendaManagementContent.tsx:322`](../frontend/src/components/features/admin/AgendaManagementContent.tsx#L322) — error de fechas bloqueadas (`bg-red-50`).
+- [ ] [`components/features/admin/HolisticServicesManagement.tsx:156,177`](../frontend/src/components/features/admin/HolisticServicesManagement.tsx#L156) — 2 banners de error.
+- [ ] [`components/features/holistic-services/ServicePaymentPage.tsx:187`](../frontend/src/components/features/holistic-services/ServicePaymentPage.tsx#L187) (`bg-amber-50` warning), [`:201`](../frontend/src/components/features/holistic-services/ServicePaymentPage.tsx#L201) (`bg-red-50` error).
+- [ ] [`components/features/holistic-services/ServiceBookingPage.tsx:224`](../frontend/src/components/features/holistic-services/ServiceBookingPage.tsx#L224) — banner error inline (`bg-red-50`).
+- [ ] [`components/features/holistic-services/MyServicesList.tsx:170`](../frontend/src/components/features/holistic-services/MyServicesList.tsx#L170) — pill amber para "pendiente"; decidir si `<Alert>` o `<Badge variant="warning">`.
+- [ ] [`components/features/onboarding/WelcomeModal.tsx:69`](../frontend/src/components/features/onboarding/WelcomeModal.tsx#L69) — bloque informativo `bg-amber-50` → `<Alert variant="info">` o `<Alert variant="warning">`.
+
+**4. Skeletons inline residuales → `<Skeleton>` (INC-006):**
+
+- [ ] [`components/features/birth-chart/ChartHistoryPage/ChartHistoryPage.tsx:276-282`](../frontend/src/components/features/birth-chart/ChartHistoryPage/ChartHistoryPage.tsx#L276-L282) — 4 divs con `bg-muted animate-pulse rounded`.
+- [ ] [`components/features/encyclopedia/ArticleSkeleton.tsx:35`](../frontend/src/components/features/encyclopedia/ArticleSkeleton.tsx#L35) — componer sobre `<Skeleton>`.
+- [ ] [`components/features/encyclopedia/ArticleListPageContent.tsx:74`](../frontend/src/components/features/encyclopedia/ArticleListPageContent.tsx#L74).
+- [ ] [`components/features/encyclopedia/ArticleDetailPageContent.tsx:28`](../frontend/src/components/features/encyclopedia/ArticleDetailPageContent.tsx#L28).
+
+**5. Limpieza colateral oportunista:**
+
+- [ ] Eliminar las clases `dark:*` huérfanas que aparezcan en los archivos tocados (alineado con la nota de "No dark mode" del documento).
+- [ ] Verificar que no se introduzcan nuevos casos: agregar regla ESLint o lint custom que falle ante `className="...bg-(red|amber|yellow|green)-50..."` fuera de `components/ui/`.
+
+#### 🎯 Criterios de aceptación
+
+- [ ] El criterio aspiracional de T-UI-03 se cumple: **NO existe ningún botón "Reintentar"** en componentes de feature; el copy uniforme es "Intentar de nuevo".
+- [ ] `grep -r "No hay" src/` solo retorna usos dentro de `<EmptyState>` o tests.
+- [ ] `grep -r "bg-red-50\|bg-amber-50\|bg-yellow-50\|bg-green-50" src/` no retorna banners (sí puede retornar usos legítimos como charts/indicators).
+- [ ] `grep -r "animate-pulse rounded.*bg-muted" src/` no retorna skeletons inline.
+- [ ] Tests existentes pasan; tests actualizados para reflejar nuevos copys.
+- [ ] Ciclo de calidad completo pasa (`npm run format && npm run lint:fix && npm run type-check && npm run test:run && npm run build && node scripts/validate-architecture.js`).
+
+#### 📁 Archivos involucrados
+
+≈25 archivos en `admin/`, `holistic-services/`, `dashboard/`, `daily-reading/`, `birth-chart/`, `encyclopedia/`, `premium/`, `onboarding/`.
+
+#### 📝 Sugerencia de implementación
+
+Por tamaño, conviene dividir en **2-3 PRs**:
+
+1. **T-UI-11a** — Empty states + skeletons residuales (lowest risk, mostly admin).
+2. **T-UI-11b** — Botones "Reintentar" → "Intentar de nuevo" (requiere alinear tests y componente `ErrorState` de birth-chart).
+3. **T-UI-11c** — Banners holistic-services + onboarding (más diseño, conviene reviewer con ojo visual).
+
+---
+
 ## ORDEN DE IMPLEMENTACIÓN RECOMENDADO
 
 ```
@@ -705,6 +788,7 @@ Esto es ambiguo: el usuario puede leer "Próximamente" en el dashboard y pensar 
 8. T-UI-05 (CTA Premium copy)       ─┐
 9. T-UI-07 (CTA Auth copy)           ├─ Copy unification (requiere PO)
 10. T-UI-10 (Próximamente)          ─┘
+11. T-UI-11 (Barrido residual)      ─── Cierre: archivos fuera del scope inicial
 ```
 
 Cada tarea es un PR independiente a `develop`. Pasar el ciclo de calidad completo antes de mergear cada uno.
@@ -723,4 +807,5 @@ T-UI-09 ─────────┐
 T-UI-10 ─────────┤
 T-UI-05 (req PO) ┤
 T-UI-07 (req PO) ┘
+T-UI-11 (depende de T-UI-01..10 completadas) ──► barrido residual
 ```
