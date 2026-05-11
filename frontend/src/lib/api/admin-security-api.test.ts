@@ -31,7 +31,7 @@ describe('admin-security-api', () => {
             lastViolation: '2024-01-01T09:30:00Z',
           },
         ],
-        blockedIPs: [
+        blockedIps: [
           {
             ipAddress: '10.0.0.1',
             reason: 'Excessive violations',
@@ -53,9 +53,9 @@ describe('admin-security-api', () => {
       expect(apiClient.get).toHaveBeenCalledWith('/admin/rate-limits/violations');
       expect(result).toEqual(mockData);
       expect(result.violations).toHaveLength(2);
-      expect(result.blockedIPs).toHaveLength(1);
+      expect(result.blockedIps).toHaveLength(1);
       expect(result.violations[0].ipAddress).toBe('192.168.1.1');
-      expect(result.blockedIPs[0].reason).toBe('Excessive violations');
+      expect(result.blockedIps[0].reason).toBe('Excessive violations');
     });
   });
 

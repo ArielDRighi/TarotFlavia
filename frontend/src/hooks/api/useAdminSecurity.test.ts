@@ -38,7 +38,7 @@ describe('useAdminSecurity hooks', () => {
             lastViolation: '2024-01-01T11:00:00Z',
           },
         ],
-        blockedIPs: [
+        blockedIps: [
           {
             ipAddress: '10.0.0.1',
             reason: 'Excessive violations',
@@ -61,7 +61,7 @@ describe('useAdminSecurity hooks', () => {
 
       expect(result.current.data).toEqual(mockData);
       expect(result.current.data?.violations).toHaveLength(1);
-      expect(result.current.data?.blockedIPs).toHaveLength(1);
+      expect(result.current.data?.blockedIps).toHaveLength(1);
       expect(securityApi.fetchRateLimitData).toHaveBeenCalled();
     });
   });

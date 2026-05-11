@@ -65,7 +65,7 @@ describe('UpgradeModal', () => {
     it('should render pricing information', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      expect(screen.getByText(/9\.99/)).toBeInTheDocument();
+      expect(screen.getByText(/7\.000/)).toBeInTheDocument();
       expect(screen.getByText(/mes/i)).toBeInTheDocument();
     });
 

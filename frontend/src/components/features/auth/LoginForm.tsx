@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth.schemas';
 
 /**
@@ -146,7 +147,7 @@ export function LoginForm() {
                 Iniciando...
               </>
             ) : (
-              'Iniciar Sesión'
+              CTA_AUTH.LOGIN
             )}
           </Button>
         </form>
@@ -160,7 +161,7 @@ export function LoginForm() {
           ¿Olvidaste tu contraseña?
         </Link>
         <Link href="/registro" className="text-primary text-sm hover:underline">
-          Crear cuenta nueva
+          {CTA_AUTH.REGISTER}
         </Link>
       </CardFooter>
     </Card>

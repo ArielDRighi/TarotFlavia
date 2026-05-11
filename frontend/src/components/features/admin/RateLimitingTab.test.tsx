@@ -36,7 +36,7 @@ describe('RateLimitingTab', () => {
             lastViolation: '2024-01-01T11:00:00Z',
           },
         ],
-        blockedIPs: [
+        blockedIps: [
           {
             ipAddress: '10.0.0.1',
             reason: 'Excessive violations',

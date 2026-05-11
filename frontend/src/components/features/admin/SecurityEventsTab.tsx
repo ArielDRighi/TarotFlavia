@@ -23,6 +23,9 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
+import { Search } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -51,7 +54,7 @@ export function SecurityEventsTab() {
     limit: 10,
   });
 
-  const { data, isLoading } = useSecurityEvents(filters);
+  const { data, isLoading, isError, refetch } = useSecurityEvents(filters);
 
   const handleFilterChange = (key: keyof SecurityEventFilters, value: string | number) => {
     setFilters((prev) => ({
@@ -77,6 +80,18 @@ export function SecurityEventsTab() {
       </div>
     );
   }
+
+  if (isError) {
+    return (
+      <ErrorDisplay
+        message="Error al cargar eventos de seguridad"
+        onRetry={() => void refetch()}
+      />
+    );
+  }
+
+  const events = data?.events ?? [];
+  const meta = data?.meta;
 
   return (
     <div className="space-y-6">
@@ -184,10 +199,12 @@ export function SecurityEventsTab() {
           <CardTitle>Eventos de Seguridad</CardTitle>
         </CardHeader>
         <CardContent>
-          {!data || data.events.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">
-              No se encontraron eventos de seguridad
-            </p>
+          {events.length === 0 ? (
+            <EmptyState
+              icon={<Search />}
+              title="Sin eventos"
+              message="No se encontraron eventos de seguridad"
+            />
           ) : (
             <>
               <Table>
@@ -202,7 +219,7 @@ export function SecurityEventsTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.events.map((event) => (
+                  {events.map((event) => (
                     <TableRow key={event.id}>
                       <TableCell className="whitespace-nowrap">
                         {parseTimestamp(event.createdAt).toLocaleString()}
@@ -222,13 +239,13 @@ export function SecurityEventsTab() {
               </Table>
 
               {/* Paginación */}
-              {data.meta.totalPages > 1 && (
+              {meta && meta.totalPages > 1 && (
                 <div className="mt-6">
                   <Pagination
-                    currentPage={data.meta.currentPage}
-                    totalPages={data.meta.totalPages}
-                    totalItems={data.meta.totalItems}
-                    limit={data.meta.itemsPerPage}
+                    currentPage={meta.currentPage}
+                    totalPages={meta.totalPages}
+                    totalItems={meta.totalItems}
+                    limit={meta.itemsPerPage}
                     onPageChange={handlePageChange}
                   />
                 </div>

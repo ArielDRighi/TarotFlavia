@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +37,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 
 export function RateLimitingTab() {
-  const { data, isLoading } = useRateLimitData();
+  const { data, isLoading, isError, refetch } = useRateLimitData();
   const [unblockIPAddress, setUnblockIPAddress] = useState<string | null>(null);
 
   const handleUnblockClick = (ip: string) => {
@@ -64,9 +65,20 @@ export function RateLimitingTab() {
     );
   }
 
-  const totalViolations = data?.violations.reduce((sum, v) => sum + v.count, 0) || 0;
-  const activeViolatingIps = data?.violations.length || 0;
-  const blockedIpsCount = data?.blockedIPs.length || 0;
+  if (isError) {
+    return (
+      <ErrorDisplay
+        message="Error al cargar datos de rate limiting"
+        onRetry={() => void refetch()}
+      />
+    );
+  }
+
+  const violations = data?.violations ?? [];
+  const blockedIPs = data?.blockedIps ?? [];
+  const totalViolations = violations.reduce((sum, v) => sum + v.count, 0);
+  const activeViolatingIps = violations.length;
+  const blockedIpsCount = blockedIPs.length;
 
   return (
     <div className="space-y-6">
@@ -106,7 +118,7 @@ export function RateLimitingTab() {
           <CardTitle>IPs con Violaciones</CardTitle>
         </CardHeader>
         <CardContent>
-          {!data?.violations || data.violations.length === 0 ? (
+          {violations.length === 0 ? (
             <EmptyState
               icon={<ShieldOff />}
               title="Sin violaciones"
@@ -123,7 +135,7 @@ export function RateLimitingTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.violations.map((violation) => (
+                {violations.map((violation) => (
                   <TableRow key={violation.ipAddress}>
                     <TableCell className="font-mono">{violation.ipAddress}</TableCell>
                     <TableCell>{violation.count}</TableCell>
@@ -143,7 +155,7 @@ export function RateLimitingTab() {
           <CardTitle>IPs Bloqueadas</CardTitle>
         </CardHeader>
         <CardContent>
-          {!data?.blockedIPs || data.blockedIPs.length === 0 ? (
+          {blockedIPs.length === 0 ? (
             <EmptyState
               icon={<Globe />}
               title="Sin IPs bloqueadas"
@@ -161,7 +173,7 @@ export function RateLimitingTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.blockedIPs.map((blocked) => (
+                {blockedIPs.map((blocked) => (
                   <TableRow key={blocked.ipAddress}>
                     <TableCell className="font-mono">{blocked.ipAddress}</TableCell>
                     <TableCell>

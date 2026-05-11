@@ -100,11 +100,11 @@ export interface RateLimitStats {
 
 /**
  * Respuesta completa del endpoint de rate limiting
- * Backend retorna violations, blockedIPs y stats en una sola respuesta
+ * Backend retorna violations, blockedIps y stats en una sola respuesta
  */
 export interface RateLimitResponse {
   violations: RateLimitViolation[];
-  blockedIPs: BlockedIP[];
+  blockedIps: BlockedIP[];
   stats: RateLimitStats;
 }
 

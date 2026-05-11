@@ -151,7 +151,7 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
         {/* Pricing */}
         <div className="rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 text-center">
           <div className="flex items-baseline justify-center gap-1">
-            <span className="text-4xl font-bold text-purple-900">$9.99</span>
+            <span className="text-4xl font-bold text-purple-900">$7.000</span>
             <span className="text-muted-foreground">/ mes</span>
           </div>
           <p className="text-muted-foreground mt-2 text-sm">
