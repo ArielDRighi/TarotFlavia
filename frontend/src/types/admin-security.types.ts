@@ -7,9 +7,12 @@
 
 /**
  * Violación de rate limiting
+ *
+ * Contrato real backend (RateLimitsAdminController + IPBlockingService):
+ * cada item usa la propiedad `ip` (no `ipAddress`).
  */
 export interface RateLimitViolation {
-  ipAddress: string;
+  ip: string;
   count: number;
   firstViolation: string;
   lastViolation: string;
@@ -17,9 +20,11 @@ export interface RateLimitViolation {
 
 /**
  * IP bloqueada
+ *
+ * Contrato real backend: cada item usa la propiedad `ip` (no `ipAddress`).
  */
 export interface BlockedIP {
-  ipAddress: string;
+  ip: string;
   reason: string;
   blockedAt: string;
   expiresAt: string | null; // Puede ser null si es permanente

@@ -19,13 +19,13 @@ describe('admin-security-api', () => {
       const mockData: RateLimitResponse = {
         violations: [
           {
-            ipAddress: '192.168.1.1',
+            ip: '192.168.1.1',
             count: 10,
             firstViolation: '2024-01-01T10:00:00Z',
             lastViolation: '2024-01-01T11:00:00Z',
           },
           {
-            ipAddress: '192.168.1.2',
+            ip: '192.168.1.2',
             count: 5,
             firstViolation: '2024-01-01T09:00:00Z',
             lastViolation: '2024-01-01T09:30:00Z',
@@ -33,7 +33,7 @@ describe('admin-security-api', () => {
         ],
         blockedIps: [
           {
-            ipAddress: '10.0.0.1',
+            ip: '10.0.0.1',
             reason: 'Excessive violations',
             blockedAt: '2024-01-01T12:00:00Z',
             expiresAt: '2024-01-08T12:00:00Z',
@@ -54,7 +54,7 @@ describe('admin-security-api', () => {
       expect(result).toEqual(mockData);
       expect(result.violations).toHaveLength(2);
       expect(result.blockedIps).toHaveLength(1);
-      expect(result.violations[0].ipAddress).toBe('192.168.1.1');
+      expect(result.violations[0].ip).toBe('192.168.1.1');
       expect(result.blockedIps[0].reason).toBe('Excessive violations');
     });
   });

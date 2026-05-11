@@ -136,8 +136,8 @@ export function RateLimitingTab() {
               </TableHeader>
               <TableBody>
                 {violations.map((violation) => (
-                  <TableRow key={violation.ipAddress}>
-                    <TableCell className="font-mono">{violation.ipAddress}</TableCell>
+                  <TableRow key={violation.ip}>
+                    <TableCell className="font-mono">{violation.ip}</TableCell>
                     <TableCell>{violation.count}</TableCell>
                     <TableCell>{new Date(violation.firstViolation).toLocaleString()}</TableCell>
                     <TableCell>{new Date(violation.lastViolation).toLocaleString()}</TableCell>
@@ -174,8 +174,8 @@ export function RateLimitingTab() {
               </TableHeader>
               <TableBody>
                 {blockedIPs.map((blocked) => (
-                  <TableRow key={blocked.ipAddress}>
-                    <TableCell className="font-mono">{blocked.ipAddress}</TableCell>
+                  <TableRow key={blocked.ip}>
+                    <TableCell className="font-mono">{blocked.ip}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <AlertCircle className="h-4 w-4 text-red-500" />
@@ -192,7 +192,7 @@ export function RateLimitingTab() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleUnblockClick(blocked.ipAddress)}
+                        onClick={() => handleUnblockClick(blocked.ip)}
                       >
                         Desbloquear
                       </Button>
