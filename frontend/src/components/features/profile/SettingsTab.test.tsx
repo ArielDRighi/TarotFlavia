@@ -58,8 +58,9 @@ describe('SettingsTab', () => {
 
       expect(screen.getByText('Notificaciones')).toBeInTheDocument();
       expect(
-        screen.getByText(/configuración de notificaciones disponible próximamente/i)
+        screen.getByText(/configuración de notificaciones/i)
       ).toBeInTheDocument();
+      expect(screen.getAllByText('Próximamente').length).toBeGreaterThan(0);
     });
 
     it('should render privacy section', () => {
@@ -67,7 +68,7 @@ describe('SettingsTab', () => {
 
       expect(screen.getByText('Privacidad')).toBeInTheDocument();
       expect(
-        screen.getByText(/opciones de privacidad disponibles próximamente/i)
+        screen.getByText(/opciones de privacidad/i)
       ).toBeInTheDocument();
     });
 

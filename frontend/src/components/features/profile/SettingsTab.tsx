@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -56,7 +57,7 @@ export function SettingsTab() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-sm">
-            Configuración de notificaciones disponible próximamente
+            Configuración de notificaciones <Badge variant="secondary">Próximamente</Badge>
           </p>
         </CardContent>
       </Card>
@@ -68,7 +69,7 @@ export function SettingsTab() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-sm">
-            Opciones de privacidad disponibles próximamente
+            Opciones de privacidad <Badge variant="secondary">Próximamente</Badge>
           </p>
         </CardContent>
       </Card>

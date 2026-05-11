@@ -301,7 +301,7 @@ Nota: en `SacredEventsWidget`, "Próximamente" se usa como **etiqueta de secció
 | T-UI-07 | Unificar copy de CTAs de auth | 🟡 Alta | 0.5 día | — | ✅ COMPLETADA |
 | T-UI-08 | Crear `<DisclaimerBanner>` y migrar páginas legales | 🟢 Media | 0.5 día | T-UI-04 | ✅ COMPLETADA |
 | T-UI-09 | Migrar feedback de `ContactForm` a toast | 🟢 Media | 0.25 día | — | ✅ COMPLETADA |
-| T-UI-10 | Renombrar/unificar uso de "Próximamente" | 🟢 Baja | 0.25 día | — | ⏳ PENDIENTE |
+| T-UI-10 | Renombrar/unificar uso de "Próximamente" | 🟢 Baja | 0.25 día | — | ✅ COMPLETADA |
 
 **Estimación total:** ~8.5 días.
 
@@ -661,7 +661,7 @@ Las páginas `contacto`, `terminos` y `privacidad` repiten textualmente el mismo
 **Prioridad:** 🟢 BAJA
 **Estimación:** 0.25 día
 **Dependencias:** ninguna
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA
 **Cubre INC:** INC-010
 
 #### 📋 Descripción
@@ -674,17 +674,17 @@ Esto es ambiguo: el usuario puede leer "Próximamente" en el dashboard y pensar 
 
 #### ✅ Tareas específicas
 
-- [ ] Renombrar [`SacredEventsWidget.tsx:174`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L174) de `Próximamente` → `Próximos eventos` (o `Próximos`).
-- [ ] Crear pequeño `<ComingSoonBadge>` o usar `<Badge variant="secondary">Próximamente</Badge>` para los placeholders de features no implementadas:
+- [x] Renombrar [`SacredEventsWidget.tsx:174`](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L174) de `Próximamente` → `Próximos eventos` (o `Próximos`).
+- [x] Crear pequeño `<ComingSoonBadge>` o usar `<Badge variant="secondary">Próximamente</Badge>` para los placeholders de features no implementadas:
   - [`profile/SettingsTab.tsx:59,71`](../frontend/src/components/features/profile/SettingsTab.tsx#L59)
   - [`marketplace/TarotistaProfilePage.tsx:346`](../frontend/src/components/features/marketplace/TarotistaProfilePage.tsx#L346)
   - [`admin/PlatformMetricsContent.tsx:123`](../frontend/src/components/features/admin/PlatformMetricsContent.tsx#L123)
 
 #### 🎯 Criterios de aceptación
 
-- [ ] "Próximamente" solo se usa para indicar feature en desarrollo (visualmente como Badge).
-- [ ] Las secciones de eventos usan otro copy ("Próximos eventos" / "Próximos").
-- [ ] Ciclo de calidad pasa.
+- [x] "Próximamente" solo se usa para indicar feature en desarrollo (visualmente como Badge).
+- [x] Las secciones de eventos usan otro copy ("Próximos eventos" / "Próximos").
+- [x] Ciclo de calidad pasa.
 
 #### 📁 Archivos involucrados
 

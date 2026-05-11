@@ -184,7 +184,7 @@ export function SacredEventsWidget() {
           {hasUpcomingEvents && (
             <div>
               {hasTodayEvents && (
-                <h4 className="mt-4 mb-3 text-sm font-medium text-gray-700">Próximamente</h4>
+                <h4 className="mt-4 mb-3 text-sm font-medium text-gray-700">Próximos eventos</h4>
               )}
               <div className="space-y-2">
                 {upcomingEvents.map((event) => (
