@@ -1,3 +1,4 @@
+import { DisclaimerBanner } from '@/components/ui/disclaimer-banner';
 import { ContactForm } from '@/components/features/contact/ContactForm';
 
 /**
@@ -39,12 +40,7 @@ export default function ContactoPage() {
         </div>
 
         {/* Disclaimer */}
-        <div className="rounded-lg bg-yellow-50 p-4 dark:bg-yellow-950/20">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
-            <strong>Nota:</strong> Este formulario es funcional pero el envío de correos aún no está
-            implementado. Los mensajes se muestran en la consola del navegador.
-          </p>
-        </div>
+        <DisclaimerBanner message="Este formulario es funcional pero el envío de correos aún no está implementado. Los mensajes se muestran en la consola del navegador." />
       </div>
     </div>
   );

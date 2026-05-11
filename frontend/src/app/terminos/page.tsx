@@ -1,5 +1,7 @@
 'use client';
 
+import { DisclaimerBanner } from '@/components/ui/disclaimer-banner';
+
 /**
  * Página de Términos y Condiciones
  *
@@ -112,12 +114,8 @@ export default function TerminosPage() {
               </p>
             </section>
 
-            <div className="mt-8 rounded-lg bg-yellow-50 p-4 dark:bg-yellow-950/20">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                <strong>Nota:</strong> Este es un contenido placeholder. El contenido legal real
-                debe ser revisado y aprobado por profesionales legales antes de su uso en
-                producción.
-              </p>
+            <div className="mt-8">
+              <DisclaimerBanner message="Este es un contenido placeholder. El contenido legal real debe ser revisado y aprobado por profesionales legales antes de su uso en producción." />
             </div>
           </div>
         </div>
