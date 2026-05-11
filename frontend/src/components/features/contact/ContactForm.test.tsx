@@ -1,14 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/utils/useToast';
 import { ContactForm } from './ContactForm';
 
-vi.mock('sonner', () => ({
+vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
+    info: vi.fn(),
+    dismiss: vi.fn(),
   },
+  useToast: () => ({
+    toast: {
+      success: vi.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
+      dismiss: vi.fn(),
+    },
+  }),
 }));
 
 describe('ContactForm', () => {
@@ -43,7 +53,7 @@ describe('ContactForm', () => {
     it('should render icons for name, email, and subject fields', () => {
       const { container } = render(<ContactForm />);
       const icons = container.querySelectorAll('svg');
-      expect(icons.length).toBeGreaterThanOrEqual(3); // User, Mail, MessageSquare icons
+      expect(icons.length).toBeGreaterThanOrEqual(3);
     });
 
     it('should have required attributes on inputs', () => {
@@ -79,20 +89,18 @@ describe('ContactForm', () => {
     it('should have proper label associations', () => {
       render(<ContactForm />);
 
-      const nameLabel = screen.getByText('Nombre');
-      const emailLabel = screen.getByText(/correo electrónico/i);
-      const subjectLabel = screen.getByText('Asunto');
-      const messageLabel = screen.getByText('Mensaje');
-
-      expect(nameLabel).toBeInTheDocument();
-      expect(emailLabel).toBeInTheDocument();
-      expect(subjectLabel).toBeInTheDocument();
-      expect(messageLabel).toBeInTheDocument();
+      expect(screen.getByText('Nombre')).toBeInTheDocument();
+      expect(screen.getByText(/correo electrónico/i)).toBeInTheDocument();
+      expect(screen.getByText('Asunto')).toBeInTheDocument();
+      expect(screen.getByText('Mensaje')).toBeInTheDocument();
     });
   });
 
   describe('Submission feedback', () => {
-    const fillAndSubmit = async (user: ReturnType<typeof userEvent.setup>) => {
+    const SUBMIT_TIMEOUT = 5000;
+
+    const fillAndSubmit = async () => {
+      const user = userEvent.setup();
       await user.type(screen.getByLabelText(/nombre/i), 'Ana García');
       await user.type(screen.getByLabelText(/correo electrónico/i), 'ana@example.com');
       await user.type(screen.getByLabelText(/asunto/i), 'Consulta de prueba');
@@ -101,10 +109,8 @@ describe('ContactForm', () => {
     };
 
     it('should call toast.success after successful submission', async () => {
-      const user = userEvent.setup();
       render(<ContactForm />);
-
-      await fillAndSubmit(user);
+      await fillAndSubmit();
 
       await waitFor(
         () => {
@@ -112,34 +118,25 @@ describe('ContactForm', () => {
             '¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.'
           );
         },
-        { timeout: 3000 }
+        { timeout: SUBMIT_TIMEOUT }
       );
-    }, 10000);
+    });
 
     it('should NOT render inline success banner after submission', async () => {
-      const user = userEvent.setup();
       render(<ContactForm />);
+      await fillAndSubmit();
 
-      await fillAndSubmit(user);
-
-      await waitFor(() => expect(toast.success).toHaveBeenCalled(), { timeout: 3000 });
-
+      await waitFor(() => expect(toast.success).toHaveBeenCalled(), { timeout: SUBMIT_TIMEOUT });
       expect(screen.queryByText(/¡mensaje enviado exitosamente!/i)).not.toBeInTheDocument();
-    }, 10000);
+    });
 
     it('should reset the form after successful submission', async () => {
-      const user = userEvent.setup();
       render(<ContactForm />);
-
       const nameInput = screen.getByLabelText(/nombre/i);
-      await fillAndSubmit(user);
+      await fillAndSubmit();
 
-      await waitFor(() => expect(toast.success).toHaveBeenCalled(), { timeout: 3000 });
-
-      await waitFor(() => {
-        expect(nameInput).toHaveValue('');
-      });
-    }, 10000);
+      await waitFor(() => expect(nameInput).toHaveValue(''), { timeout: SUBMIT_TIMEOUT });
+    });
 
     it('should NOT show inline alert initially', () => {
       render(<ContactForm />);
@@ -147,24 +144,22 @@ describe('ContactForm', () => {
     });
 
     it('should show loading state during submission', async () => {
-      const user = userEvent.setup();
       render(<ContactForm />);
-
+      const user = userEvent.setup();
       await user.type(screen.getByLabelText(/nombre/i), 'Ana García');
       await user.type(screen.getByLabelText(/correo electrónico/i), 'ana@example.com');
       await user.type(screen.getByLabelText(/asunto/i), 'Consulta de prueba');
       await user.type(screen.getByLabelText(/mensaje/i), 'Este es un mensaje de prueba.');
 
-      // Click but don't await — check loading state synchronously right after
-      const clickPromise = user.click(screen.getByRole('button', { name: /enviar mensaje/i }));
+      // Click without awaiting so we can observe the in-flight loading state
+      void user.click(screen.getByRole('button', { name: /enviar mensaje/i }));
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /enviando/i })).toBeDisabled();
       });
 
-      await clickPromise;
-      // Wait for submission to complete
-      await waitFor(() => expect(toast.success).toHaveBeenCalled(), { timeout: 3000 });
-    }, 10000);
+      // Wait for submission to complete to avoid async leaks
+      await waitFor(() => expect(toast.success).toHaveBeenCalled(), { timeout: SUBMIT_TIMEOUT });
+    });
   });
 });
