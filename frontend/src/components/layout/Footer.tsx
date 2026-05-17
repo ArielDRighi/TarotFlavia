@@ -7,12 +7,12 @@ import { ROUTES } from '@/lib/constants/routes';
  */
 export function Footer() {
   return (
-    <footer className="bg-surface text-muted-foreground border-t py-8" role="contentinfo">
-      <div className="container mx-auto px-4">
+    <footer className="bg-surface text-muted-foreground border-t py-4 md:py-5" role="contentinfo">
+      <div className="container mx-auto space-y-3 px-4 md:space-y-2">
         {/* Services section */}
-        <nav className="mb-6" aria-label="Servicios">
-          <h3 className="mb-4 text-center text-sm font-semibold">Nuestros Servicios</h3>
-          <ul className="flex flex-wrap items-center justify-center gap-4 text-sm md:gap-6">
+        <nav aria-label="Servicios">
+          <h3 className="sr-only">Nuestros Servicios</h3>
+          <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-sm md:gap-x-5">
             <li>
               <Link href={ROUTES.CARTA_DEL_DIA} className="hover:text-primary transition-colors">
                 Carta del Día
@@ -52,8 +52,8 @@ export function Footer() {
         </nav>
 
         {/* Legal links */}
-        <nav className="mb-4" aria-label="Enlaces legales">
-          <ul className="flex items-center justify-center gap-6 text-sm">
+        <nav aria-label="Enlaces legales">
+          <ul className="flex items-center justify-center gap-4 text-sm">
             <li>
               <Link href="/terminos" className="hover:text-primary transition-colors">
                 Términos

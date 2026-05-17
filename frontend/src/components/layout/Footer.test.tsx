@@ -113,7 +113,7 @@ describe('Footer', () => {
       render(<Footer />);
 
       const footer = screen.getByRole('contentinfo');
-      expect(footer).toHaveClass('py-8');
+      expect(footer).toHaveClass('py-4');
     });
 
     it('should center content', () => {
