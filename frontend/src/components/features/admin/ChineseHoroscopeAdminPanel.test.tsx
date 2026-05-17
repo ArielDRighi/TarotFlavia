@@ -3,8 +3,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { toast } from 'sonner';
 import { ChineseHoroscopeAdminPanel } from './ChineseHoroscopeAdminPanel';
 import * as hooks from '@/hooks/api/useAdminChineseHoroscope';
 import type { ChineseHoroscopeYearStatus } from '@/types/admin-chinese-horoscope.types';
@@ -161,5 +162,49 @@ describe('ChineseHoroscopeAdminPanel', () => {
 
     const button = await screen.findByRole('button', { name: /generando/i });
     expect(button).toBeDisabled();
+  });
+
+  it('should call toast.success with the response message on generate success', async () => {
+    setupMocks(mockStatusPartial);
+    // Capture the onSuccess callback passed to mutate
+    let capturedOnSuccess: ((data: { message: string; details: string }) => void) | undefined;
+    mockMutate.mockImplementation(
+      (
+        _year: number,
+        callbacks: { onSuccess: (data: { message: string; details: string }) => void }
+      ) => {
+        capturedOnSuccess = callbacks.onSuccess;
+      }
+    );
+
+    render(<ChineseHoroscopeAdminPanel />);
+    const button = await screen.findByRole('button', { name: /generar faltantes/i });
+    await userEvent.click(button);
+
+    act(() => {
+      capturedOnSuccess?.({ message: 'Generación iniciada para 2026', details: 'En background.' });
+    });
+
+    expect(toast.success).toHaveBeenCalledWith('Generación iniciada para 2026');
+  });
+
+  it('should call toast.error with error message on generate failure', async () => {
+    setupMocks(mockStatusPartial);
+    let capturedOnError: ((error: Error) => void) | undefined;
+    mockMutate.mockImplementation(
+      (_year: number, callbacks: { onError: (error: Error) => void }) => {
+        capturedOnError = callbacks.onError;
+      }
+    );
+
+    render(<ChineseHoroscopeAdminPanel />);
+    const button = await screen.findByRole('button', { name: /generar faltantes/i });
+    await userEvent.click(button);
+
+    act(() => {
+      capturedOnError?.(new Error('Internal Server Error'));
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Internal Server Error'));
   });
 });

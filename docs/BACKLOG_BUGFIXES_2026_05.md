@@ -642,6 +642,7 @@ Hacer robusta la generación masiva agregando reintentos por combinación fallid
 - El admin ve a simple vista cuántos horóscopos quedan por generar.
 - Tras hacer click en "Generar faltantes" la UI refleja el progreso y, al terminar, el contador queda en `60/60`.
 - Si la generación devuelve fallidos, se listan con el error correspondiente.
+  > ⚠️ **Out-of-scope (T-BUG-001-B):** el endpoint `POST generate-missing` es fire-and-forget y solo retorna `{ message, details }` — no expone la lista de combinaciones fallidas individualmente. Este criterio requiere un nuevo endpoint en el backend (fuera del alcance de T-BUG-001-A/B). Se pospone para una tarea futura cuando el backend lo soporte.
 
 #### 📁 Archivos creados/modificados
 

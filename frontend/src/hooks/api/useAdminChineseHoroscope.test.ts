@@ -52,13 +52,24 @@ describe('useAdminChineseHoroscope hooks', () => {
       expect(api.getChineseHoroscopeAdminStatus).toHaveBeenCalledWith(2026);
     });
 
-    it('should not fetch when polling is disabled', () => {
+    it('should always fetch on mount even when polling is disabled', async () => {
+      const mockStatus: ChineseHoroscopeYearStatus = {
+        year: 2026,
+        total: 60,
+        generated: 58,
+        missing: [{ animal: ChineseZodiacAnimal.RAT, element: 'metal' }],
+      };
+      vi.mocked(api.getChineseHoroscopeAdminStatus).mockResolvedValue(mockStatus);
+
       const { result } = renderHook(
         () => useChineseHoroscopeAdminStatus(2026, { pollingEnabled: false }),
         { wrapper }
       );
 
-      expect(result.current.isFetching).toBe(false);
+      // La query siempre carga aunque el polling esté desactivado
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.data).toEqual(mockStatus);
+      expect(api.getChineseHoroscopeAdminStatus).toHaveBeenCalledTimes(1);
     });
 
     it('should handle errors', async () => {

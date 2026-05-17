@@ -16,6 +16,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { ErrorDisplay } from '@/components/ui/error-display';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
 // 6. Utils & types
 import type { MissingCombination } from '@/types/admin-chinese-horoscope.types';
 
@@ -51,22 +59,22 @@ interface MissingTableProps {
 // Sub-components
 function MissingCombinationsTable({ missing }: MissingTableProps) {
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="text-muted-foreground border-b text-left">
-          <th className="pr-4 pb-2 font-medium">Animal</th>
-          <th className="pb-2 font-medium">Elemento</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Animal</TableHead>
+          <TableHead>Elemento</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {missing.map((combo) => (
-          <tr key={`${combo.animal}-${combo.element}`} className="border-b last:border-0">
-            <td className="py-1.5 pr-4">{ANIMAL_LABEL[combo.animal] ?? combo.animal}</td>
-            <td className="py-1.5">{ELEMENT_LABEL[combo.element] ?? combo.element}</td>
-          </tr>
+          <TableRow key={`${combo.animal}-${combo.element}`}>
+            <TableCell>{ANIMAL_LABEL[combo.animal] ?? combo.animal}</TableCell>
+            <TableCell>{ELEMENT_LABEL[combo.element] ?? combo.element}</TableCell>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   );
 }
 
@@ -84,6 +92,7 @@ export function ChineseHoroscopeAdminPanel() {
     isLoading,
     isError,
   } = useChineseHoroscopeAdminStatus(currentYear, {
+    // El hook detiene el polling automáticamente cuando generated === total
     pollingEnabled: isPolling,
   });
   const generateMutation = useGenerateMissingChineseHoroscopes();
@@ -106,7 +115,7 @@ export function ChineseHoroscopeAdminPanel() {
     });
   };
 
-  // 5. Render
+  // 6. Render
   if (isLoading) {
     return (
       <div className="flex justify-center p-8">
@@ -117,10 +126,7 @@ export function ChineseHoroscopeAdminPanel() {
 
   if (isError) {
     return (
-      <ErrorDisplay
-        title="Error al cargar el estado"
-        message="No se pudo obtener el estado de generación del horóscopo chino."
-      />
+      <ErrorDisplay message="Error al cargar el estado: No se pudo obtener el estado de generación del horóscopo chino." />
     );
   }
 
@@ -150,17 +156,17 @@ export function ChineseHoroscopeAdminPanel() {
             )}
           </div>
 
-          {/* Actions */}
+          {/* Actions — disabled while polling is active to prevent overlapping requests */}
           {hasMissing && (
             <Button
               onClick={handleGenerate}
-              disabled={generateMutation.isPending}
+              disabled={generateMutation.isPending || isPolling}
               className="gap-2"
             >
               <RefreshCw
-                className={`h-4 w-4 ${generateMutation.isPending ? 'animate-spin' : ''}`}
+                className={`h-4 w-4 ${generateMutation.isPending || isPolling ? 'animate-spin' : ''}`}
               />
-              {generateMutation.isPending ? 'Generando...' : 'Generar faltantes'}
+              {generateMutation.isPending || isPolling ? 'Generando...' : 'Generar faltantes'}
             </Button>
           )}
         </CardContent>
