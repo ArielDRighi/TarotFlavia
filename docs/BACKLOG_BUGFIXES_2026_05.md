@@ -668,13 +668,14 @@ Hacer robusta la generación masiva agregando reintentos por combinación fallid
 **Estimación:** 1 punto
 **Dependencias:** ninguna (puede ir en paralelo con T-BUG-001-A)
 **Cubre BUG:** BUG-001
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] En `frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx` (línea 124) reemplazar el texto plano "Horóscopo no disponible para {currentYear}" por un componente más empático: ícono + mensaje + botón "Volver al listado".
-- [ ] Si el error es 404, sugerir reintentar más tarde; si es 5xx, ofrecer reintento inmediato.
-- [ ] Asegurar que el `Spinner` siga funcionando durante `isLoading`.
-- [ ] Test de renderizado por estado (loading / error 404 / error 5xx / éxito).
+- [x] En `frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx` (línea 124) reemplazar el texto plano "Horóscopo no disponible para {currentYear}" por un componente más empático: ícono + mensaje + botón "Volver al listado".
+- [x] Si el error es 404, sugerir reintentar más tarde; si es 5xx, ofrecer reintento inmediato.
+- [x] Asegurar que el `Spinner` siga funcionando durante `isLoading`.
+- [x] Test de renderizado por estado (loading / error 404 / error 5xx / éxito).
 
 #### 🎯 Criterios de Aceptación
 
