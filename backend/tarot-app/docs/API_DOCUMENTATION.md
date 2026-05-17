@@ -1723,6 +1723,60 @@ Content-Type: application/json
 
 ---
 
+### Horóscopos Chinos (Admin)
+
+Endpoints de administración para gestionar la generación de horóscopos chinos (12 animales × 5 elementos = 60 combinaciones por año). Requieren `JwtAuthGuard + AdminGuard`.
+
+#### 📊 Estado del Año
+
+```http
+GET /api/chinese-horoscope/admin/status/:year
+Authorization: Bearer <admin_token>
+```
+
+**Parámetros de ruta:**
+- `year`: Año a consultar (2020–2050)
+
+**Response (200):**
+```json
+{
+  "year": 2026,
+  "total": 60,
+  "generated": 58,
+  "missing": [
+    { "animal": "rat", "element": "wood" },
+    { "animal": "ox", "element": "fire" }
+  ]
+}
+```
+
+#### ⚙️ Generar Horóscopos Faltantes
+
+```http
+POST /api/chinese-horoscope/admin/generate-missing/:year
+Authorization: Bearer <admin_token>
+```
+
+**Parámetros de ruta:**
+- `year`: Año a completar (2020–2050)
+
+**Comportamiento:** Fire-and-forget. La generación ocurre en background; la respuesta HTTP se retorna inmediatamente.
+
+**Response (201):**
+```json
+{
+  "message": "Generación de horóscopos chinos faltantes para 2026 iniciada",
+  "details": "Proceso en background. Solo se generarán las combinaciones ausentes."
+}
+```
+
+**Notas:**
+- Solo genera combinaciones que no existen (nunca sobreescribe existentes).
+- Cada combinación se intenta hasta 3 veces con backoff exponencial (10s, 20s, 40s) antes de marcar como fallida.
+- Un segundo cron automático (`0 0 12 16 12 *`, 16 de dic a las 12:00 UTC) verifica y completa el año siguiente si quedan faltantes.
+
+---
+
 ### Health Checks
 
 #### 🏥 Health General

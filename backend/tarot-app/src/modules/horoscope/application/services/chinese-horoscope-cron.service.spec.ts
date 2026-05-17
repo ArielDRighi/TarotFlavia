@@ -9,6 +9,8 @@ describe('ChineseHoroscopeCronService', () => {
   const mockChineseService = {
     findAllByYear: jest.fn(),
     generateAllForYear: jest.fn(),
+    findMissingCombinationsForYear: jest.fn(),
+    generateMissingForYear: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -37,11 +39,11 @@ describe('ChineseHoroscopeCronService', () => {
   });
 
   describe('generateNextYearHoroscopes', () => {
-    it('should generate horoscopes for next year if none exist', async () => {
+    it('debe generar horóscopos para el año siguiente si no existen', async () => {
       // Arrange
       mockChineseService.findAllByYear.mockResolvedValue([]);
       mockChineseService.generateAllForYear.mockResolvedValue({
-        successful: 12,
+        successful: 60,
         failed: 0,
         results: [],
       });
@@ -55,7 +57,7 @@ describe('ChineseHoroscopeCronService', () => {
       expect(chineseService.generateAllForYear).toHaveBeenCalledWith(nextYear);
     });
 
-    it('should not generate if horoscopes already exist', async () => {
+    it('debe no generar si ya existen horóscopos', async () => {
       // Arrange
       mockChineseService.findAllByYear.mockResolvedValue([
         { id: 1, animal: 'rat', year: 2027 },
@@ -70,7 +72,7 @@ describe('ChineseHoroscopeCronService', () => {
       expect(chineseService.generateAllForYear).not.toHaveBeenCalled();
     });
 
-    it('should handle generation errors gracefully', async () => {
+    it('debe manejar errores de generación sin lanzar excepción', async () => {
       // Arrange
       mockChineseService.findAllByYear.mockResolvedValue([]);
       mockChineseService.generateAllForYear.mockRejectedValue(
@@ -82,7 +84,7 @@ describe('ChineseHoroscopeCronService', () => {
       expect(chineseService.generateAllForYear).toHaveBeenCalled();
     });
 
-    it('should log success message when generation completes', async () => {
+    it('debe loguear mensaje de éxito al completar la generación', async () => {
       // Arrange
       const logSpy = jest.spyOn(service['logger'], 'log');
       mockChineseService.findAllByYear.mockResolvedValue([]);
@@ -104,7 +106,7 @@ describe('ChineseHoroscopeCronService', () => {
       );
     });
 
-    it('should log warning when horoscopes already exist', async () => {
+    it('debe loguear warning cuando los horóscopos ya existen', async () => {
       // Arrange
       const warnSpy = jest.spyOn(service['logger'], 'warn');
       mockChineseService.findAllByYear.mockResolvedValue([
@@ -121,7 +123,7 @@ describe('ChineseHoroscopeCronService', () => {
       );
     });
 
-    it('should log error when generation fails', async () => {
+    it('debe loguear error cuando la generación falla', async () => {
       // Arrange
       const errorSpy = jest.spyOn(service['logger'], 'error');
       mockChineseService.findAllByYear.mockResolvedValue([]);
@@ -139,7 +141,7 @@ describe('ChineseHoroscopeCronService', () => {
       );
     });
 
-    it('should handle errors from findAllByYear gracefully', async () => {
+    it('debe manejar errores de findAllByYear sin lanzar excepción', async () => {
       // Arrange
       const errorSpy = jest.spyOn(service['logger'], 'error');
       mockChineseService.findAllByYear.mockRejectedValue(
@@ -157,7 +159,7 @@ describe('ChineseHoroscopeCronService', () => {
       expect(chineseService.generateAllForYear).not.toHaveBeenCalled();
     });
 
-    it('should handle non-Error objects in catch block', async () => {
+    it('debe manejar errores no-Error en el catch', async () => {
       // Arrange
       const errorSpy = jest.spyOn(service['logger'], 'error');
       mockChineseService.findAllByYear.mockResolvedValue([]);
@@ -176,8 +178,101 @@ describe('ChineseHoroscopeCronService', () => {
     });
   });
 
+  // ===== T-BUG-001-A: Segundo cron de verificación (16 de diciembre) =====
+  describe('verifyAndCompleteNextYearHoroscopes', () => {
+    it('debe llamar a generateMissingForYear si quedan combinaciones faltantes', async () => {
+      // Arrange
+      const nextYear = new Date().getFullYear() + 1;
+      mockChineseService.findMissingCombinationsForYear.mockResolvedValue([
+        { animal: 'rat', element: 'metal' },
+        { animal: 'ox', element: 'water' },
+      ]);
+      mockChineseService.generateMissingForYear.mockResolvedValue({
+        successful: 2,
+        failed: 0,
+        results: [],
+      });
+
+      // Act
+      await service.verifyAndCompleteNextYearHoroscopes();
+
+      // Assert
+      expect(
+        chineseService.findMissingCombinationsForYear,
+      ).toHaveBeenCalledWith(nextYear);
+      expect(chineseService.generateMissingForYear).toHaveBeenCalledWith(
+        nextYear,
+      );
+    });
+
+    it('debe NO llamar a generateMissingForYear si los 60 horóscopos ya existen', async () => {
+      // Arrange
+      mockChineseService.findMissingCombinationsForYear.mockResolvedValue([]);
+
+      // Act
+      await service.verifyAndCompleteNextYearHoroscopes();
+
+      // Assert
+      expect(chineseService.generateMissingForYear).not.toHaveBeenCalled();
+    });
+
+    it('debe loguear cantidad de faltantes y resultado del reintento', async () => {
+      // Arrange
+      const logSpy = jest.spyOn(service['logger'], 'log');
+      const warnSpy = jest.spyOn(service['logger'], 'warn');
+      mockChineseService.findMissingCombinationsForYear.mockResolvedValue([
+        { animal: 'rat', element: 'metal' },
+      ]);
+      mockChineseService.generateMissingForYear.mockResolvedValue({
+        successful: 1,
+        failed: 0,
+        results: [],
+      });
+
+      // Act
+      await service.verifyAndCompleteNextYearHoroscopes();
+
+      // Assert
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('1 horóscopos faltantes'),
+      );
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining('1 exitosos'),
+      );
+    });
+
+    it('debe loguear que la generación está completa si no hay faltantes', async () => {
+      // Arrange
+      const logSpy = jest.spyOn(service['logger'], 'log');
+      mockChineseService.findMissingCombinationsForYear.mockResolvedValue([]);
+
+      // Act
+      await service.verifyAndCompleteNextYearHoroscopes();
+
+      // Assert
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('60/60'));
+    });
+
+    it('debe manejar errores del proceso de verificación sin lanzar excepción', async () => {
+      // Arrange
+      const errorSpy = jest.spyOn(service['logger'], 'error');
+      mockChineseService.findMissingCombinationsForYear.mockRejectedValue(
+        new Error('DB unavailable'),
+      );
+
+      // Act & Assert
+      await expect(
+        service.verifyAndCompleteNextYearHoroscopes(),
+      ).resolves.not.toThrow();
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error en verificación de faltantes'),
+        expect.any(String),
+      );
+    });
+  });
+
   describe('generateManually', () => {
-    it('should generate horoscopes for specified year', async () => {
+    it('debe generar horóscopos para el año especificado', async () => {
       // Arrange
       mockChineseService.generateAllForYear.mockResolvedValue({
         successful: 12,
@@ -192,7 +287,7 @@ describe('ChineseHoroscopeCronService', () => {
       expect(chineseService.generateAllForYear).toHaveBeenCalledWith(2028);
     });
 
-    it('should default to next year if no year specified', async () => {
+    it('debe usar el año siguiente por defecto si no se especifica año', async () => {
       // Arrange
       mockChineseService.generateAllForYear.mockResolvedValue({
         successful: 12,
@@ -208,7 +303,7 @@ describe('ChineseHoroscopeCronService', () => {
       expect(chineseService.generateAllForYear).toHaveBeenCalledWith(nextYear);
     });
 
-    it('should log warning when manual generation starts', async () => {
+    it('debe loguear warning al iniciar generación manual', async () => {
       // Arrange
       const warnSpy = jest.spyOn(service['logger'], 'warn');
       mockChineseService.generateAllForYear.mockResolvedValue({
@@ -226,7 +321,7 @@ describe('ChineseHoroscopeCronService', () => {
       );
     });
 
-    it('should log completion message with success and failure counts', async () => {
+    it('debe loguear mensaje de completado con conteos', async () => {
       // Arrange
       const logSpy = jest.spyOn(service['logger'], 'log');
       mockChineseService.generateAllForYear.mockResolvedValue({
@@ -244,7 +339,7 @@ describe('ChineseHoroscopeCronService', () => {
       );
     });
 
-    it('should handle errors in manual generation', async () => {
+    it('debe lanzar excepción si la generación manual falla', async () => {
       // Arrange
       mockChineseService.generateAllForYear.mockRejectedValue(
         new Error('Manual generation failed'),

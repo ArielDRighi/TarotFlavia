@@ -530,7 +530,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 
 | ID         | Tarea                                                                       | Tipo        | Prioridad   | Estimación |
 | ---------- | --------------------------------------------------------------------------- | ----------- | ----------- | ---------- |
-| T-BUG-001-A | Reintento + endpoint "generar faltantes" para horóscopos chinos             | Backend     | 🔴 Crítica  | 5 pts      |
+| T-BUG-001-A | Reintento + endpoint "generar faltantes" para horóscopos chinos             | Backend     | ✅ COMPLETADA  | 5 pts      |
 | T-BUG-001-B | UI de estado del año + acción "Generar faltantes" en admin                  | Frontend    | 🟠 Alta     | 3 pts      |
 | T-BUG-001-C | Mensaje accionable en página pública cuando falta horóscopo (404)           | Frontend    | 🟡 Media    | 1 pt       |
 | T-BUG-002   | Compactar Footer (reducir altura y wrap excesivo)                           | Frontend    | 🟡 Media    | 2 pts      |
@@ -561,6 +561,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 
 ### T-BUG-001-A: Reintento + Endpoint "Generar Faltantes" para Horóscopos Chinos
 
+**Estado:** ✅ COMPLETADA
 **Prioridad:** 🔴 Crítica
 **Estimación:** 5 puntos
 **Dependencias:** ninguna
@@ -574,39 +575,39 @@ Hacer robusta la generación masiva agregando reintentos por combinación fallid
 
 **Servicio (`chinese-horoscope.service.ts`):**
 
-- [ ] Agregar método `findMissingCombinationsForYear(year): Promise<{ animal, element }[]>` que compare contra los 60 esperados.
-- [ ] Agregar método `generateMissingForYear(year): Promise<{ successful, failed, results }>` que solo genere las combinaciones faltantes (reusa `generateForAnimalAndElement`).
-- [ ] Modificar `generateAllForYear` (o el helper privado): por cada combinación, intentar hasta `MAX_RETRIES = 3` con backoff exponencial (10s, 20s, 40s) antes de marcar como fallida definitiva.
-- [ ] Asegurar que `generateForAnimalAndElement` no rompa el bucle si lanza (catch ya existe en línea 265-277, solo añadir retry layer).
+- [x] Agregar método `findMissingCombinationsForYear(year): Promise<{ animal, element }[]>` que compare contra los 60 esperados.
+- [x] Agregar método `generateMissingForYear(year): Promise<{ successful, failed, results }>` que solo genere las combinaciones faltantes (reusa `generateForAnimalAndElement`).
+- [x] Modificar `generateAllForYear` (o el helper privado): por cada combinación, intentar hasta `MAX_RETRIES = 3` con backoff exponencial (10s, 20s, 40s) antes de marcar como fallida definitiva.
+- [x] Asegurar que `generateForAnimalAndElement` no rompa el bucle si lanza (catch ya existe en línea 265-277, solo añadir retry layer).
 
 **Cron (`chinese-horoscope-cron.service.ts`):**
 
-- [ ] Agregar segundo cron (16 de diciembre a las 12:00 UTC) que verifique si `findMissingCombinationsForYear(nextYear).length > 0` y llame a `generateMissingForYear` si corresponde.
-- [ ] Loguear cantidad de faltantes + resultado del reintento.
+- [x] Agregar segundo cron (16 de diciembre a las 12:00 UTC) que verifique si `findMissingCombinationsForYear(nextYear).length > 0` y llame a `generateMissingForYear` si corresponde.
+- [x] Loguear cantidad de faltantes + resultado del reintento.
 
 **Controller (`chinese-horoscope.controller.ts`):**
 
-- [ ] Agregar `GET /chinese-horoscope/admin/status/:year` que retorne `{ year, total: 60, generated: N, missing: [...] }`.
-- [ ] Agregar `POST /chinese-horoscope/admin/generate-missing/:year` que dispare `generateMissingForYear`.
-- [ ] Ambos endpoints requieren `JwtAuthGuard + AdminGuard`.
-- [ ] Documentación Swagger en español.
+- [x] Agregar `GET /chinese-horoscope/admin/status/:year` que retorne `{ year, total: 60, generated: N, missing: [...] }`.
+- [x] Agregar `POST /chinese-horoscope/admin/generate-missing/:year` que dispare `generateMissingForYear`.
+- [x] Ambos endpoints requieren `JwtAuthGuard + AdminGuard`.
+- [x] Documentación Swagger en español.
 
 **Tests:**
 
-- [ ] Unit tests para `findMissingCombinationsForYear` (varios escenarios: vacío, parcial, completo).
-- [ ] Unit tests para `generateMissingForYear` (mock del provider IA).
-- [ ] Unit tests para retry logic con mock que falle N veces y luego responda OK.
-- [ ] Unit tests para el nuevo cron (con `jest.useFakeTimers()`).
-- [ ] Tests de controller para los dos endpoints nuevos.
-- [ ] Coverage ≥ 80%.
+- [x] Unit tests para `findMissingCombinationsForYear` (varios escenarios: vacío, parcial, completo).
+- [x] Unit tests para `generateMissingForYear` (mock del provider IA).
+- [x] Unit tests para retry logic con mock que falle N veces y luego responda OK.
+- [x] Unit tests para el nuevo cron (con `jest.useFakeTimers()`).
+- [x] Tests de controller para los dos endpoints nuevos.
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 
-- Si una combinación falla 3 veces, queda registrada como fallida pero no detiene al resto.
-- El endpoint de status devuelve correctamente las combinaciones faltantes.
-- `generateMissingForYear(year)` NUNCA regenera horóscopos existentes.
-- El cron de respaldo se ejecuta solo si quedan faltantes.
-- `npm run test:cov && npm run build && node scripts/validate-architecture.js` pasan.
+- [x] Si una combinación falla 3 veces, queda registrada como fallida pero no detiene al resto.
+- [x] El endpoint de status devuelve correctamente las combinaciones faltantes.
+- [x] `generateMissingForYear(year)` NUNCA regenera horóscopos existentes.
+- [x] El cron de respaldo se ejecuta solo si quedan faltantes.
+- [x] `npm run test:cov && npm run build && node scripts/validate-architecture.js` pasan.
 
 #### 📁 Archivos involucrados
 
