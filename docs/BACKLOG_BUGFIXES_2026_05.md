@@ -304,7 +304,7 @@ En `frontend/src/components/layout/Header.tsx`:
 
 - `backend/tarot-app/src/database/seeds/users.seeder.ts:43` hashea **`Test123456!`** y lo aplica a los 3 usuarios de prueba (free/premium/admin).
 - `backend/tarot-app/scripts/db-seed-users.ts:31-33` imprime al usuario credenciales **falsas**: `admin123 / premium123 / free123`. Estas nunca funcionan porque NO coinciden con el hash en BD.
-- `docs/USERS.md` (líneas 1-20) sí tiene las credenciales correctas (`Test123456!`).
+- `backend/tarot-app/docs/USERS.md` (líneas 1-20) sí tiene las credenciales correctas (`Test123456!`).
 
 Para un dev nuevo (especialmente cambiando de SO como el usuario actual) esto genera fricción innecesaria: corre `npm run db:seed:users`, lee la salida con `admin123`, intenta loguearse y falla.
 
@@ -538,7 +538,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-003-B | (Opcional) Cron backend que marque compras `pending` vencidas               | Backend     | ✅ COMPLETADA | 3 pts      |
 | T-BUG-003-C | Acción de usuario "Eliminar compra vencida" + filtros en Mis Servicios     | Frontend    | ✅ COMPLETADA | 2 pts      |
 | T-BUG-004   | Implementar menú hamburguesa mobile en Header con Sheet                    | Frontend    | ✅ COMPLETADA  | 3 pts      |
-| T-BUG-005   | Corregir credenciales impresas por `db-seed-users.ts`                      | Backend     | 🟡 Media    | 0.5 pt     |
+| T-BUG-005   | Corregir credenciales impresas por `db-seed-users.ts`                      | Backend     | ✅ COMPLETADA | 0.5 pt     |
 | T-BUG-006   | Crear página placeholder `/admin/lecturas` (o quitar del sidebar)          | Frontend    | 🔴 Crítica  | 1 pt       |
 | T-BUG-007-A | Backend: extender `/admin/dashboard/stats` con `recentReadings` + counts reales | Backend  | 🔴 Crítica  | 3 pts      |
 | T-BUG-007-B | Frontend: corregir tipos + eliminar mocks del dashboard                    | Frontend    | 🔴 Crítica  | 2 pts      |
@@ -942,13 +942,14 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 ### T-BUG-005: Corregir Credenciales Impresas por `db-seed-users.ts`
 
+**Estado:** ✅ COMPLETADA
 **Prioridad:** 🟡 Media · **Estimación:** 0.5 pt · **Cubre BUG:** BUG-005
 
 #### ✅ Tareas
 
-- [ ] En `backend/tarot-app/scripts/db-seed-users.ts:30-33`, reemplazar las contraseñas falsas por `Test123456!` (las 3 líneas).
+- [x] En `backend/tarot-app/scripts/db-seed-users.ts:30-33`, reemplazar las contraseñas falsas por `Test123456!` (las 3 líneas).
 - [ ] (Opcional) Importar la contraseña desde una constante compartida en `users.seeder.ts` para evitar futuras divergencias.
-- [ ] Verificar que `docs/USERS.md` siga siendo coherente.
+- [x] Verificar que `backend/tarot-app/docs/USERS.md` siga siendo coherente.
 
 #### 📁 Archivos
 
