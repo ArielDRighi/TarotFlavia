@@ -8,14 +8,16 @@
  * - paid + fecha futura → 'confirmed'
  * - paid + fecha pasada → 'completed'
  * - paid + sin fecha    → 'completed'
+ * - paid + fecha = hoy  → 'confirmed' (mismo día = vigente)
  * - pending + fecha pasada → 'expired'
  * - pending + fecha futura → 'pending'
+ * - pending + fecha = hoy  → 'pending' (mismo día = vigente)
  * - pending + sin fecha    → 'pending'
  * - cancelled              → 'cancelled'
  * - refunded               → 'refunded'
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { deriveDisplayStatus } from './holistic-services';
 import type { ServicePurchase } from '@/types';
 
@@ -125,5 +127,75 @@ describe('deriveDisplayStatus — other statuses', () => {
       selectedDate: '2020-01-01',
     });
     expect(deriveDisplayStatus(purchase)).toBe('cancelled');
+  });
+});
+
+// ============================================================================
+// Tests: edge-case "hoy" — usando fake timers para determinismo
+// ============================================================================
+
+describe('deriveDisplayStatus — edge-case selectedDate = hoy', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should return "confirmed" for paid purchase with selectedDate = today (same day is vigente)', () => {
+    // Fijar el tiempo a las 08:00 AM del 2026-05-17 para simular "antes del mediodía"
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 17, 8, 0, 0)); // 08:00 local
+
+    const purchase = makePurchase({
+      paymentStatus: 'paid',
+      selectedDate: '2026-05-17',
+    });
+    expect(deriveDisplayStatus(purchase)).toBe('confirmed');
+  });
+
+  it('should return "confirmed" for paid purchase with selectedDate = today at 13:00 (after noon, still same day)', () => {
+    // Fijar el tiempo a las 13:00 PM — todayNoon === appointmentNoon, compra sigue vigente
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 17, 13, 0, 0)); // 13:00 local
+
+    const purchase = makePurchase({
+      paymentStatus: 'paid',
+      selectedDate: '2026-05-17',
+    });
+    // appointmentDate (noon 17/5) === todayNoon (noon 17/5) → confirmed
+    expect(deriveDisplayStatus(purchase)).toBe('confirmed');
+  });
+
+  it('should return "pending" for pending purchase with selectedDate = today (not expired)', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 17, 15, 30, 0)); // 15:30 local
+
+    const purchase = makePurchase({
+      paymentStatus: 'pending',
+      selectedDate: '2026-05-17',
+    });
+    // appointmentDate (noon 17/5) === todayNoon (noon 17/5) → NOT expired → pending
+    expect(deriveDisplayStatus(purchase)).toBe('pending');
+  });
+
+  it('should return "expired" for pending purchase with selectedDate = yesterday', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 17, 9, 0, 0)); // 09:00 del 17/5
+
+    const purchase = makePurchase({
+      paymentStatus: 'pending',
+      selectedDate: '2026-05-16', // ayer
+    });
+    // appointmentDate (noon 16/5) < todayNoon (noon 17/5) → expired
+    expect(deriveDisplayStatus(purchase)).toBe('expired');
+  });
+
+  it('should return "completed" for paid purchase with selectedDate = yesterday', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 17, 9, 0, 0)); // 09:00 del 17/5
+
+    const purchase = makePurchase({
+      paymentStatus: 'paid',
+      selectedDate: '2026-05-16', // ayer
+    });
+    expect(deriveDisplayStatus(purchase)).toBe('completed');
   });
 });
