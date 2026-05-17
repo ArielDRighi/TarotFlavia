@@ -304,7 +304,7 @@ En `frontend/src/components/layout/Header.tsx`:
 
 - `backend/tarot-app/src/database/seeds/users.seeder.ts:43` hashea **`Test123456!`** y lo aplica a los 3 usuarios de prueba (free/premium/admin).
 - `backend/tarot-app/scripts/db-seed-users.ts:31-33` imprime al usuario credenciales **falsas**: `admin123 / premium123 / free123`. Estas nunca funcionan porque NO coinciden con el hash en BD.
-- `docs/USERS.md` (líneas 1-20) sí tiene las credenciales correctas (`Test123456!`).
+- `backend/tarot-app/docs/USERS.md` (líneas 1-20) sí tiene las credenciales correctas (`Test123456!`).
 
 Para un dev nuevo (especialmente cambiando de SO como el usuario actual) esto genera fricción innecesaria: corre `npm run db:seed:users`, lee la salida con `admin123`, intenta loguearse y falla.
 
@@ -949,7 +949,7 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 - [x] En `backend/tarot-app/scripts/db-seed-users.ts:30-33`, reemplazar las contraseñas falsas por `Test123456!` (las 3 líneas).
 - [ ] (Opcional) Importar la contraseña desde una constante compartida en `users.seeder.ts` para evitar futuras divergencias.
-- [x] Verificar que `docs/USERS.md` siga siendo coherente.
+- [x] Verificar que `backend/tarot-app/docs/USERS.md` siga siendo coherente.
 
 #### 📁 Archivos
 
