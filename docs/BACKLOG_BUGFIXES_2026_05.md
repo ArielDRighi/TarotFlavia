@@ -535,7 +535,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-001-C | Mensaje accionable en página pública cuando falta horóscopo (404)           | Frontend    | 🟡 Media    | 1 pt       |
 | T-BUG-002   | Compactar Footer (reducir altura y wrap excesivo)                           | Frontend    | ✅ COMPLETADA | 2 pts      |
 | T-BUG-003-A | Derivar estado `expired` para compras `pending` con fecha pasada (frontend) | Frontend    | ✅ COMPLETADA  | 3 pts      |
-| T-BUG-003-B | (Opcional) Cron backend que marque compras `pending` vencidas               | Backend     | 🟡 Media    | 3 pts      |
+| T-BUG-003-B | (Opcional) Cron backend que marque compras `pending` vencidas               | Backend     | ✅ COMPLETADA | 3 pts      |
 | T-BUG-003-C | Acción de usuario "Eliminar compra vencida" + filtros en Mis Servicios     | Frontend    | 🟡 Media    | 2 pts      |
 | T-BUG-004   | Implementar menú hamburguesa mobile en Header con Sheet                    | Frontend    | 🔴 Crítica  | 3 pts      |
 | T-BUG-005   | Corregir credenciales impresas por `db-seed-users.ts`                      | Backend     | 🟡 Media    | 0.5 pt     |
@@ -795,28 +795,47 @@ Modificar la lógica de derivación de estado en `holistic-services.ts` para dis
 **Estimación:** 3 puntos
 **Dependencias:** decisión de producto sobre si persistir el estado o solo mostrarlo
 **Cubre BUG:** BUG-003 (fase 2)
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Decisión: ¿agregar valor `EXPIRED` al enum `PurchaseStatus` o reutilizar `CANCELLED` con motivo?
-- [ ] Si nuevo enum: migración que agregue el valor.
-- [ ] Crear `ExpirePendingPurchasesUseCase` que busque compras con `paymentStatus = PENDING` y `selectedDate < today - 24h` (margen de gracia).
-- [ ] Crear `ServicePurchaseCronService` con `@Cron('0 3 * * *')` (3 AM UTC diariamente).
-- [ ] Loguear cantidad de compras movidas.
-- [ ] Tests unitarios + e2e mínimo.
+- [x] Decisión: agregar valor `EXPIRED` al enum `PurchaseStatus` (distinto de `CANCELLED` que implica acción explícita del usuario/admin).
+- [x] Migración `1776200000000-AddExpiredStatusToServicePurchases.ts` que agrega `'expired'` al enum PostgreSQL `service_purchases_payment_status_enum`.
+- [x] Actualizar `PurchaseStatus` enum TypeScript con `EXPIRED = 'expired'` y JSDoc explicativo.
+- [x] Agregar método `findPendingBeforeDate(cutoffDate: string)` a `IServicePurchaseRepository` e implementación en `TypeOrmServicePurchaseRepository` usando `LessThan` de TypeORM.
+- [x] Crear `ExpirePendingPurchasesUseCase` que busque compras con `paymentStatus = PENDING` y `selectedDate < today - 24h` (margen de gracia) y las actualice a `EXPIRED`.
+- [x] Crear `ServicePurchaseCronService` con `@Cron(CronExpression.EVERY_DAY_AT_3AM)` (3 AM UTC diariamente).
+- [x] Loguear cantidad de compras movidas + advertencia si hay fallas.
+- [x] Job idempotente: re-ejecutarlo no rompe nada (filas ya en `EXPIRED` no son afectadas).
+- [x] Registrar `ExpirePendingPurchasesUseCase` y `ServicePurchaseCronService` en `HolisticServicesModule`.
+- [x] Tests unitarios para `ExpirePendingPurchasesUseCase` (7 tests, cubre: 0 resultados, múltiples éxitos, fallo por null, fallo por excepción, fecha correcta de cutoff, idempotencia, sin early exit).
+- [x] Tests unitarios para `ServicePurchaseCronService` (5 tests, cubre: invocación del use-case, logging de éxito, logging de warning en fallos, manejo de errores sin rethrow, ausencia de warning sin fallos).
+- [x] Tests de `findPendingBeforeDate` en `TypeOrmServicePurchaseRepository`.
+- [x] Actualizar mocks en 3 test suites preexistentes que usan `IServicePurchaseRepository` para incluir el nuevo método.
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 
-- Diariamente, las compras `pending` con fecha de turno anterior a hace 24 h pasan a `EXPIRED`/`CANCELLED`.
-- El job es idempotente (re-ejecutarlo no rompe nada).
-- Coverage ≥ 80%.
+- [x] Diariamente, las compras `pending` con fecha de turno anterior a hace 24 h pasan a `EXPIRED`.
+- [x] El job es idempotente (re-ejecutarlo no rompe nada).
+- [x] Coverage ≥ 80% (153 tests, todos pasan).
+- [x] `npm run format && npm run lint && npm run build && node scripts/validate-architecture.js` pasan.
 
-#### 📁 Archivos involucrados
+#### 📁 Archivos creados/modificados
 
-- `backend/tarot-app/src/modules/holistic-services/domain/enums/purchase-status.enum.ts`
-- `backend/tarot-app/src/modules/holistic-services/application/use-cases/expire-pending-purchases.use-case.ts`
-- `backend/tarot-app/src/modules/holistic-services/application/services/service-purchase-cron.service.ts`
-- `backend/tarot-app/src/database/migrations/` (si se agrega enum value)
+- `backend/tarot-app/src/modules/holistic-services/domain/enums/purchase-status.enum.ts` — añadido `EXPIRED`
+- `backend/tarot-app/src/modules/holistic-services/domain/interfaces/service-purchase-repository.interface.ts` — añadido `findPendingBeforeDate`
+- `backend/tarot-app/src/modules/holistic-services/infrastructure/repositories/typeorm-service-purchase.repository.ts` — implementación de `findPendingBeforeDate`
+- `backend/tarot-app/src/modules/holistic-services/infrastructure/repositories/typeorm-service-purchase.repository.spec.ts` — tests de `findPendingBeforeDate`
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/expire-pending-purchases.use-case.ts` — nuevo
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/expire-pending-purchases.use-case.spec.ts` — nuevo (7 tests)
+- `backend/tarot-app/src/modules/holistic-services/application/services/service-purchase-cron.service.ts` — nuevo
+- `backend/tarot-app/src/modules/holistic-services/application/services/service-purchase-cron.service.spec.ts` — nuevo (5 tests)
+- `backend/tarot-app/src/modules/holistic-services/holistic-services.module.ts` — registrados nuevos providers
+- `backend/tarot-app/src/database/migrations/1776200000000-AddExpiredStatusToServicePurchases.ts` — nueva migración
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/purchase-use-cases.spec.ts` — mock actualizado
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/process-mercadopago-webhook.use-case.spec.ts` — mock actualizado
+- `backend/tarot-app/src/modules/holistic-services/application/use-cases/get-service-availability.use-case.spec.ts` — mock actualizado
 
 ---
 

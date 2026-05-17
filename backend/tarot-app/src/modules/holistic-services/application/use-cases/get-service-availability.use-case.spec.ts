@@ -129,6 +129,7 @@ describe('GetServiceAvailabilityUseCase', () => {
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
       findActiveByDate: jest.fn(),
+      findPendingBeforeDate: jest.fn(),
     };
 
     mockAvailabilityRepo = {

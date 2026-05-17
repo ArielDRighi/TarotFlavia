@@ -270,4 +270,33 @@ describe('TypeOrmServicePurchaseRepository', () => {
       expect(updateCall.paymentStatus).toBe(PurchaseStatus.PAID);
     });
   });
+
+  describe('findPendingBeforeDate', () => {
+    it('should query for PENDING purchases with selectedDate before the cutoff', async () => {
+      const purchases = [
+        { ...mockPurchase, selectedDate: '2026-05-10' } as ServicePurchase,
+        { ...mockPurchase, id: 2, selectedDate: '2026-05-11' } as ServicePurchase,
+      ];
+      typeOrmRepository.find.mockResolvedValue(purchases);
+
+      const result = await repository.findPendingBeforeDate('2026-05-16');
+
+      expect(result).toHaveLength(2);
+      expect(typeOrmRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            paymentStatus: PurchaseStatus.PENDING,
+          }),
+        }),
+      );
+    });
+
+    it('should return an empty array when no purchases match', async () => {
+      typeOrmRepository.find.mockResolvedValue([]);
+
+      const result = await repository.findPendingBeforeDate('2026-05-16');
+
+      expect(result).toEqual([]);
+    });
+  });
 });

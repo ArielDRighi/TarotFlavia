@@ -33,9 +33,13 @@ import { CancelPurchaseUseCase } from './application/use-cases/cancel-purchase.u
 import { GetPurchaseByIdUseCase } from './application/use-cases/get-purchase-by-id.use-case';
 import { GetServiceAvailabilityUseCase } from './application/use-cases/get-service-availability.use-case';
 import { ProcessMercadoPagoWebhookUseCase } from './application/use-cases/process-mercadopago-webhook.use-case';
+import { ExpirePendingPurchasesUseCase } from './application/use-cases/expire-pending-purchases.use-case';
 
 // ==================== Orchestrator ====================
 import { HolisticServicesOrchestratorService } from './application/orchestrators/holistic-services-orchestrator.service';
+
+// ==================== Cron Services ====================
+import { ServicePurchaseCronService } from './application/services/service-purchase-cron.service';
 
 // ==================== External Modules ====================
 import { EmailModule } from '../email/email.module';
@@ -83,9 +87,13 @@ import { PaymentsModule } from '../payments/payments.module';
     GetPurchaseByIdUseCase,
     GetServiceAvailabilityUseCase,
     ProcessMercadoPagoWebhookUseCase,
+    ExpirePendingPurchasesUseCase,
 
     // Orchestrator
     HolisticServicesOrchestratorService,
+
+    // Cron Services
+    ServicePurchaseCronService,
   ],
   exports: [HolisticServicesOrchestratorService, SERVICE_PURCHASE_REPOSITORY],
 })
