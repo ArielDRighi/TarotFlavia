@@ -536,7 +536,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-002   | Compactar Footer (reducir altura y wrap excesivo)                           | Frontend    | ✅ COMPLETADA | 2 pts      |
 | T-BUG-003-A | Derivar estado `expired` para compras `pending` con fecha pasada (frontend) | Frontend    | ✅ COMPLETADA  | 3 pts      |
 | T-BUG-003-B | (Opcional) Cron backend que marque compras `pending` vencidas               | Backend     | ✅ COMPLETADA | 3 pts      |
-| T-BUG-003-C | Acción de usuario "Eliminar compra vencida" + filtros en Mis Servicios     | Frontend    | 🟡 Media    | 2 pts      |
+| T-BUG-003-C | Acción de usuario "Eliminar compra vencida" + filtros en Mis Servicios     | Frontend    | ✅ COMPLETADA | 2 pts      |
 | T-BUG-004   | Implementar menú hamburguesa mobile en Header con Sheet                    | Frontend    | 🔴 Crítica  | 3 pts      |
 | T-BUG-005   | Corregir credenciales impresas por `db-seed-users.ts`                      | Backend     | 🟡 Media    | 0.5 pt     |
 | T-BUG-006   | Crear página placeholder `/admin/lecturas` (o quitar del sidebar)          | Frontend    | 🔴 Crítica  | 1 pt       |
@@ -845,14 +845,16 @@ Modificar la lógica de derivación de estado en `holistic-services.ts` para dis
 **Estimación:** 2 puntos
 **Dependencias:** T-BUG-003-A
 **Cubre BUG:** BUG-003
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Definir con producto si "Eliminar" es borrado físico, soft-delete o solo ocultar en UI.
-- [ ] En `MyServicesList.tsx`, agregar pestañas/chips de filtro: `Todos | Vigentes | Vencidos | Pagados`.
-- [ ] Agregar acción "Eliminar" en cards con estado `expired` o `cancelled` (con confirmación modal).
-- [ ] Endpoint backend (si aplica): `DELETE /holistic-services/purchases/:id` o `PATCH .../hide`.
-- [ ] Tests de filtros y acción de eliminar.
+- [x] Definir con producto si "Eliminar" es borrado físico, soft-delete o solo ocultar en UI.
+- [x] En `MyServicesList.tsx`, agregar pestañas/chips de filtro: `Todos | Vigentes | Vencidos | Pagados`.
+- [x] Agregar acción "Eliminar" en cards con estado `expired` o `cancelled` (con confirmación modal).
+- [x] Endpoint backend (si aplica): se reutiliza el endpoint existente `PATCH .../cancel` vía `cancelPurchase`.
+- [x] Agregar `useCancelPurchase` mutation en `useHolisticServices.ts` (invalida cache `myPurchases`).
+- [x] Tests de filtros y acción de eliminar (46 tests en total, todos pasan).
 
 #### 🎯 Criterios de Aceptación
 

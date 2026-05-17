@@ -10,6 +10,7 @@ import {
   useHolisticServiceDetail,
   useMyPurchases,
   usePurchaseDetail,
+  useCancelPurchase,
 } from './useHolisticServices';
 import * as holisticApi from '@/lib/api/holistic-services-api';
 import type { HolisticService, HolisticServiceDetail, ServicePurchase } from '@/types';
@@ -241,6 +242,46 @@ describe('useHolisticServices Hooks', () => {
       const { result } = renderHook(() => usePurchaseDetail(999), {
         wrapper: createWrapper(queryClient),
       });
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+
+      expect(result.current.error).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // useCancelPurchase
+  // ============================================================================
+
+  describe('useCancelPurchase', () => {
+    it('should call cancelPurchase API and invalidate myPurchases cache on success', async () => {
+      vi.mocked(holisticApi.cancelPurchase).mockResolvedValue(undefined);
+
+      const queryClient = createTestQueryClient();
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+      const { result } = renderHook(() => useCancelPurchase(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      result.current.mutate(10);
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(holisticApi.cancelPurchase).toHaveBeenCalledWith(10);
+      expect(invalidateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ queryKey: expect.arrayContaining(['holistic-services']) })
+      );
+    });
+
+    it('should expose error when cancelPurchase fails', async () => {
+      vi.mocked(holisticApi.cancelPurchase).mockRejectedValue(new Error('Compra no encontrada'));
+
+      const queryClient = createTestQueryClient();
+      const { result } = renderHook(() => useCancelPurchase(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      result.current.mutate(999);
 
       await waitFor(() => expect(result.current.isError).toBe(true));
 

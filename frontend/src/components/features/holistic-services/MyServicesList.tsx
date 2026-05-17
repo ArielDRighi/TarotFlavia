@@ -4,18 +4,31 @@
  * Authenticated page listing the user's holistic service purchases.
  * Shows purchase cards with complete appointment information:
  * - Nombre del servicio, duración, precio en ARS
- * - Estado visual: Pendiente (amber), Confirmado (green), Completado (grey), Cancelado (red)
+ * - Estado visual: Pendiente (amber), Confirmado (green), Completado (grey), Cancelado (red), Vencido (red)
  * - Turno confirmado: fecha, hora, link WhatsApp
  * - Pendiente de pago: link para reintentar el pago en MP
  * - Estado vacío: mensaje + link al catálogo
+ * - Filtros: Todos | Vigentes | Vencidos | Pagados (T-BUG-003-C)
+ * - Acción "Eliminar" para compras expired/cancelled (T-BUG-003-C)
  */
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { CalendarDays, Clock, MessageCircle, CreditCard } from 'lucide-react';
+import { CalendarDays, Clock, MessageCircle, CreditCard, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { useMyPurchases } from '@/hooks/api/useHolisticServices';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useMyPurchases, useCancelPurchase } from '@/hooks/api/useHolisticServices';
 import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
 import { parseDateString } from '@/lib/utils/date';
@@ -45,6 +58,15 @@ const STATUS_COLOR: Record<string, string> = {
   expired: 'bg-red-50 text-red-700 border-red-200',
 };
 
+type FilterTab = 'all' | 'active' | 'expired' | 'paid';
+
+const FILTER_TABS: { key: FilterTab; label: string }[] = [
+  { key: 'all', label: 'Todos' },
+  { key: 'active', label: 'Vigentes' },
+  { key: 'expired', label: 'Vencidos' },
+  { key: 'paid', label: 'Pagados' },
+];
+
 // ============================================================================
 // Helpers
 // ============================================================================
@@ -58,6 +80,17 @@ function formatAppointmentDate(dateStr: string): string {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
+  });
+}
+
+function filterPurchases(purchases: ServicePurchase[], tab: FilterTab): ServicePurchase[] {
+  if (tab === 'all') return purchases;
+  return purchases.filter((p) => {
+    const status = deriveDisplayStatus(p);
+    if (tab === 'active') return status === 'pending';
+    if (tab === 'expired') return status === 'expired' || status === 'cancelled';
+    if (tab === 'paid') return status === 'confirmed' || status === 'completed';
+    return true;
   });
 }
 
@@ -89,9 +122,10 @@ function StatusBadge({ displayStatus, purchaseId }: StatusBadgeProps) {
 
 interface PurchaseCardProps {
   purchase: ServicePurchase;
+  onDelete: (id: number) => void;
 }
 
-function PurchaseCard({ purchase }: PurchaseCardProps) {
+function PurchaseCard({ purchase, onDelete }: PurchaseCardProps) {
   const serviceName = purchase.holisticService?.name ?? 'Servicio';
   const durationMinutes = purchase.holisticService?.durationMinutes ?? null;
   const displayStatus = deriveDisplayStatus(purchase);
@@ -99,6 +133,7 @@ function PurchaseCard({ purchase }: PurchaseCardProps) {
   const showWhatsApp =
     (displayStatus === 'confirmed' || displayStatus === 'completed') && purchase.whatsappNumber;
   const showRetryPayment = displayStatus === 'pending' && purchase.initPoint;
+  const showDelete = displayStatus === 'expired' || displayStatus === 'cancelled';
 
   return (
     <div
@@ -108,7 +143,19 @@ function PurchaseCard({ purchase }: PurchaseCardProps) {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-serif text-lg font-medium">{serviceName}</h3>
-        <StatusBadge displayStatus={displayStatus} purchaseId={purchase.id} />
+        <div className="flex items-center gap-2">
+          <StatusBadge displayStatus={displayStatus} purchaseId={purchase.id} />
+          {showDelete && (
+            <button
+              data-testid={`delete-purchase-btn-${purchase.id}`}
+              onClick={() => onDelete(purchase.id)}
+              className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+              aria-label="Eliminar compra"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Service details */}
@@ -186,6 +233,24 @@ function PurchaseCard({ purchase }: PurchaseCardProps) {
 
 export function MyServicesList() {
   const { data: purchases, isLoading } = useMyPurchases();
+  const { mutate: cancelPurchaseMutation } = useCancelPurchase();
+  const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [purchaseToDelete, setPurchaseToDelete] = useState<number | null>(null);
+
+  const handleDeleteRequest = (id: number) => {
+    setPurchaseToDelete(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (purchaseToDelete !== null) {
+      cancelPurchaseMutation(purchaseToDelete);
+      setPurchaseToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setPurchaseToDelete(null);
+  };
 
   // ---- Skeleton ----
   if (isLoading) {
@@ -227,15 +292,65 @@ export function MyServicesList() {
     );
   }
 
-  return (
-    <div data-testid="my-services-list" className="bg-bg-main min-h-screen px-4 py-8 md:px-8">
-      <div className="mx-auto max-w-2xl space-y-4">
-        <h1 className="mb-6 font-serif text-3xl font-semibold">Mis Servicios</h1>
+  const filteredPurchases = filterPurchases(purchases, activeFilter);
 
-        {purchases.map((purchase) => (
-          <PurchaseCard key={purchase.id} purchase={purchase} />
-        ))}
+  return (
+    <>
+      <div data-testid="my-services-list" className="bg-bg-main min-h-screen px-4 py-8 md:px-8">
+        <div className="mx-auto max-w-2xl space-y-4">
+          <h1 className="mb-4 font-serif text-3xl font-semibold">Mis Servicios</h1>
+
+          {/* Filter tabs */}
+          <div className="mb-2 flex flex-wrap gap-2">
+            {FILTER_TABS.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setActiveFilter(key)}
+                className={cn(
+                  'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+                  activeFilter === key
+                    ? 'border-purple-600 bg-purple-600 text-white'
+                    : 'border-gray-300 bg-white text-gray-600 hover:border-purple-400 hover:text-purple-600'
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {filteredPurchases.map((purchase) => (
+            <PurchaseCard key={purchase.id} purchase={purchase} onDelete={handleDeleteRequest} />
+          ))}
+
+          {filteredPurchases.length === 0 && (
+            <p className="text-text-secondary py-8 text-center text-sm">
+              No hay compras en esta categoría.
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Confirmation dialog */}
+      <AlertDialog open={purchaseToDelete !== null} onOpenChange={handleCancelDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta compra?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará la compra de tu historial. No podrás deshacer esta acción.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDelete}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="confirm-delete-btn"
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

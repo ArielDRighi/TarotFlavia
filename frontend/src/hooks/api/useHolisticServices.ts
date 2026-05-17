@@ -5,13 +5,14 @@
  */
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getHolisticServices,
   getHolisticServiceDetail,
   getHolisticServiceAvailability,
   getMyPurchases,
   getPurchaseDetail,
+  cancelPurchase,
 } from '@/lib/api/holistic-services-api';
 
 // ============================================================================
@@ -103,5 +104,20 @@ export function usePurchaseDetail(id: number) {
     queryFn: () => getPurchaseDetail(id),
     enabled: id > 0,
     staleTime: 1 * 60 * 1000, // 1 minute
+  });
+}
+
+/**
+ * Hook to cancel (soft-delete) a purchase by ID.
+ * Invalidates the myPurchases cache on success.
+ * @returns TanStack Mutation result
+ */
+export function useCancelPurchase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => cancelPurchase(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: holisticServiceQueryKeys.myPurchases() });
+    },
   });
 }
