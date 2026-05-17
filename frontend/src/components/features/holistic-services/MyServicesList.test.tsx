@@ -693,7 +693,7 @@ describe('MyServicesList', () => {
     expect(screen.getByTestId(`delete-purchase-btn-40`)).toBeInTheDocument();
   });
 
-  it('should show "Eliminar" button for cancelled purchase', () => {
+  it('should NOT show "Eliminar" button for cancelled purchase (backend only cancels pending)', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: [mockPurchaseCancelled],
       isLoading: false,
@@ -704,8 +704,8 @@ describe('MyServicesList', () => {
     render(<MyServicesList />, { wrapper });
 
     expect(
-      screen.getByTestId(`delete-purchase-btn-${mockPurchaseCancelled.id}`)
-    ).toBeInTheDocument();
+      screen.queryByTestId(`delete-purchase-btn-${mockPurchaseCancelled.id}`)
+    ).not.toBeInTheDocument();
   });
 
   it('should NOT show "Eliminar" button for pending purchase', () => {
@@ -787,6 +787,27 @@ describe('MyServicesList', () => {
     const confirmBtn = screen.getByTestId('confirm-delete-btn');
     await user.click(confirmBtn);
 
-    expect(mockMutate).toHaveBeenCalledWith(42);
+    expect(mockMutate).toHaveBeenCalledWith(
+      42,
+      expect.objectContaining({ onError: expect.any(Function) })
+    );
+  });
+
+  it('should show aria-pressed=true on active filter button', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    const todosBtn = screen.getByRole('button', { name: /todos/i });
+    expect(todosBtn).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /vigentes/i })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
   });
 });

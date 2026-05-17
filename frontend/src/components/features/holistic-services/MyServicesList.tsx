@@ -16,6 +16,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { CalendarDays, Clock, MessageCircle, CreditCard, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
@@ -133,7 +134,7 @@ function PurchaseCard({ purchase, onDelete }: PurchaseCardProps) {
   const showWhatsApp =
     (displayStatus === 'confirmed' || displayStatus === 'completed') && purchase.whatsappNumber;
   const showRetryPayment = displayStatus === 'pending' && purchase.initPoint;
-  const showDelete = displayStatus === 'expired' || displayStatus === 'cancelled';
+  const showDelete = displayStatus === 'expired';
 
   return (
     <div
@@ -243,8 +244,13 @@ export function MyServicesList() {
 
   const handleConfirmDelete = () => {
     if (purchaseToDelete !== null) {
-      cancelPurchaseMutation(purchaseToDelete);
+      const idToDelete = purchaseToDelete;
       setPurchaseToDelete(null);
+      cancelPurchaseMutation(idToDelete, {
+        onError: () => {
+          toast.error('No se pudo eliminar la compra. Intentá de nuevo más tarde.');
+        },
+      });
     }
   };
 
@@ -306,6 +312,7 @@ export function MyServicesList() {
               <button
                 key={key}
                 onClick={() => setActiveFilter(key)}
+                aria-pressed={activeFilter === key}
                 className={cn(
                   'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
                   activeFilter === key
