@@ -73,4 +73,11 @@ export interface IServicePurchaseRepository {
    * Used to block already-booked time slots in the availability calendar.
    */
   findActiveByDate(date: string): Promise<ServicePurchase[]>;
+
+  /**
+   * Finds all PENDING purchases whose selectedDate is strictly before the
+   * provided cutoff date string (format YYYY-MM-DD). Used by the expiration
+   * cron to identify purchases that should be transitioned to EXPIRED.
+   */
+  findPendingBeforeDate(cutoffDate: string): Promise<ServicePurchase[]>;
 }
