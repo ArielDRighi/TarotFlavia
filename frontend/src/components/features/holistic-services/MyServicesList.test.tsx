@@ -327,6 +327,46 @@ describe('MyServicesList', () => {
     expect(badge.className).toMatch(/gray|grey|slate|neutral/i);
   });
 
+  it('should render "Vencido" red badge for pending purchase with past date', () => {
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 20,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [expiredPurchase],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    const badge = screen.getByTestId('purchase-status-badge-20');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent(/vencido/i);
+    expect(badge.className).toMatch(/red/i);
+  });
+
+  it('should NOT show retry payment link for expired purchase', () => {
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 21,
+      selectedDate: '2020-01-01',
+      initPoint: 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=old',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [expiredPurchase],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(screen.queryByTestId(`retry-payment-link-21`)).not.toBeInTheDocument();
+  });
+
   it('should render "Cancelado" red badge for cancelled status', () => {
     vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
       data: [mockPurchaseCancelled],
