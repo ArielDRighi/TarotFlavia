@@ -1,23 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Menu, Star } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuthStore } from '@/stores/authStore';
 import { UserMenu } from './UserMenu';
 import { NotificationBell } from '@/components/features/notifications';
-import { ROUTES } from '@/lib/constants/routes';
-import { cn } from '@/lib/utils/cn';
+import { HeaderNavLinks } from './HeaderNavLinks';
 
 /**
  * Header component
  * Main navigation header with logo, navigation links, and user menu
- * Responsive with hamburger menu on mobile
+ * Responsive with hamburger menu on mobile (Sheet) and horizontal nav on desktop
  */
 export function Header() {
   const { user } = useAuthStore();
-  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="bg-surface shadow-soft sticky top-0 z-50 w-full border-b" role="banner">
@@ -25,17 +25,30 @@ export function Header() {
         className="container mx-auto flex h-16 items-center justify-between px-4"
         aria-label="Navegación principal"
       >
-        {/* Mobile menu button - TODO: Implement mobile navigation panel in TASK 2.3 */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          aria-label="Menú"
-          aria-expanded={false}
-          aria-haspopup="true"
-        >
-          <Menu className="size-5" />
-        </Button>
+        {/* Mobile menu button */}
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              aria-label="Menú"
+              aria-expanded={mobileMenuOpen}
+              aria-haspopup="true"
+              aria-controls="mobile-nav-panel"
+            >
+              <Menu className="size-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" id="mobile-nav-panel" className="w-72 pt-10">
+            <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
+            <HeaderNavLinks
+              variant="mobile"
+              user={user}
+              onNavigate={() => setMobileMenuOpen(false)}
+            />
+          </SheetContent>
+        </Sheet>
 
         {/* Logo - centered on mobile, left on desktop */}
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
@@ -43,104 +56,7 @@ export function Header() {
         </Link>
 
         {/* Desktop navigation */}
-        <div className="hidden items-center gap-6 md:flex">
-          <Link
-            href={ROUTES.CARTA_DEL_DIA}
-            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-          >
-            Tarot del Día
-          </Link>
-          <Link
-            href={ROUTES.HOROSCOPO}
-            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-          >
-            Horóscopo
-          </Link>
-          <Link
-            href={ROUTES.HOROSCOPO_CHINO}
-            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-          >
-            Horóscopo Chino
-          </Link>
-          <Link
-            href={ROUTES.NUMEROLOGIA}
-            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-          >
-            Numerología
-          </Link>
-          <Link
-            href={ROUTES.RITUALES}
-            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-          >
-            Rituales
-          </Link>
-          <Link
-            href={ROUTES.ENCICLOPEDIA}
-            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-          >
-            Enciclopedia Mística
-          </Link>
-          <Link
-            href={ROUTES.PENDULO}
-            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-          >
-            Péndulo
-          </Link>
-          <Link
-            href={ROUTES.CARTA_ASTRAL}
-            className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-          >
-            Carta Astral
-          </Link>
-          <Link
-            href={ROUTES.SERVICIOS}
-            className={cn(
-              'text-sm font-medium transition-colors',
-              pathname.startsWith('/servicios')
-                ? 'text-primary font-semibold'
-                : 'text-text-primary hover:text-primary'
-            )}
-          >
-            Servicios
-          </Link>
-          {user && (
-            <>
-              <Link
-                href={ROUTES.TAROT}
-                className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-              >
-                Tirada de Tarot
-              </Link>
-              {user.plan !== 'premium' && (
-                <Link
-                  href={ROUTES.PREMIUM}
-                  className="text-secondary hover:text-secondary/80 flex items-center gap-1 text-sm font-medium transition-colors"
-                  data-testid="premium-nav-link"
-                >
-                  <Star className="size-4 fill-current" aria-hidden="true" />
-                  Premium
-                </Link>
-              )}
-              {/* "Explorar" link hidden in MVP - single tarotista (Flavia) */}
-              {/* TODO: Enable when multiple tarotistas are supported */}
-              {/* <Link
-                href="/explorar"
-                className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-              >
-                Explorar
-              </Link> */}
-              {/* "Mis Sesiones" link hidden in MVP - no user sessions implemented yet */}
-              {/* Sessions endpoints exist only for tarotistas (/tarotist/scheduling/sessions) */}
-              {/* TODO: Enable when user sessions feature is implemented */}
-              {/* <Link
-                href="/sesiones"
-                className="text-text-primary hover:text-primary text-sm font-medium transition-colors"
-              >
-                Mis Sesiones
-              </Link> */}
-            </>
-          )}
-        </div>
+        <HeaderNavLinks variant="desktop" user={user} />
 
         {/* User menu and notifications - always visible on right */}
         <div className="flex items-center gap-2">

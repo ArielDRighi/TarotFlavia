@@ -537,7 +537,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-003-A | Derivar estado `expired` para compras `pending` con fecha pasada (frontend) | Frontend    | ✅ COMPLETADA  | 3 pts      |
 | T-BUG-003-B | (Opcional) Cron backend que marque compras `pending` vencidas               | Backend     | ✅ COMPLETADA | 3 pts      |
 | T-BUG-003-C | Acción de usuario "Eliminar compra vencida" + filtros en Mis Servicios     | Frontend    | ✅ COMPLETADA | 2 pts      |
-| T-BUG-004   | Implementar menú hamburguesa mobile en Header con Sheet                    | Frontend    | 🔴 Crítica  | 3 pts      |
+| T-BUG-004   | Implementar menú hamburguesa mobile en Header con Sheet                    | Frontend    | ✅ COMPLETADA  | 3 pts      |
 | T-BUG-005   | Corregir credenciales impresas por `db-seed-users.ts`                      | Backend     | 🟡 Media    | 0.5 pt     |
 | T-BUG-006   | Crear página placeholder `/admin/lecturas` (o quitar del sidebar)          | Frontend    | 🔴 Crítica  | 1 pt       |
 | T-BUG-007-A | Backend: extender `/admin/dashboard/stats` con `recentReadings` + counts reales | Backend  | 🔴 Crítica  | 3 pts      |
@@ -877,6 +877,7 @@ Modificar la lógica de derivación de estado en `holistic-services.ts` para dis
 **Estimación:** 3 puntos
 **Dependencias:** ninguna
 **Cubre BUG:** BUG-004
+**Estado:** ✅ COMPLETADA
 
 #### 📋 Descripción
 
@@ -886,39 +887,39 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 **Refactor del Header (`frontend/src/components/layout/Header.tsx`):**
 
-- [ ] Agregar `const [mobileMenuOpen, setMobileMenuOpen] = useState(false);` en el componente.
-- [ ] Envolver el botón hamburguesa en `<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>` con `<SheetTrigger asChild>` para el botón.
-- [ ] Crear `<SheetContent side="left">` con la lista de links + título de menú (visible o `sr-only`).
-- [ ] Reemplazar `aria-expanded={false}` hardcoded por `aria-expanded={mobileMenuOpen}` y agregar `aria-controls`.
-- [ ] Eliminar el TODO comment de la línea 28 una vez resuelto.
+- [x] Agregar `const [mobileMenuOpen, setMobileMenuOpen] = useState(false);` en el componente.
+- [x] Envolver el botón hamburguesa en `<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>` con `<SheetTrigger asChild>` para el botón.
+- [x] Crear `<SheetContent side="left">` con la lista de links + título de menú (visible o `sr-only`).
+- [x] Reemplazar `aria-expanded={false}` hardcoded por `aria-expanded={mobileMenuOpen}` y agregar `aria-controls`.
+- [x] Eliminar el TODO comment de la línea 28 una vez resuelto.
 
 **Extracción de links (recomendado, no obligatorio):**
 
-- [ ] Crear `frontend/src/components/layout/HeaderNavLinks.tsx` con prop `variant: 'mobile' | 'desktop'` y `onNavigate?: () => void`.
-- [ ] Mover los links actuales (Tarot del Día, Horóscopo, Horóscopo Chino, Numerología, Rituales, Enciclopedia Mística, Péndulo, Carta Astral, Servicios, Tirada de Tarot, Premium) a este componente.
-- [ ] En mobile: `flex flex-col gap-2` con padding generoso; en desktop: `flex gap-6` (comportamiento actual).
-- [ ] Mantener la lógica de "link activo" (ej. Servicios usa `pathname.startsWith('/servicios')`) para ambas variantes.
-- [ ] Mantener el render condicional del link "Premium" basado en `user.plan !== 'premium'`.
+- [x] Crear `frontend/src/components/layout/HeaderNavLinks.tsx` con prop `variant: 'mobile' | 'desktop'` y `onNavigate?: () => void`.
+- [x] Mover los links actuales (Tarot del Día, Horóscopo, Horóscopo Chino, Numerología, Rituales, Enciclopedia Mística, Péndulo, Carta Astral, Servicios, Tirada de Tarot, Premium) a este componente.
+- [x] En mobile: `flex flex-col gap-2` con padding generoso; en desktop: `flex gap-6` (comportamiento actual).
+- [x] Mantener la lógica de "link activo" (ej. Servicios usa `pathname.startsWith('/servicios')`) para ambas variantes.
+- [x] Mantener el render condicional del link "Premium" basado en `user.plan !== 'premium'`.
 
 **Comportamiento UX:**
 
-- [ ] Pasar `onClick={() => setMobileMenuOpen(false)}` (o `onNavigate`) a cada `<Link>` del panel para cerrar al navegar.
-- [ ] Verificar que el Sheet cierra con `Escape` y click en backdrop (shadcn lo provee por defecto).
-- [ ] Target táctil ≥ 44px (WCAG) por link.
+- [x] Pasar `onClick={() => setMobileMenuOpen(false)}` (o `onNavigate`) a cada `<Link>` del panel para cerrar al navegar.
+- [x] Verificar que el Sheet cierra con `Escape` y click en backdrop (shadcn lo provee por defecto).
+- [x] Target táctil ≥ 44px (WCAG) por link.
 
 **Tests (`Header.test.tsx`):**
 
-- [ ] Test: el botón hamburguesa renderiza con clase `md:hidden`.
-- [ ] Test: al clickear el botón se abre el Sheet (`getByRole('dialog')` o `data-testid`).
-- [ ] Test: `aria-expanded` cambia de `false` a `true` tras el click.
-- [ ] Test: al clickear un link, el `onOpenChange` se llama con `false`.
-- [ ] Test: link "Premium" solo aparece cuando `user.plan !== 'premium'`.
-- [ ] Coverage ≥ 80%.
+- [x] Test: el botón hamburguesa renderiza con clase `md:hidden`.
+- [x] Test: al clickear el botón se abre el Sheet (`getByRole('dialog')` o `data-testid`).
+- [x] Test: `aria-expanded` cambia de `false` a `true` tras el click.
+- [x] Test: al clickear un link, el `onOpenChange` se llama con `false`.
+- [x] Test: link "Premium" solo aparece cuando `user.plan !== 'premium'`.
+- [x] Coverage ≥ 80%.
 
 **Validación manual:**
 
-- [ ] Chrome DevTools con presets "iPhone 14" y "Pixel 7".
-- [ ] Navegación con teclado (Tab, Enter, Escape).
+- [x] Chrome DevTools con presets "iPhone 14" y "Pixel 7".
+- [x] Navegación con teclado (Tab, Enter, Escape).
 
 #### 🎯 Criterios de Aceptación
 
@@ -934,7 +935,7 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 - `frontend/src/components/layout/Header.tsx`
 - `frontend/src/components/layout/Header.test.tsx`
-- `frontend/src/components/layout/HeaderNavLinks.tsx` (nuevo, opcional)
+- `frontend/src/components/layout/HeaderNavLinks.tsx` (nuevo ✅)
 - `frontend/src/components/ui/sheet.tsx` (existente — usar tal cual)
 
 ---
