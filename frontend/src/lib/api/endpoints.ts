@@ -118,6 +118,9 @@ export const API_ENDPOINTS = {
     BY_YEAR: (year: number) => `/chinese-horoscope/${year}`,
     BY_YEAR_ANIMAL_ELEMENT: (year: number, animal: string, element: string) =>
       `/chinese-horoscope/${year}/${animal}/${element}`,
+    // Admin endpoints (T-BUG-001-A/B)
+    ADMIN_STATUS: (year: number) => `/chinese-horoscope/admin/status/${year}`,
+    ADMIN_GENERATE_MISSING: (year: number) => `/chinese-horoscope/admin/generate-missing/${year}`,
   },
 
   // Numerology (Numerología)
