@@ -1762,11 +1762,11 @@ Authorization: Bearer <admin_token>
 
 **Comportamiento:** Fire-and-forget. La generación ocurre en background; la respuesta HTTP se retorna inmediatamente.
 
-**Response (200):**
+**Response (201):**
 ```json
 {
-  "message": "Generación de horóscopos faltantes para 2026 iniciada en background",
-  "details": "Se procesarán las combinaciones faltantes con reintentos automáticos (MAX_RETRIES=3, backoff exponencial: 10s/20s/40s)"
+  "message": "Generación de horóscopos chinos faltantes para 2026 iniciada",
+  "details": "Proceso en background. Solo se generarán las combinaciones ausentes."
 }
 ```
 

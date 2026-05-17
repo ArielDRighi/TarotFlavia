@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ChineseZodiacAnimal,
   ChineseElement,
+  CHINESE_ELEMENTS,
 } from '../../../../common/utils/chinese-zodiac.utils';
 
 /**
@@ -163,6 +164,7 @@ export class MissingCombinationDto {
 
   @ApiProperty({
     description: 'Elemento Wu Xing',
+    enum: CHINESE_ELEMENTS,
     example: 'metal',
   })
   element: ChineseElement;

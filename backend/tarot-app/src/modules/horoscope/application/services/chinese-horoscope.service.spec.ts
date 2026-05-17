@@ -165,13 +165,13 @@ describe('ChineseHoroscopeService', () => {
 
     it('debe manejar fallos parciales durante generación masiva', async () => {
       // Arrange
-      // La 3ra combinación (índice 2) debe fallar sus 3 intentos (MAX_RETRIES=3)
-      // Llamadas 3,4,5 corresponden a los 3 intentos de la 3ra combinación
+      // La 3ra combinación (índice 2) debe fallar sus 4 intentos (1 inicial + 3 retries)
+      // Llamadas 3,4,5,6 corresponden a los 4 intentos de la 3ra combinación
       let globalCallCount = 0;
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockImplementation(() => {
         globalCallCount++;
-        if (globalCallCount >= 3 && globalCallCount <= 5) {
+        if (globalCallCount >= 3 && globalCallCount <= 6) {
           return Promise.reject(new Error('Error de IA'));
         }
         return Promise.resolve(mockAIResponse);
@@ -554,8 +554,8 @@ describe('ChineseHoroscopeService', () => {
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockImplementation(() => {
         callCount++;
-        // La 3ra combinación falla en intentos 3, 4, 5 (3 reintentos)
-        if (callCount >= 3 && callCount <= 5) {
+        // La 3ra combinación falla en intentos 3, 4, 5, 6 (1 inicial + 3 retries = 4 totales)
+        if (callCount >= 3 && callCount <= 6) {
           return Promise.reject(new Error('Rate limit error'));
         }
         return Promise.resolve(mockAIResponse);
@@ -607,8 +607,8 @@ describe('ChineseHoroscopeService', () => {
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockImplementation(() => {
         callCount++;
-        // Los primeros 3 intentos siempre fallan (MAX_RETRIES para rat/metal)
-        if (callCount <= 3) {
+        // Los primeros 4 intentos siempre fallan (1 inicial + 3 retries para rat/metal)
+        if (callCount <= 4) {
           return Promise.reject(new Error('Persistent error'));
         }
         return Promise.resolve(mockAIResponse);

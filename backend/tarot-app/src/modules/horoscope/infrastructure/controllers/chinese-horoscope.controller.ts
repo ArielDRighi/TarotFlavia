@@ -229,81 +229,8 @@ export class ChineseHoroscopeController {
   }
 
   /**
-   * Obtener horóscopo chino específico por año, animal y elemento
-   * TASK-126: Endpoint para las 60 combinaciones animal/elemento
-   */
-  @Get(':year/:animal/:element')
-  @ApiOperation({
-    summary: 'Obtener horóscopo chino específico por animal y elemento',
-  })
-  @ApiParam({
-    name: 'year',
-    example: 2026,
-    description: 'Año a consultar (2020-2050)',
-  })
-  @ApiParam({
-    name: 'animal',
-    enum: ChineseZodiacAnimal,
-    description: 'Animal zodiacal chino',
-    example: 'dragon',
-  })
-  @ApiParam({
-    name: 'element',
-    enum: CHINESE_ELEMENTS,
-    description: 'Elemento Wu Xing',
-    example: 'earth',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Horóscopo específico para animal y elemento',
-    type: ChineseHoroscopeResponseDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Horóscopo no disponible',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Año, animal o elemento inválido',
-  })
-  async getByAnimalAndElement(
-    @Param('year', ParseIntPipe) year: number,
-    @Param('animal', new ParseEnumPipe(ChineseZodiacAnimal))
-    animal: ChineseZodiacAnimal,
-    @Param('element') element: string,
-  ): Promise<ChineseHoroscopeResponseDto> {
-    // Validar rango de año
-    this.validateYear(year);
-
-    // Validar elemento (debe ser uno de los 5 elementos)
-    if (!CHINESE_ELEMENTS.includes(element as ChineseElement)) {
-      throw new BadRequestException(
-        `Elemento inválido. Debe ser uno de: ${CHINESE_ELEMENTS.join(', ')}`,
-      );
-    }
-
-    const horoscope = await this.chineseService.findByAnimalElementAndYear(
-      animal,
-      element as ChineseElement,
-      year,
-    );
-
-    if (!horoscope) {
-      throw new NotFoundException(
-        `Horóscopo chino de ${animal} de ${element} para ${year} no disponible`,
-      );
-    }
-
-    // Incrementar viewCount de forma asíncrona (fire-and-forget)
-    this.chineseService.incrementViewCount(horoscope.id).catch(() => {
-      // Ignorar errores silenciosamente
-    });
-
-    return this.toResponseDto(horoscope);
-  }
-
-  /**
    * T-BUG-001-A: Estado de generación de horóscopos chinos de un año (Admin only)
+   * IMPORTANTE: debe declararse ANTES de :year/:animal/:element para evitar colisión de rutas
    */
   @Get('admin/status/:year')
   @UseGuards(JwtAuthGuard, AdminGuard)
@@ -389,6 +316,81 @@ export class ChineseHoroscopeController {
       details:
         'Proceso en background. Solo se generarán las combinaciones ausentes.',
     };
+  }
+
+  /**
+   * Obtener horóscopo chino específico por año, animal y elemento
+   * TASK-126: Endpoint para las 60 combinaciones animal/elemento
+   * IMPORTANTE: debe declararse DESPUÉS de las rutas estáticas admin para evitar colisión
+   */
+  @Get(':year/:animal/:element')
+  @ApiOperation({
+    summary: 'Obtener horóscopo chino específico por animal y elemento',
+  })
+  @ApiParam({
+    name: 'year',
+    example: 2026,
+    description: 'Año a consultar (2020-2050)',
+  })
+  @ApiParam({
+    name: 'animal',
+    enum: ChineseZodiacAnimal,
+    description: 'Animal zodiacal chino',
+    example: 'dragon',
+  })
+  @ApiParam({
+    name: 'element',
+    enum: CHINESE_ELEMENTS,
+    description: 'Elemento Wu Xing',
+    example: 'earth',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Horóscopo específico para animal y elemento',
+    type: ChineseHoroscopeResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Horóscopo no disponible',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Año, animal o elemento inválido',
+  })
+  async getByAnimalAndElement(
+    @Param('year', ParseIntPipe) year: number,
+    @Param('animal', new ParseEnumPipe(ChineseZodiacAnimal))
+    animal: ChineseZodiacAnimal,
+    @Param('element') element: string,
+  ): Promise<ChineseHoroscopeResponseDto> {
+    // Validar rango de año
+    this.validateYear(year);
+
+    // Validar elemento (debe ser uno de los 5 elementos)
+    if (!CHINESE_ELEMENTS.includes(element as ChineseElement)) {
+      throw new BadRequestException(
+        `Elemento inválido. Debe ser uno de: ${CHINESE_ELEMENTS.join(', ')}`,
+      );
+    }
+
+    const horoscope = await this.chineseService.findByAnimalElementAndYear(
+      animal,
+      element as ChineseElement,
+      year,
+    );
+
+    if (!horoscope) {
+      throw new NotFoundException(
+        `Horóscopo chino de ${animal} de ${element} para ${year} no disponible`,
+      );
+    }
+
+    // Incrementar viewCount de forma asíncrona (fire-and-forget)
+    this.chineseService.incrementViewCount(horoscope.id).catch(() => {
+      // Ignorar errores silenciosamente
+    });
+
+    return this.toResponseDto(horoscope);
   }
 
   /**

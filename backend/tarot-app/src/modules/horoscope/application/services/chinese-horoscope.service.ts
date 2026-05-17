@@ -542,7 +542,12 @@ export class ChineseHoroscopeService {
   /**
    * T-BUG-001-A: Genera un horóscopo con reintentos y backoff exponencial.
    *
-   * Intenta generar hasta MAX_RETRIES veces con delays: 10s, 20s, 40s.
+   * Intenta generar con hasta MAX_RETRIES reintentos (4 intentos totales):
+   *   - Intento 1: falla → espera 10s
+   *   - Reintento 1: falla → espera 20s
+   *   - Reintento 2: falla → espera 40s
+   *   - Reintento 3: falla → resultado definitivo fallido
+   *
    * Si todos los intentos fallan, retorna un GenerationResult con success=false.
    *
    * @param animal - Animal del zodiaco chino
@@ -556,11 +561,11 @@ export class ChineseHoroscopeService {
     element: ChineseElement,
     year: number,
   ): Promise<GenerationResult> {
-    const MAX_RETRIES = 3;
-    const RETRY_DELAYS_MS = [10000, 20000, 40000];
+    const MAX_RETRIES = 3; // 3 reintentos = 4 intentos totales
+    const RETRY_DELAYS_MS = [10000, 20000, 40000]; // delay antes de cada reintento
     let lastError = '';
 
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
       try {
         const horoscope = await this.generateForAnimalAndElement(
           animal,
@@ -571,10 +576,10 @@ export class ChineseHoroscopeService {
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
 
-        if (attempt < MAX_RETRIES) {
+        if (attempt <= MAX_RETRIES) {
           const retryDelay = RETRY_DELAYS_MS[attempt - 1];
           this.logger.warn(
-            `Reintento ${attempt}/${MAX_RETRIES - 1} para ${animal}/${element} en ${retryDelay / 1000}s: ${lastError}`,
+            `Reintento ${attempt}/${MAX_RETRIES} para ${animal}/${element} en ${retryDelay / 1000}s: ${lastError}`,
           );
           await this.delay(retryDelay);
         }
