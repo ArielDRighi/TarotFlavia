@@ -55,6 +55,15 @@ interface GenerationResult {
 }
 
 /**
+ * Combinación de animal y elemento faltante
+ * T-BUG-001-A: Para identificar horóscopos no generados
+ */
+interface MissingCombination {
+  animal: ChineseZodiacAnimal;
+  element: ChineseElement;
+}
+
+/**
  * Servicio de generación de horóscopos chinos anuales usando IA
  *
  * Responsabilidades:
@@ -209,6 +218,9 @@ export class ChineseHoroscopeService {
    * Genera secuencialmente con un delay de 10 segundos entre cada llamada
    * para evitar rate limits de los proveedores de IA (6 RPM).
    *
+   * T-BUG-001-A: Agrega reintentos (hasta MAX_RETRIES) con backoff exponencial
+   * por cada combinación fallida antes de marcarla como definitivamente fallida.
+   *
    * Tiempo estimado: ~10 minutos para 60 horóscopos.
    *
    * @param year - Año gregoriano para generar horóscopos
@@ -244,36 +256,20 @@ export class ChineseHoroscopeService {
           await this.delay(10000);
         }
 
-        try {
+        this.logger.log(`[${counter}/60] Generando ${animal} de ${element}...`);
+
+        // T-BUG-001-A: Reintentos con backoff exponencial
+        const result = await this.generateWithRetry(animal, element, year);
+        results.push(result);
+
+        if (result.success) {
           this.logger.log(
-            `[${counter}/60] Generando ${animal} de ${element}...`,
+            `[${counter}/60] ✓ ${animal}/${element} completado (ID: ${result.id})`,
           );
-          const horoscope = await this.generateForAnimalAndElement(
-            animal,
-            element,
-            year,
-          );
-          results.push({
-            animal,
-            element,
-            success: true,
-            id: horoscope.id,
-          });
-          this.logger.log(
-            `[${counter}/60] ✓ ${animal}/${element} completado (ID: ${horoscope.id})`,
-          );
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
+        } else {
           this.logger.error(
-            `[${counter}/60] ✗ Falló ${animal}/${element}: ${errorMessage}`,
+            `[${counter}/60] ✗ Falló definitivamente ${animal}/${element}: ${result.error}`,
           );
-          results.push({
-            animal,
-            element,
-            success: false,
-            error: errorMessage,
-          });
         }
       }
     }
@@ -289,6 +285,111 @@ export class ChineseHoroscopeService {
     );
 
     return summary;
+  }
+
+  /**
+   * T-BUG-001-A: Genera horóscopos solo para las combinaciones faltantes de un año.
+   *
+   * Identifica las combinaciones (animal, elemento) que no tienen horóscopo
+   * en la base de datos y genera únicamente esas, sin tocar las existentes.
+   *
+   * @param year - Año gregoriano para generar los faltantes
+   * @returns Resumen de generación (exitosos, fallidos, detalles)
+   */
+  async generateMissingForYear(year: number): Promise<{
+    successful: number;
+    failed: number;
+    results: GenerationResult[];
+  }> {
+    const missing = await this.findMissingCombinationsForYear(year);
+    const results: GenerationResult[] = [];
+
+    if (missing.length === 0) {
+      this.logger.log(
+        `No hay horóscopos faltantes para ${year}. Los 60 ya existen.`,
+      );
+      return { successful: 0, failed: 0, results: [] };
+    }
+
+    this.logger.log(
+      `Generando ${missing.length} horóscopos faltantes para año ${year}`,
+    );
+
+    let counter = 0;
+    for (const { animal, element } of missing) {
+      counter++;
+      // Delay entre generaciones (excepto la primera)
+      if (counter > 1) {
+        await this.delay(10000);
+      }
+
+      this.logger.log(
+        `[${counter}/${missing.length}] Generando faltante ${animal}/${element}...`,
+      );
+
+      const result = await this.generateWithRetry(animal, element, year);
+      results.push(result);
+
+      if (result.success) {
+        this.logger.log(
+          `[${counter}/${missing.length}] ✓ ${animal}/${element} completado (ID: ${result.id})`,
+        );
+      } else {
+        this.logger.error(
+          `[${counter}/${missing.length}] ✗ Falló definitivamente ${animal}/${element}: ${result.error}`,
+        );
+      }
+    }
+
+    const summary = {
+      successful: results.filter((r) => r.success).length,
+      failed: results.filter((r) => !r.success).length,
+      results,
+    };
+
+    this.logger.log(
+      `Generación de faltantes completada: ${summary.successful} exitosos, ${summary.failed} fallidos`,
+    );
+
+    return summary;
+  }
+
+  /**
+   * T-BUG-001-A: Identifica las combinaciones (animal, elemento) faltantes para un año.
+   *
+   * Compara los 60 horóscopos esperados (12 animales × 5 elementos) contra los
+   * que existen en la base de datos y retorna los que faltan.
+   *
+   * @param year - Año gregoriano a verificar
+   * @returns Array de combinaciones faltantes
+   */
+  async findMissingCombinationsForYear(
+    year: number,
+  ): Promise<MissingCombination[]> {
+    const existing = await this.repository.find({ where: { year } });
+    const existingSet = new Set(
+      existing.map((h) => `${h.animal}:${h.element}`),
+    );
+
+    const animals = Object.values(ChineseZodiacAnimal);
+    const elements: ChineseElement[] = [
+      'metal',
+      'water',
+      'wood',
+      'fire',
+      'earth',
+    ];
+
+    const missing: MissingCombination[] = [];
+    for (const animal of animals) {
+      for (const element of elements) {
+        if (!existingSet.has(`${animal}:${element}`)) {
+          missing.push({ animal, element });
+        }
+      }
+    }
+
+    return missing;
   }
 
   /**
@@ -436,6 +537,51 @@ export class ChineseHoroscopeService {
       areaObj.rating >= 1 &&
       areaObj.rating <= 10
     );
+  }
+
+  /**
+   * T-BUG-001-A: Genera un horóscopo con reintentos y backoff exponencial.
+   *
+   * Intenta generar hasta MAX_RETRIES veces con delays: 10s, 20s, 40s.
+   * Si todos los intentos fallan, retorna un GenerationResult con success=false.
+   *
+   * @param animal - Animal del zodiaco chino
+   * @param element - Elemento Wu Xing
+   * @param year - Año gregoriano
+   * @returns GenerationResult con éxito o fallo definitivo
+   * @private
+   */
+  private async generateWithRetry(
+    animal: ChineseZodiacAnimal,
+    element: ChineseElement,
+    year: number,
+  ): Promise<GenerationResult> {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS_MS = [10000, 20000, 40000];
+    let lastError = '';
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const horoscope = await this.generateForAnimalAndElement(
+          animal,
+          element,
+          year,
+        );
+        return { animal, element, success: true, id: horoscope.id };
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : String(error);
+
+        if (attempt < MAX_RETRIES) {
+          const retryDelay = RETRY_DELAYS_MS[attempt - 1];
+          this.logger.warn(
+            `Reintento ${attempt}/${MAX_RETRIES - 1} para ${animal}/${element} en ${retryDelay / 1000}s: ${lastError}`,
+          );
+          await this.delay(retryDelay);
+        }
+      }
+    }
+
+    return { animal, element, success: false, error: lastError };
   }
 
   /**

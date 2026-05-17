@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChineseZodiacAnimal } from '../../../../common/utils/chinese-zodiac.utils';
+import {
+  ChineseZodiacAnimal,
+  ChineseElement,
+} from '../../../../common/utils/chinese-zodiac.utils';
 
 /**
  * DTO para el área de un horóscopo chino
@@ -145,4 +148,42 @@ export class ChineseHoroscopeResponseDto {
     example: 'Dragón de Tierra',
   })
   fullZodiacType?: string;
+}
+
+/**
+ * T-BUG-001-A: DTO para una combinación animal/elemento faltante
+ */
+export class MissingCombinationDto {
+  @ApiProperty({
+    description: 'Animal del zodiaco chino',
+    enum: ChineseZodiacAnimal,
+    example: 'rat',
+  })
+  animal: ChineseZodiacAnimal;
+
+  @ApiProperty({
+    description: 'Elemento Wu Xing',
+    example: 'metal',
+  })
+  element: ChineseElement;
+}
+
+/**
+ * T-BUG-001-A: DTO para el status de generación de un año
+ */
+export class ChineseHoroscopeYearStatusDto {
+  @ApiProperty({ description: 'Año consultado', example: 2026 })
+  year: number;
+
+  @ApiProperty({ description: 'Total esperado (siempre 60)', example: 60 })
+  total: number;
+
+  @ApiProperty({ description: 'Cantidad de horóscopos generados', example: 58 })
+  generated: number;
+
+  @ApiProperty({
+    description: 'Combinaciones faltantes',
+    type: [MissingCombinationDto],
+  })
+  missing: MissingCombinationDto[];
 }

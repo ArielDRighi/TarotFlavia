@@ -165,12 +165,13 @@ describe('ChineseHoroscopeService', () => {
 
     it('debe manejar fallos parciales durante generación masiva', async () => {
       // Arrange
-      let callCount = 0;
+      // La 3ra combinación (índice 2) debe fallar sus 3 intentos (MAX_RETRIES=3)
+      // Llamadas 3,4,5 corresponden a los 3 intentos de la 3ra combinación
+      let globalCallCount = 0;
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockImplementation(() => {
-        callCount++;
-        if (callCount === 3) {
-          // Falla la tercera combinación (Rata/Madera)
+        globalCallCount++;
+        if (globalCallCount >= 3 && globalCallCount <= 5) {
           return Promise.reject(new Error('Error de IA'));
         }
         return Promise.resolve(mockAIResponse);
@@ -383,6 +384,252 @@ describe('ChineseHoroscopeService', () => {
   });
 
   // ===== TASK-124: Tests para 60 horóscopos (animal + elemento) =====
+  // ===== T-BUG-001-A: Retry + findMissingCombinationsForYear + generateMissingForYear =====
+  describe('findMissingCombinationsForYear', () => {
+    it('debe retornar las 60 combinaciones cuando no hay ninguna generada', async () => {
+      // Arrange
+      repository.find.mockResolvedValue([]);
+
+      // Act
+      const result = await service.findMissingCombinationsForYear(2026);
+
+      // Assert
+      expect(result).toHaveLength(60);
+      expect(repository.find).toHaveBeenCalledWith({ where: { year: 2026 } });
+    });
+
+    it('debe retornar array vacío cuando todos los 60 horóscopos existen', async () => {
+      // Arrange
+      const animals = Object.values(ChineseZodiacAnimal);
+      const elements: ChineseElement[] = [
+        'metal',
+        'water',
+        'wood',
+        'fire',
+        'earth',
+      ];
+      const allHoroscopes = animals.flatMap((animal) =>
+        elements.map((element) => ({
+          ...mockHoroscope,
+          animal,
+          element,
+        })),
+      );
+      repository.find.mockResolvedValue(allHoroscopes as ChineseHoroscope[]);
+
+      // Act
+      const result = await service.findMissingCombinationsForYear(2026);
+
+      // Assert
+      expect(result).toHaveLength(0);
+    });
+
+    it('debe retornar solo las combinaciones faltantes cuando hay algunas generadas', async () => {
+      // Arrange — solo existe dragón/earth
+      repository.find.mockResolvedValue([
+        {
+          ...mockHoroscope,
+          animal: ChineseZodiacAnimal.DRAGON,
+          element: 'earth',
+        },
+      ] as ChineseHoroscope[]);
+
+      // Act
+      const result = await service.findMissingCombinationsForYear(2026);
+
+      // Assert
+      expect(result).toHaveLength(59);
+      const hasDragonEarth = result.some(
+        (c) => c.animal === ChineseZodiacAnimal.DRAGON && c.element === 'earth',
+      );
+      expect(hasDragonEarth).toBe(false);
+    });
+
+    it('debe incluir todas las combinaciones esperadas (12 animales × 5 elementos)', async () => {
+      // Arrange
+      repository.find.mockResolvedValue([]);
+
+      // Act
+      const result = await service.findMissingCombinationsForYear(2026);
+
+      // Assert — verificar que hay 5 combinaciones por cada animal
+      const animals = Object.values(ChineseZodiacAnimal);
+      for (const animal of animals) {
+        const combosForAnimal = result.filter((c) => c.animal === animal);
+        expect(combosForAnimal).toHaveLength(5);
+      }
+    });
+  });
+
+  describe('generateMissingForYear', () => {
+    it('debe generar solo las combinaciones faltantes', async () => {
+      // Arrange — solo 1 existente (dragon/earth), 59 faltantes
+      repository.find.mockResolvedValue([
+        {
+          ...mockHoroscope,
+          animal: ChineseZodiacAnimal.DRAGON,
+          element: 'earth',
+        },
+      ] as ChineseHoroscope[]);
+      repository.findOne.mockResolvedValue(null);
+      aiProviderService.generateCompletion.mockResolvedValue(mockAIResponse);
+      repository.create.mockReturnValue(mockHoroscope as ChineseHoroscope);
+      repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
+
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
+
+      // Act
+      const result = await service.generateMissingForYear(2026);
+
+      // Assert
+      expect(result.successful).toBe(59);
+      expect(result.failed).toBe(0);
+      expect(result.results).toHaveLength(59);
+      // No debería haber llamado a la IA para dragon/earth (ya existe)
+      expect(aiProviderService.generateCompletion).toHaveBeenCalledTimes(59);
+    });
+
+    it('debe retornar 0 exitosos si no hay faltantes', async () => {
+      // Arrange — todos existen
+      const animals = Object.values(ChineseZodiacAnimal);
+      const elements: ChineseElement[] = [
+        'metal',
+        'water',
+        'wood',
+        'fire',
+        'earth',
+      ];
+      const allHoroscopes = animals.flatMap((animal) =>
+        elements.map((element) => ({ ...mockHoroscope, animal, element })),
+      );
+      repository.find.mockResolvedValue(allHoroscopes as ChineseHoroscope[]);
+
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
+
+      // Act
+      const result = await service.generateMissingForYear(2026);
+
+      // Assert
+      expect(result.successful).toBe(0);
+      expect(result.failed).toBe(0);
+      expect(result.results).toHaveLength(0);
+      expect(aiProviderService.generateCompletion).not.toHaveBeenCalled();
+    });
+
+    it('debe NUNCA regenerar horóscopos existentes', async () => {
+      // Arrange — dragon/earth existe en DB
+      repository.find.mockResolvedValue([
+        {
+          ...mockHoroscope,
+          animal: ChineseZodiacAnimal.DRAGON,
+          element: 'earth',
+        },
+      ] as ChineseHoroscope[]);
+      // findOne simula que dragon/earth YA existe (los 59 restantes no)
+      repository.findOne.mockResolvedValue(null);
+      aiProviderService.generateCompletion.mockResolvedValue(mockAIResponse);
+      repository.create.mockReturnValue(mockHoroscope as ChineseHoroscope);
+      repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
+
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
+
+      // Act
+      await service.generateMissingForYear(2026);
+
+      // Assert — debe generar exactamente 59, no 60
+      expect(aiProviderService.generateCompletion).toHaveBeenCalledTimes(59);
+    });
+  });
+
+  describe('retry logic en generateAllForYear', () => {
+    it('debe reintentar hasta MAX_RETRIES veces con backoff si la IA falla', async () => {
+      // Arrange — la tercera combinación falla en todos los intentos
+      let callCount = 0;
+      repository.findOne.mockResolvedValue(null);
+      aiProviderService.generateCompletion.mockImplementation(() => {
+        callCount++;
+        // La 3ra combinación falla en intentos 3, 4, 5 (3 reintentos)
+        if (callCount >= 3 && callCount <= 5) {
+          return Promise.reject(new Error('Rate limit error'));
+        }
+        return Promise.resolve(mockAIResponse);
+      });
+      repository.create.mockReturnValue(mockHoroscope as ChineseHoroscope);
+      repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
+
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
+
+      // Act
+      const result = await service.generateAllForYear(2026);
+
+      // Assert — 1 falla definitiva (todos los reintentos agotados), 59 éxitos
+      expect(result.failed).toBe(1);
+      expect(result.successful).toBe(59);
+    });
+
+    it('debe tener éxito si la IA falla en el primer intento pero responde en reintento', async () => {
+      // Arrange — la primera llamada a la IA falla, las siguientes tienen éxito
+      let firstCallForCombination = true;
+      repository.findOne.mockResolvedValue(null);
+      aiProviderService.generateCompletion.mockImplementation(() => {
+        if (firstCallForCombination) {
+          firstCallForCombination = false;
+          return Promise.reject(new Error('Timeout'));
+        }
+        return Promise.resolve(mockAIResponse);
+      });
+      repository.create.mockReturnValue(mockHoroscope as ChineseHoroscope);
+      repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
+
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
+
+      // Act
+      const result = await service.generateAllForYear(2026);
+
+      // Assert — todas las 60 exitosas (la primera combinación pasa en reintento)
+      expect(result.successful).toBe(60);
+      expect(result.failed).toBe(0);
+    });
+
+    it('debe no detener el bucle cuando una combinación falla definitivamente', async () => {
+      // Arrange — rat/metal falla siempre (primera combinación)
+      let callCount = 0;
+      repository.findOne.mockResolvedValue(null);
+      aiProviderService.generateCompletion.mockImplementation(() => {
+        callCount++;
+        // Los primeros 3 intentos siempre fallan (MAX_RETRIES para rat/metal)
+        if (callCount <= 3) {
+          return Promise.reject(new Error('Persistent error'));
+        }
+        return Promise.resolve(mockAIResponse);
+      });
+      repository.create.mockReturnValue(mockHoroscope as ChineseHoroscope);
+      repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
+
+      jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
+
+      // Act
+      const result = await service.generateAllForYear(2026);
+
+      // Assert — continúa procesando el resto (59 exitosos, 1 fallido)
+      expect(result.failed).toBe(1);
+      expect(result.successful).toBe(59);
+      expect(result.results).toHaveLength(60);
+    });
+  });
+
   describe('TASK-124: Schema con elemento', () => {
     it('debe generar horóscopo con elemento específico', async () => {
       // Arrange

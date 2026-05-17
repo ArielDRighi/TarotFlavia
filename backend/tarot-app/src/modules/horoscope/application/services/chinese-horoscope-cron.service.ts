@@ -101,6 +101,65 @@ export class ChineseHoroscopeCronService {
   }
 
   /**
+   * T-BUG-001-A: Verifica el 16 de diciembre si la generación del día anterior quedó completa.
+   * Si hay faltantes, genera solo las combinaciones ausentes.
+   *
+   * Cron expression: "0 0 12 16 12 *"
+   * - 0 segundos
+   * - 0 minutos
+   * - 12 hora (12:00 UTC)
+   * - 16 día del mes
+   * - 12 mes (diciembre)
+   * - * cualquier día de la semana
+   */
+  @Cron('0 0 12 16 12 *', {
+    name: 'verify-chinese-horoscope-completeness',
+    timeZone: 'UTC',
+  })
+  async verifyAndCompleteNextYearHoroscopes(): Promise<void> {
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
+
+    this.logger.log(
+      `=== VERIFICACIÓN: Comprobando completitud de horóscopos chinos ${nextYear} ===`,
+    );
+
+    try {
+      const missing =
+        await this.chineseHoroscopeService.findMissingCombinationsForYear(
+          nextYear,
+        );
+
+      if (missing.length === 0) {
+        this.logger.log(
+          `Verificación OK: 60/60 horóscopos chinos de ${nextYear} están generados.`,
+        );
+        return;
+      }
+
+      this.logger.warn(
+        `Se encontraron ${missing.length} horóscopos faltantes para ${nextYear}. Iniciando regeneración...`,
+      );
+
+      const result =
+        await this.chineseHoroscopeService.generateMissingForYear(nextYear);
+
+      this.logger.log(
+        `Regeneración completada: ${result.successful} exitosos, ${result.failed} fallidos para ${nextYear}`,
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? (error.stack ?? '') : '';
+
+      this.logger.error(
+        `Error en verificación de faltantes para ${nextYear}: ${errorMessage}`,
+        errorStack,
+      );
+    }
+  }
+
+  /**
    * Método manual para generar horóscopos de un año específico
    * Útil para testing y mantenimiento
    *

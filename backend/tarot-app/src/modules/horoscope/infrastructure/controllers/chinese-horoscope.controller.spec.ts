@@ -63,6 +63,8 @@ describe('ChineseHoroscopeController', () => {
       findForUser: jest.fn(),
       generateAllForYear: jest.fn(),
       incrementViewCount: jest.fn().mockResolvedValue(undefined),
+      findMissingCombinationsForYear: jest.fn(),
+      generateMissingForYear: jest.fn(),
     };
 
     const mockUsersService = {
@@ -477,6 +479,90 @@ describe('ChineseHoroscopeController', () => {
       const invalidYear = 2019;
 
       expect(() => controller.generateForYear(invalidYear)).toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  // ===== T-BUG-001-A: Nuevos endpoints admin =====
+  describe('getAdminStatus', () => {
+    it('debe retornar status del año con generated y missing', async () => {
+      // Arrange
+      const year = 2026;
+      const mockMissing = [
+        {
+          animal: 'rat' as ChineseZodiacAnimal,
+          element: 'metal' as ChineseElement,
+        },
+        {
+          animal: 'ox' as ChineseZodiacAnimal,
+          element: 'water' as ChineseElement,
+        },
+      ];
+      chineseService.findMissingCombinationsForYear.mockResolvedValue(
+        mockMissing,
+      );
+
+      // Act
+      const result = await controller.getAdminStatus(year);
+
+      // Assert
+      expect(result.year).toBe(2026);
+      expect(result.total).toBe(60);
+      expect(result.generated).toBe(58);
+      expect(result.missing).toHaveLength(2);
+      expect(result.missing[0].animal).toBe('rat');
+      expect(
+        chineseService.findMissingCombinationsForYear,
+      ).toHaveBeenCalledWith(2026);
+    });
+
+    it('debe retornar generated=60 y missing vacío si todos existen', async () => {
+      // Arrange
+      chineseService.findMissingCombinationsForYear.mockResolvedValue([]);
+
+      // Act
+      const result = await controller.getAdminStatus(2026);
+
+      // Assert
+      expect(result.generated).toBe(60);
+      expect(result.missing).toHaveLength(0);
+    });
+
+    it('debe lanzar BadRequestException si el año está fuera de rango', async () => {
+      await expect(controller.getAdminStatus(2019)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(controller.getAdminStatus(2051)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('generateMissingForYear', () => {
+    it('debe iniciar la generación de faltantes en background y retornar mensaje', () => {
+      // Arrange
+      const year = 2026;
+      chineseService.generateMissingForYear.mockResolvedValue({
+        successful: 5,
+        failed: 0,
+        results: [],
+      });
+
+      // Act
+      const result = controller.generateMissingForYear(year);
+
+      // Assert
+      expect(result.message).toContain('2026');
+      expect(result.details).toBeDefined();
+      expect(chineseService.generateMissingForYear).toHaveBeenCalledWith(2026);
+    });
+
+    it('debe lanzar BadRequestException si el año está fuera de rango', () => {
+      expect(() => controller.generateMissingForYear(2019)).toThrow(
+        BadRequestException,
+      );
+      expect(() => controller.generateMissingForYear(2051)).toThrow(
         BadRequestException,
       );
     });
