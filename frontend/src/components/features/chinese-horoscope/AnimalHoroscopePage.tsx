@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Calculator } from 'lucide-react';
+import { ArrowLeft, Calculator, Clock, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
@@ -19,6 +19,15 @@ import {
 } from '@/components/features/chinese-horoscope';
 import { useAnimalHoroscopePage } from '@/hooks/utils/useAnimalHoroscopePage';
 import { ROUTES } from '@/lib/constants/routes';
+
+interface ErrorWithResponse {
+  response?: { status: number };
+}
+
+function getErrorStatus(error: Error): number | null {
+  const err = error as ErrorWithResponse;
+  return err.response?.status ?? null;
+}
 
 export function AnimalHoroscopePage() {
   const router = useRouter();
@@ -120,9 +129,33 @@ export function AnimalHoroscopePage() {
               <Spinner size="md" text="Cargando horóscopo..." />
             </div>
           ) : error ? (
-            <div className="py-8 text-center">
-              <p className="text-muted-foreground">Horóscopo no disponible para {currentYear}</p>
-            </div>
+            getErrorStatus(error) === 404 ? (
+              <div className="space-y-4 py-8 text-center" data-testid="error-not-found">
+                <Clock className="text-muted-foreground mx-auto h-10 w-10" />
+                <div>
+                  <p className="text-lg font-medium">Horóscopo en preparación</p>
+                  <p className="text-muted-foreground mt-1">
+                    El horóscopo para {currentYear} todavía no está disponible. No es un error tuyo
+                    — estamos trabajando en ello.
+                  </p>
+                </div>
+                <Button variant="outline" onClick={() => router.push(ROUTES.HOROSCOPO_CHINO)}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Volver al listado
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4 py-8 text-center" data-testid="error-server">
+                <p className="text-lg font-medium">Ocurrió un error al cargar el horóscopo</p>
+                <p className="text-muted-foreground">
+                  Por favor, intenta de nuevo en unos momentos.
+                </p>
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Reintentar
+                </Button>
+              </div>
+            )
           ) : horoscopeData ? (
             <ChineseHoroscopeDetail horoscope={horoscopeData} element={element} />
           ) : null}
