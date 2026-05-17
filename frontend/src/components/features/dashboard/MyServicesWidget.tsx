@@ -21,6 +21,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   completed: { label: 'Completado', className: 'bg-gray-100 text-gray-600' },
   cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-800' },
   refunded: { label: 'Reembolsado', className: 'bg-rose-100 text-rose-800' },
+  expired: { label: 'Vencido', className: 'bg-red-50 text-red-700' },
 };
 
 const MAX_VISIBLE_PURCHASES = 3;

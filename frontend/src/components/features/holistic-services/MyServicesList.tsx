@@ -33,6 +33,7 @@ const STATUS_LABEL: Record<string, string> = {
   completed: 'Completado',
   cancelled: 'Cancelado',
   refunded: 'Reembolsado',
+  expired: 'Vencido',
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -41,6 +42,7 @@ const STATUS_COLOR: Record<string, string> = {
   completed: 'bg-gray-100 text-gray-600 border-gray-300',
   cancelled: 'bg-red-100 text-red-800 border-red-300',
   refunded: 'bg-rose-100 text-rose-800 border-rose-300',
+  expired: 'bg-red-50 text-red-700 border-red-200',
 };
 
 // ============================================================================

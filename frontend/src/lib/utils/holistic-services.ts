@@ -14,9 +14,13 @@ import type { ServicePurchase, PurchaseStatus } from '@/types';
 
 /**
  * Display status derived from a ServicePurchase.
- * Extends PurchaseStatus with 'confirmed' and 'completed' for paid purchases.
+ * Extends PurchaseStatus with 'confirmed', 'completed', and 'expired'.
+ *
+ * - 'confirmed': paid, future appointment date
+ * - 'completed': paid, past appointment date (or no date)
+ * - 'expired':   pending, appointment date already passed
  */
-export type DisplayStatus = PurchaseStatus | 'confirmed' | 'completed';
+export type DisplayStatus = PurchaseStatus | 'confirmed' | 'completed' | 'expired';
 
 // ============================================================================
 // Helpers
@@ -25,19 +29,31 @@ export type DisplayStatus = PurchaseStatus | 'confirmed' | 'completed';
 /**
  * Derives a display status from the purchase.
  *
- * - Non-paid purchases → use paymentStatus as-is
- * - "paid" with future selectedDate → "confirmed"
- * - "paid" with past selectedDate (or no date) → "completed"
+ * - "paid" + future selectedDate        → "confirmed"
+ * - "paid" + past selectedDate (or none) → "completed"
+ * - "pending" + past selectedDate        → "expired"
+ * - "pending" + future/no selectedDate   → "pending"
+ * - any other status                     → paymentStatus as-is
  *
- * Uses `parseDateString` (noon-local trick) to avoid UTC-midnight day shift
- * when comparing the appointment date against today.
+ * Both `parseDateString` and the "today" reference use LOCAL noon
+ * (new Date(y, m, d, 12, 0, 0)) so that same-day comparisons are
+ * stable regardless of the time-of-day the function is called.
  */
 export function deriveDisplayStatus(purchase: ServicePurchase): DisplayStatus {
-  if (purchase.paymentStatus !== 'paid') return purchase.paymentStatus;
+  const now = new Date();
+  // Normalize "today" to local noon — same anchor as parseDateString
+  const todayNoon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
 
-  if (!purchase.selectedDate) return 'completed';
+  if (purchase.paymentStatus === 'paid') {
+    if (!purchase.selectedDate) return 'completed';
+    const appointmentDate = parseDateString(purchase.selectedDate);
+    return appointmentDate >= todayNoon ? 'confirmed' : 'completed';
+  }
 
-  const appointmentDate = parseDateString(purchase.selectedDate);
-  const today = new Date();
-  return appointmentDate >= today ? 'confirmed' : 'completed';
+  if (purchase.paymentStatus === 'pending' && purchase.selectedDate) {
+    const appointmentDate = parseDateString(purchase.selectedDate);
+    if (appointmentDate < todayNoon) return 'expired';
+  }
+
+  return purchase.paymentStatus;
 }

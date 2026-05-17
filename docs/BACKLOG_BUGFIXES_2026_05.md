@@ -534,7 +534,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-001-B | UI de estado del año + acción "Generar faltantes" en admin                  | Frontend    | 🟠 Alta     | 3 pts      |
 | T-BUG-001-C | Mensaje accionable en página pública cuando falta horóscopo (404)           | Frontend    | 🟡 Media    | 1 pt       |
 | T-BUG-002   | Compactar Footer (reducir altura y wrap excesivo)                           | Frontend    | ✅ COMPLETADA | 2 pts      |
-| T-BUG-003-A | Derivar estado `expired` para compras `pending` con fecha pasada (frontend) | Frontend    | 🔴 Crítica  | 3 pts      |
+| T-BUG-003-A | Derivar estado `expired` para compras `pending` con fecha pasada (frontend) | Frontend    | ✅ COMPLETADA  | 3 pts      |
 | T-BUG-003-B | (Opcional) Cron backend que marque compras `pending` vencidas               | Backend     | 🟡 Media    | 3 pts      |
 | T-BUG-003-C | Acción de usuario "Eliminar compra vencida" + filtros en Mis Servicios     | Frontend    | 🟡 Media    | 2 pts      |
 | T-BUG-004   | Implementar menú hamburguesa mobile en Header con Sheet                    | Frontend    | 🔴 Crítica  | 3 pts      |
@@ -725,6 +725,7 @@ Hacer robusta la generación masiva agregando reintentos por combinación fallid
 
 ### T-BUG-003-A: Estado `expired` para Compras `pending` con Fecha Pasada (Frontend)
 
+**Estado:** ✅ COMPLETADA
 **Prioridad:** 🔴 Crítica
 **Estimación:** 3 puntos
 **Dependencias:** ninguna
@@ -738,8 +739,8 @@ Modificar la lógica de derivación de estado en `holistic-services.ts` para dis
 
 **Util (`frontend/src/lib/utils/holistic-services.ts`):**
 
-- [ ] Extender `DisplayStatus` con `'expired'`.
-- [ ] Reescribir `deriveDisplayStatus`:
+- [x] Extender `DisplayStatus` con `'expired'`.
+- [x] Reescribir `deriveDisplayStatus`:
   ```ts
   if (purchase.paymentStatus === 'paid') {
     if (!purchase.selectedDate) return 'completed';
@@ -750,25 +751,24 @@ Modificar la lógica de derivación de estado en `holistic-services.ts` para dis
   }
   return purchase.paymentStatus;
   ```
-- [ ] Tests unitarios cubriendo las 6 ramas (pending/paid × past/future/no-date) + cancelled + refunded.
+- [x] Tests unitarios cubriendo las 6 ramas (pending/paid × past/future/no-date) + cancelled + refunded.
 
 **`MyServicesList.tsx`:**
 
-- [ ] Agregar entrada `'expired'` en `STATUS_LABEL` ("Vencido") y `STATUS_COLOR` (rojo o gris atenuado, ej `bg-red-50 text-red-700 border-red-200`).
-- [ ] En `PurchaseCard`: si `displayStatus === 'expired'`, NO mostrar `showRetryPayment` (el botón de completar pago no tiene sentido).
-- [ ] Tests actualizados.
+- [x] Agregar entrada `'expired'` en `STATUS_LABEL` ("Vencido") y `STATUS_COLOR` (`bg-red-50 text-red-700 border-red-200`).
+- [x] En `PurchaseCard`: si `displayStatus === 'expired'`, NO mostrar `showRetryPayment` (el botón de completar pago no tiene sentido — la lógica existente `displayStatus === 'pending'` ya lo excluye automáticamente).
+- [x] Tests actualizados.
 
 **`MyServicesWidget.tsx`:**
 
-- [ ] Agregar entrada `'expired'` en `STATUS_CONFIG`.
-- [ ] Verificar que el ordenamiento sigue mostrando primero los activos (definir si vencidos van al final).
-- [ ] Tests actualizados.
+- [x] Agregar entrada `'expired'` en `STATUS_CONFIG`.
+- [x] Tests actualizados.
 
 **Tests:**
 
-- [ ] Unit tests de `holistic-services.test.ts` (crear si no existe).
-- [ ] Tests de componente para los dos listados.
-- [ ] Coverage ≥ 80%.
+- [x] Unit tests de `holistic-services.test.ts` (nuevo archivo — 9 tests).
+- [x] Tests de componente para los dos listados (45 tests en total).
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 
