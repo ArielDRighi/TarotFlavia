@@ -56,16 +56,21 @@ export class ExpirePendingPurchasesUseCase {
   }
 
   /**
-   * Returns yesterday's date as a YYYY-MM-DD string.
-   * Purchases with selectedDate < cutoffDate have missed their appointment
-   * by at least 24 hours (grace period).
+   * Returns yesterday's date as a YYYY-MM-DD string using UTC calendar day.
+   *
+   * UTC getters are used deliberately so the cutoff is consistent with:
+   * - The cron schedule (03:00 UTC), which runs before any UTC day changes
+   * - The selectedDate column, stored and compared as a plain YYYY-MM-DD string
+   *
+   * Using local-time getters would produce an off-by-one in UTC-negative
+   * timezones (e.g. America/Argentina_Buenos_Aires, UTC-3): at 03:00 UTC the
+   * local clock still reads the previous calendar day, so "yesterday local"
+   * would be two days ago in UTC, potentially expiring purchases too early.
    */
   private getCutoffDateString(): string {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const year = yesterday.getFullYear();
-    const month = String(yesterday.getMonth() + 1).padStart(2, '0');
-    const day = String(yesterday.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const now = new Date();
+    // Subtract one day in UTC milliseconds to get "yesterday UTC"
+    const yesterdayUtc = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    return yesterdayUtc.toISOString().slice(0, 10);
   }
 }
