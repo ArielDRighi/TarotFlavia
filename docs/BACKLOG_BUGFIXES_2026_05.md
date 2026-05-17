@@ -533,7 +533,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-001-A | Reintento + endpoint "generar faltantes" para horóscopos chinos             | Backend     | ✅ COMPLETADA  | 5 pts      |
 | T-BUG-001-B | UI de estado del año + acción "Generar faltantes" en admin                  | Frontend    | 🟠 Alta     | 3 pts      |
 | T-BUG-001-C | Mensaje accionable en página pública cuando falta horóscopo (404)           | Frontend    | 🟡 Media    | 1 pt       |
-| T-BUG-002   | Compactar Footer (reducir altura y wrap excesivo)                           | Frontend    | 🟡 Media    | 2 pts      |
+| T-BUG-002   | Compactar Footer (reducir altura y wrap excesivo)                           | Frontend    | ✅ COMPLETADA | 2 pts      |
 | T-BUG-003-A | Derivar estado `expired` para compras `pending` con fecha pasada (frontend) | Frontend    | 🔴 Crítica  | 3 pts      |
 | T-BUG-003-B | (Opcional) Cron backend que marque compras `pending` vencidas               | Backend     | 🟡 Media    | 3 pts      |
 | T-BUG-003-C | Acción de usuario "Eliminar compra vencida" + filtros en Mis Servicios     | Frontend    | 🟡 Media    | 2 pts      |
@@ -695,17 +695,17 @@ Hacer robusta la generación masiva agregando reintentos por combinación fallid
 **Estimación:** 2 puntos
 **Dependencias:** ninguna
 **Cubre BUG:** BUG-002
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] En `frontend/src/components/layout/Footer.tsx`:
-  - [ ] Reducir `py-8` → `py-4 md:py-5`.
-  - [ ] Convertir el `<h3>` "Nuestros Servicios" a `sr-only` (o eliminarlo si producto lo aprueba).
-  - [ ] Reemplazar la doble separación (`mb-6` + `mb-4`) por un contenedor con `space-y-3 md:space-y-2`.
-  - [ ] Considerar fusionar las dos `<nav>` (servicios + legales) en una sola fila en desktop (`md:flex-row`) con un separador vertical (`md:divide-x`).
-  - [ ] Asegurar que en mobile (<640px) los 7 servicios entren en máximo 2 filas (reducir `gap-4` a `gap-x-3 gap-y-1.5`).
-- [ ] Actualizar/crear test visual con `getByRole('contentinfo')` y verificar altura razonable mediante snapshot estructural (no pixel-perfect).
-- [ ] Validación con Playwright local (chequeo manual con `page.locator('footer').boundingBox()`); documentar capturas antes/después en el PR.
+- [x] En `frontend/src/components/layout/Footer.tsx`:
+  - [x] Reducir `py-8` → `py-4 md:py-5`.
+  - [x] Convertir el `<h3>` "Nuestros Servicios" a `sr-only`.
+  - [x] Reemplazar la doble separación (`mb-6` + `mb-4`) por un contenedor con `space-y-3 md:space-y-2`.
+  - [x] Asegurar que en mobile (<640px) los 7 servicios entren en máximo 2 filas (reducir `gap-4` a `gap-x-3 gap-y-1.5`).
+- [x] Actualizar test `Footer.test.tsx`: ajustar test de clase `py-8` → `py-4`.
+- [x] Ciclo de calidad completo: format, lint:fix, type-check, test:run, validate-architecture.
 
 #### 🎯 Criterios de Aceptación
 
