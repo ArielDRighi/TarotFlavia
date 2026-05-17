@@ -626,15 +626,16 @@ Hacer robusta la generación masiva agregando reintentos por combinación fallid
 **Estimación:** 3 puntos
 **Dependencias:** T-BUG-001-A
 **Cubre BUG:** BUG-001
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] En el panel admin de horóscopos chinos (revisar ruta actual, probablemente `/admin/horoscopo-chino` o similar) mostrar un card con `Generados: N / 60` para el año en curso.
-- [ ] Listar las combinaciones faltantes en una tabla colapsable (animal + elemento + emoji).
-- [ ] Botón "Generar faltantes" que llame al nuevo endpoint `POST /chinese-horoscope/admin/generate-missing/:year` y muestre toast con resultado.
-- [ ] Polling/refetch automático del status mientras la generación está en curso (intervalo 30s con `enabled` controlado por estado local).
-- [ ] Tests del componente con MSW o jest mocks del hook.
-- [ ] Coverage ≥ 80%.
+- [x] En el panel admin de horóscopos chinos (ruta `/admin/horoscopo-chino`) mostrar un card con `Generados: N / 60` para el año en curso.
+- [x] Listar las combinaciones faltantes en una tabla colapsable (animal + elemento + emoji).
+- [x] Botón "Generar faltantes" que llame al nuevo endpoint `POST /chinese-horoscope/admin/generate-missing/:year` y muestre toast con resultado.
+- [x] Polling/refetch automático del status mientras la generación está en curso (intervalo 30s con `enabled` controlado por estado local).
+- [x] Tests del componente con jest mocks del hook (23 tests en total).
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 
@@ -642,13 +643,21 @@ Hacer robusta la generación masiva agregando reintentos por combinación fallid
 - Tras hacer click en "Generar faltantes" la UI refleja el progreso y, al terminar, el contador queda en `60/60`.
 - Si la generación devuelve fallidos, se listan con el error correspondiente.
 
-#### 📁 Archivos involucrados
+#### 📁 Archivos creados/modificados
 
-- `frontend/src/app/admin/...` (definir página exacta — revisar estructura del panel admin actual)
-- `frontend/src/components/features/admin/ChineseHoroscopeAdminPanel.tsx` (nuevo o existente — confirmar)
+- `frontend/src/app/admin/horoscopo-chino/page.tsx` (nuevo)
+- `frontend/src/app/admin/horoscopo-chino/page.test.tsx` (nuevo)
+- `frontend/src/components/features/admin/ChineseHoroscopeAdminPanel.tsx` (nuevo)
+- `frontend/src/components/features/admin/ChineseHoroscopeAdminPanel.test.tsx` (nuevo)
 - `frontend/src/hooks/api/useAdminChineseHoroscope.ts` (nuevo)
+- `frontend/src/hooks/api/useAdminChineseHoroscope.test.ts` (nuevo)
 - `frontend/src/lib/api/admin-chinese-horoscope-api.ts` (nuevo)
-- `frontend/src/lib/api/endpoints.ts` (agregar `CHINESE_HOROSCOPE.ADMIN_STATUS` y `ADMIN_GENERATE_MISSING`)
+- `frontend/src/lib/api/admin-chinese-horoscope-api.test.ts` (nuevo)
+- `frontend/src/lib/api/endpoints.ts` (agregados `CHINESE_HOROSCOPE.ADMIN_STATUS` y `ADMIN_GENERATE_MISSING`)
+- `frontend/src/types/admin-chinese-horoscope.types.ts` (nuevo)
+- `frontend/src/types/index.ts` (exportaciones del nuevo tipo)
+- `frontend/src/components/features/admin/index.ts` (exportación del nuevo componente)
+- `frontend/src/lib/config/admin-navigation.ts` (entrada "Horóscopo Chino" en SISTEMA)
 
 ---
 

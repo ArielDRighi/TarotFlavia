@@ -299,3 +299,10 @@ export type {
   SetWeeklyAvailabilityDto,
   AddExceptionDto,
 } from './scheduling-admin.types';
+
+// Admin Chinese Horoscope Types (T-BUG-001-B)
+export type {
+  MissingCombination,
+  ChineseHoroscopeYearStatus,
+  GenerateMissingResponse,
+} from './admin-chinese-horoscope.types';

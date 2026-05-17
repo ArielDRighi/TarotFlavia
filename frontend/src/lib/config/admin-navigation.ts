@@ -11,6 +11,7 @@ import {
   ScrollText,
   HandHeart,
   CalendarClock,
+  Rabbit,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -50,6 +51,7 @@ export const adminNavSections: NavSection[] = [
       { name: 'Seguridad', href: '/admin/seguridad', icon: Shield },
       { name: 'Caché', href: '/admin/cache', icon: Database },
       { name: 'Audit Logs', href: '/admin/audit', icon: ScrollText },
+      { name: 'Horóscopo Chino', href: '/admin/horoscopo-chino', icon: Rabbit },
     ],
   },
 ];
