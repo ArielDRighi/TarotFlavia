@@ -109,11 +109,18 @@ describe('Footer', () => {
       expect(footer).toHaveClass('text-muted-foreground');
     });
 
-    it('should have vertical padding', () => {
+    it('should have compact mobile vertical padding', () => {
       render(<Footer />);
 
       const footer = screen.getByRole('contentinfo');
       expect(footer).toHaveClass('py-4');
+    });
+
+    it('should have responsive desktop padding', () => {
+      render(<Footer />);
+
+      const footer = screen.getByRole('contentinfo');
+      expect(footer).toHaveClass('md:py-5');
     });
 
     it('should center content', () => {
@@ -121,6 +128,23 @@ describe('Footer', () => {
 
       const footer = screen.getByRole('contentinfo');
       expect(footer).toHaveClass('border-t');
+    });
+
+    it('should render services heading as visually hidden (sr-only)', () => {
+      render(<Footer />);
+
+      const heading = screen.getByText('Nuestros Servicios');
+      expect(heading).toHaveClass('sr-only');
+    });
+
+    it('should use compact service link gaps', () => {
+      render(<Footer />);
+
+      const servicesList = screen
+        .getByRole('navigation', { name: /servicios/i })
+        .querySelector('ul');
+      expect(servicesList).toHaveClass('gap-x-3');
+      expect(servicesList).toHaveClass('gap-y-1.5');
     });
   });
 
@@ -135,6 +159,26 @@ describe('Footer', () => {
       render(<Footer />);
 
       expect(screen.getAllByRole('navigation')).toHaveLength(2);
+    });
+
+    it('should have minimum touch target on service links', () => {
+      render(<Footer />);
+
+      const serviceLinks = screen
+        .getByRole('navigation', { name: /servicios/i })
+        .querySelectorAll('a');
+      serviceLinks.forEach((link) => {
+        expect(link).toHaveClass('py-1.5');
+      });
+    });
+
+    it('should have minimum touch target on legal links', () => {
+      render(<Footer />);
+
+      const legalLinks = screen.getByRole('navigation', { name: /legales/i }).querySelectorAll('a');
+      legalLinks.forEach((link) => {
+        expect(link).toHaveClass('py-1.5');
+      });
     });
   });
 });
