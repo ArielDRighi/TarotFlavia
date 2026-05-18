@@ -540,7 +540,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-004   | Implementar menú hamburguesa mobile en Header con Sheet                    | Frontend    | ✅ COMPLETADA  | 3 pts      |
 | T-BUG-005   | Corregir credenciales impresas por `db-seed-users.ts`                      | Backend     | ✅ COMPLETADA | 0.5 pt     |
 | T-BUG-006   | Crear página placeholder `/admin/lecturas` (o quitar del sidebar)          | Frontend    | ✅ COMPLETADA | 1 pt       |
-| T-BUG-007-A | Backend: extender `/admin/dashboard/stats` con `recentReadings` + counts reales | Backend  | 🔴 Crítica  | 3 pts      |
+| T-BUG-007-A | Backend: extender `/admin/dashboard/stats` con `recentReadings` + counts reales | Backend  | ✅ COMPLETADA  | 3 pts      |
 | T-BUG-007-B | Frontend: corregir tipos + eliminar mocks del dashboard                    | Frontend    | 🔴 Crítica  | 2 pts      |
 | T-BUG-008   | Actualizar pricing table de IA + recalcular costos históricos              | Backend     | 🔴 Crítica  | 3 pts      |
 | T-BUG-009   | Alinear tipos frontend de AI Usage con DTOs backend                        | Frontend    | 🟠 Alta     | 1 pt       |
@@ -984,18 +984,21 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 ### T-BUG-007-A: Backend — Extender `/admin/dashboard/stats` con Datos Reales
 
 **Prioridad:** 🔴 Crítica · **Estimación:** 3 pts · **Cubre BUG:** BUG-007
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas
 
-- [ ] Agregar al DTO `StatsResponseDto` el campo `recentReadings: RecentReadingDto[]` (reutilizar del endpoint deprecado `/metrics` si existe).
-- [ ] Agregar `activeTarotistas: number` calculado desde `tarotistas` con `isActive = true` (o equivalente).
-- [ ] Asegurar que `openai.totalCostUsd` siempre se devuelva (no `totalCost` ni `undefined`).
-- [ ] Tests del use case + controller.
-- [ ] Coverage ≥ 80%.
+- [x] Agregar al DTO `StatsResponseDto` el campo `recentReadings: RecentReadingDto[]` (reutilizar del endpoint deprecado `/metrics` si existe).
+- [x] Agregar `activeTarotistas: number` calculado desde `tarotistas` con `isActive = true` (o equivalente).
+- [x] Asegurar que `openai.totalCostUsd` siempre se devuelva (no `totalCost` ni `undefined`).
+- [x] Tests del use case + controller.
+- [x] Coverage ≥ 80%.
 
 #### 📁 Archivos
 
-- `backend/tarot-app/src/modules/admin/application/services/admin-dashboard.service.ts`
+- `backend/tarot-app/src/modules/admin/admin-dashboard.service.ts`
+- `backend/tarot-app/src/modules/admin/admin-dashboard.service.spec.ts`
+- `backend/tarot-app/src/modules/admin/admin-dashboard.controller.spec.ts`
 - `backend/tarot-app/src/modules/admin/dto/stats-response.dto.ts`
 
 ---

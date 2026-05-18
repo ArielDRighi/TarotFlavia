@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, IsNull } from 'typeorm';
 import { User, UserPlan } from '../users/entities/user.entity';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import {
   AIUsageLog,
@@ -48,6 +49,8 @@ export class AdminDashboardService {
     private readonly cardRepository: Repository<TarotCard>,
     @InjectRepository(PredefinedQuestion)
     private readonly predefinedQuestionRepository: Repository<PredefinedQuestion>,
+    @InjectRepository(Tarotista)
+    private readonly tarotistaRepository: Repository<Tarotista>,
   ) {}
 
   async getMetrics(): Promise<DashboardMetricsDto> {
@@ -255,12 +258,22 @@ export class AdminDashboardService {
    * Returns detailed metrics for users, readings, cards, AI usage, and questions
    */
   async getStats(): Promise<StatsResponseDto> {
-    const [users, readings, cards, openai, questions] = await Promise.all([
+    const [
+      users,
+      readings,
+      cards,
+      openai,
+      questions,
+      recentReadings,
+      activeTarotistas,
+    ] = await Promise.all([
       this.getUserStats(),
       this.getReadingStats(),
       this.getCardStats(),
       this.getOpenAIStats(),
       this.getQuestionStats(),
+      this.getRecentReadings(10),
+      this.getActiveTarotistasCount(),
     ]);
 
     return {
@@ -269,6 +282,8 @@ export class AdminDashboardService {
       cards,
       openai,
       questions,
+      recentReadings,
+      activeTarotistas,
     };
   }
 
@@ -784,5 +799,12 @@ export class AdminDashboardService {
       predefinedPercentage: parseFloat(predefinedPercentage.toFixed(2)),
       customPercentage: parseFloat(customPercentage.toFixed(2)),
     };
+  }
+
+  /**
+   * Cuenta los tarotistas con isActive = true
+   */
+  private async getActiveTarotistasCount(): Promise<number> {
+    return this.tarotistaRepository.count({ where: { isActive: true } });
   }
 }

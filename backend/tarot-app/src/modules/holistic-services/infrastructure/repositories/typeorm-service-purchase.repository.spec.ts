@@ -275,7 +275,11 @@ describe('TypeOrmServicePurchaseRepository', () => {
     it('should query for PENDING purchases with selectedDate before the cutoff', async () => {
       const purchases = [
         { ...mockPurchase, selectedDate: '2026-05-10' } as ServicePurchase,
-        { ...mockPurchase, id: 2, selectedDate: '2026-05-11' } as ServicePurchase,
+        {
+          ...mockPurchase,
+          id: 2,
+          selectedDate: '2026-05-11',
+        } as ServicePurchase,
       ];
       typeOrmRepository.find.mockResolvedValue(purchases);
 
