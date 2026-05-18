@@ -58,7 +58,7 @@ describe('useDashboardStats', () => {
     },
     openai: {
       totalPrompts: 450,
-      totalCost: 25.5,
+      totalCostUsd: 25.5,
       aiCostsPerDay: [],
     },
     questions: {
@@ -66,6 +66,7 @@ describe('useDashboardStats', () => {
       mostCommonQuestion: '¿Encontraré el amor?',
     },
     recentReadings: [],
+    activeTarotistas: 3,
   };
 
   beforeEach(() => {

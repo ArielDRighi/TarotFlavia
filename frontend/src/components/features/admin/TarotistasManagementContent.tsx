@@ -8,6 +8,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TarotistasTable } from './TarotistasTable';
 import { ApplicationCard } from './ApplicationCard';
@@ -37,6 +38,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 export function TarotistasManagementContent() {
+  const router = useRouter();
+
   // State para tabs
   const [activeTab, setActiveTab] = useState('activos');
 
@@ -65,7 +68,7 @@ export function TarotistasManagementContent() {
   const [selectedTarotista, setSelectedTarotista] = useState<AdminTarotista | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<TarotistaApplication | null>(null);
   const [actionType, setActionType] = useState<
-    'deactivate' | 'reactivate' | 'approve' | 'reject' | null
+    'deactivate' | 'reactivate' | 'approve' | 'reject' | 'edit-config' | 'view-metrics' | null
   >(null);
   const [rejectReason, setRejectReason] = useState('');
   const [approveNotes, setApproveNotes] = useState('');
@@ -81,16 +84,14 @@ export function TarotistasManagementContent() {
         setActionType('reactivate');
         break;
       case 'view-profile':
-        toast.info('Vista de perfil: próximamente');
+        router.push(`/admin/tarotistas/${tarotista.id}`);
         setSelectedTarotista(null);
         break;
       case 'edit-config':
-        toast.info('Edición de configuración IA: próximamente');
-        setSelectedTarotista(null);
+        setActionType('edit-config');
         break;
       case 'view-metrics':
-        toast.info('Vista de métricas: próximamente');
-        setSelectedTarotista(null);
+        setActionType('view-metrics');
         break;
       default:
         break;
@@ -354,6 +355,79 @@ export function TarotistasManagementContent() {
             >
               {isPending ? 'Procesando...' : 'Rechazar'}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* MODAL EDIT CONFIG */}
+      <AlertDialog
+        open={actionType === 'edit-config'}
+        onOpenChange={(open) => !open && closeDialog()}
+      >
+        <AlertDialogContent data-testid="tarotista-config-modal">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Configuración de {selectedTarotista?.nombrePublico}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Gestionar la configuración IA y parámetros del tarotista.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <p className="text-muted-foreground text-sm">
+              Para editar la configuración completa, accede al perfil del tarotista.
+            </p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cerrar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedTarotista) {
+                  router.push(`/admin/tarotistas/${selectedTarotista.id}/configuracion`);
+                }
+                closeDialog();
+              }}
+            >
+              Ir a Configuración
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* MODAL VIEW METRICS */}
+      <AlertDialog
+        open={actionType === 'view-metrics'}
+        onOpenChange={(open) => !open && closeDialog()}
+      >
+        <AlertDialogContent data-testid="tarotista-metrics-modal">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Métricas de {selectedTarotista?.nombrePublico}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Estadísticas de sesiones, ingresos y valoraciones del tarotista.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-4">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Total lecturas</span>
+              <span className="text-sm">{selectedTarotista?.totalLecturas ?? '—'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Rating promedio</span>
+              <span className="text-sm">{selectedTarotista?.ratingPromedio ?? '—'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Total reviews</span>
+              <span className="text-sm">{selectedTarotista?.totalReviews ?? '—'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Ingresos totales (USD)</span>
+              <span className="text-sm">
+                {selectedTarotista?.totalIngresos != null
+                  ? `$${selectedTarotista.totalIngresos.toFixed(2)}`
+                  : '—'}
+              </span>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={closeDialog}>Cerrar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

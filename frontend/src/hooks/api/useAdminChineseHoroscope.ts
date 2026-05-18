@@ -35,7 +35,7 @@ interface UseChineseHoroscopeAdminStatusOptions {
  */
 export function useChineseHoroscopeAdminStatus(
   year: number,
-  options: UseChineseHoroscopeAdminStatusOptions = {},
+  options: UseChineseHoroscopeAdminStatusOptions = {}
 ) {
   const { pollingEnabled = false } = options;
 

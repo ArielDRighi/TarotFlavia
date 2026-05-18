@@ -54,7 +54,7 @@ describe('AdminDashboardPage', () => {
     },
     openai: {
       totalPrompts: 450,
-      totalCost: 25.5,
+      totalCostUsd: 25.5,
       aiCostsPerDay: [],
     },
     questions: {
@@ -62,6 +62,7 @@ describe('AdminDashboardPage', () => {
       mostCommonQuestion: '¿Encontraré el amor?',
     },
     recentReadings: [],
+    activeTarotistas: 3,
   };
 
   const mockCharts: ChartsResponseDto = {

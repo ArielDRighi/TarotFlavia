@@ -36,6 +36,7 @@ import {
   useAddBlockedDate,
   useRemoveBlockedDate,
 } from '@/hooks/api/useAdminScheduling';
+import { usePrimaryTarotista } from '@/hooks/api/usePrimaryTarotista';
 import {
   setWeeklyAvailabilitySchema,
   type SetWeeklyAvailabilityForm,
@@ -47,8 +48,7 @@ import { DayOfWeek, DAY_LABELS } from '@/types';
 // Constants
 // ============================================================================
 
-/** Flavia's fixed tarotista ID (single-tarotista MVP) */
-const FLAVIA_TAROTISTA_ID = 1;
+// FLAVIA_TAROTISTA_ID eliminado — se resuelve dinámicamente con usePrimaryTarotista()
 
 // ============================================================================
 // WeeklyAvailabilityForm (inline)
@@ -145,24 +145,31 @@ export function AgendaManagementContent() {
   // ---- Add blocked date form state ----
   const [showAddBlockedDate, setShowAddBlockedDate] = useState(false);
 
-  // ---- Queries ----
+  // ---- Resolver tarotista primario dinámicamente (sin hardcode) ----
+  const {
+    primaryTarotistaId,
+    isLoading: primaryLoading,
+    isError: primaryError,
+  } = usePrimaryTarotista();
+
+  // ---- Queries (habilitadas solo cuando el ID está disponible) ----
   const {
     data: availability,
     isLoading: availabilityLoading,
     error: availabilityError,
-  } = useAdminWeeklyAvailability(FLAVIA_TAROTISTA_ID);
+  } = useAdminWeeklyAvailability(primaryTarotistaId as number);
 
   const {
     data: exceptions,
     isLoading: exceptionsLoading,
     error: exceptionsError,
-  } = useAdminBlockedDates(FLAVIA_TAROTISTA_ID);
+  } = useAdminBlockedDates(primaryTarotistaId as number);
 
   // ---- Mutations ----
-  const setAvailabilityMutation = useSetWeeklyAvailability(FLAVIA_TAROTISTA_ID);
-  const removeAvailabilityMutation = useRemoveWeeklyAvailability(FLAVIA_TAROTISTA_ID);
-  const addBlockedDateMutation = useAddBlockedDate(FLAVIA_TAROTISTA_ID);
-  const removeBlockedDateMutation = useRemoveBlockedDate(FLAVIA_TAROTISTA_ID);
+  const setAvailabilityMutation = useSetWeeklyAvailability(primaryTarotistaId as number);
+  const removeAvailabilityMutation = useRemoveWeeklyAvailability(primaryTarotistaId as number);
+  const addBlockedDateMutation = useAddBlockedDate(primaryTarotistaId as number);
+  const removeBlockedDateMutation = useRemoveBlockedDate(primaryTarotistaId as number);
 
   // ---- Handlers: availability ----
   const handleAddAvailability = (day: DayOfWeek) => {
@@ -217,6 +224,27 @@ export function AgendaManagementContent() {
   };
 
   // ---- Render ----
+  // Mientras se resuelve el tarotista primario, mostrar skeleton
+  if (primaryLoading) {
+    return (
+      <div data-testid="primary-tarotista-loading" className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-14" />
+        ))}
+      </div>
+    );
+  }
+
+  if (primaryError || !primaryTarotistaId) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>
+          Error al cargar la configuración de agenda. Por favor, intenta de nuevo.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <div data-testid="agenda-management-content">
       {/* Tab buttons */}
