@@ -539,7 +539,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-003-C | Acción de usuario "Eliminar compra vencida" + filtros en Mis Servicios     | Frontend    | ✅ COMPLETADA | 2 pts      |
 | T-BUG-004   | Implementar menú hamburguesa mobile en Header con Sheet                    | Frontend    | ✅ COMPLETADA  | 3 pts      |
 | T-BUG-005   | Corregir credenciales impresas por `db-seed-users.ts`                      | Backend     | ✅ COMPLETADA | 0.5 pt     |
-| T-BUG-006   | Crear página placeholder `/admin/lecturas` (o quitar del sidebar)          | Frontend    | 🔴 Crítica  | 1 pt       |
+| T-BUG-006   | Crear página placeholder `/admin/lecturas` (o quitar del sidebar)          | Frontend    | ✅ COMPLETADA | 1 pt       |
 | T-BUG-007-A | Backend: extender `/admin/dashboard/stats` con `recentReadings` + counts reales | Backend  | 🔴 Crítica  | 3 pts      |
 | T-BUG-007-B | Frontend: corregir tipos + eliminar mocks del dashboard                    | Frontend    | 🔴 Crítica  | 2 pts      |
 | T-BUG-008   | Actualizar pricing table de IA + recalcular costos históricos              | Backend     | 🔴 Crítica  | 3 pts      |
@@ -960,26 +960,24 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 ### T-BUG-006: Crear Página Placeholder `/admin/lecturas` (o Quitar del Sidebar)
 
+**Estado:** ✅ COMPLETADA
 **Prioridad:** 🔴 Crítica · **Estimación:** 1 pt · **Cubre BUG:** BUG-006
 
 #### ✅ Tareas
 
-**Decisión de producto (rápida, en este PR):** crear placeholder o eliminar del sidebar.
+**Decisión tomada:** Opción A — Placeholder (sidebar se mantiene, ruta ya no da 404).
 
-**Opción A — Placeholder (recomendada):**
+**Opción A — Placeholder:**
 
-- [ ] Crear `frontend/src/app/admin/lecturas/page.tsx` con título y mensaje "Sección en construcción".
-- [ ] Test de renderizado mínimo.
-
-**Opción B — Eliminar del sidebar:**
-
-- [ ] Quitar la entrada `'Lecturas'` de `admin-navigation.ts:40`.
-- [ ] Test de sidebar actualizado.
+- [x] Crear `frontend/src/app/admin/lecturas/page.tsx` con título y mensaje "En construcción".
+- [x] Crear `frontend/src/components/features/admin/LecturasPlaceholderContent.tsx`.
+- [x] Test de renderizado mínimo (4 tests).
 
 #### 📁 Archivos
 
-- `frontend/src/app/admin/lecturas/page.tsx` (nuevo, opción A)
-- `frontend/src/lib/config/admin-navigation.ts` (opción B)
+- `frontend/src/app/admin/lecturas/page.tsx` (nuevo)
+- `frontend/src/components/features/admin/LecturasPlaceholderContent.tsx` (nuevo)
+- `frontend/src/components/features/admin/LecturasPlaceholderContent.test.tsx` (nuevo)
 
 ---
 
