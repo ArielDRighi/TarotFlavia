@@ -15,6 +15,7 @@ import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
 import { TarotCard } from '../tarot/cards/entities/tarot-card.entity';
 import { PredefinedQuestion } from '../predefined-questions/entities/predefined-question.entity';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { StatsResponseDto } from './dto/stats-response.dto';
 
 describe('AdminDashboardService', () => {
@@ -67,6 +68,10 @@ describe('AdminDashboardService', () => {
     createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
+  const mockTarotistaRepository = {
+    count: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -90,6 +95,10 @@ describe('AdminDashboardService', () => {
         {
           provide: getRepositoryToken(PredefinedQuestion),
           useValue: mockPredefinedQuestionRepository,
+        },
+        {
+          provide: getRepositoryToken(Tarotista),
+          useValue: mockTarotistaRepository,
         },
       ],
     }).compile();
@@ -217,8 +226,8 @@ describe('AdminDashboardService', () => {
         },
       ]);
 
-      // Mock getActiveTarotistasCount (getCount on user repository)
-      mockQueryBuilder.getCount.mockResolvedValueOnce(2);
+      // Mock getActiveTarotistasCount (count on tarotista repository)
+      mockTarotistaRepository.count.mockResolvedValueOnce(2);
 
       const result: StatsResponseDto = await service.getStats();
 
@@ -463,58 +472,24 @@ describe('AdminDashboardService', () => {
     });
   });
 
-  describe('getActiveTarotistasCount (via getStats)', () => {
-    it('should return the count of users with TAROTIST role', async () => {
-      jest.clearAllMocks();
-      mockQueryBuilder.getCount.mockResolvedValueOnce(3);
+  describe('getActiveTarotistasCount', () => {
+    it('should return count of tarotistas with isActive = true', async () => {
+      mockTarotistaRepository.count.mockResolvedValueOnce(3);
 
-      // We test the private method indirectly by calling getStats and checking activeTarotistas
-      // Set up all required mocks for getStats
-      mockUserRepository.count
-        .mockResolvedValueOnce(100) // totalUsers
-        .mockResolvedValueOnce(75) // free users
-        .mockResolvedValueOnce(25); // premium users
+      const result = await service['getActiveTarotistasCount']();
 
-      mockQueryBuilder.getRawOne
-        .mockResolvedValueOnce({ count: '20' }) // activeUsersLast7Days
-        .mockResolvedValueOnce({ count: '40' }) // activeUsersLast30Days
-        .mockResolvedValueOnce({ totalReadings: '500', totalUsers: '100' }) // averageReadingsPerUser
-        .mockResolvedValueOnce({ upright: '200', reversed: '200' }) // cardOrientationRatio
-        .mockResolvedValueOnce({ totalTokens: '1000000', avgTokens: '2000' }) // tokenStats
-        .mockResolvedValueOnce({ totalCost: '0.00' }) // totalCost
-        .mockResolvedValueOnce({ avgDuration: '1200' }) // averageDuration
-        .mockResolvedValueOnce({ predefinedCount: '300', customCount: '200' }); // predefinedVsCustom
+      expect(mockTarotistaRepository.count).toHaveBeenCalledWith({
+        where: { isActive: true },
+      });
+      expect(result).toBe(3);
+    });
 
-      mockReadingRepository.count
-        .mockResolvedValueOnce(500) // totalReadings
-        .mockResolvedValueOnce(50) // readingsLast7Days
-        .mockResolvedValueOnce(150); // readingsLast30Days
+    it('should return 0 when no active tarotistas exist', async () => {
+      mockTarotistaRepository.count.mockResolvedValueOnce(0);
 
-      mockAIUsageRepository.count
-        .mockResolvedValueOnce(1000) // total interpretations
-        .mockResolvedValueOnce(10) // errors
-        .mockResolvedValueOnce(50); // cached
+      const result = await service['getActiveTarotistasCount']();
 
-      mockQueryBuilder.getRawMany
-        .mockResolvedValueOnce([{ date: '2024-01-01', count: '5' }]) // newRegistrationsPerDay
-        .mockResolvedValueOnce([
-          { categoryId: 1, categoryName: 'Amor', count: '300' },
-        ]) // categoryDistribution
-        .mockResolvedValueOnce([{ cardCount: 3, count: '200' }]) // spreadDistribution
-        .mockResolvedValueOnce([{ date: '2024-01-01', count: '20' }]) // readingsPerDay
-        .mockResolvedValueOnce([{ cardId: 1, name: 'El Loco', count: '100' }]) // topCards
-        .mockResolvedValueOnce([{ category: 'arcanos_mayores', count: '300' }]) // cardCategoryDistribution
-        .mockResolvedValueOnce([{ provider: 'groq', count: '900' }]) // providerUsage
-        .mockResolvedValueOnce([{ date: '2024-01-01', totalCost: '0.00' }]) // aiCostsPerDay
-        .mockResolvedValueOnce([
-          { questionId: 1, question: '¿Pregunta?', count: '100' },
-        ]); // topPredefinedQuestions
-
-      mockQueryBuilder.getMany.mockResolvedValueOnce([]); // recentReadings
-
-      const result = await service.getStats();
-
-      expect(result.activeTarotistas).toBe(3);
+      expect(result).toBe(0);
     });
   });
 });

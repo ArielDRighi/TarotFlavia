@@ -316,7 +316,7 @@ export class StatsResponseDto {
 
   @ApiProperty({
     example: 3,
-    description: 'Número de tarotistas activos (con rol TAROTIST)',
+    description: 'Número de tarotistas activos (Tarotista.isActive = true)',
   })
   activeTarotistas: number;
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, IsNull } from 'typeorm';
 import { User, UserPlan } from '../users/entities/user.entity';
-import { UserRole } from '../../common/enums/user-role.enum';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import {
   AIUsageLog,
@@ -49,6 +49,8 @@ export class AdminDashboardService {
     private readonly cardRepository: Repository<TarotCard>,
     @InjectRepository(PredefinedQuestion)
     private readonly predefinedQuestionRepository: Repository<PredefinedQuestion>,
+    @InjectRepository(Tarotista)
+    private readonly tarotistaRepository: Repository<Tarotista>,
   ) {}
 
   async getMetrics(): Promise<DashboardMetricsDto> {
@@ -800,14 +802,9 @@ export class AdminDashboardService {
   }
 
   /**
-   * Cuenta los usuarios con rol TAROTIST
+   * Cuenta los tarotistas con isActive = true
    */
   private async getActiveTarotistasCount(): Promise<number> {
-    const result = await this.userRepository
-      .createQueryBuilder('user')
-      .where(':role = ANY(user.roles)', { role: UserRole.TAROTIST })
-      .getCount();
-
-    return result;
+    return this.tarotistaRepository.count({ where: { isActive: true } });
   }
 }
