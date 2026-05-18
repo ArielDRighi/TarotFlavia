@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, IsNull } from 'typeorm';
 import { User, UserPlan } from '../users/entities/user.entity';
+import { UserRole } from '../../common/enums/user-role.enum';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import {
   AIUsageLog,
@@ -255,12 +256,22 @@ export class AdminDashboardService {
    * Returns detailed metrics for users, readings, cards, AI usage, and questions
    */
   async getStats(): Promise<StatsResponseDto> {
-    const [users, readings, cards, openai, questions] = await Promise.all([
+    const [
+      users,
+      readings,
+      cards,
+      openai,
+      questions,
+      recentReadings,
+      activeTarotistas,
+    ] = await Promise.all([
       this.getUserStats(),
       this.getReadingStats(),
       this.getCardStats(),
       this.getOpenAIStats(),
       this.getQuestionStats(),
+      this.getRecentReadings(10),
+      this.getActiveTarotistasCount(),
     ]);
 
     return {
@@ -269,6 +280,8 @@ export class AdminDashboardService {
       cards,
       openai,
       questions,
+      recentReadings,
+      activeTarotistas,
     };
   }
 
@@ -784,5 +797,17 @@ export class AdminDashboardService {
       predefinedPercentage: parseFloat(predefinedPercentage.toFixed(2)),
       customPercentage: parseFloat(customPercentage.toFixed(2)),
     };
+  }
+
+  /**
+   * Cuenta los usuarios con rol TAROTIST
+   */
+  private async getActiveTarotistasCount(): Promise<number> {
+    const result = await this.userRepository
+      .createQueryBuilder('user')
+      .where(':role = ANY(user.roles)', { role: UserRole.TAROTIST })
+      .getCount();
+
+    return result;
   }
 }

@@ -63,6 +63,8 @@ describe('AdminDashboardController', () => {
         customPercentage: 33.33,
       },
     },
+    recentReadings: [],
+    activeTarotistas: 2,
   };
 
   const mockChartsResponse: ChartsResponseDto = {

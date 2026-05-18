@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { RecentReadingDto } from './recent-reading.dto';
 
 // ============= User Stats DTOs =============
 export class NewRegistrationDto {
@@ -306,6 +307,18 @@ export class StatsResponseDto {
     description: 'Estadísticas de preguntas',
   })
   questions: QuestionStatsDto;
+
+  @ApiProperty({
+    type: [RecentReadingDto],
+    description: 'Lecturas recientes (últimas 10)',
+  })
+  recentReadings: RecentReadingDto[];
+
+  @ApiProperty({
+    example: 3,
+    description: 'Número de tarotistas activos (con rol TAROTIST)',
+  })
+  activeTarotistas: number;
 }
 
 // ============= Charts Response =============
