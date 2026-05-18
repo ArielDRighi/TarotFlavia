@@ -541,19 +541,20 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-005   | Corregir credenciales impresas por `db-seed-users.ts`                      | Backend     | ✅ COMPLETADA | 0.5 pt     |
 | T-BUG-006   | Crear página placeholder `/admin/lecturas` (o quitar del sidebar)          | Frontend    | ✅ COMPLETADA | 1 pt       |
 | T-BUG-007-A | Backend: extender `/admin/dashboard/stats` con `recentReadings` + counts reales | Backend  | ✅ COMPLETADA  | 3 pts      |
-| T-BUG-007-B | Frontend: corregir tipos + eliminar mocks del dashboard                    | Frontend    | 🔴 Crítica  | 2 pts      |
-| T-BUG-008   | Actualizar pricing table de IA + recalcular costos históricos              | Backend     | 🔴 Crítica  | 3 pts      |
-| T-BUG-009   | Alinear tipos frontend de AI Usage con DTOs backend                        | Frontend    | 🟠 Alta     | 1 pt       |
-| T-BUG-010-A | Implementar "Desbloquear IP" (frontend + endpoint backend)                 | Full-stack  | 🟠 Alta     | 2 pts      |
-| T-BUG-010-B | Implementar "Gestionar roles" en Usuarios admin                            | Frontend    | 🟠 Alta     | 3 pts      |
-| T-BUG-010-C | Implementar acciones de Tarotistas (perfil/config IA/métricas)             | Frontend    | 🟡 Media    | 3 pts      |
-| T-BUG-011   | Fix `SelectItem value=""` en `SecurityEventsTab`                            | Frontend    | 🔴 Crítica  | 0.5 pt     |
-| T-BUG-012   | Persistir rate-limit / IP blocks fuera de memoria                          | Backend     | 🟠 Alta     | 3 pts      |
-| T-BUG-013   | Eliminar `FLAVIA_TAROTISTA_ID` hardcoded en agenda admin                   | Frontend    | 🟡 Media    | 1 pt       |
-| T-BUG-014   | Date range picker en AI Usage + centralizar `GROQ_DAILY_LIMIT`             | Frontend    | 🟡 Media    | 2 pts      |
-| T-BUG-015   | Migrar respuesta de Audit Logs al contrato estándar `{ data, meta }`       | Backend     | 🟡 Media    | 2 pts      |
+| T-BUG-007-B | **Admin FE consolidada** — dashboard sin mocks + acciones tarotistas + agenda sin hardcode | Frontend    | 🔴 Crítica  | 6 pts ⬆️    |
+| T-BUG-008   | **AI Usage consolidada** — pricing real + tipos lowercase + date range + daily limit       | Full-stack  | 🔴 Crítica  | 6 pts ⬆️    |
+| T-BUG-009   | _Absorbida por T-BUG-008 (consolidación 2026-05-18)_                                       | —           | —           | —          |
+| T-BUG-010-A | **Seguridad consolidada** — IP blocks persistidos + desbloqueo + fix SelectItem + audit `{data,meta}` | Full-stack | 🟠 Alta | 7.5 pts ⬆️  |
+| T-BUG-010-B | Implementar "Gestionar roles" en Usuarios admin                                            | Frontend    | 🟠 Alta     | 3 pts      |
+| T-BUG-010-C | _Absorbida por T-BUG-007-B (consolidación 2026-05-18)_                                     | —           | —           | —          |
+| T-BUG-011   | _Absorbida por T-BUG-010-A (consolidación 2026-05-18)_                                     | —           | —           | —          |
+| T-BUG-012   | _Absorbida por T-BUG-010-A (consolidación 2026-05-18)_                                     | —           | —           | —          |
+| T-BUG-013   | _Absorbida por T-BUG-007-B (consolidación 2026-05-18)_                                     | —           | —           | —          |
+| T-BUG-014   | _Absorbida por T-BUG-008 (consolidación 2026-05-18)_                                       | —           | —           | —          |
+| T-BUG-015   | _Absorbida por T-BUG-010-A (consolidación 2026-05-18)_                                     | —           | —           | —          |
 
 **Estimación total:** ~49 puntos (~25 días con TDD + ciclo de calidad).
+**Tras consolidación 2026-05-18:** 4 tareas pendientes (T-BUG-007-B, T-BUG-008, T-BUG-010-A, T-BUG-010-B) = 22.5 pts, en lugar de 11 — sin pérdida de alcance. Ver detalle al final del archivo.
 
 ---
 
@@ -1003,11 +1004,16 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 ---
 
-### T-BUG-007-B: Frontend — Corregir Tipos y Eliminar Mocks del Dashboard
+> **🔀 Consolidación 2026-05-18:** Las tareas T-BUG-007-B a T-BUG-015 originales fueron consolidadas en **4 tareas** (T-BUG-007-B, T-BUG-008, T-BUG-010-A, T-BUG-010-B) para reducir el overhead de CI (~30 min por PR). El alcance total se preserva — cada tarea consolidada agrupa subtareas marcadas con `ex T-BUG-XXX` para trazabilidad.
 
-**Prioridad:** 🔴 Crítica · **Estimación:** 2 pts · **Dependencias:** T-BUG-007-A · **Cubre BUG:** BUG-007
+### T-BUG-007-B (consolidada): Admin FE — Eliminar mocks + acciones placeholder
+
+**Prioridad:** 🔴 Crítica · **Estimación:** 6 pts · **Dependencias:** T-BUG-007-A · **Cubre BUGs:** BUG-007 (FE), BUG-010 (parte 3), BUG-013
+**Consolida:** T-BUG-007-B (original) + T-BUG-010-C + T-BUG-013
 
 #### ✅ Tareas
+
+**Dashboard (ex T-BUG-007-B):**
 
 - [ ] En `frontend/src/types/admin.types.ts`: renombrar `totalCost → totalCostUsd`, agregar `recentReadings`, agregar `activeTarotistas`.
 - [ ] En `frontend/src/lib/utils/dashboard-utils.ts`:
@@ -1015,86 +1021,159 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
   - Reemplazar `stats.openai.totalCost * 10` por la fórmula real de revenue (consultar con producto o quitar el card hasta tener fuente).
 - [ ] Tests del dashboard con stats mockeados (validar que no aparezca `NaN`).
 
+**Tarotistas — Acciones (ex T-BUG-010-C):**
+
+- [ ] `view-profile`: navegar a `/admin/tarotistas/[id]` o abrir modal con datos del tarotista (definir con producto).
+- [ ] `edit-config`: modal o página `/admin/tarotistas/[id]/configuracion` que use `TAROTISTA_CONFIG` ya existente.
+- [ ] `view-metrics`: modal/página con stats (sesiones, ingresos, rating) del tarotista.
+- [ ] Reemplazar `toast.info('próximamente')` en `TarotistasManagementContent.tsx:84-94`.
+
+**Agenda — Eliminar hardcode (ex T-BUG-013):**
+
+- [ ] Determinar fuente de verdad: ¿`/tarotistas?primary=true` o un endpoint nuevo `/tarotistas/principal`?
+- [ ] Reemplazar el `const FLAVIA_TAROTISTA_ID = 1` por un hook `usePrimaryTarotista()` o equivalente.
+- [ ] Manejar estado de loading/error (skeleton en la agenda mientras se resuelve el ID).
+
+**Tests:**
+
+- [ ] Tests del dashboard, modal/acciones de tarotistas y nuevo hook `usePrimaryTarotista`.
+
 #### 📁 Archivos
 
 - `frontend/src/types/admin.types.ts`
 - `frontend/src/lib/utils/dashboard-utils.ts`
 - `frontend/src/app/admin/page.tsx`
 - `frontend/src/app/admin/page.test.tsx`
+- `frontend/src/components/features/admin/TarotistasManagementContent.tsx`
+- `frontend/src/components/features/admin/TarotistaConfigModal.tsx` (nuevo)
+- `frontend/src/app/admin/tarotistas/[id]/page.tsx` (nuevo si se elige ruta dedicada)
+- `frontend/src/components/features/admin/AgendaManagementContent.tsx`
+- `frontend/src/hooks/api/useTarotistas.ts` (posible nuevo hook)
 
 ---
 
-### T-BUG-008: Actualizar Pricing Table de IA + Recalcular Históricos
+### T-BUG-008 (consolidada): AI Usage — Pricing real + tipos + filtros end-to-end
 
-**Prioridad:** 🔴 Crítica · **Estimación:** 3 pts · **Cubre BUG:** BUG-008
+**Prioridad:** 🔴 Crítica · **Estimación:** 6 pts · **Cubre BUGs:** BUG-008, BUG-009, BUG-014
+**Consolida:** T-BUG-008 (original) + T-BUG-009 + T-BUG-014
 
 #### ✅ Tareas
+
+**Backend — Pricing (ex T-BUG-008):**
 
 - [ ] Investigar y documentar pricing por proveedor/modelo (Groq, Gemini, DeepSeek, OpenAI). Para Groq y Gemini: confirmar si el plan actual es free tier (entonces $0 es correcto y solo cambia la presentación).
 - [ ] Actualizar `COST_PER_MILLION_TOKENS` en `backend/tarot-app/src/modules/ai-usage/ai-usage.service.ts:39-44` con los valores reales.
-- [ ] Si los proveedores principales son free tier: agregar copy en el panel admin que aclare "Costo $0 porque Groq/Gemini en free tier" para evitar confusión.
 - [ ] (Opcional fase 2) Migration que recalcule `costUsd` de logs históricos.
-- [ ] Tests unitarios del cálculo.
 
-#### 📁 Archivos
+**Backend — Filtros + daily limit (ex T-BUG-014, parte BE):**
 
-- `backend/tarot-app/src/modules/ai-usage/ai-usage.service.ts`
-- `backend/tarot-app/src/modules/ai-usage/ai-usage.service.spec.ts`
-- `backend/tarot-app/src/database/migrations/` (si fase 2)
+- [ ] Verificar/agregar params `startDate`/`endDate` en el endpoint de AI Usage si no existen.
+- [ ] Exponer `dailyLimit` por proveedor en el DTO (o vía `/admin/config/thresholds`).
 
----
-
-### T-BUG-009: Alinear Tipos Frontend de AI Usage con DTOs Backend
-
-**Prioridad:** 🟠 Alta · **Estimación:** 1 pt · **Cubre BUG:** BUG-009
-
-#### ✅ Tareas
+**Frontend — Tipos (ex T-BUG-009):**
 
 - [ ] En `frontend/src/types/admin.types.ts`:
   - Cambiar `provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK'` por `provider: 'groq' | 'openai' | 'deepseek' | 'gemini'` (lowercase + incluir gemini).
   - Renombrar `aiCostsPerDay → costsPerDay`.
   - Cualquier comparación en componentes que use uppercase debe actualizarse.
 - [ ] Crear helper `getProviderLabel(provider): string` para renderizar capitalizado (`'Groq'`, `'Gemini'`, etc.).
+
+**Frontend — Filtros (ex T-BUG-014, parte FE):**
+
+- [ ] Agregar `DateRangePicker` (presets: hoy, 7d, 30d, custom) en `AIUsageContent.tsx`.
+- [ ] Pasar `startDate/endDate` al hook `useAIUsageStats({ startDate, endDate })`.
+- [ ] En `AIUsageMetricsCards.tsx:14` eliminar `GROQ_DAILY_LIMIT = 14400` y consumirlo del DTO backend.
+
+**Copy & tests:**
+
+- [ ] Si Groq/Gemini son free tier: agregar copy en el panel admin que aclare "Costo $0 porque Groq/Gemini en free tier" para evitar confusión.
+- [ ] Tests unitarios del cálculo de pricing.
 - [ ] Tests de la tabla de proveedores con todos los providers.
+- [ ] Tests del filtro de fechas.
 
 #### 📁 Archivos
 
+- `backend/tarot-app/src/modules/ai-usage/ai-usage.service.ts`
+- `backend/tarot-app/src/modules/ai-usage/ai-usage.service.spec.ts`
+- `backend/tarot-app/src/database/migrations/` (si fase 2)
 - `frontend/src/types/admin.types.ts`
 - `frontend/src/components/features/admin/AIProvidersTable.tsx`
 - `frontend/src/components/features/admin/AIUsageMetricsCards.tsx`
+- `frontend/src/components/features/admin/AIUsageContent.tsx`
+- `frontend/src/hooks/queries/useAdminAIUsage.ts`
 
 ---
 
-### T-BUG-010-A: Implementar "Desbloquear IP"
+### T-BUG-010-A (consolidada): Admin Seguridad — IP blocks persistidos + acciones + audit
 
-**Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Cubre BUG:** BUG-010 (parte 1)
+**Prioridad:** 🟠 Alta · **Estimación:** 7.5 pts · **Cubre BUGs:** BUG-010 (parte 1), BUG-011, BUG-012, BUG-015
+**Consolida:** T-BUG-010-A (original) + T-BUG-011 + T-BUG-012 + T-BUG-015
+
+> **Orden interno recomendado:** primero T-BUG-012 (persistir IP blocks), luego T-BUG-010-A (desbloquear IP), después T-BUG-011 y T-BUG-015 (independientes). T-BUG-010-A depende del repo persistido.
 
 #### ✅ Tareas
 
-**Backend:**
+**Backend — Persistir IP blocks (ex T-BUG-012):**
+
+**Decisión de infra (en el PR):** Redis vs PostgreSQL. Si no hay Redis disponible, usar tabla.
+
+- [ ] Crear migración: tabla `ip_blocks { id, ip, blocked_until, reason, created_at }`.
+- [ ] Crear entidad y repositorio (`IIpBlockRepository`, `TypeOrmIpBlockRepository`).
+- [ ] Refactor `IpBlockingService` para usar el repo en lugar de `Map` en memoria.
+- [ ] Job/lógica que limpie bloqueos expirados (`blocked_until < now`).
+- [ ] Validar que en multi-instancia el bloqueo es consistente.
+
+**Backend — Desbloquear IP (ex T-BUG-010-A, parte BE):**
 
 - [ ] Crear endpoint `DELETE /admin/security/block-ip/:ip` (autenticado + AdminGuard).
-- [ ] Lógica en `IpBlockingService.unblockIp(ip)` (depende de T-BUG-012 si se persiste en BD).
+- [ ] Lógica en `IpBlockingService.unblockIp(ip)` (usando el repo persistido).
 - [ ] Tests del controller y el service.
 
-**Frontend:**
+**Backend — Audit Logs contrato (ex T-BUG-015, parte BE):**
+
+- [ ] Refactor de `audit-log.service.ts:17-20`: devolver `{ data: AuditLog[], meta: { page, limit, totalItems, totalPages } }`.
+- [ ] Actualizar el controller y los tipos del controller-spec.
+- [ ] Tests de paginación.
+
+**Frontend — Desbloquear IP (ex T-BUG-010-A, parte FE):**
 
 - [ ] En `RateLimitingTab.tsx:47-53`, reemplazar `toast.info` por mutation real que llame al nuevo endpoint.
 - [ ] Invalidar la query del listado de IPs bloqueadas tras éxito.
 - [ ] Toast de éxito/error y actualizar UI optimista.
+- [ ] Agregar `ADMIN.UNBLOCK_IP` en `frontend/src/lib/api/endpoints.ts`.
+
+**Frontend — Fix SelectItem (ex T-BUG-011):**
+
+- [ ] En `frontend/src/components/features/admin/SecurityEventsTab.tsx:117,149` cambiar `value=""` por `value="all"`.
+- [ ] En el handler de filtros, tratar `"all"` como "sin filtro" (no enviar el param al backend).
+- [ ] Test que verifique que la tab renderiza sin errores y los filtros operan.
+
+**Frontend — Audit Logs (ex T-BUG-015, parte FE):**
+
+- [ ] Adaptar componente y hooks a la nueva respuesta `{ data, meta }`.
 
 #### 📁 Archivos
 
-- `backend/tarot-app/src/modules/admin/infrastructure/controllers/admin-security.controller.ts` (o donde esté el módulo)
+- `backend/tarot-app/src/database/migrations/<timestamp>-CreateIpBlocks.ts` (nuevo)
 - `backend/tarot-app/src/common/services/ip-blocking.service.ts`
+- `backend/tarot-app/src/common/entities/ip-block.entity.ts` (nuevo)
+- `backend/tarot-app/src/common/repositories/typeorm-ip-block.repository.ts` (nuevo)
+- `backend/tarot-app/src/modules/admin/infrastructure/controllers/admin-security.controller.ts` (o donde esté el módulo)
+- `backend/tarot-app/src/modules/audit/audit-log.service.ts`
+- `backend/tarot-app/src/modules/audit/infrastructure/controllers/audit-log.controller.ts`
 - `frontend/src/components/features/admin/RateLimitingTab.tsx`
-- `frontend/src/lib/api/endpoints.ts` (agregar `ADMIN.UNBLOCK_IP`)
+- `frontend/src/components/features/admin/SecurityEventsTab.tsx`
+- `frontend/src/components/features/admin/AuditLogsTable.tsx` (o equivalente)
+- `frontend/src/hooks/api/useAuditLogs.ts`
+- `frontend/src/lib/api/endpoints.ts`
 
 ---
 
 ### T-BUG-010-B: Implementar "Gestionar Roles" en Usuarios Admin
 
 **Prioridad:** 🟠 Alta · **Estimación:** 3 pts · **Cubre BUG:** BUG-010 (parte 2)
+
+> Mantenida sin consolidar: agrega un modal nuevo con flujo de diff y confirmaciones — alcance independiente del resto del admin FE. No tiene sentido mezclarla con T-BUG-007-B.
 
 #### ✅ Tareas
 
@@ -1113,158 +1192,51 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 ---
 
-### T-BUG-010-C: Implementar Acciones de Tarotistas
-
-**Prioridad:** 🟡 Media · **Estimación:** 3 pts · **Cubre BUG:** BUG-010 (parte 3)
-
-#### ✅ Tareas
-
-- [ ] `view-profile`: navegar a `/admin/tarotistas/[id]` o abrir modal con datos del tarotista (definir con producto).
-- [ ] `edit-config`: modal o página `/admin/tarotistas/[id]/configuracion` que use `TAROTISTA_CONFIG` ya existente.
-- [ ] `view-metrics`: modal/página con stats (sesiones, ingresos, rating) del tarotista.
-- [ ] Reemplazar `toast.info('próximamente')` en `TarotistasManagementContent.tsx:84-94`.
-- [ ] Tests.
-
-#### 📁 Archivos
-
-- `frontend/src/components/features/admin/TarotistasManagementContent.tsx`
-- `frontend/src/components/features/admin/TarotistaConfigModal.tsx` (nuevo)
-- `frontend/src/app/admin/tarotistas/[id]/page.tsx` (nuevo si se elige ruta dedicada)
-
----
-
-### T-BUG-011: Fix `SelectItem value=""` en `SecurityEventsTab`
-
-**Prioridad:** 🔴 Crítica · **Estimación:** 0.5 pt · **Cubre BUG:** BUG-011
-
-#### ✅ Tareas
-
-- [ ] En `frontend/src/components/features/admin/SecurityEventsTab.tsx:117,149` cambiar `value=""` por `value="all"`.
-- [ ] En el handler de filtros, tratar `"all"` como "sin filtro" (no enviar el param al backend).
-- [ ] Test que verifique que la tab renderiza sin errores y los filtros operan.
-
-#### 📁 Archivos
-
-- `frontend/src/components/features/admin/SecurityEventsTab.tsx`
-
----
-
-### T-BUG-012: Persistir Rate-Limit / IP Blocks Fuera de Memoria
-
-**Prioridad:** 🟠 Alta · **Estimación:** 3 pts · **Cubre BUG:** BUG-012
-
-#### ✅ Tareas
-
-**Decisión de infra (en el PR):** Redis vs PostgreSQL. Si no hay Redis disponible, usar tabla.
-
-- [ ] Crear migración: tabla `ip_blocks { id, ip, blocked_until, reason, created_at }`.
-- [ ] Crear entidad y repositorio (`IIpBlockRepository`, `TypeOrmIpBlockRepository`).
-- [ ] Refactor `IpBlockingService` para usar el repo en lugar de `Map` en memoria.
-- [ ] Job/lógica que limpie bloqueos expirados (`blocked_until < now`).
-- [ ] Tests del service + repo.
-- [ ] Validar que en multi-instancia el bloqueo es consistente.
-
-#### 📁 Archivos
-
-- `backend/tarot-app/src/database/migrations/<timestamp>-CreateIpBlocks.ts` (nuevo)
-- `backend/tarot-app/src/common/services/ip-blocking.service.ts`
-- `backend/tarot-app/src/common/entities/ip-block.entity.ts` (nuevo)
-- `backend/tarot-app/src/common/repositories/typeorm-ip-block.repository.ts` (nuevo)
-
----
-
-### T-BUG-013: Eliminar `FLAVIA_TAROTISTA_ID` Hardcoded en Agenda Admin
-
-**Prioridad:** 🟡 Media · **Estimación:** 1 pt · **Cubre BUG:** BUG-013
-
-#### ✅ Tareas
-
-- [ ] Determinar fuente de verdad: ¿`/tarotistas?primary=true` o un endpoint nuevo `/tarotistas/principal`?
-- [ ] Reemplazar el `const FLAVIA_TAROTISTA_ID = 1` por un hook `usePrimaryTarotista()` o equivalente.
-- [ ] Manejar estado de loading/error (skeleton en la agenda mientras se resuelve el ID).
-- [ ] Tests del nuevo flujo.
-
-#### 📁 Archivos
-
-- `frontend/src/components/features/admin/AgendaManagementContent.tsx`
-- `frontend/src/hooks/api/useTarotistas.ts` (posible nuevo hook)
-
----
-
-### T-BUG-014: Date Range Picker en AI Usage + Centralizar Daily Limit
-
-**Prioridad:** 🟡 Media · **Estimación:** 2 pts · **Cubre BUG:** BUG-014
-
-#### ✅ Tareas
-
-- [ ] Agregar `DateRangePicker` (presets: hoy, 7d, 30d, custom) en `AIUsageContent.tsx`.
-- [ ] Pasar `startDate/endDate` al hook `useAIUsageStats({ startDate, endDate })`.
-- [ ] Verificar que el endpoint backend ya acepta esos params; si no, agregarlos.
-- [ ] En `AIUsageMetricsCards.tsx:14` eliminar `GROQ_DAILY_LIMIT = 14400` y consumirlo del DTO backend (o desde un endpoint `/admin/config/thresholds`).
-- [ ] Tests.
-
-#### 📁 Archivos
-
-- `frontend/src/components/features/admin/AIUsageContent.tsx`
-- `frontend/src/components/features/admin/AIUsageMetricsCards.tsx`
-- `frontend/src/hooks/queries/useAdminAIUsage.ts`
-
----
-
-### T-BUG-015: Migrar Audit Logs al Contrato Estándar `{ data, meta }`
-
-**Prioridad:** 🟡 Media · **Estimación:** 2 pts · **Cubre BUG:** BUG-015
-
-#### ✅ Tareas
-
-- [ ] Refactor de `audit-log.service.ts:17-20`: devolver `{ data: AuditLog[], meta: { page, limit, totalItems, totalPages } }`.
-- [ ] Actualizar el controller y los tipos del controller-spec.
-- [ ] Frontend de audit logs adaptado a la nueva respuesta.
-- [ ] Tests de paginación.
-
-#### 📁 Archivos
-
-- `backend/tarot-app/src/modules/audit/audit-log.service.ts`
-- `backend/tarot-app/src/modules/audit/infrastructure/controllers/audit-log.controller.ts`
-- `frontend/src/components/features/admin/AuditLogsTable.tsx` (o equivalente)
-- `frontend/src/hooks/api/useAuditLogs.ts`
-
----
-
 ## ORDEN DE EJECUCIÓN SUGERIDO
+
+> Reordenado según la consolidación 2026-05-18 (T-BUG-007-B/008/010-A absorben tareas previas; ver nota en cada tarea).
 
 **Sprint 1 — Críticos que rompen funcionalidad básica:**
 
-1. **T-BUG-005** (0.5 pt — desbloquea desarrollo local con credenciales correctas).
-2. **T-BUG-011** (0.5 pt — fix mínimo, evita crash de Security Events).
-3. **T-BUG-006** (1 pt — elimina 404 en sidebar admin).
-4. **T-BUG-004** (3 pts — sin esto, mobile no puede navegar).
-5. **T-BUG-003-A** (3 pts — afecta a todos los usuarios con compras).
-6. **T-BUG-001-A** (5 pts — completa los horóscopos faltantes).
+1. **T-BUG-005** (0.5 pt — desbloquea desarrollo local con credenciales correctas). ✅ _completada_
+2. **T-BUG-006** (1 pt — elimina 404 en sidebar admin). ✅ _completada_
+3. **T-BUG-004** (3 pts — sin esto, mobile no puede navegar).
+4. **T-BUG-003-A** (3 pts — afecta a todos los usuarios con compras).
+5. **T-BUG-001-A** (5 pts — completa los horóscopos faltantes).
+
+> Nota: T-BUG-011 (fix `SelectItem` crítico) fue absorbido por **T-BUG-010-A (consolidada)**. Si se necesita el fix urgente y aislado, se puede extraer como hotfix antes del bloque consolidado.
 
 **Sprint 2 — Admin panel utilizable:**
 
-7. **T-BUG-007-A + T-BUG-007-B** (5 pts — dashboard con datos reales).
-8. **T-BUG-008** (3 pts — costos de IA correctos).
-9. **T-BUG-009** (1 pt — tipos alineados, prerequisito para tareas siguientes de AI Usage).
-10. **T-BUG-010-A** (2 pts — desbloquear IP funcional).
-11. **T-BUG-010-B** (3 pts — gestión de roles).
-12. **T-BUG-001-B** (3 pts — UI admin para horóscopos chinos).
+6. **T-BUG-007-A** (3 pts — backend dashboard stats reales). ✅ _completada_
+7. **T-BUG-007-B (consolidada)** (6 pts — Admin FE: dashboard sin mocks + acciones tarotistas + agenda sin hardcode).
+8. **T-BUG-008 (consolidada)** (6 pts — AI Usage end-to-end: pricing real + tipos lowercase + date range + daily limit).
+9. **T-BUG-010-A (consolidada)** (7.5 pts — Seguridad admin: IP blocks persistidos + desbloqueo + fix SelectItem + audit logs `{data,meta}`).
+10. **T-BUG-010-B** (3 pts — gestión de roles).
+11. **T-BUG-001-B** (3 pts — UI admin para horóscopos chinos).
 
 **Sprint 3 — Robustez y deuda técnica:**
 
-13. **T-BUG-012** (3 pts — persistencia de rate-limit).
-14. **T-BUG-010-C** (3 pts — acciones de tarotistas).
-15. **T-BUG-014** (2 pts — date range + daily limit centralizado).
-16. **T-BUG-015** (2 pts — contrato de paginación de audit).
-17. **T-BUG-002** (2 pts — compactar footer).
-18. **T-BUG-013** (1 pt — tarotistaId hardcoded).
-19. **T-BUG-001-C** (1 pt — UX 404 horóscopo chino).
-20. **T-BUG-003-C** (2 pts — filtros + eliminar en Mis Servicios).
+12. **T-BUG-002** (2 pts — compactar footer).
+13. **T-BUG-001-C** (1 pt — UX 404 horóscopo chino).
+14. **T-BUG-003-C** (2 pts — filtros + eliminar en Mis Servicios).
 
 **Backlog futuro / opcional:**
 
 - **T-BUG-003-B** (3 pts — solo si producto decide persistir el estado expired en BD).
+
+---
+
+### Mapeo de consolidación 2026-05-18
+
+| Tarea consolidada | Absorbe | Pts | Tipo |
+|---|---|---|---|
+| **T-BUG-007-B** | T-BUG-007-B + T-BUG-010-C + T-BUG-013 | 6 | FE only |
+| **T-BUG-008** | T-BUG-008 + T-BUG-009 + T-BUG-014 | 6 | BE + FE |
+| **T-BUG-010-A** | T-BUG-010-A + T-BUG-011 + T-BUG-012 + T-BUG-015 | 7.5 | BE + FE |
+| **T-BUG-010-B** | _(sin cambios)_ | 3 | FE only |
+
+**Reducción:** 11 tareas → 4 tareas (mismos 22.5 pts, sin descartar alcance). Ahorro estimado: ~7 ciclos de CI (~3.5 h por sprint).
 
 ---
 
