@@ -93,25 +93,61 @@ describe('AIUsageMetricsCards', () => {
     expect(screen.getByText('$0.1690')).toBeInTheDocument();
   });
 
-  it('should show free tier note when freeProviders are present', () => {
+  it('should show free tier note only for providers active in statistics that are free tier', () => {
+    // mockStats has groq in statistics and freeProviders=['groq','gemini']
+    // Only groq is active → note shows "Groq" but not "Gemini" (not in statistics)
     render(<AIUsageMetricsCards stats={mockStats} />);
 
     const freeTierNote = screen.getByTestId('free-tier-note');
     expect(freeTierNote).toBeInTheDocument();
     expect(freeTierNote).toHaveTextContent(/Groq/i);
-    expect(freeTierNote).toHaveTextContent(/Gemini/i);
+    // Gemini is in freeProviders but NOT active in statistics → must not appear
+    expect(freeTierNote).not.toHaveTextContent(/Gemini/i);
   });
 
-  it('should NOT show free tier note when freeProviders list is empty', () => {
-    const statsNoPaidTier: AIUsageStats = {
+  it('should NOT show free tier note when statistics is empty (no active providers)', () => {
+    // Backend always sends freeProviders as a constant, but if there are no
+    // active providers in statistics the note must be hidden.
+    const statsNoData: AIUsageStats = {
       ...mockStats,
-      freeProviders: [],
+      statistics: [],
+      freeProviders: ['groq', 'gemini'], // backend constant, but no activity
     };
 
-    render(<AIUsageMetricsCards stats={statsNoPaidTier} />);
+    render(<AIUsageMetricsCards stats={statsNoData} />);
 
     expect(screen.queryByTestId('free-tier-note')).not.toBeInTheDocument();
     expect(screen.getByText('USD')).toBeInTheDocument();
+  });
+
+  it('should NOT show free tier note when active providers are all paid', () => {
+    // openai is not in freeProviders=['groq','gemini']
+    const statsOnlyPaid: AIUsageStats = {
+      ...mockStats,
+      statistics: [mockStats.statistics[1]], // only openai
+      freeProviders: ['groq', 'gemini'],
+    };
+
+    render(<AIUsageMetricsCards stats={statsOnlyPaid} />);
+
+    expect(screen.queryByTestId('free-tier-note')).not.toBeInTheDocument();
+    expect(screen.getByText('USD')).toBeInTheDocument();
+  });
+
+  it('should show partial free tier note when mix of free and paid providers are active', () => {
+    // groq (free) + openai (paid) both active
+    const statsMixed: AIUsageStats = {
+      ...mockStats,
+      statistics: [mockStats.statistics[0], mockStats.statistics[1]],
+      freeProviders: ['groq', 'gemini'],
+    };
+
+    render(<AIUsageMetricsCards stats={statsMixed} />);
+
+    // Note is shown (has active free providers), but NOT the "all free" branch
+    const freeTierNote = screen.getByTestId('free-tier-note');
+    expect(freeTierNote).toBeInTheDocument();
+    expect(freeTierNote).toHaveTextContent(/Groq/i);
   });
 
   it('should calculate and display success rate correctly', () => {
@@ -169,7 +205,7 @@ describe('AIUsageMetricsCards', () => {
     expect(successCard).toBeInTheDocument();
   });
 
-  it('should handle empty statistics', () => {
+  it('should handle empty statistics (zeros, no free tier note)', () => {
     const emptyStats: AIUsageStats = {
       statistics: [],
       groqCallsToday: 0,
@@ -178,7 +214,7 @@ describe('AIUsageMetricsCards', () => {
       highErrorRateAlert: false,
       highFallbackRateAlert: false,
       highDailyCostAlert: false,
-      freeProviders: [],
+      freeProviders: ['groq', 'gemini'], // backend sends this even with no data
     };
 
     render(<AIUsageMetricsCards stats={emptyStats} />);
@@ -186,5 +222,7 @@ describe('AIUsageMetricsCards', () => {
     // Should show zeros
     expect(screen.getByText('$0.0000')).toBeInTheDocument();
     expect(screen.getByText('0.00%')).toBeInTheDocument();
+    // No active providers → no free tier note
+    expect(screen.queryByTestId('free-tier-note')).not.toBeInTheDocument();
   });
 });

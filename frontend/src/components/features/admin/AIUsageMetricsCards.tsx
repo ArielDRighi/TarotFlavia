@@ -32,15 +32,17 @@ export function AIUsageMetricsCards({ stats }: AIUsageMetricsCardsProps) {
   // Groq daily limit comes from the backend DTO
   const groqDailyLimit = stats.groqDailyLimit;
 
-  // Free tier note: if all cost is $0 because all active providers are free tier
-  const allFreeProviders =
-    stats.freeProviders.length > 0 &&
-    stats.statistics.every((s) => stats.freeProviders.includes(s.provider));
+  // Free tier note: only when there are active providers that are in the free tier list.
+  // Compute the intersection of active providers (from statistics) and freeProviders.
+  const activeProviders = stats.statistics.map((s) => s.provider);
+  const activeFreeProviders = activeProviders.filter((p) => stats.freeProviders.includes(p));
+  const hasActiveFreeProviders = activeFreeProviders.length > 0;
+  const allActiveAreFree =
+    hasActiveFreeProviders && activeProviders.every((p) => stats.freeProviders.includes(p));
 
-  const freeTierLabel =
-    stats.freeProviders.length > 0
-      ? `Free tier: ${stats.freeProviders.map(getProviderLabel).join(', ')}`
-      : undefined;
+  const freeTierLabel = hasActiveFreeProviders
+    ? `Free tier: ${activeFreeProviders.map(getProviderLabel).join(', ')}`
+    : undefined;
 
   // Determine success rate color
   const getSuccessRateColor = (rate: number) => {
@@ -82,7 +84,7 @@ export function AIUsageMetricsCards({ stats }: AIUsageMetricsCardsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">${totalCost.toFixed(4)}</div>
-          {allFreeProviders && freeTierLabel ? (
+          {allActiveAreFree && freeTierLabel ? (
             <p className="text-muted-foreground text-xs" data-testid="free-tier-note">
               {freeTierLabel} — $0 es correcto
             </p>
