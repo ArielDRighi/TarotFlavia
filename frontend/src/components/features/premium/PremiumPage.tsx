@@ -132,9 +132,7 @@ function PremiumCtaButton({ premiumPlan, testId }: PremiumCtaButtonProps) {
     >
       {isPending ? 'Redirigiendo...' : CTA_PREMIUM.PURCHASE}
       {premiumPlan && !isPending && (
-        <span className="ml-2 text-sm opacity-80">
-          {formatPriceArs(premiumPlan.price)}/mes
-        </span>
+        <span className="ml-2 text-sm opacity-80">{formatPriceArs(premiumPlan.price)}/mes</span>
       )}
     </Button>
   );

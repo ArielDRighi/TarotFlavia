@@ -83,10 +83,7 @@ export function SecurityEventsTab() {
 
   if (isError) {
     return (
-      <ErrorDisplay
-        message="Error al cargar eventos de seguridad"
-        onRetry={() => void refetch()}
-      />
+      <ErrorDisplay message="Error al cargar eventos de seguridad" onRetry={() => void refetch()} />
     );
   }
 

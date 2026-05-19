@@ -43,24 +43,16 @@ export function transformStatsToMetrics(stats: StatsResponseDto) {
     ),
   };
 
-  // Active Tarotistas (mock - backend no tiene este dato aún)
+  // Active Tarotistas (dato real del backend: Tarotista.isActive = true)
   const activeTarotistas: DashboardMetric = {
-    value: 25,
+    value: stats.activeTarotistas,
     change: 0,
     trend: 'stable',
-  };
-
-  // Monthly Revenue (calculado desde AI costs - aproximación)
-  const monthlyRevenue: DashboardMetric = {
-    value: stats.openai.totalCost * 10, // Factor aproximado
-    change: 8,
-    trend: 'up',
   };
 
   return {
     totalUsers,
     monthlyReadings,
     activeTarotistas,
-    monthlyRevenue,
   };
 }

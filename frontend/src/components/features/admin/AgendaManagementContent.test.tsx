@@ -12,6 +12,10 @@ vi.mock('@/hooks/api/useAdminScheduling', () => ({
   useRemoveBlockedDate: vi.fn(),
 }));
 
+vi.mock('@/hooks/api/usePrimaryTarotista', () => ({
+  usePrimaryTarotista: vi.fn(),
+}));
+
 import {
   useAdminWeeklyAvailability,
   useAdminBlockedDates,
@@ -20,6 +24,7 @@ import {
   useAddBlockedDate,
   useRemoveBlockedDate,
 } from '@/hooks/api/useAdminScheduling';
+import { usePrimaryTarotista } from '@/hooks/api/usePrimaryTarotista';
 import { AgendaManagementContent } from './AgendaManagementContent';
 import { DayOfWeek, ExceptionType } from '@/types';
 import type { TarotistAvailability, TarotistException } from '@/types';
@@ -55,6 +60,15 @@ const mutationMock = { mutate: vi.fn(), isPending: false };
 describe('AgendaManagementContent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Por defecto: tarotista primario resuelto con ID 1
+    vi.mocked(usePrimaryTarotista).mockReturnValue({
+      primaryTarotistaId: 1,
+      primaryTarotista: undefined,
+      isLoading: false,
+      isError: false,
+      isSuccess: true,
+    } as ReturnType<typeof usePrimaryTarotista>);
 
     vi.mocked(useAdminWeeklyAvailability).mockReturnValue({
       data: mockAvailability,
@@ -143,5 +157,35 @@ describe('AgendaManagementContent', () => {
     await userEvent.click(screen.getByRole('tab', { name: /fechas bloqueadas/i }));
     await userEvent.click(screen.getByRole('button', { name: /agregar fecha bloqueada/i }));
     expect(screen.getByTestId('add-blocked-date-form')).toBeInTheDocument();
+  });
+
+  describe('usePrimaryTarotista — sin hardcode', () => {
+    it('debe mostrar skeleton mientras se resuelve el tarotista primario', () => {
+      vi.mocked(usePrimaryTarotista).mockReturnValue({
+        primaryTarotistaId: undefined,
+        primaryTarotista: undefined,
+        isLoading: true,
+        isError: false,
+        isSuccess: false,
+      } as ReturnType<typeof usePrimaryTarotista>);
+
+      render(<AgendaManagementContent />);
+      expect(screen.getByTestId('primary-tarotista-loading')).toBeInTheDocument();
+    });
+
+    it('debe pasar el ID correcto del hook a las queries de scheduling', () => {
+      vi.mocked(usePrimaryTarotista).mockReturnValue({
+        primaryTarotistaId: 7,
+        primaryTarotista: undefined,
+        isLoading: false,
+        isError: false,
+        isSuccess: true,
+      } as ReturnType<typeof usePrimaryTarotista>);
+
+      render(<AgendaManagementContent />);
+
+      // Verificar que useAdminWeeklyAvailability fue llamado con el ID del hook (7), no con 1
+      expect(useAdminWeeklyAvailability).toHaveBeenCalledWith(7);
+    });
   });
 });

@@ -24,7 +24,7 @@ import { transformStatsToMetrics } from '@/lib/utils/dashboard-utils';
 function StatsCardsSkeleton() {
   return (
     <>
-      {[1, 2, 3, 4].map((i) => (
+      {[1, 2, 3].map((i) => (
         <Skeleton key={i} className="h-32" />
       ))}
     </>
@@ -40,11 +40,11 @@ export default function AdminDashboardPage() {
       <h1 className="mb-8 font-serif text-3xl font-bold">Dashboard Admin</h1>
 
       {/* Cards de Métricas */}
-      <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {isLoadingStats ? (
           <StatsCardsSkeleton />
         ) : statsError ? (
-          <Alert variant="destructive" className="col-span-4">
+          <Alert variant="destructive" className="col-span-3">
             <AlertDescription>
               Error al cargar estadísticas. Por favor, intenta de nuevo.
             </AlertDescription>
@@ -65,12 +65,6 @@ export default function AdminDashboardPage() {
                     title="Tarotistas Activos"
                     metric={metrics.activeTarotistas}
                     icon="star"
-                  />
-                  <StatsCard
-                    title="Revenue del Mes"
-                    metric={metrics.monthlyRevenue}
-                    icon="dollar-sign"
-                    prefix="$"
                   />
                 </>
               );

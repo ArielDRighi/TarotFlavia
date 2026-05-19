@@ -1008,6 +1008,8 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 ### T-BUG-007-B (consolidada): Admin FE — Eliminar mocks + acciones placeholder
 
+**Estado:** ✅ COMPLETADA
+
 **Prioridad:** 🔴 Crítica · **Estimación:** 6 pts · **Dependencias:** T-BUG-007-A · **Cubre BUGs:** BUG-007 (FE), BUG-010 (parte 3), BUG-013
 **Consolida:** T-BUG-007-B (original) + T-BUG-010-C + T-BUG-013
 
@@ -1015,28 +1017,28 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 **Dashboard (ex T-BUG-007-B):**
 
-- [ ] En `frontend/src/types/admin.types.ts`: renombrar `totalCost → totalCostUsd`, agregar `recentReadings`, agregar `activeTarotistas`.
-- [ ] En `frontend/src/lib/utils/dashboard-utils.ts`:
+- [x] En `frontend/src/types/admin.types.ts`: renombrar `totalCost → totalCostUsd`, agregar `recentReadings`, agregar `activeTarotistas`.
+- [x] En `frontend/src/lib/utils/dashboard-utils.ts`:
   - Reemplazar `activeTarotistas.value = 25` por `stats.activeTarotistas`.
-  - Reemplazar `stats.openai.totalCost * 10` por la fórmula real de revenue (consultar con producto o quitar el card hasta tener fuente).
-- [ ] Tests del dashboard con stats mockeados (validar que no aparezca `NaN`).
+  - Reemplazar `stats.openai.totalCost * 10` → card `monthlyRevenue` eliminada (sin fuente real de revenue).
+- [x] Tests del dashboard con stats mockeados (validar que no aparezca `NaN`).
 
 **Tarotistas — Acciones (ex T-BUG-010-C):**
 
-- [ ] `view-profile`: navegar a `/admin/tarotistas/[id]` o abrir modal con datos del tarotista (definir con producto).
-- [ ] `edit-config`: modal o página `/admin/tarotistas/[id]/configuracion` que use `TAROTISTA_CONFIG` ya existente.
-- [ ] `view-metrics`: modal/página con stats (sesiones, ingresos, rating) del tarotista.
-- [ ] Reemplazar `toast.info('próximamente')` en `TarotistasManagementContent.tsx:84-94`.
+- [x] `view-profile`: navega a `/admin/tarotistas/[id]` vía `router.push`.
+- [x] `edit-config`: abre modal inline con navegación a `/admin/tarotistas/[id]/configuracion`.
+- [x] `view-metrics`: abre modal inline con stats disponibles del tarotista.
+- [x] Reemplazar `toast.info('próximamente')` en `TarotistasManagementContent.tsx`.
 
 **Agenda — Eliminar hardcode (ex T-BUG-013):**
 
-- [ ] Determinar fuente de verdad: ¿`/tarotistas?primary=true` o un endpoint nuevo `/tarotistas/principal`?
-- [ ] Reemplazar el `const FLAVIA_TAROTISTA_ID = 1` por un hook `usePrimaryTarotista()` o equivalente.
-- [ ] Manejar estado de loading/error (skeleton en la agenda mientras se resuelve el ID).
+- [x] Determinar fuente de verdad: usa `useAdminTarotistas({ isActive: true, limit: 1 })` (endpoint existente).
+- [x] Reemplazar el `const FLAVIA_TAROTISTA_ID = 1` por hook `usePrimaryTarotista()`.
+- [x] Manejar estado de loading/error (skeleton `data-testid="primary-tarotista-loading"` + error state).
 
 **Tests:**
 
-- [ ] Tests del dashboard, modal/acciones de tarotistas y nuevo hook `usePrimaryTarotista`.
+- [x] Tests del dashboard, modal/acciones de tarotistas y nuevo hook `usePrimaryTarotista`.
 
 #### 📁 Archivos
 

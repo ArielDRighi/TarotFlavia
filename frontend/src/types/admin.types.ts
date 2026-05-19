@@ -52,7 +52,7 @@ export interface AICostPerDayDto {
 
 export interface OpenAIStatsDto {
   totalPrompts: number;
-  totalCost: number;
+  totalCostUsd: number;
   aiCostsPerDay: AICostPerDayDto[];
 }
 
@@ -82,6 +82,7 @@ export interface StatsResponseDto {
   openai: OpenAIStatsDto;
   questions: QuestionStatsDto;
   recentReadings: RecentReadingDto[]; // Agregar lecturas recientes del backend
+  activeTarotistas: number; // Número de tarotistas activos (Tarotista.isActive = true)
 }
 
 // --- /admin/dashboard/charts ---
