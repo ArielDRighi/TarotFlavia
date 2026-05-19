@@ -157,19 +157,19 @@ export function AgendaManagementContent() {
     data: availability,
     isLoading: availabilityLoading,
     error: availabilityError,
-  } = useAdminWeeklyAvailability(primaryTarotistaId as number);
+  } = useAdminWeeklyAvailability(primaryTarotistaId);
 
   const {
     data: exceptions,
     isLoading: exceptionsLoading,
     error: exceptionsError,
-  } = useAdminBlockedDates(primaryTarotistaId as number);
+  } = useAdminBlockedDates(primaryTarotistaId);
 
   // ---- Mutations ----
-  const setAvailabilityMutation = useSetWeeklyAvailability(primaryTarotistaId as number);
-  const removeAvailabilityMutation = useRemoveWeeklyAvailability(primaryTarotistaId as number);
-  const addBlockedDateMutation = useAddBlockedDate(primaryTarotistaId as number);
-  const removeBlockedDateMutation = useRemoveBlockedDate(primaryTarotistaId as number);
+  const setAvailabilityMutation = useSetWeeklyAvailability(primaryTarotistaId);
+  const removeAvailabilityMutation = useRemoveWeeklyAvailability(primaryTarotistaId);
+  const addBlockedDateMutation = useAddBlockedDate(primaryTarotistaId);
+  const removeBlockedDateMutation = useRemoveBlockedDate(primaryTarotistaId);
 
   // ---- Handlers: availability ----
   const handleAddAvailability = (day: DayOfWeek) => {

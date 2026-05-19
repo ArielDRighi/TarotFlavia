@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement, type ReactNode } from 'react';
 import { usePrimaryTarotista } from './usePrimaryTarotista';
 import { apiClient } from '@/lib/api/axios-config';
+import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type { AdminTarotistasResponse } from '@/types/admin-tarotistas.types';
 
 vi.mock('@/lib/api/axios-config', () => ({
@@ -91,7 +92,7 @@ describe('usePrimaryTarotista', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(mockApiClient.get).toHaveBeenCalledWith(
-      '/admin/tarotistas',
+      API_ENDPOINTS.ADMIN.TAROTISTAS,
       expect.objectContaining({
         params: expect.objectContaining({ isActive: true, limit: 1 }),
       })

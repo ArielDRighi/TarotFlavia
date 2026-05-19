@@ -4,7 +4,7 @@
  * TDD - T-BUG-007-B: Dashboard sin mocks
  * Valida que transformStatsToMetrics use datos reales del backend:
  * - activeTarotistas desde stats.activeTarotistas (no hardcodeado a 25)
- * - monthlyRevenue no usa totalCost * 10 (campo renombrado a totalCostUsd y revenue se elimina)
+ * - monthlyRevenue eliminada (no hay fuente real de revenue; se retornan 3 métricas)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -110,7 +110,7 @@ describe('transformStatsToMetrics', () => {
   });
 
   describe('retorno completo', () => {
-    it('debe retornar las cuatro métricas esperadas', () => {
+    it('debe retornar las tres métricas esperadas (totalUsers, monthlyReadings, activeTarotistas)', () => {
       const stats = buildMockStats();
       const metrics = transformStatsToMetrics(stats);
       expect(metrics).toHaveProperty('totalUsers');

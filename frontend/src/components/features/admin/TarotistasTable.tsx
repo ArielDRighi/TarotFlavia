@@ -115,7 +115,11 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 p-0"
+                      data-testid={`actions-menu-trigger-${tarotista.id}`}
+                    >
                       <span className="sr-only">Abrir menú</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
@@ -123,17 +127,24 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onAction('view-profile', tarotista)}>
+                    <DropdownMenuItem
+                      data-testid="action-view-profile"
+                      onClick={() => onAction('view-profile', tarotista)}
+                    >
                       <Eye className="mr-2 h-4 w-4" />
                       Ver perfil
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onAction('edit-config', tarotista)}>
+                    <DropdownMenuItem
+                      data-testid="action-edit-config"
+                      onClick={() => onAction('edit-config', tarotista)}
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       Editar configuración IA
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {tarotista.isActive ? (
                       <DropdownMenuItem
+                        data-testid="action-deactivate"
                         onClick={() => onAction('deactivate', tarotista)}
                         className="text-orange-600"
                       >
@@ -142,6 +153,7 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem
+                        data-testid="action-reactivate"
                         onClick={() => onAction('reactivate', tarotista)}
                         className="text-green-600"
                       >
@@ -149,7 +161,10 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
                         Reactivar
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={() => onAction('view-metrics', tarotista)}>
+                    <DropdownMenuItem
+                      data-testid="action-view-metrics"
+                      onClick={() => onAction('view-metrics', tarotista)}
+                    >
                       <BarChart3 className="mr-2 h-4 w-4" />
                       Ver métricas
                     </DropdownMenuItem>
