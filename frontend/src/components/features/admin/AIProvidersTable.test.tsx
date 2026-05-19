@@ -10,7 +10,7 @@ import type { AIProviderStats } from '@/types/admin.types';
 describe('AIProvidersTable', () => {
   const mockProviders: AIProviderStats[] = [
     {
-      provider: 'GROQ',
+      provider: 'groq',
       totalCalls: 100,
       successCalls: 95,
       errorCalls: 3,
@@ -23,7 +23,7 @@ describe('AIProvidersTable', () => {
       fallbackRate: 0.5,
     },
     {
-      provider: 'OPENAI',
+      provider: 'openai',
       totalCalls: 50,
       successCalls: 48,
       errorCalls: 1,
@@ -38,11 +38,128 @@ describe('AIProvidersTable', () => {
   ];
 
   describe('Rendering', () => {
-    it('should render table with provider data', () => {
+    it('should render table with provider labels (human-readable)', () => {
       render(<AIProvidersTable providers={mockProviders} />);
 
-      expect(screen.getByText('GROQ')).toBeInTheDocument();
-      expect(screen.getByText('OPENAI')).toBeInTheDocument();
+      expect(screen.getByText('Groq')).toBeInTheDocument();
+      expect(screen.getByText('OpenAI')).toBeInTheDocument();
+    });
+
+    it('should NOT render raw uppercase provider values', () => {
+      render(<AIProvidersTable providers={mockProviders} />);
+
+      expect(screen.queryByText('GROQ')).not.toBeInTheDocument();
+      expect(screen.queryByText('OPENAI')).not.toBeInTheDocument();
+    });
+
+    it('should render DeepSeek label for deepseek provider', () => {
+      const providers: AIProviderStats[] = [
+        {
+          provider: 'deepseek',
+          totalCalls: 20,
+          successCalls: 20,
+          errorCalls: 0,
+          cachedCalls: 0,
+          totalTokens: 10000,
+          totalCost: 0.002,
+          avgDuration: 800,
+          errorRate: 0.0,
+          cacheHitRate: 0.0,
+          fallbackRate: 0.0,
+        },
+      ];
+
+      render(<AIProvidersTable providers={providers} />);
+
+      expect(screen.getByText('DeepSeek')).toBeInTheDocument();
+      expect(screen.queryByText('DEEPSEEK')).not.toBeInTheDocument();
+    });
+
+    it('should render Gemini label for gemini provider', () => {
+      const providers: AIProviderStats[] = [
+        {
+          provider: 'gemini',
+          totalCalls: 30,
+          successCalls: 30,
+          errorCalls: 0,
+          cachedCalls: 0,
+          totalTokens: 15000,
+          totalCost: 0.0,
+          avgDuration: 600,
+          errorRate: 0.0,
+          cacheHitRate: 0.0,
+          fallbackRate: 0.0,
+        },
+      ];
+
+      render(<AIProvidersTable providers={providers} />);
+
+      expect(screen.getByText('Gemini')).toBeInTheDocument();
+      expect(screen.queryByText('GEMINI')).not.toBeInTheDocument();
+    });
+
+    it('should render all four providers at once', () => {
+      const allProviders: AIProviderStats[] = [
+        {
+          provider: 'groq',
+          totalCalls: 100,
+          successCalls: 95,
+          errorCalls: 5,
+          cachedCalls: 2,
+          totalTokens: 50000,
+          totalCost: 0.0,
+          avgDuration: 500,
+          errorRate: 5.0,
+          cacheHitRate: 2.0,
+          fallbackRate: 1.0,
+        },
+        {
+          provider: 'openai',
+          totalCalls: 50,
+          successCalls: 48,
+          errorCalls: 2,
+          cachedCalls: 1,
+          totalTokens: 20000,
+          totalCost: 0.015,
+          avgDuration: 800,
+          errorRate: 4.0,
+          cacheHitRate: 2.0,
+          fallbackRate: 0.5,
+        },
+        {
+          provider: 'deepseek',
+          totalCalls: 20,
+          successCalls: 20,
+          errorCalls: 0,
+          cachedCalls: 0,
+          totalTokens: 10000,
+          totalCost: 0.003,
+          avgDuration: 700,
+          errorRate: 0.0,
+          cacheHitRate: 0.0,
+          fallbackRate: 0.0,
+        },
+        {
+          provider: 'gemini',
+          totalCalls: 30,
+          successCalls: 30,
+          errorCalls: 0,
+          cachedCalls: 0,
+          totalTokens: 15000,
+          totalCost: 0.0,
+          avgDuration: 600,
+          errorRate: 0.0,
+          cacheHitRate: 0.0,
+          fallbackRate: 0.0,
+        },
+      ];
+
+      render(<AIProvidersTable providers={allProviders} />);
+
+      expect(screen.getByText('Groq')).toBeInTheDocument();
+      expect(screen.getByText('OpenAI')).toBeInTheDocument();
+      expect(screen.getByText('DeepSeek')).toBeInTheDocument();
+      expect(screen.getByText('Gemini')).toBeInTheDocument();
     });
 
     it('should render all column headers', () => {
@@ -63,7 +180,6 @@ describe('AIProvidersTable', () => {
     it('should render formatted numbers with locale', () => {
       render(<AIProvidersTable providers={mockProviders} />);
 
-      // Check for formatted numbers (with commas or periods depending on locale)
       expect(screen.getByText(/50[.,]000/)).toBeInTheDocument();
       expect(screen.getByText(/30[.,]000/)).toBeInTheDocument();
     });
@@ -78,8 +194,8 @@ describe('AIProvidersTable', () => {
     it('should render error rates with 2 decimals', () => {
       render(<AIProvidersTable providers={mockProviders} />);
 
-      // Should find 3.00% error rate for GROQ (not in totals footer)
-      const groqRow = screen.getByText('GROQ').closest('tr');
+      // Should find 3.00% error rate for Groq row
+      const groqRow = screen.getByText('Groq').closest('tr');
       expect(groqRow).toHaveTextContent('3.00%');
     });
   });
@@ -88,7 +204,7 @@ describe('AIProvidersTable', () => {
     it('should calculate total calls correctly', () => {
       render(<AIProvidersTable providers={mockProviders} />);
 
-      // 100 + 50 = 150 (find in footer)
+      // 100 + 50 = 150
       const footer = document.querySelector('tfoot');
       expect(footer).toHaveTextContent(/150/);
     });
@@ -157,7 +273,7 @@ describe('AIProvidersTable', () => {
     it('should handle zero totalCalls without division by zero', () => {
       const providersWithZero: AIProviderStats[] = [
         {
-          provider: 'GROQ',
+          provider: 'groq',
           totalCalls: 0,
           successCalls: 0,
           errorCalls: 0,
@@ -182,8 +298,8 @@ describe('AIProvidersTable', () => {
 
       render(<AIProvidersTable providers={singleProvider} />);
 
-      expect(screen.getByText('GROQ')).toBeInTheDocument();
-      expect(screen.queryByText('OPENAI')).not.toBeInTheDocument();
+      expect(screen.getByText('Groq')).toBeInTheDocument();
+      expect(screen.queryByText('OpenAI')).not.toBeInTheDocument();
     });
   });
 });

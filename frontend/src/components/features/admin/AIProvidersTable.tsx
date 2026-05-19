@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { getProviderLabel } from '@/lib/utils/ai-usage';
 import type { AIProviderStats } from '@/types/admin.types';
 
 interface AIProvidersTableProps {
@@ -67,7 +68,7 @@ export function AIProvidersTable({ providers }: AIProvidersTableProps) {
         <TableBody>
           {providers.map((provider) => (
             <TableRow key={provider.provider}>
-              <TableCell className="font-medium">{provider.provider}</TableCell>
+              <TableCell className="font-medium">{getProviderLabel(provider.provider)}</TableCell>
               <TableCell className="text-right">{provider.totalCalls.toLocaleString()}</TableCell>
               <TableCell className="text-right">{provider.successCalls.toLocaleString()}</TableCell>
               <TableCell className="text-right">{provider.errorCalls.toLocaleString()}</TableCell>

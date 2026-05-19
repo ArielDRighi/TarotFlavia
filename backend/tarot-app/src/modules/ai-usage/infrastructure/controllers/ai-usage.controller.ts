@@ -8,7 +8,11 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
-import { AIUsageService } from '../../ai-usage.service';
+import {
+  AIUsageService,
+  GROQ_DAILY_LIMIT,
+  FREE_TIER_PROVIDERS,
+} from '../../ai-usage.service';
 import { AIUsageStatsDto } from '../../application/dto/ai-usage-stats.dto';
 import { AIProvider } from '../../entities/ai-usage-log.entity';
 
@@ -70,6 +74,7 @@ export class AIUsageController {
     return {
       statistics,
       groqCallsToday,
+      groqDailyLimit: GROQ_DAILY_LIMIT,
       groqRateLimitAlert:
         await this.aiUsageService.shouldAlert('groqRateLimit'),
       highErrorRateAlert:
@@ -78,6 +83,7 @@ export class AIUsageController {
         await this.aiUsageService.shouldAlert('highFallbackRate'),
       highDailyCostAlert:
         await this.aiUsageService.shouldAlert('highDailyCost'),
+      freeProviders: FREE_TIER_PROVIDERS,
     };
   }
 }

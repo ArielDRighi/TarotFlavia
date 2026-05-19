@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AIUsageController } from './ai-usage.controller';
-import { AIUsageService } from '../../ai-usage.service';
+import {
+  AIUsageService,
+  GROQ_DAILY_LIMIT,
+  FREE_TIER_PROVIDERS,
+} from '../../ai-usage.service';
 import { AIProvider } from '../../entities/ai-usage-log.entity';
 
 describe('AIUsageController', () => {
@@ -90,10 +94,12 @@ describe('AIUsageController', () => {
       expect(result).toEqual({
         statistics: mockStatistics,
         groqCallsToday: 1200,
+        groqDailyLimit: GROQ_DAILY_LIMIT,
         groqRateLimitAlert: false,
         highErrorRateAlert: false,
         highFallbackRateAlert: false,
         highDailyCostAlert: false,
+        freeProviders: FREE_TIER_PROVIDERS,
       });
     });
 
@@ -126,6 +132,26 @@ describe('AIUsageController', () => {
       expect(result.highErrorRateAlert).toBe(false);
       expect(result.highFallbackRateAlert).toBe(true);
       expect(result.highDailyCostAlert).toBe(false);
+    });
+
+    it('should include groqDailyLimit from service constant', async () => {
+      mockAIUsageService.getStatistics.mockResolvedValue(mockStatistics);
+      mockAIUsageService.shouldAlert.mockResolvedValue(false);
+
+      const result = await controller.getStatistics();
+
+      expect(result.groqDailyLimit).toBe(GROQ_DAILY_LIMIT);
+    });
+
+    it('should include freeProviders list', async () => {
+      mockAIUsageService.getStatistics.mockResolvedValue(mockStatistics);
+      mockAIUsageService.shouldAlert.mockResolvedValue(false);
+
+      const result = await controller.getStatistics();
+
+      expect(result.freeProviders).toEqual(FREE_TIER_PROVIDERS);
+      expect(result.freeProviders).toContain('groq');
+      expect(result.freeProviders).toContain('gemini');
     });
 
     it('should handle empty statistics gracefully', async () => {

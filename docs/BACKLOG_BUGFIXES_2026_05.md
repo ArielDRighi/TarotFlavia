@@ -542,7 +542,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-006   | Crear página placeholder `/admin/lecturas` (o quitar del sidebar)          | Frontend    | ✅ COMPLETADA | 1 pt       |
 | T-BUG-007-A | Backend: extender `/admin/dashboard/stats` con `recentReadings` + counts reales | Backend  | ✅ COMPLETADA  | 3 pts      |
 | T-BUG-007-B | **Admin FE consolidada** — dashboard sin mocks + acciones tarotistas + agenda sin hardcode | Frontend    | 🔴 Crítica  | 6 pts ⬆️    |
-| T-BUG-008   | **AI Usage consolidada** — pricing real + tipos lowercase + date range + daily limit       | Full-stack  | 🔴 Crítica  | 6 pts ⬆️    |
+| T-BUG-008   | **AI Usage consolidada** — pricing real + tipos lowercase + date range + daily limit       | Full-stack  | ✅ COMPLETADA | 6 pts ⬆️    |
 | T-BUG-009   | _Absorbida por T-BUG-008 (consolidación 2026-05-18)_                                       | —           | —           | —          |
 | T-BUG-010-A | **Seguridad consolidada** — IP blocks persistidos + desbloqueo + fix SelectItem + audit `{data,meta}` | Full-stack | 🟠 Alta | 7.5 pts ⬆️  |
 | T-BUG-010-B | Implementar "Gestionar roles" en Usuarios admin                                            | Frontend    | 🟠 Alta     | 3 pts      |
@@ -1054,44 +1054,44 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 ---
 
-### T-BUG-008 (consolidada): AI Usage — Pricing real + tipos + filtros end-to-end
+ ### T-BUG-008 (consolidada): AI Usage — Pricing real + tipos + filtros end-to-end
 
-**Prioridad:** 🔴 Crítica · **Estimación:** 6 pts · **Cubre BUGs:** BUG-008, BUG-009, BUG-014
-**Consolida:** T-BUG-008 (original) + T-BUG-009 + T-BUG-014
+ **Prioridad:** 🔴 Crítica · **Estimación:** 6 pts · **Cubre BUGs:** BUG-008, BUG-009, BUG-014
+ **Consolida:** T-BUG-008 (original) + T-BUG-009 + T-BUG-014
+ **Estado:** ✅ COMPLETADA
 
-#### ✅ Tareas
+ #### ✅ Tareas
 
-**Backend — Pricing (ex T-BUG-008):**
+ **Backend — Pricing (ex T-BUG-008):**
 
-- [ ] Investigar y documentar pricing por proveedor/modelo (Groq, Gemini, DeepSeek, OpenAI). Para Groq y Gemini: confirmar si el plan actual es free tier (entonces $0 es correcto y solo cambia la presentación).
-- [ ] Actualizar `COST_PER_MILLION_TOKENS` en `backend/tarot-app/src/modules/ai-usage/ai-usage.service.ts:39-44` con los valores reales.
-- [ ] (Opcional fase 2) Migration que recalcule `costUsd` de logs históricos.
+ - [x] Investigar y documentar pricing por proveedor/modelo (Groq, Gemini, DeepSeek, OpenAI). Groq y Gemini son free tier ($0 es correcto), DeepSeek $0.14/$0.28, OpenAI $0.15/$0.60.
+ - [x] Documentar `COST_PER_MILLION_TOKENS` en `ai-usage.service.ts` con fuentes y comentarios. Exportar `GROQ_DAILY_LIMIT = 12000` y `FREE_TIER_PROVIDERS`.
+ - [x] (Opcional fase 2) Migration que recalcule `costUsd` de logs históricos — diferido, no requerido para esta tarea.
 
-**Backend — Filtros + daily limit (ex T-BUG-014, parte BE):**
+ **Backend — Filtros + daily limit (ex T-BUG-014, parte BE):**
 
-- [ ] Verificar/agregar params `startDate`/`endDate` en el endpoint de AI Usage si no existen.
-- [ ] Exponer `dailyLimit` por proveedor en el DTO (o vía `/admin/config/thresholds`).
+ - [x] `startDate`/`endDate` ya existían en el endpoint; verificados y funcionando.
+ - [x] Exponer `groqDailyLimit` y `freeProviders` en `AIUsageStatsDto`.
 
-**Frontend — Tipos (ex T-BUG-009):**
+ **Frontend — Tipos (ex T-BUG-009):**
 
-- [ ] En `frontend/src/types/admin.types.ts`:
-  - Cambiar `provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK'` por `provider: 'groq' | 'openai' | 'deepseek' | 'gemini'` (lowercase + incluir gemini).
-  - Renombrar `aiCostsPerDay → costsPerDay`.
-  - Cualquier comparación en componentes que use uppercase debe actualizarse.
-- [ ] Crear helper `getProviderLabel(provider): string` para renderizar capitalizado (`'Groq'`, `'Gemini'`, etc.).
+ - [x] En `frontend/src/types/admin.types.ts`:
+   - Cambiado `provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK'` por `provider: 'groq' | 'openai' | 'deepseek' | 'gemini'` (lowercase + incluir gemini).
+   - `AIUsageStats` tiene `groqDailyLimit: number` y `freeProviders: string[]`.
+ - [x] Creado helper `getProviderLabel(provider): string` en `src/lib/utils/ai-usage.ts`.
 
-**Frontend — Filtros (ex T-BUG-014, parte FE):**
+ **Frontend — Filtros (ex T-BUG-014, parte FE):**
 
-- [ ] Agregar `DateRangePicker` (presets: hoy, 7d, 30d, custom) en `AIUsageContent.tsx`.
-- [ ] Pasar `startDate/endDate` al hook `useAIUsageStats({ startDate, endDate })`.
-- [ ] En `AIUsageMetricsCards.tsx:14` eliminar `GROQ_DAILY_LIMIT = 14400` y consumirlo del DTO backend.
+ - [x] Selector de período (presets: Hoy, 7 días, 30 días, Todo) en `AIUsageContent.tsx`.
+ - [x] `startDate/endDate` pasados al hook `useAIUsageStats`.
+ - [x] `GROQ_DAILY_LIMIT` hardcodeado eliminado de `AIUsageMetricsCards.tsx`; se consume de `stats.groqDailyLimit`.
 
-**Copy & tests:**
+ **Copy & tests:**
 
-- [ ] Si Groq/Gemini son free tier: agregar copy en el panel admin que aclare "Costo $0 porque Groq/Gemini en free tier" para evitar confusión.
-- [ ] Tests unitarios del cálculo de pricing.
-- [ ] Tests de la tabla de proveedores con todos los providers.
-- [ ] Tests del filtro de fechas.
+ - [x] Free tier: nota informativa en `AIUsageMetricsCards` con `data-testid="free-tier-note"` cuando `freeProviders` no está vacío.
+ - [x] Tests unitarios de `getProviderLabel`, `calculateTotalCost`, `calculateSuccessRate`, `calculateTotalCalls` en `src/lib/utils/ai-usage.test.ts`.
+ - [x] Tests de `AIProvidersTable` con todos los providers (groq, openai, deepseek, gemini).
+ - [x] Tests del selector de período en `AIUsageContent.test.tsx`.
 
 #### 📁 Archivos
 
