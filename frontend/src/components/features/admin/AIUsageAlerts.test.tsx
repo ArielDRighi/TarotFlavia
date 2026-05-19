@@ -11,10 +11,12 @@ describe('AIUsageAlerts', () => {
   const baseStats: AIUsageStats = {
     statistics: [],
     groqCallsToday: 100,
+    groqDailyLimit: 12000,
     groqRateLimitAlert: false,
     highErrorRateAlert: false,
     highFallbackRateAlert: false,
     highDailyCostAlert: false,
+    freeProviders: ['groq', 'gemini'],
   };
 
   it('should not render anything when no alerts are active', () => {
