@@ -21,7 +21,7 @@ describe('admin-audit-api', () => {
   describe('fetchAuditLogs', () => {
     it('should fetch audit logs without filters', async () => {
       const mockResponse: AuditLogsResponse = {
-        logs: [
+        data: [
           {
             id: '123e4567-e89b-12d3-a456-426614174000',
             userId: 1,
@@ -39,8 +39,8 @@ describe('admin-audit-api', () => {
           },
         ],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 20,
+          page: 1,
+          limit: 20,
           totalItems: 1,
           totalPages: 1,
         },
@@ -68,10 +68,10 @@ describe('admin-audit-api', () => {
       };
 
       const mockResponse: AuditLogsResponse = {
-        logs: [],
+        data: [],
         meta: {
-          currentPage: 2,
-          itemsPerPage: 10,
+          page: 2,
+          limit: 10,
           totalItems: 0,
           totalPages: 0,
         },

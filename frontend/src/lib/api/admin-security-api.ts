@@ -8,6 +8,7 @@ import type {
   RateLimitResponse,
   SecurityEventsResponse,
   SecurityEventFilters,
+  IPActionResponse,
 } from '@/types/admin-security.types';
 
 /**
@@ -34,30 +35,13 @@ export async function fetchSecurityEvents(
   return response.data;
 }
 
-// TODO: Backend endpoints pendientes de implementación
-// Los siguientes endpoints aún no están disponibles en RateLimitsAdminController
-// Descomentar cuando el backend los implemente
-
-/*
- * Bloquear una IP
- * @param data - Datos para bloquear IP (ip y reason)
- * @returns Respuesta con mensaje y detalles de la IP bloqueada
- * @backend_endpoint POST /admin/rate-limits/block-ip (PENDIENTE)
- *
-export async function blockIP(data: BlockIPDto): Promise<IPActionResponse> {
-  const response = await apiClient.post<IPActionResponse>(API_ENDPOINTS.ADMIN.BLOCK_IP, data);
-  return response.data;
-}
-*/
-
-/*
+/**
  * Desbloquear una IP
  * @param ip - Dirección IP a desbloquear
  * @returns Respuesta con mensaje y detalles de la IP desbloqueada
- * @backend_endpoint DELETE /admin/rate-limits/unblock-ip/:ip (PENDIENTE)
- *
+ * @backend_endpoint DELETE /admin/rate-limits/unblock-ip/:ip
+ */
 export async function unblockIP(ip: string): Promise<IPActionResponse> {
   const response = await apiClient.delete<IPActionResponse>(API_ENDPOINTS.ADMIN.UNBLOCK_IP(ip));
   return response.data;
 }
-*/

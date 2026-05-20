@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useRateLimitData } from '@/hooks/api/useAdminSecurity';
+import { useRateLimitData, useUnblockIP } from '@/hooks/api/useAdminSecurity';
 import { parseTimestamp } from '@/lib/utils/date';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,10 +34,12 @@ import {
 } from '@/components/ui/table';
 import { AlertCircle, ShieldOff, Globe } from 'lucide-react';
 import { toast } from 'sonner';
+import type { IPActionResponse } from '@/types/admin-security.types';
 import { useState } from 'react';
 
 export function RateLimitingTab() {
   const { data, isLoading, isError, refetch } = useRateLimitData();
+  const { mutate: unblockIPMutate, isPending: isUnblocking } = useUnblockIP();
   const [unblockIPAddress, setUnblockIPAddress] = useState<string | null>(null);
 
   const handleUnblockClick = (ip: string) => {
@@ -47,9 +49,16 @@ export function RateLimitingTab() {
   const handleUnblockConfirm = () => {
     if (!unblockIPAddress) return;
 
-    // TODO: Implementar cuando el backend tenga el endpoint DELETE /admin/security/block-ip/:ip
-    toast.info('Función de desbloqueo pendiente de implementación en backend');
-    setUnblockIPAddress(null);
+    unblockIPMutate(unblockIPAddress, {
+      onSuccess: (result: IPActionResponse) => {
+        toast.success(result.message ?? `IP ${unblockIPAddress} desbloqueada exitosamente`);
+        setUnblockIPAddress(null);
+      },
+      onError: () => {
+        toast.error(`Error al desbloquear la IP ${unblockIPAddress}`);
+        setUnblockIPAddress(null);
+      },
+    });
   };
 
   if (isLoading) {
@@ -192,6 +201,7 @@ export function RateLimitingTab() {
                       <Button
                         size="sm"
                         variant="outline"
+                        disabled={isUnblocking}
                         onClick={() => handleUnblockClick(blocked.ip)}
                       >
                         Desbloquear

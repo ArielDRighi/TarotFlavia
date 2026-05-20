@@ -250,9 +250,7 @@ export const API_ENDPOINTS = {
     // Security & Rate Limiting
     RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIps
     SECURITY_EVENTS: '/admin/security/events',
-    // TODO: Backend endpoints pendientes
-    // BLOCK_IP: '/admin/security/block-ip',
-    // UNBLOCK_IP: (ip: string) => `/admin/security/block-ip/${ip}`,
+    UNBLOCK_IP: (ip: string) => `/admin/rate-limits/unblock-ip/${ip}`,
     // Audit Logs
     AUDIT_LOGS: '/admin/audit-logs',
     // Cache Management

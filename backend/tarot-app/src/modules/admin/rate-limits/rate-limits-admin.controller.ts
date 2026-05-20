@@ -1,7 +1,15 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
@@ -102,6 +110,51 @@ export class RateLimitsAdminController {
         totalBlockedIps,
         activeViolationsCount,
       },
+    };
+  }
+
+  @Delete('unblock-ip/:ip')
+  @ApiOperation({
+    summary: 'Desbloquear una IP',
+    description:
+      'Elimina el bloqueo de una IP específica y restablece su contador de violaciones. Solo accesible por administradores.',
+  })
+  @ApiParam({
+    name: 'ip',
+    description: 'Dirección IP a desbloquear',
+    example: '192.168.1.100',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'IP desbloqueada exitosamente',
+    schema: {
+      properties: {
+        message: {
+          type: 'string',
+          example: 'IP 192.168.1.100 desbloqueada exitosamente',
+        },
+        ip: { type: 'string', example: '192.168.1.100' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'La IP no está bloqueada',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Usuario no es administrador',
+  })
+  unblockIp(@Param('ip') ip: string): { message: string; ip: string } {
+    if (!this.ipBlockingService.isBlocked(ip)) {
+      throw new NotFoundException(`La IP ${ip} no se encuentra bloqueada`);
+    }
+
+    this.ipBlockingService.unblockIP(ip);
+
+    return {
+      message: `IP ${ip} desbloqueada exitosamente`,
+      ip,
     };
   }
 }
