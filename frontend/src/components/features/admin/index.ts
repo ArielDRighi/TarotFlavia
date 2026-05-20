@@ -7,3 +7,4 @@ export { PlatformMetricsContent } from './PlatformMetricsContent';
 export { Pagination } from './Pagination';
 export { CacheStatsCards } from './CacheStatsCards';
 export { ChineseHoroscopeAdminPanel } from './ChineseHoroscopeAdminPanel';
+export { ManageRolesModal } from './ManageRolesModal';
