@@ -544,7 +544,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-007-B | **Admin FE consolidada** — dashboard sin mocks + acciones tarotistas + agenda sin hardcode | Frontend    | 🔴 Crítica  | 6 pts ⬆️    |
 | T-BUG-008   | **AI Usage consolidada** — pricing real + tipos lowercase + date range + daily limit       | Full-stack  | ✅ COMPLETADA | 6 pts ⬆️    |
 | T-BUG-009   | _Absorbida por T-BUG-008 (consolidación 2026-05-18)_                                       | —           | —           | —          |
-| T-BUG-010-A | **Seguridad consolidada** — IP blocks persistidos + desbloqueo + fix SelectItem + audit `{data,meta}` | Full-stack | 🟠 Alta | 7.5 pts ⬆️  |
+| T-BUG-010-A | **Seguridad consolidada** — IP blocks persistidos + desbloqueo + fix SelectItem + audit `{data,meta}` | Full-stack | ✅ COMPLETADA | 7.5 pts ⬆️  |
 | T-BUG-010-B | Implementar "Gestionar roles" en Usuarios admin                                            | Frontend    | 🟠 Alta     | 3 pts      |
 | T-BUG-010-C | _Absorbida por T-BUG-007-B (consolidación 2026-05-18)_                                     | —           | —           | —          |
 | T-BUG-011   | _Absorbida por T-BUG-010-A (consolidación 2026-05-18)_                                     | —           | —           | —          |
@@ -555,6 +555,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 
 **Estimación total:** ~49 puntos (~25 días con TDD + ciclo de calidad).
 **Tras consolidación 2026-05-18:** 4 tareas pendientes (T-BUG-007-B, T-BUG-008, T-BUG-010-A, T-BUG-010-B) = 22.5 pts, en lugar de 11 — sin pérdida de alcance. Ver detalle al final del archivo.
+> T-BUG-008 ✅ completada (2026-05-18). T-BUG-010-A ✅ completada (2026-05-19).
 
 ---
 
@@ -1110,6 +1111,7 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 **Prioridad:** 🟠 Alta · **Estimación:** 7.5 pts · **Cubre BUGs:** BUG-010 (parte 1), BUG-011, BUG-012, BUG-015
 **Consolida:** T-BUG-010-A (original) + T-BUG-011 + T-BUG-012 + T-BUG-015
+**Estado:** ✅ COMPLETADA (2026-05-19)
 
 > **Orden interno recomendado:** primero T-BUG-012 (persistir IP blocks), luego T-BUG-010-A (desbloquear IP), después T-BUG-011 y T-BUG-015 (independientes). T-BUG-010-A depende del repo persistido.
 
@@ -1119,40 +1121,40 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 **Decisión de infra (en el PR):** Redis vs PostgreSQL. Si no hay Redis disponible, usar tabla.
 
-- [ ] Crear migración: tabla `ip_blocks { id, ip, blocked_until, reason, created_at }`.
-- [ ] Crear entidad y repositorio (`IIpBlockRepository`, `TypeOrmIpBlockRepository`).
-- [ ] Refactor `IpBlockingService` para usar el repo en lugar de `Map` en memoria.
-- [ ] Job/lógica que limpie bloqueos expirados (`blocked_until < now`).
-- [ ] Validar que en multi-instancia el bloqueo es consistente.
+- [x] Crear migración: tabla `ip_blocks { id, ip, blocked_until, reason, created_at }`.
+- [x] Crear entidad y repositorio (`IIpBlockRepository`, `TypeOrmIpBlockRepository`).
+- [x] Refactor `IpBlockingService` para usar el repo en lugar de `Map` en memoria.
+- [x] Job/lógica que limpie bloqueos expirados (`blocked_until < now`).
+- [x] Validar que en multi-instancia el bloqueo es consistente.
 
 **Backend — Desbloquear IP (ex T-BUG-010-A, parte BE):**
 
-- [ ] Crear endpoint `DELETE /admin/security/block-ip/:ip` (autenticado + AdminGuard).
-- [ ] Lógica en `IpBlockingService.unblockIp(ip)` (usando el repo persistido).
-- [ ] Tests del controller y el service.
+- [x] Crear endpoint `DELETE /admin/security/block-ip/:ip` (autenticado + AdminGuard).
+- [x] Lógica en `IpBlockingService.unblockIp(ip)` (usando el repo persistido).
+- [x] Tests del controller y el service.
 
 **Backend — Audit Logs contrato (ex T-BUG-015, parte BE):**
 
-- [ ] Refactor de `audit-log.service.ts:17-20`: devolver `{ data: AuditLog[], meta: { page, limit, totalItems, totalPages } }`.
-- [ ] Actualizar el controller y los tipos del controller-spec.
-- [ ] Tests de paginación.
+- [x] Refactor de `audit-log.service.ts:17-20`: devolver `{ data: AuditLog[], meta: { page, limit, totalItems, totalPages } }`.
+- [x] Actualizar el controller y los tipos del controller-spec.
+- [x] Tests de paginación.
 
 **Frontend — Desbloquear IP (ex T-BUG-010-A, parte FE):**
 
-- [ ] En `RateLimitingTab.tsx:47-53`, reemplazar `toast.info` por mutation real que llame al nuevo endpoint.
-- [ ] Invalidar la query del listado de IPs bloqueadas tras éxito.
-- [ ] Toast de éxito/error y actualizar UI optimista.
-- [ ] Agregar `ADMIN.UNBLOCK_IP` en `frontend/src/lib/api/endpoints.ts`.
+- [x] En `RateLimitingTab.tsx:47-53`, reemplazar `toast.info` por mutation real que llame al nuevo endpoint.
+- [x] Invalidar la query del listado de IPs bloqueadas tras éxito.
+- [x] Toast de éxito/error y actualizar UI optimista.
+- [x] Agregar `ADMIN.UNBLOCK_IP` en `frontend/src/lib/api/endpoints.ts`.
 
 **Frontend — Fix SelectItem (ex T-BUG-011):**
 
-- [ ] En `frontend/src/components/features/admin/SecurityEventsTab.tsx:117,149` cambiar `value=""` por `value="all"`.
-- [ ] En el handler de filtros, tratar `"all"` como "sin filtro" (no enviar el param al backend).
-- [ ] Test que verifique que la tab renderiza sin errores y los filtros operan.
+- [x] En `frontend/src/components/features/admin/SecurityEventsTab.tsx:117,149` cambiar `value=""` por `value="all"`.
+- [x] En el handler de filtros, tratar `"all"` como "sin filtro" (no enviar el param al backend).
+- [x] Test que verifique que la tab renderiza sin errores y los filtros operan.
 
 **Frontend — Audit Logs (ex T-BUG-015, parte FE):**
 
-- [ ] Adaptar componente y hooks a la nueva respuesta `{ data, meta }`.
+- [x] Adaptar componente y hooks a la nueva respuesta `{ data, meta }`.
 
 #### 📁 Archivos
 
@@ -1213,7 +1215,7 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 6. **T-BUG-007-A** (3 pts — backend dashboard stats reales). ✅ _completada_
 7. **T-BUG-007-B (consolidada)** (6 pts — Admin FE: dashboard sin mocks + acciones tarotistas + agenda sin hardcode).
 8. **T-BUG-008 (consolidada)** (6 pts — AI Usage end-to-end: pricing real + tipos lowercase + date range + daily limit).
-9. **T-BUG-010-A (consolidada)** (7.5 pts — Seguridad admin: IP blocks persistidos + desbloqueo + fix SelectItem + audit logs `{data,meta}`).
+9. **T-BUG-010-A (consolidada)** (7.5 pts — Seguridad admin: IP blocks persistidos + desbloqueo + fix SelectItem + audit logs `{data,meta}`). ✅ _completada_
 10. **T-BUG-010-B** (3 pts — gestión de roles).
 11. **T-BUG-001-B** (3 pts — UI admin para horóscopos chinos).
 

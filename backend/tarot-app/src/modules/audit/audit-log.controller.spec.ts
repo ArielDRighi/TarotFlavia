@@ -33,9 +33,9 @@ describe('AuditLogController', () => {
   });
 
   describe('findAll', () => {
-    it('should return paginated audit logs', async () => {
+    it('should return paginated audit logs using standard {data, meta} contract', async () => {
       const mockResponse = {
-        logs: [
+        data: [
           {
             id: 'uuid-1',
             userId: 1,
@@ -47,8 +47,8 @@ describe('AuditLogController', () => {
           },
         ],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 20,
+          page: 1,
+          limit: 20,
           totalItems: 1,
           totalPages: 1,
         },
@@ -59,6 +59,9 @@ describe('AuditLogController', () => {
       const result = await controller.findAll({});
 
       expect(result).toEqual(mockResponse);
+      expect(result.data).toBeDefined();
+      expect(result.meta.page).toBe(1);
+      expect(result.meta.limit).toBe(20);
       expect(service.findAll).toHaveBeenCalledWith({});
     });
 
@@ -73,11 +76,26 @@ describe('AuditLogController', () => {
         limit: 50,
       };
 
-      mockService.findAll.mockResolvedValue({ logs: [], meta: {} });
+      mockService.findAll.mockResolvedValue({
+        data: [],
+        meta: { page: 2, limit: 50, totalItems: 0, totalPages: 0 },
+      });
 
       await controller.findAll(query);
 
       expect(service.findAll).toHaveBeenCalledWith(query);
+    });
+
+    it('should return empty data array when no logs match', async () => {
+      mockService.findAll.mockResolvedValue({
+        data: [],
+        meta: { page: 1, limit: 20, totalItems: 0, totalPages: 0 },
+      });
+
+      const result = await controller.findAll({ userId: 9999 });
+
+      expect(result.data).toEqual([]);
+      expect(result.meta.totalItems).toBe(0);
     });
   });
 });

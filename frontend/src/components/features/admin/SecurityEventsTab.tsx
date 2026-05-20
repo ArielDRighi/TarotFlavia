@@ -57,9 +57,10 @@ export function SecurityEventsTab() {
   const { data, isLoading, isError, refetch } = useSecurityEvents(filters);
 
   const handleFilterChange = (key: keyof SecurityEventFilters, value: string | number) => {
+    const finalValue = value === 'all' || !value ? undefined : value;
     setFilters((prev) => ({
       ...prev,
-      [key]: value || undefined,
+      [key]: finalValue,
       page: 1, // Reset page when filters change
     }));
   };
@@ -102,7 +103,7 @@ export function SecurityEventsTab() {
             <div className="space-y-2">
               <Label htmlFor="eventType">Tipo de Evento</Label>
               <Select
-                value={filters.eventType || ''}
+                value={filters.eventType || 'all'}
                 onValueChange={(value) =>
                   handleFilterChange('eventType', value as SecurityEventType)
                 }
@@ -111,7 +112,7 @@ export function SecurityEventsTab() {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="successful_login">Login Exitoso</SelectItem>
                   <SelectItem value="failed_login">Login Fallido</SelectItem>
                   <SelectItem value="password_changed">Contraseña Cambiada</SelectItem>
@@ -134,7 +135,7 @@ export function SecurityEventsTab() {
             <div className="space-y-2">
               <Label htmlFor="severity">Severidad</Label>
               <Select
-                value={filters.severity || ''}
+                value={filters.severity || 'all'}
                 onValueChange={(value) =>
                   handleFilterChange('severity', value as SecurityEventSeverity)
                 }
@@ -143,7 +144,7 @@ export function SecurityEventsTab() {
                   <SelectValue placeholder="Todas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   <SelectItem value="low">Baja</SelectItem>
                   <SelectItem value="medium">Media</SelectItem>
                   <SelectItem value="high">Alta</SelectItem>
