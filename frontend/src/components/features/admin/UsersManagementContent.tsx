@@ -13,24 +13,37 @@ import { UsersFilters } from './UsersFilters';
 import { Pagination } from './Pagination';
 import { ChangePlanModal } from './ChangePlanModal';
 import { BanUserModal } from './BanUserModal';
+import { ManageRolesModal } from './ManageRolesModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAdminUsers } from '@/hooks/api/useAdminUsers';
-import { useBanUser, useUnbanUser, useUpdateUserPlan } from '@/hooks/api/useAdminUserActions';
+import {
+  useBanUser,
+  useUnbanUser,
+  useUpdateUserPlan,
+  useManageRoles,
+} from '@/hooks/api/useAdminUserActions';
 import type { AdminUser, UserFilters } from '@/types/admin-users.types';
 import type { UpdateUserPlanForm } from '@/lib/validations/admin-users.schemas';
 import type { BanUserForm } from '@/lib/validations/admin-users.schemas';
+import type { UserRole } from '@/types/user.types';
 import { toast } from 'sonner';
+
+interface RoleDiff {
+  toAdd: Exclude<UserRole, 'consumer'>[];
+  toRemove: Exclude<UserRole, 'consumer'>[];
+}
 
 export function UsersManagementContent() {
   const [filters, setFilters] = useState<UserFilters>({ page: 1, limit: 10 });
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [modalOpen, setModalOpen] = useState<'plan' | 'ban' | null>(null);
+  const [modalOpen, setModalOpen] = useState<'plan' | 'ban' | 'roles' | null>(null);
 
   const { data, isLoading, error } = useAdminUsers(filters);
   const banUserMutation = useBanUser();
   const unbanUserMutation = useUnbanUser();
   const updatePlanMutation = useUpdateUserPlan();
+  const manageRolesMutation = useManageRoles();
 
   const handleFilterChange = (newFilters: Partial<UserFilters>) => {
     setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
@@ -54,9 +67,7 @@ export function UsersManagementContent() {
         handleUnban(user);
         break;
       case 'manage-roles':
-        // TODO: Implement ManageRolesModal in future task
-        toast.info('Gestión de roles: próximamente');
-        setSelectedUser(null);
+        setModalOpen('roles');
         break;
       default:
         break;
@@ -108,6 +119,24 @@ export function UsersManagementContent() {
         toast.error(`Error al desbanear usuario: ${error.message}`);
       },
     });
+  };
+
+  const handleManageRoles = (diff: RoleDiff) => {
+    if (!selectedUser) return;
+
+    manageRolesMutation.mutate(
+      { userId: selectedUser.id, ...diff },
+      {
+        onSuccess: () => {
+          toast.success('Roles actualizados correctamente');
+          setModalOpen(null);
+          setSelectedUser(null);
+        },
+        onError: (error) => {
+          toast.error(`Error al actualizar roles: ${error.message}`);
+        },
+      }
+    );
   };
 
   if (isLoading) {
@@ -177,6 +206,17 @@ export function UsersManagementContent() {
             }}
             onSubmit={handleBan}
             isPending={banUserMutation.isPending}
+          />
+
+          <ManageRolesModal
+            user={selectedUser}
+            open={modalOpen === 'roles'}
+            onClose={() => {
+              setModalOpen(null);
+              setSelectedUser(null);
+            }}
+            onSave={handleManageRoles}
+            isPending={manageRolesMutation.isPending}
           />
         </>
       )}

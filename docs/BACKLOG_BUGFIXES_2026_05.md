@@ -545,7 +545,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 | T-BUG-008   | **AI Usage consolidada** — pricing real + tipos lowercase + date range + daily limit       | Full-stack  | ✅ COMPLETADA | 6 pts ⬆️    |
 | T-BUG-009   | _Absorbida por T-BUG-008 (consolidación 2026-05-18)_                                       | —           | —           | —          |
 | T-BUG-010-A | **Seguridad consolidada** — IP blocks persistidos + desbloqueo + fix SelectItem + audit `{data,meta}` | Full-stack | ✅ COMPLETADA | 7.5 pts ⬆️  |
-| T-BUG-010-B | Implementar "Gestionar roles" en Usuarios admin                                            | Frontend    | 🟠 Alta     | 3 pts      |
+| T-BUG-010-B | Implementar "Gestionar roles" en Usuarios admin                                            | Frontend    | ✅ COMPLETADA | 3 pts      |
 | T-BUG-010-C | _Absorbida por T-BUG-007-B (consolidación 2026-05-18)_                                     | —           | —           | —          |
 | T-BUG-011   | _Absorbida por T-BUG-010-A (consolidación 2026-05-18)_                                     | —           | —           | —          |
 | T-BUG-012   | _Absorbida por T-BUG-010-A (consolidación 2026-05-18)_                                     | —           | —           | —          |
@@ -555,7 +555,7 @@ Varias acciones del admin muestran `toast.info('...próximamente')` aunque los e
 
 **Estimación total:** ~49 puntos (~25 días con TDD + ciclo de calidad).
 **Tras consolidación 2026-05-18:** 4 tareas pendientes (T-BUG-007-B, T-BUG-008, T-BUG-010-A, T-BUG-010-B) = 22.5 pts, en lugar de 11 — sin pérdida de alcance. Ver detalle al final del archivo.
-> T-BUG-008 ✅ completada (2026-05-18). T-BUG-010-A ✅ completada (2026-05-19).
+> T-BUG-008 ✅ completada (2026-05-18). T-BUG-010-A ✅ completada (2026-05-19). T-BUG-010-B ✅ completada (2026-05-20).
 
 ---
 
@@ -1179,14 +1179,14 @@ Convertir el botón hamburguesa estático del `Header` en un menú lateral funci
 
 > Mantenida sin consolidar: agrega un modal nuevo con flujo de diff y confirmaciones — alcance independiente del resto del admin FE. No tiene sentido mezclarla con T-BUG-007-B.
 
-#### ✅ Tareas
+**Estado:** ✅ COMPLETADA
 
-- [ ] Crear modal `ManageRolesModal` en `frontend/src/components/features/admin/` con checkboxes para CONSUMER/TAROTIST/ADMIN.
-- [ ] Hooks de mutation para los 4 endpoints existentes en backend (`ADD_TAROTIST_ROLE`, `REMOVE_TAROTIST_ROLE`, `ADD_ADMIN_ROLE`, `REMOVE_ADMIN_ROLE`).
-- [ ] Lógica de "diff": comparar roles actuales con los seleccionados y disparar solo las mutaciones necesarias.
-- [ ] Confirmación adicional al quitar rol ADMIN ("Esto removerá el acceso al panel admin. ¿Continuar?").
-- [ ] En `UsersManagementContent.tsx:56-60`, reemplazar `toast.info` por abrir el modal.
-- [ ] Tests del modal y del flujo.
+- [x] Crear modal `ManageRolesModal` en `frontend/src/components/features/admin/` con checkboxes para CONSUMER/TAROTIST/ADMIN.
+- [x] Hooks de mutation para los 4 endpoints existentes en backend (`ADD_TAROTIST_ROLE`, `REMOVE_TAROTIST_ROLE`, `ADD_ADMIN_ROLE`, `REMOVE_ADMIN_ROLE`).
+- [x] Lógica de "diff": comparar roles actuales con los seleccionados y disparar solo las mutaciones necesarias.
+- [x] Confirmación adicional al quitar rol ADMIN ("Esto removerá el acceso al panel admin. ¿Continuar?").
+- [x] En `UsersManagementContent.tsx:56-60`, reemplazar `toast.info` por abrir el modal.
+- [x] Tests del modal y del flujo.
 
 #### 📁 Archivos
 
