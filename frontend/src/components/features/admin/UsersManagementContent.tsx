@@ -30,8 +30,8 @@ import type { UserRole } from '@/types/user.types';
 import { toast } from 'sonner';
 
 interface RoleDiff {
-  toAdd: UserRole[];
-  toRemove: UserRole[];
+  toAdd: Exclude<UserRole, 'consumer'>[];
+  toRemove: Exclude<UserRole, 'consumer'>[];
 }
 
 export function UsersManagementContent() {

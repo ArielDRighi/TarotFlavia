@@ -15,10 +15,12 @@ import {
 import type { UpdateUserPlanDto } from '@/types/admin-users.types';
 import type { UserRole } from '@/types/user.types';
 
+type AssignableRole = Exclude<UserRole, 'consumer'>;
+
 interface RoleDiff {
   userId: number;
-  toAdd: UserRole[];
-  toRemove: UserRole[];
+  toAdd: AssignableRole[];
+  toRemove: AssignableRole[];
 }
 
 /**
@@ -121,14 +123,12 @@ export function useRemoveAdminRole() {
   });
 }
 
-const ROLE_ADD_FN: Record<UserRole, (userId: number) => Promise<unknown>> = {
-  consumer: () => Promise.resolve(),
+const ROLE_ADD_FN: Record<AssignableRole, (userId: number) => Promise<unknown>> = {
   tarotist: addTarotistRole,
   admin: addAdminRole,
 };
 
-const ROLE_REMOVE_FN: Record<UserRole, (userId: number) => Promise<unknown>> = {
-  consumer: () => Promise.resolve(),
+const ROLE_REMOVE_FN: Record<AssignableRole, (userId: number) => Promise<unknown>> = {
   tarotist: removeTarotistRole,
   admin: removeAdminRole,
 };

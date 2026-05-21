@@ -33,9 +33,11 @@ import { Label } from '@/components/ui/label';
 import type { AdminUser } from '@/types/admin-users.types';
 import type { UserRole } from '@/types/user.types';
 
+type AssignableRole = Exclude<UserRole, 'consumer'>;
+
 interface RoleDiff {
-  toAdd: UserRole[];
-  toRemove: UserRole[];
+  toAdd: AssignableRole[];
+  toRemove: AssignableRole[];
 }
 
 interface ManageRolesModalProps {
@@ -64,12 +66,20 @@ const AVAILABLE_ROLES: { role: UserRole; label: string; description: string }[] 
   },
 ];
 
+function isAssignableRole(role: UserRole): role is AssignableRole {
+  return role !== 'consumer';
+}
+
 function computeDiff(original: UserRole[], current: UserRole[]): RoleDiff {
   const originalSet = new Set(original);
   const currentSet = new Set(current);
 
-  const toAdd = current.filter((r) => !originalSet.has(r));
-  const toRemove = original.filter((r) => !currentSet.has(r));
+  const toAdd = current.filter(
+    (r) => !originalSet.has(r) && isAssignableRole(r)
+  ) as AssignableRole[];
+  const toRemove = original.filter(
+    (r) => !currentSet.has(r) && isAssignableRole(r)
+  ) as AssignableRole[];
 
   return { toAdd, toRemove };
 }
@@ -147,7 +157,7 @@ function ManageRolesModalInner({
                   data-testid={`role-checkbox-${role}`}
                   checked={selectedRoles.includes(role)}
                   onChange={() => toggleRole(role)}
-                  disabled={isPending}
+                  disabled={isPending || role === 'consumer'}
                   className="mt-1 h-4 w-4 cursor-pointer rounded border-gray-300"
                 />
                 <div className="grid gap-0.5">
@@ -172,7 +182,12 @@ function ManageRolesModalInner({
       </Dialog>
 
       {/* Confirmación al remover rol ADMIN */}
-      <AlertDialog open={showAdminConfirm}>
+      <AlertDialog
+        open={showAdminConfirm}
+        onOpenChange={(open) => {
+          if (!open) handleCancelAdminConfirm();
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">

@@ -254,4 +254,20 @@ describe('ManageRolesModal', () => {
     expect(screen.getByText('Tarotista')).toBeInTheDocument();
     expect(screen.getByText('Administrador')).toBeInTheDocument();
   });
+
+  it('should always disable the consumer checkbox (rol solo lectura)', () => {
+    render(
+      <ManageRolesModal
+        user={mockUser}
+        open={true}
+        onClose={mockOnClose}
+        onSave={mockOnSave}
+        isPending={false}
+      />
+    );
+
+    expect(screen.getByTestId('role-checkbox-consumer')).toBeDisabled();
+    expect(screen.getByTestId('role-checkbox-tarotist')).not.toBeDisabled();
+    expect(screen.getByTestId('role-checkbox-admin')).not.toBeDisabled();
+  });
 });
