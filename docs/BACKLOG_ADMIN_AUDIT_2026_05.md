@@ -385,18 +385,19 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 **Estimación:** 3 puntos
 **Dependencias:** definición de producto sobre qué es una "sesión" en el MVP
 **Cubre hallazgo:** ADM-002
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Definir la fuente del dato (p. ej. `service_purchases` pagadas y con fecha pasada, o sesiones en vivo si aplica).
-- [ ] Añadir `completedSessions: number` a `PlatformMetricsDto` y `topTarotistas[].completedSessions` a `TarotistaMetricsDto`.
-- [ ] Implementar el cálculo en `TypeOrmMetricsRepository.getPlatformMetrics`.
-- [ ] Swagger actualizado; unit tests + coverage ≥ 80%.
+- [x] Definir la fuente del dato: `sessions` con `status = COMPLETED` y `completedAt` en el período.
+- [x] Añadir `completedSessions: number` a `PlatformMetricsDto` y `topTarotistas[].completedSessions` a `TarotistaMetricsDto`.
+- [x] Implementar el cálculo en `TypeOrmMetricsRepository.getPlatformMetrics` y `getTarotistaMetrics`.
+- [x] Swagger actualizado; unit tests + coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] `GET /tarotistas/metrics/platform` devuelve sesiones globales y por tarotista.
-- [ ] Tests cubren período sin sesiones (devuelve 0) y con datos.
+- [x] `GET /tarotistas/metrics/platform` devuelve sesiones globales y por tarotista.
+- [x] Tests cubren período sin sesiones (devuelve 0) y con datos.
 
 #### 📁 Archivos involucrados
 

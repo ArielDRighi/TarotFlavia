@@ -16,6 +16,7 @@ import { TarotistaRevenueMetrics } from './entities/tarotista-revenue-metrics.en
 import { UserTarotistaSubscription } from './entities/user-tarotista-subscription.entity';
 import { User } from '../users/entities/user.entity';
 import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
+import { Session } from '../scheduling/entities/session.entity';
 
 // ==================== Clean Architecture (NEW) ====================
 // Repositories
@@ -59,6 +60,7 @@ import { RevenueCalculationService } from './services/revenue-calculation.servic
       UserTarotistaSubscription,
       User,
       TarotReading,
+      Session,
     ]),
   ],
   controllers: [

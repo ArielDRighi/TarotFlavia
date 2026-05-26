@@ -112,6 +112,12 @@ export class TarotistaMetricsDto {
   totalReviews: number;
 
   @ApiProperty({
+    description: 'Total de sesiones completadas en el período',
+    example: 12,
+  })
+  completedSessions: number;
+
+  @ApiProperty({
     description: 'Período consultado',
     example: {
       start: '2025-01-01T00:00:00Z',
@@ -197,6 +203,12 @@ export class PlatformMetricsDto {
     example: 500,
   })
   activeUsers: number;
+
+  @ApiProperty({
+    description: 'Total de sesiones completadas en la plataforma en el período',
+    example: 42,
+  })
+  completedSessions: number;
 
   @ApiProperty({
     description: 'Período consultado',
