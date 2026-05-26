@@ -336,6 +336,28 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
       where: tarotistaIds.map((id) => ({ id })),
     });
 
+    // Get completed sessions for all top tarotistas in a single aggregated query
+    const completedSessionsRaw: { tarotistaId: number; count: string }[] =
+      await this.sessionRepo
+        .createQueryBuilder('session')
+        .where('session.tarotistaId IN (:...tarotistaIds)', { tarotistaIds })
+        .andWhere('session.status = :status', {
+          status: SessionStatus.COMPLETED,
+        })
+        .andWhere('session.completedAt >= :start', { start })
+        .andWhere('session.completedAt <= :end', { end })
+        .select('session.tarotistaId', 'tarotistaId')
+        .addSelect('COUNT(session.id)', 'count')
+        .groupBy('session.tarotistaId')
+        .getRawMany();
+
+    const completedSessionsMap = new Map<number, number>(
+      completedSessionsRaw.map((row) => [
+        row.tarotistaId,
+        parseInt(row.count, 10) || 0,
+      ]),
+    );
+
     // Generate complete metrics for each
     const metricsPromises = tarotistaIds.map(async (tarotistaId) => {
       const tarotista = tarotistas.find((t) => t.id === tarotistaId);
@@ -361,13 +383,7 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
         .addSelect('SUM(revenue.totalRevenueUsd)', 'totalGrossRevenue')
         .getRawOne();
 
-      const completedSessions = await this.sessionRepo.count({
-        where: {
-          tarotistaId,
-          status: SessionStatus.COMPLETED,
-          completedAt: Between(start, end),
-        },
-      });
+      const completedSessions = completedSessionsMap.get(tarotistaId) ?? 0;
 
       return {
         tarotistaId: tarotista.id,

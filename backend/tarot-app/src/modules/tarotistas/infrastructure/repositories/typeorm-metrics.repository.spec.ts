@@ -193,6 +193,12 @@ describe('TypeOrmMetricsRepository', () => {
         >,
       );
       sessionRepo.count.mockResolvedValue(42);
+      // Aggregated GROUP BY query for topTarotistas (returns empty - no tarotistas found)
+      sessionRepo.createQueryBuilder.mockReturnValue(
+        buildQbChain(null, []) as unknown as ReturnType<
+          Repository<Session>['createQueryBuilder']
+        >,
+      );
       tarotistaRepo.find.mockResolvedValue([]);
 
       const result = await repository.getPlatformMetrics(dto);
@@ -229,10 +235,10 @@ describe('TypeOrmMetricsRepository', () => {
       };
 
       // getPlatformMetrics calls revenueRepo.createQueryBuilder 4 times:
-      // 1. getRawOne - total metrics aggregation
+      // 1. getRawOne  - total metrics aggregation
       // 2. getRawMany - distinct active tarotistas
       // 3. getRawMany - top tarotistas by revenue (inside getTopTarotistasInternal)
-      // 4. getRawOne - per-tarotista metrics (inside getTopTarotistasInternal)
+      // 4. getRawOne  - per-tarotista revenue metrics (inside getTopTarotistasInternal)
       revenueRepo.createQueryBuilder
         .mockReturnValueOnce(
           buildQbChain(revenueRaw) as unknown as ReturnType<
@@ -263,12 +269,22 @@ describe('TypeOrmMetricsRepository', () => {
         >,
       );
 
-      sessionRepo.count.mockResolvedValue(8);
+      // sessionRepo.count is called once for platform-wide total
+      sessionRepo.count.mockResolvedValue(42);
+
+      // sessionRepo.createQueryBuilder is called once inside getTopTarotistasInternal
+      // for the aggregated GROUP BY query replacing the N+1 counts
+      sessionRepo.createQueryBuilder.mockReturnValue(
+        buildQbChain(null, [
+          { tarotistaId: 1, count: '8' },
+        ]) as unknown as ReturnType<Repository<Session>['createQueryBuilder']>,
+      );
 
       tarotistaRepo.find.mockResolvedValue([mockTarotista]);
 
       const result = await repository.getPlatformMetrics(dto);
 
+      expect(result.completedSessions).toBe(42);
       expect(result.topTarotistas[0].completedSessions).toBe(8);
     });
   });
