@@ -4,6 +4,10 @@ import { UserPlan } from '../../../../users/entities/user.entity';
 export interface IReadingRepository {
   create(reading: Partial<TarotReading>): Promise<TarotReading>;
   findById(id: number, relations?: string[]): Promise<TarotReading | null>;
+  findByIdIncludingDeleted(
+    id: number,
+    relations?: string[],
+  ): Promise<TarotReading | null>;
   findByUserId(
     userId: number,
     options?: PaginationOptions,

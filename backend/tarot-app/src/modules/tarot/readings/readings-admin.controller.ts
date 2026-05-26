@@ -77,6 +77,7 @@ export class ReadingsAdminController {
   })
   @ApiParam({ name: 'id', type: Number, description: 'ID de la lectura' })
   @ApiResponse({ status: 204, description: 'Lectura eliminada correctamente' })
+  @ApiResponse({ status: 400, description: 'La lectura ya está eliminada' })
   @ApiResponse({ status: 404, description: 'Lectura no encontrada' })
   @ApiResponse({
     status: 403,
@@ -100,7 +101,7 @@ export class ReadingsAdminController {
       entityId: String(id),
       newValue: { deletedAt: new Date().toISOString() },
       ipAddress: req.ip ?? null,
-      userAgent: (req.headers['user-agent'] as string) ?? null,
+      userAgent: req.headers['user-agent'] ?? null,
     });
   }
 
@@ -112,6 +113,7 @@ export class ReadingsAdminController {
   })
   @ApiParam({ name: 'id', type: Number, description: 'ID de la lectura' })
   @ApiResponse({ status: 200, description: 'Lectura restaurada correctamente' })
+  @ApiResponse({ status: 400, description: 'La lectura no está eliminada' })
   @ApiResponse({ status: 404, description: 'Lectura no encontrada' })
   @ApiResponse({
     status: 403,
@@ -135,7 +137,7 @@ export class ReadingsAdminController {
       entityId: String(id),
       newValue: { restoredAt: new Date().toISOString() },
       ipAddress: req.ip ?? null,
-      userAgent: (req.headers['user-agent'] as string) ?? null,
+      userAgent: req.headers['user-agent'] ?? null,
     });
 
     return restored;

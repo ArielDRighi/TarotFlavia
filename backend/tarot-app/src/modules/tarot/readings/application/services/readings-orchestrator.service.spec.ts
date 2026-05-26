@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { ReadingsOrchestratorService } from './readings-orchestrator.service';
 import { CreateReadingUseCase } from '../use-cases/create-reading.use-case';
 import { ListReadingsUseCase } from '../use-cases/list-readings.use-case';
@@ -79,6 +79,7 @@ describe('ReadingsOrchestratorService', () => {
     const mockReadingRepo = {
       create: jest.fn(),
       findById: jest.fn(),
+      findByIdIncludingDeleted: jest.fn(),
       findByUserId: jest.fn(),
       findAll: jest.fn(),
       findTrashed: jest.fn(),
@@ -838,17 +839,17 @@ describe('ReadingsOrchestratorService', () => {
   describe('Admin Moderation Methods', () => {
     describe('adminSoftDelete', () => {
       it('debe eliminar lógicamente una lectura existente', async () => {
-        readingRepo.findById.mockResolvedValue(mockReading);
+        readingRepo.findByIdIncludingDeleted.mockResolvedValue(mockReading);
         readingRepo.softDelete.mockResolvedValue(undefined);
 
         await service.adminSoftDelete(1);
 
-        expect(readingRepo.findById).toHaveBeenCalledWith(1);
+        expect(readingRepo.findByIdIncludingDeleted).toHaveBeenCalledWith(1);
         expect(readingRepo.softDelete).toHaveBeenCalledWith(1);
       });
 
       it('debe lanzar NotFoundException si la lectura no existe', async () => {
-        readingRepo.findById.mockResolvedValue(null);
+        readingRepo.findByIdIncludingDeleted.mockResolvedValue(null);
 
         await expect(service.adminSoftDelete(999)).rejects.toThrow(
           NotFoundException,
@@ -858,7 +859,7 @@ describe('ReadingsOrchestratorService', () => {
 
       it('debe lanzar BadRequestException si la lectura ya está eliminada', async () => {
         const deletedReading = { ...mockReading, deletedAt: new Date() };
-        readingRepo.findById.mockResolvedValue(deletedReading);
+        readingRepo.findByIdIncludingDeleted.mockResolvedValue(deletedReading);
 
         await expect(service.adminSoftDelete(1)).rejects.toThrow(
           'La lectura con ID 1 ya está eliminada',
@@ -871,20 +872,19 @@ describe('ReadingsOrchestratorService', () => {
       it('debe restaurar una lectura eliminada', async () => {
         const deletedReading = { ...mockReading, deletedAt: new Date() };
         const restoredReading = { ...mockReading, deletedAt: undefined };
-        readingRepo.findById
-          .mockResolvedValueOnce(deletedReading)
-          .mockResolvedValueOnce(restoredReading);
+        readingRepo.findByIdIncludingDeleted.mockResolvedValue(deletedReading);
+        readingRepo.findById.mockResolvedValue(restoredReading);
         readingRepo.restore.mockResolvedValue(undefined);
 
         const result = await service.adminRestore(1);
 
-        expect(readingRepo.findById).toHaveBeenCalledWith(1);
+        expect(readingRepo.findByIdIncludingDeleted).toHaveBeenCalledWith(1);
         expect(readingRepo.restore).toHaveBeenCalledWith(1);
         expect(result).toEqual(restoredReading);
       });
 
       it('debe lanzar NotFoundException si la lectura no existe', async () => {
-        readingRepo.findById.mockResolvedValue(null);
+        readingRepo.findByIdIncludingDeleted.mockResolvedValue(null);
 
         await expect(service.adminRestore(999)).rejects.toThrow(
           NotFoundException,
@@ -893,7 +893,7 @@ describe('ReadingsOrchestratorService', () => {
       });
 
       it('debe lanzar BadRequestException si la lectura no está eliminada', async () => {
-        readingRepo.findById.mockResolvedValue(mockReading);
+        readingRepo.findByIdIncludingDeleted.mockResolvedValue(mockReading);
 
         await expect(service.adminRestore(1)).rejects.toThrow(
           'La lectura con ID 1 no está eliminada',
@@ -903,9 +903,8 @@ describe('ReadingsOrchestratorService', () => {
 
       it('debe lanzar NotFoundException si no se puede obtener la lectura restaurada', async () => {
         const deletedReading = { ...mockReading, deletedAt: new Date() };
-        readingRepo.findById
-          .mockResolvedValueOnce(deletedReading)
-          .mockResolvedValueOnce(null);
+        readingRepo.findByIdIncludingDeleted.mockResolvedValue(deletedReading);
+        readingRepo.findById.mockResolvedValue(null);
         readingRepo.restore.mockResolvedValue(undefined);
 
         await expect(service.adminRestore(1)).rejects.toThrow(

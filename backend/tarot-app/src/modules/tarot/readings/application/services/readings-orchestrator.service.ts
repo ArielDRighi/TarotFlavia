@@ -125,7 +125,7 @@ export class ReadingsOrchestratorService {
   // ==================== Admin Moderation Methods ====================
 
   async adminSoftDelete(readingId: number): Promise<void> {
-    const reading = await this.readingRepo.findById(readingId);
+    const reading = await this.readingRepo.findByIdIncludingDeleted(readingId);
     if (!reading) {
       throw new NotFoundException(`Lectura con ID ${readingId} no encontrada`);
     }
@@ -138,7 +138,7 @@ export class ReadingsOrchestratorService {
   }
 
   async adminRestore(readingId: number): Promise<TarotReading> {
-    const reading = await this.readingRepo.findById(readingId);
+    const reading = await this.readingRepo.findByIdIncludingDeleted(readingId);
     if (!reading) {
       throw new NotFoundException(`Lectura con ID ${readingId} no encontrada`);
     }
