@@ -23,6 +23,7 @@ describe('MetricsController', () => {
     totalGrossRevenue: 7500.0,
     averageRating: 4.8,
     totalReviews: 50,
+    completedSessions: 12,
     period: {
       start: new Date('2025-01-01'),
       end: new Date('2025-01-31'),
@@ -36,6 +37,7 @@ describe('MetricsController', () => {
     totalGrossRevenue: 75000.0,
     activeTarotistas: 10,
     activeUsers: 500,
+    completedSessions: 42,
     period: {
       start: new Date('2025-01-01'),
       end: new Date('2025-01-31'),
