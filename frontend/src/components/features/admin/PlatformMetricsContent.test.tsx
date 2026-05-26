@@ -6,7 +6,6 @@ import { render, screen } from '@testing-library/react';
 import { PlatformMetricsContent } from './PlatformMetricsContent';
 import * as usePlatformMetricsModule from '@/hooks/api/usePlatformMetrics';
 import type { PlatformMetricsDto } from '@/types';
-import { MetricsPeriod } from '@/types';
 
 vi.mock('@/hooks/api/usePlatformMetrics');
 
@@ -143,6 +142,14 @@ describe('PlatformMetricsContent', () => {
 
     // Should show 0, not '-' or 'Próximamente'
     expect(screen.queryByText('Próximamente')).not.toBeInTheDocument();
+    // The card header should still be visible
+    expect(screen.getByText('Sesiones Completadas')).toBeInTheDocument();
+    // 0 should be rendered (formatted as "0" by formatLargeNumber)
+    const zeroCells = screen.getAllByText('0');
+    // At least 2 occurrences of "0": one in the card, one in the table session column
+    expect(zeroCells.length).toBeGreaterThanOrEqual(2);
+    // No '-' placeholders in the table
+    expect(screen.queryAllByText('-')).toHaveLength(0);
   });
 
   it('should show error alert when there is an error', () => {
