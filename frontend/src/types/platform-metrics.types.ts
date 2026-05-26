@@ -29,6 +29,7 @@ export interface TarotistaMetricsDto {
   tarotistaId: number;
   nombrePublico: string;
   totalReadings: number;
+  completedSessions: number;
   totalRevenueShare: number;
   totalPlatformFee: number;
   totalGrossRevenue: number;
@@ -42,6 +43,7 @@ export interface TarotistaMetricsDto {
 
 export interface PlatformMetricsDto {
   totalReadings: number;
+  completedSessions: number;
   totalRevenueShare: number;
   totalPlatformFee: number;
   totalGrossRevenue: number;

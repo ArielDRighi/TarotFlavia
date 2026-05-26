@@ -413,17 +413,19 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 **Estimación:** 1 punto
 **Dependencias:** T-ADM-002-A
 **Cubre hallazgo:** ADM-002
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Reemplazar el `0` + badge "Próximamente" (`PlatformMetricsContent.tsx:126-128`) por `metrics.completedSessions`.
-- [ ] Reemplazar el `-` de la columna "Sesiones" (`:194`) por `tarotista.completedSessions`.
-- [ ] Actualizar tipos `PlatformMetrics` en `types/`.
-- [ ] Tests actualizados; ciclo de calidad.
+- [x] Reemplazar el `0` + badge "Próximamente" (`PlatformMetricsContent.tsx:126-128`) por `metrics.completedSessions`.
+- [x] Reemplazar el `-` de la columna "Sesiones" (`:194`) por `tarotista.completedSessions`.
+- [x] Actualizar tipos `PlatformMetrics` en `types/` (`completedSessions` en `PlatformMetricsDto` y `TarotistaMetricsDto`).
+- [x] Tests actualizados (nuevo `PlatformMetricsContent.test.tsx` + mocks en `usePlatformMetrics.test.ts` + `page.test.tsx`); 24 tests pasando.
+- [x] Ciclo de calidad frontend completo (format, lint:fix, type-check, build, validate-architecture).
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] La tarjeta y la columna muestran datos reales sin badge "Próximamente".
+- [x] La tarjeta y la columna muestran datos reales sin badge "Próximamente".
 
 #### 📁 Archivos involucrados
 
