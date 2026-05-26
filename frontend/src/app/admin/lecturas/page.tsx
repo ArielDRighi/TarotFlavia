@@ -1,9 +1,9 @@
-import { LecturasPlaceholderContent } from '@/components/features/admin/LecturasPlaceholderContent';
+import { ReadingsManagementContent } from '@/components/features/admin/ReadingsManagementContent';
 
 export default function AdminLecturasPage() {
   return (
     <div className="container py-8">
-      <LecturasPlaceholderContent />
+      <ReadingsManagementContent />
     </div>
   );
 }

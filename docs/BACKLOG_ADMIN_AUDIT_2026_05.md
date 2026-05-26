@@ -350,22 +350,23 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 **Estimación:** 5 puntos
 **Dependencias:** ninguna para listar (usa `GET /admin/readings`); T-ADM-001-A si se incluyen acciones de moderación
 **Cubre hallazgo:** ADM-001
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `lib/api/admin-readings-api.ts` + entrada `ADMIN.READINGS` en `API_ENDPOINTS` (`/admin/readings`).
-- [ ] Crear `hooks/api/useAdminReadings.ts` (React Query, soporta `includeDeleted`).
-- [ ] Crear `components/features/admin/ReadingsManagementContent.tsx` con tabla paginada, filtros (toggle "Incluir eliminadas", búsqueda) y estados loading/error/empty.
-- [ ] Reemplazar `LecturasPlaceholderContent` en `app/admin/lecturas/page.tsx` por el nuevo contenido (mantener `LecturasPlaceholderContent` en el repo, sin borrar, por si se necesita).
-- [ ] (Si T-ADM-001-A) acciones de borrar/restaurar con `AlertDialog` de confirmación.
-- [ ] Tests de componente + hook; coverage ≥ 80%.
-- [ ] Ciclo de calidad frontend completo.
+- [x] Crear `lib/api/admin-readings-api.ts` + entrada `ADMIN.READINGS` en `API_ENDPOINTS` (`/admin/readings`).
+- [x] Crear `hooks/api/useAdminReadings.ts` (React Query, soporta `includeDeleted`).
+- [x] Crear `components/features/admin/ReadingsManagementContent.tsx` con tabla paginada, filtros (toggle "Incluir eliminadas") y estados loading/error/empty.
+- [x] Reemplazar `LecturasPlaceholderContent` en `app/admin/lecturas/page.tsx` por el nuevo contenido (se mantiene `LecturasPlaceholderContent` en el repo sin borrar).
+- [x] Acciones de borrar/restaurar con `AlertDialog` de confirmación (usando endpoints de T-ADM-001-A).
+- [x] Tests de componente + hook + api; 19 tests pasando.
+- [x] Ciclo de calidad frontend completo (format, lint:fix, type-check, build, validate-architecture).
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] `/admin/lecturas` muestra lecturas reales paginadas, no el placeholder.
-- [ ] El toggle "Incluir eliminadas" envía `?includeDeleted=true`.
-- [ ] Respeta el contrato `{ data, meta }` estándar.
+- [x] `/admin/lecturas` muestra lecturas reales paginadas, no el placeholder.
+- [x] El toggle "Incluir eliminadas" envía `?includeDeleted=true`.
+- [x] Respeta el contrato `{ data, meta }` estándar.
 
 #### 📁 Archivos involucrados
 
