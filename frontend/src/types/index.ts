@@ -306,3 +306,12 @@ export type {
   ChineseHoroscopeYearStatus,
   GenerateMissingResponse,
 } from './admin-chinese-horoscope.types';
+
+// Admin Readings Types (T-ADM-001-B)
+export type {
+  CardPreviewAdmin,
+  AdminReadingListItem,
+  AdminReadingsMeta,
+  AdminReadingsResponse,
+  AdminReadingsFilters,
+} from './admin-readings.types';
