@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient } from './axios-config';
 import { fetchRateLimitData, fetchSecurityEvents } from './admin-security-api';
+import { API_ENDPOINTS } from './endpoints';
 import type { RateLimitResponse, SecurityEventsResponse } from '@/types/admin-security.types';
 
 vi.mock('./axios-config');
@@ -92,7 +93,7 @@ describe('admin-security-api', () => {
 
       const result = await fetchSecurityEvents(filters);
 
-      expect(apiClient.get).toHaveBeenCalledWith('/admin/security/events', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.ADMIN.SECURITY_EVENTS, {
         params: filters,
       });
       expect(result).toEqual(mockData);
@@ -115,7 +116,7 @@ describe('admin-security-api', () => {
 
       const result = await fetchSecurityEvents();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/admin/security/events', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.ADMIN.SECURITY_EVENTS, {
         params: {},
       });
       expect(result.data).toHaveLength(0);
