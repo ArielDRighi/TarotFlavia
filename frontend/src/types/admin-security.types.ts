@@ -83,12 +83,15 @@ export interface SecurityEventFilters {
 
 /**
  * Respuesta paginada de eventos de seguridad
+ *
+ * Contrato estándar del proyecto: { data, meta: { page, limit, totalItems, totalPages } }
+ * (Alineado con AuditLogsContent y el resto de tablas paginadas)
  */
 export interface SecurityEventsResponse {
-  events: SecurityEvent[];
+  data: SecurityEvent[];
   meta: {
-    currentPage: number;
-    itemsPerPage: number;
+    page: number;
+    limit: number;
     totalItems: number;
     totalPages: number;
   };

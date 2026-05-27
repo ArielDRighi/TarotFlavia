@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient } from './axios-config';
 import { fetchRateLimitData, fetchSecurityEvents } from './admin-security-api';
+import { API_ENDPOINTS } from './endpoints';
 import type { RateLimitResponse, SecurityEventsResponse } from '@/types/admin-security.types';
 
 vi.mock('./axios-config');
@@ -69,7 +70,7 @@ describe('admin-security-api', () => {
       };
 
       const mockData: SecurityEventsResponse = {
-        events: [
+        data: [
           {
             id: 'uuid-123',
             eventType: 'failed_login',
@@ -81,8 +82,8 @@ describe('admin-security-api', () => {
           },
         ],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 1,
           totalPages: 1,
         },
@@ -92,20 +93,20 @@ describe('admin-security-api', () => {
 
       const result = await fetchSecurityEvents(filters);
 
-      expect(apiClient.get).toHaveBeenCalledWith('/admin/security/events', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.ADMIN.SECURITY_EVENTS, {
         params: filters,
       });
       expect(result).toEqual(mockData);
-      expect(result.events).toHaveLength(1);
+      expect(result.data).toHaveLength(1);
       expect(result.meta.totalItems).toBe(1);
     });
 
     it('should fetch security events without filters', async () => {
       const mockData: SecurityEventsResponse = {
-        events: [],
+        data: [],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 0,
           totalPages: 0,
         },
@@ -115,10 +116,10 @@ describe('admin-security-api', () => {
 
       const result = await fetchSecurityEvents();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/admin/security/events', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.ADMIN.SECURITY_EVENTS, {
         params: {},
       });
-      expect(result.events).toHaveLength(0);
+      expect(result.data).toHaveLength(0);
     });
   });
 });

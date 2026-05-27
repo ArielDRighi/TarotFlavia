@@ -15,10 +15,10 @@ import { SecurityEventSeverity } from './enums/security-event-severity.enum';
 import { LoggerService } from '../../common/logger/logger.service';
 
 export interface SecurityEventListResponse {
-  events: SecurityEvent[];
+  data: SecurityEvent[];
   meta: {
-    currentPage: number;
-    itemsPerPage: number;
+    page: number;
+    limit: number;
     totalItems: number;
     totalPages: number;
   };
@@ -130,10 +130,10 @@ export class SecurityEventService {
       });
 
     return {
-      events,
+      data: events,
       meta: {
-        currentPage: page,
-        itemsPerPage: limit,
+        page,
+        limit,
         totalItems,
         totalPages: Math.ceil(totalItems / limit),
       },

@@ -88,7 +88,7 @@ export function SecurityEventsTab() {
     );
   }
 
-  const events = data?.events ?? [];
+  const events = data?.data ?? [];
   const meta = data?.meta;
 
   return (
@@ -240,10 +240,10 @@ export function SecurityEventsTab() {
               {meta && meta.totalPages > 1 && (
                 <div className="mt-6">
                   <Pagination
-                    currentPage={meta.currentPage}
+                    currentPage={meta.page}
                     totalPages={meta.totalPages}
                     totalItems={meta.totalItems}
-                    limit={meta.itemsPerPage}
+                    limit={meta.limit}
                     onPageChange={handlePageChange}
                   />
                 </div>
