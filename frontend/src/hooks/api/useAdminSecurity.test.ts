@@ -76,7 +76,7 @@ describe('useAdminSecurity hooks', () => {
       };
 
       const mockData = {
-        events: [
+        data: [
           {
             id: 'uuid-123',
             eventType: 'failed_login' as const,
@@ -88,8 +88,8 @@ describe('useAdminSecurity hooks', () => {
           },
         ],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 1,
           totalPages: 1,
         },
@@ -102,8 +102,8 @@ describe('useAdminSecurity hooks', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toEqual(mockData);
-      expect(result.current.data?.events).toHaveLength(1);
-      expect(result.current.data?.events[0].ipAddress).toBe('192.168.1.50');
+      expect(result.current.data?.data).toHaveLength(1);
+      expect(result.current.data?.data[0].ipAddress).toBe('192.168.1.50');
       expect(securityApi.fetchSecurityEvents).toHaveBeenCalledWith(filters);
     });
   });

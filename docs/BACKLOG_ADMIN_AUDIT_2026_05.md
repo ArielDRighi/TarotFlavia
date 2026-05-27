@@ -475,26 +475,32 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 **Estimación:** 3 puntos
 **Dependencias:** ninguna
 **Cubre hallazgo:** ADM-004
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Backend: refactor `SecurityEventService.findAll` para devolver `{ data, meta: { page, limit, totalItems, totalPages } }`.
-- [ ] Actualizar `QuerySecurityEventDto` / tipos de respuesta si aplica.
-- [ ] Frontend: adaptar `SecurityEventsTab.tsx` (`data.data`, `meta.page/limit`) y `admin-security.types.ts`.
-- [ ] Actualizar tests de controller, servicio y componente.
-- [ ] Ciclos de calidad backend y frontend.
+- [x] Backend: refactor `SecurityEventService.findAll` para devolver `{ data, meta: { page, limit, totalItems, totalPages } }`.
+- [x] Actualizar `SecurityEventListResponse` (interface interna del servicio).
+- [x] Frontend: adaptar `SecurityEventsTab.tsx` (`data.data`, `meta.page/limit`) y `admin-security.types.ts`.
+- [x] Actualizar tests de controller, servicio y componente (incluyendo `useAdminSecurity.test.ts` y `admin-security-api.test.ts`).
+- [x] Crear `security-event.service.spec.ts` (nuevo — 13 tests cubriendo findAll, logSecurityEvent, detectSuspiciousActivity).
+- [x] Ciclos de calidad backend y frontend completos.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] El endpoint y el componente usan el contrato estándar del proyecto.
-- [ ] La pestaña "Eventos de Seguridad" pagina correctamente sin regresiones.
+- [x] El endpoint y el componente usan el contrato estándar del proyecto.
+- [x] La pestaña "Eventos de Seguridad" pagina correctamente sin regresiones.
 
 #### 📁 Archivos involucrados
 
-- `backend/tarot-app/src/modules/security/security-event.service.ts` + spec
-- `backend/tarot-app/src/modules/security/security-events.controller.ts` + spec
-- `frontend/src/components/features/admin/SecurityEventsTab.tsx` + test
-- `frontend/src/types/admin-security.types.ts`
+- `backend/tarot-app/src/modules/security/security-event.service.ts` (modificado)
+- `backend/tarot-app/src/modules/security/security-event.service.spec.ts` (nuevo)
+- `backend/tarot-app/src/modules/security/security-events.controller.spec.ts` (actualizado)
+- `frontend/src/components/features/admin/SecurityEventsTab.tsx` (modificado)
+- `frontend/src/components/features/admin/SecurityEventsTab.test.tsx` (nuevo)
+- `frontend/src/types/admin-security.types.ts` (modificado)
+- `frontend/src/hooks/api/useAdminSecurity.test.ts` (actualizado)
+- `frontend/src/lib/api/admin-security-api.test.ts` (actualizado)
 
 ---
 

@@ -69,7 +69,7 @@ describe('admin-security-api', () => {
       };
 
       const mockData: SecurityEventsResponse = {
-        events: [
+        data: [
           {
             id: 'uuid-123',
             eventType: 'failed_login',
@@ -81,8 +81,8 @@ describe('admin-security-api', () => {
           },
         ],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 1,
           totalPages: 1,
         },
@@ -96,16 +96,16 @@ describe('admin-security-api', () => {
         params: filters,
       });
       expect(result).toEqual(mockData);
-      expect(result.events).toHaveLength(1);
+      expect(result.data).toHaveLength(1);
       expect(result.meta.totalItems).toBe(1);
     });
 
     it('should fetch security events without filters', async () => {
       const mockData: SecurityEventsResponse = {
-        events: [],
+        data: [],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 0,
           totalPages: 0,
         },
@@ -118,7 +118,7 @@ describe('admin-security-api', () => {
       expect(apiClient.get).toHaveBeenCalledWith('/admin/security/events', {
         params: {},
       });
-      expect(result.events).toHaveLength(0);
+      expect(result.data).toHaveLength(0);
     });
   });
 });
