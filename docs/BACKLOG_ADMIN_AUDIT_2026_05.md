@@ -515,7 +515,7 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 #### ✅ Tareas específicas
 
 - [x] Si `analytics.savings` trae datos: desestructurar `savings` en `CacheStatsCards` y renderizar una 5ª tarjeta "Ahorro estimado".
-- [x] Si no se implementa: eliminar la prop `savings` muerta y su `TODO`.
+- [ ] Si no se implementa: eliminar la prop `savings` muerta y su `TODO`.
 - [x] Tests actualizados; ciclo de calidad.
 
 #### 🎯 Criterios de Aceptación

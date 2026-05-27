@@ -52,7 +52,7 @@ describe('CacheStatsCards', () => {
     expect(screen.getByText('Ahorro Estimado')).toBeInTheDocument();
   });
 
-  it('should display total savings as sum of openai and deepseek savings', () => {
+  it('should display openaiSavings as the estimated savings baseline', () => {
     // Act
     render(
       <CacheStatsCards
@@ -62,9 +62,9 @@ describe('CacheStatsCards', () => {
       />
     );
 
-    // Assert: openaiSavings (1.5525) + deepseekSavings (0.276) = 1.8285 → $1.83
+    // Assert: openaiSavings (1.5525) → $1.55 (not summed with deepseekSavings)
     expect(screen.getByTestId('savings-card')).toBeInTheDocument();
-    expect(screen.getByText('$1.83')).toBeInTheDocument();
+    expect(screen.getByText('$1.55')).toBeInTheDocument();
   });
 
   it('should display groq rate limit savings in savings card', () => {
