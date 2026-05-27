@@ -8,7 +8,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TarotistasTable } from './TarotistasTable';
 import { ApplicationCard } from './ApplicationCard';
@@ -38,8 +37,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 export function TarotistasManagementContent() {
-  const router = useRouter();
-
   // State para tabs
   const [activeTab, setActiveTab] = useState('activos');
 
@@ -84,7 +81,8 @@ export function TarotistasManagementContent() {
         setActionType('reactivate');
         break;
       case 'view-profile':
-        router.push(`/admin/tarotistas/${tarotista.id}`);
+        // T-ADM-003 (Opción B): acción deshabilitada en la tabla para MVP single-tarotista.
+        // La ruta /admin/tarotistas/[id] no existe aún. Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003
         setSelectedTarotista(null);
         break;
       case 'edit-config':
@@ -380,9 +378,9 @@ export function TarotistasManagementContent() {
             <AlertDialogCancel>Cerrar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (selectedTarotista) {
-                  router.push(`/admin/tarotistas/${selectedTarotista.id}/configuracion`);
-                }
+                // T-ADM-003 (Opción B): navegación deshabilitada. La ruta
+                // /admin/tarotistas/[id]/configuracion no existe en el MVP single-tarotista.
+                // Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003
                 closeDialog();
               }}
             >

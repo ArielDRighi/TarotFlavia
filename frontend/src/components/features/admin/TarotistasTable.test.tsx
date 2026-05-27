@@ -103,6 +103,51 @@ describe('TarotistasTable', () => {
     expect(actionButtons.length).toBe(mockTarotistas.length);
   });
 
+  // T-ADM-003 (Opción B): "Ver perfil" y "Configuración" deben estar deshabilitados
+  // en el MVP single-tarotista para evitar dead-links (404)
+  it('should render "Ver perfil" menu item as disabled (ADM-003)', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    render(<TarotistasTable tarotistas={mockTarotistas} onAction={onAction} />);
+
+    // Abrir el primer dropdown
+    const triggers = screen.getAllByRole('button');
+    await user.click(triggers[0]);
+
+    // El ítem "Ver perfil" existe pero está disabled
+    const viewProfileItem = await screen.findByTestId('action-view-profile');
+    expect(viewProfileItem).toHaveAttribute('data-disabled');
+  });
+
+  it('should render "Editar configuración IA" menu item as disabled (ADM-003)', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    render(<TarotistasTable tarotistas={mockTarotistas} onAction={onAction} />);
+
+    const triggers = screen.getAllByRole('button');
+    await user.click(triggers[0]);
+
+    const editConfigItem = await screen.findByTestId('action-edit-config');
+    expect(editConfigItem).toHaveAttribute('data-disabled');
+  });
+
+  it('should NOT call onAction for disabled actions (ADM-003)', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    render(<TarotistasTable tarotistas={mockTarotistas} onAction={onAction} />);
+
+    const triggers = screen.getAllByRole('button');
+    await user.click(triggers[0]);
+
+    const viewProfileItem = await screen.findByTestId('action-view-profile');
+    await user.click(viewProfileItem);
+
+    expect(onAction).not.toHaveBeenCalledWith('view-profile', expect.anything());
+  });
+
   it('should display "N/A" for null rating', () => {
     const onAction = vi.fn();
     render(<TarotistasTable tarotistas={mockTarotistas} onAction={onAction} />);

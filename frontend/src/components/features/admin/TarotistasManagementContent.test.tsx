@@ -179,30 +179,35 @@ describe('TarotistasManagementContent — acciones tarotista', () => {
     expect(screen.getByText('Tarotistas Activos')).toBeInTheDocument();
   });
 
-  it('acción view-profile debe navegar a /admin/tarotistas/[id] (NO toast próximamente)', async () => {
+  // T-ADM-003 (Opción B): view-profile NO debe navegar a ruta inexistente
+  it('acción view-profile NO debe navegar (dead-link deshabilitado — ADM-003)', async () => {
     render(<TarotistasManagementContent />, { wrapper });
 
     const btn = screen.getByTestId(`action-view-profile-${mockTarotista.id}`);
-    expect(btn).toBeInTheDocument(); // Falla explícitamente si no existe
+    expect(btn).toBeInTheDocument();
     fireEvent.click(btn);
 
+    // Con Opción B el router.push no se llama para view-profile
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith(`/admin/tarotistas/${mockTarotista.id}`);
+      expect(mockPush).not.toHaveBeenCalledWith(`/admin/tarotistas/${mockTarotista.id}`);
     });
-    expect(toast.info).not.toHaveBeenCalledWith(expect.stringContaining('próximamente'));
   });
 
-  it('acción edit-config debe abrir modal y NO mostrar toast.info con "próximamente"', async () => {
+  // T-ADM-003 (Opción B): edit-config NO debe navegar a configuracion/ inexistente
+  it('acción edit-config NO debe navegar a /admin/tarotistas/[id]/configuracion (ADM-003)', async () => {
     render(<TarotistasManagementContent />, { wrapper });
 
     const btn = screen.getByTestId(`action-edit-config-${mockTarotista.id}`);
     expect(btn).toBeInTheDocument();
     fireEvent.click(btn);
 
+    // El modal se abre pero "Ir a Configuración" no navega a la ruta inexistente
     await waitFor(() => {
       expect(screen.getByTestId('tarotista-config-modal')).toBeInTheDocument();
     });
-    expect(toast.info).not.toHaveBeenCalledWith(expect.stringContaining('próximamente'));
+    expect(mockPush).not.toHaveBeenCalledWith(
+      `/admin/tarotistas/${mockTarotista.id}/configuracion`
+    );
   });
 
   it('acción view-metrics debe abrir modal y NO mostrar toast.info con "próximamente"', async () => {

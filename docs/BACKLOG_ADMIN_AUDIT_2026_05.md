@@ -440,13 +440,15 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 **Estimación:** 3 pts (Opción B) / 6 pts (Opción A)
 **Dependencias:** decisión de producto sobre mantener flujo multi-tarotista
 **Cubre hallazgo:** ADM-003
+**Estado:** ✅ COMPLETADA (Opción B — MVP single-tarotista)
 
 #### ✅ Tareas específicas — Opción B (interino, recomendada para MVP single-tarotista)
 
-- [ ] En `TarotistasTable.tsx`, deshabilitar/ocultar los items "Ver perfil" y "Configuración" (estado `disabled` + tooltip "Disponible con multi-tarotista").
-- [ ] En `TarotistasManagementContent.tsx`, neutralizar los `router.push` a rutas inexistentes (o no exponerlos).
-- [ ] NO eliminar el código; comentar con referencia a ADM-003.
-- [ ] Tests actualizados.
+- [x] En `TarotistasTable.tsx`, deshabilitar los items "Ver perfil" y "Configuración" (estado `disabled` + tooltip "Disponible con multi-tarotista").
+- [x] En `TarotistasManagementContent.tsx`, neutralizar los `router.push` a rutas inexistentes (`/admin/tarotistas/${id}` y `/admin/tarotistas/${id}/configuracion`). Eliminado `useRouter` ya que no queda uso.
+- [x] Código comentado con referencia a ADM-003.
+- [x] Tests actualizados: 15 tests pasando (TarotistasTable + TarotistasManagementContent).
+- [x] Ciclo de calidad frontend completo (format, lint:fix, type-check, build, validate-architecture).
 
 #### ✅ Tareas específicas — Opción A (implementación completa, si se aprueba multi-tarotista)
 
@@ -456,7 +458,7 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Ningún click en el menú de acciones de Tarotistas produce 404.
+- [x] Ningún click en el menú de acciones de Tarotistas produce 404.
 - [ ] (Opción A) Perfil y configuración funcionan end-to-end.
 
 #### 📁 Archivos involucrados
