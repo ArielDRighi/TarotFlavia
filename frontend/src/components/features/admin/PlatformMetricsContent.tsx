@@ -12,7 +12,6 @@ import { MetricsPeriod } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -123,10 +122,10 @@ export function PlatformMetricsContent() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-gray-500">
-                  <Badge variant="secondary">Próximamente</Badge>
-                </p>
+                <div className="text-2xl font-bold">
+                  {formatLargeNumber(metrics.completedSessions)}
+                </div>
+                <p className="text-xs text-gray-500">En el período seleccionado</p>
               </CardContent>
             </Card>
 
@@ -191,7 +190,9 @@ export function PlatformMetricsContent() {
                     <TableCell className="text-right">
                       {formatLargeNumber(tarotista.totalReadings)}
                     </TableCell>
-                    <TableCell className="text-right text-gray-500">-</TableCell>
+                    <TableCell className="text-right">
+                      {formatLargeNumber(tarotista.completedSessions)}
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(tarotista.totalGrossRevenue)}
                     </TableCell>
