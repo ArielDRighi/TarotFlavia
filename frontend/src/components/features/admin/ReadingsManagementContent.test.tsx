@@ -182,7 +182,7 @@ describe('ReadingsManagementContent', () => {
       fireEvent.click(toggle);
 
       expect(mockUseAdminReadings).toHaveBeenCalledWith(
-        expect.objectContaining({ includeDeleted: true }),
+        expect.objectContaining({ includeDeleted: true })
       );
     });
 

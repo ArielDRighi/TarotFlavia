@@ -8,7 +8,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TarotistasTable } from './TarotistasTable';
 import { ApplicationCard } from './ApplicationCard';
@@ -38,8 +37,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 export function TarotistasManagementContent() {
-  const router = useRouter();
-
   // State para tabs
   const [activeTab, setActiveTab] = useState('activos');
 
@@ -84,7 +81,8 @@ export function TarotistasManagementContent() {
         setActionType('reactivate');
         break;
       case 'view-profile':
-        router.push(`/admin/tarotistas/${tarotista.id}`);
+        // T-ADM-003 (Opción B): acción deshabilitada en la tabla para MVP single-tarotista.
+        // La ruta /admin/tarotistas/[id] no existe aún. Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003
         setSelectedTarotista(null);
         break;
       case 'edit-config':
@@ -373,21 +371,14 @@ export function TarotistasManagementContent() {
           </AlertDialogHeader>
           <div className="py-4">
             <p className="text-muted-foreground text-sm">
-              Para editar la configuración completa, accede al perfil del tarotista.
+              La edición de configuración estará disponible con el flujo multi-tarotista.
+              {/* T-ADM-003 (Opción B): navegación a /admin/tarotistas/[id]/configuracion
+                  deshabilitada en el MVP single-tarotista.
+                  Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003 */}
             </p>
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cerrar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (selectedTarotista) {
-                  router.push(`/admin/tarotistas/${selectedTarotista.id}/configuracion`);
-                }
-                closeDialog();
-              }}
-            >
-              Ir a Configuración
-            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
