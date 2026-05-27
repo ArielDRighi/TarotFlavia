@@ -371,21 +371,14 @@ export function TarotistasManagementContent() {
           </AlertDialogHeader>
           <div className="py-4">
             <p className="text-muted-foreground text-sm">
-              Para editar la configuración completa, accede al perfil del tarotista.
+              La edición de configuración estará disponible con el flujo multi-tarotista.
+              {/* T-ADM-003 (Opción B): navegación a /admin/tarotistas/[id]/configuracion
+                  deshabilitada en el MVP single-tarotista.
+                  Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003 */}
             </p>
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cerrar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                // T-ADM-003 (Opción B): navegación deshabilitada. La ruta
-                // /admin/tarotistas/[id]/configuracion no existe en el MVP single-tarotista.
-                // Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003
-                closeDialog();
-              }}
-            >
-              Ir a Configuración
-            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

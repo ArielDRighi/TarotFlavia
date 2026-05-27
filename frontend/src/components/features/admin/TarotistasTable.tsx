@@ -137,11 +137,18 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span>
+                          {/* span con tabIndex/role para mantener accesibilidad por teclado
+                              cuando el DropdownMenuItem subyacente está disabled */}
+                          <span
+                            tabIndex={0}
+                            role="menuitem"
+                            aria-disabled="true"
+                            className="cursor-not-allowed"
+                          >
                             <DropdownMenuItem
                               data-testid="action-view-profile"
                               disabled
-                              className="cursor-not-allowed opacity-50"
+                              className="pointer-events-none opacity-50"
                             >
                               <Eye className="mr-2 h-4 w-4" />
                               Ver perfil
@@ -155,11 +162,16 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span>
+                          <span
+                            tabIndex={0}
+                            role="menuitem"
+                            aria-disabled="true"
+                            className="cursor-not-allowed"
+                          >
                             <DropdownMenuItem
                               data-testid="action-edit-config"
                               disabled
-                              className="cursor-not-allowed opacity-50"
+                              className="pointer-events-none opacity-50"
                             >
                               <Settings className="mr-2 h-4 w-4" />
                               Editar configuración IA

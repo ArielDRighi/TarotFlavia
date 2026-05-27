@@ -111,9 +111,8 @@ describe('TarotistasTable', () => {
     const onAction = vi.fn();
     render(<TarotistasTable tarotistas={mockTarotistas} onAction={onAction} />);
 
-    // Abrir el primer dropdown
-    const triggers = screen.getAllByRole('button');
-    await user.click(triggers[0]);
+    // Usar data-testid estable en lugar de índice frágil
+    await user.click(screen.getByTestId(`actions-menu-trigger-${mockTarotistas[0].id}`));
 
     // El ítem "Ver perfil" existe pero está disabled
     const viewProfileItem = await screen.findByTestId('action-view-profile');
@@ -126,8 +125,7 @@ describe('TarotistasTable', () => {
     const onAction = vi.fn();
     render(<TarotistasTable tarotistas={mockTarotistas} onAction={onAction} />);
 
-    const triggers = screen.getAllByRole('button');
-    await user.click(triggers[0]);
+    await user.click(screen.getByTestId(`actions-menu-trigger-${mockTarotistas[0].id}`));
 
     const editConfigItem = await screen.findByTestId('action-edit-config');
     expect(editConfigItem).toHaveAttribute('data-disabled');
@@ -139,8 +137,7 @@ describe('TarotistasTable', () => {
     const onAction = vi.fn();
     render(<TarotistasTable tarotistas={mockTarotistas} onAction={onAction} />);
 
-    const triggers = screen.getAllByRole('button');
-    await user.click(triggers[0]);
+    await user.click(screen.getByTestId(`actions-menu-trigger-${mockTarotistas[0].id}`));
 
     const viewProfileItem = await screen.findByTestId('action-view-profile');
     await user.click(viewProfileItem);
