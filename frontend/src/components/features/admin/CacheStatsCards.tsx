@@ -4,7 +4,7 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Database, TrendingUp, TrendingDown, Zap } from 'lucide-react';
+import { Database, TrendingUp, TrendingDown, Zap, DollarSign } from 'lucide-react';
 import type {
   HitRateMetrics,
   SavingsMetrics,
@@ -14,15 +14,16 @@ import { cn } from '@/lib/utils';
 
 interface CacheStatsCardsProps {
   hitRate: HitRateMetrics;
-  savings?: SavingsMetrics; // TODO: Use savings metrics when backend provides detailed cost data
+  savings?: SavingsMetrics;
   responseTime: ResponseTimeMetrics;
 }
 
-export function CacheStatsCards({ hitRate, responseTime }: CacheStatsCardsProps) {
+export function CacheStatsCards({ hitRate, savings, responseTime }: CacheStatsCardsProps) {
   const missRate = 100 - hitRate.percentage;
+  const totalSavingsUsd = savings ? savings.openaiSavings + savings.deepseekSavings : 0;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
       {/* Total Requests */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -79,6 +80,22 @@ export function CacheStatsCards({ hitRate, responseTime }: CacheStatsCardsProps)
           <div className="text-2xl font-bold">{responseTime.improvementFactor}x</div>
           <p className="text-muted-foreground text-xs">
             Cache: {responseTime.cacheAvg}ms vs AI: {responseTime.aiAvg}ms
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Ahorro Estimado */}
+      <Card data-testid="savings-card">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Ahorro Estimado</CardTitle>
+          <DollarSign className="text-muted-foreground h-4 w-4" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-green-600">${totalSavingsUsd.toFixed(2)}</div>
+          <p className="text-muted-foreground text-xs">
+            {savings
+              ? `${savings.groqRateLimitSaved} llamadas Groq evitadas`
+              : '0 llamadas Groq evitadas'}
           </p>
         </CardContent>
       </Card>

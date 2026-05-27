@@ -510,16 +510,17 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 **Estimación:** 1 punto
 **Dependencias:** que el backend exponga `savings` con costo real (relación con BUG-008 resuelto)
 **Cubre hallazgo:** ADM-005
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Si `analytics.savings` trae datos: desestructurar `savings` en `CacheStatsCards` y renderizar una 5ª tarjeta "Ahorro estimado".
-- [ ] Si no se implementa: eliminar la prop `savings` muerta y su `TODO`.
-- [ ] Tests actualizados; ciclo de calidad.
+- [x] Si `analytics.savings` trae datos: desestructurar `savings` en `CacheStatsCards` y renderizar una 5ª tarjeta "Ahorro estimado".
+- [x] Si no se implementa: eliminar la prop `savings` muerta y su `TODO`.
+- [x] Tests actualizados; ciclo de calidad.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] No queda una prop pasada-pero-ignorada: o se muestra el ahorro, o se retira la prop.
+- [x] No queda una prop pasada-pero-ignorada: o se muestra el ahorro, o se retira la prop.
 
 #### 📁 Archivos involucrados
 
