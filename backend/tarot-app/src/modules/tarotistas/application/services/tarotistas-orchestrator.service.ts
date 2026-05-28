@@ -70,10 +70,12 @@ export class TarotistasOrchestratorService {
 
   async getAllTarotistas(filterDto: GetTarotistasFilterDto): Promise<{
     data: Tarotista[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    meta: {
+      page: number;
+      limit: number;
+      totalItems: number;
+      totalPages: number;
+    };
   }> {
     const options = {
       page: filterDto.page || 1,
@@ -92,10 +94,12 @@ export class TarotistasOrchestratorService {
 
     return {
       data: result.data,
-      total: result.total,
-      page: options.page,
-      limit: options.limit,
-      totalPages,
+      meta: {
+        page: options.page,
+        limit: options.limit,
+        totalItems: result.total,
+        totalPages,
+      },
     };
   }
 
@@ -130,12 +134,24 @@ export class TarotistasOrchestratorService {
 
   async getAllApplications(filterDto: GetTarotistasFilterDto): Promise<{
     data: TarotistaApplication[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    meta: {
+      page: number;
+      limit: number;
+      totalItems: number;
+      totalPages: number;
+    };
   }> {
-    return await this.listApplicationsUseCase.execute(filterDto);
+    const result = await this.listApplicationsUseCase.execute(filterDto);
+
+    return {
+      data: result.data,
+      meta: {
+        page: result.page,
+        limit: result.limit,
+        totalItems: result.total,
+        totalPages: result.totalPages,
+      },
+    };
   }
 
   async bulkImportCustomMeanings(
