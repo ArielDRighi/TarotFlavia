@@ -181,11 +181,11 @@ describe('TypeOrmUserRepository', () => {
 
       const result = await repository.findWithFilters(query);
 
-      expect(result.users).toHaveLength(2);
-      expect(result.users[0]).not.toHaveProperty('password');
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]).not.toHaveProperty('password');
       expect(result.meta).toEqual({
-        currentPage: 1,
-        itemsPerPage: 10,
+        page: 1,
+        limit: 10,
         totalItems: 2,
         totalPages: 1,
       });

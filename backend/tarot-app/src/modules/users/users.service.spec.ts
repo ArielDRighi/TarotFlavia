@@ -314,10 +314,10 @@ describe('UsersService', () => {
 
       const result = await service.findAllWithFilters({});
 
-      expect(result.users).toHaveLength(2);
-      expect(result.users[0]).not.toHaveProperty('password');
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]).not.toHaveProperty('password');
       expect(result.meta.totalItems).toBe(2);
-      expect(result.meta.currentPage).toBe(1);
+      expect(result.meta.page).toBe(1);
     });
 
     it('should apply search filter', async () => {

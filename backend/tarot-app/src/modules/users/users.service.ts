@@ -453,10 +453,10 @@ export class UsersService {
     const totalPages = Math.ceil(totalItems / limit);
 
     return {
-      users: usersWithoutPassword,
+      data: usersWithoutPassword,
       meta: {
-        currentPage: page,
-        itemsPerPage: limit,
+        page,
+        limit,
         totalItems,
         totalPages,
       },
