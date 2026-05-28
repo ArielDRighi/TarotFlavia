@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Shield, Trash2, Plus } from 'lucide-react';
+import { Shield, Trash2, Plus, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   useIpWhitelist,
@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -31,7 +32,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { WhitelistActionResponse } from '@/types/admin-security.types';
+
+// IPs que el servicio siempre incluye como entradas de sistema (loopback).
+// No se permiten eliminar desde la UI para evitar romper la whitelist interna.
+const SYSTEM_IPS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
 export function IpWhitelistTab() {
   const [newIp, setNewIp] = useState('');
@@ -117,16 +123,22 @@ export function IpWhitelistTab() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
-            <Input
-              data-testid="add-ip-input"
-              placeholder="Ej: 203.0.113.45 o 2001:db8::1"
-              value={newIp}
-              onChange={(e) => setNewIp(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAdd();
-              }}
-              disabled={isAdding}
-            />
+            <div className="flex flex-1 flex-col gap-1">
+              <Label htmlFor="add-ip-input" className="sr-only">
+                Dirección IP a agregar a la whitelist
+              </Label>
+              <Input
+                id="add-ip-input"
+                data-testid="add-ip-input"
+                placeholder="Ej: 203.0.113.45 o 2001:db8::1"
+                value={newIp}
+                onChange={(e) => setNewIp(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAdd();
+                }}
+                disabled={isAdding}
+              />
+            </div>
             <Button
               data-testid="add-ip-button"
               onClick={handleAdd}
@@ -157,22 +169,51 @@ export function IpWhitelistTab() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ips.map((ip) => (
-                <TableRow key={ip}>
-                  <TableCell className="font-mono">{ip}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      data-testid={`remove-ip-${ip}`}
-                      onClick={() => setIpToRemove(ip)}
-                      disabled={isRemoving}
-                    >
-                      <Trash2 className="text-destructive h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {ips.map((ip) => {
+                const isSystemIp = SYSTEM_IPS.has(ip);
+                return (
+                  <TableRow key={ip}>
+                    <TableCell className="font-mono">
+                      <span className="flex items-center gap-2">
+                        {ip}
+                        {isSystemIp && (
+                          <Badge variant="outline" className="text-xs">
+                            Sistema
+                          </Badge>
+                        )}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {isSystemIp ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex h-8 w-8 items-center justify-center">
+                                <Lock
+                                  className="text-muted-foreground h-4 w-4"
+                                  aria-label={`${ip} es una IP de sistema y no puede eliminarse`}
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>IP de sistema — no se puede eliminar</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          data-testid={`remove-ip-${ip}`}
+                          aria-label={`Eliminar ${ip} de la whitelist`}
+                          onClick={() => setIpToRemove(ip)}
+                          disabled={isRemoving}
+                        >
+                          <Trash2 className="text-destructive h-4 w-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </Card>

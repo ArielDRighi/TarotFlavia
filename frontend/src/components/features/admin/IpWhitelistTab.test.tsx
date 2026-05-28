@@ -79,11 +79,33 @@ describe('IpWhitelistTab', () => {
       expect(screen.getByTestId('whitelist-count')).toHaveTextContent('2');
     });
 
-    it('should render the add IP form', () => {
+    it('should render the add IP form with accessible label', () => {
       setupMocks();
       render(<IpWhitelistTab />);
       expect(screen.getByTestId('add-ip-input')).toBeInTheDocument();
       expect(screen.getByTestId('add-ip-button')).toBeInTheDocument();
+      // El input debe tener un label accesible asociado
+      const input = screen.getByLabelText(/dirección ip a agregar/i);
+      expect(input).toBeInTheDocument();
+    });
+  });
+
+  describe('system IPs (loopback)', () => {
+    it('should render system IPs with Sistema badge and no remove button', () => {
+      setupMocks({ ips: ['127.0.0.1', '::1', '::ffff:127.0.0.1', '10.0.0.1'], count: 4 });
+      render(<IpWhitelistTab />);
+
+      // Sistema badge visible para loopback IPs
+      const sistemaBadges = screen.getAllByText('Sistema');
+      expect(sistemaBadges).toHaveLength(3);
+
+      // No debe existir botón de eliminar para las IPs de sistema
+      expect(screen.queryByTestId('remove-ip-127.0.0.1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('remove-ip-::1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('remove-ip-::ffff:127.0.0.1')).not.toBeInTheDocument();
+
+      // Sí debe existir botón de eliminar para IPs no-sistema
+      expect(screen.getByTestId('remove-ip-10.0.0.1')).toBeInTheDocument();
     });
   });
 
@@ -121,6 +143,7 @@ describe('IpWhitelistTab', () => {
       render(<IpWhitelistTab />);
 
       const removeButton = screen.getByTestId('remove-ip-192.168.1.1');
+      expect(removeButton).toHaveAttribute('aria-label', 'Eliminar 192.168.1.1 de la whitelist');
       await userEvent.click(removeButton);
 
       expect(screen.getByRole('alertdialog')).toBeInTheDocument();
