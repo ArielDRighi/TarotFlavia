@@ -535,17 +535,18 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 **Estimación:** 3 puntos
 **Dependencias:** confirmar que la whitelist debe gestionarse por UI (y no solo por infra/seed)
 **Cubre hallazgo:** ADM-006
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `lib/api/admin-ip-whitelist-api.ts` + entradas en `API_ENDPOINTS` (`/admin/ip-whitelist`).
-- [ ] Crear `hooks/api/useAdminIpWhitelist.ts` (list/add/remove).
-- [ ] Agregar pestaña "IP Whitelist" en `SecurityManagementContent.tsx` con tabla + alta/baja.
-- [ ] Tests + ciclo de calidad.
+- [x] Crear `lib/api/admin-ip-whitelist-api.ts` + entradas en `API_ENDPOINTS` (`/admin/ip-whitelist`).
+- [x] Crear `hooks/api/useAdminIpWhitelist.ts` (list/add/remove).
+- [x] Agregar pestaña "IP Whitelist" en `SecurityManagementContent.tsx` con tabla + alta/baja.
+- [x] Tests + ciclo de calidad (27 tests nuevos pasando; format, lint:fix, type-check, build, validate-architecture ✅).
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] El admin puede listar, agregar y quitar IPs permitidas desde `/admin/seguridad`.
+- [x] El admin puede listar, agregar y quitar IPs permitidas desde `/admin/seguridad`.
 
 #### 📁 Archivos involucrados
 
@@ -554,6 +555,7 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 - `frontend/src/hooks/api/useAdminIpWhitelist.ts` (nuevo) + test
 - `frontend/src/lib/api/admin-ip-whitelist-api.ts` (nuevo) + test
 - `frontend/src/lib/api/endpoints.ts`
+- `frontend/src/types/admin-security.types.ts`
 
 ---
 

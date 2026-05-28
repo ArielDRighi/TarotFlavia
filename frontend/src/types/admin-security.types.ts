@@ -131,3 +131,26 @@ export interface IPActionResponse {
   message: string;
   ip: string;
 }
+
+/**
+ * Respuesta del endpoint GET /admin/ip-whitelist
+ */
+export interface WhitelistResponse {
+  ips: string[];
+  count: number;
+}
+
+/**
+ * DTO para agregar/eliminar IP de la whitelist
+ */
+export interface WhitelistIPDto {
+  ip: string;
+}
+
+/**
+ * Respuesta de acción sobre IP en la whitelist (agregar/eliminar)
+ */
+export interface WhitelistActionResponse {
+  message: string;
+  ip: string;
+}
