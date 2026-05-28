@@ -566,3 +566,43 @@ El backend expone un CRUD de IP whitelist (`GET/POST/DELETE /admin/ip-whitelist`
 - **3 secciones con incompletitud/roturas menores**: Métricas (sesiones), Tarotistas (dead-links), Seguridad (contrato paginación).
 - **2 mejoras de baja prioridad**: tarjeta de ahorro de caché y UI de IP whitelist.
 - Prioridad sugerida: **ADM-001 → ADM-003 (Opción B) → ADM-004 → ADM-002 → ADM-005 → ADM-006**.
+
+---
+
+## PARTE C: HALLAZGOS POST-IMPLEMENTACIÓN (TESTING MANUAL — 27/05/2026)
+
+> Tras cerrar ADM-001…006, el testing manual del panel reveló que **tres secciones marcadas
+> "✅ Correcto" en la auditoría inicial en realidad crasheaban** ("Application error: a client-side
+> exception has occurred"). La auditoría se hizo leyendo código, no ejecutando contra el backend
+> real; los crashes solo aparecen con datos en vivo. Causa común: **el `<T>` de `apiClient.get<T>()`
+> es solo un cast de TS, no valida runtime**, así que un shape de backend distinto al tipado del
+> frontend revienta al renderizar. Misma clase que **ADM-004**.
+
+### ADM-007: `/admin/usuarios` crashea — paginación no estándar `{ users, meta: { currentPage } }`
+
+**Severidad:** 🔴 Crítica (página inutilizable) · **Estado:** ✅ COMPLETADA
+
+- **Backend** `/admin/users` devolvía `{ users, meta: { currentPage, itemsPerPage, totalItems, totalPages } }`.
+- **Frontend** `UsersManagementContent`/`UsersTable` esperan `{ data, meta: { page, limit, … } }` → `data.data` `undefined` → `UsersTable` `users.length` → **TypeError**.
+- **Fix:** se alineó `UserListResponseDto` + `UsersService.findAllWithFilters` + `TypeOrmUserRepository.findWithFilters` al contrato estándar `{ data, meta: { page, limit, totalItems, totalPages } }` (regla #3). Frontend sin cambios. Specs actualizados (58 tests). Verificado en vivo.
+
+### ADM-008: `/admin/tarotistas` crashea — shape plano sin `meta`
+
+**Severidad:** 🔴 Crítica · **Estado:** ✅ COMPLETADA
+
+- **Backend** `getAllTarotistas`/`getAllApplications` devolvían `{ data, total, page, limit, totalPages }` (plano, sin objeto `meta`).
+- **Frontend** lee `tarotistaData.meta.totalPages` → `meta` `undefined` → **TypeError**.
+- **Fix:** ambos métodos del orchestrator envuelven en `{ data, meta: { page, limit, totalItems, totalPages } }`. Frontend sin cambios. Specs actualizados (23 tests). Verificado en vivo.
+- **Sub-hallazgo (separado, NO crashea):** la pestaña "Aplicaciones Pendientes" envía `?status=pending`, pero `GetTarotistasFilterDto` no acepta `status` (`forbidNonWhitelisted`) → `400`. Además `ListApplicationsUseCase` es un **stub intencional** (siempre `[]`, MVP single-tarotista). Cae a EmptyState, no crashea. **Pendiente de decisión de producto** (¿implementar aplicaciones o quitar la pestaña?).
+
+### ADM-009: `/admin/planes` crashea — `price` serializado como string
+
+**Severidad:** 🔴 Crítica · **Estado:** ✅ COMPLETADA
+
+- **Backend** `/plan-config` devolvía `price` como **string** (`"0.00"`): Postgres `decimal` se serializa como string en TypeORM.
+- **Frontend** `PlanComparisonTable` hace `(value as number).toFixed(2)` → sobre string lanza **"toFixed is not a function"**.
+- **Fix:** transformer en `@Column` de `Plan.price` (`from: parseFloat`), mismo patrón que `holistic-service.entity`. Afecta a todos los consumidores, que ya tipan `price: number`. Test del transformer agregado (25 tests). Verificado en vivo.
+
+> **Nota de proceso:** estos tres confirman que las secciones "✅ Correcto" de la PARTE A no fueron
+> verificadas en runtime. Recomendación: en futuras auditorías, ejecutar cada pantalla contra el
+> backend real (o agregar validación de contrato runtime, p.ej. Zod, en la capa `api/`).
