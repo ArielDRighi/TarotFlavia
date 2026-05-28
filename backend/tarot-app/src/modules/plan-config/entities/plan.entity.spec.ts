@@ -1,3 +1,4 @@
+import { getMetadataArgsStorage } from 'typeorm';
 import { Plan } from './plan.entity';
 import { UserPlan } from '../../users/entities/user.entity';
 
@@ -44,6 +45,39 @@ describe('Plan Entity', () => {
       expect(plan.planType).toBe(UserPlan.ANONYMOUS);
       expect(plan.readingsLimit).toBe(3);
       expect(plan.aiQuotaMonthly).toBe(0);
+    });
+  });
+
+  describe('price column transformer', () => {
+    // El tipo decimal de Postgres se serializa como string vía TypeORM. El
+    // transformer `from` debe convertirlo a number para que el frontend pueda
+    // operar sobre él (p.ej. price.toFixed(2)) sin lanzar TypeError.
+    // Obtenemos el transformer real declarado en @Column sobre `price`.
+    const getPriceTransformer = (): {
+      to: (value: number) => unknown;
+      from: (value: string) => number;
+    } => {
+      const priceColumn = getMetadataArgsStorage().columns.find(
+        (c) => c.target === Plan && c.propertyName === 'price',
+      );
+      return priceColumn?.options?.transformer as {
+        to: (value: number) => unknown;
+        from: (value: string) => number;
+      };
+    };
+
+    it('should declare a transformer on the price column', () => {
+      const transformer = getPriceTransformer();
+      expect(transformer).toBeDefined();
+      expect(typeof transformer.from).toBe('function');
+    });
+
+    it('should parse a decimal string from the DB into a number', () => {
+      const { from } = getPriceTransformer();
+
+      expect(from('9.99')).toBe(9.99);
+      expect(from('0.00')).toBe(0);
+      expect(typeof from('15.50')).toBe('number');
     });
   });
 

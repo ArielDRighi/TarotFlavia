@@ -33,10 +33,12 @@ interface TarotistaResponse {
 
 interface TarotistaListResponse {
   data: TarotistaResponse[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  meta: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+  };
 }
 
 interface ApplicationResponse {
@@ -263,9 +265,9 @@ describe('Admin Tarotistas Management (e2e)', () => {
       expect(response.status).toBe(200);
       const body = response.body as TarotistaListResponse;
       expect(body.data).toBeInstanceOf(Array);
-      expect(body.total).toBeGreaterThanOrEqual(0);
-      expect(body.page).toBe(1);
-      expect(body.limit).toBe(20);
+      expect(body.meta.totalItems).toBeGreaterThanOrEqual(0);
+      expect(body.meta.page).toBe(1);
+      expect(body.meta.limit).toBe(20);
     });
 
     it('should filter by search term', async () => {
@@ -278,7 +280,7 @@ describe('Admin Tarotistas Management (e2e)', () => {
 
       expect(response.status).toBe(200);
       const body = response.body as TarotistaListResponse;
-      if (body.total > 0) {
+      if (body.meta.totalItems > 0) {
         expect(body.data[0].nombrePublico).toContain('Luna');
       }
     });
@@ -449,10 +451,10 @@ describe('Admin Tarotistas Management (e2e)', () => {
       expect(response.status).toBe(200);
       const body = response.body as {
         data: ApplicationResponse[];
-        total: number;
+        meta: { totalItems: number };
       };
       expect(body.data).toBeInstanceOf(Array);
-      expect(body.total).toBeGreaterThanOrEqual(0);
+      expect(body.meta.totalItems).toBeGreaterThanOrEqual(0);
     });
 
     it('should approve application and create tarotista', async () => {

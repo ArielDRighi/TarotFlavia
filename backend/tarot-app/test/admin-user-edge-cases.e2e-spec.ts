@@ -272,7 +272,7 @@ describe('Admin User Journey - Edge Cases E2E', () => {
         .set('Authorization', `Bearer ${newToken}`)
         .expect(200);
 
-      expect(userListWithNewToken.body).toHaveProperty('users');
+      expect(userListWithNewToken.body).toHaveProperty('data');
     }, 40000);
 
     it('✅ Remover rol ADMIN bloquea acceso incluso con token válido', async () => {

@@ -103,10 +103,12 @@ describe('TarotistasAdminController', () => {
             nombrePublico: 'Luna Mística',
           } as unknown as Tarotista,
         ],
-        total: 1,
-        page: 1,
-        limit: 20,
-        totalPages: 1,
+        meta: {
+          page: 1,
+          limit: 20,
+          totalItems: 1,
+          totalPages: 1,
+        },
       };
 
       mockOrchestrator.getAllTarotistas.mockResolvedValue(expectedResult);
@@ -131,10 +133,12 @@ describe('TarotistasAdminController', () => {
             nombrePublico: 'Luna Mística',
           } as unknown as Tarotista,
         ],
-        total: 1,
-        page: 1,
-        limit: 20,
-        totalPages: 1,
+        meta: {
+          page: 1,
+          limit: 20,
+          totalItems: 1,
+          totalPages: 1,
+        },
       };
 
       mockOrchestrator.getAllTarotistas.mockResolvedValue(expectedResult);
@@ -154,10 +158,12 @@ describe('TarotistasAdminController', () => {
 
       mockOrchestrator.getAllTarotistas.mockResolvedValue({
         data: [],
-        total: 0,
-        page: 1,
-        limit: 20,
-        totalPages: 0,
+        meta: {
+          page: 1,
+          limit: 20,
+          totalItems: 0,
+          totalPages: 0,
+        },
       });
 
       await controller.getAllTarotistas(filterDto);
@@ -392,10 +398,12 @@ describe('TarotistasAdminController', () => {
             status: ApplicationStatus.PENDING,
           } as unknown as TarotistaApplication,
         ],
-        total: 1,
-        page: 1,
-        limit: 20,
-        totalPages: 1,
+        meta: {
+          page: 1,
+          limit: 20,
+          totalItems: 1,
+          totalPages: 1,
+        },
       };
 
       mockOrchestrator.getAllApplications.mockResolvedValue(expectedResult);

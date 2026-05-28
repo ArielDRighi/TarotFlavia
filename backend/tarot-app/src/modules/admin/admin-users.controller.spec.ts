@@ -78,10 +78,10 @@ describe('AdminUsersController', () => {
   describe('findAll', () => {
     it('should return paginated users with default parameters', async () => {
       const mockResponse = {
-        users: [mockUser],
+        data: [mockUser],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 1,
           totalPages: 1,
         },
@@ -105,10 +105,10 @@ describe('AdminUsersController', () => {
       };
 
       const mockResponse = {
-        users: [],
+        data: [],
         meta: {
-          currentPage: 2,
-          itemsPerPage: 20,
+          page: 2,
+          limit: 20,
           totalItems: 0,
           totalPages: 0,
         },

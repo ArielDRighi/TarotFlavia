@@ -23,7 +23,7 @@ interface LoginResponse {
 }
 
 interface UserListResponse {
-  users: Array<{
+  data: Array<{
     id: number;
     email: string;
     name: string;
@@ -33,8 +33,8 @@ interface UserListResponse {
     banReason: string | null;
   }>;
   meta: {
-    currentPage: number;
-    itemsPerPage: number;
+    page: number;
+    limit: number;
     totalItems: number;
     totalPages: number;
   };
@@ -208,13 +208,13 @@ describe('Admin Users Management (e2e)', () => {
 
       expect(response.status).toBe(200);
       const body = response.body as UserListResponse;
-      expect(body).toHaveProperty('users');
+      expect(body).toHaveProperty('data');
       expect(body).toHaveProperty('meta');
-      expect(body.meta).toHaveProperty('currentPage', 1);
-      expect(body.meta).toHaveProperty('itemsPerPage', 10);
+      expect(body.meta).toHaveProperty('page', 1);
+      expect(body.meta).toHaveProperty('limit', 10);
       expect(body.meta).toHaveProperty('totalItems');
       expect(body.meta).toHaveProperty('totalPages');
-      expect(Array.isArray(body.users)).toBe(true);
+      expect(Array.isArray(body.data)).toBe(true);
     });
 
     it('should filter by search term', async () => {
@@ -225,8 +225,8 @@ describe('Admin Users Management (e2e)', () => {
 
       expect(response.status).toBe(200);
       const body = response.body as UserListResponse;
-      expect(body.users.length).toBeGreaterThan(0);
-      const foundUser = body.users.find(
+      expect(body.data.length).toBeGreaterThan(0);
+      const foundUser = body.data.find(
         (u) => u.email === 'admin@test-admin-users.com',
       );
       expect(foundUser).toBeDefined();
@@ -240,8 +240,8 @@ describe('Admin Users Management (e2e)', () => {
 
       expect(response.status).toBe(200);
       const body = response.body as UserListResponse;
-      expect(body.users.length).toBeGreaterThan(0);
-      body.users.forEach((user) => {
+      expect(body.data.length).toBeGreaterThan(0);
+      body.data.forEach((user) => {
         expect(user.roles).toContain(UserRole.ADMIN);
       });
     });
@@ -254,8 +254,8 @@ describe('Admin Users Management (e2e)', () => {
 
       expect(response.status).toBe(200);
       const body = response.body as UserListResponse;
-      expect(body.meta.itemsPerPage).toBe(2);
-      expect(body.users.length).toBeLessThanOrEqual(2);
+      expect(body.meta.limit).toBe(2);
+      expect(body.data.length).toBeLessThanOrEqual(2);
     });
   });
 
