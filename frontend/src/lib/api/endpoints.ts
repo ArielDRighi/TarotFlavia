@@ -251,6 +251,8 @@ export const API_ENDPOINTS = {
     RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIps
     SECURITY_EVENTS: '/admin/security/events',
     UNBLOCK_IP: (ip: string) => `/admin/rate-limits/unblock-ip/${ip}`,
+    // IP Whitelist (T-ADM-006)
+    IP_WHITELIST: '/admin/ip-whitelist',
     // Readings Admin (T-ADM-001-B)
     READINGS: '/admin/readings',
     READING_SOFT_DELETE: (id: number) => `/admin/readings/${id}`,
