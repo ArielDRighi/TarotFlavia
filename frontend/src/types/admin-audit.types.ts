@@ -69,19 +69,20 @@ export interface AuditLogFilters {
 }
 
 /**
- * Metadata de paginación (match exacto con backend AuditLogListResponse)
+ * Metadata de paginación estándar del proyecto
+ * { page, limit, totalItems, totalPages }
  */
 export interface AuditLogsPaginationMeta {
-  currentPage: number;
-  itemsPerPage: number;
+  page: number;
+  limit: number;
   totalItems: number;
   totalPages: number;
 }
 
 /**
- * Respuesta paginada de logs de auditoría (match exacto con backend)
+ * Respuesta paginada de logs de auditoría — contrato estándar { data, meta }
  */
 export interface AuditLogsResponse {
-  logs: AuditLog[];
+  data: AuditLog[];
   meta: AuditLogsPaginationMeta;
 }

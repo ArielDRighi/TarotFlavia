@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { SharedReading, ReadingCard } from '@/types';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 /**
  * Helper to get the question text from various sources
@@ -149,7 +150,7 @@ export function SharedReadingView({ reading, spreadName }: SharedReadingViewProp
             Crea tu cuenta gratis y descubre lo que las cartas tienen para ti
           </p>
           <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700">
-            <Link href="/registro">Crear mi cuenta gratis</Link>
+            <Link href="/registro">{CTA_AUTH.REGISTER_CONVERSION}</Link>
           </Button>
         </div>
       </footer>

@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { SharedReadingView, type SharedReadingViewProps } from './SharedReadingView';
 import type { SharedReading } from '@/types';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 describe('SharedReadingView', () => {
   const mockReading: SharedReading = {
@@ -117,7 +118,7 @@ El Loco y el Mago juntos indican un nuevo comienzo lleno de potencial.`,
     render(<SharedReadingView {...defaultProps} />);
 
     expect(screen.getByText('¿Quieres tu propia lectura?')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /crear mi cuenta gratis/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: CTA_AUTH.REGISTER_CONVERSION })).toHaveAttribute(
       'href',
       '/registro'
     );

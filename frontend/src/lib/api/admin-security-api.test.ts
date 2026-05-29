@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient } from './axios-config';
 import { fetchRateLimitData, fetchSecurityEvents } from './admin-security-api';
+import { API_ENDPOINTS } from './endpoints';
 import type { RateLimitResponse, SecurityEventsResponse } from '@/types/admin-security.types';
 
 vi.mock('./axios-config');
@@ -19,21 +20,21 @@ describe('admin-security-api', () => {
       const mockData: RateLimitResponse = {
         violations: [
           {
-            ipAddress: '192.168.1.1',
+            ip: '192.168.1.1',
             count: 10,
             firstViolation: '2024-01-01T10:00:00Z',
             lastViolation: '2024-01-01T11:00:00Z',
           },
           {
-            ipAddress: '192.168.1.2',
+            ip: '192.168.1.2',
             count: 5,
             firstViolation: '2024-01-01T09:00:00Z',
             lastViolation: '2024-01-01T09:30:00Z',
           },
         ],
-        blockedIPs: [
+        blockedIps: [
           {
-            ipAddress: '10.0.0.1',
+            ip: '10.0.0.1',
             reason: 'Excessive violations',
             blockedAt: '2024-01-01T12:00:00Z',
             expiresAt: '2024-01-08T12:00:00Z',
@@ -53,9 +54,9 @@ describe('admin-security-api', () => {
       expect(apiClient.get).toHaveBeenCalledWith('/admin/rate-limits/violations');
       expect(result).toEqual(mockData);
       expect(result.violations).toHaveLength(2);
-      expect(result.blockedIPs).toHaveLength(1);
-      expect(result.violations[0].ipAddress).toBe('192.168.1.1');
-      expect(result.blockedIPs[0].reason).toBe('Excessive violations');
+      expect(result.blockedIps).toHaveLength(1);
+      expect(result.violations[0].ip).toBe('192.168.1.1');
+      expect(result.blockedIps[0].reason).toBe('Excessive violations');
     });
   });
 
@@ -69,7 +70,7 @@ describe('admin-security-api', () => {
       };
 
       const mockData: SecurityEventsResponse = {
-        events: [
+        data: [
           {
             id: 'uuid-123',
             eventType: 'failed_login',
@@ -81,8 +82,8 @@ describe('admin-security-api', () => {
           },
         ],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 1,
           totalPages: 1,
         },
@@ -92,20 +93,20 @@ describe('admin-security-api', () => {
 
       const result = await fetchSecurityEvents(filters);
 
-      expect(apiClient.get).toHaveBeenCalledWith('/admin/security/events', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.ADMIN.SECURITY_EVENTS, {
         params: filters,
       });
       expect(result).toEqual(mockData);
-      expect(result.events).toHaveLength(1);
+      expect(result.data).toHaveLength(1);
       expect(result.meta.totalItems).toBe(1);
     });
 
     it('should fetch security events without filters', async () => {
       const mockData: SecurityEventsResponse = {
-        events: [],
+        data: [],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 0,
           totalPages: 0,
         },
@@ -115,10 +116,10 @@ describe('admin-security-api', () => {
 
       const result = await fetchSecurityEvents();
 
-      expect(apiClient.get).toHaveBeenCalledWith('/admin/security/events', {
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.ADMIN.SECURITY_EVENTS, {
         params: {},
       });
-      expect(result.events).toHaveLength(0);
+      expect(result.data).toHaveLength(0);
     });
   });
 });

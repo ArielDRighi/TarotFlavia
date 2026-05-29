@@ -104,6 +104,7 @@ describe('CreatePurchaseUseCase', () => {
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
       findActiveByDate: jest.fn(),
+      findPendingBeforeDate: jest.fn(),
     };
     mockMpService = {
       createPreference: jest.fn().mockResolvedValue({
@@ -239,6 +240,7 @@ describe('GetUserPurchasesUseCase', () => {
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
       findActiveByDate: jest.fn(),
+      findPendingBeforeDate: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -314,6 +316,7 @@ describe('GetAllPurchasesUseCase', () => {
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
       findActiveByDate: jest.fn(),
+      findPendingBeforeDate: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -388,6 +391,7 @@ describe('CancelPurchaseUseCase', () => {
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
       findActiveByDate: jest.fn(),
+      findPendingBeforeDate: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -478,6 +482,7 @@ describe('GetPurchaseByIdUseCase', () => {
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
       findActiveByDate: jest.fn(),
+      findPendingBeforeDate: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

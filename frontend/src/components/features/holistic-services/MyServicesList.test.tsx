@@ -15,6 +15,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MyServicesList } from './MyServicesList';
 import * as useHolisticServicesHook from '@/hooks/api/useHolisticServices';
@@ -22,6 +23,7 @@ import type { ServicePurchase } from '@/types';
 
 vi.mock('@/hooks/api/useHolisticServices', () => ({
   useMyPurchases: vi.fn(),
+  useCancelPurchase: vi.fn(),
 }));
 
 // Mock Next.js Link
@@ -174,6 +176,11 @@ describe('MyServicesList', () => {
   beforeEach(() => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     vi.clearAllMocks();
+    // Default mock for useCancelPurchase (used by all tests)
+    vi.mocked(useHolisticServicesHook.useCancelPurchase).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useCancelPurchase>);
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -325,6 +332,46 @@ describe('MyServicesList', () => {
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent(/completado/i);
     expect(badge.className).toMatch(/gray|grey|slate|neutral/i);
+  });
+
+  it('should render "Vencido" red badge for pending purchase with past date', () => {
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 20,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [expiredPurchase],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    const badge = screen.getByTestId('purchase-status-badge-20');
+    expect(badge).toBeInTheDocument();
+    expect(badge).toHaveTextContent(/vencido/i);
+    expect(badge.className).toMatch(/red/i);
+  });
+
+  it('should NOT show retry payment link for expired purchase', () => {
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 21,
+      selectedDate: '2020-01-01',
+      initPoint: 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=old',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [expiredPurchase],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(screen.queryByTestId(`retry-payment-link-21`)).not.toBeInTheDocument();
   });
 
   it('should render "Cancelado" red badge for cancelled status', () => {
@@ -507,5 +554,260 @@ describe('MyServicesList', () => {
     expect(
       screen.getByTestId(`purchase-appointment-time-${mockPurchasePendingWithDate.id}`)
     ).toHaveTextContent('10:00');
+  });
+
+  // ---- Filters (T-BUG-003-C) ----
+
+  it('should render filter chips: Todos, Vigentes, Vencidos, Pagados', () => {
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 30,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending, expiredPurchase, mockPurchaseCompleted],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(screen.getByRole('button', { name: /todos/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /vigentes/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /vencidos/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /pagados/i })).toBeInTheDocument();
+  });
+
+  it('should show all purchases when "Todos" filter is active (default)', () => {
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 31,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending, expiredPurchase, mockPurchaseCompleted],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(screen.getByTestId(`purchase-card-${mockPurchasePending.id}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`purchase-card-31`)).toBeInTheDocument();
+    expect(screen.getByTestId(`purchase-card-${mockPurchaseCompleted.id}`)).toBeInTheDocument();
+  });
+
+  it('should filter to only pending (vigentes) when "Vigentes" is clicked', async () => {
+    const user = userEvent.setup();
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 32,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending, expiredPurchase, mockPurchaseCompleted],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    await user.click(screen.getByRole('button', { name: /vigentes/i }));
+
+    expect(screen.getByTestId(`purchase-card-${mockPurchasePending.id}`)).toBeInTheDocument();
+    expect(screen.queryByTestId(`purchase-card-32`)).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`purchase-card-${mockPurchaseCompleted.id}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should filter to only expired when "Vencidos" is clicked', async () => {
+    const user = userEvent.setup();
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 33,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending, expiredPurchase, mockPurchaseCompleted],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    await user.click(screen.getByRole('button', { name: /vencidos/i }));
+
+    expect(screen.queryByTestId(`purchase-card-${mockPurchasePending.id}`)).not.toBeInTheDocument();
+    expect(screen.getByTestId(`purchase-card-33`)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`purchase-card-${mockPurchaseCompleted.id}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should filter to only paid (confirmed+completed) when "Pagados" is clicked', async () => {
+    const user = userEvent.setup();
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 34,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending, expiredPurchase, mockPurchaseCompleted, mockPurchaseConfirmed],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    await user.click(screen.getByRole('button', { name: /pagados/i }));
+
+    expect(screen.queryByTestId(`purchase-card-${mockPurchasePending.id}`)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(`purchase-card-34`)).not.toBeInTheDocument();
+    expect(screen.getByTestId(`purchase-card-${mockPurchaseCompleted.id}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`purchase-card-${mockPurchaseConfirmed.id}`)).toBeInTheDocument();
+  });
+
+  // ---- Delete action (T-BUG-003-C) ----
+
+  it('should show "Eliminar" button for expired purchase', () => {
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 40,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [expiredPurchase],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(screen.getByTestId(`delete-purchase-btn-40`)).toBeInTheDocument();
+  });
+
+  it('should NOT show "Eliminar" button for cancelled purchase (backend only cancels pending)', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchaseCancelled],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(
+      screen.queryByTestId(`delete-purchase-btn-${mockPurchaseCancelled.id}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should NOT show "Eliminar" button for pending purchase', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(
+      screen.queryByTestId(`delete-purchase-btn-${mockPurchasePending.id}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should NOT show "Eliminar" button for confirmed purchase', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchaseConfirmed],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    expect(
+      screen.queryByTestId(`delete-purchase-btn-${mockPurchaseConfirmed.id}`)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should open confirmation dialog when "Eliminar" is clicked', async () => {
+    const user = userEvent.setup();
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 41,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [expiredPurchase],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    await user.click(screen.getByTestId('delete-purchase-btn-41'));
+
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /eliminar esta compra/i })).toBeInTheDocument();
+  });
+
+  it('should call cancelPurchase mutate when confirming delete in dialog', async () => {
+    const user = userEvent.setup();
+    const mockMutate = vi.fn();
+    vi.mocked(useHolisticServicesHook.useCancelPurchase).mockReturnValue({
+      mutate: mockMutate,
+      isPending: false,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useCancelPurchase>);
+
+    const expiredPurchase: ServicePurchase = {
+      ...mockPurchasePending,
+      id: 42,
+      selectedDate: '2020-01-01',
+    };
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [expiredPurchase],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    await user.click(screen.getByTestId('delete-purchase-btn-42'));
+    // Click confirm button inside dialog
+    const confirmBtn = screen.getByTestId('confirm-delete-btn');
+    await user.click(confirmBtn);
+
+    expect(mockMutate).toHaveBeenCalledWith(
+      42,
+      expect.objectContaining({ onError: expect.any(Function) })
+    );
+  });
+
+  it('should show aria-pressed=true on active filter button', () => {
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: [mockPurchasePending],
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesList />, { wrapper });
+
+    const todosBtn = screen.getByRole('button', { name: /todos/i });
+    expect(todosBtn).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /vigentes/i })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
   });
 });

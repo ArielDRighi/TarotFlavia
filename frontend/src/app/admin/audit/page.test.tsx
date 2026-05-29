@@ -63,7 +63,7 @@ describe('AuditLogsPage', () => {
 
   it('should render audit logs table with data', async () => {
     const mockData: AuditLogsResponse = {
-      logs: [
+      data: [
         {
           id: '123e4567-e89b-12d3-a456-426614174000',
           userId: 1,
@@ -81,8 +81,8 @@ describe('AuditLogsPage', () => {
         },
       ],
       meta: {
-        currentPage: 1,
-        itemsPerPage: 20,
+        page: 1,
+        limit: 20,
         totalItems: 1,
         totalPages: 1,
       },
@@ -108,10 +108,10 @@ describe('AuditLogsPage', () => {
 
   it('should show empty state when no logs', async () => {
     const mockData: AuditLogsResponse = {
-      logs: [],
+      data: [],
       meta: {
-        currentPage: 1,
-        itemsPerPage: 20,
+        page: 1,
+        limit: 20,
         totalItems: 0,
         totalPages: 0,
       },
@@ -151,8 +151,8 @@ describe('AuditLogsPage', () => {
   it('should handle filter changes', async () => {
     const mockUseAuditLogs = vi.fn().mockReturnValue({
       data: {
-        logs: [],
-        meta: { currentPage: 1, itemsPerPage: 20, totalItems: 0, totalPages: 0 },
+        data: [],
+        meta: { page: 1, limit: 20, totalItems: 0, totalPages: 0 },
       },
       isLoading: false,
       isError: false,

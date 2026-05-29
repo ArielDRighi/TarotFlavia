@@ -13,6 +13,9 @@ import { RecentReadingsTable } from '@/components/features/admin/RecentReadingsT
 import { useDashboardStats } from '@/hooks/api/useDashboardStats';
 import { useDashboardCharts } from '@/hooks/api/useDashboardCharts';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/empty-state';
+import { BarChart3, BookOpen } from 'lucide-react';
 import { transformStatsToMetrics } from '@/lib/utils/dashboard-utils';
 
 /**
@@ -21,7 +24,7 @@ import { transformStatsToMetrics } from '@/lib/utils/dashboard-utils';
 function StatsCardsSkeleton() {
   return (
     <>
-      {[1, 2, 3, 4].map((i) => (
+      {[1, 2, 3].map((i) => (
         <Skeleton key={i} className="h-32" />
       ))}
     </>
@@ -37,13 +40,15 @@ export default function AdminDashboardPage() {
       <h1 className="mb-8 font-serif text-3xl font-bold">Dashboard Admin</h1>
 
       {/* Cards de Métricas */}
-      <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {isLoadingStats ? (
           <StatsCardsSkeleton />
         ) : statsError ? (
-          <div className="col-span-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            Error al cargar estadísticas. Por favor, intenta de nuevo.
-          </div>
+          <Alert variant="destructive" className="col-span-3">
+            <AlertDescription>
+              Error al cargar estadísticas. Por favor, intenta de nuevo.
+            </AlertDescription>
+          </Alert>
         ) : stats ? (
           <>
             {(() => {
@@ -61,12 +66,6 @@ export default function AdminDashboardPage() {
                     metric={metrics.activeTarotistas}
                     icon="star"
                   />
-                  <StatsCard
-                    title="Revenue del Mes"
-                    metric={metrics.monthlyRevenue}
-                    icon="dollar-sign"
-                    prefix="$"
-                  />
                 </>
               );
             })()}
@@ -80,9 +79,11 @@ export default function AdminDashboardPage() {
         {isLoadingCharts ? (
           <Skeleton className="h-[400px]" />
         ) : chartsError ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            Error al cargar gráfico de lecturas. Por favor, intenta de nuevo.
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>
+              Error al cargar gráfico de lecturas. Por favor, intenta de nuevo.
+            </AlertDescription>
+          </Alert>
         ) : charts ? (
           <DailyReadingsChart data={charts.readingsPerDay} />
         ) : null}
@@ -91,15 +92,20 @@ export default function AdminDashboardPage() {
         {isLoadingStats ? (
           <Skeleton className="h-[400px]" />
         ) : statsError ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            Error al cargar distribución de planes. Por favor, intenta de nuevo.
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>
+              Error al cargar distribución de planes. Por favor, intenta de nuevo.
+            </AlertDescription>
+          </Alert>
         ) : stats?.users?.planDistribution && Array.isArray(stats.users.planDistribution) ? (
           <PlanDistributionChart data={stats.users.planDistribution} />
         ) : (
-          <div className="border-border bg-bg-main flex h-[400px] items-center justify-center rounded-lg border">
-            <p className="text-text-secondary">No hay datos de distribución disponibles</p>
-          </div>
+          <EmptyState
+            icon={<BarChart3 />}
+            title="Sin datos"
+            message="No hay datos de distribución disponibles"
+            className="border-border bg-bg-main h-[400px] rounded-lg border"
+          />
         )}
       </div>
 
@@ -111,9 +117,12 @@ export default function AdminDashboardPage() {
         ) : stats?.recentReadings ? (
           <RecentReadingsTable readings={stats.recentReadings} />
         ) : (
-          <div className="text-muted-foreground rounded-lg border p-8 text-center">
-            No hay lecturas recientes disponibles
-          </div>
+          <EmptyState
+            icon={<BookOpen />}
+            title="Sin lecturas recientes"
+            message="No hay lecturas recientes disponibles"
+            className="rounded-lg border"
+          />
         )}
       </div>
     </div>

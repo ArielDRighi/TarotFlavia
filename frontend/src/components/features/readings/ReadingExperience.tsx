@@ -24,6 +24,7 @@ import { TarotCard } from './TarotCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
+import { Spinner } from '@/components/ui/spinner';
 import FreeReadingUpgradeBanner from './FreeReadingUpgradeBanner';
 import UpgradeModal from './UpgradeModal';
 import DailyLimitReachedModal from './DailyLimitReachedModal';
@@ -519,7 +520,7 @@ export function ReadingExperience({
   if (isSpreadsLoading || isQuestionsLoading) {
     return (
       <div className="bg-bg-main flex min-h-screen items-center justify-center p-8">
-        <div className="animate-pulse">Cargando...</div>
+        <Spinner size="lg" text="Cargando..." />
       </div>
     );
   }
@@ -699,9 +700,6 @@ export function ReadingExperience({
       {state === 'error' && (
         <div className="mx-auto max-w-4xl py-12 text-center">
           <ErrorDisplay message={error || 'Error al crear la lectura'} onRetry={handleRetry} />
-          <Button variant="outline" onClick={handleRetry} className="mt-4">
-            Reintentar
-          </Button>
         </div>
       )}
 

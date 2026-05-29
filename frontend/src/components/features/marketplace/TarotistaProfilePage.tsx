@@ -343,7 +343,9 @@ export function TarotistaProfilePage({ id }: TarotistaProfilePageProps) {
             {/* TODO: Implementar lista de reviews cuando el backend esté listo */}
             <div className="py-8 text-center text-gray-500">
               <MessageSquare className="mx-auto mb-4 h-12 w-12 text-gray-300" />
-              <p>Las reseñas estarán disponibles próximamente.</p>
+              <p>
+                Las reseñas estarán disponibles <Badge variant="secondary">Próximamente</Badge>
+              </p>
             </div>
           </CardContent>
         </Card>

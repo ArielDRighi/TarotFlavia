@@ -36,6 +36,18 @@ export interface AIUsageStatistics {
   fallbackRate: number;
 }
 
+/**
+ * Pricing table (USD per million tokens) — actualizado 2026-05-19.
+ *
+ * Fuentes:
+ *  - Groq  : https://groq.com/pricing  — free tier (sin costo para el plan actual)
+ *  - Gemini: https://ai.google.dev/pricing — free tier (sin costo para el plan actual)
+ *  - DeepSeek: https://platform.deepseek.com/docs/pricing  — V3 input $0.14 / output $0.28
+ *  - OpenAI: https://openai.com/api/pricing — gpt-4o-mini input $0.15 / output $0.60
+ *
+ * NOTA: Groq y Gemini tienen $0 porque la aplicación usa el plan gratuito de cada proveedor.
+ * Si en el futuro se migra a un plan de pago, actualizar los valores y quitar de FREE_TIER_PROVIDERS.
+ */
 const COST_PER_MILLION_TOKENS = {
   [AIProvider.GROQ]: { input: 0, output: 0 },
   [AIProvider.DEEPSEEK]: { input: 0.14, output: 0.28 },
@@ -43,8 +55,19 @@ const COST_PER_MILLION_TOKENS = {
   [AIProvider.GEMINI]: { input: 0, output: 0 },
 };
 
+/**
+ * Proveedores que operan en free tier.
+ * El costo $0 para estos proveedores es correcto — no es un error de datos.
+ */
+export const FREE_TIER_PROVIDERS: string[] = [
+  AIProvider.GROQ,
+  AIProvider.GEMINI,
+];
+
+export const GROQ_DAILY_LIMIT = 12000;
+
 const ALERT_THRESHOLDS = {
-  groqDailyLimit: 12000,
+  groqDailyLimit: GROQ_DAILY_LIMIT,
   errorRatePercent: 5,
   fallbackRatePercent: 10,
   dailyCostUsd: 2.0,

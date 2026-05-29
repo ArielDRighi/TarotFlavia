@@ -19,6 +19,7 @@ vi.mock('@/hooks/api/useAdminUserActions', () => ({
   useBanUser: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
   useUnbanUser: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
   useUpdateUserPlan: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+  useManageRoles: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
 }));
 
 describe('AdminUsuariosPage', () => {

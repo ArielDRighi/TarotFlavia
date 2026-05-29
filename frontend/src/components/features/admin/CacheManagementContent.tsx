@@ -10,9 +10,12 @@
 'use client';
 
 import { useState } from 'react';
-import { RefreshCw, Trash2, Play } from 'lucide-react';
+import { RefreshCw, Trash2, Play, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import {
   Select,
   SelectContent,
@@ -121,17 +124,20 @@ export function CacheManagementContent() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-destructive mb-4">Error al cargar datos de caché</p>
-        <Button onClick={() => refetch()} variant="outline">
-          Reintentar
-        </Button>
-      </div>
+      <ErrorDisplay
+        message="Error al cargar datos de caché"
+        onRetry={() => refetch()}
+        className="py-12"
+      />
     );
   }
 
   if (isLoading || !analytics) {
-    return <div className="py-12 text-center">Cargando...</div>;
+    return (
+      <div className="py-12">
+        <Spinner size="md" text="Cargando..." />
+      </div>
+    );
   }
 
   const tarotistas = tarotistasResponse?.data || [];
@@ -169,7 +175,11 @@ export function CacheManagementContent() {
         </CardHeader>
         <CardContent>
           {analytics.topCombinations.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">No hay combinaciones cacheadas</p>
+            <EmptyState
+              icon={<Database />}
+              title="Sin caché aún"
+              message="No hay combinaciones cacheadas"
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -336,11 +346,12 @@ export function CacheManagementContent() {
         </Card>
       )}
 
-      {warmingLoading && (
-        <p className="text-muted-foreground text-center">Cargando warming status...</p>
-      )}
+      {warmingLoading && <Spinner size="sm" text="Cargando warming status..." />}
       {warmingError && (
-        <p className="text-destructive text-center">Error al cargar warming status</p>
+        <ErrorDisplay
+          message="Error al cargar warming status"
+          onRetry={() => void refetchWarming()}
+        />
       )}
     </div>
   );

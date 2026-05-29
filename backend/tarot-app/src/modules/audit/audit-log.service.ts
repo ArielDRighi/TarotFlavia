@@ -11,11 +11,15 @@ import { AuditLog } from './entities/audit-log.entity';
 import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { QueryAuditLogDto } from './dto/query-audit-log.dto';
 
+/**
+ * Contrato de paginación estándar del proyecto.
+ * Ver regla #3 en CLAUDE.md: { data: [], meta: { page, limit, totalItems, totalPages } }
+ */
 export interface AuditLogListResponse {
-  logs: AuditLog[];
+  data: AuditLog[];
   meta: {
-    currentPage: number;
-    itemsPerPage: number;
+    page: number;
+    limit: number;
     totalItems: number;
     totalPages: number;
   };
@@ -69,7 +73,7 @@ export class AuditLogService {
 
     const skip = (page - 1) * limit;
 
-    const [logs, totalItems] = await this.auditLogRepository.findAndCount({
+    const [data, totalItems] = await this.auditLogRepository.findAndCount({
       where,
       relations: ['user', 'targetUser'],
       order: { createdAt: 'DESC' },
@@ -78,10 +82,10 @@ export class AuditLogService {
     });
 
     return {
-      logs,
+      data,
       meta: {
-        currentPage: page,
-        itemsPerPage: limit,
+        page,
+        limit,
         totalItems,
         totalPages: Math.ceil(totalItems / limit),
       },

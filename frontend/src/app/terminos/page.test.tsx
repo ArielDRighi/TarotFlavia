@@ -73,9 +73,8 @@ describe('TerminosPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('should have disclaimer in yellow background', () => {
-    const { container } = render(<TerminosPage />);
-    const disclaimer = container.querySelector('.bg-yellow-50');
-    expect(disclaimer).toBeInTheDocument();
+  it('should render the disclaimer banner', () => {
+    render(<TerminosPage />);
+    expect(screen.getByTestId('disclaimer-banner')).toBeInTheDocument();
   });
 });

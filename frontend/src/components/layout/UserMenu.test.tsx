@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UserMenu } from './UserMenu';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -32,13 +33,13 @@ describe('UserMenu', () => {
     it('should render "Iniciar Sesión" link when not authenticated', () => {
       render(<UserMenu />);
 
-      expect(screen.getByRole('link', { name: /iniciar sesión/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: CTA_AUTH.LOGIN })).toBeInTheDocument();
     });
 
-    it('should render "Registrarse" button when not authenticated', () => {
+    it('should render "Crear cuenta" button when not authenticated', () => {
       render(<UserMenu />);
 
-      const registerButton = screen.getByRole('link', { name: /registrarse/i });
+      const registerButton = screen.getByRole('link', { name: CTA_AUTH.REGISTER });
       expect(registerButton).toBeInTheDocument();
       expect(registerButton).toHaveAttribute('href', '/registro');
     });

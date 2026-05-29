@@ -33,7 +33,7 @@ describe('AIUsageContent', () => {
   const mockStats: AIUsageStats = {
     statistics: [
       {
-        provider: 'GROQ',
+        provider: 'groq',
         totalCalls: 100,
         successCalls: 95,
         errorCalls: 3,
@@ -47,10 +47,12 @@ describe('AIUsageContent', () => {
       },
     ],
     groqCallsToday: 5000,
+    groqDailyLimit: 12000,
     groqRateLimitAlert: false,
     highErrorRateAlert: false,
     highFallbackRateAlert: false,
     highDailyCostAlert: false,
+    freeProviders: ['groq', 'gemini'],
   };
 
   describe('Loading State', () => {
@@ -120,7 +122,6 @@ describe('AIUsageContent', () => {
 
       render(<AIUsageContent />, { wrapper: createWrapper() });
 
-      // Check for Total Requests card heading
       expect(screen.getByText('Total Requests')).toBeInTheDocument();
       expect(screen.getByText('Tokens Consumidos')).toBeInTheDocument();
     });
@@ -135,7 +136,56 @@ describe('AIUsageContent', () => {
       render(<AIUsageContent />, { wrapper: createWrapper() });
 
       expect(screen.getByText('Estadísticas por Proveedor')).toBeInTheDocument();
-      expect(screen.getByText('GROQ')).toBeInTheDocument();
+      // provider label should be human-readable
+      expect(screen.getByText('Groq')).toBeInTheDocument();
+    });
+  });
+
+  describe('Date Range Preset Filter', () => {
+    it('should render the date preset selector', () => {
+      vi.spyOn(useAdminAIUsage, 'useAIUsageStats').mockReturnValue({
+        data: mockStats,
+        isLoading: false,
+        error: null,
+      } as never);
+
+      render(<AIUsageContent />, { wrapper: createWrapper() });
+
+      expect(screen.getByTestId('date-preset-select')).toBeInTheDocument();
+      expect(screen.getByText('Período:')).toBeInTheDocument();
+    });
+
+    it('should call useAIUsageStats without dates when preset is "all"', () => {
+      const mockUseStats = vi.spyOn(useAdminAIUsage, 'useAIUsageStats').mockReturnValue({
+        data: mockStats,
+        isLoading: false,
+        error: null,
+      } as never);
+
+      render(<AIUsageContent />, { wrapper: createWrapper() });
+
+      // Default preset is 'all' → no date params
+      expect(mockUseStats).toHaveBeenCalledWith(undefined, undefined);
+    });
+
+    it('should render preset options in the select', () => {
+      // Note: Radix UI Select interaction (click to open, click option) requires pointer
+      // events not available in jsdom. We verify the select is present and initial state
+      // calls the hook with undefined dates (all-time preset).
+      const mockUseStats = vi.spyOn(useAdminAIUsage, 'useAIUsageStats').mockReturnValue({
+        data: mockStats,
+        isLoading: false,
+        error: null,
+      } as never);
+
+      render(<AIUsageContent />, { wrapper: createWrapper() });
+
+      // Select trigger is rendered and accessible
+      const trigger = screen.getByTestId('date-preset-select');
+      expect(trigger).toBeInTheDocument();
+
+      // Default (all-time) calls hook with undefined dates
+      expect(mockUseStats).toHaveBeenCalledWith(undefined, undefined);
     });
   });
 

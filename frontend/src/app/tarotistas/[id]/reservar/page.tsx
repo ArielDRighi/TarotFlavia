@@ -8,6 +8,7 @@
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { BookingPage } from '@/components/features/marketplace';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 
 interface ReservarPageProps {
   params: {
@@ -25,7 +26,7 @@ export default function ReservarPage({ params }: ReservarPageProps) {
         <Skeleton className="mb-4 h-6 w-64" />
         <Skeleton className="mb-8 h-24 w-full" />
         <Skeleton className="h-96 w-full" />
-        <p className="mt-4 text-center text-sm text-gray-500">Cargando...</p>
+        <Spinner size="md" text="Cargando..." className="mt-4" />
       </div>
     );
   }

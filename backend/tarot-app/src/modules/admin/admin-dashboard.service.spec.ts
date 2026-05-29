@@ -15,6 +15,7 @@ import { TarotReading } from '../tarot/readings/entities/tarot-reading.entity';
 import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
 import { TarotCard } from '../tarot/cards/entities/tarot-card.entity';
 import { PredefinedQuestion } from '../predefined-questions/entities/predefined-question.entity';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { StatsResponseDto } from './dto/stats-response.dto';
 
 describe('AdminDashboardService', () => {
@@ -67,6 +68,10 @@ describe('AdminDashboardService', () => {
     createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
   };
 
+  const mockTarotistaRepository = {
+    count: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -90,6 +95,10 @@ describe('AdminDashboardService', () => {
         {
           provide: getRepositoryToken(PredefinedQuestion),
           useValue: mockPredefinedQuestionRepository,
+        },
+        {
+          provide: getRepositoryToken(Tarotista),
+          useValue: mockTarotistaRepository,
         },
       ],
     }).compile();
@@ -203,6 +212,23 @@ describe('AdminDashboardService', () => {
         .mockResolvedValueOnce(100) // errors
         .mockResolvedValueOnce(500); // cached
 
+      // Mock getRecentReadings (getMany on reading repository)
+      mockQueryBuilder.getMany.mockResolvedValueOnce([
+        {
+          id: 1,
+          user: { email: 'user@test.com', name: 'Usuario Test' },
+          category: { id: 1, name: 'Amor' },
+          questionType: 'custom',
+          customQuestion: '¿Encontraré el amor?',
+          predefinedQuestionId: null,
+          interpretation: 'Test interpretation',
+          createdAt: new Date('2024-01-01'),
+        },
+      ]);
+
+      // Mock getActiveTarotistasCount (count on tarotista repository)
+      mockTarotistaRepository.count.mockResolvedValueOnce(2);
+
       const result: StatsResponseDto = await service.getStats();
 
       expect(result).toBeDefined();
@@ -229,6 +255,13 @@ describe('AdminDashboardService', () => {
 
       expect(result.questions).toBeDefined();
       expect(result.questions.topPredefinedQuestions).toHaveLength(2);
+
+      expect(result.recentReadings).toBeDefined();
+      expect(result.recentReadings).toHaveLength(1);
+      expect(result.recentReadings[0].id).toBe(1);
+      expect(result.recentReadings[0].userEmail).toBe('user@test.com');
+
+      expect(result.activeTarotistas).toBe(2);
     });
   });
 
@@ -436,6 +469,27 @@ describe('AdminDashboardService', () => {
         66.67,
         1,
       );
+    });
+  });
+
+  describe('getActiveTarotistasCount', () => {
+    it('should return count of tarotistas with isActive = true', async () => {
+      mockTarotistaRepository.count.mockResolvedValueOnce(3);
+
+      const result = await service['getActiveTarotistasCount']();
+
+      expect(mockTarotistaRepository.count).toHaveBeenCalledWith({
+        where: { isActive: true },
+      });
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 when no active tarotistas exist', async () => {
+      mockTarotistaRepository.count.mockResolvedValueOnce(0);
+
+      const result = await service['getActiveTarotistasCount']();
+
+      expect(result).toBe(0);
     });
   });
 });

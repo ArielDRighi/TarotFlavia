@@ -11,7 +11,7 @@ describe('AIUsageMetricsCards', () => {
   const mockStats: AIUsageStats = {
     statistics: [
       {
-        provider: 'GROQ',
+        provider: 'groq',
         totalCalls: 1000,
         successCalls: 950,
         errorCalls: 50,
@@ -24,7 +24,7 @@ describe('AIUsageMetricsCards', () => {
         fallbackRate: 1.0,
       },
       {
-        provider: 'OPENAI',
+        provider: 'openai',
         totalCalls: 100,
         successCalls: 98,
         errorCalls: 2,
@@ -38,10 +38,12 @@ describe('AIUsageMetricsCards', () => {
       },
     ],
     groqCallsToday: 100,
+    groqDailyLimit: 12000,
     groqRateLimitAlert: false,
     highErrorRateAlert: false,
     highFallbackRateAlert: false,
     highDailyCostAlert: false,
+    freeProviders: ['groq', 'gemini'],
   };
 
   it('should render all four metric cards', () => {
@@ -57,15 +59,17 @@ describe('AIUsageMetricsCards', () => {
     render(<AIUsageMetricsCards stats={mockStats} />);
 
     // 1000 + 100 = 1100 (formatted with separators)
-    // Should be in the first card (Total Requests)
     const totalRequestsCard = screen.getByText('Total Requests').closest('[data-slot="card"]');
     expect(totalRequestsCard).toHaveTextContent(/1[.,]100/);
   });
 
-  it('should display Groq calls info', () => {
+  it('should display Groq calls using groqDailyLimit from DTO (not hardcoded)', () => {
     render(<AIUsageMetricsCards stats={mockStats} />);
 
-    expect(screen.getByText(/100.*14[.,]400/i)).toBeInTheDocument();
+    // groqDailyLimit is 12000 (from DTO), not 14400 (old hardcoded value)
+    expect(screen.getByText(/100.*12[.,]000/i)).toBeInTheDocument();
+    // Should NOT show old hardcoded value
+    expect(screen.queryByText(/14[.,]400/)).not.toBeInTheDocument();
   });
 
   it('should calculate and display total tokens correctly', () => {
@@ -87,6 +91,63 @@ describe('AIUsageMetricsCards', () => {
 
     // 0.1234 + 0.0456 = 0.1690
     expect(screen.getByText('$0.1690')).toBeInTheDocument();
+  });
+
+  it('should show free tier note only for providers active in statistics that are free tier', () => {
+    // mockStats has groq in statistics and freeProviders=['groq','gemini']
+    // Only groq is active → note shows "Groq" but not "Gemini" (not in statistics)
+    render(<AIUsageMetricsCards stats={mockStats} />);
+
+    const freeTierNote = screen.getByTestId('free-tier-note');
+    expect(freeTierNote).toBeInTheDocument();
+    expect(freeTierNote).toHaveTextContent(/Groq/i);
+    // Gemini is in freeProviders but NOT active in statistics → must not appear
+    expect(freeTierNote).not.toHaveTextContent(/Gemini/i);
+  });
+
+  it('should NOT show free tier note when statistics is empty (no active providers)', () => {
+    // Backend always sends freeProviders as a constant, but if there are no
+    // active providers in statistics the note must be hidden.
+    const statsNoData: AIUsageStats = {
+      ...mockStats,
+      statistics: [],
+      freeProviders: ['groq', 'gemini'], // backend constant, but no activity
+    };
+
+    render(<AIUsageMetricsCards stats={statsNoData} />);
+
+    expect(screen.queryByTestId('free-tier-note')).not.toBeInTheDocument();
+    expect(screen.getByText('USD')).toBeInTheDocument();
+  });
+
+  it('should NOT show free tier note when active providers are all paid', () => {
+    // openai is not in freeProviders=['groq','gemini']
+    const statsOnlyPaid: AIUsageStats = {
+      ...mockStats,
+      statistics: [mockStats.statistics[1]], // only openai
+      freeProviders: ['groq', 'gemini'],
+    };
+
+    render(<AIUsageMetricsCards stats={statsOnlyPaid} />);
+
+    expect(screen.queryByTestId('free-tier-note')).not.toBeInTheDocument();
+    expect(screen.getByText('USD')).toBeInTheDocument();
+  });
+
+  it('should show partial free tier note when mix of free and paid providers are active', () => {
+    // groq (free) + openai (paid) both active
+    const statsMixed: AIUsageStats = {
+      ...mockStats,
+      statistics: [mockStats.statistics[0], mockStats.statistics[1]],
+      freeProviders: ['groq', 'gemini'],
+    };
+
+    render(<AIUsageMetricsCards stats={statsMixed} />);
+
+    // Note is shown (has active free providers), but NOT the "all free" branch
+    const freeTierNote = screen.getByTestId('free-tier-note');
+    expect(freeTierNote).toBeInTheDocument();
+    expect(freeTierNote).toHaveTextContent(/Groq/i);
   });
 
   it('should calculate and display success rate correctly', () => {
@@ -144,14 +205,16 @@ describe('AIUsageMetricsCards', () => {
     expect(successCard).toBeInTheDocument();
   });
 
-  it('should handle empty statistics', () => {
+  it('should handle empty statistics (zeros, no free tier note)', () => {
     const emptyStats: AIUsageStats = {
       statistics: [],
       groqCallsToday: 0,
+      groqDailyLimit: 12000,
       groqRateLimitAlert: false,
       highErrorRateAlert: false,
       highFallbackRateAlert: false,
       highDailyCostAlert: false,
+      freeProviders: ['groq', 'gemini'], // backend sends this even with no data
     };
 
     render(<AIUsageMetricsCards stats={emptyStats} />);
@@ -159,5 +222,7 @@ describe('AIUsageMetricsCards', () => {
     // Should show zeros
     expect(screen.getByText('$0.0000')).toBeInTheDocument();
     expect(screen.getByText('0.00%')).toBeInTheDocument();
+    // No active providers → no free tier note
+    expect(screen.queryByTestId('free-tier-note')).not.toBeInTheDocument();
   });
 });

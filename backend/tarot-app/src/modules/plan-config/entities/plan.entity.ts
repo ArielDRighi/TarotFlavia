@@ -51,7 +51,16 @@ export class Plan {
     example: 0,
     description: 'Precio mensual en USD',
   })
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string): number => parseFloat(value),
+    },
+  })
   price: number;
 
   @ApiProperty({

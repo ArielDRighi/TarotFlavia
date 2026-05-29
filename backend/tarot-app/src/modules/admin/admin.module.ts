@@ -15,6 +15,7 @@ import { AIUsageLog } from '../ai-usage/entities/ai-usage-log.entity';
 import { TarotCard } from '../tarot/cards/entities/tarot-card.entity';
 import { PredefinedQuestion } from '../predefined-questions/entities/predefined-question.entity';
 import { SystemConfig } from './entities/system-config.entity';
+import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
 
@@ -27,6 +28,7 @@ import { AuditModule } from '../audit/audit.module';
       TarotCard,
       PredefinedQuestion,
       SystemConfig,
+      Tarotista,
     ]),
     CacheModule.register({
       ttl: ADMIN_DASHBOARD_CACHE_TTL,

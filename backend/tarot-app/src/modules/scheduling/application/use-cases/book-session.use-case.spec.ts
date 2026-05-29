@@ -124,6 +124,7 @@ describe('BookSessionUseCase', () => {
       findByMercadoPagoPaymentId: jest.fn(),
       findByPreferenceId: jest.fn(),
       findActiveByDate: jest.fn(),
+      findPendingBeforeDate: jest.fn(),
     } as jest.Mocked<IServicePurchaseRepository>;
 
     mockGetAvailableSlotsUseCase = {

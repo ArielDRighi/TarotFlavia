@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
+import { IIpBlockRepository } from '../interfaces/ip-block-repository.interface';
 
 /**
  * Interface for tracking IP violations
@@ -19,15 +20,66 @@ interface BlockRecord {
 }
 
 /**
- * Service to track rate limit violations and temporarily block IPs
+ * Service to track rate limit violations and temporarily block IPs.
+ *
+ * Maintains an in-memory Map for fast synchronous lookups (required by
+ * CustomThrottlerGuard on every request). Additionally persists blocks to the
+ * database via IIpBlockRepository so they survive process restarts.
+ *
+ * On startup (OnModuleInit) the service rehydrates the in-memory map from
+ * active DB records. This means after a restart, previously blocked IPs are
+ * still blocked without requiring new violations.
+ *
+ * Violation counts are intentionally kept in-memory only: they are ephemeral
+ * signals that reset within a time window and do not need to survive restarts.
  */
 @Injectable()
-export class IPBlockingService {
+export class IPBlockingService implements OnModuleInit {
   private readonly logger = new Logger(IPBlockingService.name);
   private readonly violations = new Map<string, ViolationRecord>();
   private readonly blockedIPs = new Map<string, BlockRecord>();
   private readonly VIOLATION_THRESHOLD = 10;
   private readonly VIOLATION_WINDOW_MS = 3600000; // 1 hour
+
+  constructor(
+    @Optional()
+    private readonly ipBlockRepository?: IIpBlockRepository,
+  ) {}
+
+  /**
+   * Rehydrate in-memory blocked IPs from the database on module startup.
+   * Skips silently if no repository is provided (e.g. in unit tests).
+   */
+  async onModuleInit(): Promise<void> {
+    if (!this.ipBlockRepository) {
+      this.logger.warn(
+        'IIpBlockRepository not provided — IP blocks will not persist across restarts.',
+      );
+      return;
+    }
+
+    try {
+      // Clean up expired records first
+      await this.ipBlockRepository.deleteExpired();
+
+      const active = await this.ipBlockRepository.findActive();
+      for (const record of active) {
+        this.blockedIPs.set(record.ip, {
+          blockedAt: record.createdAt,
+          blockedUntil: record.blockedUntil,
+          reason: record.reason,
+        });
+      }
+      this.logger.log(
+        `Rehydrated ${active.length} active IP block(s) from database.`,
+      );
+    } catch (error) {
+      this.logger.error(
+        'Failed to rehydrate IP blocks from database:',
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
 
   /**
    * Record a rate limit violation for an IP
@@ -92,7 +144,8 @@ export class IPBlockingService {
   }
 
   /**
-   * Manually block an IP for a specified duration
+   * Manually block an IP for a specified duration.
+   * Updates in-memory map immediately and persists to DB asynchronously.
    * @param ip IP address
    * @param durationSeconds Duration in seconds
    * @param reason Optional reason for blocking
@@ -108,16 +161,39 @@ export class IPBlockingService {
     this.logger.warn(
       `IP ${ip} blocked until ${blockedUntil.toISOString()} - ${reason}`,
     );
+
+    // Persist asynchronously — fire and forget, errors are logged
+    if (this.ipBlockRepository) {
+      this.ipBlockRepository
+        .upsert(ip, blockedUntil, reason)
+        .catch((err: unknown) => {
+          this.logger.error(
+            `Failed to persist IP block for ${ip}:`,
+            err instanceof Error ? err.message : String(err),
+          );
+        });
+    }
   }
 
   /**
-   * Unblock an IP and reset its violation count
+   * Unblock an IP and reset its violation count.
+   * Updates in-memory map immediately and removes from DB asynchronously.
    * @param ip IP address
    */
   unblockIP(ip: string): void {
     this.blockedIPs.delete(ip);
     this.violations.delete(ip);
     this.logger.log(`IP ${ip} unblocked`);
+
+    // Remove from DB asynchronously — fire and forget, errors are logged
+    if (this.ipBlockRepository) {
+      this.ipBlockRepository.remove(ip).catch((err: unknown) => {
+        this.logger.error(
+          `Failed to remove IP block for ${ip} from database:`,
+          err instanceof Error ? err.message : String(err),
+        );
+      });
+    }
   }
 
   /**

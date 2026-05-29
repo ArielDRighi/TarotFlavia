@@ -23,6 +23,12 @@ import { SessionType, SessionStatus, PaymentStatus } from '../domain/enums';
 ])
 @Index('idx_user_session_date', ['userId', 'sessionDate'])
 @Index('idx_session_status', ['status'])
+@Index('idx_session_completed_at_status', ['status', 'completedAt'])
+@Index('idx_session_tarotista_completed', [
+  'tarotistaId',
+  'status',
+  'completedAt',
+])
 export class Session {
   @PrimaryGeneratedColumn('increment')
   id: number;

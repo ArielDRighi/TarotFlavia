@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { ArticleDetailView } from '@/components/features/encyclopedia/ArticleDetailView';
 import { useArticle } from '@/hooks/api/useEncyclopediaArticles';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ROUTES } from '@/lib/constants/routes';
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -25,7 +26,7 @@ export function ArticleDetailPageContent() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-muted h-8 w-48 animate-pulse rounded" />
+        <Skeleton className="h-8 w-48" />
       </div>
     );
   }

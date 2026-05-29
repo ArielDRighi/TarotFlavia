@@ -29,7 +29,7 @@ describe('useAuditLogs', () => {
 
   it('should fetch audit logs successfully', async () => {
     const mockResponse: AuditLogsResponse = {
-      logs: [
+      data: [
         {
           id: '123e4567-e89b-12d3-a456-426614174000',
           userId: 1,
@@ -47,8 +47,8 @@ describe('useAuditLogs', () => {
         },
       ],
       meta: {
-        currentPage: 1,
-        itemsPerPage: 20,
+        page: 1,
+        limit: 20,
         totalItems: 1,
         totalPages: 1,
       },
@@ -77,10 +77,10 @@ describe('useAuditLogs', () => {
     };
 
     const mockResponse: AuditLogsResponse = {
-      logs: [],
+      data: [],
       meta: {
-        currentPage: 1,
-        itemsPerPage: 10,
+        page: 1,
+        limit: 10,
         totalItems: 0,
         totalPages: 0,
       },
@@ -118,8 +118,8 @@ describe('useAuditLogs', () => {
   it('should set correct query key with filters', async () => {
     const filters = { userId: 1 };
     vi.mocked(adminAuditApi.fetchAuditLogs).mockResolvedValue({
-      logs: [],
-      meta: { currentPage: 1, itemsPerPage: 20, totalItems: 0, totalPages: 0 },
+      data: [],
+      meta: { page: 1, limit: 20, totalItems: 0, totalPages: 0 },
     });
 
     const { result } = renderHook(() => useAuditLogs(filters), {

@@ -52,7 +52,7 @@ export interface AICostPerDayDto {
 
 export interface OpenAIStatsDto {
   totalPrompts: number;
-  totalCost: number;
+  totalCostUsd: number;
   aiCostsPerDay: AICostPerDayDto[];
 }
 
@@ -82,6 +82,7 @@ export interface StatsResponseDto {
   openai: OpenAIStatsDto;
   questions: QuestionStatsDto;
   recentReadings: RecentReadingDto[]; // Agregar lecturas recientes del backend
+  activeTarotistas: number; // Número de tarotistas activos (Tarotista.isActive = true)
 }
 
 // --- /admin/dashboard/charts ---
@@ -98,10 +99,10 @@ export interface ChartsResponseDto {
 
 /**
  * Estadísticas de un proveedor de IA
- * Refleja exactamente el ProviderStatisticsDto del backend
+ * Refleja exactamente el ProviderStatisticsDto del backend (valores lowercase)
  */
 export interface AIProviderStats {
-  provider: 'GROQ' | 'OPENAI' | 'DEEPSEEK';
+  provider: 'groq' | 'openai' | 'deepseek' | 'gemini';
   totalCalls: number;
   successCalls: number;
   errorCalls: number;
@@ -120,10 +121,14 @@ export interface AIProviderStats {
 export interface AIUsageStats {
   statistics: AIProviderStats[];
   groqCallsToday: number;
+  /** Límite diario de Groq expuesto por el backend */
+  groqDailyLimit: number;
   groqRateLimitAlert: boolean;
   highErrorRateAlert: boolean;
   highFallbackRateAlert: boolean;
   highDailyCostAlert: boolean;
+  /** Proveedores en free tier — el costo $0 es correcto, no un error de datos */
+  freeProviders: string[];
 }
 
 /**

@@ -65,7 +65,7 @@ describe('PremiumBenefitsSection', () => {
   it('should render upgrade CTA button', () => {
     render(<PremiumBenefitsSection />);
 
-    const ctaButton = screen.getByRole('link', { name: /actualizar a premium/i });
+    const ctaButton = screen.getByRole('link', { name: /comenzar premium/i });
 
     expect(ctaButton).toBeInTheDocument();
     expect(ctaButton).toHaveAttribute('href', '/registro');

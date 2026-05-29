@@ -18,6 +18,8 @@ import {
 import { TarotistaRevenueMetrics } from '../../entities/tarotista-revenue-metrics.entity';
 import { Tarotista } from '../../entities/tarotista.entity';
 import { TarotReading } from '../../../tarot/readings/entities/tarot-reading.entity';
+import { Session } from '../../../scheduling/entities/session.entity';
+import { SessionStatus } from '../../../scheduling/domain/enums';
 
 /**
  * TypeORM implementation of IMetricsRepository
@@ -32,6 +34,8 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
     private readonly tarotistaRepo: Repository<Tarotista>,
     @InjectRepository(TarotReading)
     private readonly readingRepo: Repository<TarotReading>,
+    @InjectRepository(Session)
+    private readonly sessionRepo: Repository<Session>,
   ) {}
 
   async getReadingCountsByTarotista(
@@ -199,6 +203,15 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
       .addSelect('SUM(revenue.totalRevenueUsd)', 'totalGrossRevenue')
       .getRawOne();
 
+    // Count completed sessions for this tarotista in the period
+    const completedSessions = await this.sessionRepo.count({
+      where: {
+        tarotistaId: dto.tarotistaId,
+        status: SessionStatus.COMPLETED,
+        completedAt: Between(start, end),
+      },
+    });
+
     return {
       tarotistaId: tarotista.id,
       nombrePublico: tarotista.nombrePublico,
@@ -210,6 +223,7 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
         parseFloat(metricsRaw?.totalGrossRevenue ?? '0') || 0.0,
       averageRating: tarotista.ratingPromedio || 0.0,
       totalReviews: tarotista.totalReviews || 0,
+      completedSessions,
       period: { start, end },
     };
   }
@@ -263,6 +277,14 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
 
     const activeUsers = activeUsersResult.length;
 
+    // Count completed sessions platform-wide in the period
+    const completedSessions = await this.sessionRepo.count({
+      where: {
+        status: SessionStatus.COMPLETED,
+        completedAt: Between(start, end),
+      },
+    });
+
     // Top 5 tarotistas by revenue
     const topTarotistas = await this.getTopTarotistasInternal(start, end);
 
@@ -276,6 +298,7 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
         parseFloat(totalMetricsRaw?.totalGrossRevenue ?? '0') || 0.0,
       activeTarotistas,
       activeUsers,
+      completedSessions,
       period: { start, end },
       topTarotistas,
     };
@@ -313,6 +336,28 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
       where: tarotistaIds.map((id) => ({ id })),
     });
 
+    // Get completed sessions for all top tarotistas in a single aggregated query
+    const completedSessionsRaw: { tarotistaId: number; count: string }[] =
+      await this.sessionRepo
+        .createQueryBuilder('session')
+        .where('session.tarotistaId IN (:...tarotistaIds)', { tarotistaIds })
+        .andWhere('session.status = :status', {
+          status: SessionStatus.COMPLETED,
+        })
+        .andWhere('session.completedAt >= :start', { start })
+        .andWhere('session.completedAt <= :end', { end })
+        .select('session.tarotistaId', 'tarotistaId')
+        .addSelect('COUNT(session.id)', 'count')
+        .groupBy('session.tarotistaId')
+        .getRawMany();
+
+    const completedSessionsMap = new Map<number, number>(
+      completedSessionsRaw.map((row) => [
+        row.tarotistaId,
+        parseInt(row.count, 10) || 0,
+      ]),
+    );
+
     // Generate complete metrics for each
     const metricsPromises = tarotistaIds.map(async (tarotistaId) => {
       const tarotista = tarotistas.find((t) => t.id === tarotistaId);
@@ -338,6 +383,8 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
         .addSelect('SUM(revenue.totalRevenueUsd)', 'totalGrossRevenue')
         .getRawOne();
 
+      const completedSessions = completedSessionsMap.get(tarotistaId) ?? 0;
+
       return {
         tarotistaId: tarotista.id,
         nombrePublico: tarotista.nombrePublico,
@@ -347,6 +394,7 @@ export class TypeOrmMetricsRepository implements IMetricsRepository {
         totalGrossRevenue: parseFloat(metrics?.totalGrossRevenue ?? '0') || 0.0,
         averageRating: tarotista.ratingPromedio || 0.0,
         totalReviews: tarotista.totalReviews || 0,
+        completedSessions,
         period: { start, end },
       };
     });

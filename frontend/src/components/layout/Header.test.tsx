@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Header } from './Header';
 import * as nextNavigation from 'next/navigation';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -113,20 +115,20 @@ describe('Header', () => {
       expect(screen.getByRole('link', { name: /iniciar sesión/i })).toBeInTheDocument();
     });
 
-    it('should show "Registrarse" button when not authenticated', () => {
+    it('should show "Crear cuenta" button when not authenticated', () => {
       render(<Header />);
 
-      const registerButton = screen.getByRole('link', { name: /registrarse/i });
+      const registerButton = screen.getByRole('link', { name: CTA_AUTH.REGISTER });
       expect(registerButton).toBeInTheDocument();
       expect(registerButton).toHaveAttribute('href', '/registro');
     });
 
-    it('should render "Registrarse" as primary button (more prominent)', () => {
+    it('should render "Crear cuenta" as primary button (more prominent)', () => {
       render(<Header />);
 
-      const registerButton = screen.getByRole('link', { name: /registrarse/i });
+      const registerButton = screen.getByRole('link', { name: CTA_AUTH.REGISTER });
       // Primary button has bg-primary class, outline button has border-input class
-      // Registrarse should be primary (default variant), NOT outline
+      // Crear cuenta should be primary (default variant), NOT outline
       expect(registerButton).toHaveClass('bg-primary');
       expect(registerButton).not.toHaveClass('border-input');
     });
@@ -173,10 +175,10 @@ describe('Header', () => {
       expect(screen.queryByRole('link', { name: /iniciar sesión/i })).not.toBeInTheDocument();
     });
 
-    it('should NOT show "Registrarse" button when authenticated', () => {
+    it('should NOT show "Crear cuenta" button when authenticated', () => {
       render(<Header />);
 
-      expect(screen.queryByRole('link', { name: /registrarse/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: CTA_AUTH.REGISTER })).not.toBeInTheDocument();
     });
   });
 
@@ -193,6 +195,81 @@ describe('Header', () => {
 
       const menuButton = screen.getByRole('button', { name: /menú/i });
       expect(menuButton).toHaveClass('md:hidden');
+    });
+
+    it('should have aria-expanded=false when menu is closed', () => {
+      render(<Header />);
+
+      const menuButton = screen.getByRole('button', { name: /menú/i });
+      expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('should open the mobile menu Sheet when hamburger button is clicked', async () => {
+      const user = userEvent.setup();
+      render(<Header />);
+
+      const menuButton = screen.getByRole('button', { name: /menú/i });
+      await user.click(menuButton);
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('should have aria-expanded=true when menu is open', async () => {
+      const user = userEvent.setup();
+      render(<Header />);
+
+      const menuButton = screen.getByRole('button', { name: /menú/i });
+      await user.click(menuButton);
+
+      expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('should show navigation links inside the mobile menu', async () => {
+      const user = userEvent.setup();
+      render(<Header />);
+
+      await user.click(screen.getByRole('button', { name: /menú/i }));
+
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(screen.getAllByRole('link', { name: /tarot del día/i }).length).toBeGreaterThan(0);
+    });
+
+    it('should show "Tirada de Tarot" link in mobile menu when authenticated', async () => {
+      mockUseAuthStore.mockReturnValue({
+        user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'free' },
+      });
+      const user = userEvent.setup();
+      render(<Header />);
+
+      await user.click(screen.getByRole('button', { name: /menú/i }));
+
+      expect(screen.getAllByRole('link', { name: /tirada de tarot/i }).length).toBeGreaterThan(0);
+    });
+
+    it('should show "Premium" link in mobile menu for free authenticated users', async () => {
+      mockUseAuthStore.mockReturnValue({
+        user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'free' },
+      });
+      const user = userEvent.setup();
+      render(<Header />);
+
+      await user.click(screen.getByRole('button', { name: /menú/i }));
+
+      const premiumLinks = screen.getAllByRole('link', { name: /premium/i });
+      expect(premiumLinks.length).toBeGreaterThan(0);
+    });
+
+    it('should NOT show "Premium" link in mobile menu for premium users', async () => {
+      mockUseAuthStore.mockReturnValue({
+        user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'premium' },
+      });
+      const user = userEvent.setup();
+      render(<Header />);
+
+      await user.click(screen.getByRole('button', { name: /menú/i }));
+
+      expect(screen.queryByRole('link', { name: /^premium$/i })).not.toBeInTheDocument();
     });
   });
 

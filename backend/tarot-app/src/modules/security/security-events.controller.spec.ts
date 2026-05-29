@@ -20,10 +20,10 @@ describe('SecurityEventsController', () => {
 
   const mockService = {
     findAll: jest.fn().mockResolvedValue({
-      events: [mockEvent],
+      data: [mockEvent],
       meta: {
-        currentPage: 1,
-        itemsPerPage: 20,
+        page: 1,
+        limit: 20,
         totalItems: 1,
         totalPages: 1,
       },
@@ -52,7 +52,7 @@ describe('SecurityEventsController', () => {
   });
 
   describe('findAll', () => {
-    it('should return paginated security events', async () => {
+    it('should return paginated security events with standard contract', async () => {
       const query = {
         page: 1,
         limit: 20,
@@ -62,14 +62,30 @@ describe('SecurityEventsController', () => {
 
       expect(service.findAll).toHaveBeenCalledWith(query);
       expect(result).toEqual({
-        events: [mockEvent],
+        data: [mockEvent],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 20,
+          page: 1,
+          limit: 20,
           totalItems: 1,
           totalPages: 1,
         },
       });
+    });
+
+    it('should use data key (not events) in response', async () => {
+      const query = { page: 1, limit: 20 };
+      const result = await controller.findAll(query);
+      expect(result).toHaveProperty('data');
+      expect(result).not.toHaveProperty('events');
+    });
+
+    it('should use page and limit keys in meta (not currentPage/itemsPerPage)', async () => {
+      const query = { page: 1, limit: 20 };
+      const result = await controller.findAll(query);
+      expect(result.meta).toHaveProperty('page');
+      expect(result.meta).toHaveProperty('limit');
+      expect(result.meta).not.toHaveProperty('currentPage');
+      expect(result.meta).not.toHaveProperty('itemsPerPage');
     });
 
     it('should filter by eventType', async () => {

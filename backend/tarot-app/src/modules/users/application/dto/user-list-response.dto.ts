@@ -6,13 +6,13 @@ export class PaginationMetaDto {
     description: 'Número de página actual',
     example: 1,
   })
-  currentPage: number;
+  page: number;
 
   @ApiProperty({
     description: 'Cantidad de resultados por página',
     example: 10,
   })
-  itemsPerPage: number;
+  limit: number;
 
   @ApiProperty({
     description: 'Total de resultados',
@@ -32,7 +32,7 @@ export class UserListResponseDto {
     description: 'Lista de usuarios',
     type: [Object],
   })
-  users: UserWithoutPassword[];
+  data: UserWithoutPassword[];
 
   @ApiProperty({
     description: 'Metadatos de paginación',

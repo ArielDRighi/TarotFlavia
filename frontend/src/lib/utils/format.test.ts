@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { formatDate, formatRelativeTime, formatPrice, truncateText } from '@/lib/utils/format';
+import {
+  formatDate,
+  formatRelativeTime,
+  formatPrice,
+  formatPriceArs,
+  truncateText,
+} from '@/lib/utils/format';
 
 describe('format utilities', () => {
   describe('formatDate', () => {
@@ -76,6 +82,21 @@ describe('format utilities', () => {
     it('should format price in different currencies', () => {
       const result = formatPrice(100, 'USD');
       expect(result).toContain('$');
+    });
+  });
+
+  describe('formatPriceArs', () => {
+    it('should format ARS price without decimals using thousand separator', () => {
+      const result = formatPriceArs(7000);
+      expect(result).toContain('7.000');
+      expect(result).toContain('$');
+      expect(result).not.toContain(',');
+    });
+
+    it('should round decimal amounts (no fractional pesos)', () => {
+      const result = formatPriceArs(9.99);
+      expect(result).toContain('10');
+      expect(result).not.toContain('9,99');
     });
   });
 

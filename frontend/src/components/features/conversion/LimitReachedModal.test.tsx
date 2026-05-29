@@ -72,7 +72,7 @@ describe('LimitReachedModal', () => {
       />
     );
 
-    const upgradeButton = screen.getByRole('button', { name: /actualizar a premium/i });
+    const upgradeButton = screen.getByRole('button', { name: /mejorar a premium/i });
     await user.click(upgradeButton);
 
     expect(mockOnUpgrade).toHaveBeenCalledOnce();

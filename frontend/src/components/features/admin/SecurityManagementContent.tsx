@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RateLimitingTab } from './RateLimitingTab';
 import { SecurityEventsTab } from './SecurityEventsTab';
+import { IpWhitelistTab } from './IpWhitelistTab';
 
 export function SecurityManagementContent() {
   const [activeTab, setActiveTab] = useState('rate-limiting');
@@ -20,6 +21,7 @@ export function SecurityManagementContent() {
       <TabsList>
         <TabsTrigger value="rate-limiting">Rate Limiting</TabsTrigger>
         <TabsTrigger value="security-events">Eventos de Seguridad</TabsTrigger>
+        <TabsTrigger value="ip-whitelist">IP Whitelist</TabsTrigger>
       </TabsList>
 
       <TabsContent value="rate-limiting" className="mt-6">
@@ -28,6 +30,10 @@ export function SecurityManagementContent() {
 
       <TabsContent value="security-events" className="mt-6">
         <SecurityEventsTab />
+      </TabsContent>
+
+      <TabsContent value="ip-whitelist" className="mt-6">
+        <IpWhitelistTab />
       </TabsContent>
     </Tabs>
   );

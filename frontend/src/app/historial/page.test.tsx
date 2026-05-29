@@ -794,7 +794,7 @@ describe('HistorialPage', () => {
 
       renderWithProviders(<HistorialPage />);
 
-      const retryButton = screen.getByRole('button', { name: /reintentar/i });
+      const retryButton = screen.getByRole('button', { name: /intentar de nuevo/i });
       expect(retryButton).toBeInTheDocument();
     });
 
@@ -810,7 +810,7 @@ describe('HistorialPage', () => {
 
       renderWithProviders(<HistorialPage />);
 
-      const retryButton = screen.getByRole('button', { name: /reintentar/i });
+      const retryButton = screen.getByRole('button', { name: /intentar de nuevo/i });
       await userEvent.click(retryButton);
 
       expect(mockRefetch).toHaveBeenCalled();

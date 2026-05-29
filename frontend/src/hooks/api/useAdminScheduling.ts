@@ -35,26 +35,28 @@ export const adminSchedulingQueryKeys = {
 
 /**
  * Hook to fetch weekly availability slots for a tarotista (admin view)
- * @param tarotistaId - Tarotista ID
+ * @param tarotistaId - Tarotista ID (query is disabled when undefined)
  * @returns TanStack Query result with availability list
  */
-export function useAdminWeeklyAvailability(tarotistaId: number) {
+export function useAdminWeeklyAvailability(tarotistaId: number | undefined) {
   return useQuery({
-    queryKey: adminSchedulingQueryKeys.availability(tarotistaId),
-    queryFn: () => adminGetWeeklyAvailability(tarotistaId),
+    queryKey: adminSchedulingQueryKeys.availability(tarotistaId ?? 0),
+    queryFn: () => adminGetWeeklyAvailability(tarotistaId!),
+    enabled: !!tarotistaId,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
 /**
  * Hook to fetch blocked dates / exceptions for a tarotista (admin view)
- * @param tarotistaId - Tarotista ID
+ * @param tarotistaId - Tarotista ID (query is disabled when undefined)
  * @returns TanStack Query result with exceptions list
  */
-export function useAdminBlockedDates(tarotistaId: number) {
+export function useAdminBlockedDates(tarotistaId: number | undefined) {
   return useQuery({
-    queryKey: adminSchedulingQueryKeys.blockedDates(tarotistaId),
-    queryFn: () => adminGetBlockedDates(tarotistaId),
+    queryKey: adminSchedulingQueryKeys.blockedDates(tarotistaId ?? 0),
+    queryFn: () => adminGetBlockedDates(tarotistaId!),
+    enabled: !!tarotistaId,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
@@ -68,14 +70,14 @@ export function useAdminBlockedDates(tarotistaId: number) {
  * Invalidates availability query for the given tarotista on success.
  * @returns TanStack Mutation result
  */
-export function useSetWeeklyAvailability(tarotistaId: number) {
+export function useSetWeeklyAvailability(tarotistaId: number | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: SetWeeklyAvailabilityDto) => adminSetWeeklyAvailability(tarotistaId, data),
+    mutationFn: (data: SetWeeklyAvailabilityDto) => adminSetWeeklyAvailability(tarotistaId!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: adminSchedulingQueryKeys.availability(tarotistaId),
+        queryKey: adminSchedulingQueryKeys.availability(tarotistaId ?? 0),
       });
     },
   });
@@ -86,15 +88,15 @@ export function useSetWeeklyAvailability(tarotistaId: number) {
  * Invalidates availability query for the given tarotista on success.
  * @returns TanStack Mutation result
  */
-export function useRemoveWeeklyAvailability(tarotistaId: number) {
+export function useRemoveWeeklyAvailability(tarotistaId: number | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (availabilityId: number) =>
-      adminRemoveWeeklyAvailability(tarotistaId, availabilityId),
+      adminRemoveWeeklyAvailability(tarotistaId!, availabilityId),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: adminSchedulingQueryKeys.availability(tarotistaId),
+        queryKey: adminSchedulingQueryKeys.availability(tarotistaId ?? 0),
       });
     },
   });
@@ -105,14 +107,14 @@ export function useRemoveWeeklyAvailability(tarotistaId: number) {
  * Invalidates blocked dates query for the given tarotista on success.
  * @returns TanStack Mutation result
  */
-export function useAddBlockedDate(tarotistaId: number) {
+export function useAddBlockedDate(tarotistaId: number | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: AddExceptionDto) => adminAddBlockedDate(tarotistaId, data),
+    mutationFn: (data: AddExceptionDto) => adminAddBlockedDate(tarotistaId!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: adminSchedulingQueryKeys.blockedDates(tarotistaId),
+        queryKey: adminSchedulingQueryKeys.blockedDates(tarotistaId ?? 0),
       });
     },
   });
@@ -123,14 +125,14 @@ export function useAddBlockedDate(tarotistaId: number) {
  * Invalidates blocked dates query for the given tarotista on success.
  * @returns TanStack Mutation result
  */
-export function useRemoveBlockedDate(tarotistaId: number) {
+export function useRemoveBlockedDate(tarotistaId: number | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (dateId: number) => adminRemoveBlockedDate(tarotistaId, dateId),
+    mutationFn: (dateId: number) => adminRemoveBlockedDate(tarotistaId!, dateId),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: adminSchedulingQueryKeys.blockedDates(tarotistaId),
+        queryKey: adminSchedulingQueryKeys.blockedDates(tarotistaId ?? 0),
       });
     },
   });

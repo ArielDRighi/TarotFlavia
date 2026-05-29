@@ -131,16 +131,16 @@ describe('Admin Operations Integration Tests', () => {
         .expect(200);
 
       // ASSERT
-      expect(response.body).toHaveProperty('users');
+      expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('meta');
       expect(response.body.meta).toHaveProperty('totalItems');
-      expect(response.body.meta).toHaveProperty('currentPage');
-      expect(response.body.meta).toHaveProperty('itemsPerPage');
-      expect(Array.isArray(response.body.users)).toBe(true);
-      expect(response.body.users.length).toBeGreaterThan(0);
+      expect(response.body.meta).toHaveProperty('page');
+      expect(response.body.meta).toHaveProperty('limit');
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBeGreaterThan(0);
 
       // Verificar que incluye nuestros usuarios de prueba
-      const emails = response.body.users.map(
+      const emails = response.body.data.map(
         (user: { email: string }) => user.email,
       );
       expect(emails).toContain(adminUser.email);

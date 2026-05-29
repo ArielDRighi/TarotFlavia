@@ -118,6 +118,9 @@ export const API_ENDPOINTS = {
     BY_YEAR: (year: number) => `/chinese-horoscope/${year}`,
     BY_YEAR_ANIMAL_ELEMENT: (year: number, animal: string, element: string) =>
       `/chinese-horoscope/${year}/${animal}/${element}`,
+    // Admin endpoints (T-BUG-001-A/B)
+    ADMIN_STATUS: (year: number) => `/chinese-horoscope/admin/status/${year}`,
+    ADMIN_GENERATE_MISSING: (year: number) => `/chinese-horoscope/admin/generate-missing/${year}`,
   },
 
   // Numerology (Numerología)
@@ -245,11 +248,15 @@ export const API_ENDPOINTS = {
     // Public (no authentication required)
     PLAN_CONFIG_PUBLIC: '/plan-config/public',
     // Security & Rate Limiting
-    RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIPs
+    RATE_LIMIT_DATA: '/admin/rate-limits/violations', // Retorna violations + blockedIps
     SECURITY_EVENTS: '/admin/security/events',
-    // TODO: Backend endpoints pendientes
-    // BLOCK_IP: '/admin/security/block-ip',
-    // UNBLOCK_IP: (ip: string) => `/admin/security/block-ip/${ip}`,
+    UNBLOCK_IP: (ip: string) => `/admin/rate-limits/unblock-ip/${ip}`,
+    // IP Whitelist (T-ADM-006)
+    IP_WHITELIST: '/admin/ip-whitelist',
+    // Readings Admin (T-ADM-001-B)
+    READINGS: '/admin/readings',
+    READING_SOFT_DELETE: (id: number) => `/admin/readings/${id}`,
+    READING_RESTORE: (id: number) => `/admin/readings/${id}/restore`,
     // Audit Logs
     AUDIT_LOGS: '/admin/audit-logs',
     // Cache Management

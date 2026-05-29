@@ -11,8 +11,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
+import { usePublicPlans } from '@/hooks/api/usePublicPlans';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants/routes';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { formatPriceArs } from '@/lib/utils/format';
 import type { CreatePreapprovalResponse } from '@/types';
 
 /**
@@ -82,6 +85,8 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
   const { user } = useAuth();
   const router = useRouter();
   const { mutate: createPreapproval, isPending } = useCreatePreapproval();
+  const { data: plans } = usePublicPlans();
+  const premiumPrice = plans?.find((p) => p.planType === 'premium')?.price;
 
   // Custom title and description based on reason
   const getContent = () => {
@@ -150,7 +155,9 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
         {/* Pricing */}
         <div className="rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 text-center">
           <div className="flex items-baseline justify-center gap-1">
-            <span className="text-4xl font-bold text-purple-900">$9.99</span>
+            <span className="text-4xl font-bold text-purple-900">
+              {premiumPrice != null ? formatPriceArs(premiumPrice) : '---'}
+            </span>
             <span className="text-muted-foreground">/ mes</span>
           </div>
           <p className="text-muted-foreground mt-2 text-sm">
@@ -167,7 +174,11 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
           >
             <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
-            {isPending ? 'Cargando...' : 'Comenzar ahora'}
+            {isPending
+              ? 'Cargando...'
+              : reason === 'limit-reached'
+                ? CTA_PREMIUM.LIMIT_REACHED
+                : CTA_PREMIUM.PURCHASE}
           </Button>
 
           <button

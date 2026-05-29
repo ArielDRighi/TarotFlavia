@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
 import type { CreatePreapprovalResponse } from '@/types';
 import { ROUTES } from '@/lib/constants/routes';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 
 // ============================================================================
 // Constants
@@ -106,7 +107,7 @@ function CtaButton({ isPending, onClick }: CtaButtonProps) {
       ) : (
         <>
           <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
-          Obtener Premium
+          {CTA_PREMIUM.PURCHASE}
         </>
       )}
     </Button>
@@ -271,7 +272,7 @@ export default function PremiumUpgradePrompt({
           variant="secondary"
           className="flex-shrink-0 bg-white text-purple-600 hover:bg-white/90"
         >
-          {isPending ? 'Cargando...' : 'Obtener Premium'}
+          {isPending ? 'Cargando...' : CTA_PREMIUM.PURCHASE}
         </Button>
       </div>
     </div>

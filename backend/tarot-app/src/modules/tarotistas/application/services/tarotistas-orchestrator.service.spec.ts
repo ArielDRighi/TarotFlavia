@@ -136,10 +136,12 @@ describe('TarotistasOrchestratorService', () => {
 
       expect(result).toEqual({
         data: useCaseResult.data,
-        total: 25,
-        page: 1,
-        limit: 10,
-        totalPages: 3, // ceil(25/10)
+        meta: {
+          page: 1,
+          limit: 10,
+          totalItems: 25,
+          totalPages: 3, // ceil(25/10)
+        },
       });
     });
 

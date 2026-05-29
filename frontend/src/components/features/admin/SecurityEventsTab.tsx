@@ -23,6 +23,9 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
+import { Search } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -51,12 +54,13 @@ export function SecurityEventsTab() {
     limit: 10,
   });
 
-  const { data, isLoading } = useSecurityEvents(filters);
+  const { data, isLoading, isError, refetch } = useSecurityEvents(filters);
 
   const handleFilterChange = (key: keyof SecurityEventFilters, value: string | number) => {
+    const finalValue = value === 'all' || !value ? undefined : value;
     setFilters((prev) => ({
       ...prev,
-      [key]: value || undefined,
+      [key]: finalValue,
       page: 1, // Reset page when filters change
     }));
   };
@@ -78,6 +82,15 @@ export function SecurityEventsTab() {
     );
   }
 
+  if (isError) {
+    return (
+      <ErrorDisplay message="Error al cargar eventos de seguridad" onRetry={() => void refetch()} />
+    );
+  }
+
+  const events = data?.data ?? [];
+  const meta = data?.meta;
+
   return (
     <div className="space-y-6">
       {/* Filtros */}
@@ -90,7 +103,7 @@ export function SecurityEventsTab() {
             <div className="space-y-2">
               <Label htmlFor="eventType">Tipo de Evento</Label>
               <Select
-                value={filters.eventType || ''}
+                value={filters.eventType || 'all'}
                 onValueChange={(value) =>
                   handleFilterChange('eventType', value as SecurityEventType)
                 }
@@ -99,7 +112,7 @@ export function SecurityEventsTab() {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="successful_login">Login Exitoso</SelectItem>
                   <SelectItem value="failed_login">Login Fallido</SelectItem>
                   <SelectItem value="password_changed">Contraseña Cambiada</SelectItem>
@@ -122,7 +135,7 @@ export function SecurityEventsTab() {
             <div className="space-y-2">
               <Label htmlFor="severity">Severidad</Label>
               <Select
-                value={filters.severity || ''}
+                value={filters.severity || 'all'}
                 onValueChange={(value) =>
                   handleFilterChange('severity', value as SecurityEventSeverity)
                 }
@@ -131,7 +144,7 @@ export function SecurityEventsTab() {
                   <SelectValue placeholder="Todas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas</SelectItem>
+                  <SelectItem value="all">Todas</SelectItem>
                   <SelectItem value="low">Baja</SelectItem>
                   <SelectItem value="medium">Media</SelectItem>
                   <SelectItem value="high">Alta</SelectItem>
@@ -184,10 +197,12 @@ export function SecurityEventsTab() {
           <CardTitle>Eventos de Seguridad</CardTitle>
         </CardHeader>
         <CardContent>
-          {!data || data.events.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">
-              No se encontraron eventos de seguridad
-            </p>
+          {events.length === 0 ? (
+            <EmptyState
+              icon={<Search />}
+              title="Sin eventos"
+              message="No se encontraron eventos de seguridad"
+            />
           ) : (
             <>
               <Table>
@@ -202,7 +217,7 @@ export function SecurityEventsTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.events.map((event) => (
+                  {events.map((event) => (
                     <TableRow key={event.id}>
                       <TableCell className="whitespace-nowrap">
                         {parseTimestamp(event.createdAt).toLocaleString()}
@@ -222,13 +237,13 @@ export function SecurityEventsTab() {
               </Table>
 
               {/* Paginación */}
-              {data.meta.totalPages > 1 && (
+              {meta && meta.totalPages > 1 && (
                 <div className="mt-6">
                   <Pagination
-                    currentPage={data.meta.currentPage}
-                    totalPages={data.meta.totalPages}
-                    totalItems={data.meta.totalItems}
-                    limit={data.meta.itemsPerPage}
+                    currentPage={meta.page}
+                    totalPages={meta.totalPages}
+                    totalItems={meta.totalItems}
+                    limit={meta.limit}
                     onPageChange={handlePageChange}
                   />
                 </div>

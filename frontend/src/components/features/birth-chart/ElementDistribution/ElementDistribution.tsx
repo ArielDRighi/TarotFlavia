@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { ChartDistribution } from '@/types/birth-chart.types';
 
 interface ElementDistributionProps {
@@ -252,7 +253,12 @@ export function ElementDistribution({
             <span>.</span>
           </p>
         ) : (
-          <p className="text-muted-foreground text-sm">No hay datos de distribución disponibles.</p>
+          <EmptyState
+            title="Sin datos de elementos"
+            message="No hay datos de distribución disponibles."
+            className="py-4"
+            data-testid="element-distribution-empty"
+          />
         )}
       </div>
     </TooltipProvider>

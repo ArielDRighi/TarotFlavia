@@ -1,14 +1,18 @@
 'use client';
 
-import { CalendarHeart, Moon, Sun, Sparkles, ChevronRight, Zap } from 'lucide-react';
+import { CalendarHeart, Moon, Sun, Sparkles, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
+import { PremiumUpsellCard } from '@/components/ui/premium-upsell-card';
 import { useTodayEvents, useUpcomingEvents } from '@/hooks/api/useSacredCalendar';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
 import { SacredEventType, ImportanceLevel, IMPORTANCE_INFO, type SacredEvent } from '@/types';
 import { parseDateString } from '@/lib/utils/date';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { differenceInCalendarDays } from 'date-fns';
 
 const EVENT_ICONS: Record<SacredEventType, React.ComponentType<{ className?: string }>> = {
@@ -85,12 +89,18 @@ export function SacredEventsWidget() {
   const { user } = useAuthStore();
   const isPremium = user?.plan === 'premium';
 
-  const { data: todayEvents, isLoading: todayLoading, error: todayError } = useTodayEvents();
+  const {
+    data: todayEvents,
+    isLoading: todayLoading,
+    error: todayError,
+    refetch: refetchToday,
+  } = useTodayEvents();
 
   const {
     data: upcomingEventsData,
     isLoading: upcomingLoading,
     error: upcomingError,
+    refetch: refetchUpcoming,
   } = useUpcomingEvents(30);
 
   const isLoading = todayLoading || upcomingLoading;
@@ -124,27 +134,30 @@ export function SacredEventsWidget() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="py-8 text-center">
-          <div className="animate-pulse">
-            <CalendarHeart className="mx-auto mb-2 h-12 w-12 text-purple-300" />
-            <p className="text-sm text-gray-500">Cargando eventos...</p>
-          </div>
+        <div className="py-8">
+          <Spinner size="md" text="Cargando eventos..." />
         </div>
       )}
 
       {/* Error State */}
       {hasError && !isLoading && (
-        <div className="py-8 text-center">
-          <p className="text-sm text-red-600">Error al cargar eventos. Inténtalo de nuevo.</p>
-        </div>
+        <ErrorDisplay
+          message="Error al cargar eventos"
+          onRetry={() => {
+            void refetchToday();
+            void refetchUpcoming();
+          }}
+          className="py-4"
+        />
       )}
 
       {/* Empty State */}
       {!isLoading && !hasError && !hasAnyEvents && (
-        <div className="py-8 text-center">
-          <CalendarHeart className="mx-auto mb-2 h-12 w-12 text-gray-300" />
-          <p className="text-sm text-gray-500">No hay eventos próximos en el calendario sagrado.</p>
-        </div>
+        <EmptyState
+          title="Sin eventos próximos"
+          message="No hay eventos próximos en el calendario sagrado."
+          className="py-4"
+        />
       )}
 
       {/* Content */}
@@ -171,7 +184,7 @@ export function SacredEventsWidget() {
           {hasUpcomingEvents && (
             <div>
               {hasTodayEvents && (
-                <h4 className="mt-4 mb-3 text-sm font-medium text-gray-700">Próximamente</h4>
+                <h4 className="mt-4 mb-3 text-sm font-medium text-gray-700">Próximos eventos</h4>
               )}
               <div className="space-y-2">
                 {upcomingEvents.map((event) => (
@@ -186,28 +199,12 @@ export function SacredEventsWidget() {
       {/* Premium Upsell for Free Users */}
       {!isPremium && !isLoading && (
         <div className="mt-4 border-t border-gray-200 pt-4">
-          <div className="flex items-start gap-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-3">
-            <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-purple-600" />
-            <div className="min-w-0 flex-1">
-              <p className="mb-1 text-sm font-medium text-gray-900">
-                Desbloquea el calendario completo
-              </p>
-              <p className="mb-2 text-xs text-gray-600">
-                Accede a todos los eventos sagrados del año y planifica tus rituales con
-                anticipación.
-              </p>
-              <Button
-                asChild
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Link href="/premium">
-                  Mejorar a Premium
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </div>
+          <PremiumUpsellCard
+            title="Desbloquea el calendario completo"
+            description="Accede a todos los eventos sagrados del año y planifica tus rituales con anticipación."
+            href="/premium"
+            ctaLabel={CTA_PREMIUM.UPSELL_SOFT}
+          />
         </div>
       )}
     </Card>

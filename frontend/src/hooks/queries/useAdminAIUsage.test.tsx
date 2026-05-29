@@ -37,7 +37,7 @@ describe('useAdminAIUsage', () => {
       const mockData: AIUsageStats = {
         statistics: [
           {
-            provider: 'GROQ' as const,
+            provider: 'groq' as const,
             totalCalls: 1000,
             successCalls: 950,
             errorCalls: 50,
@@ -51,10 +51,12 @@ describe('useAdminAIUsage', () => {
           },
         ],
         groqCallsToday: 100,
+        groqDailyLimit: 12000,
         groqRateLimitAlert: false,
         highErrorRateAlert: false,
         highFallbackRateAlert: false,
         highDailyCostAlert: false,
+        freeProviders: ['groq', 'gemini'],
       };
 
       vi.mocked(adminAIUsageApi.getAIUsageStats).mockResolvedValue(mockData);
@@ -70,13 +72,15 @@ describe('useAdminAIUsage', () => {
     });
 
     it('should fetch AI usage statistics with date filters', async () => {
-      const mockData = {
+      const mockData: AIUsageStats = {
         statistics: [],
         groqCallsToday: 100,
+        groqDailyLimit: 12000,
         groqRateLimitAlert: false,
         highErrorRateAlert: false,
         highFallbackRateAlert: false,
         highDailyCostAlert: false,
+        freeProviders: [],
       };
 
       vi.mocked(adminAIUsageApi.getAIUsageStats).mockResolvedValue(mockData);
@@ -95,13 +99,15 @@ describe('useAdminAIUsage', () => {
     });
 
     it('should have correct query key', async () => {
-      const mockData = {
+      const mockData: AIUsageStats = {
         statistics: [],
         groqCallsToday: 100,
+        groqDailyLimit: 12000,
         groqRateLimitAlert: false,
         highErrorRateAlert: false,
         highFallbackRateAlert: false,
         highDailyCostAlert: false,
+        freeProviders: [],
       };
 
       vi.mocked(adminAIUsageApi.getAIUsageStats).mockResolvedValue(mockData);
@@ -120,13 +126,15 @@ describe('useAdminAIUsage', () => {
     });
 
     it('should refetch every 5 minutes (300000ms)', async () => {
-      const mockData = {
+      const mockData: AIUsageStats = {
         statistics: [],
         groqCallsToday: 100,
+        groqDailyLimit: 12000,
         groqRateLimitAlert: false,
         highErrorRateAlert: false,
         highFallbackRateAlert: false,
         highDailyCostAlert: false,
+        freeProviders: [],
       };
 
       vi.mocked(adminAIUsageApi.getAIUsageStats).mockResolvedValue(mockData);

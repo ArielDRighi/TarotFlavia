@@ -58,7 +58,7 @@ describe('AIUsagePage', () => {
     const mockStats: AIUsageStats = {
       statistics: [
         {
-          provider: 'GROQ',
+          provider: 'groq',
           totalCalls: 1000,
           successCalls: 950,
           errorCalls: 50,
@@ -72,10 +72,12 @@ describe('AIUsagePage', () => {
         },
       ],
       groqCallsToday: 100,
+      groqDailyLimit: 12000,
       groqRateLimitAlert: false,
       highErrorRateAlert: false,
       highFallbackRateAlert: false,
       highDailyCostAlert: false,
+      freeProviders: [],
     };
 
     vi.mocked(useAdminAIUsage.useAIUsageStats).mockReturnValue({
@@ -98,10 +100,12 @@ describe('AIUsagePage', () => {
     const mockStats: AIUsageStats = {
       statistics: [],
       groqCallsToday: 100,
+      groqDailyLimit: 12000,
       groqRateLimitAlert: true,
       highErrorRateAlert: true,
       highFallbackRateAlert: false,
       highDailyCostAlert: false,
+      freeProviders: [],
     };
 
     vi.spyOn(useAdminAIUsage, 'useAIUsageStats').mockReturnValue({
@@ -120,10 +124,12 @@ describe('AIUsagePage', () => {
     const mockStats: AIUsageStats = {
       statistics: [],
       groqCallsToday: 100,
+      groqDailyLimit: 12000,
       groqRateLimitAlert: false,
       highErrorRateAlert: false,
       highFallbackRateAlert: false,
       highDailyCostAlert: false,
+      freeProviders: [],
     };
 
     vi.spyOn(useAdminAIUsage, 'useAIUsageStats').mockReturnValue({

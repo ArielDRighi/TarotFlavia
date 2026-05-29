@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/constants/routes';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { Sparkles, Layers, MessageSquare, BarChart3, ShieldOff, Crown } from 'lucide-react';
 
 const benefits = [
@@ -133,7 +134,7 @@ export function PremiumBenefitsSection() {
           >
             <Link href={ROUTES.REGISTER}>
               <Crown className="mr-2 h-4 w-4" />
-              Actualizar a Premium
+              {CTA_PREMIUM.PURCHASE}
             </Link>
           </Button>
         </div>

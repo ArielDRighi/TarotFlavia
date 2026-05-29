@@ -22,6 +22,7 @@ import {
 import { ChineseHoroscopeService } from '../../application/services/chinese-horoscope.service';
 import {
   ChineseHoroscopeResponseDto,
+  ChineseHoroscopeYearStatusDto,
   // ChineseHoroscopeAreaDto,  // Not used directly - inferred from entity
   // ChineseHoroscopeLuckyDto,  // Not used directly - inferred from entity
 } from '../../application/dto/chinese-horoscope-response.dto';
@@ -228,8 +229,99 @@ export class ChineseHoroscopeController {
   }
 
   /**
+   * T-BUG-001-A: Estado de generación de horóscopos chinos de un año (Admin only)
+   * IMPORTANTE: debe declararse ANTES de :year/:animal/:element para evitar colisión de rutas
+   */
+  @Get('admin/status/:year')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Obtener estado de generación de horóscopos chinos de un año (Admin)',
+  })
+  @ApiParam({
+    name: 'year',
+    example: 2026,
+    description: 'Año a consultar (2020-2050)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado de generación del año',
+    type: ChineseHoroscopeYearStatusDto,
+  })
+  @ApiResponse({ status: 400, description: 'Año inválido o fuera de rango' })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({
+    status: 403,
+    description: 'No autorizado (requiere rol admin)',
+  })
+  async getAdminStatus(
+    @Param('year', ParseIntPipe) year: number,
+  ): Promise<ChineseHoroscopeYearStatusDto> {
+    this.validateYear(year);
+    const missing =
+      await this.chineseService.findMissingCombinationsForYear(year);
+    return {
+      year,
+      total: 60,
+      generated: 60 - missing.length,
+      missing,
+    };
+  }
+
+  /**
+   * T-BUG-001-A: Generar solo los horóscopos chinos faltantes para un año (Admin only)
+   */
+  @Post('admin/generate-missing/:year')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Generar solo los horóscopos chinos faltantes de un año (Admin)',
+  })
+  @ApiParam({
+    name: 'year',
+    example: 2026,
+    description: 'Año a completar (2020-2050)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Generación de horóscopos faltantes iniciada',
+  })
+  @ApiResponse({ status: 400, description: 'Año inválido o fuera de rango' })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  @ApiResponse({
+    status: 403,
+    description: 'No autorizado (requiere rol admin)',
+  })
+  generateMissingForYear(@Param('year', ParseIntPipe) year: number): {
+    message: string;
+    details: string;
+  } {
+    this.validateYear(year);
+
+    // Fire-and-forget: inicia la generación de faltantes en background
+    this.chineseService
+      .generateMissingForYear(year)
+      .then((result) => {
+        this.logger.log(
+          `Generación de faltantes completada: ${result.successful} exitosos, ${result.failed} fallidos`,
+        );
+      })
+      .catch((error) => {
+        this.logger.error('Error en generación de faltantes:', error);
+      });
+
+    return {
+      message: `Generación de horóscopos chinos faltantes para ${year} iniciada`,
+      details:
+        'Proceso en background. Solo se generarán las combinaciones ausentes.',
+    };
+  }
+
+  /**
    * Obtener horóscopo chino específico por año, animal y elemento
    * TASK-126: Endpoint para las 60 combinaciones animal/elemento
+   * IMPORTANTE: debe declararse DESPUÉS de las rutas estáticas admin para evitar colisión
    */
   @Get(':year/:animal/:element')
   @ApiOperation({

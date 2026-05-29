@@ -122,7 +122,7 @@ describe('AuditLogService', () => {
   });
 
   describe('findAll', () => {
-    it('should return paginated audit logs', async () => {
+    it('should return paginated audit logs using standard {data, meta} contract', async () => {
       const mockLogs = [
         {
           id: 'uuid-1',
@@ -148,10 +148,11 @@ describe('AuditLogService', () => {
 
       const result = await service.findAll({ page: 1, limit: 20 });
 
-      expect(result.logs).toEqual(mockLogs);
+      // Verifica contrato estándar: data + meta con page/limit (no logs/currentPage/itemsPerPage)
+      expect(result.data).toEqual(mockLogs);
       expect(result.meta).toEqual({
-        currentPage: 1,
-        itemsPerPage: 20,
+        page: 1,
+        limit: 20,
         totalItems: 2,
         totalPages: 1,
       });
@@ -292,8 +293,8 @@ describe('AuditLogService', () => {
       const result = await service.findAll({ page: 3, limit: 20 });
 
       expect(result.meta).toEqual({
-        currentPage: 3,
-        itemsPerPage: 20,
+        page: 3,
+        limit: 20,
         totalItems: 50,
         totalPages: 3,
       });
@@ -330,6 +331,20 @@ describe('AuditLogService', () => {
         skip: 0,
         take: 50,
       });
+    });
+
+    it('should return empty data array when no logs match filters', async () => {
+      mockRepository.findAndCount.mockResolvedValue([[], 0]);
+
+      const result = await service.findAll({
+        userId: 9999,
+        page: 1,
+        limit: 20,
+      });
+
+      expect(result.data).toEqual([]);
+      expect(result.meta.totalItems).toBe(0);
+      expect(result.meta.totalPages).toBe(0);
     });
   });
 });

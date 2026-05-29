@@ -35,6 +35,7 @@ function createWrapper() {
 describe('PlatformMetricsPage', () => {
   const mockMetrics: PlatformMetricsDto = {
     totalReadings: 1500,
+    completedSessions: 87,
     totalRevenueShare: 52500.0,
     totalPlatformFee: 22500.0,
     totalGrossRevenue: 75000.0,
@@ -49,6 +50,7 @@ describe('PlatformMetricsPage', () => {
         tarotistaId: 1,
         nombrePublico: 'Luna Misteriosa',
         totalReadings: 150,
+        completedSessions: 30,
         totalRevenueShare: 5250.0,
         totalPlatformFee: 2250.0,
         totalGrossRevenue: 7500.0,
@@ -63,6 +65,7 @@ describe('PlatformMetricsPage', () => {
         tarotistaId: 2,
         nombrePublico: 'Estrella Mística',
         totalReadings: 130,
+        completedSessions: 25,
         totalRevenueShare: 4550.0,
         totalPlatformFee: 1950.0,
         totalGrossRevenue: 6500.0,

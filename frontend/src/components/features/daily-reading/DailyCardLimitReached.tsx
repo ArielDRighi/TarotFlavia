@@ -6,6 +6,7 @@ import { Calendar, History, Sparkles, Crown, CalendarHeart, Bell, Wand2 } from '
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
 import { PREMIUM_BENEFITS } from '@/lib/constants';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { ROUTES } from '@/lib/constants/routes';
 import {
   Card,
@@ -233,7 +234,7 @@ export function DailyCardLimitReached() {
               size="lg"
             >
               <Crown className="h-4 w-4" />
-              Actualizar a Premium
+              {CTA_PREMIUM.LIMIT_REACHED}
             </Button>
             <div className="flex w-full flex-col gap-2 sm:flex-row">
               <Button

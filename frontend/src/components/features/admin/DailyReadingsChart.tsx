@@ -14,6 +14,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { TrendingUp } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { ReadingsPerDayDto } from '@/types/admin.types';
 import { formatDateCompact, formatDateLocalized } from '@/lib/utils';
 
@@ -29,9 +31,12 @@ export function DailyReadingsChart({ data }: DailyReadingsChartProps) {
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <div className="text-muted-foreground flex h-[300px] items-center justify-center">
-            No hay datos disponibles
-          </div>
+          <EmptyState
+            icon={<TrendingUp />}
+            title="Sin datos"
+            message="No hay datos disponibles"
+            className="h-[300px]"
+          />
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>

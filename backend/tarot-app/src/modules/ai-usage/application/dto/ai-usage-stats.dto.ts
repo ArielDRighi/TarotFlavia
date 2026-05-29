@@ -68,9 +68,15 @@ export class AIUsageStatsDto {
 
   @ApiProperty({
     example: 12500,
-    description: 'Groq calls today (14,400 daily limit)',
+    description: 'Groq calls today (compared to groqDailyLimit)',
   })
   groqCallsToday: number;
+
+  @ApiProperty({
+    example: 12000,
+    description: 'Groq daily call limit (alert threshold)',
+  })
+  groqDailyLimit: number;
 
   @ApiProperty({
     example: false,
@@ -95,4 +101,13 @@ export class AIUsageStatsDto {
     description: 'Whether high daily cost alert should trigger',
   })
   highDailyCostAlert: boolean;
+
+  @ApiProperty({
+    example: ['groq', 'gemini'],
+    description:
+      'Providers operating on free tier — cost is $0 by design (not a data error)',
+    isArray: true,
+    type: String,
+  })
+  freeProviders: string[];
 }

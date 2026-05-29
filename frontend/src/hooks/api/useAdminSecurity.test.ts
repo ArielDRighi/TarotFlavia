@@ -32,15 +32,15 @@ describe('useAdminSecurity hooks', () => {
       const mockData = {
         violations: [
           {
-            ipAddress: '192.168.1.1',
+            ip: '192.168.1.1',
             count: 10,
             firstViolation: '2024-01-01T10:00:00Z',
             lastViolation: '2024-01-01T11:00:00Z',
           },
         ],
-        blockedIPs: [
+        blockedIps: [
           {
-            ipAddress: '10.0.0.1',
+            ip: '10.0.0.1',
             reason: 'Excessive violations',
             blockedAt: '2024-01-01T12:00:00Z',
             expiresAt: '2024-01-08T12:00:00Z',
@@ -61,7 +61,7 @@ describe('useAdminSecurity hooks', () => {
 
       expect(result.current.data).toEqual(mockData);
       expect(result.current.data?.violations).toHaveLength(1);
-      expect(result.current.data?.blockedIPs).toHaveLength(1);
+      expect(result.current.data?.blockedIps).toHaveLength(1);
       expect(securityApi.fetchRateLimitData).toHaveBeenCalled();
     });
   });
@@ -76,7 +76,7 @@ describe('useAdminSecurity hooks', () => {
       };
 
       const mockData = {
-        events: [
+        data: [
           {
             id: 'uuid-123',
             eventType: 'failed_login' as const,
@@ -88,8 +88,8 @@ describe('useAdminSecurity hooks', () => {
           },
         ],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 10,
+          page: 1,
+          limit: 10,
           totalItems: 1,
           totalPages: 1,
         },
@@ -102,8 +102,8 @@ describe('useAdminSecurity hooks', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
       expect(result.current.data).toEqual(mockData);
-      expect(result.current.data?.events).toHaveLength(1);
-      expect(result.current.data?.events[0].ipAddress).toBe('192.168.1.50');
+      expect(result.current.data?.data).toHaveLength(1);
+      expect(result.current.data?.data[0].ipAddress).toBe('192.168.1.50');
       expect(securityApi.fetchSecurityEvents).toHaveBeenCalledWith(filters);
     });
   });

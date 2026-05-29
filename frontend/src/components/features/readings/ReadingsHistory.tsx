@@ -13,6 +13,7 @@ import { shouldUseNativeShare } from '@/lib/utils/device';
 import { ReadingCard } from '@/components/features/readings/ReadingCard';
 import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -323,12 +324,10 @@ export function ReadingsHistory() {
 
       {/* Error State */}
       {isError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
-          <p className="text-red-600">{error?.message || 'Error al obtener lecturas'}</p>
-          <Button variant="outline" onClick={() => refetch()} className="mt-4">
-            Reintentar
-          </Button>
-        </div>
+        <ErrorDisplay
+          message={error?.message || 'Error al obtener lecturas'}
+          onRetry={() => refetch()}
+        />
       )}
 
       {/* Empty State (no readings at all) */}

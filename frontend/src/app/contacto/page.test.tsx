@@ -55,10 +55,9 @@ describe('ContactoPage', () => {
     expect(altContactSection).toBeInTheDocument();
   });
 
-  it('should have yellow disclaimer section', () => {
-    const { container } = render(<ContactoPage />);
-    const disclaimer = container.querySelector('.bg-yellow-50');
-    expect(disclaimer).toBeInTheDocument();
+  it('should render the disclaimer banner', () => {
+    render(<ContactoPage />);
+    expect(screen.getByTestId('disclaimer-banner')).toBeInTheDocument();
   });
 
   it('should render submit button from ContactForm', () => {

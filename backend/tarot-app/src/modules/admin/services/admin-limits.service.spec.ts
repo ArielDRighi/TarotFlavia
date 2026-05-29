@@ -374,10 +374,10 @@ describe('AdminLimitsService', () => {
       ];
 
       const mockResponse = {
-        logs: mockHistory as unknown as never[],
+        data: mockHistory as unknown as never[],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 20,
+          page: 1,
+          limit: 20,
           totalItems: 1,
           totalPages: 1,
         },
@@ -396,10 +396,10 @@ describe('AdminLimitsService', () => {
 
     it('should return empty logs array when no history exists', async () => {
       const mockResponse = {
-        logs: [],
+        data: [],
         meta: {
-          currentPage: 1,
-          itemsPerPage: 20,
+          page: 1,
+          limit: 20,
           totalItems: 0,
           totalPages: 0,
         },

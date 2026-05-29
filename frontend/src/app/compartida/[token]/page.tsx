@@ -11,6 +11,7 @@ import { getSharedReading } from '@/lib/api';
 import { SharedReadingView } from '@/components/features/readings';
 import { Button } from '@/components/ui/button';
 import { generateSharedReadingMetadata } from '@/lib/metadata/seo';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 interface SharedReadingPageProps {
   params: Promise<{
@@ -103,7 +104,7 @@ function ReadingNotAvailable() {
 
         <div className="space-y-4">
           <Button asChild size="lg" className="w-full bg-purple-600 hover:bg-purple-700">
-            <Link href="/registro">Crear mi cuenta gratis</Link>
+            <Link href="/registro">{CTA_AUTH.REGISTER_CONVERSION}</Link>
           </Button>
 
           <Button asChild variant="outline" size="lg" className="w-full">

@@ -34,7 +34,7 @@ describe('CacheStatsCards', () => {
     improvementFactor: 30,
   };
 
-  it('should render all 4 stat cards', () => {
+  it('should render all 5 stat cards', () => {
     // Act
     render(
       <CacheStatsCards
@@ -49,6 +49,59 @@ describe('CacheStatsCards', () => {
     expect(screen.getByText('Hit Rate')).toBeInTheDocument();
     expect(screen.getByText('Miss Rate')).toBeInTheDocument();
     expect(screen.getByText('Speed Improvement')).toBeInTheDocument();
+    expect(screen.getByText('Ahorro Estimado')).toBeInTheDocument();
+  });
+
+  it('should display openaiSavings as the estimated savings baseline', () => {
+    // Act
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={mockSavings}
+        responseTime={mockResponseTime}
+      />
+    );
+
+    // Assert: openaiSavings (1.5525) → $1.55 (not summed with deepseekSavings)
+    expect(screen.getByTestId('savings-card')).toBeInTheDocument();
+    expect(screen.getByText('$1.55')).toBeInTheDocument();
+  });
+
+  it('should display groq rate limit savings in savings card', () => {
+    // Act
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={mockSavings}
+        responseTime={mockResponseTime}
+      />
+    );
+
+    // Assert: groqRateLimitSaved = 855, groqRateLimitPercentage = 5.9
+    expect(screen.getByText(/855 llamadas Groq evitadas/)).toBeInTheDocument();
+  });
+
+  it('should render savings card even when savings is zero', () => {
+    // Arrange
+    const zeroSavings: SavingsMetrics = {
+      openaiSavings: 0,
+      deepseekSavings: 0,
+      groqRateLimitSaved: 0,
+      groqRateLimitPercentage: 0,
+    };
+
+    // Act
+    render(
+      <CacheStatsCards
+        hitRate={mockHitRate}
+        savings={zeroSavings}
+        responseTime={mockResponseTime}
+      />
+    );
+
+    // Assert
+    expect(screen.getByTestId('savings-card')).toBeInTheDocument();
+    expect(screen.getByText('$0.00')).toBeInTheDocument();
   });
 
   it('should display total requests correctly', () => {

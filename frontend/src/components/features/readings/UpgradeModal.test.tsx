@@ -17,12 +17,18 @@ vi.mock('@/hooks/api/useSubscription', () => ({
   useCreatePreapproval: vi.fn(),
 }));
 
+vi.mock('@/hooks/api/usePublicPlans', () => ({
+  usePublicPlans: vi.fn(),
+}));
+
 import UpgradeModal from './UpgradeModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
+import { usePublicPlans } from '@/hooks/api/usePublicPlans';
 
 const mockUseAuth = useAuth as ReturnType<typeof vi.fn>;
 const mockUseCreatePreapproval = useCreatePreapproval as ReturnType<typeof vi.fn>;
+const mockUsePublicPlans = usePublicPlans as ReturnType<typeof vi.fn>;
 
 describe('UpgradeModal', () => {
   const mockOnClose = vi.fn();
@@ -37,6 +43,14 @@ describe('UpgradeModal', () => {
     mockUseCreatePreapproval.mockReturnValue({
       mutate: mockMutate,
       isPending: false,
+    });
+    mockUsePublicPlans.mockReturnValue({
+      data: [
+        { id: 1, planType: 'free', name: 'Plan Gratis', price: 0 },
+        { id: 2, planType: 'premium', name: 'Plan Premium', price: 7000 },
+      ],
+      isLoading: false,
+      isError: false,
     });
   });
 
@@ -65,14 +79,26 @@ describe('UpgradeModal', () => {
     it('should render pricing information', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      expect(screen.getByText(/9\.99/)).toBeInTheDocument();
+      expect(screen.getByText(/7\.000/)).toBeInTheDocument();
       expect(screen.getByText(/mes/i)).toBeInTheDocument();
     });
 
-    it('should render CTA button', () => {
+    it('should render CTA button with PURCHASE copy when no reason', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      expect(screen.getByRole('button', { name: /Comenzar ahora/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Comenzar Premium/i })).toBeInTheDocument();
+    });
+
+    it('should render CTA button with LIMIT_REACHED copy when reason is limit-reached', () => {
+      render(<UpgradeModal open={true} onClose={mockOnClose} reason="limit-reached" />);
+
+      expect(screen.getByRole('button', { name: /Mejorar a Premium/i })).toBeInTheDocument();
+    });
+
+    it('should render CTA button with PURCHASE copy when reason is feature-locked', () => {
+      render(<UpgradeModal open={true} onClose={mockOnClose} reason="feature-locked" />);
+
+      expect(screen.getByRole('button', { name: /Comenzar Premium/i })).toBeInTheDocument();
     });
 
     it('should render "Más información" link', () => {
@@ -105,17 +131,17 @@ describe('UpgradeModal', () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it('should enable "Comenzar ahora" CTA button for free users', () => {
+    it('should enable CTA button for free users', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+      const ctaButton = screen.getByRole('button', { name: /Comenzar Premium/i });
       expect(ctaButton).not.toBeDisabled();
     });
 
-    it('should call createPreapproval mutate when clicking "Comenzar ahora" as free user', () => {
+    it('should call createPreapproval mutate when clicking CTA as free user', () => {
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+      const ctaButton = screen.getByRole('button', { name: /Comenzar Premium/i });
       fireEvent.click(ctaButton);
 
       expect(mockMutate).toHaveBeenCalledTimes(1);
@@ -143,7 +169,7 @@ describe('UpgradeModal', () => {
 
         render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-        const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+        const ctaButton = screen.getByRole('button', { name: /Comenzar Premium/i });
         fireEvent.click(ctaButton);
 
         expect(window.location.href).toBe(initPoint);
@@ -160,7 +186,7 @@ describe('UpgradeModal', () => {
 
       render(<UpgradeModal open={true} onClose={mockOnClose} />);
 
-      const ctaButton = screen.getByRole('button', { name: /Comenzar ahora/i });
+      const ctaButton = screen.getByRole('button', { name: /Comenzar Premium/i });
       fireEvent.click(ctaButton);
 
       expect(mockRouterPush).toHaveBeenCalledWith(

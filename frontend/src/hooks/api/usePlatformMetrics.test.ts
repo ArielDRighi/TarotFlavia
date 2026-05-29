@@ -39,6 +39,7 @@ describe('usePlatformMetrics', () => {
   it('should fetch platform metrics with default period (MONTH)', async () => {
     const mockData: PlatformMetricsDto = {
       totalReadings: 1500,
+      completedSessions: 120,
       totalRevenueShare: 52500.0,
       totalPlatformFee: 22500.0,
       totalGrossRevenue: 75000.0,
@@ -53,6 +54,7 @@ describe('usePlatformMetrics', () => {
           tarotistaId: 1,
           nombrePublico: 'Luna Misteriosa',
           totalReadings: 150,
+          completedSessions: 30,
           totalRevenueShare: 5250.0,
           totalPlatformFee: 2250.0,
           totalGrossRevenue: 7500.0,
@@ -87,6 +89,7 @@ describe('usePlatformMetrics', () => {
   it('should fetch platform metrics with WEEK period', async () => {
     const mockData: PlatformMetricsDto = {
       totalReadings: 350,
+      completedSessions: 40,
       totalRevenueShare: 12250.0,
       totalPlatformFee: 5250.0,
       totalGrossRevenue: 17500.0,
@@ -116,6 +119,7 @@ describe('usePlatformMetrics', () => {
   it('should fetch platform metrics with custom date range', async () => {
     const mockData: PlatformMetricsDto = {
       totalReadings: 500,
+      completedSessions: 60,
       totalRevenueShare: 17500.0,
       totalPlatformFee: 7500.0,
       totalGrossRevenue: 25000.0,
@@ -167,6 +171,7 @@ describe('usePlatformMetrics', () => {
   it('should refetch when period changes', async () => {
     const mockDataMonth: PlatformMetricsDto = {
       totalReadings: 1500,
+      completedSessions: 120,
       totalRevenueShare: 52500.0,
       totalPlatformFee: 22500.0,
       totalGrossRevenue: 75000.0,
@@ -181,6 +186,7 @@ describe('usePlatformMetrics', () => {
 
     const mockDataWeek: PlatformMetricsDto = {
       totalReadings: 350,
+      completedSessions: 40,
       totalRevenueShare: 12250.0,
       totalPlatformFee: 5250.0,
       totalGrossRevenue: 17500.0,
@@ -222,6 +228,7 @@ describe('usePlatformMetrics', () => {
   it('should use default period MONTH when no period provided', async () => {
     const mockData: PlatformMetricsDto = {
       totalReadings: 1500,
+      completedSessions: 120,
       totalRevenueShare: 52500.0,
       totalPlatformFee: 22500.0,
       totalGrossRevenue: 75000.0,

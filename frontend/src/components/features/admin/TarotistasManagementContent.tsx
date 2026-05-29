@@ -13,6 +13,7 @@ import { TarotistasTable } from './TarotistasTable';
 import { ApplicationCard } from './ApplicationCard';
 import { Pagination } from './Pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useAdminTarotistas, useTarotistaApplications } from '@/hooks/api/useAdminTarotistas';
 import {
   useDeactivateTarotista,
@@ -64,7 +65,7 @@ export function TarotistasManagementContent() {
   const [selectedTarotista, setSelectedTarotista] = useState<AdminTarotista | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<TarotistaApplication | null>(null);
   const [actionType, setActionType] = useState<
-    'deactivate' | 'reactivate' | 'approve' | 'reject' | null
+    'deactivate' | 'reactivate' | 'approve' | 'reject' | 'edit-config' | 'view-metrics' | null
   >(null);
   const [rejectReason, setRejectReason] = useState('');
   const [approveNotes, setApproveNotes] = useState('');
@@ -80,16 +81,15 @@ export function TarotistasManagementContent() {
         setActionType('reactivate');
         break;
       case 'view-profile':
-        toast.info('Vista de perfil: próximamente');
+        // T-ADM-003 (Opción B): acción deshabilitada en la tabla para MVP single-tarotista.
+        // La ruta /admin/tarotistas/[id] no existe aún. Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003
         setSelectedTarotista(null);
         break;
       case 'edit-config':
-        toast.info('Edición de configuración IA: próximamente');
-        setSelectedTarotista(null);
+        setActionType('edit-config');
         break;
       case 'view-metrics':
-        toast.info('Vista de métricas: próximamente');
-        setSelectedTarotista(null);
+        setActionType('view-metrics');
         break;
       default:
         break;
@@ -222,9 +222,7 @@ export function TarotistasManagementContent() {
               )}
             </>
           ) : (
-            <div className="border-border bg-bg-main rounded-lg border p-8 text-center">
-              <p className="text-muted-foreground">No hay tarotistas registrados</p>
-            </div>
+            <EmptyState title="Sin tarotistas" message="No hay tarotistas registrados" />
           )}
         </TabsContent>
 
@@ -262,9 +260,7 @@ export function TarotistasManagementContent() {
               )}
             </>
           ) : (
-            <div className="border-border bg-bg-main rounded-lg border p-8 text-center">
-              <p className="text-muted-foreground">No hay aplicaciones pendientes</p>
-            </div>
+            <EmptyState title="Sin aplicaciones" message="No hay aplicaciones pendientes" />
           )}
         </TabsContent>
       </Tabs>
@@ -357,6 +353,72 @@ export function TarotistasManagementContent() {
             >
               {isPending ? 'Procesando...' : 'Rechazar'}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* MODAL EDIT CONFIG */}
+      <AlertDialog
+        open={actionType === 'edit-config'}
+        onOpenChange={(open) => !open && closeDialog()}
+      >
+        <AlertDialogContent data-testid="tarotista-config-modal">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Configuración de {selectedTarotista?.nombrePublico}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Gestionar la configuración IA y parámetros del tarotista.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <p className="text-muted-foreground text-sm">
+              La edición de configuración estará disponible con el flujo multi-tarotista.
+              {/* T-ADM-003 (Opción B): navegación a /admin/tarotistas/[id]/configuracion
+                  deshabilitada en el MVP single-tarotista.
+                  Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003 */}
+            </p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cerrar</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* MODAL VIEW METRICS */}
+      <AlertDialog
+        open={actionType === 'view-metrics'}
+        onOpenChange={(open) => !open && closeDialog()}
+      >
+        <AlertDialogContent data-testid="tarotista-metrics-modal">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Métricas de {selectedTarotista?.nombrePublico}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Estadísticas de sesiones, ingresos y valoraciones del tarotista.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-4">
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Total lecturas</span>
+              <span className="text-sm">{selectedTarotista?.totalLecturas ?? '—'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Rating promedio</span>
+              <span className="text-sm">{selectedTarotista?.ratingPromedio ?? '—'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Total reviews</span>
+              <span className="text-sm">{selectedTarotista?.totalReviews ?? '—'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Ingresos totales (USD)</span>
+              <span className="text-sm">
+                {selectedTarotista?.totalIngresos != null
+                  ? `$${selectedTarotista.totalIngresos.toFixed(2)}`
+                  : '—'}
+              </span>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={closeDialog}>Cerrar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

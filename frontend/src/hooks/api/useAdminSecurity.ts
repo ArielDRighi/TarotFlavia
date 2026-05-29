@@ -2,8 +2,8 @@
  * Hooks for admin security and rate limiting management
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { fetchRateLimitData, fetchSecurityEvents } from '@/lib/api/admin-security-api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchRateLimitData, fetchSecurityEvents, unblockIP } from '@/lib/api/admin-security-api';
 import type { SecurityEventFilters } from '@/types/admin-security.types';
 
 /**
@@ -33,26 +33,18 @@ export function useSecurityEvents(filters: SecurityEventFilters = {}) {
   });
 }
 
-// TODO: Backend endpoints pendientes
-// Descomentar cuando se implementen POST /admin/security/block-ip y DELETE /admin/security/block-ip/:ip
-/*
-export function useBlockIP() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: BlockIPDto) => blockIP(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'security', 'rate-limiting'] });
-    },
-  });
-}
-
+/**
+ * Hook para desbloquear una IP
+ * Invalida el cache de rate limiting al completarse
+ */
 export function useUnblockIP() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (ip: string) => unblockIP(ip),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'security', 'rate-limiting'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['admin', 'security', 'rate-limiting'],
+      });
     },
   });
 }
-*/

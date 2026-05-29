@@ -91,7 +91,7 @@ describe('MyServicesWidget', () => {
     expect(screen.getByText('No se pudieron cargar tus servicios.')).toBeInTheDocument();
 
     const { default: userEvent } = await import('@testing-library/user-event');
-    await userEvent.click(screen.getByRole('button', { name: /reintentar/i }));
+    await userEvent.click(screen.getByRole('button', { name: /intentar de nuevo/i }));
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 
@@ -251,6 +251,34 @@ describe('MyServicesWidget', () => {
     render(<MyServicesWidget />, { wrapper });
 
     expect(screen.queryByText(/\d{2}\/\d{2}\/\d{4}/)).not.toBeInTheDocument();
+  });
+
+  it('should show "Vencido" badge for pending purchase with past selectedDate', () => {
+    const purchases = [
+      createMockPurchase({ id: 1, paymentStatus: 'pending', selectedDate: '2020-01-01' }),
+    ];
+
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: purchases,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesWidget />, { wrapper });
+
+    expect(screen.getByText('Vencido')).toBeInTheDocument();
+  });
+
+  it('should show "Pendiente" badge for pending purchase without selectedDate', () => {
+    const purchases = [createMockPurchase({ id: 1, paymentStatus: 'pending', selectedDate: null })];
+
+    vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+      data: purchases,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+    render(<MyServicesWidget />, { wrapper });
+
+    expect(screen.getByText('Pendiente')).toBeInTheDocument();
   });
 
   it('should link to /mis-servicios from the footer', () => {

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { useArticlesByCategory } from '@/hooks/api/useEncyclopediaArticles';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 
@@ -71,7 +72,7 @@ export function ArticleListPageContent({
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-muted h-16 animate-pulse rounded-lg" />
+            <Skeleton key={i} className="h-16 rounded-lg" />
           ))}
         </div>
       ) : (

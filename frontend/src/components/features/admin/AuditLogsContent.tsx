@@ -199,7 +199,7 @@ export function AuditLogsContent() {
           <CardTitle>Logs de Auditoría</CardTitle>
         </CardHeader>
         <CardContent>
-          {!data || data.logs.length === 0 ? (
+          {!data || data.data.length === 0 ? (
             <p className="text-muted-foreground py-8 text-center">
               No se encontraron logs de auditoría
             </p>
@@ -217,7 +217,7 @@ export function AuditLogsContent() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.logs.map((log) => {
+                  {data.data.map((log) => {
                     const isExpanded = expandedRows.has(log.id);
                     return (
                       <React.Fragment key={log.id}>
@@ -295,10 +295,10 @@ export function AuditLogsContent() {
               {data.meta.totalPages > 1 && (
                 <div className="mt-6">
                   <Pagination
-                    currentPage={data.meta.currentPage}
+                    currentPage={data.meta.page}
                     totalPages={data.meta.totalPages}
                     totalItems={data.meta.totalItems}
-                    limit={data.meta.itemsPerPage}
+                    limit={data.meta.limit}
                     onPageChange={handlePageChange}
                   />
                 </div>

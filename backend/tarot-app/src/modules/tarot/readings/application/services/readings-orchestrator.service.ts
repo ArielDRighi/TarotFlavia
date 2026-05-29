@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateReadingUseCase } from '../use-cases/create-reading.use-case';
 import { ListReadingsUseCase } from '../use-cases/list-readings.use-case';
 import { GetReadingUseCase } from '../use-cases/get-reading.use-case';
@@ -115,6 +120,41 @@ export class ReadingsOrchestratorService {
         hasPreviousPage: false,
       },
     };
+  }
+
+  // ==================== Admin Moderation Methods ====================
+
+  async adminSoftDelete(readingId: number): Promise<void> {
+    const reading = await this.readingRepo.findByIdIncludingDeleted(readingId);
+    if (!reading) {
+      throw new NotFoundException(`Lectura con ID ${readingId} no encontrada`);
+    }
+    if (reading.deletedAt) {
+      throw new BadRequestException(
+        `La lectura con ID ${readingId} ya está eliminada`,
+      );
+    }
+    await this.readingRepo.softDelete(readingId);
+  }
+
+  async adminRestore(readingId: number): Promise<TarotReading> {
+    const reading = await this.readingRepo.findByIdIncludingDeleted(readingId);
+    if (!reading) {
+      throw new NotFoundException(`Lectura con ID ${readingId} no encontrada`);
+    }
+    if (!reading.deletedAt) {
+      throw new BadRequestException(
+        `La lectura con ID ${readingId} no está eliminada`,
+      );
+    }
+    await this.readingRepo.restore(readingId);
+    const restored = await this.readingRepo.findById(readingId);
+    if (!restored) {
+      throw new NotFoundException(
+        `Lectura con ID ${readingId} no encontrada después de restaurar`,
+      );
+    }
+    return restored;
   }
 
   async cleanupOldDeletedReadings(): Promise<number> {

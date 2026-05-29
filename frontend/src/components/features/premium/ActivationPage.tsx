@@ -136,7 +136,7 @@ function FailureState() {
           onClick={() => router.push(ROUTES.PREMIUM)}
           className="bg-purple-600 text-white hover:bg-purple-700"
         >
-          Reintentar
+          Intentar de nuevo
         </Button>
         <div data-testid="btn-go-home-failure">
           <Button asChild variant="outline">

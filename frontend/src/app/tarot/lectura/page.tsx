@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ReadingExperience } from '@/components/features/readings/ReadingExperience';
 import { ROUTES } from '@/lib/constants/routes';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Inner component that uses useSearchParams
@@ -48,13 +49,13 @@ function LecturaPageLoading() {
     <div className="bg-bg-main min-h-screen p-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 h-6 w-48 animate-pulse rounded bg-gray-200" />
-          <div className="mx-auto h-8 w-64 animate-pulse rounded bg-gray-200" />
+          <Skeleton className="mx-auto mb-4 h-6 w-48" />
+          <Skeleton className="mx-auto h-8 w-64" />
         </div>
         <div className="flex justify-center">
           <div className="grid grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-60 w-40 animate-pulse rounded-xl bg-gray-200" />
+              <Skeleton key={index} className="h-60 w-40 rounded-xl" />
             ))}
           </div>
         </div>

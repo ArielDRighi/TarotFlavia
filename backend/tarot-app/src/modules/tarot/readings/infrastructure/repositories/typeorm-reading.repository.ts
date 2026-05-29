@@ -39,6 +39,18 @@ export class TypeOrmReadingRepository implements IReadingRepository {
     });
   }
 
+  async findByIdIncludingDeleted(
+    id: number,
+    relations: string[] = ['deck', 'user', 'cards', 'interpretations'],
+  ): Promise<TarotReading | null> {
+    return this.readingRepo
+      .createQueryBuilder('reading')
+      .setFindOptions({ relations })
+      .where('reading.id = :id', { id })
+      .withDeleted()
+      .getOne();
+  }
+
   async findByUserId(
     userId: number,
     options?: PaginationOptions,

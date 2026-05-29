@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { HandHeart, ArrowRight, AlertCircle, CalendarDays, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { HandHeart, ArrowRight, CalendarDays, Clock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
 import { ROUTES } from '@/lib/constants/routes';
 import { cn, formatDateShort } from '@/lib/utils';
@@ -21,6 +21,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   completed: { label: 'Completado', className: 'bg-gray-100 text-gray-600' },
   cancelled: { label: 'Cancelado', className: 'bg-red-100 text-red-800' },
   refunded: { label: 'Reembolsado', className: 'bg-rose-100 text-rose-800' },
+  expired: { label: 'Vencido', className: 'bg-red-50 text-red-700' },
 };
 
 const MAX_VISIBLE_PURCHASES = 3;
@@ -99,19 +100,11 @@ export function MyServicesWidget() {
 
   if (isError) {
     return (
-      <Card className="p-6" data-testid="my-services-widget-error">
-        <div className="flex items-center gap-2 text-sm text-red-600">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>No se pudieron cargar tus servicios.</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ml-auto text-red-600 hover:text-red-800"
-            onClick={() => void refetch()}
-          >
-            Reintentar
-          </Button>
-        </div>
+      <Card data-testid="my-services-widget-error">
+        <ErrorDisplay
+          message="No se pudieron cargar tus servicios."
+          onRetry={() => void refetch()}
+        />
       </Card>
     );
   }

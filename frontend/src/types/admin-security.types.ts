@@ -7,9 +7,12 @@
 
 /**
  * Violación de rate limiting
+ *
+ * Contrato real backend (RateLimitsAdminController + IPBlockingService):
+ * cada item usa la propiedad `ip` (no `ipAddress`).
  */
 export interface RateLimitViolation {
-  ipAddress: string;
+  ip: string;
   count: number;
   firstViolation: string;
   lastViolation: string;
@@ -17,9 +20,11 @@ export interface RateLimitViolation {
 
 /**
  * IP bloqueada
+ *
+ * Contrato real backend: cada item usa la propiedad `ip` (no `ipAddress`).
  */
 export interface BlockedIP {
-  ipAddress: string;
+  ip: string;
   reason: string;
   blockedAt: string;
   expiresAt: string | null; // Puede ser null si es permanente
@@ -78,12 +83,15 @@ export interface SecurityEventFilters {
 
 /**
  * Respuesta paginada de eventos de seguridad
+ *
+ * Contrato estándar del proyecto: { data, meta: { page, limit, totalItems, totalPages } }
+ * (Alineado con AuditLogsContent y el resto de tablas paginadas)
  */
 export interface SecurityEventsResponse {
-  events: SecurityEvent[];
+  data: SecurityEvent[];
   meta: {
-    currentPage: number;
-    itemsPerPage: number;
+    page: number;
+    limit: number;
     totalItems: number;
     totalPages: number;
   };
@@ -100,11 +108,11 @@ export interface RateLimitStats {
 
 /**
  * Respuesta completa del endpoint de rate limiting
- * Backend retorna violations, blockedIPs y stats en una sola respuesta
+ * Backend retorna violations, blockedIps y stats en una sola respuesta
  */
 export interface RateLimitResponse {
   violations: RateLimitViolation[];
-  blockedIPs: BlockedIP[];
+  blockedIps: BlockedIP[];
   stats: RateLimitStats;
 }
 
@@ -120,6 +128,29 @@ export interface BlockIPDto {
  * Respuesta de acción sobre IP (bloquear/desbloquear)
  */
 export interface IPActionResponse {
+  message: string;
+  ip: string;
+}
+
+/**
+ * Respuesta del endpoint GET /admin/ip-whitelist
+ */
+export interface WhitelistResponse {
+  ips: string[];
+  count: number;
+}
+
+/**
+ * DTO para agregar/eliminar IP de la whitelist
+ */
+export interface WhitelistIPDto {
+  ip: string;
+}
+
+/**
+ * Respuesta de acción sobre IP en la whitelist (agregar/eliminar)
+ */
+export interface WhitelistActionResponse {
   message: string;
   ip: string;
 }

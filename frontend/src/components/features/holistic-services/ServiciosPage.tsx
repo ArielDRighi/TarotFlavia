@@ -8,9 +8,10 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBag } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShoppingBag, PackageSearch } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorDisplay } from '@/components/ui/error-display';
 import { useHolisticServices } from '@/hooks/api/useHolisticServices';
 import { useAuthStore } from '@/stores/authStore';
 import { ROUTES } from '@/lib/constants/routes';
@@ -59,27 +60,21 @@ export function ServiciosPage() {
 
       {/* Error state */}
       {!isLoading && isError && (
-        <div
+        <ErrorDisplay
           data-testid="servicios-error-state"
-          className="flex flex-col items-center gap-4 py-12 text-center"
-        >
-          <p className="text-text-secondary">
-            Ocurrió un error al cargar los servicios. Por favor intentá de nuevo.
-          </p>
-          <Button variant="outline" onClick={() => void refetch()}>
-            Reintentar
-          </Button>
-        </div>
+          message="Ocurrió un error al cargar los servicios. Por favor intentá de nuevo."
+          onRetry={() => void refetch()}
+        />
       )}
 
       {/* Empty state */}
       {!isLoading && !isError && services && services.length === 0 && (
-        <div
+        <EmptyState
           data-testid="servicios-empty-state"
-          className="flex flex-col items-center gap-4 py-12 text-center"
-        >
-          <p className="text-text-secondary">No hay servicios disponibles en este momento.</p>
-        </div>
+          icon={<PackageSearch />}
+          title="Sin servicios disponibles"
+          message="No hay servicios disponibles en este momento."
+        />
       )}
 
       {/* Services grid */}

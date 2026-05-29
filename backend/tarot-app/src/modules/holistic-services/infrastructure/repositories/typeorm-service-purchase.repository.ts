@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Repository } from 'typeorm';
+import { In, IsNull, LessThan, Repository } from 'typeorm';
 import { ServicePurchase } from '../../entities/service-purchase.entity';
 import { IServicePurchaseRepository } from '../../domain/interfaces/service-purchase-repository.interface';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
@@ -201,6 +201,16 @@ export class TypeOrmServicePurchaseRepository implements IServicePurchaseReposit
         paymentStatus: In([PurchaseStatus.PENDING, PurchaseStatus.PAID]),
       },
       relations: ['holisticService'],
+    });
+  }
+
+  async findPendingBeforeDate(cutoffDate: string): Promise<ServicePurchase[]> {
+    return this.repository.find({
+      where: {
+        paymentStatus: PurchaseStatus.PENDING,
+        selectedDate: LessThan(cutoffDate),
+      },
+      order: { createdAt: 'ASC' },
     });
   }
 }

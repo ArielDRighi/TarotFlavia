@@ -138,13 +138,12 @@ describe('ChineseHoroscopeAnimalPage', () => {
     mockUseChineseHoroscopeByElement.mockReturnValue({
       isLoading: false,
       data: null,
-      error: new Error('Not found'),
+      error: Object.assign(new Error('Not found'), { response: { status: 404 } }),
     });
 
     renderWithProviders(<ChineseHoroscopeAnimalPage />);
 
-    const currentYear = new Date().getFullYear();
-    expect(screen.getByText(`Horóscopo no disponible para ${currentYear}`)).toBeInTheDocument();
+    expect(screen.getByText(/horóscopo en preparación/i)).toBeInTheDocument();
   });
 
   it('should render horoscope detail when data is loaded', () => {

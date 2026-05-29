@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { BookingCalendar } from '@/components/features/marketplace/BookingCalendar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { usePurchaseDetail } from '@/hooks/api/useHolisticServices';
 import { useBookSession } from '@/hooks/api/useSessions';
 import { ROUTES } from '@/lib/constants/routes';
@@ -192,15 +193,16 @@ export function ServiceBookingPage({ purchaseId }: ServiceBookingPageProps) {
       <div data-testid="service-booking-page" className="bg-bg-main min-h-screen px-4 py-8 md:px-8">
         <div className="mx-auto max-w-2xl">
           <h1 className="mb-6 font-serif text-3xl font-semibold">Reservar Sesión</h1>
-          <div
+          <Alert
             data-testid="payment-pending-notice"
-            className="rounded-xl border border-amber-300 bg-amber-50 p-6 text-amber-800"
+            variant="warning"
             role="status"
+            aria-live="polite"
           >
-            <p className="text-base leading-relaxed">
+            <AlertDescription>
               Tu pago aún está siendo verificado. Te notificaremos cuando puedas reservar tu turno.
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         </div>
       </div>
     );
@@ -217,13 +219,9 @@ export function ServiceBookingPage({ purchaseId }: ServiceBookingPageProps) {
         </p>
 
         {bookingError && (
-          <div
-            data-testid="booking-error-message"
-            className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-800"
-            role="alert"
-          >
-            <p className="text-sm leading-relaxed">{bookingError}</p>
-          </div>
+          <Alert variant="destructive" data-testid="booking-error-message">
+            <AlertDescription>{bookingError}</AlertDescription>
+          </Alert>
         )}
 
         <BookingCalendar

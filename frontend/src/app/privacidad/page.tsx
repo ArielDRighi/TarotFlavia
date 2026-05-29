@@ -1,5 +1,7 @@
 'use client';
 
+import { DisclaimerBanner } from '@/components/ui/disclaimer-banner';
+
 /**
  * Página de Política de Privacidad
  *
@@ -22,7 +24,7 @@ export default function PrivacidadPage() {
 
         {/* Content */}
         <div className="rounded-lg border p-6">
-          <div className="prose prose-purple dark:prose-invert max-w-none space-y-6">
+          <div className="prose prose-purple max-w-none space-y-6">
             <section>
               <h2 className="font-serif text-2xl font-semibold">1. Introducción</h2>
               <p className="text-text-secondary">
@@ -149,12 +151,8 @@ export default function PrivacidadPage() {
               </p>
             </section>
 
-            <div className="mt-8 rounded-lg bg-yellow-50 p-4 dark:bg-yellow-950/20">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                <strong>Nota:</strong> Este es un contenido placeholder. El contenido legal real
-                debe ser revisado y aprobado por profesionales legales antes de su uso en
-                producción.
-              </p>
+            <div className="mt-8">
+              <DisclaimerBanner message="Este es un contenido placeholder. El contenido legal real debe ser revisado y aprobado por profesionales legales antes de su uso en producción." />
             </div>
           </div>
         </div>

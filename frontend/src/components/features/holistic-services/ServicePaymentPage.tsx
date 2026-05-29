@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useHolisticServiceDetail } from '@/hooks/api/useHolisticServices';
 import { useCreatePurchase } from '@/hooks/api/useHolisticServiceMutations';
 import { ROUTES } from '@/lib/constants/routes';
@@ -182,27 +183,19 @@ export function ServicePaymentPage({ slug, selectedDate, selectedTime }: Service
 
         {/* Post-click verification message */}
         {paymentInitiated && (
-          <div
-            data-testid="payment-pending-message"
-            className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-800"
-            role="status"
-          >
-            <p className="text-sm leading-relaxed">
+          <Alert variant="info" data-testid="payment-pending-message" role="status">
+            <AlertDescription>
               Tu pago está siendo verificado. Una vez confirmado, recibirás un email con todos los
               datos de tu sesión.
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         )}
 
         {/* Purchase error */}
         {purchaseError && (
-          <div
-            data-testid="payment-error-message"
-            className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-800"
-            role="alert"
-          >
-            <p className="text-sm leading-relaxed">{purchaseError}</p>
-          </div>
+          <Alert variant="destructive" data-testid="payment-error-message">
+            <AlertDescription>{purchaseError}</AlertDescription>
+          </Alert>
         )}
 
         {/* CTA */}

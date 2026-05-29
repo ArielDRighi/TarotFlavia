@@ -24,8 +24,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Eye, Settings, Ban, RefreshCw, BarChart3 } from 'lucide-react';
+import { MoreHorizontal, Eye, Settings, Ban, RefreshCw, BarChart3, Users } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { AdminTarotista } from '@/types/admin-tarotistas.types';
+
+// T-ADM-003 (Opción B — MVP single-tarotista): Las acciones "Ver perfil" y
+// "Configuración" apuntan a rutas que no existen todavía (/admin/tarotistas/[id]).
+// Se deshabilitan con tooltip hasta implementar el flujo multi-tarotista completo.
+// Ver: docs/BACKLOG_ADMIN_AUDIT_2026_05.md#adm-003
 
 interface TarotistasTableProps {
   tarotistas: AdminTarotista[];
@@ -49,9 +56,12 @@ const formatRating = (value: number | null) => {
 export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) {
   if (tarotistas.length === 0) {
     return (
-      <div className="border-border bg-bg-main rounded-lg border p-8 text-center">
-        <p className="text-muted-foreground">No hay tarotistas para mostrar</p>
-      </div>
+      <EmptyState
+        icon={<Users />}
+        title="Sin tarotistas"
+        message="No hay tarotistas para mostrar"
+        className="rounded-lg border"
+      />
     );
   }
 
@@ -111,7 +121,11 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 p-0"
+                      data-testid={`actions-menu-trigger-${tarotista.id}`}
+                    >
                       <span className="sr-only">Abrir menú</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
@@ -119,17 +133,58 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onAction('view-profile', tarotista)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver perfil
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onAction('edit-config', tarotista)}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Editar configuración IA
-                    </DropdownMenuItem>
+                    {/* T-ADM-003: deshabilitado hasta implementar multi-tarotista */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          {/* span con tabIndex/role para mantener accesibilidad por teclado
+                              cuando el DropdownMenuItem subyacente está disabled */}
+                          <span
+                            tabIndex={0}
+                            role="menuitem"
+                            aria-disabled="true"
+                            className="cursor-not-allowed"
+                          >
+                            <DropdownMenuItem
+                              data-testid="action-view-profile"
+                              disabled
+                              className="pointer-events-none opacity-50"
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver perfil
+                            </DropdownMenuItem>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>Disponible con multi-tarotista</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    {/* T-ADM-003: deshabilitado hasta implementar multi-tarotista */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span
+                            tabIndex={0}
+                            role="menuitem"
+                            aria-disabled="true"
+                            className="cursor-not-allowed"
+                          >
+                            <DropdownMenuItem
+                              data-testid="action-edit-config"
+                              disabled
+                              className="pointer-events-none opacity-50"
+                            >
+                              <Settings className="mr-2 h-4 w-4" />
+                              Editar configuración IA
+                            </DropdownMenuItem>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>Disponible con multi-tarotista</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     <DropdownMenuSeparator />
                     {tarotista.isActive ? (
                       <DropdownMenuItem
+                        data-testid="action-deactivate"
                         onClick={() => onAction('deactivate', tarotista)}
                         className="text-orange-600"
                       >
@@ -138,6 +193,7 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem
+                        data-testid="action-reactivate"
                         onClick={() => onAction('reactivate', tarotista)}
                         className="text-green-600"
                       >
@@ -145,7 +201,10 @@ export function TarotistasTable({ tarotistas, onAction }: TarotistasTableProps) 
                         Reactivar
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={() => onAction('view-metrics', tarotista)}>
+                    <DropdownMenuItem
+                      data-testid="action-view-metrics"
+                      onClick={() => onAction('view-metrics', tarotista)}
+                    >
                       <BarChart3 className="mr-2 h-4 w-4" />
                       Ver métricas
                     </DropdownMenuItem>

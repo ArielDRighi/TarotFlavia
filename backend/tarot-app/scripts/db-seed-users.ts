@@ -27,11 +27,6 @@ async function bootstrap() {
     await seedUsers(userRepository);
     console.log('✅ Test users created successfully\n');
 
-    console.log('🔑 Test User Credentials:');
-    console.log('  Admin:   admin@test.com   / admin123');
-    console.log('  Premium: premium@test.com / premium123');
-    console.log('  Free:    free@test.com    / free123\n');
-
     console.log('✨ Users seeding completed!');
   } catch (error) {
     console.error('❌ Error seeding users:', error);
