@@ -225,6 +225,10 @@ export class GroqProvider implements IAIProvider {
     return AIProviderType.GROQ;
   }
 
+  isConfigured(): boolean {
+    return this.client !== null;
+  }
+
   /**
    * Calculate appropriate max_tokens based on card count
    * Groq is free, so we can be more generous

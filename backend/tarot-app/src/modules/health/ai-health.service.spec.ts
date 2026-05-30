@@ -189,7 +189,7 @@ describe('AIHealthService', () => {
     it('should detect valid DeepSeek API key', async () => {
       mockConfigService.get.mockImplementation((key: string) => {
         if (key === 'DEEPSEEK_API_KEY') return 'sk-deepseek123';
-        if (key === 'DEEPSEEK_MODEL') return 'deepseek-chat';
+        if (key === 'DEEPSEEK_MODEL') return 'deepseek-v4-flash';
         return undefined;
       });
 
@@ -197,7 +197,7 @@ describe('AIHealthService', () => {
 
       expect(result.provider).toBe('deepseek');
       expect(result.configured).toBe(true);
-      expect(result.model).toBe('deepseek-chat');
+      expect(result.model).toBe('deepseek-v4-flash');
     });
   });
 

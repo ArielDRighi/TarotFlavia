@@ -329,7 +329,7 @@ describe('EnvironmentVariables', () => {
           DEEPSEEK_API_KEY: 'sk-deepseek-1234',
         });
 
-        expect(envConfig.DEEPSEEK_MODEL).toBe('deepseek-chat');
+        expect(envConfig.DEEPSEEK_MODEL).toBe('deepseek-v4-flash');
       });
     });
 

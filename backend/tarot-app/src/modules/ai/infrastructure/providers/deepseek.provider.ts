@@ -13,7 +13,7 @@ import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
 @Injectable()
 export class DeepSeekProvider implements IAIProvider {
   private client: OpenAI | null = null;
-  private readonly DEFAULT_MODEL = 'deepseek-chat';
+  private readonly DEFAULT_MODEL = 'deepseek-v4-flash';
   private readonly DEFAULT_TEMPERATURE = 0.6; // Similar to Llama
   private readonly TIMEOUT = 15000; // 15s
   private readonly BASE_URL = 'https://api.deepseek.com';
@@ -241,6 +241,10 @@ export class DeepSeekProvider implements IAIProvider {
 
   getProviderType(): AIProviderType {
     return AIProviderType.DEEPSEEK;
+  }
+
+  isConfigured(): boolean {
+    return this.client !== null;
   }
 
   /**

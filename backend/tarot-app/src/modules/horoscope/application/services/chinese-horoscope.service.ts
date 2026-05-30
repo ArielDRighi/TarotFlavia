@@ -7,7 +7,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChineseHoroscope } from '../../entities/chinese-horoscope.entity';
 import { AIProviderService } from '../../../ai/application/services/ai-provider.service';
-import { AIMessage } from '../../../ai/domain/interfaces/ai-provider.interface';
+import {
+  AIMessage,
+  AIProviderType,
+} from '../../../ai/domain/interfaces/ai-provider.interface';
 import {
   ChineseZodiacAnimal,
   ChineseElement,
@@ -155,6 +158,7 @@ export class ChineseHoroscopeService {
         temperature: 0.7, // Balance entre creatividad y consistencia
         maxTokens: 1500, // Suficiente para las 4 áreas + elementos lucky
       },
+      AIProviderType.GROQ, // Los horóscopos usan Groq (fallback automático al resto)
     );
 
     // 5. Parsear respuesta de la IA
