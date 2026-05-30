@@ -66,8 +66,9 @@ describe('UserDashboard', () => {
       data: undefined,
       isLoading: false,
       error: null,
+      errorState: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<DailyHoroscope, Error>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
 
     // Default mock for useMyAnimalHoroscope (Chinese horoscope widget)
     vi.spyOn(useChineseHoroscopeModule, 'useMyAnimalHoroscope').mockReturnValue({
@@ -514,8 +515,9 @@ describe('UserDashboard', () => {
       },
       isLoading: false,
       error: null,
+      errorState: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<DailyHoroscope, Error>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
 
     render(<UserDashboard />);
 
@@ -601,8 +603,9 @@ describe('UserDashboard', () => {
       },
       isLoading: false,
       error: null,
+      errorState: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<DailyHoroscope, Error>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
 
     render(<UserDashboard />);
 
