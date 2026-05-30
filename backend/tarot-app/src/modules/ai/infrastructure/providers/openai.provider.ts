@@ -220,6 +220,10 @@ export class OpenAIProvider implements IAIProvider {
     return AIProviderType.OPENAI;
   }
 
+  isConfigured(): boolean {
+    return this.client !== null;
+  }
+
   /**
    * Calculate appropriate max_tokens based on card count
    * OpenAI is costly, so we're more restrictive

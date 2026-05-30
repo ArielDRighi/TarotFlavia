@@ -257,23 +257,31 @@ export class AIProviderService {
    * Returns the provider list to iterate, placing `primaryProvider` first when
    * provided and keeping the rest in their default priority order as fallback.
    * If the preferred provider is unknown, falls back to the default order.
+   *
+   * Providers without an API key configured are excluded entirely, so they are
+   * never attempted nor logged as errors (evita ensuciar las métricas con
+   * proveedores que no están en uso, ej. OpenAI/Gemini sin key).
    */
   private getOrderedProviders(primaryProvider?: AIProviderType): IAIProvider[] {
+    const configured = this.providers.filter((provider) =>
+      provider.isConfigured(),
+    );
+
     if (!primaryProvider) {
-      return this.providers;
+      return configured;
     }
 
-    const preferred = this.providers.find(
+    const preferred = configured.find(
       (provider) => provider.getProviderType() === primaryProvider,
     );
 
     if (!preferred) {
-      return this.providers;
+      return configured;
     }
 
     return [
       preferred,
-      ...this.providers.filter(
+      ...configured.filter(
         (provider) => provider.getProviderType() !== primaryProvider,
       ),
     ];
