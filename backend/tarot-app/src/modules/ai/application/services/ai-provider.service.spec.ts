@@ -155,6 +155,82 @@ describe('AIProviderService', () => {
       );
     });
 
+    it('should try the preferred primaryProvider first (DeepSeek) without using Groq', async () => {
+      deepseekProvider.generateCompletion.mockResolvedValue({
+        ...mockSuccessResponse,
+        provider: AIProviderType.DEEPSEEK,
+      });
+
+      const result = await service.generateCompletion(
+        mockMessages,
+        1,
+        1,
+        undefined,
+        AIProviderType.DEEPSEEK,
+      );
+
+      expect(result.provider).toBe(AIProviderType.DEEPSEEK);
+      expect(deepseekProvider.generateCompletion).toHaveBeenCalledTimes(1);
+      expect(groqProvider.generateCompletion).not.toHaveBeenCalled();
+      expect(geminiProvider.generateCompletion).not.toHaveBeenCalled();
+      expect(aiUsageService.createLog).toHaveBeenCalledWith(
+        expect.objectContaining({ fallbackUsed: false }),
+      );
+    });
+
+    it('should keep the rest of providers as fallback when primaryProvider fails', async () => {
+      deepseekProvider.generateCompletion.mockRejectedValue(
+        new Error('DeepSeek down'),
+      );
+      groqProvider.generateCompletion.mockResolvedValue(mockSuccessResponse);
+
+      const result = await service.generateCompletion(
+        mockMessages,
+        1,
+        1,
+        undefined,
+        AIProviderType.DEEPSEEK,
+      );
+
+      expect(result.provider).toBe(AIProviderType.GROQ);
+      expect(deepseekProvider.generateCompletion).toHaveBeenCalled();
+      expect(groqProvider.generateCompletion).toHaveBeenCalled();
+      expect(aiUsageService.createLog).toHaveBeenCalledWith(
+        expect.objectContaining({ fallbackUsed: true }),
+      );
+    });
+
+    it('should use the default order (Groq first) when primaryProvider is Groq', async () => {
+      groqProvider.generateCompletion.mockResolvedValue(mockSuccessResponse);
+
+      const result = await service.generateCompletion(
+        mockMessages,
+        null,
+        null,
+        undefined,
+        AIProviderType.GROQ,
+      );
+
+      expect(result.provider).toBe(AIProviderType.GROQ);
+      expect(groqProvider.generateCompletion).toHaveBeenCalledTimes(1);
+      expect(deepseekProvider.generateCompletion).not.toHaveBeenCalled();
+    });
+
+    it('should fallback to default order when primaryProvider is unknown', async () => {
+      groqProvider.generateCompletion.mockResolvedValue(mockSuccessResponse);
+
+      const result = await service.generateCompletion(
+        mockMessages,
+        1,
+        1,
+        undefined,
+        'unknown' as unknown as AIProviderType,
+      );
+
+      expect(result.provider).toBe(AIProviderType.GROQ);
+      expect(groqProvider.generateCompletion).toHaveBeenCalledTimes(1);
+    });
+
     it('should fallback to Gemini when Groq fails with 429 error', async () => {
       const rateLimitError = Object.assign(new Error('Rate limit exceeded'), {
         status: 429,

@@ -17,6 +17,7 @@ import { TarotSpread } from '../spreads/entities/tarot-spread.entity';
 import { TarotReading } from '../readings/entities/tarot-reading.entity';
 import { Tarotista } from '../../tarotistas/entities/tarotista.entity';
 import { AIProviderService } from '../../ai/application/services/ai-provider.service';
+import { AIProviderType } from '../../ai/domain/interfaces/ai-provider.interface';
 import { InterpretationCacheService } from '../../cache/application/services/interpretation-cache.service';
 import { PromptBuilderService } from '../../ai/application/services/prompt-builder.service';
 import { TarotPrompts } from '../../ai/application/prompts/tarot-prompts';
@@ -219,6 +220,7 @@ export class InterpretationsService {
         userId,
         readingId,
         aiConfig, // Pass maxTokens from DB config (default: 4000)
+        AIProviderType.DEEPSEEK, // IA principal del tarot (fallback automático al resto)
       );
 
       // Sanitize AI response before using it (TASK-048-a: Output Sanitization)
@@ -437,11 +439,17 @@ export class InterpretationsService {
         `Generating daily card interpretation for card: ${card.name} (${isReversed ? 'reversed' : 'upright'})`,
       );
 
-      // Generar interpretación con IA
-      const response = await this.aiProviderService.generateCompletion([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ]);
+      // Generar interpretación con IA (DeepSeek principal, fallback automático)
+      const response = await this.aiProviderService.generateCompletion(
+        [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        undefined,
+        undefined,
+        undefined,
+        AIProviderType.DEEPSEEK,
+      );
 
       // Sanitizar output
       const sanitized = this.outputSanitizer.sanitizeAiResponse(

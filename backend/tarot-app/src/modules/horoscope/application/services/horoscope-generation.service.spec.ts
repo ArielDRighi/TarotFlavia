@@ -154,6 +154,7 @@ describe('HoroscopeGenerationService', () => {
           temperature: 0.8,
           maxTokens: 1000,
         },
+        AIProviderType.GROQ, // Los horóscopos usan Groq
       );
       expect(repository.create).toHaveBeenCalled();
       expect(repository.save).toHaveBeenCalled();

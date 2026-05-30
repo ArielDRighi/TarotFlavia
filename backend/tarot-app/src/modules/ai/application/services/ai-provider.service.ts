@@ -95,18 +95,23 @@ export class AIProviderService {
    * Generate completion with automatic fallback, retry, and circuit breaker
    * Tries providers in priority order until one succeeds
    * @param config Optional AI config (temperature, maxTokens, topP) from tarotista settings
+   * @param primaryProvider Optional preferred provider to try first. The remaining
+   *   providers stay as fallback in their default priority order. Allows each feature
+   *   to pick its main provider (ej: DeepSeek para tarot/numerología/carta astral,
+   *   Groq para horóscopos) sin perder el fallback automático.
    */
   async generateCompletion(
     messages: AIMessage[],
     userId?: number | null,
     readingId?: number | null,
     config?: Partial<AIProviderConfig>,
+    primaryProvider?: AIProviderType,
   ): Promise<AIResponse> {
     const errors: Array<{ provider: string; error: string }> = [];
     let fallbackUsed = false;
     let providerIndex = 0;
 
-    for (const provider of this.providers) {
+    for (const provider of this.getOrderedProviders(primaryProvider)) {
       const providerType = provider.getProviderType();
       const circuitBreaker = this.circuitBreakers.get(providerType);
 
@@ -246,6 +251,32 @@ export class AIProviderService {
       .map((e) => `${e.provider}: ${e.error}`)
       .join('; ');
     throw new Error(`All AI providers failed: ${errorSummary}`);
+  }
+
+  /**
+   * Returns the provider list to iterate, placing `primaryProvider` first when
+   * provided and keeping the rest in their default priority order as fallback.
+   * If the preferred provider is unknown, falls back to the default order.
+   */
+  private getOrderedProviders(primaryProvider?: AIProviderType): IAIProvider[] {
+    if (!primaryProvider) {
+      return this.providers;
+    }
+
+    const preferred = this.providers.find(
+      (provider) => provider.getProviderType() === primaryProvider,
+    );
+
+    if (!preferred) {
+      return this.providers;
+    }
+
+    return [
+      preferred,
+      ...this.providers.filter(
+        (provider) => provider.getProviderType() !== primaryProvider,
+      ),
+    ];
   }
 
   private mapProviderToEnum(providerType: AIProviderType | string): AIProvider {

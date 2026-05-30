@@ -7,7 +7,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
 import { AIProviderService } from '../../../ai/application/services/ai-provider.service';
-import { AIMessage } from '../../../ai/domain/interfaces/ai-provider.interface';
+import {
+  AIMessage,
+  AIProviderType,
+} from '../../../ai/domain/interfaces/ai-provider.interface';
 import {
   getZodiacSignInfo,
   ZodiacSign,
@@ -97,6 +100,7 @@ export class HoroscopeGenerationService {
         temperature: 0.8, // Mayor variedad en las generaciones
         maxTokens: 1000, // Suficiente para los 3 areas + elementos lucky
       },
+      AIProviderType.GROQ, // Los horóscopos usan Groq (fallback automático al resto)
     );
 
     // 5. Parsear respuesta de la IA
