@@ -79,9 +79,7 @@ describe('HoroscopeWidget', () => {
 
       expect(screen.getByTestId('horoscope-widget')).toBeInTheDocument();
       expect(screen.getByText('Aries')).toBeInTheDocument();
-      expect(
-        screen.getByText('Hoy es un día propicio para nuevos comienzos.')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Hoy es un día propicio para nuevos comienzos.')).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /ver más/i })).toHaveAttribute(
         'href',
         '/horoscopo/aries'
@@ -100,13 +98,8 @@ describe('HoroscopeWidget', () => {
       render(<HoroscopeWidget />);
 
       expect(screen.getByTestId('horoscope-widget-no-birthdate')).toBeInTheDocument();
-      expect(
-        screen.getByText(/configura tu fecha de nacimiento/i)
-      ).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /configurar/i })).toHaveAttribute(
-        'href',
-        '/perfil'
-      );
+      expect(screen.getByText(/configura tu fecha de nacimiento/i)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /configurar/i })).toHaveAttribute('href', '/perfil');
     });
 
     it('should NOT show the "not-generated" message', () => {
@@ -133,13 +126,9 @@ describe('HoroscopeWidget', () => {
       render(<HoroscopeWidget />);
 
       expect(screen.getByTestId('horoscope-widget-not-generated')).toBeInTheDocument();
-      expect(
-        screen.getByText(/tu horóscopo de hoy se está preparando/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/tu horóscopo de hoy se está preparando/i)).toBeInTheDocument();
       // Crítico: NO debe pedir configurar fecha
-      expect(
-        screen.queryByText(/configura tu fecha de nacimiento/i)
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText(/configura tu fecha de nacimiento/i)).not.toBeInTheDocument();
       expect(screen.queryByRole('link', { name: /configurar/i })).not.toBeInTheDocument();
     });
   });
@@ -157,9 +146,7 @@ describe('HoroscopeWidget', () => {
       expect(screen.getByTestId('horoscope-widget-error')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument();
       // No debe mostrar el CTA de fecha de nacimiento
-      expect(
-        screen.queryByText(/configura tu fecha de nacimiento/i)
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText(/configura tu fecha de nacimiento/i)).not.toBeInTheDocument();
     });
 
     it('should call refetch when retry button is clicked', async () => {
@@ -179,4 +166,3 @@ describe('HoroscopeWidget', () => {
     });
   });
 });
-

@@ -292,7 +292,7 @@ Páginas que usan hoy el widget pobre: `/carta-del-dia`, `/horoscopo`, `/horosco
 **Estimación:** 2 puntos
 **Dependencias:** ninguna
 **Cubre BUG:** BUG-016
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada
 
 #### 📋 Descripción
 
@@ -300,14 +300,14 @@ Que el `HoroscopeWidget` deje de mostrar "Configura tu fecha de nacimiento" cuan
 
 #### ✅ Tareas específicas
 
-- [ ] En `useMySignHoroscope` (o un wrapper), mapear el error a un estado tipado: `'no-birthdate'` (400) / `'not-generated'` (404) / `'error'` (resto).
-- [ ] Ajustar `retry`: no reintentar en 400/404; permitir 1-2 reintentos para 5xx.
-- [ ] En `HoroscopeWidget.tsx` reemplazar el bloque único `if (error || !horoscope)` por ramas:
+- [x] En `useMySignHoroscope` (o un wrapper), mapear el error a un estado tipado: `'no-birthdate'` (400) / `'not-generated'` (404) / `'error'` (resto).
+- [x] Ajustar `retry`: no reintentar en 400/404; permitir 1-2 reintentos para 5xx.
+- [x] En `HoroscopeWidget.tsx` reemplazar el bloque único `if (error || !horoscope)` por ramas:
   - 400 → CTA "Configura tu fecha de nacimiento" (actual).
   - 404 → mensaje "Tu horóscopo de hoy se está preparando, volvé en un rato".
   - 5xx/desconocido → estado de error genérico con opción de reintentar.
-- [ ] Tests del widget por estado (success / 400 / 404 / 5xx).
-- [ ] Coverage ≥ 80%.
+- [x] Tests del widget por estado (success / 400 / 404 / 5xx).
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 

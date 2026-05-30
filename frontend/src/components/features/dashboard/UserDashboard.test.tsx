@@ -15,7 +15,6 @@ import type {
   AuthUser,
   UserProfile,
   UserCapabilities,
-  DailyHoroscope,
   ChineseHoroscope,
   SacredEvent,
 } from '@/types';

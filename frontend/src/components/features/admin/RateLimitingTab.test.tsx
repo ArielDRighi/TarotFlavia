@@ -2,7 +2,7 @@
  * Tests for RateLimitingTab component
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -25,6 +25,15 @@ const createWrapper = () => {
 };
 
 describe('RateLimitingTab', () => {
+  beforeEach(() => {
+    // El componente desestructura { mutate, isPending } de useUnblockIP (mutación
+    // para desbloquear IPs). Sin este default el auto-mock devuelve undefined.
+    vi.mocked(useAdminSecurity.useUnblockIP).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as never);
+  });
+
   it('should render stats cards when data is loaded', () => {
     vi.mocked(useAdminSecurity.useRateLimitData).mockReturnValue({
       data: {
