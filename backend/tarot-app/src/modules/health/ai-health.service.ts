@@ -261,7 +261,8 @@ export class AIHealthService {
       deepseek.chat.completions.create({
         messages: [{ role: 'user', content: 'test' }],
         model:
-          this.configService.get<string>('DEEPSEEK_MODEL') || 'deepseek-chat',
+          this.configService.get<string>('DEEPSEEK_MODEL') ||
+          'deepseek-v4-flash',
         max_tokens: 1,
       }),
       this.timeout(this.DEEPSEEK_TIMEOUT),

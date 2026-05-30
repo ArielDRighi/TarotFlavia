@@ -133,8 +133,8 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  @Transform(({ value }) => (value ? String(value) : 'deepseek-chat'))
-  DEEPSEEK_MODEL: string = 'deepseek-chat';
+  @Transform(({ value }) => (value ? String(value) : 'deepseek-v4-flash'))
+  DEEPSEEK_MODEL: string = 'deepseek-v4-flash';
 
   // OpenAI (Fallback/Premium - Optional)
   @IsString()
