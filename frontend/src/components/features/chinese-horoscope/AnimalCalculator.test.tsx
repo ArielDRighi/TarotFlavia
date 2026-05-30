@@ -295,7 +295,17 @@ describe('AnimalCalculator', () => {
 
     it('should persist birthDate in sessionStorage when viewing horoscope', async () => {
       const user = userEvent.setup();
-      const mockSetItem = vi.spyOn(Storage.prototype, 'setItem');
+
+      // En jsdom 27 `sessionStorage` es un objeto exótico cuyo `setItem` no se puede
+      // interceptar con vi.spyOn (ni vía Storage.prototype ni vía la instancia).
+      // Reemplazamos la instancia por un mock para poder verificar la persistencia.
+      const setItemMock = vi.fn();
+      const originalSessionStorage = window.sessionStorage;
+      Object.defineProperty(window, 'sessionStorage', {
+        value: { getItem: vi.fn(), setItem: setItemMock, removeItem: vi.fn(), clear: vi.fn() },
+        writable: true,
+        configurable: true,
+      });
 
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
@@ -314,8 +324,13 @@ describe('AnimalCalculator', () => {
       const viewButton = screen.getByTestId('animal-calculator-view-button');
       await user.click(viewButton);
 
-      expect(mockSetItem).toHaveBeenCalledWith('anonymousBirthDate', '1988-03-15');
-      mockSetItem.mockRestore();
+      expect(setItemMock).toHaveBeenCalledWith('anonymousBirthDate', '1988-03-15');
+
+      Object.defineProperty(window, 'sessionStorage', {
+        value: originalSessionStorage,
+        writable: true,
+        configurable: true,
+      });
     });
   });
 

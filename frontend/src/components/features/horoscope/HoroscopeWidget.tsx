@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Settings } from 'lucide-react';
+import { AlertCircle, ArrowRight, Clock, RefreshCw, Settings } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,17 +16,12 @@ import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
  * Dashboard widget showing user's daily horoscope.
  * Displays personalized content based on user's birth date.
  *
- * States:
- * - No birthDate: Shows CTA to configure profile
- * - Loading: Shows skeleton
- * - Error/No data: Shows error message
- * - Success: Shows horoscope summary with link to full view
- *
- * Features:
- * - Automatic sign detection from birthDate
- * - Compact view with 3-line clamped content
- * - Area scores display
- * - Link to full horoscope page
+ * Estados (diferenciados según la respuesta del backend):
+ * - **Loading**: skeleton.
+ * - **Success**: muestra el horóscopo del día.
+ * - **400 / `no-birthdate`**: el usuario no tiene fecha de nacimiento → CTA a `/perfil`.
+ * - **404 / `not-generated`**: el horóscopo del día aún no se generó → mensaje "se está preparando".
+ * - **5xx / `error`**: error transitorio → mensaje genérico + botón "Reintentar".
  *
  * @example
  * ```tsx
@@ -34,7 +29,7 @@ import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
  * ```
  */
 export function HoroscopeWidget() {
-  const { data: horoscope, isLoading, error } = useMySignHoroscope();
+  const { data: horoscope, isLoading, errorState, refetch, isRefetching } = useMySignHoroscope();
 
   // Loading state
   if (isLoading) {
@@ -47,10 +42,10 @@ export function HoroscopeWidget() {
     );
   }
 
-  // Error or no data (includes no birthDate case from API)
-  if (error || !horoscope) {
+  // 400: el usuario no tiene fecha de nacimiento cargada
+  if (errorState === 'no-birthdate') {
     return (
-      <Card className="p-6" data-testid="horoscope-widget-no-data">
+      <Card className="p-6" data-testid="horoscope-widget-no-birthdate">
         <h2 className="mb-2 font-serif text-xl">Tu Horóscopo</h2>
         <p className="text-muted-foreground mb-4 text-sm">
           Configura tu fecha de nacimiento para ver tu horóscopo personalizado
@@ -60,6 +55,36 @@ export function HoroscopeWidget() {
             <Settings className="mr-2 h-4 w-4" />
             Configurar
           </Link>
+        </Button>
+      </Card>
+    );
+  }
+
+  // 404: el horóscopo del día todavía no fue generado para el signo del usuario
+  if (errorState === 'not-generated') {
+    return (
+      <Card className="p-6" data-testid="horoscope-widget-not-generated">
+        <h2 className="mb-2 font-serif text-xl">Tu Horóscopo</h2>
+        <p className="text-muted-foreground mb-4 flex items-start gap-2 text-sm">
+          <Clock className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>Tu horóscopo de hoy se está preparando, volvé en un rato.</span>
+        </p>
+      </Card>
+    );
+  }
+
+  // 5xx / error genérico / sin datos por razones inesperadas
+  if (errorState === 'error' || !horoscope) {
+    return (
+      <Card className="p-6" data-testid="horoscope-widget-error">
+        <h2 className="mb-2 font-serif text-xl">Tu Horóscopo</h2>
+        <p className="text-muted-foreground mb-4 flex items-start gap-2 text-sm">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>No pudimos cargar tu horóscopo. Intentá nuevamente en unos segundos.</span>
+        </p>
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isRefetching}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          Reintentar
         </Button>
       </Card>
     );
