@@ -329,7 +329,7 @@ Que el `HoroscopeWidget` deje de mostrar "Configura tu fecha de nacimiento" cuan
 **Estimación:** 3 puntos
 **Dependencias:** ninguna (puede ir en paralelo con T-BUG-016-A)
 **Cubre BUG:** BUG-016 (causa subyacente)
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada
 
 #### 📋 Descripción
 
@@ -337,11 +337,11 @@ Confirmar que los 12 horóscopos occidentales se generan completos cada día y a
 
 #### ✅ Tareas específicas
 
-- [ ] Auditar `horoscope-cron.service.ts` y `horoscope-generation.service.ts`: confirmar que se generan los 12 signos por día y qué pasa ante fallo individual.
-- [ ] Si un signo falla, reintentar con backoff sin abortar el resto del lote.
-- [ ] (Opcional) Endpoint admin de status del día (`generados / 12`) + "generar faltantes del día" reutilizando el patrón de T-BUG-001-A.
-- [ ] Tests unitarios de la lógica de generación/reintento.
-- [ ] Coverage ≥ 80%.
+- [x] Auditar `horoscope-cron.service.ts` y `horoscope-generation.service.ts`: confirmar que se generan los 12 signos por día y qué pasa ante fallo individual.
+- [x] Si un signo falla, reintentar con backoff sin abortar el resto del lote.
+- [x] Verificación diaria (cron a las 09:00 UTC) que detecta y regenera solo los signos faltantes del día (`generateMissingHoroscopes` + `findMissingSignsForDate`).
+- [x] Tests unitarios de la lógica de generación/reintento.
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 

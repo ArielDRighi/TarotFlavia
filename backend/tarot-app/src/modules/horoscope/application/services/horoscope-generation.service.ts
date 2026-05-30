@@ -184,6 +184,24 @@ export class HoroscopeGenerationService {
   }
 
   /**
+   * T-BUG-016-B: Identifica los signos zodiacales sin horóscopo para una fecha.
+   *
+   * Compara los 12 signos esperados contra los horóscopos existentes en la BD
+   * para la fecha dada y retorna los signos faltantes.
+   *
+   * @param date - Fecha a verificar (default: hoy)
+   * @returns Array de signos zodiacales sin horóscopo para esa fecha
+   */
+  async findMissingSignsForDate(
+    date: Date = new Date(),
+  ): Promise<ZodiacSign[]> {
+    const existing = await this.findAllByDate(date);
+    const existingSigns = new Set(existing.map((h) => h.zodiacSign));
+
+    return Object.values(ZodiacSign).filter((sign) => !existingSigns.has(sign));
+  }
+
+  /**
    * Incrementa el contador de visualizaciones de un horóscopo
    *
    * Operación atómica usando query builder para evitar race conditions.

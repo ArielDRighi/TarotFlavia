@@ -385,6 +385,54 @@ describe('HoroscopeGenerationService', () => {
     });
   });
 
+  describe('findMissingSignsForDate (T-BUG-016-B)', () => {
+    it('should return all 12 signs when none exist for the date', async () => {
+      const date = new Date('2026-01-17');
+
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getMany = jest.fn().mockResolvedValue([]);
+
+      const result = await service.findMissingSignsForDate(date);
+
+      expect(result).toHaveLength(12);
+      expect(result).toContain(ZodiacSign.ARIES);
+      expect(result).toContain(ZodiacSign.PISCES);
+    });
+
+    it('should return only the signs that are missing', async () => {
+      const date = new Date('2026-01-17');
+
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getMany = jest.fn().mockResolvedValue([
+        { ...mockDailyHoroscope, zodiacSign: ZodiacSign.ARIES },
+        { ...mockDailyHoroscope, zodiacSign: ZodiacSign.TAURUS },
+      ]);
+
+      const result = await service.findMissingSignsForDate(date);
+
+      expect(result).toHaveLength(10);
+      expect(result).not.toContain(ZodiacSign.ARIES);
+      expect(result).not.toContain(ZodiacSign.TAURUS);
+      expect(result).toContain(ZodiacSign.GEMINI);
+    });
+
+    it('should return empty array when all 12 signs exist', async () => {
+      const date = new Date('2026-01-17');
+
+      const allSigns = Object.values(ZodiacSign).map((sign) => ({
+        ...mockDailyHoroscope,
+        zodiacSign: sign,
+      }));
+
+      const queryBuilder = repository.createQueryBuilder();
+      queryBuilder.getMany = jest.fn().mockResolvedValue(allSigns);
+
+      const result = await service.findMissingSignsForDate(date);
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('incrementViewCount', () => {
     it('should increment view count for a horoscope', async () => {
       const id = 1;
