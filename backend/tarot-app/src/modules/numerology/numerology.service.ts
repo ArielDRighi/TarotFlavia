@@ -17,6 +17,7 @@ import {
 } from './dto/numerology-response.dto';
 import { NumerologyInterpretation } from './entities/numerology-interpretation.entity';
 import { AIProviderService } from '../ai/application/services/ai-provider.service';
+import { AIProviderType } from '../ai/domain/interfaces/ai-provider.interface';
 import {
   NUMEROLOGY_SYSTEM_PROMPT,
   buildNumerologyUserPrompt,
@@ -149,6 +150,7 @@ export class NumerologyService {
       user.id,
       null,
       { temperature: 0.7, maxTokens: 1500 },
+      AIProviderType.DEEPSEEK, // IA principal (fallback automático al resto)
     );
 
     const generationTimeMs = Date.now() - startTime;

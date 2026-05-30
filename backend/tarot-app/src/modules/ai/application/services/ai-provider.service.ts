@@ -95,18 +95,34 @@ export class AIProviderService {
    * Generate completion with automatic fallback, retry, and circuit breaker
    * Tries providers in priority order until one succeeds
    * @param config Optional AI config (temperature, maxTokens, topP) from tarotista settings
+   * @param primaryProvider Optional preferred provider to try first. The remaining
+   *   providers stay as fallback in their default priority order. Allows each feature
+   *   to pick its main provider (ej: DeepSeek para tarot/numerología/carta astral,
+   *   Groq para horóscopos) sin perder el fallback automático.
    */
   async generateCompletion(
     messages: AIMessage[],
     userId?: number | null,
     readingId?: number | null,
     config?: Partial<AIProviderConfig>,
+    primaryProvider?: AIProviderType,
   ): Promise<AIResponse> {
     const errors: Array<{ provider: string; error: string }> = [];
     let fallbackUsed = false;
     let providerIndex = 0;
 
-    for (const provider of this.providers) {
+    const orderedProviders = this.getOrderedProviders(primaryProvider);
+
+    // Si ningún proveedor tiene API key configurada, el bucle no correría y se
+    // lanzaría "All AI providers failed:" con resumen vacío (confuso). Avisar claro.
+    if (orderedProviders.length === 0) {
+      throw new Error(
+        'No hay ningún proveedor de IA configurado (falta API key). ' +
+          'Configurá al menos GROQ_API_KEY o DEEPSEEK_API_KEY.',
+      );
+    }
+
+    for (const provider of orderedProviders) {
       const providerType = provider.getProviderType();
       const circuitBreaker = this.circuitBreakers.get(providerType);
 
@@ -246,6 +262,40 @@ export class AIProviderService {
       .map((e) => `${e.provider}: ${e.error}`)
       .join('; ');
     throw new Error(`All AI providers failed: ${errorSummary}`);
+  }
+
+  /**
+   * Returns the provider list to iterate, placing `primaryProvider` first when
+   * provided and keeping the rest in their default priority order as fallback.
+   * If the preferred provider is unknown, falls back to the default order.
+   *
+   * Providers without an API key configured are excluded entirely, so they are
+   * never attempted nor logged as errors (evita ensuciar las métricas con
+   * proveedores que no están en uso, ej. OpenAI/Gemini sin key).
+   */
+  private getOrderedProviders(primaryProvider?: AIProviderType): IAIProvider[] {
+    const configured = this.providers.filter((provider) =>
+      provider.isConfigured(),
+    );
+
+    if (!primaryProvider) {
+      return configured;
+    }
+
+    const preferred = configured.find(
+      (provider) => provider.getProviderType() === primaryProvider,
+    );
+
+    if (!preferred) {
+      return configured;
+    }
+
+    return [
+      preferred,
+      ...configured.filter(
+        (provider) => provider.getProviderType() !== primaryProvider,
+      ),
+    ];
   }
 
   private mapProviderToEnum(providerType: AIProviderType | string): AIProvider {
