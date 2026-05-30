@@ -34,6 +34,7 @@ describe('HoroscopeCronService', () => {
   const mockHoroscopeGenerationService = {
     generateForSign: jest.fn(),
     cleanupOldHoroscopes: jest.fn(),
+    findMissingSignsForDate: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -125,12 +126,13 @@ describe('HoroscopeCronService', () => {
       await service.generateDailyHoroscopes();
 
       // Assert
-      // Debe haber intentado generar los 12 signos a pesar del error
+      // T-BUG-016-B: 11 signos exitosos (1 llamada cada uno) + Cáncer reintentado
+      // 4 veces (1 intento + 3 reintentos) = 15 llamadas totales
       expect(
         mockHoroscopeGenerationService.generateForSign,
-      ).toHaveBeenCalledTimes(12);
+      ).toHaveBeenCalledTimes(15);
 
-      // Verificar que se logueo el error de Cancer
+      // Verificar que se logueo el error de Cancer tras agotar reintentos
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         expect.stringContaining('Cáncer: Cancer generation failed'),
       );
@@ -241,6 +243,170 @@ describe('HoroscopeCronService', () => {
       expect(Logger.prototype.warn).toHaveBeenCalledWith(
         'Generación manual iniciada...',
       );
+    });
+  });
+
+  describe('retry behavior (T-BUG-016-B)', () => {
+    it('should retry a transient failure and succeed without leaving a gap', async () => {
+      // Arrange: Leo falla 2 veces y luego tiene éxito
+      let leoAttempts = 0;
+      mockHoroscopeGenerationService.generateForSign.mockImplementation(
+        (sign: ZodiacSign) => {
+          if (sign === ZodiacSign.LEO) {
+            leoAttempts++;
+            if (leoAttempts <= 2) {
+              return Promise.reject(new Error('Transient 5xx'));
+            }
+          }
+          return Promise.resolve(createMockHoroscope(sign));
+        },
+      );
+
+      // Act
+      await service.generateDailyHoroscopes();
+
+      // Assert: 11 signos OK (1 llamada) + Leo (3 llamadas) = 14 llamadas
+      expect(
+        mockHoroscopeGenerationService.generateForSign,
+      ).toHaveBeenCalledTimes(14);
+
+      // No debe haber error definitivo, los 12 fueron exitosos
+      expect(Logger.prototype.log).toHaveBeenCalledWith(
+        expect.stringContaining('12/12 exitosos'),
+      );
+    });
+
+    it('should give up after exhausting retries for a sign', async () => {
+      // Arrange: Virgo siempre falla
+      mockHoroscopeGenerationService.generateForSign.mockImplementation(
+        (sign: ZodiacSign) => {
+          if (sign === ZodiacSign.VIRGO) {
+            return Promise.reject(new Error('Persistent failure'));
+          }
+          return Promise.resolve(createMockHoroscope(sign));
+        },
+      );
+
+      // Act
+      await service.generateDailyHoroscopes();
+
+      // Assert: Virgo intentado 4 veces (1 + 3 reintentos)
+      const virgoCalls =
+        mockHoroscopeGenerationService.generateForSign.mock.calls.filter(
+          (call) => call[0] === ZodiacSign.VIRGO,
+        );
+      expect(virgoCalls).toHaveLength(4);
+
+      expect(Logger.prototype.error).toHaveBeenCalledWith(
+        expect.stringContaining('sin más reintentos'),
+      );
+    });
+  });
+
+  describe('verifyAndCompleteDailyHoroscopes (T-BUG-016-B)', () => {
+    it('should not generate anything when all 12 signs exist', async () => {
+      // Arrange
+      mockHoroscopeGenerationService.findMissingSignsForDate.mockResolvedValue(
+        [],
+      );
+
+      // Act
+      await service.verifyAndCompleteDailyHoroscopes();
+
+      // Assert
+      expect(
+        mockHoroscopeGenerationService.findMissingSignsForDate,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockHoroscopeGenerationService.generateForSign,
+      ).not.toHaveBeenCalled();
+      expect(Logger.prototype.log).toHaveBeenCalledWith(
+        expect.stringContaining('los 12 horóscopos del día existen'),
+      );
+    });
+
+    it('should generate only the missing signs', async () => {
+      // Arrange: faltan 2 signos
+      mockHoroscopeGenerationService.findMissingSignsForDate.mockResolvedValue([
+        ZodiacSign.ARIES,
+        ZodiacSign.PISCES,
+      ]);
+      mockHoroscopeGenerationService.generateForSign.mockImplementation(
+        (sign: ZodiacSign) => Promise.resolve(createMockHoroscope(sign)),
+      );
+
+      // Act
+      await service.verifyAndCompleteDailyHoroscopes();
+
+      // Assert: solo se generan los 2 faltantes
+      expect(
+        mockHoroscopeGenerationService.generateForSign,
+      ).toHaveBeenCalledTimes(2);
+      expect(
+        mockHoroscopeGenerationService.generateForSign,
+      ).toHaveBeenCalledWith(ZodiacSign.ARIES, expect.any(Date));
+      expect(
+        mockHoroscopeGenerationService.generateForSign,
+      ).toHaveBeenCalledWith(ZodiacSign.PISCES, expect.any(Date));
+    });
+
+    it('should handle errors gracefully', async () => {
+      // Arrange
+      mockHoroscopeGenerationService.findMissingSignsForDate.mockRejectedValue(
+        new Error('DB down'),
+      );
+
+      // Act
+      await service.verifyAndCompleteDailyHoroscopes();
+
+      // Assert
+      expect(Logger.prototype.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error en verificación de horóscopos'),
+        expect.anything(),
+      );
+    });
+  });
+
+  describe('generateMissingHoroscopes (T-BUG-016-B)', () => {
+    it('should return summary with missing, successful and failed counts', async () => {
+      // Arrange: faltan 3, uno falla
+      mockHoroscopeGenerationService.findMissingSignsForDate.mockResolvedValue([
+        ZodiacSign.GEMINI,
+        ZodiacSign.CANCER,
+        ZodiacSign.LEO,
+      ]);
+      mockHoroscopeGenerationService.generateForSign.mockImplementation(
+        (sign: ZodiacSign) => {
+          if (sign === ZodiacSign.CANCER) {
+            return Promise.reject(new Error('fail'));
+          }
+          return Promise.resolve(createMockHoroscope(sign));
+        },
+      );
+
+      // Act
+      const result = await service.generateMissingHoroscopes(new Date());
+
+      // Assert
+      expect(result.missing).toBe(3);
+      expect(result.successful).toBe(2);
+      expect(result.failed).toBe(1);
+    });
+
+    it('should return zeros when nothing is missing', async () => {
+      // Arrange
+      mockHoroscopeGenerationService.findMissingSignsForDate.mockResolvedValue(
+        [],
+      );
+
+      // Act
+      const result = await service.generateMissingHoroscopes(new Date());
+
+      // Assert
+      expect(result).toEqual({ missing: 0, successful: 0, failed: 0 });
+      expect(
+        mockHoroscopeGenerationService.generateForSign,
+      ).not.toHaveBeenCalled();
     });
   });
 

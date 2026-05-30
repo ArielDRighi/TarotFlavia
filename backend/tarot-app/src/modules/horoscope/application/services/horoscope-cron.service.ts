@@ -10,6 +10,9 @@ import {
   RETENTION_DAYS,
   GENERATION_SCHEDULE,
   CLEANUP_SCHEDULE,
+  VERIFICATION_SCHEDULE,
+  MAX_RETRIES_PER_SIGN,
+  RETRY_DELAYS_MS,
 } from './horoscope-cron.config';
 
 /**
@@ -140,6 +143,11 @@ export class HoroscopeCronService {
   /**
    * Genera un horóscopo individual para un signo
    *
+   * T-BUG-016-B: Reintenta hasta MAX_RETRIES_PER_SIGN veces con backoff
+   * exponencial ante fallos transitorios (5xx / rate limit / timeout) antes
+   * de marcar el signo como definitivamente fallido. Esto evita que un error
+   * puntual deje un hueco permanente en la generación diaria.
+   *
    * @param sign - Signo zodiacal
    * @param date - Fecha del horóscopo
    * @param index - Índice en el orden de generación (1-12)
@@ -152,35 +160,51 @@ export class HoroscopeCronService {
     index: number,
   ): Promise<GenerationResult> {
     const signInfo = getZodiacSignInfo(sign);
+    let lastError = '';
 
-    try {
-      this.logger.log(`[${index}/12] Generando ${signInfo.nameEs}...`);
+    for (let attempt = 1; attempt <= MAX_RETRIES_PER_SIGN + 1; attempt++) {
+      try {
+        this.logger.log(`[${index}/12] Generando ${signInfo.nameEs}...`);
 
-      const startTime = Date.now();
-      const horoscope = await this.horoscopeService.generateForSign(sign, date);
-      const duration = Date.now() - startTime;
+        const startTime = Date.now();
+        const horoscope = await this.horoscopeService.generateForSign(
+          sign,
+          date,
+        );
+        const duration = Date.now() - startTime;
 
-      this.logger.log(
-        `[${index}/12] ✓ ${signInfo.nameEs} (${duration}ms, ${horoscope.aiProvider})`,
-      );
+        this.logger.log(
+          `[${index}/12] ✓ ${signInfo.nameEs} (${duration}ms, ${horoscope.aiProvider})`,
+        );
 
-      return {
-        sign,
-        success: true,
-        duration,
-        provider: horoscope.aiProvider || undefined,
-      };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      this.logger.error(`[${index}/12] ✗ ${signInfo.nameEs}: ${errorMessage}`);
+        return {
+          sign,
+          success: true,
+          duration,
+          provider: horoscope.aiProvider || undefined,
+        };
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : String(error);
 
-      return {
-        sign,
-        success: false,
-        error: errorMessage,
-      };
+        if (attempt <= MAX_RETRIES_PER_SIGN) {
+          const retryDelay = RETRY_DELAYS_MS[attempt - 1];
+          this.logger.warn(
+            `[${index}/12] Reintento ${attempt}/${MAX_RETRIES_PER_SIGN} para ${signInfo.nameEs} en ${retryDelay / 1000}s: ${lastError}`,
+          );
+          await this.delay(retryDelay);
+        }
+      }
     }
+
+    this.logger.error(
+      `[${index}/12] ✗ ${signInfo.nameEs}: ${lastError} (sin más reintentos)`,
+    );
+
+    return {
+      sign,
+      success: false,
+      error: lastError,
+    };
   }
 
   /**
@@ -216,6 +240,89 @@ export class HoroscopeCronService {
   async generateNow(): Promise<void> {
     this.logger.warn('Generación manual iniciada...');
     await this.generateDailyHoroscopes();
+  }
+
+  /**
+   * T-BUG-016-B: Verifica la completitud de la generación diaria - 09:00 UTC
+   *
+   * Se ejecuta unas horas después de la generación de las 06:00 para detectar
+   * signos que hayan quedado sin horóscopo (por fallos transitorios persistentes)
+   * y regenerar únicamente los faltantes, sin tocar los ya generados.
+   *
+   * Cron expression: "0 0 9 * * *" (todos los días a las 09:00 UTC)
+   */
+  @Cron(VERIFICATION_SCHEDULE, {
+    name: 'verify-daily-horoscope-completeness',
+    timeZone: 'UTC',
+  })
+  async verifyAndCompleteDailyHoroscopes(): Promise<void> {
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0];
+
+    this.logger.log(
+      `=== VERIFICACIÓN: Comprobando completitud de horóscopos para ${dateStr} ===`,
+    );
+
+    try {
+      await this.generateMissingHoroscopes(today);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? (error.stack ?? '') : '';
+      this.logger.error(
+        `Error en verificación de horóscopos para ${dateStr}: ${errorMessage}`,
+        errorStack,
+      );
+    }
+  }
+
+  /**
+   * T-BUG-016-B: Genera únicamente los horóscopos faltantes de una fecha.
+   *
+   * Identifica los signos sin horóscopo para la fecha dada y genera solo esos,
+   * con reintentos por signo. No regenera los que ya existen.
+   *
+   * @param date - Fecha objetivo (default: hoy)
+   * @returns Resumen de generación (faltantes detectados, exitosos, fallidos)
+   */
+  async generateMissingHoroscopes(date: Date = new Date()): Promise<{
+    missing: number;
+    successful: number;
+    failed: number;
+  }> {
+    const missingSigns =
+      await this.horoscopeService.findMissingSignsForDate(date);
+
+    if (missingSigns.length === 0) {
+      this.logger.log('Verificación OK: los 12 horóscopos del día existen.');
+      return { missing: 0, successful: 0, failed: 0 };
+    }
+
+    this.logger.warn(
+      `Se encontraron ${missingSigns.length} horóscopos faltantes. Iniciando regeneración...`,
+    );
+
+    const results: GenerationResult[] = [];
+    for (let i = 0; i < missingSigns.length; i++) {
+      const sign = missingSigns[i];
+
+      // Delay ANTES de generar (excepto para el primer faltante)
+      if (i > 0) {
+        await this.delay(this.DELAY_BETWEEN_SIGNS_MS);
+      }
+
+      const result = await this.generateSingleHoroscope(sign, date, i + 1);
+      results.push(result);
+    }
+
+    const successful = results.filter((r) => r.success).length;
+    const failed = results.filter((r) => !r.success).length;
+
+    this.logger.log(
+      `Regeneración de faltantes completada: ${successful} exitosos, ${failed} fallidos`,
+    );
+
+    return { missing: missingSigns.length, successful, failed };
   }
 
   /**

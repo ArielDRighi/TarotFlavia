@@ -44,6 +44,32 @@ export const GENERATION_SCHEDULE = '0 0 6 * * *';
 export const CLEANUP_SCHEDULE = '0 0 0 * * 0';
 
 /**
+ * T-BUG-016-B: Expresión cron para verificar la completitud de la generación diaria
+ *
+ * Formato: "segundo minuto hora díaMes mes díaSemana"
+ * Valor: "0 0 9 * * *"
+ * Significado: Todos los días a las 09:00 UTC (3 horas después de la generación)
+ * Razón: Detectar y regenerar signos faltantes si la generación de las 06:00 quedó incompleta
+ */
+export const VERIFICATION_SCHEDULE = '0 0 9 * * *';
+
+/**
+ * T-BUG-016-B: Cantidad máxima de reintentos por signo ante fallo transitorio
+ *
+ * Valor: 3 reintentos (4 intentos totales por signo)
+ * Razón: Tolerar errores transitorios (5xx / rate limit / timeout) de los proveedores de IA
+ */
+export const MAX_RETRIES_PER_SIGN = 3;
+
+/**
+ * T-BUG-016-B: Delays (ms) de backoff exponencial antes de cada reintento
+ *
+ * Valor: [6000, 12000, 24000]
+ * Razón: Backoff creciente respetando rate limits sin bloquear el lote completo
+ */
+export const RETRY_DELAYS_MS = [6000, 12000, 24000];
+
+/**
  * Configuración completa del cron de horóscopos
  *
  * Objeto agregado para facilitar importación y modificación centralizada
@@ -53,4 +79,7 @@ export const HOROSCOPE_CRON_CONFIG = {
   RETENTION_DAYS,
   GENERATION_SCHEDULE,
   CLEANUP_SCHEDULE,
+  VERIFICATION_SCHEDULE,
+  MAX_RETRIES_PER_SIGN,
+  RETRY_DELAYS_MS,
 } as const;
