@@ -332,6 +332,21 @@ describe('AIProviderService', () => {
       expect(openaiProvider.generateCompletion).toHaveBeenCalled();
     });
 
+    it('should throw a clear error when NO provider is configured', async () => {
+      groqProvider.isConfigured.mockReturnValue(false);
+      deepseekProvider.isConfigured.mockReturnValue(false);
+      geminiProvider.isConfigured.mockReturnValue(false);
+      openaiProvider.isConfigured.mockReturnValue(false);
+
+      await expect(
+        service.generateCompletion(mockMessages, 1, 1),
+      ).rejects.toThrow(/No hay ningún proveedor de IA configurado/);
+
+      // No se intenta ningún provider ni se loguea error vacío
+      expect(groqProvider.generateCompletion).not.toHaveBeenCalled();
+      expect(aiUsageService.createLog).not.toHaveBeenCalled();
+    });
+
     it('should log all provider failures', async () => {
       const error = new Error('Service unavailable');
 

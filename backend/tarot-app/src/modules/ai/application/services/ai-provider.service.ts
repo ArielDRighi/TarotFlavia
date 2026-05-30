@@ -111,7 +111,18 @@ export class AIProviderService {
     let fallbackUsed = false;
     let providerIndex = 0;
 
-    for (const provider of this.getOrderedProviders(primaryProvider)) {
+    const orderedProviders = this.getOrderedProviders(primaryProvider);
+
+    // Si ningún proveedor tiene API key configurada, el bucle no correría y se
+    // lanzaría "All AI providers failed:" con resumen vacío (confuso). Avisar claro.
+    if (orderedProviders.length === 0) {
+      throw new Error(
+        'No hay ningún proveedor de IA configurado (falta API key). ' +
+          'Configurá al menos GROQ_API_KEY o DEEPSEEK_API_KEY.',
+      );
+    }
+
+    for (const provider of orderedProviders) {
       const providerType = provider.getProviderType();
       const circuitBreaker = this.circuitBreakers.get(providerType);
 

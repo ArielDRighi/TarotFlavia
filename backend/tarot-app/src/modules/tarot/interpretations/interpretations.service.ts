@@ -445,9 +445,9 @@ export class InterpretationsService {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        undefined,
-        undefined,
-        undefined,
+        null, // userId: no aplica para carta del día
+        null, // readingId: no aplica
+        undefined, // config: usar defaults del provider
         AIProviderType.DEEPSEEK,
       );
 
