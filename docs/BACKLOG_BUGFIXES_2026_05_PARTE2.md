@@ -24,12 +24,12 @@ Durante una segunda verificación visual sobre **https://staging.auguriatarot.co
 
 ## ÍNDICE DE BUGS
 
-| ID      | Bug                                                                          | Severidad  | Módulo afectado                |
-| ------- | ---------------------------------------------------------------------------- | ---------- | ------------------------------ |
-| BUG-016 | Widget de horóscopo pide configurar fecha aunque ya está cargada             | 🟠 Alta    | Frontend — Horoscope Widget    |
-| BUG-017 | La Guía del Tarot no figura en `/enciclopedia/guias`                         | 🔴 Crítica | Frontend — Encyclopedia        |
-| BUG-018 | Símbolos zodiacales se ven multicolor (emoji) en vez de lila                 | 🟡 Media   | Frontend — Horoscope UI        |
-| BUG-019 | Tarjeta informativa por servicio mucho más pobre que la de Numerología       | 🟠 Alta    | Frontend — Encyclopedia/Servicios |
+| ID      | Bug                                                                    | Severidad  | Módulo afectado                   |
+| ------- | ---------------------------------------------------------------------- | ---------- | --------------------------------- |
+| BUG-016 | Widget de horóscopo pide configurar fecha aunque ya está cargada       | 🟠 Alta    | Frontend — Horoscope Widget       |
+| BUG-017 | La Guía del Tarot no figura en `/enciclopedia/guias`                   | 🔴 Crítica | Frontend — Encyclopedia           |
+| BUG-018 | Símbolos zodiacales se ven multicolor (emoji) en vez de lila           | 🟡 Media   | Frontend — Horoscope UI           |
+| BUG-019 | Tarjeta informativa por servicio mucho más pobre que la de Numerología | 🟠 Alta    | Frontend — Encyclopedia/Servicios |
 
 ---
 
@@ -196,7 +196,7 @@ Los símbolos en `ZODIAC_SIGNS_INFO` ([zodiac.ts](frontend/src/lib/utils/zodiac.
 
 #### Notas Técnicas
 
-- Forzar **presentación de texto** del glifo: agregar el selector de variación `︎` (U+FE0E, *text presentation selector*) al símbolo, y/o aplicar CSS `font-variant-emoji: text` en el `<span>`.
+- Forzar **presentación de texto** del glifo: agregar el selector de variación `︎` (U+FE0E, _text presentation selector_) al símbolo, y/o aplicar CSS `font-variant-emoji: text` en el `<span>`.
 - Aplicar explícitamente el color lila con `text-primary` (o el token correspondiente) al `<span>` del símbolo.
 - Alternativa más robusta y multiplataforma: reemplazar los glifos Unicode por **íconos SVG** (set propio o librería) teñidos con `text-primary` vía `currentColor` — evita depender del soporte de `font-variant-emoji`.
 - Aplicar el mismo tratamiento en todos los lugares que rendericen `signInfo.symbol` (`HoroscopeWidget.tsx:74`, detalle `[sign]`, etc.).
@@ -272,13 +272,13 @@ Páginas que usan hoy el widget pobre: `/carta-del-dia`, `/horoscopo`, `/horosco
 
 ### Índice de Tareas Técnicas
 
-| ID          | Tarea                                                                          | Tipo        | Prioridad   | Estimación |
-| ----------- | ------------------------------------------------------------------------------ | ----------- | ----------- | ---------- |
-| T-BUG-016-A | Diferenciar estados del widget de horóscopo (400 vs 404 vs 5xx)                | Frontend    | 🟠 Alta     | 2 pts      |
-| T-BUG-016-B | (Subyacente) Auditar/robustecer generación diaria de horóscopos occidentales   | Backend     | 🟠 Alta     | 3 pts      |
-| T-BUG-017   | Agregar la Guía del Tarot al índice `/enciclopedia/guias`                       | Frontend    | 🔴 Crítica  | 0.5 pt     |
-| T-BUG-018   | Forzar render lila/monocromático de los símbolos zodiacales                    | Frontend    | 🟡 Media    | 1.5 pts    |
-| T-BUG-019   | Tarjetas informativas ricas por servicio (paridad con Numerología)             | Frontend    | 🟠 Alta     | 5-8 pts    |
+| ID          | Tarea                                                                        | Tipo     | Prioridad  | Estimación |
+| ----------- | ---------------------------------------------------------------------------- | -------- | ---------- | ---------- |
+| T-BUG-016-A | Diferenciar estados del widget de horóscopo (400 vs 404 vs 5xx)              | Frontend | 🟠 Alta    | 2 pts      |
+| T-BUG-016-B | (Subyacente) Auditar/robustecer generación diaria de horóscopos occidentales | Backend  | 🟠 Alta    | 3 pts      |
+| T-BUG-017   | Agregar la Guía del Tarot al índice `/enciclopedia/guias`                    | Frontend | 🔴 Crítica | 0.5 pt     |
+| T-BUG-018   | Forzar render lila/monocromático de los símbolos zodiacales                  | Frontend | 🟡 Media   | 1.5 pts    |
+| T-BUG-019   | Tarjetas informativas ricas por servicio (paridad con Numerología)           | Frontend | 🟠 Alta    | 5-8 pts    |
 
 **Estimación total:** ~13–18 puntos.
 

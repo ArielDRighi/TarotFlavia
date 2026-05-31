@@ -12,6 +12,7 @@ import { ArticleDetailPageContent } from '@/components/features/encyclopedia/Art
  */
 
 const GUIDE_CATEGORIES = [
+  ArticleCategory.GUIDE_TAROT,
   ArticleCategory.GUIDE_NUMEROLOGY,
   ArticleCategory.GUIDE_PENDULUM,
   ArticleCategory.GUIDE_BIRTH_CHART,
