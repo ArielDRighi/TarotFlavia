@@ -184,6 +184,12 @@ body {
   .rotate-y-180 {
     transform: rotateY(180deg);
   }
+
+  /* Fuerza presentación de texto (monocromática) en glifos que el sistema
+     podría renderizar como emoji multicolor — ej. símbolos zodiacales. */
+  .zodiac-symbol {
+    font-variant-emoji: text;
+  }
 }
 
 /* ===========================================

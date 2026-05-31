@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import type { ZodiacSign, ZodiacSignInfo } from '@/types/horoscope.types';
 
+import { ZodiacSymbol } from './ZodiacSymbol';
+
 /**
  * ZodiacSignCard Component Props
  */
@@ -86,9 +88,7 @@ export function ZodiacSignCard({
       tabIndex={0}
       role="button"
     >
-      <span className="text-4xl" role="img" aria-label={signInfo.nameEs}>
-        {signInfo.symbol}
-      </span>
+      <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-4xl" />
       <p className="mt-2 font-serif text-lg">{signInfo.nameEs}</p>
       {isUserSign && <span className="text-muted-foreground text-xs">Tu signo</span>}
     </Card>

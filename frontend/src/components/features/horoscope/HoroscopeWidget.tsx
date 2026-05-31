@@ -10,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useMySignHoroscope } from '@/hooks/api/useHoroscope';
 import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
 
+import { ZodiacSymbol } from './ZodiacSymbol';
+
 /**
  * HoroscopeWidget Component
  *
@@ -96,7 +98,7 @@ export function HoroscopeWidget() {
     <Card data-testid="horoscope-widget" className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-3xl">{signInfo.symbol}</span>
+          <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-3xl" />
           <h2 className="font-serif text-xl">{signInfo.nameEs}</h2>
         </div>
         <Button asChild variant="ghost" size="sm">

@@ -393,17 +393,17 @@ Confirmar que los 12 horóscopos occidentales se generan completos cada día y a
 **Estimación:** 1.5 puntos
 **Dependencias:** ninguna
 **Cubre BUG:** BUG-018
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada
 
 #### ✅ Tareas específicas
 
-- [ ] Forzar presentación de texto del glifo: agregar selector de variación U+FE0E al símbolo y/o `font-variant-emoji: text` en el `<span>` de `ZodiacSignCard.tsx`.
-- [ ] Aplicar color lila explícito (`text-primary` / token) al `<span>` del símbolo.
-- [ ] (Alternativa robusta) Evaluar reemplazo de glifos Unicode por SVG teñidos con `currentColor` si el soporte de `font-variant-emoji` es insuficiente en los navegadores objetivo.
-- [ ] Aplicar el mismo tratamiento en todos los lugares que rendericen `signInfo.symbol` (`HoroscopeWidget.tsx:74`, detalle `[sign]`).
-- [ ] Verificar en navegadores móviles (donde el render emoji es más frecuente) que se vean lila.
-- [ ] Tests de `ZodiacSignCard` (clase de color / selector de variación).
-- [ ] Coverage ≥ 80%.
+- [x] Forzar presentación de texto del glifo: agregar selector de variación U+FE0E al símbolo y/o `font-variant-emoji: text` en el `<span>` de `ZodiacSignCard.tsx`.
+- [x] Aplicar color lila explícito (`text-primary` / token) al `<span>` del símbolo.
+- [x] (Alternativa robusta) Evaluar reemplazo de glifos Unicode por SVG teñidos con `currentColor` si el soporte de `font-variant-emoji` es insuficiente en los navegadores objetivo.
+- [x] Aplicar el mismo tratamiento en todos los lugares que rendericen `signInfo.symbol` (`HoroscopeWidget.tsx:74`, detalle `[sign]`).
+- [x] Verificar en navegadores móviles (donde el render emoji es más frecuente) que se vean lila.
+- [x] Tests de `ZodiacSignCard` (clase de color / selector de variación).
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 

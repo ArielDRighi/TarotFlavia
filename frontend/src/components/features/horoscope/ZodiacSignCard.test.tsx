@@ -31,7 +31,7 @@ describe('ZodiacSignCard', () => {
 
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-      expect(screen.getByText('♈')).toBeInTheDocument();
+      expect(screen.getByLabelText('Aries')).toHaveTextContent('♈');
     });
 
     it('should render zodiac sign name in Spanish', () => {
@@ -246,7 +246,7 @@ describe('ZodiacSignCard', () => {
         const signInfo = createTestSignInfo({ sign, nameEs, symbol });
         const { unmount } = render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-        expect(screen.getByText(symbol)).toBeInTheDocument();
+        expect(screen.getByLabelText(nameEs)).toHaveTextContent(symbol);
         expect(screen.getByText(nameEs)).toBeInTheDocument();
         expect(screen.getByTestId(`zodiac-card-${sign}`)).toBeInTheDocument();
 
