@@ -110,4 +110,32 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
     const link = screen.getByRole('link', { name: /guía de numerología/i });
     expect(link).toHaveAttribute('href', '/enciclopedia/guias/guia-numerologia');
   });
+
+  it('debe incluir la Guía del Tarot en el listado', () => {
+    const tarotGuide = buildGuideArticle(
+      10,
+      'guia-tarot',
+      'Guía del Tarot',
+      ArticleCategory.GUIDE_TAROT
+    );
+    mockUseArticlesByCategory.mockImplementation((cat: ArticleCategory) => {
+      if (cat === ArticleCategory.GUIDE_TAROT) return { data: [tarotGuide], isLoading: false };
+      return { data: [], isLoading: false };
+    });
+
+    renderWithProviders(<GuiasPage />);
+
+    const link = screen.getByRole('link', { name: /guía del tarot/i });
+    expect(link).toHaveAttribute('href', '/enciclopedia/guias/guia-tarot');
+  });
+
+  it('debe consultar la categoría GUIDE_TAROT y ubicarla primera', () => {
+    mockUseArticlesByCategory.mockReturnValue({ data: [], isLoading: false });
+
+    renderWithProviders(<GuiasPage />);
+
+    const requestedCategories = mockUseArticlesByCategory.mock.calls.map((call) => call[0]);
+    expect(requestedCategories).toContain(ArticleCategory.GUIDE_TAROT);
+    expect(requestedCategories[0]).toBe(ArticleCategory.GUIDE_TAROT);
+  });
 });

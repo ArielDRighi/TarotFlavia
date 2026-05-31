@@ -10,6 +10,7 @@ import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const GUIDE_CATEGORIES: ArticleCategory[] = [
+  ArticleCategory.GUIDE_TAROT,
   ArticleCategory.GUIDE_NUMEROLOGY,
   ArticleCategory.GUIDE_PENDULUM,
   ArticleCategory.GUIDE_BIRTH_CHART,
@@ -59,7 +60,7 @@ function CategorySection({ category }: { category: ArticleCategory }) {
 /**
  * GuiasContent
  *
- * Fetches and renders all guide articles across the 6 guide categories.
+ * Fetches and renders all guide articles across the 7 guide categories.
  * Uses one hook call per category (as per the API design).
  */
 export function GuiasContent() {
