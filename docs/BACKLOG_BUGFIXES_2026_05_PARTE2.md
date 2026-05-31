@@ -363,15 +363,15 @@ Confirmar que los 12 horóscopos occidentales se generan completos cada día y a
 **Estimación:** 0.5 punto
 **Dependencias:** ninguna
 **Cubre BUG:** BUG-017
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada
 
 #### ✅ Tareas específicas
 
-- [ ] Agregar `ArticleCategory.GUIDE_TAROT` al array `GUIDE_CATEGORIES` en `GuiasContent.tsx`, ubicándola **primera** (guía más importante).
-- [ ] Verificar que el artículo `guia-tarot` esté sembrado en staging/prod; re-seed de encyclopedia si falta.
-- [ ] Actualizar comentarios/JSDoc que mencionan "6 guías" → "7 guías" (`guias/page.tsx`, `GuiasContent`).
-- [ ] Actualizar tests (`GuiasContent` / `guias/page.test.tsx`) para esperar la Guía del Tarot.
-- [ ] Coverage ≥ 80%.
+- [x] Agregar `ArticleCategory.GUIDE_TAROT` al array `GUIDE_CATEGORIES` en `GuiasContent.tsx`, ubicándola **primera** (guía más importante).
+- [x] Verificar que el artículo `guia-tarot` esté sembrado en staging/prod; re-seed de encyclopedia si falta.
+- [x] Actualizar comentarios/JSDoc que mencionan "6 guías" → "7 guías" (`guias/page.tsx`, `GuiasContent`).
+- [x] Actualizar tests (`GuiasContent` / `guias/page.test.tsx`) para esperar la Guía del Tarot.
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 
