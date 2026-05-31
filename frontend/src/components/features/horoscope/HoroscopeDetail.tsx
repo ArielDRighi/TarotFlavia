@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { HoroscopeAreaCard } from './HoroscopeAreaCard';
+import { ZodiacSymbol } from './ZodiacSymbol';
 import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
 import { cn } from '@/lib/utils';
 import type { DailyHoroscope } from '@/types/horoscope.types';
@@ -45,7 +46,7 @@ export function HoroscopeDetail({ horoscope, className }: HoroscopeDetailProps) 
     <div data-testid="horoscope-detail" className={cn('space-y-6', className)}>
       {/* Header */}
       <div className="text-center">
-        <span className="text-6xl">{signInfo.symbol}</span>
+        <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-6xl" />
         <h1 className="mt-2 font-serif text-3xl">{signInfo.nameEs}</h1>
         <Badge variant="secondary" className="mt-2">
           {horoscope.horoscopeDate}
