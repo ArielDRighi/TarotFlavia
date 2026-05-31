@@ -84,21 +84,14 @@ describe('RitualsPage', () => {
     });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guia-rituales"', () => {
+  it('debe renderizar ServiceIntro de rituales', () => {
     renderWithProviders(<RitualsPage />);
 
-    const widget = screen.getByTestId('encyclopedia-info-widget');
+    const widget = screen.getByTestId('rituals-intro');
     expect(widget).toBeInTheDocument();
   });
 
-  it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {
-    // Simulate widget returning null (error state)
-    mockUseArticleSnippet.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error('API error'),
-    });
-
+  it('debe renderizar correctamente la página con la tarjeta informativa', () => {
     renderWithProviders(<RitualsPage />);
 
     // The page should still render without errors

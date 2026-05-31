@@ -1,6 +1,6 @@
 import { DailyCardExperience } from '@/components/features/daily-reading';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
-import { ROUTES } from '@/lib/constants/routes';
+import { ServiceIntro } from '@/components/features/encyclopedia';
+import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
 
 /**
  * Carta del Día Page
@@ -18,11 +18,7 @@ export default function CartaDelDiaPage() {
         </h1>
 
         {/* Encyclopedia Widget */}
-        <EncyclopediaInfoWidget
-          slug="guia-tarot"
-          href={ROUTES.ENCICLOPEDIA_GUIA('guia-tarot')}
-          className="mb-8 w-full"
-        />
+        <ServiceIntro data={SERVICE_INTROS['daily-card']} className="mb-8 w-full" />
 
         {/* Main Content - All logic delegated to feature component */}
         <DailyCardExperience />

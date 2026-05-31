@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import HoroscopoChinoPage from './page';
 
-// Mock EncyclopediaInfoWidget
+// Mock ServiceIntro
 vi.mock('@/components/features/encyclopedia', () => ({
-  EncyclopediaInfoWidget: ({ slug }: { slug: string }) => (
-    <div data-testid="encyclopedia-info-widget" data-slug={slug} />
+  ServiceIntro: ({ data }: { data: { testId?: string } }) => (
+    <div data-testid="service-intro" data-key={data?.testId} />
   ),
 }));
 
@@ -188,7 +188,7 @@ describe('HoroscopoChinoPage', () => {
     });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guia-horoscopo-chino"', () => {
+  it('debe renderizar ServiceIntro del horóscopo chino', () => {
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
       data: [],
@@ -196,12 +196,12 @@ describe('HoroscopoChinoPage', () => {
 
     renderWithProviders(<HoroscopoChinoPage />);
 
-    const widget = screen.getByTestId('encyclopedia-info-widget');
+    const widget = screen.getByTestId('service-intro');
     expect(widget).toBeInTheDocument();
-    expect(widget).toHaveAttribute('data-slug', 'guia-horoscopo-chino');
+    expect(widget).toHaveAttribute('data-key', 'chinese-horoscope-intro');
   });
 
-  it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {
+  it('debe renderizar correctamente la página con la tarjeta informativa', () => {
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,
       data: [],

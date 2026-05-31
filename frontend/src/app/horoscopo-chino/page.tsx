@@ -10,7 +10,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useChineseHoroscopeMainPage } from '@/hooks/utils/useChineseHoroscopeMainPage';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
+import { ServiceIntro } from '@/components/features/encyclopedia';
+import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
 import { ROUTES } from '@/lib/constants/routes';
 import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
 
@@ -36,11 +37,7 @@ export default function HoroscopoChinoPage() {
         <p className="text-muted-foreground">Descubre las predicciones anuales según tu animal</p>
       </div>
 
-      <EncyclopediaInfoWidget
-        slug="guia-horoscopo-chino"
-        href={ROUTES.ENCICLOPEDIA_GUIA('guia-horoscopo-chino')}
-        className="mb-6"
-      />
+      <ServiceIntro data={SERVICE_INTROS['chinese-horoscope']} className="mb-6" />
 
       {/* User's horoscope card (if authenticated and has birthDate) */}
       {isAuthenticated && userBirthDate && myHoroscope && (

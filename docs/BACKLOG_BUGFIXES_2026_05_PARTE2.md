@@ -425,7 +425,7 @@ Confirmar que los 12 horóscopos occidentales se generan completos cada día y a
 **Estimación:** 5-8 puntos (según enfoque A o B y cantidad de servicios)
 **Dependencias:** decisión de arquitectura (componente por servicio vs `<ServiceIntro>` data-driven)
 **Cubre BUG:** BUG-019
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada
 
 #### 📋 Descripción
 
@@ -435,12 +435,12 @@ Llevar la tarjeta informativa de cada servicio al mismo nivel de riqueza visual 
 
 **Enfoque B (recomendado — data-driven):**
 
-- [ ] Crear componente genérico `ServiceIntro` que reciba `{ title, intro, sections: { heading, icon?, items: {term, description}[] }[], note?, href }`, replicando el diseño de `NumerologyIntro` (card gradiente lila/índigo, grid de columnas, bullets, nota).
-- [ ] Crear archivo de datos `service-intros.data.ts` con el contenido por servicio (Tarot, Horóscopo Occidental, Horóscopo Chino, Péndulo, Carta Astral, Rituales, Carta del Día) — contenido específico y veraz.
-- [ ] Refactor: `NumerologyIntro` pasa a ser una instancia de `<ServiceIntro>` con sus datos (sin regresión visual).
-- [ ] Reemplazar `EncyclopediaInfoWidget` por `<ServiceIntro>` en las 8 ubicaciones: `/carta-del-dia`, `/horoscopo`, `/horoscopo-chino`, `/ritual`, `/tarot`, `BirthChartPageContent`, `PendulumConsultation`, `RitualsPage`.
-- [ ] Tests del genérico + un test por servicio (título, secciones, bullets, botón). Actualizar tests de páginas que cambian de widget.
-- [ ] Coverage ≥ 80%.
+- [x] Crear componente genérico `ServiceIntro` que reciba `{ title, intro, sections: { heading, icon?, items: {term, description}[] }[], note?, href }`, replicando el diseño de `NumerologyIntro` (card gradiente lila/índigo, grid de columnas, bullets, nota).
+- [x] Crear archivo de datos `service-intros.data.ts` con el contenido por servicio (Tarot, Horóscopo Occidental, Horóscopo Chino, Péndulo, Carta Astral, Rituales, Carta del Día) — contenido específico y veraz.
+- [x] Refactor: `NumerologyIntro` pasa a ser una instancia de `<ServiceIntro>` con sus datos (sin regresión visual).
+- [x] Reemplazar `EncyclopediaInfoWidget` por `<ServiceIntro>` en las 8 ubicaciones: `/carta-del-dia`, `/horoscopo`, `/horoscopo-chino`, `/ritual`, `/tarot`, `BirthChartPageContent`, `PendulumConsultation`, `RitualsPage`.
+- [x] Tests del genérico + un test por servicio (título, secciones, bullets, botón). Actualizar tests de páginas que cambian de widget.
+- [x] Coverage ≥ 80%.
 
 **Enfoque A (alternativo — un componente por servicio):**
 
