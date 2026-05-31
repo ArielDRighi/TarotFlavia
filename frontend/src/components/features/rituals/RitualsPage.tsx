@@ -14,7 +14,8 @@ import { Button } from '@/components/ui/button';
 import { History } from 'lucide-react';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants/routes';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
+import { ServiceIntro } from '@/components/features/encyclopedia';
+import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
 import type { RitualCategory, RitualDifficulty, RitualFilters } from '@/types/ritual.types';
 
 export function RitualsPage() {
@@ -63,11 +64,7 @@ export function RitualsPage() {
         )}
       </div>
 
-      <EncyclopediaInfoWidget
-        slug="guia-rituales"
-        href={ROUTES.ENCICLOPEDIA_GUIA('guia-rituales')}
-        className="mb-6"
-      />
+      <ServiceIntro data={SERVICE_INTROS.rituals} className="mb-6" />
 
       {/* Rituales destacados */}
       {!hasFilters && (

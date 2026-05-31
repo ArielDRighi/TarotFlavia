@@ -23,8 +23,8 @@ import {
 } from '@/components/features/pendulum';
 import { usePendulumQuery, usePendulumCapabilities } from '@/hooks/api/usePendulum';
 import { useAuthStore } from '@/stores/authStore';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
-import { ROUTES } from '@/lib/constants/routes';
+import { ServiceIntro } from '@/components/features/encyclopedia';
+import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
 import type { PendulumMovement, PendulumQueryResponse } from '@/types/pendulum.types';
 
 export function PendulumConsultation() {
@@ -124,11 +124,7 @@ export function PendulumConsultation() {
           <p className="text-muted-foreground">Formula tu pregunta y deja que el péndulo te guíe</p>
         </div>
 
-        <EncyclopediaInfoWidget
-          slug="guia-pendulo"
-          href={ROUTES.ENCICLOPEDIA_GUIA('guia-pendulo')}
-          className="mb-6"
-        />
+        <ServiceIntro data={SERVICE_INTROS.pendulum} className="mb-6" />
 
         {/* Límites */}
         <PendulumLimitBanner />

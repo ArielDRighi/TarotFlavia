@@ -30,7 +30,7 @@ const mockSetChartResult = vi.fn();
 const mockRouterPush = vi.fn();
 
 vi.mock('@/components/features/encyclopedia', () => ({
-  EncyclopediaInfoWidget: () => null,
+  ServiceIntro: () => null,
 }));
 
 vi.mock('@/stores/authStore');

@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import HoroscopoPage from './page';
 
-// Mock EncyclopediaInfoWidget
+// Mock ServiceIntro
 vi.mock('@/components/features/encyclopedia', () => ({
-  EncyclopediaInfoWidget: ({ slug }: { slug: string }) => (
-    <div data-testid="encyclopedia-info-widget" data-slug={slug} />
+  ServiceIntro: ({ data }: { data: { testId?: string } }) => (
+    <div data-testid="service-intro" data-key={data?.testId} />
   ),
 }));
 // Mock next/navigation
@@ -170,7 +170,7 @@ describe('HoroscopoPage', () => {
     expect(ariesCard).toHaveClass('border-accent');
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guia-horoscopo-occidental"', () => {
+  it('debe renderizar ServiceIntro del horóscopo occidental', () => {
     mockUseAuthStore.mockReturnValue({
       user: null,
       isAuthenticated: false,
@@ -182,12 +182,12 @@ describe('HoroscopoPage', () => {
 
     renderWithProviders(<HoroscopoPage />);
 
-    const widget = screen.getByTestId('encyclopedia-info-widget');
+    const widget = screen.getByTestId('service-intro');
     expect(widget).toBeInTheDocument();
-    expect(widget).toHaveAttribute('data-slug', 'guia-horoscopo-occidental');
+    expect(widget).toHaveAttribute('data-key', 'western-horoscope-intro');
   });
 
-  it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {
+  it('debe renderizar correctamente la página con la tarjeta informativa', () => {
     mockUseAuthStore.mockReturnValue({
       user: null,
       isAuthenticated: false,

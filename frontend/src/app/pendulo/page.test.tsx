@@ -132,6 +132,12 @@ vi.mock('@/hooks/api/useEncyclopediaArticles', () => ({
   useArticleSnippet: () => ({ data: null, isLoading: false, error: null }),
 }));
 
+vi.mock('@/components/features/encyclopedia', () => ({
+  ServiceIntro: ({ data }: { data: { testId?: string } }) => (
+    <div data-testid="service-intro" data-key={data?.testId} />
+  ),
+}));
+
 vi.mock('@/components/ui/card', () => ({
   Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div className={className} data-testid="card">

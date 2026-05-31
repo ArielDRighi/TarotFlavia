@@ -79,6 +79,8 @@ export type { RelatedCardsProps } from './RelatedCards';
 // Widget components
 export { EncyclopediaInfoWidget } from './EncyclopediaInfoWidget';
 export type { EncyclopediaInfoWidgetProps } from './EncyclopediaInfoWidget';
+export { ServiceIntro } from './ServiceIntro';
+export type { ServiceIntroProps } from './ServiceIntro';
 
 // Article components (Astrology & Guides)
 export { ArticleCard } from './ArticleCard';

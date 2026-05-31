@@ -64,10 +64,10 @@ vi.mock('@/hooks/api/useUserCapabilities', () => ({
   useInvalidateCapabilities: () => mockUseInvalidateCapabilities(),
 }));
 
-// Mock EncyclopediaInfoWidget
+// Mock ServiceIntro
 vi.mock('@/components/features/encyclopedia', () => ({
-  EncyclopediaInfoWidget: ({ slug }: { slug: string }) => (
-    <div data-testid="encyclopedia-info-widget" data-slug={slug} />
+  ServiceIntro: ({ data }: { data: { testId?: string } }) => (
+    <div data-testid="service-intro" data-key={data?.testId} />
   ),
 }));
 

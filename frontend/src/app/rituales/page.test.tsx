@@ -17,7 +17,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('@/components/features/encyclopedia', () => ({
-  EncyclopediaInfoWidget: () => null,
+  ServiceIntro: () => null,
 }));
 
 // Mock hooks
