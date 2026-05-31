@@ -19,8 +19,8 @@ export const TEXT_PRESENTATION_SELECTOR = '\uFE0E';
 export interface ZodiacSymbolProps {
   /** Glifo Unicode del signo (ej. "♈") */
   symbol: string;
-  /** Etiqueta accesible (nombre del signo en español) */
-  label?: string;
+  /** Etiqueta accesible (nombre del signo en español). Obligatoria por a11y: el `role="img"` necesita un nombre accesible. */
+  label: string;
   /** Clases CSS adicionales (ej. tamaño del texto) */
   className?: string;
 }
@@ -44,7 +44,7 @@ export interface ZodiacSymbolProps {
  */
 export function ZodiacSymbol({ symbol, label, className }: ZodiacSymbolProps) {
   return (
-    <span className={cn('zodiac-symbol text-primary', className)} role="img" aria-label={label}>
+    <span className={cn('zodiac-symbol', className, 'text-primary')} role="img" aria-label={label}>
       {`${symbol}${TEXT_PRESENTATION_SELECTOR}`}
     </span>
   );

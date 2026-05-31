@@ -164,8 +164,10 @@ describe('generateStaticParams (guias)', () => {
   });
 
   it('debe retornar slugs de todas las guías', async () => {
-    // generateStaticParams calls getArticlesByCategory once per guide category (6 total)
+    // generateStaticParams calls getArticlesByCategory once per guide category (7 total)
+    // El orden refleja GUIDE_CATEGORIES en page.tsx (GUIDE_TAROT primero).
     mockGetArticlesByCategory
+      .mockResolvedValueOnce([{ slug: 'guia-tarot' }])
       .mockResolvedValueOnce([{ slug: 'guia-numerologia' }])
       .mockResolvedValueOnce([{ slug: 'guia-pendulo' }])
       .mockResolvedValueOnce([{ slug: 'guia-carta-astral' }])
@@ -176,6 +178,7 @@ describe('generateStaticParams (guias)', () => {
     const params = await generateStaticParams();
 
     expect(params).toEqual([
+      { slug: 'guia-tarot' },
       { slug: 'guia-numerologia' },
       { slug: 'guia-pendulo' },
       { slug: 'guia-carta-astral' },

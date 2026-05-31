@@ -42,4 +42,12 @@ describe('ZodiacSymbol', () => {
     expect(span).toHaveClass('text-6xl');
     expect(span).toHaveClass('text-primary');
   });
+
+  it('should keep text-primary even when className passes a conflicting text color', () => {
+    render(<ZodiacSymbol symbol="♍" label="Virgo" className="text-red-500" />);
+
+    const span = screen.getByLabelText('Virgo');
+    expect(span).toHaveClass('text-primary');
+    expect(span).not.toHaveClass('text-red-500');
+  });
 });
