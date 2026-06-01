@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
+import { MarkdownArticle } from './MarkdownArticle';
 import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
@@ -154,9 +153,7 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
       </div>
 
       {/* Contenido Markdown */}
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
-      </div>
+      <MarkdownArticle content={article.content} />
 
       {/* Cartas de tarot relacionadas */}
       {hasRelatedTarotCards && (

@@ -269,7 +269,7 @@ En [GuiasContent.tsx](frontend/src/components/features/encyclopedia/GuiasContent
 **Estimación:** 3 puntos
 **Dependencias:** ninguna
 **Cubre Hallazgo:** ENC-001
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-001-render-editorial-markdown`)
 
 #### 📋 Descripción
 
@@ -277,13 +277,13 @@ Eliminar la dependencia de las clases `prose` (inertes en Tailwind v4) y dar jer
 
 #### ✅ Tareas específicas
 
-- [ ] Crear componente reutilizable `MarkdownArticle` que mapee los nodos de `ReactMarkdown` (`components={{ h1, h2, h3, p, ul, ol, li, strong, em, blockquote, a, table, hr }}`) a estilos Tailwind con tokens de marca.
-- [ ] Títulos en Cormorant (`font-serif`), cuerpo en Lato (`font-sans`), enlaces lila (`text-primary`), acentos dorados (`secondary`).
-- [ ] Medida de lectura `max-w-[68ch]`, `text-lg`, `leading-relaxed`, ritmo vertical consistente.
-- [ ] Reemplazar el `<div className="prose …">` de `ArticleDetailView.tsx` por `MarkdownArticle`.
-- [ ] (Decisión) Si se opta por `@tailwindcss/typography`, instalar y configurar preset `prose` con tokens; documentar la elección.
-- [ ] Tests del render (presencia y estilos diferenciados de h1/h2/h3, listas, strong, enlaces).
-- [ ] Coverage ≥ 80%.
+- [x] Crear componente reutilizable `MarkdownArticle` que mapee los nodos de `ReactMarkdown` (`components={{ h1, h2, h3, p, ul, ol, li, strong, em, blockquote, a, table, thead, th, td, code, hr }}`) a estilos Tailwind con tokens de marca.
+- [x] Títulos en Cormorant (`font-serif`), cuerpo en Lato (`font-sans`), enlaces lila (`text-primary`), acentos dorados (`secondary`).
+- [x] Medida de lectura `max-w-[68ch]`, `text-lg`, `leading-relaxed`, ritmo vertical consistente.
+- [x] Reemplazar el `<div className="prose …">` de `ArticleDetailView.tsx` por `MarkdownArticle`.
+- [x] (Decisión) **Opción B** elegida: mapeo de nodos a componentes propios, **sin** sumar `@tailwindcss/typography` (cero dependencias nuevas, permite acentos editoriales). Documentado en el JSDoc del componente.
+- [x] Tests del render (jerarquía h1/h2/h3, cuerpo, listas, strong, em, enlaces, blockquote, tabla GFM, separador, código inline).
+- [x] Coverage 100% del componente (≥ 80% requerido).
 
 #### 🎯 Criterios de Aceptación
 
