@@ -3,6 +3,7 @@
 import Link from 'next/link';
 
 import { MarkdownArticle } from './MarkdownArticle';
+import { RelatedTarotCards } from './RelatedTarotCards';
 import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
@@ -157,22 +158,9 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
           el <h1> de la página (ya renderizado arriba con article.nameEs). */}
       <MarkdownArticle content={stripLeadingMarkdownHeading(article.content)} />
 
-      {/* Cartas de tarot relacionadas */}
-      {hasRelatedTarotCards && (
-        <section data-testid="related-tarot-cards" className="space-y-4">
-          <h2 className="text-foreground text-xl font-bold">Cartas de Tarot Relacionadas</h2>
-          <div className="flex flex-wrap gap-2">
-            {article.relatedTarotCards!.map((cardId) => (
-              <span
-                key={cardId}
-                className="bg-muted text-muted-foreground rounded-md px-3 py-1 text-sm"
-              >
-                #{cardId}
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
+          completa (título incluido) o nada si ningún ID resuelve. */}
+      {hasRelatedTarotCards && <RelatedTarotCards cardIds={article.relatedTarotCards!} />}
 
       {/* Artículos relacionados */}
       {hasRelatedArticles && (

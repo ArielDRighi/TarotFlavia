@@ -17,6 +17,15 @@ vi.mock('remark-gfm', () => ({
   default: vi.fn(),
 }));
 
+// Mock RelatedTarotCards to isolate ArticleDetailView from the cards data hook.
+// We assert it receives the related card IDs; its own rendering (thumbnail,
+// name, href) is covered by RelatedTarotCards.test.tsx.
+vi.mock('./RelatedTarotCards', () => ({
+  RelatedTarotCards: ({ cardIds }: { cardIds: number[] }) => (
+    <div data-testid="related-tarot-cards-mock">{cardIds.join(',')}</div>
+  ),
+}));
+
 // Mock next/link
 vi.mock('next/link', () => ({
   default: ({
@@ -118,22 +127,23 @@ describe('ArticleDetailView', () => {
   });
 
   describe('Related tarot cards', () => {
-    it('should show related tarot cards section when relatedTarotCards has items', () => {
+    it('should delegate the related card IDs to RelatedTarotCards (no raw IDs shown)', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: [1, 3, 10] })} />);
 
-      expect(screen.getByTestId('related-tarot-cards')).toBeInTheDocument();
+      expect(screen.getByTestId('related-tarot-cards-mock')).toHaveTextContent('1,3,10');
+      expect(screen.queryByText('#1')).not.toBeInTheDocument();
     });
 
-    it('should not show related tarot cards section when relatedTarotCards is null', () => {
+    it('should not render RelatedTarotCards when relatedTarotCards is null', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: null })} />);
 
-      expect(screen.queryByTestId('related-tarot-cards')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('related-tarot-cards-mock')).not.toBeInTheDocument();
     });
 
-    it('should not show related tarot cards section when relatedTarotCards is empty', () => {
+    it('should not render RelatedTarotCards when relatedTarotCards is empty', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: [] })} />);
 
-      expect(screen.queryByTestId('related-tarot-cards')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('related-tarot-cards-mock')).not.toBeInTheDocument();
     });
   });
 
