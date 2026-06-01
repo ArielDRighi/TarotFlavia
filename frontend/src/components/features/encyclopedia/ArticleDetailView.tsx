@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
+import { MarkdownArticle } from './MarkdownArticle';
 import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
+import { stripLeadingMarkdownHeading } from '@/lib/utils/text';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -153,10 +153,9 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
         {article.snippet && <p className="text-muted-foreground text-lg">{article.snippet}</p>}
       </div>
 
-      {/* Contenido Markdown */}
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
-      </div>
+      {/* Contenido Markdown — se elimina el título `#` inicial para no duplicar
+          el <h1> de la página (ya renderizado arriba con article.nameEs). */}
+      <MarkdownArticle content={stripLeadingMarkdownHeading(article.content)} />
 
       {/* Cartas de tarot relacionadas */}
       {hasRelatedTarotCards && (

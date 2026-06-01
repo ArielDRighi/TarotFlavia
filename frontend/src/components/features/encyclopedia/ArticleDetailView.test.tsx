@@ -97,6 +97,24 @@ describe('ArticleDetailView', () => {
 
       expect(screen.getByTestId('markdown-content')).toHaveTextContent('## Contenido de prueba');
     });
+
+    it('should strip the leading top-level heading to avoid a duplicate title', () => {
+      const content = '# Aries\n\n## Carácter\n\nTexto.';
+      render(<ArticleDetailView article={createTestArticle({ nameEs: 'Aries', content })} />);
+
+      const markdown = screen.getByTestId('markdown-content');
+      expect(markdown).not.toHaveTextContent('# Aries');
+      expect(markdown).toHaveTextContent('## Carácter');
+    });
+
+    it('should render a single h1 on the page (the article title)', () => {
+      const content = '# Aries\n\n## Carácter\n\nTexto.';
+      render(<ArticleDetailView article={createTestArticle({ nameEs: 'Aries', content })} />);
+
+      const level1Headings = screen.getAllByRole('heading', { level: 1 });
+      expect(level1Headings).toHaveLength(1);
+      expect(level1Headings[0]).toHaveTextContent('Aries');
+    });
   });
 
   describe('Related tarot cards', () => {
