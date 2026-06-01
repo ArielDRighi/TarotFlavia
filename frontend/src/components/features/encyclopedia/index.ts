@@ -57,6 +57,7 @@ export { CardKeywords } from './CardKeywords';
 export { CardMetadata } from './CardMetadata';
 export { CardNavigation } from './CardNavigation';
 export { RelatedCards } from './RelatedCards';
+export { RelatedTarotCards } from './RelatedTarotCards';
 
 // Type exports — list components
 export type { CardThumbnailProps } from './CardThumbnail';
@@ -75,6 +76,7 @@ export type { CardKeywordsProps } from './CardKeywords';
 export type { CardMetadataProps } from './CardMetadata';
 export type { CardNavigationProps } from './CardNavigation';
 export type { RelatedCardsProps } from './RelatedCards';
+export type { RelatedTarotCardsProps } from './RelatedTarotCards';
 
 // Widget components
 export { EncyclopediaInfoWidget } from './EncyclopediaInfoWidget';

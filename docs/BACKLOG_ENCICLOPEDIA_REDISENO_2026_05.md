@@ -306,15 +306,21 @@ Eliminar la dependencia de las clases `prose` (inertes en Tailwind v4) y dar jer
 **Estimación:** 1.5 puntos
 **Dependencias:** ninguna
 **Cubre Hallazgo:** ENC-002
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-002-cartas-relacionadas-miniatura`)
 
 #### ✅ Tareas específicas
 
-- [ ] Resolver cada ID de `relatedTarotCards` a su carta (nombre + slug + imagen), vía hook/endpoint existente.
-- [ ] Renderizar cada carta con `CardThumbnail` + nombre, enlazando a `/enciclopedia/tarot/[slug]`.
-- [ ] Conservar la condición de ocultar la sección cuando no hay cartas relacionadas.
-- [ ] Tests del nuevo render (miniatura, nombre, href).
-- [ ] Coverage ≥ 80%.
+- [x] Resolver cada ID de `relatedTarotCards` a su carta (nombre + slug + imagen), vía hook/endpoint existente.
+- [x] Renderizar cada carta con `CardThumbnail` + nombre, enlazando a `/enciclopedia/tarot/[slug]`.
+- [x] Conservar la condición de ocultar la sección cuando no hay cartas relacionadas.
+- [x] Tests del nuevo render (miniatura, nombre, href).
+- [x] Coverage ≥ 80%.
+
+#### 📝 Notas de implementación
+
+- Nuevo componente `RelatedTarotCards` que resuelve los IDs contra el mazo completo (`useCards`, cacheado 1h — sin endpoint nuevo) y construye un mapa `id → CardSummary`. Los IDs desconocidos se omiten; si ninguno resuelve, no renderiza nada.
+- Se añadió un prop opcional `href` a `CardThumbnail` (default `/enciclopedia/{slug}`, retrocompatible) para enlazar a la ruta canónica de tarot `ROUTES.ENCICLOPEDIA_TAROT_CARD(slug)` sin afectar otros usos.
+- `ArticleDetailView` conserva el gate de la sección (oculta si `relatedTarotCards` es `null`/vacío) y delega la grilla al nuevo componente.
 
 #### 🎯 Criterios de Aceptación
 
