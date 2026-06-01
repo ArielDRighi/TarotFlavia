@@ -158,13 +158,9 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
           el <h1> de la página (ya renderizado arriba con article.nameEs). */}
       <MarkdownArticle content={stripLeadingMarkdownHeading(article.content)} />
 
-      {/* Cartas de tarot relacionadas */}
-      {hasRelatedTarotCards && (
-        <section data-testid="related-tarot-cards" className="space-y-4">
-          <h2 className="text-foreground text-xl font-bold">Cartas de Tarot Relacionadas</h2>
-          <RelatedTarotCards cardIds={article.relatedTarotCards!} />
-        </section>
-      )}
+      {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
+          completa (título incluido) o nada si ningún ID resuelve. */}
+      {hasRelatedTarotCards && <RelatedTarotCards cardIds={article.relatedTarotCards!} />}
 
       {/* Artículos relacionados */}
       {hasRelatedArticles && (

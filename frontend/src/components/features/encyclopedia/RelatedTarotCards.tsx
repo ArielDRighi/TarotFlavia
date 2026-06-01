@@ -1,5 +1,7 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCards } from '@/hooks/api/useEncyclopedia';
 import { ROUTES } from '@/lib/constants/routes';
@@ -18,18 +20,30 @@ export interface RelatedTarotCardsProps {
 
 const GRID_CLASSES = 'grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6';
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function RelatedTarotCardsSection({ children }: { children: ReactNode }) {
+  return (
+    <section data-testid="related-tarot-cards" className="space-y-4">
+      <h2 className="text-foreground text-xl font-bold">Cartas de Tarot Relacionadas</h2>
+      {children}
+    </section>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 /**
  * RelatedTarotCards Component
  *
- * Resolves an article's `relatedTarotCards` IDs to full card data and renders
- * each as a thumbnail + name linking to its tarot detail page, instead of the
- * raw numeric IDs.
+ * Renders the full "Cartas de Tarot Relacionadas" section: resolves an article's
+ * `relatedTarotCards` IDs to full card data and shows each as a thumbnail + name
+ * linking to its tarot detail page, instead of the raw numeric IDs.
  *
  * Card data is resolved from the full deck (`useCards`, cached for 1h) so no new
- * endpoint is required. Unknown IDs are skipped; when none resolve, nothing is
- * rendered.
+ * endpoint is required. Unknown IDs are skipped; when none resolve, the whole
+ * section (heading included) is hidden — owning the heading here avoids leaving
+ * an orphan title in the parent.
  *
  * @example
  * ```tsx
@@ -41,11 +55,13 @@ export function RelatedTarotCards({ cardIds }: RelatedTarotCardsProps) {
 
   if (isLoading) {
     return (
-      <div data-testid="related-tarot-cards-skeleton" className={GRID_CLASSES}>
-        {cardIds.map((id) => (
-          <Skeleton key={id} className="aspect-[2/3] rounded-md" />
-        ))}
-      </div>
+      <RelatedTarotCardsSection>
+        <div data-testid="related-tarot-cards-skeleton" className={GRID_CLASSES}>
+          {cardIds.map((id) => (
+            <Skeleton key={id} className="aspect-[2/3] rounded-md" />
+          ))}
+        </div>
+      </RelatedTarotCardsSection>
     );
   }
 
@@ -59,10 +75,16 @@ export function RelatedTarotCards({ cardIds }: RelatedTarotCardsProps) {
   }
 
   return (
-    <div className={GRID_CLASSES}>
-      {resolvedCards.map((card) => (
-        <CardThumbnail key={card.id} card={card} href={ROUTES.ENCICLOPEDIA_TAROT_CARD(card.slug)} />
-      ))}
-    </div>
+    <RelatedTarotCardsSection>
+      <div className={GRID_CLASSES}>
+        {resolvedCards.map((card) => (
+          <CardThumbnail
+            key={card.id}
+            card={card}
+            href={ROUTES.ENCICLOPEDIA_TAROT_CARD(card.slug)}
+          />
+        ))}
+      </div>
+    </RelatedTarotCardsSection>
   );
 }

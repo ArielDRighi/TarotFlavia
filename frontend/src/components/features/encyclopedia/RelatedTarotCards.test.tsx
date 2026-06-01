@@ -54,6 +54,34 @@ describe('RelatedTarotCards', () => {
 
       expect(screen.getByTestId('related-tarot-cards-skeleton')).toBeInTheDocument();
     });
+
+    it('should render one skeleton placeholder per card ID', () => {
+      mockCards(undefined, true);
+
+      render(<RelatedTarotCards cardIds={[1, 3, 10]} />);
+
+      expect(screen.getByTestId('related-tarot-cards-skeleton').children).toHaveLength(3);
+    });
+  });
+
+  describe('Section wrapper', () => {
+    it('should render the section with its heading when cards resolve', () => {
+      mockCards(ALL_CARDS);
+
+      render(<RelatedTarotCards cardIds={[1, 3]} />);
+
+      expect(screen.getByTestId('related-tarot-cards')).toBeInTheDocument();
+      expect(screen.getByText('Cartas de Tarot Relacionadas')).toBeInTheDocument();
+    });
+
+    it('should not render the section heading when no IDs resolve', () => {
+      mockCards(ALL_CARDS);
+
+      render(<RelatedTarotCards cardIds={[999]} />);
+
+      expect(screen.queryByTestId('related-tarot-cards')).not.toBeInTheDocument();
+      expect(screen.queryByText('Cartas de Tarot Relacionadas')).not.toBeInTheDocument();
+    });
   });
 
   describe('Empty / unresolved state', () => {

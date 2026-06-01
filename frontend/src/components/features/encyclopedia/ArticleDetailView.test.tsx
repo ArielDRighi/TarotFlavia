@@ -127,12 +127,6 @@ describe('ArticleDetailView', () => {
   });
 
   describe('Related tarot cards', () => {
-    it('should show related tarot cards section when relatedTarotCards has items', () => {
-      render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: [1, 3, 10] })} />);
-
-      expect(screen.getByTestId('related-tarot-cards')).toBeInTheDocument();
-    });
-
     it('should delegate the related card IDs to RelatedTarotCards (no raw IDs shown)', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: [1, 3, 10] })} />);
 
@@ -140,16 +134,16 @@ describe('ArticleDetailView', () => {
       expect(screen.queryByText('#1')).not.toBeInTheDocument();
     });
 
-    it('should not show related tarot cards section when relatedTarotCards is null', () => {
+    it('should not render RelatedTarotCards when relatedTarotCards is null', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: null })} />);
 
-      expect(screen.queryByTestId('related-tarot-cards')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('related-tarot-cards-mock')).not.toBeInTheDocument();
     });
 
-    it('should not show related tarot cards section when relatedTarotCards is empty', () => {
+    it('should not render RelatedTarotCards when relatedTarotCards is empty', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: [] })} />);
 
-      expect(screen.queryByTestId('related-tarot-cards')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('related-tarot-cards-mock')).not.toBeInTheDocument();
     });
   });
 
