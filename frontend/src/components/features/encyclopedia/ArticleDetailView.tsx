@@ -7,6 +7,7 @@ import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
+import { stripLeadingMarkdownHeading } from '@/lib/utils/text';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -152,8 +153,9 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
         {article.snippet && <p className="text-muted-foreground text-lg">{article.snippet}</p>}
       </div>
 
-      {/* Contenido Markdown */}
-      <MarkdownArticle content={article.content} />
+      {/* Contenido Markdown — se elimina el título `#` inicial para no duplicar
+          el <h1> de la página (ya renderizado arriba con article.nameEs). */}
+      <MarkdownArticle content={stripLeadingMarkdownHeading(article.content)} />
 
       {/* Cartas de tarot relacionadas */}
       {hasRelatedTarotCards && (
