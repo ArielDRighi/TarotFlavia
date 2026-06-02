@@ -182,44 +182,49 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
         </>
       )}
 
-      {/* Contenido Markdown — se elimina el título `#` inicial para no duplicar
-          el <h1> de la página (ya renderizado en el hero/cabecera). En guías se
-          activa el modo editorial (drop-cap, badges numerados, ✦, imágenes y
-          callouts por sección modelados como datos). */}
-      <MarkdownArticle
-        content={stripLeadingMarkdownHeading(article.content)}
-        editorial={isGuide}
-        sections={editorial?.sections}
-      />
+      {/* Columna de lectura. En guías se centra como columna editorial (el hero
+          va a ancho completo arriba); el resto de artículos conserva su flujo. */}
+      <div className={cn('space-y-8', isGuide && 'mx-auto w-full max-w-[68ch]')}>
+        {/* Contenido Markdown — se elimina el título `#` inicial para no duplicar
+            el <h1> de la página (ya renderizado en el hero/cabecera). En guías se
+            activa el modo editorial (drop-cap, badges numerados, ✦, imágenes y
+            callouts por sección modelados como datos). */}
+        <MarkdownArticle
+          content={stripLeadingMarkdownHeading(article.content)}
+          editorial={isGuide}
+          sections={editorial?.sections}
+          className={cn(isGuide && 'max-w-none')}
+        />
 
-      {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
-          completa (título incluido) o nada si ningún ID resuelve. */}
-      {hasRelatedTarotCards && <RelatedTarotCards cardIds={article.relatedTarotCards!} />}
+        {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
+            completa (título incluido) o nada si ningún ID resuelve. */}
+        {hasRelatedTarotCards && <RelatedTarotCards cardIds={article.relatedTarotCards!} />}
 
-      {/* Artículos relacionados */}
-      {hasRelatedArticles && (
-        <section data-testid="related-articles" className="space-y-4">
-          <h2 className="text-foreground text-xl font-bold">Artículos Relacionados</h2>
-          <div className="flex flex-col gap-3">
-            {article.relatedArticles.map((relatedArticle) => (
-              <RelatedArticleItem key={relatedArticle.id} article={relatedArticle} />
-            ))}
+        {/* Artículos relacionados */}
+        {hasRelatedArticles && (
+          <section data-testid="related-articles" className="space-y-4">
+            <h2 className="text-foreground text-xl font-bold">Artículos Relacionados</h2>
+            <div className="flex flex-col gap-3">
+              {article.relatedArticles.map((relatedArticle) => (
+                <RelatedArticleItem key={relatedArticle.id} article={relatedArticle} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* CTA al módulo correspondiente (guías con herramienta asociada) */}
+        {cta && (
+          <div className="border-t pt-6">
+            <Link
+              data-testid="article-cta"
+              href={cta.href}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center rounded-lg px-6 py-3 font-semibold transition-colors"
+            >
+              {cta.label}
+            </Link>
           </div>
-        </section>
-      )}
-
-      {/* CTA al módulo correspondiente (guías con herramienta asociada) */}
-      {cta && (
-        <div className="border-t pt-6">
-          <Link
-            data-testid="article-cta"
-            href={cta.href}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center rounded-lg px-6 py-3 font-semibold transition-colors"
-          >
-            {cta.label}
-          </Link>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
