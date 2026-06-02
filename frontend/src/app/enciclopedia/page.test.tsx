@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import EnciclopediaPage from './page';
@@ -12,6 +12,13 @@ vi.mock('next/navigation', () => ({
     replace: vi.fn(),
     prefetch: vi.fn(),
   }),
+}));
+
+// Mock next/image (render a plain img so we can assert src/alt)
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="next-image" />
+  ),
 }));
 
 vi.mock('next/link', () => ({
@@ -89,5 +96,44 @@ describe('EnciclopediaPage (Hub principal)', () => {
     renderWithProviders(<EnciclopediaPage />);
 
     expect(screen.getByTestId('encyclopedia-section-guias')).toHaveTextContent('Guías');
+  });
+
+  // ─── Rediseño T-ENC-005: identidad de marca ──────────────────────────────────
+
+  it('debe mostrar una banda de cabecera con identidad de marca', () => {
+    renderWithProviders(<EnciclopediaPage />);
+
+    const hero = screen.getByTestId('encyclopedia-hub-hero');
+    expect(hero).toBeInTheDocument();
+    expect(hero).toHaveTextContent('Enciclopedia Mística');
+  });
+
+  it('cada sección debe mostrar una imagen temática con alt descriptivo (no emojis)', () => {
+    renderWithProviders(<EnciclopediaPage />);
+
+    const tarot = screen.getByTestId('encyclopedia-section-tarot');
+    const astrologia = screen.getByTestId('encyclopedia-section-astrologia');
+    const guias = screen.getByTestId('encyclopedia-section-guias');
+
+    const tarotImg = within(tarot).getByTestId('next-image');
+    const astrologiaImg = within(astrologia).getByTestId('next-image');
+    const guiasImg = within(guias).getByTestId('next-image');
+
+    expect(tarotImg).toHaveAttribute('src', '/images/enciclopedia/hub-tarot.webp');
+    expect(astrologiaImg).toHaveAttribute('src', '/images/enciclopedia/hub-astrologia.webp');
+    expect(guiasImg).toHaveAttribute('src', '/images/enciclopedia/hub-guias.webp');
+
+    // alt descriptivo y temáticamente coherente con su sección (detecta alt
+    // ausentes o intercambiados, no solo cadenas vacías)
+    expect(tarotImg.getAttribute('alt')).toMatch(/tarot/i);
+    expect(astrologiaImg.getAttribute('alt')).toMatch(/zodiac|astro|constelac/i);
+    expect(guiasImg.getAttribute('alt')).toMatch(/libro|esot|guía/i);
+  });
+
+  it('no debe usar emojis del sistema como íconos de sección', () => {
+    renderWithProviders(<EnciclopediaPage />);
+
+    const hub = screen.getByTestId('encyclopedia-hub');
+    expect(hub.textContent ?? '').not.toMatch(/[🃏⭐📚]/u);
   });
 });

@@ -425,16 +425,23 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 **Estimación:** 2 puntos
 **Dependencias:** T-ENC-007 (assets)
 **Cubre Hallazgo:** ENC-004
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-005-rediseno-hub-enciclopedia`)
 
 #### ✅ Tareas específicas
 
-- [ ] Encabezado con banda oscura/gradiente (`bg-hero`/`bg-hero-mid`) + título Cormorant + filete dorado.
-- [ ] Reemplazar emojis (🃏 ⭐ 📚) por imágenes/ilustraciones de marca en las 3 tarjetas.
-- [ ] Tarjetas con imagen + overlay + título dorado + micro-interacción de hover (zoom + glow).
-- [ ] Mantener grid responsive y enlaces existentes.
-- [ ] Tests (3 secciones, enlaces correctos, alt de imágenes).
-- [ ] Coverage ≥ 80%.
+- [x] Encabezado con banda oscura/gradiente (`bg-hero`/`bg-hero-mid`) + título Cormorant + filete dorado.
+- [x] Reemplazar emojis (🃏 ⭐ 📚) por imágenes/ilustraciones de marca en las 3 tarjetas.
+- [x] Tarjetas con imagen + overlay + título dorado + micro-interacción de hover (zoom + glow).
+- [x] Mantener grid responsive y enlaces existentes.
+- [x] Tests (3 secciones, enlaces correctos, alt de imágenes).
+- [x] Coverage 100% en `EnciclopediaHubContent` (≥ 80% requerido).
+
+#### 📝 Notas de implementación
+
+- La banda de cabecera reutiliza el canon visual de `ArticleHero` (gradiente noche `HERO_GRADIENT`, estrellas `animate-twinkle`, luna creciente CSS y filete dorado), manteniendo coherencia entre el hub y el detalle de artículo.
+- Cada sección es una `SectionCard` (sub-componente): imagen `next/image` (`fill`, assets `hub-*.webp` de T-ENC-003/007), overlay de legibilidad, título Cormorant crema, descripción y CTA dorado. El emoji del sistema se eliminó del modelo de datos (`icon` → `image: { src, alt }`).
+- Micro-interacción de hover coherente vía `group`: zoom suave de imagen (`group-hover:scale-105`), glow dorado (`inset shadow`), elevación (`-translate-y-1`) y desplazamiento del CTA. Foco visible (`focus-visible:ring-secondary`) para accesibilidad por teclado.
+- Se conservan los `data-testid` y `href` existentes (cero regresión de navegación); los test-ids de sección quedan anidados dentro del `Link` de categoría.
 
 #### 🎯 Criterios de Aceptación
 
