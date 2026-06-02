@@ -1,14 +1,43 @@
 'use client';
 
+// 1. React & Next.js
+import Image from 'next/image';
 import Link from 'next/link';
 
+// 6. Utils & types
 import { useArticlesByCategory } from '@/hooks/api/useEncyclopediaArticles';
 import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface GuideTheme {
+  /** Short category label shown in the gold chip. */
+  chip: string;
+  /** Themed thumbnail; falls back to a brand gradient when absent. */
+  image?: { src: string; alt: string };
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+const IMAGE_BASE = '/images/enciclopedia';
+
+/**
+ * Brand-night gradient used as the header band background and as the thumbnail
+ * fallback (kept in sync with `ArticleHero` / `EnciclopediaHubContent`).
+ */
+const HERO_GRADIENT = 'linear-gradient(160deg, #1a0a2e 0%, #2d1b69 55%, #1a0a2e 100%)';
+const THUMB_FALLBACK_GRADIENT = 'linear-gradient(150deg, #2d1b69 0%, #1a0a2e 60%, #2d1b69 100%)';
+const THUMB_OVERLAY =
+  'linear-gradient(180deg, rgba(26, 10, 46, 0) 35%, rgba(26, 10, 46, 0.45) 100%)';
+const GOLD_FILLET = 'linear-gradient(90deg, transparent, #d69e2e, transparent)';
+const CREAM = '#f9f7f2';
+const CREAM_MUTED = 'rgba(249, 247, 242, 0.72)';
+
+/**
+ * Guide categories, in display order. The Tarot guide stays first (BUG-017 fix).
+ */
 const GUIDE_CATEGORIES: ArticleCategory[] = [
   ArticleCategory.GUIDE_TAROT,
   ArticleCategory.GUIDE_NUMEROLOGY,
@@ -19,37 +48,127 @@ const GUIDE_CATEGORIES: ArticleCategory[] = [
   ArticleCategory.GUIDE_CHINESE,
 ];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+/**
+ * Per-category editorial theme: short gold chip label and an optional themed
+ * thumbnail. Only the Tarot guide ships an asset today (T-ENC-007 pending); the
+ * rest gracefully fall back to a brand gradient until their image lands.
+ */
+const GUIDE_THEME: Partial<Record<ArticleCategory, GuideTheme>> = {
+  [ArticleCategory.GUIDE_TAROT]: {
+    chip: 'Tarot',
+    image: {
+      src: `${IMAGE_BASE}/guia-tarot-hero.webp`,
+      alt: 'Ilustración mística de cartas de tarot con resplandor dorado',
+    },
+  },
+  [ArticleCategory.GUIDE_NUMEROLOGY]: { chip: 'Numerología' },
+  [ArticleCategory.GUIDE_PENDULUM]: { chip: 'Péndulo' },
+  [ArticleCategory.GUIDE_BIRTH_CHART]: { chip: 'Carta Astral' },
+  [ArticleCategory.GUIDE_RITUAL]: { chip: 'Rituales' },
+  [ArticleCategory.GUIDE_HOROSCOPE]: { chip: 'Horóscopo' },
+  [ArticleCategory.GUIDE_CHINESE]: { chip: 'Horóscopo Chino' },
+};
 
-interface GuiaItemProps {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getGuideTheme(category: ArticleCategory): GuideTheme {
+  return GUIDE_THEME[category] ?? { chip: 'Guía' };
+}
+
+/**
+ * Resolves the thumbnail for an article: prefers a backend-provided `imageUrl`
+ * (future-proof), then the category theme asset, otherwise `null` (fallback).
+ */
+function resolveThumbnail(article: ArticleSummary, theme: GuideTheme): GuideTheme['image'] | null {
+  if (article.imageUrl) {
+    return { src: article.imageUrl, alt: `Imagen ilustrativa de ${article.nameEs}` };
+  }
+  return theme.image ?? null;
+}
+
+// ─── Sub-components ─────────────────────────────────────────────────────────────
+
+interface GuiaCardProps {
   article: ArticleSummary;
 }
 
-function GuiaItem({ article }: GuiaItemProps) {
+/**
+ * GuiaCard
+ *
+ * Editorial card for a guide: themed thumbnail (or brand gradient fallback) with
+ * a gold category chip, Cormorant title, 2-line snippet and a "Leer guía →" CTA.
+ * Hover triggers a coherent micro-interaction (lift + gold border + image zoom).
+ */
+function GuiaCard({ article }: GuiaCardProps) {
+  const theme = getGuideTheme(article.category);
+  const image = resolveThumbnail(article, theme);
+
   return (
     <Link
       href={ROUTES.ENCICLOPEDIA_GUIA(article.slug)}
-      className="bg-card hover:bg-accent flex items-center justify-between rounded-lg border p-4 transition-colors"
+      className="group border-border bg-card hover:border-secondary focus-visible:ring-secondary focus-visible:ring-offset-background relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(214,158,46,0.45)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
     >
-      <div>
-        <h3 className="font-medium">{article.nameEs}</h3>
-        {article.snippet && (
-          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">{article.snippet}</p>
+      {/* Thumbnail */}
+      <div className="relative aspect-[16/9] overflow-hidden">
+        {image ? (
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          />
+        ) : (
+          <div
+            data-testid="guia-thumb-fallback"
+            className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-out group-hover:scale-105"
+            style={{ background: THUMB_FALLBACK_GRADIENT }}
+            aria-hidden="true"
+          >
+            <span className="font-serif text-5xl" style={{ color: 'rgba(214, 158, 46, 0.55)' }}>
+              ✦
+            </span>
+          </div>
         )}
+
+        {/* Overlay de legibilidad */}
+        <div
+          className="absolute inset-0"
+          style={{ background: THUMB_OVERLAY }}
+          aria-hidden="true"
+        />
+
+        {/* Chip de categoría dorado */}
+        <span className="bg-secondary text-secondary-foreground absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-semibold tracking-[0.08em] uppercase">
+          {theme.chip}
+        </span>
       </div>
-      <span className="text-muted-foreground ml-4 shrink-0 text-sm">→</span>
+
+      {/* Cuerpo */}
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="font-serif text-xl font-semibold">{article.nameEs}</h3>
+        {article.snippet && (
+          <p className="text-muted-foreground mt-2 line-clamp-2 text-sm leading-relaxed">
+            {article.snippet}
+          </p>
+        )}
+        <span
+          className="text-secondary mt-4 inline-flex items-center gap-1 text-sm font-medium transition-transform group-hover:translate-x-1"
+          aria-hidden="true"
+        >
+          Leer guía →
+        </span>
+      </div>
     </Link>
   );
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function CategorySection({ category }: { category: ArticleCategory }) {
   const { data: articles } = useArticlesByCategory(category);
   return (
     <>
       {(articles ?? []).map((article) => (
-        <GuiaItem key={article.id} article={article} />
+        <GuiaCard key={article.id} article={article} />
       ))}
     </>
   );
@@ -60,22 +179,46 @@ function CategorySection({ category }: { category: ArticleCategory }) {
 /**
  * GuiasContent
  *
- * Fetches and renders all guide articles across the 7 guide categories.
- * Uses one hook call per category (as per the API design).
+ * Listado editorial de las 7 guías prácticas. Muestra una banda de cabecera con
+ * identidad de marca (gradiente noche + título Cormorant + filete dorado) y una
+ * grilla de tarjetas editoriales (thumbnail temático, chip de categoría dorado,
+ * título Cormorant, snippet y CTA), reemplazando las filas planas previas
+ * (T-ENC-006 / hallazgo ENC-005). Usa una llamada al hook por categoría.
  */
 export function GuiasContent() {
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="mb-2 font-serif text-3xl font-bold">Guías</h1>
-        <p className="text-muted-foreground">
-          Aprende con nuestras guías prácticas sobre espiritualidad y esoterismo.
-        </p>
-      </div>
+      {/* Banda de cabecera con identidad de marca */}
+      <header
+        data-testid="guias-hero"
+        className="relative mb-8 overflow-hidden rounded-2xl"
+        style={{ background: HERO_GRADIENT }}
+      >
+        <div className="relative z-10 px-6 py-10 text-center sm:px-10 sm:py-12">
+          <h1
+            className="font-serif text-3xl leading-tight font-bold sm:text-4xl"
+            style={{ color: CREAM }}
+          >
+            Guías
+          </h1>
+          <p
+            className="mx-auto mt-3 max-w-xl text-base leading-relaxed"
+            style={{ color: CREAM_MUTED }}
+          >
+            Aprende con nuestras guías prácticas sobre espiritualidad y esoterismo.
+          </p>
+        </div>
 
-      {/* List */}
-      <div className="flex flex-col gap-3">
+        {/* Filete dorado inferior */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-0.5"
+          style={{ background: GOLD_FILLET }}
+          aria-hidden="true"
+        />
+      </header>
+
+      {/* Grid de tarjetas */}
+      <div className="grid gap-6 md:grid-cols-2">
         {GUIDE_CATEGORIES.map((category) => (
           <CategorySection key={category} category={category} />
         ))}
