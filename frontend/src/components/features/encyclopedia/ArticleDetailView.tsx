@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 
 import { ArticleHero } from './ArticleHero';
@@ -133,7 +134,13 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
   const isGuide = isGuideCategory(article.category);
   const editorial = getArticleEditorial(article.slug);
   const readingMeta = getArticleReadingMeta(article.content);
-  const headings = isGuide ? extractArticleHeadings(article.content) : [];
+  // Memoized so the array identity is stable across re-renders: ArticleToc keys
+  // its IntersectionObserver effect on `headings`, so a fresh array each render
+  // would tear down and rebuild the observer needlessly.
+  const headings = useMemo(
+    () => (isGuide ? extractArticleHeadings(article.content) : []),
+    [isGuide, article.content]
+  );
   const hasToc = headings.length > 0;
   const hasRelatedTarotCards =
     article.relatedTarotCards !== null && article.relatedTarotCards.length > 0;

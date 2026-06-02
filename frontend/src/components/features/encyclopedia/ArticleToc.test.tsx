@@ -188,6 +188,38 @@ describe('ArticleToc', () => {
       );
     });
 
+    it('should reset the active section to the first when the headings change', () => {
+      const { rerender } = renderWithAnchors();
+
+      // Scroll-spy moves the active section away from the first…
+      fireIntersection([{ id: 'seccion-2', isIntersecting: true, top: 40 }]);
+      expect(desktopToc().getByRole('link', { name: /Los Arcanos Mayores/ })).toHaveAttribute(
+        'aria-current',
+        'location'
+      );
+
+      // …then navigating to another guide (same component instance, new headings)
+      // resets the highlight to the new article's first section.
+      const otherHeadings: ArticleHeading[] = [
+        { id: 'seccion-1', number: 1, label: 'Introducción a los Rituales' },
+        { id: 'seccion-2', number: 2, label: 'Herramientas' },
+      ];
+      rerender(
+        <>
+          {otherHeadings.map((h) => (
+            <h2 key={h.id} id={h.id}>
+              {h.label}
+            </h2>
+          ))}
+          <ArticleToc headings={otherHeadings} />
+        </>
+      );
+
+      expect(
+        desktopToc().getByRole('link', { name: /Introducción a los Rituales/ })
+      ).toHaveAttribute('aria-current', 'location');
+    });
+
     it('should mark a section active when its link is clicked', async () => {
       const user = userEvent.setup();
       renderWithAnchors();

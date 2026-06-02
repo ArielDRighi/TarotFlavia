@@ -98,6 +98,18 @@ function TocLinkList({ headings, activeId, onSelect }: TocLinkListProps) {
 export function ArticleToc({ headings, className }: ArticleTocProps) {
   const [activeId, setActiveId] = useState<string | null>(headings[0]?.id ?? null);
 
+  // Reset the active section to the first when the set of sections changes. The
+  // App Router reuses this component instance when navigating between guides, so
+  // without this the highlight would keep the previous article's section until
+  // the observer's first callback. Adjusting state during render (the React
+  // idiom) avoids an effect-driven extra commit and a stale frame.
+  const headingsKey = headings.map((heading) => heading.id).join('|');
+  const [prevHeadingsKey, setPrevHeadingsKey] = useState(headingsKey);
+  if (prevHeadingsKey !== headingsKey) {
+    setPrevHeadingsKey(headingsKey);
+    setActiveId(headings[0]?.id ?? null);
+  }
+
   useEffect(() => {
     if (headings.length === 0) {
       return;
