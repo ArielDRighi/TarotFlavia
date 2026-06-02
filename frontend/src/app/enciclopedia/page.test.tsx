@@ -123,10 +123,11 @@ describe('EnciclopediaPage (Hub principal)', () => {
     expect(astrologiaImg).toHaveAttribute('src', '/images/enciclopedia/hub-astrologia.webp');
     expect(guiasImg).toHaveAttribute('src', '/images/enciclopedia/hub-guias.webp');
 
-    // alt no vacío y en español
-    expect(tarotImg.getAttribute('alt')).toBeTruthy();
-    expect(astrologiaImg.getAttribute('alt')).toBeTruthy();
-    expect(guiasImg.getAttribute('alt')).toBeTruthy();
+    // alt descriptivo y temáticamente coherente con su sección (detecta alt
+    // ausentes o intercambiados, no solo cadenas vacías)
+    expect(tarotImg.getAttribute('alt')).toMatch(/tarot/i);
+    expect(astrologiaImg.getAttribute('alt')).toMatch(/zodiac|astro|constelac/i);
+    expect(guiasImg.getAttribute('alt')).toMatch(/libro|esot|guía/i);
   });
 
   it('no debe usar emojis del sistema como íconos de sección', () => {
