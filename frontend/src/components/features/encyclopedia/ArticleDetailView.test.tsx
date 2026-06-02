@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 import { ArticleDetailView } from './ArticleDetailView';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
@@ -396,6 +396,58 @@ describe('ArticleDetailView', () => {
       );
 
       expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    });
+  });
+
+  describe('Table of contents (guides)', () => {
+    const guideContent =
+      '# Guía del Tarot\n\nIntro.\n\n## 1. ¿Qué es el Tarot?\n\nTexto.\n\n## 2. Los Arcanos\n\nMás texto.';
+
+    it('should render the TOC for guide articles with numbered sections', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            slug: 'guia-tarot',
+            category: ArticleCategory.GUIDE_TAROT,
+            nameEs: 'Guía del Tarot',
+            content: guideContent,
+          })}
+        />
+      );
+
+      const toc = screen.getByTestId('article-toc');
+      expect(toc).toBeInTheDocument();
+      expect(within(toc).getAllByRole('link', { name: /¿Qué es el Tarot\?/ })[0]).toHaveAttribute(
+        'href',
+        '#seccion-1'
+      );
+    });
+
+    it('should not render the TOC for non-guide articles', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.ZODIAC_SIGN,
+            content: '## 1. Carácter\n\nTexto.',
+          })}
+        />
+      );
+
+      expect(screen.queryByTestId('article-toc')).not.toBeInTheDocument();
+    });
+
+    it('should not render the TOC for a guide without numbered sections', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.GUIDE_TAROT,
+            nameEs: 'Guía del Tarot',
+            content: '# Guía del Tarot\n\nSolo un párrafo introductorio sin secciones.',
+          })}
+        />
+      );
+
+      expect(screen.queryByTestId('article-toc')).not.toBeInTheDocument();
     });
   });
 });

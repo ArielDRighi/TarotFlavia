@@ -385,15 +385,23 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 **Estimación:** 2 puntos
 **Dependencias:** T-ENC-001
 **Cubre Hallazgo:** ENC-003 (navegación de lectura)
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-004-toc-scroll-spy`)
 
 #### ✅ Tareas específicas
 
-- [ ] Generar índice (TOC) a partir de los `H2` del artículo, con anclas.
-- [ ] Resaltar la sección activa al hacer scroll (scroll-spy).
-- [ ] Comportamiento responsive (TOC lateral en desktop, colapsable en mobile).
-- [ ] Tests (generación de anclas, marcado de sección activa).
-- [ ] Coverage ≥ 80%.
+- [x] Generar índice (TOC) a partir de los `H2` del artículo, con anclas.
+- [x] Resaltar la sección activa al hacer scroll (scroll-spy).
+- [x] Comportamiento responsive (TOC lateral en desktop, colapsable en mobile).
+- [x] Tests (generación de anclas, marcado de sección activa).
+- [x] Coverage ≥ 80%.
+
+#### 📝 Notas de implementación
+
+- Nuevo util `extractArticleHeadings` + `getSectionAnchorId` en `lib/utils/text.ts`: deriva el TOC de los `## N.` (ignora `#`/`###` y `##` sin número), limpia markdown inline del label (negritas, cursiva, enlaces → texto) y construye el `id` de ancla (`seccion-N`). `getSectionAnchorId` es la **única fuente de verdad** del id, compartida entre el TOC y el heading renderizado (anclas y destinos siempre concuerdan).
+- `MarkdownArticle` (modo editorial) añade `id="seccion-N"` + `scroll-mt-24` a los H2 numerados — cero regresión para signos/planetas (modo no editorial sin id).
+- Nuevo `ArticleToc` (client): scroll-spy con `IntersectionObserver` (`rootMargin -80px 0px -70% 0px`, elige el heading más alto entre los visibles y conserva el último activo si ninguno intersecta). Responsive: `<details>` colapsable en mobile + barra lateral `lg:sticky` en desktop, ambas con `aria-current="location"` en la sección activa.
+- `ArticleDetailView` extrae el cuerpo a una variable compartida (DRY) y monta el layout de dos columnas (TOC `lg:order-2` + columna de lectura `max-w-[68ch]`) solo para guías con secciones numeradas.
+- Coverage 100% líneas/funciones en los archivos nuevos/tocados (≥ 95% ramas); ciclo de calidad frontend completo en verde.
 
 #### 🎯 Criterios de Aceptación
 
@@ -404,6 +412,9 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 #### 📁 Archivos involucrados
 
 - `frontend/src/components/features/encyclopedia/ArticleToc.tsx` (nuevo)
+- `frontend/src/lib/utils/text.ts` (util `extractArticleHeadings` / `getSectionAnchorId`)
+- `frontend/src/components/features/encyclopedia/MarkdownArticle.tsx` (ids de ancla)
+- `frontend/src/components/features/encyclopedia/ArticleDetailView.tsx` (integración)
 - tests correspondientes
 
 ---

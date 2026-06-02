@@ -13,6 +13,7 @@ import { ArticleCallout } from './ArticleCallout';
 
 // 6. Utils & types
 import { cn } from '@/lib/utils';
+import { getSectionAnchorId } from '@/lib/utils/text';
 import type { EditorialSection } from '@/lib/data/encyclopedia-editorial.data';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -184,7 +185,10 @@ function buildEditorialComponents(sections?: Record<number, EditorialSection>): 
 
       return (
         <>
-          <h2 className="text-foreground border-secondary/30 mt-12 mb-5 flex items-center gap-3 border-b pb-2 font-serif text-3xl leading-snug font-bold first:mt-0">
+          <h2
+            id={number !== null ? getSectionAnchorId(number) : undefined}
+            className="text-foreground border-secondary/30 mt-12 mb-5 flex scroll-mt-24 items-center gap-3 border-b pb-2 font-serif text-3xl leading-snug font-bold first:mt-0"
+          >
             {number !== null && (
               <span
                 data-testid="section-number"

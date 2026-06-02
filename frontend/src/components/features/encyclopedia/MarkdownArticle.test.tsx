@@ -214,6 +214,21 @@ describe('MarkdownArticle', () => {
       expect(screen.getByText('78')).toBeInTheDocument();
     });
 
+    it('should give numbered headings a stable anchor id for the TOC', () => {
+      render(<MarkdownArticle content="## 2. Los Arcanos" editorial />);
+
+      const heading = screen.getByRole('heading', { level: 2, name: 'Los Arcanos' });
+      expect(heading).toHaveAttribute('id', 'seccion-2');
+      // Offset so the anchored heading isn't hidden under sticky chrome.
+      expect(heading.className).toMatch(/scroll-mt/);
+    });
+
+    it('should not add an anchor id to headings without a leading number', () => {
+      render(<MarkdownArticle content="## Sección sin número" editorial />);
+
+      expect(screen.getByRole('heading', { level: 2 })).not.toHaveAttribute('id');
+    });
+
     it('should render the ✦ decorative separator for thematic breaks', () => {
       render(<MarkdownArticle content={'Antes\n\n---\n\nDespués'} editorial />);
 
