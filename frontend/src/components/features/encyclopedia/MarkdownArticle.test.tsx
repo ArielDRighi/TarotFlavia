@@ -183,13 +183,35 @@ describe('MarkdownArticle', () => {
       ).toBeInTheDocument();
     });
 
-    it('should give the first paragraph a drop-cap, but not the following ones', () => {
+    it('should apply a drop-cap to the first paragraph via the wrapper (stateless CSS)', () => {
       render(<MarkdownArticle content={'Primer párrafo intro.\n\nSegundo párrafo.'} editorial />);
 
-      const first = screen.getByText('Primer párrafo intro.');
-      const second = screen.getByText('Segundo párrafo.');
-      expect(first.className).toMatch(/first-letter:/);
-      expect(second.className).not.toMatch(/first-letter:/);
+      // The drop-cap lives on the wrapper, scoped to its first <p> — so it
+      // survives re-renders instead of relying on a render-time flag.
+      const wrapper = screen.getByTestId('markdown-article');
+      expect(wrapper.className).toMatch(/first-letter:/);
+      expect(wrapper.className).toMatch(/p:first-of-type/);
+    });
+
+    it('should not apply a drop-cap in default (non-editorial) mode', () => {
+      render(<MarkdownArticle content={'Primer párrafo intro.'} />);
+
+      expect(screen.getByTestId('markdown-article').className).not.toMatch(/first-letter:/);
+    });
+
+    it('should keep the drop-cap after a re-render (no stateful flag)', () => {
+      const { rerender } = render(<MarkdownArticle content={'Intro.'} editorial />);
+      rerender(<MarkdownArticle content={'Intro.'} editorial />);
+
+      expect(screen.getByTestId('markdown-article').className).toMatch(/p:first-of-type/);
+    });
+
+    it('should still detect the section number when the heading has inline markdown', () => {
+      render(<MarkdownArticle content="## 2. Los **78** Arcanos" editorial />);
+
+      expect(screen.getByTestId('section-number')).toHaveTextContent('2');
+      // The bold inline node is preserved in the label.
+      expect(screen.getByText('78')).toBeInTheDocument();
     });
 
     it('should render the ✦ decorative separator for thematic breaks', () => {

@@ -123,33 +123,59 @@ const MARKDOWN_COMPONENTS: Components = {
 // ─── Editorial mode ──────────────────────────────────────────────────────────
 
 /**
+ * Drop-cap on the article's first paragraph, applied via CSS scoped to the
+ * wrapper's first `<p>`. Stateless by design — survives re-renders (unlike a
+ * render-time flag) and adds no work to the node mapping.
+ */
+const DROP_CAP_CLASSES = [
+  '[&>p:first-of-type]:first-letter:float-left',
+  '[&>p:first-of-type]:first-letter:mt-1',
+  '[&>p:first-of-type]:first-letter:mr-3',
+  '[&>p:first-of-type]:first-letter:font-serif',
+  '[&>p:first-of-type]:first-letter:text-6xl',
+  '[&>p:first-of-type]:first-letter:leading-[0.8]',
+  '[&>p:first-of-type]:first-letter:font-bold',
+  '[&>p:first-of-type]:first-letter:text-secondary',
+].join(' ');
+
+const HEADING_NUMBER_RE = /^(\d+)\.\s+(.*)$/;
+
+/**
  * Splits a `## N. Título` heading into its section number and label. Returns a
  * null number for headings without a leading `N.` (rendered without a badge).
+ *
+ * Handles both a plain string and an array of nodes (a heading with inline
+ * markdown such as `## 2. Los **78** Arcanos`): the leading `N.` is stripped
+ * from the first text node and the remaining inline nodes are preserved.
  */
 function splitHeadingNumber(children: React.ReactNode): {
   number: number | null;
   label: React.ReactNode;
 } {
   if (typeof children === 'string') {
-    const match = children.match(/^(\d+)\.\s+(.*)$/);
+    const match = children.match(HEADING_NUMBER_RE);
     if (match) {
       return { number: Number(match[1]), label: match[2] };
+    }
+  } else if (Array.isArray(children) && typeof children[0] === 'string') {
+    const match = children[0].match(HEADING_NUMBER_RE);
+    if (match) {
+      return { number: Number(match[1]), label: [match[2], ...children.slice(1)] };
     }
   }
   return { number: null, label: children };
 }
 
 /**
- * Builds the editorial component map: extends the base typography with a drop-cap
- * first paragraph, numbered gold H2 badges, `✦` thematic separators, and the
- * injection of per-section images/callouts right after their heading.
+ * Builds the editorial component map: extends the base typography with numbered
+ * gold H2 badges, `✦` thematic separators, and the injection of per-section
+ * images/callouts right after their heading.
  *
- * A fresh closure (with its own `firstParagraph` flag) is created per render so
- * the drop-cap reliably lands on the first paragraph of each render pass.
+ * The drop-cap on the first paragraph is applied via CSS on the wrapper (see
+ * `DROP_CAP_CLASSES`), not here — keeping these overrides stateless so they
+ * survive re-renders without losing the drop-cap.
  */
 function buildEditorialComponents(sections?: Record<number, EditorialSection>): Components {
-  let firstParagraph = true;
-
   return {
     ...MARKDOWN_COMPONENTS,
     h2: ({ children }) => {
@@ -190,17 +216,6 @@ function buildEditorialComponents(sections?: Record<number, EditorialSection>): 
         </>
       );
     },
-    p: ({ children }) => {
-      if (firstParagraph) {
-        firstParagraph = false;
-        return (
-          <p className="text-foreground first-letter:text-secondary mb-6 text-lg leading-relaxed first-letter:float-left first-letter:mt-1 first-letter:mr-3 first-letter:font-serif first-letter:text-6xl first-letter:leading-[0.8] first-letter:font-bold">
-            {children}
-          </p>
-        );
-      }
-      return <p className="text-foreground mb-6 text-lg leading-relaxed">{children}</p>;
-    },
     hr: () => (
       <div
         role="separator"
@@ -236,7 +251,10 @@ export function MarkdownArticle({ content, className, editorial, sections }: Mar
   );
 
   return (
-    <div data-testid="markdown-article" className={cn('max-w-[68ch] font-sans', className)}>
+    <div
+      data-testid="markdown-article"
+      className={cn('max-w-[68ch] font-sans', editorial && DROP_CAP_CLASSES, className)}
+    >
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>
