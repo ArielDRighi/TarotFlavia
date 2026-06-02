@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 import { ArticleDetailView } from './ArticleDetailView';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
@@ -15,6 +15,22 @@ vi.mock('react-markdown', () => ({
 // Mock remark-gfm
 vi.mock('remark-gfm', () => ({
   default: vi.fn(),
+}));
+
+// Mock next/image (the ArticleHero renders it for guides with a hero asset)
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="next-image" />
+  ),
+}));
+
+// Mock RelatedTarotCards to isolate ArticleDetailView from the cards data hook.
+// We assert it receives the related card IDs; its own rendering (thumbnail,
+// name, href) is covered by RelatedTarotCards.test.tsx.
+vi.mock('./RelatedTarotCards', () => ({
+  RelatedTarotCards: ({ cardIds }: { cardIds: number[] }) => (
+    <div data-testid="related-tarot-cards-mock">{cardIds.join(',')}</div>
+  ),
 }));
 
 // Mock next/link
@@ -118,22 +134,23 @@ describe('ArticleDetailView', () => {
   });
 
   describe('Related tarot cards', () => {
-    it('should show related tarot cards section when relatedTarotCards has items', () => {
+    it('should delegate the related card IDs to RelatedTarotCards (no raw IDs shown)', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: [1, 3, 10] })} />);
 
-      expect(screen.getByTestId('related-tarot-cards')).toBeInTheDocument();
+      expect(screen.getByTestId('related-tarot-cards-mock')).toHaveTextContent('1,3,10');
+      expect(screen.queryByText('#1')).not.toBeInTheDocument();
     });
 
-    it('should not show related tarot cards section when relatedTarotCards is null', () => {
+    it('should not render RelatedTarotCards when relatedTarotCards is null', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: null })} />);
 
-      expect(screen.queryByTestId('related-tarot-cards')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('related-tarot-cards-mock')).not.toBeInTheDocument();
     });
 
-    it('should not show related tarot cards section when relatedTarotCards is empty', () => {
+    it('should not render RelatedTarotCards when relatedTarotCards is empty', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedTarotCards: [] })} />);
 
-      expect(screen.queryByTestId('related-tarot-cards')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('related-tarot-cards-mock')).not.toBeInTheDocument();
     });
   });
 
@@ -160,6 +177,49 @@ describe('ArticleDetailView', () => {
       render(<ArticleDetailView article={createTestArticle({ relatedArticles: [] })} />);
 
       expect(screen.queryByTestId('related-articles')).not.toBeInTheDocument();
+    });
+
+    it('should link each related article to the route matching its category', () => {
+      const base = { snippet: '', imageUrl: null, sortOrder: 0 };
+      const relatedArticles = [
+        { ...base, id: 10, slug: 'aries', nameEs: 'Aries', category: ArticleCategory.ZODIAC_SIGN },
+        { ...base, id: 11, slug: 'marte', nameEs: 'Marte', category: ArticleCategory.PLANET },
+        {
+          ...base,
+          id: 12,
+          slug: 'casa-1',
+          nameEs: 'Casa I',
+          category: ArticleCategory.ASTROLOGICAL_HOUSE,
+        },
+        { ...base, id: 13, slug: 'fuego', nameEs: 'Fuego', category: ArticleCategory.ELEMENT },
+        {
+          ...base,
+          id: 14,
+          slug: 'cardinal',
+          nameEs: 'Cardinal',
+          category: ArticleCategory.MODALITY,
+        },
+        {
+          ...base,
+          id: 15,
+          slug: 'guia-tarot',
+          nameEs: 'Introducción al Tarot',
+          category: ArticleCategory.GUIDE_TAROT,
+        },
+      ];
+      render(
+        <ArticleDetailView
+          article={createTestArticle({ nameEs: 'Artículo Base', relatedArticles })}
+        />
+      );
+
+      const hrefOf = (name: string) => screen.getByText(name).closest('a')?.getAttribute('href');
+      expect(hrefOf('Aries')).toBe('/enciclopedia/astrologia/signos/aries');
+      expect(hrefOf('Marte')).toBe('/enciclopedia/astrologia/planetas/marte');
+      expect(hrefOf('Casa I')).toBe('/enciclopedia/astrologia/casas/casa-1');
+      expect(hrefOf('Fuego')).toBe('/enciclopedia/elementos/fuego');
+      expect(hrefOf('Cardinal')).toBe('/enciclopedia/elementos/cardinal');
+      expect(hrefOf('Introducción al Tarot')).toBe('/enciclopedia/guias/guia-tarot');
     });
   });
 
@@ -278,6 +338,116 @@ describe('ArticleDetailView', () => {
       );
 
       expect(screen.queryByTestId('article-cta')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Editorial hero (guides)', () => {
+    it('should render the ArticleHero for guide articles', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.GUIDE_TAROT,
+            nameEs: 'Guía del Tarot',
+          })}
+        />
+      );
+
+      const hero = screen.getByTestId('article-hero');
+      expect(hero).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: 'Guía del Tarot' })).toBeInTheDocument();
+    });
+
+    it('should not render the ArticleHero for non-guide articles', () => {
+      render(
+        <ArticleDetailView article={createTestArticle({ category: ArticleCategory.ZODIAC_SIGN })} />
+      );
+
+      expect(screen.queryByTestId('article-hero')).not.toBeInTheDocument();
+    });
+
+    it('should show the hero image configured for the tarot guide', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            slug: 'guia-tarot',
+            category: ArticleCategory.GUIDE_TAROT,
+            nameEs: 'Guía del Tarot',
+          })}
+        />
+      );
+
+      expect(screen.getByTestId('next-image')).toHaveAttribute(
+        'src',
+        '/images/enciclopedia/guia-tarot-hero.webp'
+      );
+    });
+
+    it('should render a single page h1 for guide articles (no duplicate from content)', () => {
+      const content = '# Guía del Tarot\n\n## 1. ¿Qué es el Tarot?\n\nTexto.';
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            slug: 'guia-tarot',
+            category: ArticleCategory.GUIDE_TAROT,
+            nameEs: 'Guía del Tarot',
+            content,
+          })}
+        />
+      );
+
+      expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    });
+  });
+
+  describe('Table of contents (guides)', () => {
+    const guideContent =
+      '# Guía del Tarot\n\nIntro.\n\n## 1. ¿Qué es el Tarot?\n\nTexto.\n\n## 2. Los Arcanos\n\nMás texto.';
+
+    it('should render the TOC for guide articles with numbered sections', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            slug: 'guia-tarot',
+            category: ArticleCategory.GUIDE_TAROT,
+            nameEs: 'Guía del Tarot',
+            content: guideContent,
+          })}
+        />
+      );
+
+      const toc = screen.getByTestId('article-toc');
+      expect(toc).toBeInTheDocument();
+      expect(within(toc).getAllByRole('link', { name: /¿Qué es el Tarot\?/ })[0]).toHaveAttribute(
+        'href',
+        '#seccion-1'
+      );
+    });
+
+    it('should not render the TOC for non-guide articles', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.ZODIAC_SIGN,
+            content: '## 1. Carácter\n\nTexto.',
+          })}
+        />
+      );
+
+      expect(screen.queryByTestId('article-toc')).not.toBeInTheDocument();
+    });
+
+    it('should not render the TOC for a guide without numbered sections', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.GUIDE_TAROT,
+            nameEs: 'Guía del Tarot',
+            content: '# Guía del Tarot\n\nSolo un párrafo introductorio sin secciones.',
+          })}
+        />
+      );
+
+      expect(screen.queryByTestId('article-toc')).not.toBeInTheDocument();
     });
   });
 });

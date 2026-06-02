@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 import { MarkdownArticle } from './MarkdownArticle';
@@ -6,6 +6,14 @@ import { MarkdownArticle } from './MarkdownArticle';
 // NOTE: react-markdown is intentionally NOT mocked here. The whole point of this
 // component is the node-to-element mapping, so we render real Markdown and assert
 // on the produced DOM (roles + brand classes).
+
+// next/image is mocked so editorial section images render as a plain <img> we
+// can assert on (src/alt) without Next's runtime in jsdom.
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="next-image" />
+  ),
+}));
 
 describe('MarkdownArticle', () => {
   describe('Rendering', () => {
@@ -151,6 +159,139 @@ describe('MarkdownArticle', () => {
       render(<MarkdownArticle content={'Antes\n\n---\n\nDespués'} />);
 
       expect(screen.getByRole('separator')).toBeInTheDocument();
+    });
+  });
+
+  describe('Editorial mode', () => {
+    it('should render a numbered gold badge on "## N. …" headings', () => {
+      render(<MarkdownArticle content="## 1. ¿Qué es el Tarot?" editorial />);
+
+      const badge = screen.getByTestId('section-number');
+      expect(badge).toHaveTextContent('1');
+      // The heading's accessible name stays clean (badge is aria-hidden).
+      expect(
+        screen.getByRole('heading', { level: 2, name: '¿Qué es el Tarot?' })
+      ).toBeInTheDocument();
+    });
+
+    it('should not render a badge for headings without a leading number', () => {
+      render(<MarkdownArticle content="## Sección sin número" editorial />);
+
+      expect(screen.queryByTestId('section-number')).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Sección sin número' })
+      ).toBeInTheDocument();
+    });
+
+    it('should apply a drop-cap to the first paragraph via the wrapper (stateless CSS)', () => {
+      render(<MarkdownArticle content={'Primer párrafo intro.\n\nSegundo párrafo.'} editorial />);
+
+      // The drop-cap lives on the wrapper, scoped to its first <p> — so it
+      // survives re-renders instead of relying on a render-time flag.
+      const wrapper = screen.getByTestId('markdown-article');
+      expect(wrapper.className).toMatch(/first-letter:/);
+      expect(wrapper.className).toMatch(/p:first-of-type/);
+    });
+
+    it('should not apply a drop-cap in default (non-editorial) mode', () => {
+      render(<MarkdownArticle content={'Primer párrafo intro.'} />);
+
+      expect(screen.getByTestId('markdown-article').className).not.toMatch(/first-letter:/);
+    });
+
+    it('should keep the drop-cap after a re-render (no stateful flag)', () => {
+      const { rerender } = render(<MarkdownArticle content={'Intro.'} editorial />);
+      rerender(<MarkdownArticle content={'Intro.'} editorial />);
+
+      expect(screen.getByTestId('markdown-article').className).toMatch(/p:first-of-type/);
+    });
+
+    it('should still detect the section number when the heading has inline markdown', () => {
+      render(<MarkdownArticle content="## 2. Los **78** Arcanos" editorial />);
+
+      expect(screen.getByTestId('section-number')).toHaveTextContent('2');
+      // The bold inline node is preserved in the label.
+      expect(screen.getByText('78')).toBeInTheDocument();
+    });
+
+    it('should give numbered headings a stable anchor id for the TOC', () => {
+      render(<MarkdownArticle content="## 2. Los Arcanos" editorial />);
+
+      const heading = screen.getByRole('heading', { level: 2, name: 'Los Arcanos' });
+      expect(heading).toHaveAttribute('id', 'seccion-2');
+      // Offset so the anchored heading isn't hidden under sticky chrome.
+      expect(heading.className).toMatch(/scroll-mt/);
+    });
+
+    it('should not add an anchor id to headings without a leading number', () => {
+      render(<MarkdownArticle content="## Sección sin número" editorial />);
+
+      expect(screen.getByRole('heading', { level: 2 })).not.toHaveAttribute('id');
+    });
+
+    it('should render the ✦ decorative separator for thematic breaks', () => {
+      render(<MarkdownArticle content={'Antes\n\n---\n\nDespués'} editorial />);
+
+      const separator = screen.getByTestId('editorial-separator');
+      expect(separator).toHaveTextContent('✦');
+    });
+
+    it('should inject the section image after its matching heading', () => {
+      render(
+        <MarkdownArticle
+          content="## 2. Los 78 Arcanos"
+          editorial
+          sections={{
+            2: {
+              image: { src: '/images/enciclopedia/tarot-arcanos-mayores.webp', alt: 'Arcanos' },
+            },
+          }}
+        />
+      );
+
+      const figure = screen.getByTestId('section-image');
+      expect(figure).toBeInTheDocument();
+      const img = screen.getByTestId('next-image');
+      expect(img).toHaveAttribute('src', '/images/enciclopedia/tarot-arcanos-mayores.webp');
+      expect(img).toHaveAttribute('alt', 'Arcanos');
+    });
+
+    it('should inject the section callout after its matching heading', () => {
+      render(
+        <MarkdownArticle
+          content="## 1. ¿Qué es el Tarot?"
+          editorial
+          sections={{
+            1: { callout: { variant: 'clave', text: 'Una idea clave.' } },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('article-callout')).toHaveTextContent('Una idea clave.');
+      expect(screen.getByText('Clave')).toBeInTheDocument();
+    });
+
+    it('should not inject assets for sections without a configured entry', () => {
+      render(
+        <MarkdownArticle
+          content="## 3. Otra sección"
+          editorial
+          sections={{ 1: { callout: { variant: 'clave', text: 'Solo en la 1.' } } }}
+        />
+      );
+
+      expect(screen.queryByTestId('section-image')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('article-callout')).not.toBeInTheDocument();
+    });
+
+    it('should not apply editorial treatment when editorial is off (default)', () => {
+      render(<MarkdownArticle content="## 1. ¿Qué es el Tarot?" />);
+
+      // Plain mode keeps the number inline in the heading text and adds no badge.
+      expect(screen.queryByTestId('section-number')).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 2, name: '1. ¿Qué es el Tarot?' })
+      ).toBeInTheDocument();
     });
   });
 });

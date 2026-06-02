@@ -306,15 +306,21 @@ Eliminar la dependencia de las clases `prose` (inertes en Tailwind v4) y dar jer
 **Estimación:** 1.5 puntos
 **Dependencias:** ninguna
 **Cubre Hallazgo:** ENC-002
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-002-cartas-relacionadas-miniatura`)
 
 #### ✅ Tareas específicas
 
-- [ ] Resolver cada ID de `relatedTarotCards` a su carta (nombre + slug + imagen), vía hook/endpoint existente.
-- [ ] Renderizar cada carta con `CardThumbnail` + nombre, enlazando a `/enciclopedia/tarot/[slug]`.
-- [ ] Conservar la condición de ocultar la sección cuando no hay cartas relacionadas.
-- [ ] Tests del nuevo render (miniatura, nombre, href).
-- [ ] Coverage ≥ 80%.
+- [x] Resolver cada ID de `relatedTarotCards` a su carta (nombre + slug + imagen), vía hook/endpoint existente.
+- [x] Renderizar cada carta con `CardThumbnail` + nombre, enlazando a `/enciclopedia/tarot/[slug]`.
+- [x] Conservar la condición de ocultar la sección cuando no hay cartas relacionadas.
+- [x] Tests del nuevo render (miniatura, nombre, href).
+- [x] Coverage ≥ 80%.
+
+#### 📝 Notas de implementación
+
+- Nuevo componente `RelatedTarotCards` que resuelve los IDs contra el mazo completo (`useCards`, cacheado 1h — sin endpoint nuevo) y construye un mapa `id → CardSummary`. Los IDs desconocidos se omiten; si ninguno resuelve, no renderiza nada.
+- Se añadió un prop opcional `href` a `CardThumbnail` (default `/enciclopedia/{slug}`, retrocompatible) para enlazar a la ruta canónica de tarot `ROUTES.ENCICLOPEDIA_TAROT_CARD(slug)` sin afectar otros usos.
+- `ArticleDetailView` conserva el gate de la sección (oculta si `relatedTarotCards` es `null`/vacío) y delega la grilla al nuevo componente.
 
 #### 🎯 Criterios de Aceptación
 
@@ -336,7 +342,7 @@ Eliminar la dependencia de las clases `prose` (inertes en Tailwind v4) y dar jer
 **Estimación:** 3 puntos
 **Dependencias:** T-ENC-001 (render base), T-ENC-007 (assets de imagen)
 **Cubre Hallazgo:** ENC-003
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-003-article-hero-sistema-editorial`)
 
 #### 📋 Descripción
 
@@ -344,12 +350,19 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `ArticleHero` (banda `bg-hero → bg-hero-mid`, imagen de cabecera con overlay, breadcrumb, categoría, título Cormorant, lead, meta).
-- [ ] Soportar imágenes por sección (modeladas como datos, no hardcode).
-- [ ] Recursos editoriales: callouts ("Clave", "Sabías que…"), separadores dorados `✦`, blockquote dorado, drop-cap en el primer párrafo.
-- [ ] Integrar en `ArticleDetailView` / página de detalle de guía.
-- [ ] Tests (hero, callouts, render de imágenes con alt).
-- [ ] Coverage ≥ 80%.
+- [x] Crear `ArticleHero` (banda gradiente noche `bg-hero → bg-hero-mid`, imagen de cabecera opcional con overlay + estrellas/luna decorativas, breadcrumb, chip de categoría dorado, título Cormorant, lead, meta de tiempo de lectura + nº de secciones). **Fallback** a banda de gradiente cuando falta la imagen.
+- [x] Soportar imágenes por sección modeladas como **datos** (`encyclopedia-editorial.data.ts`, mapeadas por nº de sección H2), no hardcode en el render.
+- [x] Recursos editoriales: callouts ("Clave", "Sabías que…" → `ArticleCallout`), separadores dorados `✦`, blockquote dorado (ya en `MarkdownArticle`), drop-cap en el primer párrafo y badge dorado numerado en los H2.
+- [x] Integrar en `ArticleDetailView` (gate a categorías de guía `guide_*`); signos/planetas conservan su cabecera simple sin regresión.
+- [x] Tests (hero, callouts, badges, drop-cap, ✦, inyección de imagen/callout por sección con alt).
+- [x] Coverage 100% en `ArticleHero`, `ArticleCallout`, `ArticleDetailView` y datos editoriales; `MarkdownArticle` 100% líneas / 95% ramas (≥ 80% requerido).
+
+#### 📝 Notas de implementación
+
+- Imágenes generadas con los prompts de `FEEDBACK_ENCICLOPEDIA_DISENO.md` §4.1/§5/§6, optimizadas a **WebP** (ImageMagick, calidad 80, sin metadata) y guardadas en `frontend/public/images/enciclopedia/` (hero 1792px, secciones 1000px, lateral 4:5 640px, hub 800px). Set total ~700 KB.
+- `MarkdownArticle` gana un modo editorial **opt-in** (`editorial` + `sections`): por defecto conserva exactamente la tipografía base (cero regresión para signos/planetas).
+- Nuevo util `getArticleReadingMeta` (en `lib/utils/text.ts`) deriva tiempo de lectura (~200 wpm) y nº de secciones (conteo de `##`).
+- Los assets del Hub (`hub-*.webp`) ya quedan generados para habilitar T-ENC-005.
 
 #### 🎯 Criterios de Aceptación
 
@@ -372,15 +385,23 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 **Estimación:** 2 puntos
 **Dependencias:** T-ENC-001
 **Cubre Hallazgo:** ENC-003 (navegación de lectura)
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-004-toc-scroll-spy`)
 
 #### ✅ Tareas específicas
 
-- [ ] Generar índice (TOC) a partir de los `H2` del artículo, con anclas.
-- [ ] Resaltar la sección activa al hacer scroll (scroll-spy).
-- [ ] Comportamiento responsive (TOC lateral en desktop, colapsable en mobile).
-- [ ] Tests (generación de anclas, marcado de sección activa).
-- [ ] Coverage ≥ 80%.
+- [x] Generar índice (TOC) a partir de los `H2` del artículo, con anclas.
+- [x] Resaltar la sección activa al hacer scroll (scroll-spy).
+- [x] Comportamiento responsive (TOC lateral en desktop, colapsable en mobile).
+- [x] Tests (generación de anclas, marcado de sección activa).
+- [x] Coverage ≥ 80%.
+
+#### 📝 Notas de implementación
+
+- Nuevo util `extractArticleHeadings` + `getSectionAnchorId` en `lib/utils/text.ts`: deriva el TOC de los `## N.` (ignora `#`/`###` y `##` sin número), limpia markdown inline del label (negritas, cursiva, enlaces → texto) y construye el `id` de ancla (`seccion-N`). `getSectionAnchorId` es la **única fuente de verdad** del id, compartida entre el TOC y el heading renderizado (anclas y destinos siempre concuerdan).
+- `MarkdownArticle` (modo editorial) añade `id="seccion-N"` + `scroll-mt-24` a los H2 numerados — cero regresión para signos/planetas (modo no editorial sin id).
+- Nuevo `ArticleToc` (client): scroll-spy con `IntersectionObserver` (`rootMargin -80px 0px -70% 0px`, elige el heading más alto entre los visibles y conserva el último activo si ninguno intersecta). Responsive: `<details>` colapsable en mobile + barra lateral `lg:sticky` en desktop, ambas con `aria-current="location"` en la sección activa.
+- `ArticleDetailView` extrae el cuerpo a una variable compartida (DRY) y monta el layout de dos columnas (TOC `lg:order-2` + columna de lectura `max-w-[68ch]`) solo para guías con secciones numeradas.
+- Coverage 100% líneas/funciones en los archivos nuevos/tocados (≥ 95% ramas); ciclo de calidad frontend completo en verde.
 
 #### 🎯 Criterios de Aceptación
 
@@ -391,6 +412,9 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 #### 📁 Archivos involucrados
 
 - `frontend/src/components/features/encyclopedia/ArticleToc.tsx` (nuevo)
+- `frontend/src/lib/utils/text.ts` (util `extractArticleHeadings` / `getSectionAnchorId`)
+- `frontend/src/components/features/encyclopedia/MarkdownArticle.tsx` (ids de ancla)
+- `frontend/src/components/features/encyclopedia/ArticleDetailView.tsx` (integración)
 - tests correspondientes
 
 ---
@@ -401,16 +425,23 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 **Estimación:** 2 puntos
 **Dependencias:** T-ENC-007 (assets)
 **Cubre Hallazgo:** ENC-004
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-005-rediseno-hub-enciclopedia`)
 
 #### ✅ Tareas específicas
 
-- [ ] Encabezado con banda oscura/gradiente (`bg-hero`/`bg-hero-mid`) + título Cormorant + filete dorado.
-- [ ] Reemplazar emojis (🃏 ⭐ 📚) por imágenes/ilustraciones de marca en las 3 tarjetas.
-- [ ] Tarjetas con imagen + overlay + título dorado + micro-interacción de hover (zoom + glow).
-- [ ] Mantener grid responsive y enlaces existentes.
-- [ ] Tests (3 secciones, enlaces correctos, alt de imágenes).
-- [ ] Coverage ≥ 80%.
+- [x] Encabezado con banda oscura/gradiente (`bg-hero`/`bg-hero-mid`) + título Cormorant + filete dorado.
+- [x] Reemplazar emojis (🃏 ⭐ 📚) por imágenes/ilustraciones de marca en las 3 tarjetas.
+- [x] Tarjetas con imagen + overlay + título dorado + micro-interacción de hover (zoom + glow).
+- [x] Mantener grid responsive y enlaces existentes.
+- [x] Tests (3 secciones, enlaces correctos, alt de imágenes).
+- [x] Coverage 100% en `EnciclopediaHubContent` (≥ 80% requerido).
+
+#### 📝 Notas de implementación
+
+- La banda de cabecera reutiliza el canon visual de `ArticleHero` (gradiente noche `HERO_GRADIENT`, estrellas `animate-twinkle`, luna creciente CSS y filete dorado), manteniendo coherencia entre el hub y el detalle de artículo.
+- Cada sección es una `SectionCard` (sub-componente): imagen `next/image` (`fill`, assets `hub-*.webp` de T-ENC-003/007), overlay de legibilidad, título Cormorant crema, descripción y CTA dorado. El emoji del sistema se eliminó del modelo de datos (`icon` → `image: { src, alt }`).
+- Micro-interacción de hover coherente vía `group`: zoom suave de imagen (`group-hover:scale-105`), glow dorado (`inset shadow`), elevación (`-translate-y-1`) y desplazamiento del CTA. Foco visible (`focus-visible:ring-secondary`) para accesibilidad por teclado.
+- Se conservan los `data-testid` y `href` existentes (cero regresión de navegación); los test-ids de sección quedan anidados dentro del `Link` de categoría.
 
 #### 🎯 Criterios de Aceptación
 

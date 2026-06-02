@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { getInitials, stripLeadingMarkdownHeading } from './text';
+import {
+  extractArticleHeadings,
+  getArticleReadingMeta,
+  getInitials,
+  getSectionAnchorId,
+  stripLeadingMarkdownHeading,
+} from './text';
 
 describe('getInitials', () => {
   it('should return two-letter initials from two-word name', () => {
@@ -69,5 +75,100 @@ describe('stripLeadingMarkdownHeading', () => {
 
   it('should handle an empty string', () => {
     expect(stripLeadingMarkdownHeading('')).toBe('');
+  });
+});
+
+describe('getArticleReadingMeta', () => {
+  it('should count second-level headings as sections', () => {
+    const content = '# Título\n\nIntro.\n\n## 1. Uno\n\nTexto.\n\n## 2. Dos\n\nTexto.';
+    expect(getArticleReadingMeta(content).sectionCount).toBe(2);
+  });
+
+  it('should not count third-level headings (###) as sections', () => {
+    const content = '## 1. Uno\n\n### Subsección\n\nTexto.\n\n## 2. Dos\n\nTexto.';
+    expect(getArticleReadingMeta(content).sectionCount).toBe(2);
+  });
+
+  it('should not count the leading top-level heading (#) as a section', () => {
+    const content = '# Guía del Tarot\n\nIntro sin secciones.';
+    expect(getArticleReadingMeta(content).sectionCount).toBe(0);
+  });
+
+  it('should estimate reading time at ~200 words per minute (rounded up)', () => {
+    // 250 palabras → 250 / 200 = 1.25 → 2 minutos
+    const content = `# Título\n\n${Array.from({ length: 250 }, () => 'palabra').join(' ')}`;
+    expect(getArticleReadingMeta(content).readingTimeMinutes).toBe(2);
+  });
+
+  it('should never return less than 1 minute for non-empty content', () => {
+    expect(getArticleReadingMeta('## Sección\n\nTexto breve.').readingTimeMinutes).toBe(1);
+  });
+
+  it('should return zeroed meta for empty content', () => {
+    expect(getArticleReadingMeta('')).toEqual({ readingTimeMinutes: 0, sectionCount: 0 });
+  });
+});
+
+describe('getSectionAnchorId', () => {
+  it('should build a stable anchor id from a section number', () => {
+    expect(getSectionAnchorId(1)).toBe('seccion-1');
+    expect(getSectionAnchorId(12)).toBe('seccion-12');
+  });
+});
+
+describe('extractArticleHeadings', () => {
+  it('should extract numbered second-level headings as TOC entries', () => {
+    const content =
+      '# Guía del Tarot\n\nIntro.\n\n## 1. ¿Qué es el Tarot?\n\nTexto.\n\n## 2. Los Arcanos\n\nMás texto.';
+
+    expect(extractArticleHeadings(content)).toEqual([
+      { id: 'seccion-1', number: 1, label: '¿Qué es el Tarot?' },
+      { id: 'seccion-2', number: 2, label: 'Los Arcanos' },
+    ]);
+  });
+
+  it('should ignore the leading top-level heading (#)', () => {
+    const content = '# Guía del Tarot\n\n## 1. Primera\n\nTexto.';
+
+    expect(extractArticleHeadings(content)).toEqual([
+      { id: 'seccion-1', number: 1, label: 'Primera' },
+    ]);
+  });
+
+  it('should ignore third-level headings (###)', () => {
+    const content = '## 1. Sección\n\n### 1.1 Subsección\n\nTexto.';
+
+    expect(extractArticleHeadings(content)).toEqual([
+      { id: 'seccion-1', number: 1, label: 'Sección' },
+    ]);
+  });
+
+  it('should ignore second-level headings without a leading number', () => {
+    const content = '## Sin número\n\nTexto.\n\n## 1. Con número\n\nMás texto.';
+
+    expect(extractArticleHeadings(content)).toEqual([
+      { id: 'seccion-1', number: 1, label: 'Con número' },
+    ]);
+  });
+
+  it('should strip inline markdown from the label (plain-text TOC)', () => {
+    const content = '## 2. Los **78** Arcanos y el _camino_\n\nTexto.';
+
+    expect(extractArticleHeadings(content)).toEqual([
+      { id: 'seccion-2', number: 2, label: 'Los 78 Arcanos y el camino' },
+    ]);
+  });
+
+  it('should convert inline links to their visible text in the label', () => {
+    const content = '## 3. Ver la [Cruz Celta](/tiradas) en detalle\n\nTexto.';
+
+    expect(extractArticleHeadings(content)).toEqual([
+      { id: 'seccion-3', number: 3, label: 'Ver la Cruz Celta en detalle' },
+    ]);
+  });
+
+  it('should return an empty array for content without numbered sections', () => {
+    expect(extractArticleHeadings('# Solo título\n\nUn párrafo.')).toEqual([]);
+    expect(extractArticleHeadings('')).toEqual([]);
   });
 });

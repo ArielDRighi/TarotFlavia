@@ -45,6 +45,18 @@ describe('CardThumbnail', () => {
 
       expect(screen.getByTestId('card-thumbnail-the-fool')).toBeInTheDocument();
     });
+
+    it('should use the href override when provided', () => {
+      render(
+        <CardThumbnail
+          card={createTestCard({ slug: 'the-fool' })}
+          href="/enciclopedia/tarot/the-fool"
+        />
+      );
+
+      const link = screen.getByRole('link');
+      expect(link).toHaveAttribute('href', '/enciclopedia/tarot/the-fool');
+    });
   });
 
   describe('Major Arcana badge', () => {
