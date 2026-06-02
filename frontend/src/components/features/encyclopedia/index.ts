@@ -109,3 +109,5 @@ export { ArticleCallout } from './ArticleCallout';
 export type { ArticleCalloutProps } from './ArticleCallout';
 export { MarkdownArticle } from './MarkdownArticle';
 export type { MarkdownArticleProps } from './MarkdownArticle';
+export { ArticleToc } from './ArticleToc';
+export type { ArticleTocProps } from './ArticleToc';

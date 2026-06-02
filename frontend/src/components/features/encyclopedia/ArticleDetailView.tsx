@@ -1,8 +1,10 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 
 import { ArticleHero } from './ArticleHero';
+import { ArticleToc } from './ArticleToc';
 import { MarkdownArticle } from './MarkdownArticle';
 import { RelatedTarotCards } from './RelatedTarotCards';
 import { ROUTES } from '@/lib/constants/routes';
@@ -10,7 +12,11 @@ import { getArticleEditorial } from '@/lib/data/encyclopedia-editorial.data';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
-import { getArticleReadingMeta, stripLeadingMarkdownHeading } from '@/lib/utils/text';
+import {
+  extractArticleHeadings,
+  getArticleReadingMeta,
+  stripLeadingMarkdownHeading,
+} from '@/lib/utils/text';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -128,9 +134,63 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
   const isGuide = isGuideCategory(article.category);
   const editorial = getArticleEditorial(article.slug);
   const readingMeta = getArticleReadingMeta(article.content);
+  // Memoized so the array identity is stable across re-renders: ArticleToc keys
+  // its IntersectionObserver effect on `headings`, so a fresh array each render
+  // would tear down and rebuild the observer needlessly.
+  const headings = useMemo(
+    () => (isGuide ? extractArticleHeadings(article.content) : []),
+    [isGuide, article.content]
+  );
+  const hasToc = headings.length > 0;
   const hasRelatedTarotCards =
     article.relatedTarotCards !== null && article.relatedTarotCards.length > 0;
   const hasRelatedArticles = article.relatedArticles.length > 0;
+
+  // Reading column body — shared between the guide layout (centered column with a
+  // lateral TOC) and the simple layout (signs, planets, …) so it stays DRY.
+  const articleBody = (
+    <>
+      {/* Contenido Markdown — se elimina el título `#` inicial para no duplicar
+          el <h1> de la página (ya renderizado en el hero/cabecera). En guías se
+          activa el modo editorial (drop-cap, badges numerados, ✦, imágenes y
+          callouts por sección modelados como datos). */}
+      <MarkdownArticle
+        content={stripLeadingMarkdownHeading(article.content)}
+        editorial={isGuide}
+        sections={editorial?.sections}
+        className={cn(isGuide && 'max-w-none')}
+      />
+
+      {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
+          completa (título incluido) o nada si ningún ID resuelve. */}
+      {hasRelatedTarotCards && <RelatedTarotCards cardIds={article.relatedTarotCards!} />}
+
+      {/* Artículos relacionados */}
+      {hasRelatedArticles && (
+        <section data-testid="related-articles" className="space-y-4">
+          <h2 className="text-foreground text-xl font-bold">Artículos Relacionados</h2>
+          <div className="flex flex-col gap-3">
+            {article.relatedArticles.map((relatedArticle) => (
+              <RelatedArticleItem key={relatedArticle.id} article={relatedArticle} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* CTA al módulo correspondiente (guías con herramienta asociada) */}
+      {cta && (
+        <div className="border-t pt-6">
+          <Link
+            data-testid="article-cta"
+            href={cta.href}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center rounded-lg px-6 py-3 font-semibold transition-colors"
+          >
+            {cta.label}
+          </Link>
+        </div>
+      )}
+    </>
+  );
 
   return (
     <div data-testid="article-detail-view" className={cn('space-y-8', className)}>
@@ -182,49 +242,24 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
         </>
       )}
 
-      {/* Columna de lectura. En guías se centra como columna editorial (el hero
-          va a ancho completo arriba); el resto de artículos conserva su flujo. */}
-      <div className={cn('space-y-8', isGuide && 'mx-auto w-full max-w-[68ch]')}>
-        {/* Contenido Markdown — se elimina el título `#` inicial para no duplicar
-            el <h1> de la página (ya renderizado en el hero/cabecera). En guías se
-            activa el modo editorial (drop-cap, badges numerados, ✦, imágenes y
-            callouts por sección modelados como datos). */}
-        <MarkdownArticle
-          content={stripLeadingMarkdownHeading(article.content)}
-          editorial={isGuide}
-          sections={editorial?.sections}
-          className={cn(isGuide && 'max-w-none')}
-        />
-
-        {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
-            completa (título incluido) o nada si ningún ID resuelve. */}
-        {hasRelatedTarotCards && <RelatedTarotCards cardIds={article.relatedTarotCards!} />}
-
-        {/* Artículos relacionados */}
-        {hasRelatedArticles && (
-          <section data-testid="related-articles" className="space-y-4">
-            <h2 className="text-foreground text-xl font-bold">Artículos Relacionados</h2>
-            <div className="flex flex-col gap-3">
-              {article.relatedArticles.map((relatedArticle) => (
-                <RelatedArticleItem key={relatedArticle.id} article={relatedArticle} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* CTA al módulo correspondiente (guías con herramienta asociada) */}
-        {cta && (
-          <div className="border-t pt-6">
-            <Link
-              data-testid="article-cta"
-              href={cta.href}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center rounded-lg px-6 py-3 font-semibold transition-colors"
-            >
-              {cta.label}
-            </Link>
+      {/* Columna de lectura. En guías con secciones se acompaña de un índice (TOC)
+          lateral en desktop / colapsable en mobile; el hero va a ancho completo
+          arriba. El resto de artículos conserva su flujo simple. */}
+      {isGuide ? (
+        <div className="lg:flex lg:items-start lg:justify-center lg:gap-10">
+          {hasToc && (
+            <ArticleToc
+              headings={headings}
+              className="mb-8 lg:order-2 lg:mb-0 lg:w-60 lg:shrink-0"
+            />
+          )}
+          <div className="mx-auto w-full max-w-[68ch] space-y-8 lg:order-1 lg:mx-0">
+            {articleBody}
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="space-y-8">{articleBody}</div>
+      )}
     </div>
   );
 }
