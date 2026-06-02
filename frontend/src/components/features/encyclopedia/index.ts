@@ -103,5 +103,9 @@ export type { EncyclopediaHomeProps } from './EncyclopediaHome';
 // Article detail components
 export { ArticleDetailView } from './ArticleDetailView';
 export type { ArticleDetailViewProps } from './ArticleDetailView';
+export { ArticleHero } from './ArticleHero';
+export type { ArticleHeroProps } from './ArticleHero';
+export { ArticleCallout } from './ArticleCallout';
+export type { ArticleCalloutProps } from './ArticleCallout';
 export { MarkdownArticle } from './MarkdownArticle';
 export type { MarkdownArticleProps } from './MarkdownArticle';

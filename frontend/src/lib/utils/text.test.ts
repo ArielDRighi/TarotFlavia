@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getInitials, stripLeadingMarkdownHeading } from './text';
+import { getArticleReadingMeta, getInitials, stripLeadingMarkdownHeading } from './text';
 
 describe('getInitials', () => {
   it('should return two-letter initials from two-word name', () => {
@@ -69,5 +69,36 @@ describe('stripLeadingMarkdownHeading', () => {
 
   it('should handle an empty string', () => {
     expect(stripLeadingMarkdownHeading('')).toBe('');
+  });
+});
+
+describe('getArticleReadingMeta', () => {
+  it('should count second-level headings as sections', () => {
+    const content = '# Título\n\nIntro.\n\n## 1. Uno\n\nTexto.\n\n## 2. Dos\n\nTexto.';
+    expect(getArticleReadingMeta(content).sectionCount).toBe(2);
+  });
+
+  it('should not count third-level headings (###) as sections', () => {
+    const content = '## 1. Uno\n\n### Subsección\n\nTexto.\n\n## 2. Dos\n\nTexto.';
+    expect(getArticleReadingMeta(content).sectionCount).toBe(2);
+  });
+
+  it('should not count the leading top-level heading (#) as a section', () => {
+    const content = '# Guía del Tarot\n\nIntro sin secciones.';
+    expect(getArticleReadingMeta(content).sectionCount).toBe(0);
+  });
+
+  it('should estimate reading time at ~200 words per minute (rounded up)', () => {
+    // 250 palabras → 250 / 200 = 1.25 → 2 minutos
+    const content = `# Título\n\n${Array.from({ length: 250 }, () => 'palabra').join(' ')}`;
+    expect(getArticleReadingMeta(content).readingTimeMinutes).toBe(2);
+  });
+
+  it('should never return less than 1 minute for non-empty content', () => {
+    expect(getArticleReadingMeta('## Sección\n\nTexto breve.').readingTimeMinutes).toBe(1);
+  });
+
+  it('should return zeroed meta for empty content', () => {
+    expect(getArticleReadingMeta('')).toEqual({ readingTimeMinutes: 0, sectionCount: 0 });
   });
 });

@@ -1,11 +1,19 @@
 'use client';
 
+// 1. React & Next.js
+import { useMemo } from 'react';
+import Image from 'next/image';
+
 // 3. Third-party
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+// 5. Components
+import { ArticleCallout } from './ArticleCallout';
+
 // 6. Utils & types
 import { cn } from '@/lib/utils';
+import type { EditorialSection } from '@/lib/data/encyclopedia-editorial.data';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -14,6 +22,18 @@ export interface MarkdownArticleProps {
   content: string;
   /** Additional CSS classes for the wrapper */
   className?: string;
+  /**
+   * Enable editorial mode: drop-cap on the first paragraph, numbered gold badges
+   * on `## N. …` headings, decorative `✦` separators, and per-section assets.
+   * Off by default so other article types render with plain typography.
+   */
+  editorial?: boolean;
+  /**
+   * Per-section editorial resources (image and/or callout), keyed by the H2
+   * section number. Only used when `editorial` is enabled; the matching section's
+   * assets are injected right after its heading.
+   */
+  sections?: Record<number, EditorialSection>;
 }
 
 // ─── Editorial component map ────────────────────────────────────────────────────
@@ -100,6 +120,101 @@ const MARKDOWN_COMPONENTS: Components = {
   ),
 };
 
+// ─── Editorial mode ──────────────────────────────────────────────────────────
+
+/**
+ * Splits a `## N. Título` heading into its section number and label. Returns a
+ * null number for headings without a leading `N.` (rendered without a badge).
+ */
+function splitHeadingNumber(children: React.ReactNode): {
+  number: number | null;
+  label: React.ReactNode;
+} {
+  if (typeof children === 'string') {
+    const match = children.match(/^(\d+)\.\s+(.*)$/);
+    if (match) {
+      return { number: Number(match[1]), label: match[2] };
+    }
+  }
+  return { number: null, label: children };
+}
+
+/**
+ * Builds the editorial component map: extends the base typography with a drop-cap
+ * first paragraph, numbered gold H2 badges, `✦` thematic separators, and the
+ * injection of per-section images/callouts right after their heading.
+ *
+ * A fresh closure (with its own `firstParagraph` flag) is created per render so
+ * the drop-cap reliably lands on the first paragraph of each render pass.
+ */
+function buildEditorialComponents(sections?: Record<number, EditorialSection>): Components {
+  let firstParagraph = true;
+
+  return {
+    ...MARKDOWN_COMPONENTS,
+    h2: ({ children }) => {
+      const { number, label } = splitHeadingNumber(children);
+      const section = number !== null ? sections?.[number] : undefined;
+
+      return (
+        <>
+          <h2 className="text-foreground border-secondary/30 mt-12 mb-5 flex items-center gap-3 border-b pb-2 font-serif text-3xl leading-snug font-bold first:mt-0">
+            {number !== null && (
+              <span
+                data-testid="section-number"
+                aria-hidden="true"
+                className="bg-secondary text-secondary-foreground inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-serif text-lg font-bold"
+              >
+                {number}
+              </span>
+            )}
+            <span>{label}</span>
+          </h2>
+          {section?.image && (
+            <figure data-testid="section-image" className="my-8">
+              <Image
+                src={section.image.src}
+                alt={section.image.alt}
+                width={section.image.width ?? 1000}
+                height={section.image.height ?? 563}
+                sizes="(max-width: 768px) 100vw, 720px"
+                className="h-auto w-full rounded-xl shadow-lg"
+              />
+            </figure>
+          )}
+          {section?.callout && (
+            <ArticleCallout variant={section.callout.variant}>
+              {section.callout.text}
+            </ArticleCallout>
+          )}
+        </>
+      );
+    },
+    p: ({ children }) => {
+      if (firstParagraph) {
+        firstParagraph = false;
+        return (
+          <p className="text-foreground first-letter:text-secondary mb-6 text-lg leading-relaxed first-letter:float-left first-letter:mt-1 first-letter:mr-3 first-letter:font-serif first-letter:text-6xl first-letter:leading-[0.8] first-letter:font-bold">
+            {children}
+          </p>
+        );
+      }
+      return <p className="text-foreground mb-6 text-lg leading-relaxed">{children}</p>;
+    },
+    hr: () => (
+      <div
+        role="separator"
+        data-testid="editorial-separator"
+        className="my-10 flex items-center justify-center"
+      >
+        <span aria-hidden="true" className="text-secondary text-xl tracking-[0.5em]">
+          ✦
+        </span>
+      </div>
+    ),
+  };
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 /**
@@ -114,10 +229,15 @@ const MARKDOWN_COMPONENTS: Components = {
  * <MarkdownArticle content={article.content} />
  * ```
  */
-export function MarkdownArticle({ content, className }: MarkdownArticleProps) {
+export function MarkdownArticle({ content, className, editorial, sections }: MarkdownArticleProps) {
+  const components = useMemo(
+    () => (editorial ? buildEditorialComponents(sections) : MARKDOWN_COMPONENTS),
+    [editorial, sections]
+  );
+
   return (
     <div data-testid="markdown-article" className={cn('max-w-[68ch] font-sans', className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>
     </div>

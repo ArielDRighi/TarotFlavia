@@ -342,7 +342,7 @@ Eliminar la dependencia de las clases `prose` (inertes en Tailwind v4) y dar jer
 **Estimación:** 3 puntos
 **Dependencias:** T-ENC-001 (render base), T-ENC-007 (assets de imagen)
 **Cubre Hallazgo:** ENC-003
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-003-article-hero-sistema-editorial`)
 
 #### 📋 Descripción
 
@@ -350,12 +350,19 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `ArticleHero` (banda `bg-hero → bg-hero-mid`, imagen de cabecera con overlay, breadcrumb, categoría, título Cormorant, lead, meta).
-- [ ] Soportar imágenes por sección (modeladas como datos, no hardcode).
-- [ ] Recursos editoriales: callouts ("Clave", "Sabías que…"), separadores dorados `✦`, blockquote dorado, drop-cap en el primer párrafo.
-- [ ] Integrar en `ArticleDetailView` / página de detalle de guía.
-- [ ] Tests (hero, callouts, render de imágenes con alt).
-- [ ] Coverage ≥ 80%.
+- [x] Crear `ArticleHero` (banda gradiente noche `bg-hero → bg-hero-mid`, imagen de cabecera opcional con overlay + estrellas/luna decorativas, breadcrumb, chip de categoría dorado, título Cormorant, lead, meta de tiempo de lectura + nº de secciones). **Fallback** a banda de gradiente cuando falta la imagen.
+- [x] Soportar imágenes por sección modeladas como **datos** (`encyclopedia-editorial.data.ts`, mapeadas por nº de sección H2), no hardcode en el render.
+- [x] Recursos editoriales: callouts ("Clave", "Sabías que…" → `ArticleCallout`), separadores dorados `✦`, blockquote dorado (ya en `MarkdownArticle`), drop-cap en el primer párrafo y badge dorado numerado en los H2.
+- [x] Integrar en `ArticleDetailView` (gate a categorías de guía `guide_*`); signos/planetas conservan su cabecera simple sin regresión.
+- [x] Tests (hero, callouts, badges, drop-cap, ✦, inyección de imagen/callout por sección con alt).
+- [x] Coverage 100% en `ArticleHero`, `ArticleCallout`, `ArticleDetailView` y datos editoriales; `MarkdownArticle` 100% líneas / 95% ramas (≥ 80% requerido).
+
+#### 📝 Notas de implementación
+
+- Imágenes generadas con los prompts de `FEEDBACK_ENCICLOPEDIA_DISENO.md` §4.1/§5/§6, optimizadas a **WebP** (ImageMagick, calidad 80, sin metadata) y guardadas en `frontend/public/images/enciclopedia/` (hero 1792px, secciones 1000px, lateral 4:5 640px, hub 800px). Set total ~700 KB.
+- `MarkdownArticle` gana un modo editorial **opt-in** (`editorial` + `sections`): por defecto conserva exactamente la tipografía base (cero regresión para signos/planetas).
+- Nuevo util `getArticleReadingMeta` (en `lib/utils/text.ts`) deriva tiempo de lectura (~200 wpm) y nº de secciones (conteo de `##`).
+- Los assets del Hub (`hub-*.webp`) ya quedan generados para habilitar T-ENC-005.
 
 #### 🎯 Criterios de Aceptación
 

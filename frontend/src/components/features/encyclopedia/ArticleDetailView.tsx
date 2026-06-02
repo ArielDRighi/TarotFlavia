@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 
+import { ArticleHero } from './ArticleHero';
 import { MarkdownArticle } from './MarkdownArticle';
 import { RelatedTarotCards } from './RelatedTarotCards';
 import { ROUTES } from '@/lib/constants/routes';
+import { getArticleEditorial } from '@/lib/data/encyclopedia-editorial.data';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
-import { stripLeadingMarkdownHeading } from '@/lib/utils/text';
+import { getArticleReadingMeta, stripLeadingMarkdownHeading } from '@/lib/utils/text';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -47,6 +49,15 @@ const GUIDE_CTA_MAP: Partial<Record<ArticleCategory, GuideCta>> = {
     href: ROUTES.HOROSCOPO_CHINO,
   },
 };
+
+/**
+ * Whether a category is one of the activity guides (`guide_*`). Drives the
+ * editorial template (hero + editorial Markdown), independent of whether the
+ * guide has a module CTA configured above.
+ */
+function isGuideCategory(category: ArticleCategory): boolean {
+  return category.startsWith('guide_');
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -114,49 +125,72 @@ function RelatedArticleItem({ article }: RelatedArticleItemProps) {
 export function ArticleDetailView({ article, className }: ArticleDetailViewProps) {
   const categoryLabel = ARTICLE_CATEGORY_LABELS[article.category];
   const cta = GUIDE_CTA_MAP[article.category];
-  const isGuide = cta !== undefined;
+  const isGuide = isGuideCategory(article.category);
+  const editorial = getArticleEditorial(article.slug);
+  const readingMeta = getArticleReadingMeta(article.content);
   const hasRelatedTarotCards =
     article.relatedTarotCards !== null && article.relatedTarotCards.length > 0;
   const hasRelatedArticles = article.relatedArticles.length > 0;
 
   return (
     <div data-testid="article-detail-view" className={cn('space-y-8', className)}>
-      {/* Breadcrumb de navegación */}
-      <nav aria-label="Navegación" className="flex items-center gap-2 text-sm">
-        <Link
-          data-testid="breadcrumb-enciclopedia"
-          href={ROUTES.ENCICLOPEDIA}
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Enciclopedia
-        </Link>
-        <span className="text-muted-foreground" aria-hidden="true">
-          /
-        </span>
-        <span
-          data-testid="breadcrumb-current"
-          className="text-foreground font-medium"
-          aria-current="page"
-        >
-          {article.nameEs}
-        </span>
-      </nav>
+      {isGuide ? (
+        /* Guías: plantilla editorial con hero inmersivo (imagen opcional) */
+        <ArticleHero
+          category={categoryLabel}
+          title={article.nameEs}
+          lead={article.snippet}
+          image={editorial?.hero}
+          readingTimeMinutes={readingMeta.readingTimeMinutes}
+          sectionCount={readingMeta.sectionCount}
+        />
+      ) : (
+        /* Resto de artículos (signos, planetas, etc.): cabecera simple existente */
+        <>
+          {/* Breadcrumb de navegación */}
+          <nav aria-label="Navegación" className="flex items-center gap-2 text-sm">
+            <Link
+              data-testid="breadcrumb-enciclopedia"
+              href={ROUTES.ENCICLOPEDIA}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Enciclopedia
+            </Link>
+            <span className="text-muted-foreground" aria-hidden="true">
+              /
+            </span>
+            <span
+              data-testid="breadcrumb-current"
+              className="text-foreground font-medium"
+              aria-current="page"
+            >
+              {article.nameEs}
+            </span>
+          </nav>
 
-      {/* Header: nombre del artículo + badge de categoría */}
-      <div className="space-y-3">
-        <h1 className="font-serif text-4xl font-bold">{article.nameEs}</h1>
-        <span
-          data-testid="article-category-badge"
-          className="bg-secondary text-secondary-foreground inline-block rounded-full px-3 py-1 text-sm font-medium"
-        >
-          {categoryLabel}
-        </span>
-        {article.snippet && <p className="text-muted-foreground text-lg">{article.snippet}</p>}
-      </div>
+          {/* Header: nombre del artículo + badge de categoría */}
+          <div className="space-y-3">
+            <h1 className="font-serif text-4xl font-bold">{article.nameEs}</h1>
+            <span
+              data-testid="article-category-badge"
+              className="bg-secondary text-secondary-foreground inline-block rounded-full px-3 py-1 text-sm font-medium"
+            >
+              {categoryLabel}
+            </span>
+            {article.snippet && <p className="text-muted-foreground text-lg">{article.snippet}</p>}
+          </div>
+        </>
+      )}
 
       {/* Contenido Markdown — se elimina el título `#` inicial para no duplicar
-          el <h1> de la página (ya renderizado arriba con article.nameEs). */}
-      <MarkdownArticle content={stripLeadingMarkdownHeading(article.content)} />
+          el <h1> de la página (ya renderizado en el hero/cabecera). En guías se
+          activa el modo editorial (drop-cap, badges numerados, ✦, imágenes y
+          callouts por sección modelados como datos). */}
+      <MarkdownArticle
+        content={stripLeadingMarkdownHeading(article.content)}
+        editorial={isGuide}
+        sections={editorial?.sections}
+      />
 
       {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
           completa (título incluido) o nada si ningún ID resuelve. */}
@@ -174,8 +208,8 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
         </section>
       )}
 
-      {/* CTA al módulo correspondiente (solo guías) */}
-      {isGuide && cta && (
+      {/* CTA al módulo correspondiente (guías con herramienta asociada) */}
+      {cta && (
         <div className="border-t pt-6">
           <Link
             data-testid="article-cta"
