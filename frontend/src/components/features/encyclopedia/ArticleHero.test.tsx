@@ -6,7 +6,6 @@ import { ArticleHero } from './ArticleHero';
 // Mock next/image (render a plain img so we can assert src/alt)
 vi.mock('next/image', () => ({
   default: ({ src, alt }: { src: string; alt: string }) => (
-     
     <img src={src} alt={alt} data-testid="next-image" />
   ),
 }));

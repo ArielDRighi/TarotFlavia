@@ -11,7 +11,6 @@ import { MarkdownArticle } from './MarkdownArticle';
 // can assert on (src/alt) without Next's runtime in jsdom.
 vi.mock('next/image', () => ({
   default: ({ src, alt }: { src: string; alt: string }) => (
-     
     <img src={src} alt={alt} data-testid="next-image" />
   ),
 }));

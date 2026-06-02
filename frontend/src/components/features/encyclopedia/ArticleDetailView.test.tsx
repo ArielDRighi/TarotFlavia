@@ -20,7 +20,6 @@ vi.mock('remark-gfm', () => ({
 // Mock next/image (the ArticleHero renders it for guides with a hero asset)
 vi.mock('next/image', () => ({
   default: ({ src, alt }: { src: string; alt: string }) => (
-     
     <img src={src} alt={alt} data-testid="next-image" />
   ),
 }));
@@ -193,7 +192,13 @@ describe('ArticleDetailView', () => {
           category: ArticleCategory.ASTROLOGICAL_HOUSE,
         },
         { ...base, id: 13, slug: 'fuego', nameEs: 'Fuego', category: ArticleCategory.ELEMENT },
-        { ...base, id: 14, slug: 'cardinal', nameEs: 'Cardinal', category: ArticleCategory.MODALITY },
+        {
+          ...base,
+          id: 14,
+          slug: 'cardinal',
+          nameEs: 'Cardinal',
+          category: ArticleCategory.MODALITY,
+        },
         {
           ...base,
           id: 15,
@@ -203,7 +208,9 @@ describe('ArticleDetailView', () => {
         },
       ];
       render(
-        <ArticleDetailView article={createTestArticle({ nameEs: 'Artículo Base', relatedArticles })} />
+        <ArticleDetailView
+          article={createTestArticle({ nameEs: 'Artículo Base', relatedArticles })}
+        />
       );
 
       const hrefOf = (name: string) => screen.getByText(name).closest('a')?.getAttribute('href');
