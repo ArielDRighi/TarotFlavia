@@ -97,6 +97,14 @@ describe('ArticleDetailView', () => {
       expect(screen.getByTestId('article-category-badge')).toBeInTheDocument();
       expect(screen.getByTestId('article-category-badge')).toHaveTextContent('Signos Zodiacales');
     });
+
+    it('should use dark night text on the gold category badge for AA contrast', () => {
+      render(<ArticleDetailView article={createTestArticle()} />);
+
+      const badge = screen.getByTestId('article-category-badge');
+      expect(badge).toHaveClass('text-[#1a0a2e]');
+      expect(badge).not.toHaveClass('text-secondary-foreground');
+    });
   });
 
   describe('Markdown content', () => {

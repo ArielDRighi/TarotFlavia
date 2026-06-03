@@ -576,15 +576,38 @@ Producir el set de imágenes de la enciclopedia (hero del hub, cabeceras de guí
 **Estimación:** 1.5 puntos
 **Dependencias:** T-ENC-003, T-ENC-005
 **Cubre Hallazgo:** transversal (ENC-003/004)
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-009-accesibilidad-enciclopedia`)
 
 #### ✅ Tareas específicas
 
-- [ ] `alt` descriptivos en todas las imágenes nuevas.
-- [ ] Contraste AA del texto sobre bandas oscuras (`bg-hero`).
-- [ ] Foco visible y navegación por teclado en tarjetas y TOC.
-- [ ] Verificación con herramienta de accesibilidad.
-- [ ] Coverage ≥ 80% donde aplique.
+- [x] `alt` descriptivos en todas las imágenes nuevas.
+- [x] Contraste AA del texto sobre bandas oscuras (`bg-hero`).
+- [x] Foco visible y navegación por teclado en tarjetas y TOC.
+- [x] Verificación con herramienta de accesibilidad.
+- [x] Coverage ≥ 80% donde aplique.
+
+#### 📝 Notas de implementación
+
+- **Contraste de chips dorados (AA):** los chips de categoría usaban
+  `text-secondary-foreground` (= `#ffffff`) sobre `bg-secondary` (`#d69e2e`), una
+  combinación blanco-sobre-dorado de ≈ **2.4:1** que **falla** WCAG AA. Se cambió
+  a texto noche profunda (`text-[#1a0a2e]`, ≈ **7:1**, cumple AA) en `ArticleHero`,
+  `GuiaCard` (`GuiasContent`) y la cabecera simple de `ArticleDetailView`. Cambio
+  acotado a la enciclopedia (no se tocó el token global `--secondary-foreground`
+  para no afectar botones del resto de la app).
+- **Texto sobre bandas oscuras:** el cuerpo (`CREAM` `#f9f7f2` y `CREAM_MUTED`
+  `rgba(249,247,242,0.72)`) sobre el gradiente noche da ≈ **7.5:1** → ya cumplía
+  AA; se verificó y se conserva sin cambios.
+- **Foco visible / teclado:** se añadió anillo `focus-visible` a elementos que solo
+  tenían el outline por defecto: enlaces del TOC y el `<summary>` colapsable
+  (`ArticleToc`), enlace de tarjeta de carta (`CardThumbnail`) y breadcrumb del
+  hero (`ArticleHero`, con `ring-offset` sobre la banda oscura). Las tarjetas del
+  Hub y de Guías ya traían foco visible de T-ENC-005/006.
+- **`alt`:** auditadas todas las imágenes de la enciclopedia (Hub, Guías,
+  `ArticleHero`, `CardThumbnail`); todas con `alt` descriptivo en español. Se
+  añadieron tests que fijan el contrato de `alt` y de foco visible.
+- **Verificación:** ratios de contraste calculados con la fórmula de luminancia
+  relativa WCAG 2.1; tests unitarios bloquean regresiones de contraste/foco.
 
 #### 🎯 Criterios de Aceptación
 
@@ -594,7 +617,11 @@ Producir el set de imágenes de la enciclopedia (hero del hub, cabeceras de guí
 
 #### 📁 Archivos involucrados
 
-- componentes de enciclopedia afectados
+- `frontend/src/components/features/encyclopedia/ArticleHero.tsx` (+ test)
+- `frontend/src/components/features/encyclopedia/ArticleToc.tsx` (+ test)
+- `frontend/src/components/features/encyclopedia/CardThumbnail.tsx` (+ test)
+- `frontend/src/components/features/encyclopedia/ArticleDetailView.tsx` (+ test)
+- `frontend/src/components/features/encyclopedia/GuiasContent.tsx` (+ test de `app/enciclopedia/guias/page.test.tsx`)
 
 ---
 

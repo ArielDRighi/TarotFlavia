@@ -44,7 +44,10 @@ export function CardThumbnail({ card, className, href }: CardThumbnailProps) {
   const badgeLabel = isMajor ? 'Arcanos Mayores' : card.suit ? SUIT_INFO[card.suit].nameEs : null;
 
   return (
-    <Link href={href ?? `/enciclopedia/${card.slug}`} className="group block">
+    <Link
+      href={href ?? `/enciclopedia/${card.slug}`}
+      className="group focus-visible:ring-secondary focus-visible:ring-offset-background block rounded-lg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+    >
       <div
         data-testid={`card-thumbnail-${card.slug}`}
         className={cn('overflow-hidden rounded-lg', className)}

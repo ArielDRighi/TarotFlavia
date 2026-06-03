@@ -243,7 +243,7 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
             <h1 className="font-serif text-4xl font-bold">{article.nameEs}</h1>
             <span
               data-testid="article-category-badge"
-              className="bg-secondary text-secondary-foreground inline-block rounded-full px-3 py-1 text-sm font-medium"
+              className="bg-secondary inline-block rounded-full px-3 py-1 text-sm font-medium text-[#1a0a2e]"
             >
               {categoryLabel}
             </span>
