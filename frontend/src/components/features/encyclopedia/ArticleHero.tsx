@@ -147,7 +147,7 @@ export function ArticleHero({
           <Link
             data-testid="breadcrumb-enciclopedia"
             href={ROUTES.ENCICLOPEDIA}
-            className="transition-colors hover:underline"
+            className="focus-visible:ring-secondary focus-visible:ring-offset-bg-hero rounded-sm transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             style={{ color: CREAM_MUTED }}
           >
             Enciclopedia
@@ -163,7 +163,7 @@ export function ArticleHero({
         {/* Chip de categoría */}
         <span
           data-testid="article-category-badge"
-          className="bg-secondary text-secondary-foreground mb-4 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-[0.08em] uppercase"
+          className="bg-secondary text-bg-hero mb-4 inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-[0.08em] uppercase"
         >
           {category}
         </span>

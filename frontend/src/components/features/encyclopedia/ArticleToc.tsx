@@ -53,7 +53,7 @@ function TocLinkList({ headings, activeId, onSelect }: TocLinkListProps) {
               aria-current={isActive ? 'location' : undefined}
               onClick={() => onSelect(heading.id)}
               className={cn(
-                'flex items-baseline gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
+                'focus-visible:ring-secondary flex items-baseline gap-2 rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 isActive
                   ? 'bg-secondary/10 text-foreground font-semibold'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
@@ -162,7 +162,7 @@ export function ArticleToc({ headings, className }: ArticleTocProps) {
     >
       {/* Mobile: índice colapsable encima del contenido */}
       <details data-testid="article-toc-mobile" className="bg-card rounded-xl border p-4 lg:hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+        <summary className="focus-visible:ring-secondary flex cursor-pointer list-none items-center justify-between gap-2 rounded-md focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
           {title}
         </summary>
         <div className="mt-3">

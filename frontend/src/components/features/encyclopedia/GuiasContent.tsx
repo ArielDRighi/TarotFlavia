@@ -142,8 +142,11 @@ function GuiaCard({ article }: GuiaCardProps) {
           aria-hidden="true"
         />
 
-        {/* Chip de categoría dorado */}
-        <span className="bg-secondary text-secondary-foreground absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-semibold tracking-[0.08em] uppercase">
+        {/* Chip de categoría dorado — texto noche profunda para contraste AA */}
+        <span
+          data-testid="guia-category-chip"
+          className="bg-secondary text-bg-hero absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-semibold tracking-[0.08em] uppercase"
+        >
           {theme.chip}
         </span>
       </div>

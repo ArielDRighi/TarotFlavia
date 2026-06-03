@@ -148,4 +148,13 @@ describe('CardThumbnail', () => {
       expect(thumbnail).toHaveClass('custom-class');
     });
   });
+
+  describe('Accesibilidad', () => {
+    it('should give the card link a visible keyboard focus ring', () => {
+      const { container } = render(<CardThumbnail card={createTestCard()} />);
+
+      const link = container.querySelector('a');
+      expect(link?.className).toMatch(/focus-visible:ring/);
+    });
+  });
 });

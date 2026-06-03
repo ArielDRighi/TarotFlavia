@@ -232,4 +232,38 @@ describe('ArticleToc', () => {
       );
     });
   });
+
+  describe('Accesibilidad (foco visible / teclado)', () => {
+    it('should give every TOC link a visible keyboard focus ring', () => {
+      renderWithAnchors();
+
+      const links = desktopToc().getAllByRole('link');
+      expect(links).toHaveLength(3);
+      links.forEach((link) => {
+        expect(link.className).toMatch(/focus-visible:ring/);
+      });
+    });
+
+    it('should give the mobile collapsible summary a visible focus ring', () => {
+      renderWithAnchors();
+
+      const mobile = screen.getByTestId('article-toc-mobile');
+      const summary = mobile.querySelector('summary');
+      expect(summary).not.toBeNull();
+      expect(summary?.className).toMatch(/focus-visible:ring/);
+    });
+
+    it('should keep TOC links reachable by keyboard (native anchors)', async () => {
+      const user = userEvent.setup();
+      renderWithAnchors();
+
+      const secondLink = desktopToc().getByRole('link', { name: /Los Arcanos Mayores/ });
+      secondLink.focus();
+      expect(secondLink).toHaveFocus();
+
+      // Activar con teclado (Enter) marca esa sección como activa.
+      await user.keyboard('{Enter}');
+      expect(secondLink).toHaveAttribute('aria-current', 'location');
+    });
+  });
 });

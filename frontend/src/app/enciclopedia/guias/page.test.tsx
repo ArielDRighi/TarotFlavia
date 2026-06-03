@@ -183,6 +183,27 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
     expect(screen.getByText(/leer guía/i)).toBeInTheDocument();
   });
 
+  it('debe usar texto oscuro sobre el chip dorado para contraste AA (T-ENC-009)', () => {
+    const tarotGuide = buildGuideArticle(
+      10,
+      'guia-tarot',
+      'Guía del Tarot',
+      ArticleCategory.GUIDE_TAROT
+    );
+    mockUseArticlesByCategory.mockImplementation((cat: ArticleCategory) => {
+      if (cat === ArticleCategory.GUIDE_TAROT) return { data: [tarotGuide], isLoading: false };
+      return { data: [], isLoading: false };
+    });
+
+    renderWithProviders(<GuiasPage />);
+
+    // Cada guía renderiza su propio chip; el test fija un único guía mockeado,
+    // pero usamos getAllByTestId para no romper si se añaden más guías.
+    const [chip] = screen.getAllByTestId('guia-category-chip');
+    expect(chip).toHaveClass('text-bg-hero');
+    expect(chip).not.toHaveClass('text-secondary-foreground');
+  });
+
   it('debe preferir el imageUrl del backend cuando está disponible', () => {
     const numerologyGuide: ArticleSummary = {
       ...buildGuideArticle(

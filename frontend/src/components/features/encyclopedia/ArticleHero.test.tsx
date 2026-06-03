@@ -131,4 +131,24 @@ describe('ArticleHero', () => {
 
     expect(screen.getByTestId('article-hero')).toHaveClass('extra-test-class');
   });
+
+  // Accesibilidad (T-ENC-009)
+  describe('Accesibilidad', () => {
+    it('should use dark night text on the gold category chip for AA contrast', () => {
+      render(<ArticleHero category="Guía del Tarot" title="Tarot" />);
+
+      const chip = screen.getByTestId('article-category-badge');
+      // Texto blanco sobre dorado (#d69e2e) ≈ 2.4:1 (falla AA); el texto noche
+      // profunda (token --color-bg-hero = #1a0a2e) ≈ 7:1 (cumple AA).
+      expect(chip).toHaveClass('text-bg-hero');
+      expect(chip).not.toHaveClass('text-secondary-foreground');
+    });
+
+    it('should give the breadcrumb link a visible keyboard focus ring', () => {
+      render(<ArticleHero category="Guía del Tarot" title="Tarot" />);
+
+      const link = screen.getByTestId('breadcrumb-enciclopedia');
+      expect(link.className).toMatch(/focus-visible:ring/);
+    });
+  });
 });
