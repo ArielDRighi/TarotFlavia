@@ -4,6 +4,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+// 5. Components (ui → features)
+import { Reveal } from './Reveal';
 // 6. Utils & types
 import { useArticlesByCategory } from '@/hooks/api/useEncyclopediaArticles';
 import { ROUTES } from '@/lib/constants/routes';
@@ -50,8 +52,9 @@ const GUIDE_CATEGORIES: ArticleCategory[] = [
 
 /**
  * Per-category editorial theme: short gold chip label and an optional themed
- * thumbnail. Only the Tarot guide ships an asset today (T-ENC-007 pending); the
- * rest gracefully fall back to a brand gradient until their image lands.
+ * thumbnail. Only the Tarot guide ships an asset today; the rest gracefully fall
+ * back to a brand gradient until their per-guide image lands (out of T-ENC-007
+ * scope, which produced the hub/section/tarot-guide assets).
  */
 const GUIDE_THEME: Partial<Record<ArticleCategory, GuideTheme>> = {
   [ArticleCategory.GUIDE_TAROT]: {
@@ -106,7 +109,7 @@ function GuiaCard({ article }: GuiaCardProps) {
   return (
     <Link
       href={ROUTES.ENCICLOPEDIA_GUIA(article.slug)}
-      className="group border-border bg-card hover:border-secondary focus-visible:ring-secondary focus-visible:ring-offset-background relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(214,158,46,0.45)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+      className="group border-border bg-card hover:border-secondary focus-visible:ring-secondary focus-visible:ring-offset-background relative flex h-full flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(214,158,46,0.45)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
     >
       {/* Thumbnail */}
       <div className="relative aspect-[16/9] overflow-hidden">
@@ -164,12 +167,20 @@ function GuiaCard({ article }: GuiaCardProps) {
   );
 }
 
-function CategorySection({ category }: { category: ArticleCategory }) {
+function CategorySection({
+  category,
+  categoryIndex,
+}: {
+  category: ArticleCategory;
+  categoryIndex: number;
+}) {
   const { data: articles } = useArticlesByCategory(category);
   return (
     <>
-      {(articles ?? []).map((article) => (
-        <GuiaCard key={article.id} article={article} />
+      {(articles ?? []).map((article, articleIndex) => (
+        <Reveal key={article.id} index={categoryIndex + articleIndex} className="h-full">
+          <GuiaCard article={article} />
+        </Reveal>
       ))}
     </>
   );
@@ -218,10 +229,10 @@ export function GuiasContent() {
         />
       </header>
 
-      {/* Grid de tarjetas */}
+      {/* Grid de tarjetas — reveal fade-up escalonado al entrar en viewport */}
       <div className="grid gap-6 md:grid-cols-2">
-        {GUIDE_CATEGORIES.map((category) => (
-          <CategorySection key={category} category={category} />
+        {GUIDE_CATEGORIES.map((category, categoryIndex) => (
+          <CategorySection key={category} category={category} categoryIndex={categoryIndex} />
         ))}
       </div>
     </div>

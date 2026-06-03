@@ -476,7 +476,7 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 #### 📝 Notas de implementación
 
 - `GuiaItem` se reemplazó por `GuiaCard`: tarjeta editorial con thumbnail (`aspect-[16/9]`), overlay de legibilidad, chip de categoría dorado (`bg-secondary`), título Cormorant (`font-serif`), snippet `line-clamp-2` y CTA "Leer guía →". Hover coherente con el resto del rediseño (elevación `-translate-y-1`, borde dorado `hover:border-secondary`, glow y zoom de imagen `group-hover:scale-105`); foco visible por teclado.
-- **Thumbnail por categoría modelado como datos** (`GUIDE_THEME`): chip corto + asset temático opcional. Hoy solo la Guía del Tarot tiene asset (`guia-tarot-hero.webp`); el resto cae con elegancia a un **gradiente de marca con `✦`** hasta que aterricen sus imágenes (T-ENC-007 pendiente). `resolveThumbnail` prioriza un `imageUrl` del backend si existiera (a prueba de futuro).
+- **Thumbnail por categoría modelado como datos** (`GUIDE_THEME`): chip corto + asset temático opcional. Hoy solo la Guía del Tarot tiene asset (`guia-tarot-hero.webp`); el resto cae con elegancia a un **gradiente de marca con `✦`** hasta que aterricen sus imágenes por guía (fuera del alcance de T-ENC-007, que produjo los assets de hub/sección/guía-tarot). `resolveThumbnail` prioriza un `imageUrl` del backend si existiera (a prueba de futuro).
 - Cabecera con banda de marca (gradiente noche + título Cormorant + filete dorado) coherente con el Hub (T-ENC-005) y `ArticleHero`.
 - Orden conservado (Guía del Tarot primera) y `ROUTES.ENCICLOPEDIA_GUIA(slug)` sin cambios → cero regresión de navegación.
 - Coverage `GuiasContent`: 100% líneas/funciones, 83% ramas (≥ 80% requerido); ciclo de calidad frontend completo en verde.
@@ -500,7 +500,7 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 **Estimación:** 3 puntos
 **Dependencias:** ninguna (habilita ENC-003/004/005/006)
 **Cubre Hallazgo:** ENC-003 (assets), ENC-004, ENC-005
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### 📋 Descripción
 
@@ -508,11 +508,11 @@ Producir el set de imágenes de la enciclopedia (hero del hub, cabeceras de guí
 
 #### ✅ Tareas específicas
 
-- [ ] Generar imágenes con IA siguiendo la **fórmula base** y los prompts por sección de `FEEDBACK_ENCICLOPEDIA_DISENO.md §5–6`.
-- [ ] Paleta violeta/índigo + dorado; `no text`; coherentes con `hero-bg.webp` / `tarot-cards.webp`.
-- [ ] Exportar a **WebP** y guardar en `frontend/public/images/enciclopedia/` con nombres semánticos (`guia-tarot-hero.webp`, `tarot-arcanos-mayores.webp`, etc.).
-- [ ] Optimizar peso (seguir `frontend/docs/IMAGE_OPTIMIZATION.md`).
-- [ ] Definir `alt` descriptivo en español para cada imagen.
+- [x] Generar imágenes con IA siguiendo la **fórmula base** y los prompts por sección de `FEEDBACK_ENCICLOPEDIA_DISENO.md §5–6`.
+- [x] Paleta violeta/índigo + dorado; `no text`; coherentes con `hero-bg.webp` / `tarot-cards.webp`.
+- [x] Exportar a **WebP** y guardar en `frontend/public/images/enciclopedia/` con nombres semánticos (`guia-tarot-hero.webp`, `tarot-arcanos-mayores.webp`, etc.).
+- [x] Optimizar peso (seguir `frontend/docs/IMAGE_OPTIMIZATION.md`).
+- [x] Definir `alt` descriptivo en español para cada imagen.
 
 #### 🎯 Criterios de Aceptación
 
@@ -532,14 +532,14 @@ Producir el set de imágenes de la enciclopedia (hero del hub, cabeceras de guí
 **Estimación:** 1.5 puntos
 **Dependencias:** T-ENC-003, T-ENC-005, T-ENC-006
 **Cubre Hallazgo:** ENC-003/004/005 (pulido)
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Reveal fade-up escalonado por sección al hacer scroll (sutil, respetando `prefers-reduced-motion`).
-- [ ] Hover states de tarjetas (hub, guías) con glow dorado y elevación.
-- [ ] Tests donde aplique / verificación visual.
-- [ ] Coverage ≥ 80%.
+- [x] Reveal fade-up escalonado por sección al hacer scroll (sutil, respetando `prefers-reduced-motion`).
+- [x] Hover states de tarjetas (hub, guías) con glow dorado y elevación.
+- [x] Tests donde aplique / verificación visual.
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 
@@ -549,6 +549,24 @@ Producir el set de imágenes de la enciclopedia (hero del hub, cabeceras de guí
 #### 📁 Archivos involucrados
 
 - componentes de enciclopedia (hub, guías, artículo)
+
+#### 🧩 Notas técnicas (implementación)
+
+- **`useReducedMotion`** (`hooks/utils/`): suscripción a `prefers-reduced-motion`
+  vía `useSyncExternalStore` (SSR-safe, sin `setState` en efecto).
+- **`Reveal`** (`features/encyclopedia/`): wrapper con `IntersectionObserver` que
+  aplica un fade-up escalonado (retardo por `index`, con tope) cuando el elemento
+  entra en viewport. Con movimiento reducido aparece visible de inmediato
+  (derivado en render, sin desfase de hidratación) y tiene fallback si no hay
+  `IntersectionObserver`. El estilo vive en `globals.css` (`[data-reveal]`).
+- **`globals.css`**: utilidades `[data-reveal]` + bloque
+  `@media (prefers-reduced-motion: reduce)` que además neutraliza las animaciones
+  decorativas en bucle (twinkle / float / shimmer).
+- **Aplicación:** reveal escalonado en las tarjetas del hub (`EnciclopediaHubContent`),
+  en las tarjetas de guías (`GuiasContent`) y en las secciones complementarias del
+  artículo (`ArticleDetailView`: cartas relacionadas, artículos relacionados, CTA).
+- Los hover states (lift + glow dorado + zoom de imagen) ya existían desde
+  T-ENC-005/006; aquí se consolidan bajo el respeto a `prefers-reduced-motion`.
 
 ---
 
