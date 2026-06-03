@@ -462,16 +462,24 @@ Dar a los artículos una plantilla editorial: hero con imagen, recursos visuales
 **Estimación:** 2 puntos
 **Dependencias:** T-ENC-007 (thumbnails)
 **Cubre Hallazgo:** ENC-005
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-ENC-006-rediseno-tarjetas-guias`)
 
 #### ✅ Tareas específicas
 
-- [ ] Convertir `GuiaItem` en tarjeta editorial: thumbnail + título Cormorant + snippet (2 líneas) + chip de categoría dorado + CTA "Leer guía →".
-- [ ] Grid 2-col desktop / 1-col mobile.
-- [ ] Hover: elevación + borde dorado + micro-translate.
-- [ ] Conservar el orden (Guía del Tarot primera) sin regresiones.
-- [ ] Tests (tarjeta con imagen, chip, href).
-- [ ] Coverage ≥ 80%.
+- [x] Convertir `GuiaItem` en tarjeta editorial: thumbnail + título Cormorant + snippet (2 líneas) + chip de categoría dorado + CTA "Leer guía →".
+- [x] Grid 2-col desktop / 1-col mobile.
+- [x] Hover: elevación + borde dorado + micro-translate.
+- [x] Conservar el orden (Guía del Tarot primera) sin regresiones.
+- [x] Tests (tarjeta con imagen, chip, href).
+- [x] Coverage ≥ 80%.
+
+#### 📝 Notas de implementación
+
+- `GuiaItem` se reemplazó por `GuiaCard`: tarjeta editorial con thumbnail (`aspect-[16/9]`), overlay de legibilidad, chip de categoría dorado (`bg-secondary`), título Cormorant (`font-serif`), snippet `line-clamp-2` y CTA "Leer guía →". Hover coherente con el resto del rediseño (elevación `-translate-y-1`, borde dorado `hover:border-secondary`, glow y zoom de imagen `group-hover:scale-105`); foco visible por teclado.
+- **Thumbnail por categoría modelado como datos** (`GUIDE_THEME`): chip corto + asset temático opcional. Hoy solo la Guía del Tarot tiene asset (`guia-tarot-hero.webp`); el resto cae con elegancia a un **gradiente de marca con `✦`** hasta que aterricen sus imágenes (T-ENC-007 pendiente). `resolveThumbnail` prioriza un `imageUrl` del backend si existiera (a prueba de futuro).
+- Cabecera con banda de marca (gradiente noche + título Cormorant + filete dorado) coherente con el Hub (T-ENC-005) y `ArticleHero`.
+- Orden conservado (Guía del Tarot primera) y `ROUTES.ENCICLOPEDIA_GUIA(slug)` sin cambios → cero regresión de navegación.
+- Coverage `GuiasContent`: 100% líneas/funciones, 83% ramas (≥ 80% requerido); ciclo de calidad frontend completo en verde.
 
 #### 🎯 Criterios de Aceptación
 

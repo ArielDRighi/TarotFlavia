@@ -25,6 +25,13 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+// Mock next/image (render a plain img so we can assert src/alt)
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="next-image" />
+  ),
+}));
+
 const mockUseArticlesByCategory = vi.fn();
 
 vi.mock('@/hooks/api/useEncyclopediaArticles', () => ({
@@ -137,5 +144,84 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
     const requestedCategories = mockUseArticlesByCategory.mock.calls.map((call) => call[0]);
     expect(requestedCategories).toContain(ArticleCategory.GUIDE_TAROT);
     expect(requestedCategories[0]).toBe(ArticleCategory.GUIDE_TAROT);
+  });
+
+  it('debe renderizar la tarjeta de la Guía del Tarot con thumbnail temático e imagen con alt', () => {
+    const tarotGuide = buildGuideArticle(
+      10,
+      'guia-tarot',
+      'Guía del Tarot',
+      ArticleCategory.GUIDE_TAROT
+    );
+    mockUseArticlesByCategory.mockImplementation((cat: ArticleCategory) => {
+      if (cat === ArticleCategory.GUIDE_TAROT) return { data: [tarotGuide], isLoading: false };
+      return { data: [], isLoading: false };
+    });
+
+    renderWithProviders(<GuiasPage />);
+
+    const image = screen.getByTestId('next-image');
+    expect(image).toHaveAttribute('src', expect.stringContaining('guia-tarot-hero.webp'));
+    expect(image).toHaveAccessibleName(expect.stringMatching(/tarot/i));
+  });
+
+  it('debe mostrar un chip de categoría dorado y el CTA "Leer guía"', () => {
+    const tarotGuide = buildGuideArticle(
+      10,
+      'guia-tarot',
+      'Guía del Tarot',
+      ArticleCategory.GUIDE_TAROT
+    );
+    mockUseArticlesByCategory.mockImplementation((cat: ArticleCategory) => {
+      if (cat === ArticleCategory.GUIDE_TAROT) return { data: [tarotGuide], isLoading: false };
+      return { data: [], isLoading: false };
+    });
+
+    renderWithProviders(<GuiasPage />);
+
+    expect(screen.getByText('Tarot')).toBeInTheDocument();
+    expect(screen.getByText(/leer guía/i)).toBeInTheDocument();
+  });
+
+  it('debe preferir el imageUrl del backend cuando está disponible', () => {
+    const numerologyGuide: ArticleSummary = {
+      ...buildGuideArticle(
+        1,
+        'guia-numerologia',
+        'Guía de Numerología',
+        ArticleCategory.GUIDE_NUMEROLOGY
+      ),
+      imageUrl: '/images/enciclopedia/guia-numerologia.webp',
+    };
+    mockUseArticlesByCategory.mockImplementation((cat: ArticleCategory) => {
+      if (cat === ArticleCategory.GUIDE_NUMEROLOGY)
+        return { data: [numerologyGuide], isLoading: false };
+      return { data: [], isLoading: false };
+    });
+
+    renderWithProviders(<GuiasPage />);
+
+    const image = screen.getByTestId('next-image');
+    expect(image).toHaveAttribute('src', '/images/enciclopedia/guia-numerologia.webp');
+    expect(image).toHaveAccessibleName(expect.stringMatching(/guía de numerología/i));
+  });
+
+  it('debe usar un fallback decorativo cuando la guía no tiene imagen temática', () => {
+    const numerologyGuide = buildGuideArticle(
+      1,
+      'guia-numerologia',
+      'Guía de Numerología',
+      ArticleCategory.GUIDE_NUMEROLOGY
+    );
+    mockUseArticlesByCategory.mockImplementation((cat: ArticleCategory) => {
+      if (cat === ArticleCategory.GUIDE_NUMEROLOGY)
+        return { data: [numerologyGuide], isLoading: false };
+      return { data: [], isLoading: false };
+    });
+
+    renderWithProviders(<GuiasPage />);
+
+    expect(screen.getByTestId('guia-thumb-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('next-image')).not.toBeInTheDocument();
   });
 });
