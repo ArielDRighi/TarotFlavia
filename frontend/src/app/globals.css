@@ -398,3 +398,51 @@ body {
   background-clip: text;
   animation: shimmer-gold 3s linear infinite;
 }
+
+/* ===========================================
+   Scroll Reveal — fade-up escalonado (T-ENC-008)
+   El estado lo controla el componente <Reveal> vía `data-revealed`; el retardo
+   escalonado llega por la variable `--reveal-delay`.
+   =========================================== */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal][data-revealed='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Sin JS el observer no corre: mostrar el contenido para no dejarlo oculto. */
+@media (scripting: none) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ===========================================
+   Respeto a prefers-reduced-motion
+   Desactiva el reveal y neutraliza solo las animaciones DECORATIVAS en bucle.
+   Se evita un reset global (`*`) a propósito: dejaría sin girar a los spinners
+   de carga (`animate-spin`) y rompería la motion informativa del péndulo.
+   =========================================== */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .animate-twinkle,
+  .animate-float-slow,
+  .animate-shimmer-gold,
+  .animate-bounce-slow {
+    animation: none !important;
+  }
+}

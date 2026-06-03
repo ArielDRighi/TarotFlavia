@@ -7,6 +7,7 @@ import { ArticleHero } from './ArticleHero';
 import { ArticleToc } from './ArticleToc';
 import { MarkdownArticle } from './MarkdownArticle';
 import { RelatedTarotCards } from './RelatedTarotCards';
+import { Reveal } from './Reveal';
 import { ROUTES } from '@/lib/constants/routes';
 import { getArticleEditorial } from '@/lib/data/encyclopedia-editorial.data';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
@@ -162,32 +163,41 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
       />
 
       {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
-          completa (título incluido) o nada si ningún ID resuelve. */}
-      {hasRelatedTarotCards && <RelatedTarotCards cardIds={article.relatedTarotCards!} />}
+          completa (título incluido) o nada si ningún ID resuelve. Las secciones
+          complementarias se revelan con un fade-up escalonado al hacer scroll. */}
+      {hasRelatedTarotCards && (
+        <Reveal index={0}>
+          <RelatedTarotCards cardIds={article.relatedTarotCards!} />
+        </Reveal>
+      )}
 
       {/* Artículos relacionados */}
       {hasRelatedArticles && (
-        <section data-testid="related-articles" className="space-y-4">
-          <h2 className="text-foreground text-xl font-bold">Artículos Relacionados</h2>
-          <div className="flex flex-col gap-3">
-            {article.relatedArticles.map((relatedArticle) => (
-              <RelatedArticleItem key={relatedArticle.id} article={relatedArticle} />
-            ))}
-          </div>
-        </section>
+        <Reveal index={1}>
+          <section data-testid="related-articles" className="space-y-4">
+            <h2 className="text-foreground text-xl font-bold">Artículos Relacionados</h2>
+            <div className="flex flex-col gap-3">
+              {article.relatedArticles.map((relatedArticle) => (
+                <RelatedArticleItem key={relatedArticle.id} article={relatedArticle} />
+              ))}
+            </div>
+          </section>
+        </Reveal>
       )}
 
       {/* CTA al módulo correspondiente (guías con herramienta asociada) */}
       {cta && (
-        <div className="border-t pt-6">
-          <Link
-            data-testid="article-cta"
-            href={cta.href}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center rounded-lg px-6 py-3 font-semibold transition-colors"
-          >
-            {cta.label}
-          </Link>
-        </div>
+        <Reveal index={2}>
+          <div className="border-t pt-6">
+            <Link
+              data-testid="article-cta"
+              href={cta.href}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center rounded-lg px-6 py-3 font-semibold transition-colors"
+            >
+              {cta.label}
+            </Link>
+          </div>
+        </Reveal>
       )}
     </>
   );

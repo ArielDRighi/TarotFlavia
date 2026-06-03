@@ -2,6 +2,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+// 5. Components (ui → features)
+import { Reveal } from './Reveal';
 // 6. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
 
@@ -96,7 +98,7 @@ function SectionCard({ section }: { section: SectionConfig }) {
       data-testid={section.linkTestId}
       href={section.href}
       aria-label={`Explorar ${section.title}`}
-      className="group focus-visible:ring-secondary focus-visible:ring-offset-background relative block overflow-hidden rounded-2xl border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(214,158,46,0.45)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+      className="group focus-visible:ring-secondary focus-visible:ring-offset-background relative block h-full overflow-hidden rounded-2xl border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(214,158,46,0.45)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
     >
       <div
         data-testid={section.sectionTestId}
@@ -225,10 +227,12 @@ export function EnciclopediaHubContent() {
         />
       </header>
 
-      {/* Grid de secciones */}
+      {/* Grid de secciones — reveal fade-up escalonado al entrar en viewport */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {ENCYCLOPEDIA_SECTIONS.map((section) => (
-          <SectionCard key={section.id} section={section} />
+        {ENCYCLOPEDIA_SECTIONS.map((section, index) => (
+          <Reveal key={section.id} index={index} className="h-full">
+            <SectionCard section={section} />
+          </Reveal>
         ))}
       </div>
     </div>
