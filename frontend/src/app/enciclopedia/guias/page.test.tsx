@@ -197,8 +197,10 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
 
     renderWithProviders(<GuiasPage />);
 
-    const chip = screen.getByTestId('guia-category-chip');
-    expect(chip).toHaveClass('text-[#1a0a2e]');
+    // Cada guía renderiza su propio chip; el test fija un único guía mockeado,
+    // pero usamos getAllByTestId para no romper si se añaden más guías.
+    const [chip] = screen.getAllByTestId('guia-category-chip');
+    expect(chip).toHaveClass('text-bg-hero');
     expect(chip).not.toHaveClass('text-secondary-foreground');
   });
 

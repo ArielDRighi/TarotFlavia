@@ -102,7 +102,7 @@ describe('ArticleDetailView', () => {
       render(<ArticleDetailView article={createTestArticle()} />);
 
       const badge = screen.getByTestId('article-category-badge');
-      expect(badge).toHaveClass('text-[#1a0a2e]');
+      expect(badge).toHaveClass('text-bg-hero');
       expect(badge).not.toHaveClass('text-secondary-foreground');
     });
   });
