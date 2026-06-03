@@ -411,7 +411,6 @@ body {
     opacity 0.6s ease-out,
     transform 0.6s ease-out;
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
 }
 
 [data-reveal][data-revealed='true'] {
@@ -419,9 +418,19 @@ body {
   transform: none;
 }
 
+/* Sin JS el observer no corre: mostrar el contenido para no dejarlo oculto. */
+@media (scripting: none) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ===========================================
    Respeto a prefers-reduced-motion
-   Desactiva el reveal y neutraliza las animaciones decorativas en bucle.
+   Desactiva el reveal y neutraliza solo las animaciones DECORATIVAS en bucle.
+   Se evita un reset global (`*`) a propósito: dejaría sin girar a los spinners
+   de carga (`animate-spin`) y rompería la motion informativa del péndulo.
    =========================================== */
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] {
@@ -430,12 +439,10 @@ body {
     transition: none;
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
+  .animate-twinkle,
+  .animate-float-slow,
+  .animate-shimmer-gold,
+  .animate-bounce-slow {
+    animation: none !important;
   }
 }

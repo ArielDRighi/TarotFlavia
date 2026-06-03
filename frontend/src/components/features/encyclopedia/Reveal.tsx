@@ -71,7 +71,11 @@ export function Reveal({ children, index = 0, className, 'data-testid': dataTest
           observer.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: '0px 0px -10% 0px' }
+      // Sin margen inferior negativo: un margen negativo dejaría permanentemente
+      // oculto cualquier elemento que aterrice en la franja inferior de una
+      // página que ya no puede scrollear (p. ej. el CTA al final de una guía
+      // corta o las tarjetas del hub que entran justas en pantallas altas).
+      { threshold: 0.1 }
     );
 
     observer.observe(element);
