@@ -109,7 +109,7 @@ describe('CardDetailView', () => {
     });
   });
 
-  describe('Back link', () => {
+  describe('Breadcrumb navigation', () => {
     it('should render a link back to /enciclopedia', () => {
       render(<CardDetailView card={createTestCard()} />);
 

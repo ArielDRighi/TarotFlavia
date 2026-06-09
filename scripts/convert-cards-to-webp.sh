@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Convierte los PNG de las cartas de tarot a WebP con nombres basados en el slug
-# y los deposita en frontend/public/images/tarot/
+# Script de migración one-time: convierte los PNG de las cartas de tarot a WebP
+# con nombres basados en el slug y los deposita en frontend/public/images/tarot/
 #
-# Uso: bash scripts/convert-cards-to-webp.sh
+# Uso: bash scripts/convert-cards-to-webp.sh [ruta/a/Cards-png]
+# Si no se pasa argumento, usa el valor por defecto indicado abajo.
 # Requiere: ImageMagick (convert)
 
 set -euo pipefail
 
-SRC_DIR="/home/ariel/Descargas/Cards-png"
+SRC_DIR="${1:-/home/ariel/Descargas/Cards-png}"
 DEST_DIR="$(dirname "$0")/../frontend/public/images/tarot"
 
 mkdir -p "$DEST_DIR"

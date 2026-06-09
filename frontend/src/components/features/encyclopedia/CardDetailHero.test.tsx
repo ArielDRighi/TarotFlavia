@@ -141,11 +141,21 @@ describe('CardDetailHero', () => {
 
     it('muestra "Arcano Menor" sin palo cuando suit es null (caso defensivo)', () => {
       render(
-        <CardDetailHero
-          card={makeCard({ arcanaType: ArcanaType.MINOR, suit: null, number: 1 })}
-        />
+        <CardDetailHero card={makeCard({ arcanaType: ArcanaType.MINOR, suit: null, number: 1 })} />
       );
       expect(screen.getByTestId('card-arcana-chip')).toHaveTextContent('Arcano Menor');
+    });
+  });
+
+  describe('numeral romano', () => {
+    it('muestra el numeral cuando romanNumeral está presente', () => {
+      render(<CardDetailHero card={makeCard({ romanNumeral: 'XIV' })} />);
+      expect(screen.getByText('XIV')).toBeInTheDocument();
+    });
+
+    it('no muestra numeral cuando romanNumeral es null', () => {
+      render(<CardDetailHero card={makeCard({ romanNumeral: null })} />);
+      expect(screen.queryByText('0')).not.toBeInTheDocument();
     });
   });
 });

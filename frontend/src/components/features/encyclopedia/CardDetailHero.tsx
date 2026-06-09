@@ -1,3 +1,5 @@
+'use client';
+
 // 1. React & Next.js
 import Image from 'next/image';
 import Link from 'next/link';
@@ -54,7 +56,7 @@ export function CardDetailHero({ card, className }: CardDetailHeroProps) {
       {/* Estrellas decorativas */}
       {DECORATIVE_STARS.map((star, i) => (
         <span
-          key={i}
+          key={star.delay}
           className="animate-twinkle absolute rounded-full bg-amber-200/80"
           style={{
             top: star.top,
@@ -90,7 +92,7 @@ export function CardDetailHero({ card, className }: CardDetailHeroProps) {
             <Link
               data-testid="breadcrumb-enciclopedia"
               href={ROUTES.ENCICLOPEDIA}
-              className="rounded-sm transition-colors hover:underline focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-secondary focus-visible:ring-offset-bg-hero rounded-sm transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               style={{ color: CREAM_MUTED }}
             >
               Enciclopedia
@@ -101,7 +103,7 @@ export function CardDetailHero({ card, className }: CardDetailHeroProps) {
             <Link
               data-testid="breadcrumb-tarot"
               href={ROUTES.ENCICLOPEDIA_TAROT}
-              className="rounded-sm transition-colors hover:underline focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-secondary focus-visible:ring-offset-bg-hero rounded-sm transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               style={{ color: CREAM_MUTED }}
             >
               Tarot
