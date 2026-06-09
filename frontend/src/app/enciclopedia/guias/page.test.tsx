@@ -227,7 +227,7 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
     expect(image).toHaveAccessibleName(expect.stringMatching(/guía de numerología/i));
   });
 
-  it('debe usar un fallback decorativo cuando la guía no tiene imagen temática', () => {
+  it('debe renderizar el hero temático de la Guía de Numerología (T-ENC-011)', () => {
     const numerologyGuide = buildGuideArticle(
       1,
       'guia-numerologia',
@@ -242,7 +242,8 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
 
     renderWithProviders(<GuiasPage />);
 
-    expect(screen.getByTestId('guia-thumb-fallback')).toBeInTheDocument();
-    expect(screen.queryByTestId('next-image')).not.toBeInTheDocument();
+    const image = screen.getByTestId('next-image');
+    expect(image).toHaveAttribute('src', expect.stringContaining('guia-numerologia-hero.webp'));
+    expect(screen.queryByTestId('guia-thumb-fallback')).not.toBeInTheDocument();
   });
 });

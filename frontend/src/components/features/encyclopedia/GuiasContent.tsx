@@ -51,10 +51,14 @@ const GUIDE_CATEGORIES: ArticleCategory[] = [
 ];
 
 /**
- * Per-category editorial theme: short gold chip label and an optional themed
- * thumbnail. Only the Tarot guide ships an asset today; the rest gracefully fall
- * back to a brand gradient until their per-guide image lands (out of T-ENC-007
- * scope, which produced the hub/section/tarot-guide assets).
+ * Per-category editorial theme: short gold chip label and a themed thumbnail.
+ * Each guide reuses its own hero (`guia-*-hero.webp`) as the listing thumbnail
+ * (T-ENC-011), so the `✦` gradient fallback is now only a defensive safety net
+ * for non-themed categories or a missing asset.
+ *
+ * NOTE: the 6 non-tarot heroes ship as provisional placeholders (copies of
+ * `hub-guias.webp`) until T-ENC-014 generates the definitive WebP assets per the
+ * §C base formula; replacing the files needs no code change.
  */
 const GUIDE_THEME: Partial<Record<ArticleCategory, GuideTheme>> = {
   [ArticleCategory.GUIDE_TAROT]: {
@@ -64,12 +68,48 @@ const GUIDE_THEME: Partial<Record<ArticleCategory, GuideTheme>> = {
       alt: 'Ilustración mística de cartas de tarot con resplandor dorado',
     },
   },
-  [ArticleCategory.GUIDE_NUMEROLOGY]: { chip: 'Numerología' },
-  [ArticleCategory.GUIDE_PENDULUM]: { chip: 'Péndulo' },
-  [ArticleCategory.GUIDE_BIRTH_CHART]: { chip: 'Carta Astral' },
-  [ArticleCategory.GUIDE_RITUAL]: { chip: 'Rituales' },
-  [ArticleCategory.GUIDE_HOROSCOPE]: { chip: 'Horóscopo' },
-  [ArticleCategory.GUIDE_CHINESE]: { chip: 'Horóscopo Chino' },
+  [ArticleCategory.GUIDE_NUMEROLOGY]: {
+    chip: 'Numerología',
+    image: {
+      src: `${IMAGE_BASE}/guia-numerologia-hero.webp`,
+      alt: 'Numerales dorados luminosos del 1 al 9 dentro de una geometría sagrada',
+    },
+  },
+  [ArticleCategory.GUIDE_PENDULUM]: {
+    chip: 'Péndulo',
+    image: {
+      src: `${IMAGE_BASE}/guia-pendulo-hero.webp`,
+      alt: 'Péndulo de cristal suspendido trazando arcos dorados sobre una carta mística',
+    },
+  },
+  [ArticleCategory.GUIDE_BIRTH_CHART]: {
+    chip: 'Carta Astral',
+    image: {
+      src: `${IMAGE_BASE}/guia-carta-astral-hero.webp`,
+      alt: 'Rueda de carta natal luminosa con planetas y glifos zodiacales en finas líneas doradas',
+    },
+  },
+  [ArticleCategory.GUIDE_RITUAL]: {
+    chip: 'Rituales',
+    image: {
+      src: `${IMAGE_BASE}/guia-rituales-hero.webp`,
+      alt: 'Altar místico con velas encendidas, cristales y hierbas en una atmósfera ritual',
+    },
+  },
+  [ArticleCategory.GUIDE_HOROSCOPE]: {
+    chip: 'Horóscopo',
+    image: {
+      src: `${IMAGE_BASE}/guia-horoscopo-hero.webp`,
+      alt: 'Rueda zodiacal completa con los doce glifos brillando y finas líneas de constelaciones',
+    },
+  },
+  [ArticleCategory.GUIDE_CHINESE]: {
+    chip: 'Horóscopo Chino',
+    image: {
+      src: `${IMAGE_BASE}/guia-horoscopo-chino-hero.webp`,
+      alt: 'Los doce animales del zodíaco chino en finas líneas doradas dispuestos en círculo luminoso',
+    },
+  },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -82,7 +122,10 @@ function getGuideTheme(category: ArticleCategory): GuideTheme {
  * Resolves the thumbnail for an article: prefers a backend-provided `imageUrl`
  * (future-proof), then the category theme asset, otherwise `null` (fallback).
  */
-function resolveThumbnail(article: ArticleSummary, theme: GuideTheme): GuideTheme['image'] | null {
+export function resolveThumbnail(
+  article: ArticleSummary,
+  theme: GuideTheme
+): GuideTheme['image'] | null {
   if (article.imageUrl) {
     return { src: article.imageUrl, alt: `Imagen ilustrativa de ${article.nameEs}` };
   }
@@ -102,7 +145,7 @@ interface GuiaCardProps {
  * a gold category chip, Cormorant title, 2-line snippet and a "Leer guía →" CTA.
  * Hover triggers a coherent micro-interaction (lift + gold border + image zoom).
  */
-function GuiaCard({ article }: GuiaCardProps) {
+export function GuiaCard({ article }: GuiaCardProps) {
   const theme = getGuideTheme(article.category);
   const image = resolveThumbnail(article, theme);
 
