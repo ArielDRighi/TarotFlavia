@@ -36,7 +36,6 @@ export function CardImage({ src, alt, className }: CardImageProps) {
               className="object-cover transition-transform hover:scale-105"
               sizes="(max-width: 768px) 100vw, 320px"
               priority
-              unoptimized
             />
           </button>
         </DialogTrigger>
@@ -48,7 +47,6 @@ export function CardImage({ src, alt, className }: CardImageProps) {
               fill
               className="object-contain"
               sizes="(max-width: 768px) 100vw, 672px"
-              unoptimized
             />
           </div>
         </DialogContent>

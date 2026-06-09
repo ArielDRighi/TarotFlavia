@@ -44,7 +44,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg',
+      '/images/tarot/the-fool.webp',
   },
   {
     slug: 'the-magician',
@@ -79,7 +79,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg',
+      '/images/tarot/the-magician.webp',
   },
   {
     slug: 'the-high-priestess',
@@ -114,7 +114,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg',
+      '/images/tarot/the-high-priestess.webp',
   },
   {
     slug: 'the-empress',
@@ -149,7 +149,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/d2/RWS_Tarot_03_Empress.jpg',
+      '/images/tarot/the-empress.webp',
   },
   {
     slug: 'the-emperor',
@@ -184,7 +184,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/c/c3/RWS_Tarot_04_Emperor.jpg',
+      '/images/tarot/the-emperor.webp',
   },
   {
     slug: 'the-hierophant',
@@ -219,7 +219,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/8/8d/RWS_Tarot_05_Hierophant.jpg',
+      '/images/tarot/the-hierophant.webp',
   },
   {
     slug: 'the-lovers',
@@ -254,7 +254,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_06_Lovers.jpg',
+      '/images/tarot/the-lovers.webp',
   },
   {
     slug: 'the-chariot',
@@ -289,7 +289,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
+      '/images/tarot/the-chariot.webp',
   },
   {
     slug: 'strength',
@@ -324,7 +324,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg',
+      '/images/tarot/strength.webp',
   },
   {
     slug: 'the-hermit',
@@ -359,7 +359,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/4/4d/RWS_Tarot_09_Hermit.jpg',
+      '/images/tarot/the-hermit.webp',
   },
   {
     slug: 'wheel-of-fortune',
@@ -394,7 +394,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg',
+      '/images/tarot/wheel-of-fortune.webp',
   },
   {
     slug: 'justice',
@@ -429,7 +429,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/e/e0/RWS_Tarot_11_Justice.jpg',
+      '/images/tarot/justice.webp',
   },
   {
     slug: 'the-hanged-man',
@@ -458,7 +458,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       reversed: ['demora', 'resistencia', 'martirio', 'apego', 'indecisión'],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/2/2b/RWS_Tarot_12_Hanged_Man.jpg',
+      '/images/tarot/the-hanged-man.webp',
   },
   {
     slug: 'death',
@@ -493,7 +493,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/d7/RWS_Tarot_13_Death.jpg',
+      '/images/tarot/death.webp',
   },
   {
     slug: 'temperance',
@@ -528,7 +528,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/f/f8/RWS_Tarot_14_Temperance.jpg',
+      '/images/tarot/temperance.webp',
   },
   {
     slug: 'the-devil',
@@ -563,7 +563,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/5/55/RWS_Tarot_15_Devil.jpg',
+      '/images/tarot/the-devil.webp',
   },
   {
     slug: 'the-tower',
@@ -598,7 +598,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg',
+      '/images/tarot/the-tower.webp',
   },
   {
     slug: 'the-star',
@@ -633,7 +633,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_17_Star.jpg',
+      '/images/tarot/the-star.webp',
   },
   {
     slug: 'the-moon',
@@ -668,7 +668,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/7/7f/RWS_Tarot_18_Moon.jpg',
+      '/images/tarot/the-moon.webp',
   },
   {
     slug: 'the-sun',
@@ -703,7 +703,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/1/17/RWS_Tarot_19_Sun.jpg',
+      '/images/tarot/the-sun.webp',
   },
   {
     slug: 'judgement',
@@ -738,7 +738,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/dd/RWS_Tarot_20_Judgement.jpg',
+      '/images/tarot/judgement.webp',
   },
   {
     slug: 'the-world',
@@ -773,6 +773,6 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
     },
     imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/f/ff/RWS_Tarot_21_World.jpg',
+      '/images/tarot/the-world.webp',
   },
 ];
