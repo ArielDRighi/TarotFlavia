@@ -142,22 +142,31 @@ luego 010 → 011 → 012 → 013.
 
 **Prioridad:** 🟡 Media · **Estimación:** 2.5 pts · **Dependencias:** —
 **Cubre:** `/enciclopedia/tarot/[slug]` sin atmósfera de marca
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Hero del detalle de carta: **reutilizar el arte propio de la carta** como protagonista
+- [x] Hero del detalle de carta: **reutilizar el arte propio de la carta** como protagonista
       sobre banda de marca (gradiente noche + estrellas), en lugar de generar un asset por carta
       (78 cartas → inviable/innecesario). Imagen de la carta + halo dorado + breadcrumb + nombre
       Cormorant + arcano/palo como chip.
-- [ ] Cuerpo con el render editorial existente (`MarkdownArticle`) si el contenido lo amerita.
-- [ ] `alt` en español derivado del nombre de la carta.
-- [ ] Tests (hero con arte de carta, breadcrumb, chip, alt).
-- [ ] Coverage ≥ 80%.
+- [x] Cuerpo con el render editorial existente (`MarkdownArticle`) si el contenido lo amerita.
+- [x] `alt` en español derivado del nombre de la carta.
+- [x] Tests (hero con arte de carta, breadcrumb, chip, alt).
+- [x] Coverage ≥ 80% (alcanzado 100% statements/branch/funcs/lines).
+
+**Bonus incluido en esta tarea:**
+- Migración de 78 imágenes de cartas de Wikimedia Commons → assets locales WebP (22 MB → 3.2 MB, -85%).
+- Se eliminó `unoptimized={true}` de CardImage, CardThumbnail, CardListItem — Next.js ahora optimiza las imágenes nativamente.
 
 #### 📁 Archivos
 
-- componente de detalle de carta de tarot en `features/encyclopedia/`
-- tests correspondientes
+- `frontend/src/components/features/encyclopedia/CardDetailHero.tsx` (nuevo)
+- `frontend/src/components/features/encyclopedia/CardDetailHero.test.tsx` (nuevo, 13 tests)
+- `frontend/src/components/features/encyclopedia/CardDetailView.tsx` (refactorizado, usa CardDetailHero)
+- `frontend/src/components/features/encyclopedia/index.ts` (exporta CardDetailHero)
+- `frontend/public/images/tarot/` (78 WebPs nuevos)
+- `backend/.../major-arcana.data.ts` / `minor-arcana.data.ts` (URLs actualizadas)
 
 ---
 

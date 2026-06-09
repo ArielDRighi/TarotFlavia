@@ -9,23 +9,13 @@ const nextConfig: NextConfig = {
 
   // Image optimization configuration
   images: {
-    // Remote patterns for external images
+    // Wikimedia URLs still used by tarot_card table (readings flow) until migrated
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'upload.wikimedia.org',
         pathname: '/wikipedia/commons/**',
       },
-      {
-        protocol: 'https',
-        hostname: '*.wikimedia.org',
-      },
-      // Add patterns for avatar/profile images if using external CDN
-      // {
-      //   protocol: 'https',
-      //   hostname: 'cdn.auguria.com',
-      //   pathname: '/avatars/**',
-      // },
     ],
 
     // Image formats to support (AVIF provides better compression than WebP)
