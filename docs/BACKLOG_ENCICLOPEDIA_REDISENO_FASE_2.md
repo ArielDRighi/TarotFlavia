@@ -66,17 +66,24 @@ luego 010 → 011 → 012 → 013.
 
 **Prioridad:** 🟠 Alta · **Estimación:** 5 pts · **Dependencias:** T-ENC-014 (assets)
 **Cubre:** gap de guías (numerología, péndulo, carta astral, rituales, horóscopo, horóscopo chino)
+**Estado:** ✅ COMPLETADA
+
+**Nota de implementación:** La data editorial apunta a los assets definidos en §C. Las imágenes se
+generarán con T-ENC-014; hasta entonces el componente muestra el fallback de marca (`ArticleHero`
+sin `src` queda gracefully sin imagen de sección). El slug del horóscopo occidental es
+`guia-horoscopo-occidental` (no `guia-horoscopo`). `guia-rituales` tiene 4 secciones H2 (no 6);
+`guia-horoscopo-occidental` tiene 3; `guia-horoscopo-chino` tiene 4.
 
 #### ✅ Tareas específicas
 
-- [ ] Para cada una de las 6 guías, añadir su entrada en `ARTICLE_EDITORIAL`
+- [x] Para cada una de las 6 guías, añadir su entrada en `ARTICLE_EDITORIAL`
       (`encyclopedia-editorial.data.ts`) con `hero` + `sections[].image` mapeadas por nº de H2,
       siguiendo la estructura de secciones documentada en §C.
-- [ ] Cada imagen con `alt` descriptivo en español.
-- [ ] Verificar que cada guía entra al modo editorial (ya gateado por `guide_*`) y renderiza
+- [x] Cada imagen con `alt` descriptivo en español.
+- [x] Verificar que cada guía entra al modo editorial (ya gateado por `guide_*`) y renderiza
       hero con imagen + imágenes de sección, sin tocar `ArticleDetailView`.
-- [ ] Tests de la data (entradas presentes, src/alt válidos por guía).
-- [ ] Coverage ≥ 80%.
+- [x] Tests de la data (entradas presentes, src/alt válidos por guía).
+- [x] Coverage ≥ 80% (100% statements/branch/funcs/lines).
 
 #### 🎯 Criterios de aceptación
 
