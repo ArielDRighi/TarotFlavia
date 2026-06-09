@@ -25,8 +25,18 @@ vi.mock('next/image', () => ({
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a href={href}>{children}</a>
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -70,10 +80,10 @@ describe('CardDetailView', () => {
       expect(screen.getByTestId('card-detail-view')).toBeInTheDocument();
     });
 
-    it('should render card name in Spanish', () => {
+    it('should render card name in Spanish as heading', () => {
       render(<CardDetailView card={createTestCard()} />);
 
-      expect(screen.getByText('El Loco')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: 'El Loco' })).toBeInTheDocument();
     });
 
     it('should render card name in English', () => {

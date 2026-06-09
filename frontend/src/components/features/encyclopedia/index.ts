@@ -54,6 +54,7 @@ export { EncyclopediaSkeleton } from './EncyclopediaSkeleton';
 
 // Detail components
 export { CardDetailView } from './CardDetailView';
+export { CardDetailHero } from './CardDetailHero';
 export { CardImage } from './CardImage';
 export { CardMeaning } from './CardMeaning';
 export { CardKeywords } from './CardKeywords';
