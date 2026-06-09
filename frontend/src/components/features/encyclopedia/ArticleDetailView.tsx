@@ -9,7 +9,11 @@ import { MarkdownArticle } from './MarkdownArticle';
 import { RelatedTarotCards } from './RelatedTarotCards';
 import { Reveal } from './Reveal';
 import { ROUTES } from '@/lib/constants/routes';
-import { getArticleEditorial } from '@/lib/data/encyclopedia-editorial.data';
+import {
+  getArticleEditorial,
+  getAstroCategoryHero,
+  isAstroCategory,
+} from '@/lib/data/encyclopedia-editorial.data';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
@@ -100,6 +104,56 @@ function getArticleRoute(article: ArticleSummary): string {
   }
 }
 
+interface SimpleArticleHeaderProps {
+  title: string;
+  categoryLabel: string;
+  snippet?: string;
+}
+
+/**
+ * Plain header used for articles that are neither activity guides nor astrology
+ * categories: breadcrumb + title + category badge + snippet. Kept as a defensive
+ * fallback for any future category without a themed treatment.
+ */
+function SimpleArticleHeader({ title, categoryLabel, snippet }: SimpleArticleHeaderProps) {
+  return (
+    <>
+      {/* Breadcrumb de navegación */}
+      <nav aria-label="Navegación" className="flex items-center gap-2 text-sm">
+        <Link
+          data-testid="breadcrumb-enciclopedia"
+          href={ROUTES.ENCICLOPEDIA}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Enciclopedia
+        </Link>
+        <span className="text-muted-foreground" aria-hidden="true">
+          /
+        </span>
+        <span
+          data-testid="breadcrumb-current"
+          className="text-foreground font-medium"
+          aria-current="page"
+        >
+          {title}
+        </span>
+      </nav>
+
+      {/* Header: nombre del artículo + badge de categoría */}
+      <div className="space-y-3">
+        <h1 className="font-serif text-4xl font-bold">{title}</h1>
+        <span
+          data-testid="article-category-badge"
+          className="bg-secondary text-bg-hero inline-block rounded-full px-3 py-1 text-sm font-medium"
+        >
+          {categoryLabel}
+        </span>
+        {snippet && <p className="text-muted-foreground text-lg">{snippet}</p>}
+      </div>
+    </>
+  );
+}
+
 function RelatedArticleItem({ article }: RelatedArticleItemProps) {
   return (
     <Link
@@ -133,6 +187,12 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
   const categoryLabel = ARTICLE_CATEGORY_LABELS[article.category];
   const cta = GUIDE_CTA_MAP[article.category];
   const isGuide = isGuideCategory(article.category);
+  // Astrology categories (signs, planets, houses, elements, modalities) get a
+  // themed hero band — but NOT the full editorial guide mode (no drop-cap, no
+  // numbered badges, no TOC). The image is optional: when absent, ArticleHero
+  // renders the gradient band on its own.
+  const isAstro = !isGuide && isAstroCategory(article.category);
+  const astroHero = isAstro ? getAstroCategoryHero(article.category) : undefined;
   const editorial = getArticleEditorial(article.slug);
   const readingMeta = getArticleReadingMeta(article.content);
   // Memoized so the array identity is stable across re-renders: ArticleToc keys
@@ -214,42 +274,24 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
           readingTimeMinutes={readingMeta.readingTimeMinutes}
           sectionCount={readingMeta.sectionCount}
         />
+      ) : isAstro ? (
+        /* Astrología (signos, planetas, casas, elementos, modalidades): banda
+           temática con imagen genérica por categoría, SIN el modo editorial
+           completo (sin meta de lectura, drop-cap ni TOC). Si el asset aún no
+           existe, ArticleHero degrada a la banda con gradiente sola. */
+        <ArticleHero
+          category={categoryLabel}
+          title={article.nameEs}
+          lead={article.snippet}
+          image={astroHero}
+        />
       ) : (
-        /* Resto de artículos (signos, planetas, etc.): cabecera simple existente */
-        <>
-          {/* Breadcrumb de navegación */}
-          <nav aria-label="Navegación" className="flex items-center gap-2 text-sm">
-            <Link
-              data-testid="breadcrumb-enciclopedia"
-              href={ROUTES.ENCICLOPEDIA}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Enciclopedia
-            </Link>
-            <span className="text-muted-foreground" aria-hidden="true">
-              /
-            </span>
-            <span
-              data-testid="breadcrumb-current"
-              className="text-foreground font-medium"
-              aria-current="page"
-            >
-              {article.nameEs}
-            </span>
-          </nav>
-
-          {/* Header: nombre del artículo + badge de categoría */}
-          <div className="space-y-3">
-            <h1 className="font-serif text-4xl font-bold">{article.nameEs}</h1>
-            <span
-              data-testid="article-category-badge"
-              className="bg-secondary text-bg-hero inline-block rounded-full px-3 py-1 text-sm font-medium"
-            >
-              {categoryLabel}
-            </span>
-            {article.snippet && <p className="text-muted-foreground text-lg">{article.snippet}</p>}
-          </div>
-        </>
+        /* Cualquier otra categoría: cabecera simple (fallback defensivo). */
+        <SimpleArticleHeader
+          title={article.nameEs}
+          categoryLabel={categoryLabel}
+          snippet={article.snippet}
+        />
       )}
 
       {/* Columna de lectura. En guías con secciones se acompaña de un índice (TOC)

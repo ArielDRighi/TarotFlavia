@@ -2,8 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 
 import { ArticleDetailView } from './ArticleDetailView';
+import { getAstroCategoryHero } from '@/lib/data/encyclopedia-editorial.data';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail } from '@/types/encyclopedia-article.types';
+
+// Use the real editorial data, but wrap getAstroCategoryHero in a spy so a single
+// test can simulate "asset not generated yet" and assert the band still renders.
+vi.mock('@/lib/data/encyclopedia-editorial.data', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/data/encyclopedia-editorial.data')>();
+  return {
+    ...actual,
+    getAstroCategoryHero: vi.fn(actual.getAstroCategoryHero),
+  };
+});
 
 // Mock react-markdown to avoid complex rendering in tests
 vi.mock('react-markdown', () => ({
@@ -365,14 +376,6 @@ describe('ArticleDetailView', () => {
       expect(screen.getByRole('heading', { level: 1, name: 'Guía del Tarot' })).toBeInTheDocument();
     });
 
-    it('should not render the ArticleHero for non-guide articles', () => {
-      render(
-        <ArticleDetailView article={createTestArticle({ category: ArticleCategory.ZODIAC_SIGN })} />
-      );
-
-      expect(screen.queryByTestId('article-hero')).not.toBeInTheDocument();
-    });
-
     it('should show the hero image configured for the tarot guide', () => {
       render(
         <ArticleDetailView
@@ -456,6 +459,70 @@ describe('ArticleDetailView', () => {
       );
 
       expect(screen.queryByTestId('article-toc')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Themed astrology hero (T-ENC-012)', () => {
+    const astroCategories: Array<[ArticleCategory, string]> = [
+      [ArticleCategory.ZODIAC_SIGN, 'astro-signos.webp'],
+      [ArticleCategory.PLANET, 'astro-planetas.webp'],
+      [ArticleCategory.ASTROLOGICAL_HOUSE, 'astro-casas.webp'],
+      [ArticleCategory.ELEMENT, 'astro-elementos.webp'],
+      [ArticleCategory.MODALITY, 'astro-modalidades.webp'],
+    ];
+
+    it.each(astroCategories)(
+      'renders the themed hero band with image for %s',
+      (category, filename) => {
+        render(
+          <ArticleDetailView
+            article={createTestArticle({ category, nameEs: 'Entidad', snippet: 'Descripción.' })}
+          />
+        );
+
+        expect(screen.getByTestId('article-hero')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { level: 1, name: 'Entidad' })).toBeInTheDocument();
+        expect(screen.getByTestId('next-image')).toHaveAttribute(
+          'src',
+          `/images/enciclopedia/${filename}`
+        );
+      }
+    );
+
+    it('uses a Spanish alt on the themed band image', () => {
+      render(
+        <ArticleDetailView article={createTestArticle({ category: ArticleCategory.ZODIAC_SIGN })} />
+      );
+
+      const alt = screen.getByTestId('next-image').getAttribute('alt') ?? '';
+      expect(alt.trim().length).toBeGreaterThan(0);
+      expect(alt).toMatch(/zodiacal/i);
+    });
+
+    it('does NOT activate the full editorial mode (no TOC) for astrology categories', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.PLANET,
+            content: '## 1. Influencia\n\nTexto.\n\n## 2. Mitología\n\nMás texto.',
+          })}
+        />
+      );
+
+      expect(screen.queryByTestId('article-toc')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the gradient band (no image) when the asset is not available yet', () => {
+      vi.mocked(getAstroCategoryHero).mockReturnValueOnce(undefined);
+
+      render(
+        <ArticleDetailView
+          article={createTestArticle({ category: ArticleCategory.ELEMENT, nameEs: 'Fuego' })}
+        />
+      );
+
+      expect(screen.getByTestId('article-hero')).toBeInTheDocument();
+      expect(screen.queryByTestId('next-image')).not.toBeInTheDocument();
     });
   });
 });

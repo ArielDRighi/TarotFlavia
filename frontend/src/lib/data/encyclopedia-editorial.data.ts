@@ -13,6 +13,8 @@
  * without parsing positions.
  */
 
+import { ArticleCategory } from '@/types/encyclopedia-article.types';
+
 const IMAGE_BASE = '/images/enciclopedia';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -389,4 +391,60 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
  */
 export function getArticleEditorial(slug: string): ArticleEditorial | undefined {
   return ARTICLE_EDITORIAL[slug];
+}
+
+// ─── Hero temático por categoría de astrología ──────────────────────────────────
+
+/**
+ * Generic themed hero image per astrology category (T-ENC-012).
+ *
+ * Scope decision (confirmed in the backlog): ONE generic image per category
+ * (~5 assets), not one per entity (signs, planets, houses, …). Less weight,
+ * immediate visual consistency. If per-entity granularity is later desired, the
+ * data here can be extended without touching the render.
+ *
+ * Assets follow §C.7 of `docs/BACKLOG_ENCICLOPEDIA_REDISENO_FASE_2.md` and the
+ * brand prompt formula (violet/indigo night + gold). They live in
+ * `public/images/enciclopedia/` as optimized WebP. Categories not present here
+ * fall back to the plain gradient band (no image) in `ArticleHero`.
+ */
+const ASTRO_CATEGORY_HERO: Partial<Record<ArticleCategory, EditorialImage>> = {
+  [ArticleCategory.ZODIAC_SIGN]: {
+    src: `${IMAGE_BASE}/astro-signos.webp`,
+    alt: 'Rueda zodiacal con los doce glifos de los signos brillando sobre un cosmos violeta profundo',
+  },
+  [ArticleCategory.PLANET]: {
+    src: `${IMAGE_BASE}/astro-planetas.webp`,
+    alt: 'Los planetas clásicos orbitando en un cosmos dorado luminoso',
+  },
+  [ArticleCategory.ASTROLOGICAL_HOUSE]: {
+    src: `${IMAGE_BASE}/astro-casas.webp`,
+    alt: 'Rueda astral dividida en doce casas brillantes sobre el horizonte de la Tierra',
+  },
+  [ArticleCategory.ELEMENT]: {
+    src: `${IMAGE_BASE}/astro-elementos.webp`,
+    alt: 'Los cuatro elementos —fuego, tierra, aire y agua— como símbolos dorados en equilibrio',
+  },
+  [ArticleCategory.MODALITY]: {
+    src: `${IMAGE_BASE}/astro-modalidades.webp`,
+    alt: 'Tres glifos de movimiento —cardinal, fijo y mutable— como formas doradas fluidas',
+  },
+};
+
+/**
+ * Whether a category shows a themed astrology hero band (as opposed to the
+ * activity guides or the plain header). Drives the band rendering independently
+ * of whether its image asset exists yet — categories without an image still get
+ * the gradient band.
+ */
+export function isAstroCategory(category: ArticleCategory): boolean {
+  return category in ASTRO_CATEGORY_HERO;
+}
+
+/**
+ * Returns the themed hero image for an astrology category, or `undefined` when
+ * the category has no image (caller falls back to the gradient band alone).
+ */
+export function getAstroCategoryHero(category: ArticleCategory): EditorialImage | undefined {
+  return ASTRO_CATEGORY_HERO[category];
 }

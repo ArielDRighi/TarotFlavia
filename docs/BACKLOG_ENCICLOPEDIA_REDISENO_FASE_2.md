@@ -121,6 +121,7 @@ sin `src` queda gracefully sin imagen de sección). El slug del horóscopo occid
 
 **Prioridad:** 🟡 Media · **Estimación:** 3 pts · **Dependencias:** T-ENC-014
 **Cubre:** signos, planetas, casas, elementos, modalidades sin identidad visual
+**Estado:** ✅ COMPLETADA
 
 > **Decisión de alcance (confirmada):** una imagen **genérica por categoría** (≈5 assets),
 > no una por entidad. Menos peso, consistencia inmediata; si más adelante se quiere granularidad
@@ -128,20 +129,28 @@ sin `src` queda gracefully sin imagen de sección). El slug del horóscopo occid
 
 #### ✅ Tareas específicas
 
-- [ ] Mapa `categoría → { src, alt }` para `zodiac_sign`, `planet`, `astro_house`, `element`,
+- [x] Mapa `categoría → { src, alt }` para `zodiac_sign`, `planet`, `astro_house`, `element`,
       `modality` (assets `astro-*.webp` de §C).
-- [ ] Mostrar un hero/banda temática en el detalle de esas categorías **sin** activar el modo
+- [x] Mostrar un hero/banda temática en el detalle de esas categorías **sin** activar el modo
       editorial completo de guías (cabecera con imagen, no drop-cap/badges numerados), evitando
       regresión de contenido.
-- [ ] `alt` en español; contraste AA del texto sobre la banda.
-- [ ] Tests (render del hero por categoría, alt, fallback a banda sin imagen).
-- [ ] Coverage ≥ 80%.
+- [x] `alt` en español; contraste AA del texto sobre la banda.
+- [x] Tests (render del hero por categoría, alt, fallback a banda sin imagen).
+- [x] Coverage ≥ 80% (alcanzado 96% statements / 90.6% branch en ArticleDetailView; 100% en la data).
 
 #### 📁 Archivos
 
-- `frontend/src/components/features/encyclopedia/ArticleDetailView.tsx`
-- (posible) nuevo mapa de assets en `encyclopedia-editorial.data.ts` o archivo hermano
-- tests correspondientes
+- `frontend/src/components/features/encyclopedia/ArticleDetailView.tsx` (reutiliza `ArticleHero`
+  para la banda temática; extrae `SimpleArticleHeader` como fallback defensivo).
+- `frontend/src/lib/data/encyclopedia-editorial.data.ts` (nuevo mapa `ASTRO_CATEGORY_HERO` +
+  helpers `isAstroCategory` / `getAstroCategoryHero`).
+- `frontend/public/images/enciclopedia/astro-{signos,planetas,casas,elementos,modalidades}.webp`
+  (placeholders provisionales hasta que T-ENC-014 genere los assets definitivos).
+- Tests: `ArticleDetailView.test.tsx`, `encyclopedia-editorial.data.test.ts`.
+
+> **Nota:** los 5 `astro-*.webp` son placeholders (copia de `hub-astrologia.webp`) hasta que
+> T-ENC-014 genere las imágenes definitivas según la fórmula base de §C.7. El render degrada a
+> la banda con gradiente sola si un asset llegara a faltar.
 
 ---
 
