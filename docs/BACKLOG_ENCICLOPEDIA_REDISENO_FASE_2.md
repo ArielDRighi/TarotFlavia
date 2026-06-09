@@ -101,19 +101,30 @@ sin `src` queda gracefully sin imagen de sección). El slug del horóscopo occid
 
 **Prioridad:** 🟡 Media · **Estimación:** 1.5 pts · **Dependencias:** T-ENC-014
 **Cubre:** fallback de gradiente en `/enciclopedia/guias`
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Poblar `GUIDE_THEME` (`GuiasContent.tsx`) con el asset de cada categoría (reutilizar el
+- [x] Poblar `GUIDE_THEME` (`GuiasContent.tsx`) con el asset de cada categoría (reutilizar el
       hero de cada guía como thumbnail), eliminando la dependencia del fallback `✦` salvo como
       red de seguridad.
-- [ ] Conservar `resolveThumbnail` (prioridad a `imageUrl` del backend si existiera) y el orden.
-- [ ] Tests (cada tarjeta con su imagen, alt, href).
-- [ ] Coverage ≥ 80%.
+- [x] Conservar `resolveThumbnail` (prioridad a `imageUrl` del backend si existiera) y el orden.
+- [x] Tests (cada tarjeta con su imagen, alt, href).
+- [x] Coverage ≥ 80% (alcanzado 100% statements / 91.66% branch en `GuiasContent.tsx`).
 
 #### 📁 Archivos
 
-- `frontend/src/components/features/encyclopedia/GuiasContent.tsx` (+ test)
+- `frontend/src/components/features/encyclopedia/GuiasContent.tsx` (pobladas las 7 entradas de
+  `GUIDE_THEME`; `resolveThumbnail`/`GuiaCard` exportados para testear la red de seguridad).
+- `frontend/src/components/features/encyclopedia/GuiasContent.test.tsx` (nuevo, 13 tests).
+- `frontend/src/app/enciclopedia/guias/page.test.tsx` (ajustado el test de numerología: ahora
+  muestra su hero temático en vez del fallback).
+- `frontend/public/images/enciclopedia/guia-{numerologia,pendulo,carta-astral,rituales,horoscopo,horoscopo-chino}-hero.webp`
+  (placeholders provisionales —copia de `hub-guias.webp`— hasta que T-ENC-014 genere los assets
+  definitivos según §C; el reemplazo no requiere cambios de código).
+
+> **Nota:** los 6 heroes no-tarot son placeholders idénticos hasta T-ENC-014. El render degrada al
+> fallback `✦` solo si un asset llegara a faltar o para categorías no-guía (red de seguridad).
 
 ---
 
