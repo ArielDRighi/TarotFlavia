@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 
-import { getArticleEditorial } from './encyclopedia-editorial.data';
+import {
+  getArticleEditorial,
+  getAstroCategoryHero,
+  isAstroCategory,
+} from './encyclopedia-editorial.data';
+import { ArticleCategory } from '@/types/encyclopedia-article.types';
 
 // ─── Tarot (existente — sin regresión) ─────────────────────────────────────
 
@@ -155,5 +160,42 @@ describe('getArticleEditorial – spot-checks de src de sección', () => {
     expect(ed?.sections?.[4]?.image?.src).toBe(
       '/images/enciclopedia/horoscopo-chino-compatibilidad.webp'
     );
+  });
+});
+
+// ─── Hero temático por categoría de astrología (T-ENC-012) ──────────────────
+
+describe('isAstroCategory', () => {
+  it('debe ser true para las cinco categorías de astrología', () => {
+    expect(isAstroCategory(ArticleCategory.ZODIAC_SIGN)).toBe(true);
+    expect(isAstroCategory(ArticleCategory.PLANET)).toBe(true);
+    expect(isAstroCategory(ArticleCategory.ASTROLOGICAL_HOUSE)).toBe(true);
+    expect(isAstroCategory(ArticleCategory.ELEMENT)).toBe(true);
+    expect(isAstroCategory(ArticleCategory.MODALITY)).toBe(true);
+  });
+
+  it('debe ser false para guías y otras categorías', () => {
+    expect(isAstroCategory(ArticleCategory.GUIDE_TAROT)).toBe(false);
+    expect(isAstroCategory(ArticleCategory.GUIDE_NUMEROLOGY)).toBe(false);
+  });
+});
+
+describe('getAstroCategoryHero', () => {
+  const cases: Array<[ArticleCategory, string]> = [
+    [ArticleCategory.ZODIAC_SIGN, 'astro-signos.webp'],
+    [ArticleCategory.PLANET, 'astro-planetas.webp'],
+    [ArticleCategory.ASTROLOGICAL_HOUSE, 'astro-casas.webp'],
+    [ArticleCategory.ELEMENT, 'astro-elementos.webp'],
+    [ArticleCategory.MODALITY, 'astro-modalidades.webp'],
+  ];
+
+  it.each(cases)('%s → asset %s con alt en español', (category, filename) => {
+    const hero = getAstroCategoryHero(category);
+    expect(hero?.src).toBe(`/images/enciclopedia/${filename}`);
+    expect(hero?.alt.trim().length).toBeGreaterThan(0);
+  });
+
+  it('debe devolver undefined para categorías sin hero temático (fallback a banda)', () => {
+    expect(getAstroCategoryHero(ArticleCategory.GUIDE_TAROT)).toBeUndefined();
   });
 });
