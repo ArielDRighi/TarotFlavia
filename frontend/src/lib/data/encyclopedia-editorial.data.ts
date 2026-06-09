@@ -171,7 +171,7 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
       1: {
         image: {
           src: `${IMAGE_BASE}/pendulo-historia.webp`,
-          alt: 'Varillas de radiestesia antiguas y péndulo de latón sobre pergamino envejecido, ambiente mísitco vintage',
+          alt: 'Varillas de radiestesia antiguas y péndulo de latón sobre pergamino envejecido, ambiente místico vintage',
           width: 640,
           height: 794,
         },
@@ -306,7 +306,7 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
   // ─── Guía de Horóscopo Occidental ─────────────────────────────────────────
   'guia-horoscopo-occidental': {
     hero: {
-      src: `${IMAGE_BASE}/guia-horoscopo-hero.webp`,
+      src: `${IMAGE_BASE}/guia-horoscopo-occidental-hero.webp`,
       alt: 'Rueda zodiacal completa con doce glifos de signos brillantes y finas líneas de constelaciones',
     },
     sections: {
