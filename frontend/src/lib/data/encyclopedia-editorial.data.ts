@@ -124,8 +124,8 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
         image: {
           src: `${IMAGE_BASE}/numerologia-pitagoras.webp`,
           alt: 'Filósofo griego antiguo contemplando números dorados sobre un templo de mármol, atmósfera mística clásica',
-          width: 640,
-          height: 794,
+          width: 1000,
+          height: 558,
         },
       },
       2: {
@@ -174,8 +174,8 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
         image: {
           src: `${IMAGE_BASE}/pendulo-historia.webp`,
           alt: 'Varillas de radiestesia antiguas y péndulo de latón sobre pergamino envejecido, ambiente místico vintage',
-          width: 640,
-          height: 794,
+          width: 1000,
+          height: 558,
         },
       },
       2: {
