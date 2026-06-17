@@ -224,8 +224,8 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
         image: {
           src: `${IMAGE_BASE}/carta-astral-requisitos.webp`,
           alt: 'Certificado de nacimiento, globo terráqueo y reloj antiguo irradiando luz, los datos del origen del alma',
-          width: 640,
-          height: 794,
+          width: 1000,
+          height: 558,
         },
       },
       2: {
@@ -274,8 +274,8 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
         image: {
           src: `${IMAGE_BASE}/rituales-espacio.webp`,
           alt: 'Círculo brillante de sal y velas formando un espacio sagrado protegido',
-          width: 640,
-          height: 794,
+          width: 1000,
+          height: 558,
         },
       },
       2: {
@@ -308,7 +308,7 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
   // ─── Guía de Horóscopo Occidental ─────────────────────────────────────────
   'guia-horoscopo-occidental': {
     hero: {
-      src: `${IMAGE_BASE}/guia-horoscopo-occidental-hero.webp`,
+      src: `${IMAGE_BASE}/guia-horoscopo-hero.webp`,
       alt: 'Rueda zodiacal completa con doce glifos de signos brillantes y finas líneas de constelaciones',
     },
     sections: {
@@ -316,8 +316,8 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
         image: {
           src: `${IMAGE_BASE}/horoscopo-elementos.webp`,
           alt: 'Los cuatro símbolos elementales (fuego, tierra, aire, agua) en trazo dorado fino sobre cosmos violeta',
-          width: 640,
-          height: 794,
+          width: 1000,
+          height: 558,
         },
       },
       2: {
@@ -350,8 +350,8 @@ const ARTICLE_EDITORIAL: Record<string, ArticleEditorial> = {
         image: {
           src: `${IMAGE_BASE}/horoscopo-chino-carrera.webp`,
           alt: 'Los doce animales zodiacales corriendo a través de un río mítico bajo un cielo dorado',
-          width: 640,
-          height: 794,
+          width: 1000,
+          height: 558,
         },
       },
       2: {
