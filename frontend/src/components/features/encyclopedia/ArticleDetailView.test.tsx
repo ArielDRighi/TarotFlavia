@@ -228,7 +228,11 @@ describe('ArticleDetailView', () => {
       ];
       render(
         <ArticleDetailView
-          article={createTestArticle({ nameEs: 'Artículo Base', relatedArticles })}
+          article={createTestArticle({
+            nameEs: 'Artículo Base',
+            relatedArticles,
+            content: 'Descripción base.',
+          })}
         />
       );
 
@@ -523,6 +527,28 @@ describe('ArticleDetailView', () => {
       );
 
       expect(screen.getByTestId('article-toc')).toBeInTheDocument();
+    });
+
+    it('renders the TOC for astrology articles with unnumbered H2 sections (real article format)', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.PLANET,
+            content:
+              '# Sol\n\n## Significado Astrológico\n\nTexto.\n\n## Palabras Clave\n\nMás texto.',
+          })}
+        />
+      );
+
+      const toc = screen.getByTestId('article-toc');
+      expect(toc).toBeInTheDocument();
+      expect(
+        within(toc).getAllByRole('link', { name: /Significado Astrológico/ })[0]
+      ).toHaveAttribute('href', '#seccion-1');
+      expect(within(toc).getAllByRole('link', { name: /Palabras Clave/ })[0]).toHaveAttribute(
+        'href',
+        '#seccion-2'
+      );
     });
 
     it('does NOT activate the full editorial mode for astrology (no drop-cap, no numbered section badges)', () => {

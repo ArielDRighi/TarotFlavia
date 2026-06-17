@@ -19,6 +19,7 @@ import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article
 import { cn } from '@/lib/utils';
 import {
   extractArticleHeadings,
+  extractAstroHeadings,
   getArticleReadingMeta,
   stripLeadingMarkdownHeading,
 } from '@/lib/utils/text';
@@ -188,9 +189,9 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
   const cta = GUIDE_CTA_MAP[article.category];
   const isGuide = isGuideCategory(article.category);
   // Astrology categories (signs, planets, houses, elements, modalities) get a
-  // themed hero band — but NOT the full editorial guide mode (no drop-cap, no
-  // numbered badges, no TOC). The image is optional: when absent, ArticleHero
-  // renders the gradient band on its own.
+  // themed hero band and a TOC when the article has H2 sections — but NOT the
+  // full editorial mode (no drop-cap, no numbered badges). The image is optional:
+  // when absent, ArticleHero renders the gradient band on its own.
   const isAstro = !isGuide && isAstroCategory(article.category);
   const astroHero = isAstro ? getAstroCategoryHero(article.category) : undefined;
   const editorial = getArticleEditorial(article.slug);
@@ -198,8 +199,17 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
   // Memoized so the array identity is stable across re-renders: ArticleToc keys
   // its IntersectionObserver effect on `headings`, so a fresh array each render
   // would tear down and rebuild the observer needlessly.
+  //
+  // Guides: only numbered H2s (`## N. Título`) become TOC entries.
+  // Astro: all H2s (numbered or not) are indexed sequentially — real astro
+  // articles use unnumbered thematic H2s (e.g. `## Significado Astrológico`).
   const headings = useMemo(
-    () => (isGuide || isAstro ? extractArticleHeadings(article.content) : []),
+    () =>
+      isGuide
+        ? extractArticleHeadings(article.content)
+        : isAstro
+          ? extractAstroHeadings(article.content)
+          : [],
     [isGuide, isAstro, article.content]
   );
   const hasToc = headings.length > 0;
@@ -218,6 +228,7 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
       <MarkdownArticle
         content={stripLeadingMarkdownHeading(article.content)}
         editorial={isGuide}
+        astro={isAstro}
         sections={editorial?.sections}
         className={cn(isGuide && 'max-w-none')}
       />
