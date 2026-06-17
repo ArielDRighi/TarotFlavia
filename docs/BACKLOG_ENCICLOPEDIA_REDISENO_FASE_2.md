@@ -201,17 +201,19 @@ sin `src` queda gracefully sin imagen de sección). El slug del horóscopo occid
 
 **Prioridad:** 🟠 Alta · **Estimación:** 3 pts · **Dependencias:** ninguna (habilita 010/012/013)
 
+**Estado:** ✅ COMPLETADA
+
 #### ✅ Tareas específicas
 
-- [ ] Generar con IA todas las imágenes de §C usando la **fórmula base** (§6 del feedback).
-- [ ] Paleta violeta/índigo + dorado, `no text`, coherentes con `hero-bg.webp` / `tarot-cards.webp`.
-- [ ] Exportar a **WebP** (seguir `frontend/docs/IMAGE_OPTIMIZATION.md`): heros ~1792px,
+- [x] Generar con IA todas las imágenes de §C usando la **fórmula base** (§6 del feedback).
+- [x] Paleta violeta/índigo + dorado, `no text`, coherentes con `hero-bg.webp` / `tarot-cards.webp`.
+- [x] Exportar a **WebP** (seguir `frontend/docs/IMAGE_OPTIMIZATION.md`): heros ~1792px,
       secciones ~1000px, laterales 4:5 ~640px.
-- [ ] Nombres semánticos según §C; guardar en `frontend/public/images/enciclopedia/`.
+- [x] Nombres semánticos según §C; guardar en `frontend/public/images/enciclopedia/`.
 
 #### 🎯 Criterios de aceptación
 
-- Set completo disponible y optimizado; peso por imagen acorde a la guía de optimización.
+- [x] Set completo disponible y optimizado; peso por imagen acorde a la guía de optimización.
 
 ---
 
