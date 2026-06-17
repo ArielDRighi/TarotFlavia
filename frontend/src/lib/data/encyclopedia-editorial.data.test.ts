@@ -112,7 +112,7 @@ describe('getArticleEditorial – guia-rituales', () => {
 });
 
 describe('getArticleEditorial – guia-horoscopo-occidental', () => {
-  assertGuideEditorial('guia-horoscopo-occidental', 'guia-horoscopo-occidental-hero.webp', 3);
+  assertGuideEditorial('guia-horoscopo-occidental', 'guia-horoscopo-hero.webp', 3);
 });
 
 describe('getArticleEditorial – guia-horoscopo-chino', () => {
