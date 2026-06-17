@@ -30,6 +30,12 @@ export interface MarkdownArticleProps {
    */
   editorial?: boolean;
   /**
+   * Enable astro mode: adds sequential anchor IDs (`seccion-N`) to H2 headings
+   * so `ArticleToc`'s scroll-spy can track them. Does not activate drop-cap or
+   * numbered badges. Ignored when `editorial` is true.
+   */
+  astro?: boolean;
+  /**
    * Per-section editorial resources (image and/or callout), keyed by the H2
    * section number. Only used when `editorial` is enabled; the matching section's
    * assets are injected right after its heading.
@@ -168,6 +174,31 @@ function splitHeadingNumber(children: React.ReactNode): {
 }
 
 /**
+ * Builds the astro component map: extends the base typography by adding
+ * sequential anchor IDs (`seccion-N`) to each H2 so `ArticleToc`'s
+ * IntersectionObserver can track them. No drop-cap, no badges, no separators.
+ * A closure counter resets on every `useMemo` rebuild (content change), keeping
+ * IDs in sync with `extractAstroHeadings`.
+ */
+function buildAstroComponents(): Components {
+  let headingIndex = 0;
+  return {
+    ...MARKDOWN_COMPONENTS,
+    h2: ({ children }) => {
+      headingIndex += 1;
+      return (
+        <h2
+          id={getSectionAnchorId(headingIndex)}
+          className="text-foreground border-secondary/30 mt-12 mb-5 scroll-mt-24 border-b pb-2 font-serif text-3xl leading-snug font-bold first:mt-0"
+        >
+          {children}
+        </h2>
+      );
+    },
+  };
+}
+
+/**
  * Builds the editorial component map: extends the base typography with numbered
  * gold H2 badges, `✦` thematic separators, and the injection of per-section
  * images/callouts right after their heading.
@@ -248,10 +279,21 @@ function buildEditorialComponents(sections?: Record<number, EditorialSection>): 
  * <MarkdownArticle content={article.content} />
  * ```
  */
-export function MarkdownArticle({ content, className, editorial, sections }: MarkdownArticleProps) {
+export function MarkdownArticle({
+  content,
+  className,
+  editorial,
+  astro,
+  sections,
+}: MarkdownArticleProps) {
   const components = useMemo(
-    () => (editorial ? buildEditorialComponents(sections) : MARKDOWN_COMPONENTS),
-    [editorial, sections]
+    () =>
+      editorial
+        ? buildEditorialComponents(sections)
+        : astro
+          ? buildAstroComponents()
+          : MARKDOWN_COMPONENTS,
+    [editorial, astro, sections]
   );
 
   return (

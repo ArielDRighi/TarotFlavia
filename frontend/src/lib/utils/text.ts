@@ -141,3 +141,33 @@ export function extractArticleHeadings(content: string): ArticleHeading[] {
   }
   return headings;
 }
+
+/** Matches any second-level heading (`## Title`), ignoring `#`/`###`. */
+const ASTRO_HEADING_RE = /^##(?!#)[ \t]+(.+?)[ \t]*$/gm;
+
+/**
+ * Extracts table-of-contents entries from astrology article Markdown.
+ *
+ * Unlike {@link extractArticleHeadings}, this matches all H2s (numbered or not)
+ * and assigns sequential numbers (1, 2, 3…). The resulting `id` values are built
+ * with {@link getSectionAnchorId} and match the anchors injected by the astro
+ * rendering path in `MarkdownArticle` (`astro` prop).
+ *
+ * @param content - Raw Markdown content
+ * @example
+ * extractAstroHeadings('## Significado\n\nTexto.\n\n## Mitología\n\nMás.')
+ * // [{ id: 'seccion-1', number: 1, label: 'Significado' }, { id: 'seccion-2', ... }]
+ */
+export function extractAstroHeadings(content: string): ArticleHeading[] {
+  const headings: ArticleHeading[] = [];
+  let number = 0;
+  for (const match of content.matchAll(ASTRO_HEADING_RE)) {
+    number += 1;
+    headings.push({
+      id: getSectionAnchorId(number),
+      number,
+      label: stripInlineMarkdown(match[1]),
+    });
+  }
+  return headings;
+}

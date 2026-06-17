@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   extractArticleHeadings,
+  extractAstroHeadings,
   getArticleReadingMeta,
   getInitials,
   getSectionAnchorId,
@@ -170,5 +171,44 @@ describe('extractArticleHeadings', () => {
   it('should return an empty array for content without numbered sections', () => {
     expect(extractArticleHeadings('# Solo título\n\nUn párrafo.')).toEqual([]);
     expect(extractArticleHeadings('')).toEqual([]);
+  });
+});
+
+describe('extractAstroHeadings', () => {
+  it('should extract unnumbered H2 headings with sequential numbers', () => {
+    const content =
+      '# Sol\n\nIntro.\n\n## Significado Astrológico\n\nTexto.\n\n## Palabras Clave\n\nMás texto.';
+
+    expect(extractAstroHeadings(content)).toEqual([
+      { id: 'seccion-1', number: 1, label: 'Significado Astrológico' },
+      { id: 'seccion-2', number: 2, label: 'Palabras Clave' },
+    ]);
+  });
+
+  it('should ignore the leading top-level heading (#)', () => {
+    const content = '# Sol\n\n## Significado\n\nTexto.';
+    expect(extractAstroHeadings(content)).toEqual([
+      { id: 'seccion-1', number: 1, label: 'Significado' },
+    ]);
+  });
+
+  it('should ignore third-level headings (###)', () => {
+    const content = '## Carácter\n\n### Subgrado\n\nTexto.\n\n## Elemento\n\nMás texto.';
+    expect(extractAstroHeadings(content)).toEqual([
+      { id: 'seccion-1', number: 1, label: 'Carácter' },
+      { id: 'seccion-2', number: 2, label: 'Elemento' },
+    ]);
+  });
+
+  it('should strip inline markdown from labels', () => {
+    const content = '## **Significado** Astrológico\n\nTexto.';
+    expect(extractAstroHeadings(content)).toEqual([
+      { id: 'seccion-1', number: 1, label: 'Significado Astrológico' },
+    ]);
+  });
+
+  it('should return empty array for content without H2 headings', () => {
+    expect(extractAstroHeadings('# Solo título\n\nUn párrafo.')).toEqual([]);
+    expect(extractAstroHeadings('')).toEqual([]);
   });
 });
