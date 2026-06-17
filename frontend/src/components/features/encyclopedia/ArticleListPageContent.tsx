@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 
+import { ArticleHero } from './ArticleHero';
 import { useArticlesByCategory } from '@/hooks/api/useEncyclopediaArticles';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArticleCategory } from '@/types/encyclopedia-article.types';
+import { getAstroCategoryHero, isAstroCategory } from '@/lib/data/encyclopedia-editorial.data';
+import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -49,8 +51,10 @@ function ArticleListItem({ article, detailHref }: ArticleListItemProps) {
 /**
  * ArticleListPageContent
  *
- * Shared client component for article list pages (signos, planetas, casas,
- * guías). Fetches articles by category and renders a navigable list.
+ * Shared client component for article list pages (signos, planetas, casas).
+ * Fetches articles by category and renders a navigable list. For astrology
+ * categories, renders a themed hero band above the list using the category's
+ * generic image; for other categories, falls back to a plain text header.
  */
 export function ArticleListPageContent({
   category,
@@ -60,32 +64,48 @@ export function ArticleListPageContent({
 }: ArticleListPageContentProps) {
   const { data: articles, isLoading } = useArticlesByCategory(category);
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="mb-2 font-serif text-3xl font-bold">{title}</h1>
-        <p className="text-muted-foreground">{subtitle}</p>
-      </div>
+  const isAstro = isAstroCategory(category);
+  const heroImage = isAstro ? getAstroCategoryHero(category) : undefined;
 
-      {/* List */}
-      {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-lg" />
-          ))}
-        </div>
+  return (
+    <div data-testid="article-list-page">
+      {/* Banda hero temática para categorías de astrología */}
+      {isAstro ? (
+        <ArticleHero
+          category={ARTICLE_CATEGORY_LABELS[category]}
+          title={title}
+          lead={subtitle}
+          image={heroImage}
+        />
       ) : (
-        <div className="flex flex-col gap-3">
-          {(articles ?? []).map((article) => (
-            <ArticleListItem
-              key={article.id}
-              article={article}
-              detailHref={`${detailHrefPrefix}/${article.slug}`}
-            />
-          ))}
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="mb-2 font-serif text-3xl font-bold">{title}</h1>
+            <p className="text-muted-foreground">{subtitle}</p>
+          </div>
         </div>
       )}
+
+      {/* Lista de artículos */}
+      <div className="container mx-auto px-4 py-8">
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {(articles ?? []).map((article) => (
+              <ArticleListItem
+                key={article.id}
+                article={article}
+                detailHref={`${detailHrefPrefix}/${article.slug}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

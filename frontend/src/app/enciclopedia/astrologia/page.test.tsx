@@ -22,6 +22,12 @@ vi.mock('next/link', () => ({
   ),
 }));
 
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="next-image" />
+  ),
+}));
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('AstrologiaPage (/enciclopedia/astrologia)', () => {

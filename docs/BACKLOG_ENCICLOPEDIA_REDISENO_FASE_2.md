@@ -321,3 +321,25 @@ sin `src` queda gracefully sin imagen de sección). El slug del horóscopo occid
   centralizados; `alt` en español en toda imagen nueva.
 - Reutilizar `ArticleHero`, `MarkdownArticle`, `Reveal` y la data `encyclopedia-editorial.data.ts`
   de la Fase 1 — **no** crear infraestructura nueva salvo lo estrictamente necesario (T-ENC-012/013).
+
+---
+
+### T-ENC-015: Layout y TOC para artículos de astrología + rediseño hubs
+
+**Prioridad:** 🟡 Media · **Estimación:** 2 pts · **Dependencias:** T-ENC-012, T-ENC-014
+**Estado:** ✅ COMPLETADA
+
+#### ✅ Tareas específicas
+
+- [x] `ArticleDetailView`: extraer headings también para `isAstro` (no solo guides)
+- [x] `ArticleDetailView`: aplicar columna centrada (max-w-[68ch]) + TOC lateral a artículos astro con secciones H2
+- [x] `AstrologyHubContent`: nuevo componente hub con banda de marca + tarjetas temáticas (astro-signos/planetas/casas.webp)
+- [x] `AstrologiaPage`: refactorizada para usar `AstrologyHubContent`
+- [x] `ArticleListPageContent`: banda hero temática para categorías astro vía `ArticleHero` + `getAstroCategoryHero`
+- [x] Tests actualizados (TOC para astro, hub con imágenes)
+
+#### 🎯 Criterios de aceptación
+
+- [x] `/enciclopedia/astrologia` muestra diseño de marca igual al hub principal
+- [x] `/enciclopedia/astrologia/planetas` muestra banda hero temática
+- [x] `/enciclopedia/astrologia/planetas/sol` muestra columna centrada + TOC lateral

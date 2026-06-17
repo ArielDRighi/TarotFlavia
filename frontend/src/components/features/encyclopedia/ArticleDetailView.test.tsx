@@ -434,12 +434,25 @@ describe('ArticleDetailView', () => {
       );
     });
 
-    it('should not render the TOC for non-guide articles', () => {
+    it('should render the TOC for astrology articles with H2 sections', () => {
       render(
         <ArticleDetailView
           article={createTestArticle({
             category: ArticleCategory.ZODIAC_SIGN,
-            content: '## 1. Carácter\n\nTexto.',
+            content: '## 1. Carácter\n\nTexto.\n\n## 2. Elemento\n\nMás texto.',
+          })}
+        />
+      );
+
+      expect(screen.getByTestId('article-toc')).toBeInTheDocument();
+    });
+
+    it('should not render the TOC for non-guide/non-astro articles without headings', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.ZODIAC_SIGN,
+            content: 'Solo texto sin secciones H2.',
           })}
         />
       );
@@ -499,7 +512,7 @@ describe('ArticleDetailView', () => {
       expect(alt).toMatch(/zodiacal/i);
     });
 
-    it('does NOT activate the full editorial mode (no TOC) for astrology categories', () => {
+    it('renders the TOC for astrology categories that have H2 sections', () => {
       render(
         <ArticleDetailView
           article={createTestArticle({
@@ -509,7 +522,20 @@ describe('ArticleDetailView', () => {
         />
       );
 
-      expect(screen.queryByTestId('article-toc')).not.toBeInTheDocument();
+      expect(screen.getByTestId('article-toc')).toBeInTheDocument();
+    });
+
+    it('does NOT activate the full editorial mode for astrology (no drop-cap, no numbered section badges)', () => {
+      render(
+        <ArticleDetailView
+          article={createTestArticle({
+            category: ArticleCategory.PLANET,
+            content: '## 1. Influencia\n\nTexto.',
+          })}
+        />
+      );
+
+      expect(screen.queryByTestId('section-badge')).not.toBeInTheDocument();
     });
 
     it('falls back to the gradient band (no image) when the asset is not available yet', () => {

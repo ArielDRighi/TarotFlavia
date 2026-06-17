@@ -199,8 +199,8 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
   // its IntersectionObserver effect on `headings`, so a fresh array each render
   // would tear down and rebuild the observer needlessly.
   const headings = useMemo(
-    () => (isGuide ? extractArticleHeadings(article.content) : []),
-    [isGuide, article.content]
+    () => (isGuide || isAstro ? extractArticleHeadings(article.content) : []),
+    [isGuide, isAstro, article.content]
   );
   const hasToc = headings.length > 0;
   const hasRelatedTarotCards =
@@ -294,10 +294,11 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
         />
       )}
 
-      {/* Columna de lectura. En guías con secciones se acompaña de un índice (TOC)
-          lateral en desktop / colapsable en mobile; el hero va a ancho completo
-          arriba. El resto de artículos conserva su flujo simple. */}
-      {isGuide ? (
+      {/* Columna de lectura. En guías y artículos de astrología se centra en
+          una columna de lectura (max-w-[68ch]) con TOC lateral opcional en
+          desktop cuando el artículo tiene secciones H2. El resto de artículos
+          conserva su flujo simple. */}
+      {isGuide || isAstro ? (
         <div className="lg:flex lg:items-start lg:justify-center lg:gap-10">
           {hasToc && (
             <ArticleToc
