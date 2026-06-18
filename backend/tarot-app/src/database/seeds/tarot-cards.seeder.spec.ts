@@ -480,7 +480,7 @@ describe('TarotCards Seeder', () => {
       });
     });
 
-    it('should have valid imageUrl for all cards', async () => {
+    it('should have valid local WebP imageUrl for all cards', async () => {
       jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
       const saveSpy = jest
         .spyOn(
@@ -498,7 +498,29 @@ describe('TarotCards Seeder', () => {
       savedCards.forEach((card) => {
         expect(card.imageUrl).toBeDefined();
         expect(card.imageUrl.trim()).not.toBe('');
-        expect(card.imageUrl).toMatch(/^https?:\/\/.+/);
+        expect(card.imageUrl).toMatch(/^\/images\/tarot\/.+\.webp$/);
+        expect(card.imageUrl).not.toMatch(/^https?:\/\//);
+      });
+    });
+
+    it('should not use Wikimedia or external URLs for card images', async () => {
+      jest.spyOn(cardRepository, 'count').mockResolvedValue(0);
+      const saveSpy = jest
+        .spyOn(
+          cardRepository as unknown as {
+            save: (cards: TarotCard[]) => Promise<TarotCard[]>;
+          },
+          'save',
+        )
+        .mockImplementation((cards) => Promise.resolve(cards));
+
+      await seedTarotCards(cardRepository, deckRepository);
+
+      const savedCards = saveSpy.mock.calls[0][0];
+
+      savedCards.forEach((card) => {
+        expect(card.imageUrl).not.toContain('wikimedia.org');
+        expect(card.imageUrl).not.toContain('upload.wikimedia');
       });
     });
 

@@ -23,8 +23,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Loco',
     number: 0,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg',
+    imageUrl: '/images/tarot/the-fool.webp',
     meaningUpright:
       'Nuevos comienzos, aventuras personales, oportunidades, desafíos, inocencia, espíritu libre, espontaneidad.',
     meaningReversed:
@@ -37,8 +36,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Mago',
     number: 1,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/de/RWS_Tarot_01_Magician.jpg',
+    imageUrl: '/images/tarot/the-magician.webp',
     meaningUpright:
       'Invita a creer en las ideas y proyectos, a ponerse en acción. Habla de poseer la habilidad, el talento y la capacidad de manifestar todo aquello que se ha deseado. Invita a tomar las riendas de la vida en tus manos.',
     meaningReversed:
@@ -52,8 +50,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Sacerdotisa',
     number: 2,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/8/88/RWS_Tarot_02_High_Priestess.jpg',
+    imageUrl: '/images/tarot/the-high-priestess.webp',
     meaningUpright:
       'Intuición, sabiduría, serenidad, conocimiento, comprensión, escucha, confianza en la voz interior. Momento de descubrimiento interno, invita a pensar antes de actuar, a tomarse un momento para reflexionar.',
     meaningReversed:
@@ -67,8 +64,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Emperatriz',
     number: 3,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/d2/RWS_Tarot_03_Empress.jpg',
+    imageUrl: '/images/tarot/the-empress.webp',
     meaningUpright:
       'Productividad, fecundidad, abundancia, buena cosecha, belleza, sensualidad. Puede representar figuras femeninas del consultante. Momento para el amor, definición en las relaciones, armonía, equilibrio, relación llena de amor y sensualidad.',
     meaningReversed:
@@ -82,8 +78,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Emperador',
     number: 4,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/c/c3/RWS_Tarot_04_Emperor.jpg',
+    imageUrl: '/images/tarot/the-emperor.webp',
     meaningUpright:
       'Líder natural, persona de negocios estructurada que le cuesta mostrar sus emociones. Invita a tomarse un tiempo para el pensamiento estratégico y analítico. Su prioridad se centra en lo material y el trabajo. Invita a tomar acción pero con riesgo calculado.',
     meaningReversed:
@@ -97,8 +92,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Papa (El Hierofante)',
     number: 5,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/8/8d/RWS_Tarot_05_Hierophant.jpg',
+    imageUrl: '/images/tarot/the-hierophant.webp',
     meaningUpright:
       'Tradicionalismo, apego a lo convencional. Representa un mentor, guía, maestro espiritual o alguien con conocimientos específicos. Tiempo para tener fe, iluminación, despertar, encontrar el propio camino, transformación y trascendencia. Impulso por buscar conocimiento más allá de lo material.',
     meaningReversed:
@@ -112,8 +106,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'Los Amantes',
     number: 6,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_06_Lovers.jpg',
+    imageUrl: '/images/tarot/the-lovers.webp',
     meaningUpright:
       'Necesidad de realizar una decisión crucial en nuestras vidas, buen augurio en las relaciones afectivas. Etapas de conciliación, armonía y dicha. Se anuncia la llegada de un nuevo amor. En lo económico, momento de ganancia moderada.',
     meaningReversed:
@@ -126,8 +119,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Carro',
     number: 7,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
+    imageUrl: '/images/tarot/the-chariot.webp',
     meaningUpright:
       'Éxito, recuperación, buen momento, buenos resultados. Requiere prestar atención plena con los cinco sentidos para lograr los objetivos. Buen augurio de rápidos resultados o avances importantes tanto en lo económico como laboral. En el amor, tentación de ir demasiado rápido o precipitarse.',
     meaningReversed:
@@ -140,8 +132,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Fuerza',
     number: 8,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg',
+    imageUrl: '/images/tarot/strength.webp',
     meaningUpright:
       'Invita a afrontar con serenidad las situaciones, fortaleza interior, dominar impulsos y a sí mismo. En la pareja, habla de un buen momento, fortaleza y amor, paciencia y comprensión. Momento para corregir malos hábitos, vitalidad y energía, buen augurio, las cosas comienzan a mejorar.',
     meaningReversed:
@@ -154,8 +145,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Ermitaño',
     number: 9,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/4/4d/RWS_Tarot_09_Hermit.jpg',
+    imageUrl: '/images/tarot/the-hermit.webp',
     meaningUpright:
       'Momento de reflexión interna, introspección, tomar un descanso de lo mundano y cotidiano para encontrar la sabiduría interna y las respuestas. Carta de avance y evolución pero con lentitud. En el amor, necesidad de distanciarse, estar en soledad, puede representar un amor del pasado.',
     meaningReversed:
@@ -169,8 +159,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Rueda de la Fortuna',
     number: 10,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg',
+    imageUrl: '/images/tarot/wheel-of-fortune.webp',
     meaningUpright:
       'Golpe de suerte, cambios positivos, evolución favorable a un asunto, éxito, momento de fluir con los cambios y disfrutar. Cambios positivos en el amor a nivel de pareja, y si está solo puede indicar la llegada de alguien que trae cosas favorables.',
     meaningReversed:
@@ -183,8 +172,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Justicia',
     number: 11,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/e/e0/RWS_Tarot_11_Justice.jpg',
+    imageUrl: '/images/tarot/justice.webp',
     meaningUpright:
       'La ley de causa y efecto, el equilibrio y balance material. La justa recompensa. Asuntos legales a favor, resultados positivos, resoluciones favorables. Momento propicio para invertir y asociarse, mente equilibrada, asuntos tratados con integridad, objetividad e imparcialidad. Puede señalar la legalización de una relación, boda o embarazo deseado.',
     meaningReversed:
@@ -197,8 +185,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Colgado',
     number: 12,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/2/2b/RWS_Tarot_12_Hanged_Man.jpg',
+    imageUrl: '/images/tarot/the-hanged-man.webp',
     meaningUpright:
       'Cambio de punto de vista sobre la mirada de la vida. Momento de pausa para profundizar en los proyectos, en el conocimiento de uno mismo y en un trabajo de introspección profundo.',
     meaningReversed:
@@ -211,8 +198,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Muerte',
     number: 13,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/d7/RWS_Tarot_13_Death.jpg',
+    imageUrl: '/images/tarot/death.webp',
     meaningUpright:
       'Transformación, cambio y destrucción seguida de renovación. Grandes cambios, por lo general relacionados a una vieja creencia o actitud con respecto a alguna perspectiva que ya no nos es útil y debe dejarse ir. Si se está en pareja feliz, los cambios son evolución y consolidación. Si la pareja no es feliz, se recomienda replantear si vale la pena continuar.',
     meaningReversed:
@@ -225,8 +211,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Templanza',
     number: 14,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/f/f8/RWS_Tarot_14_Temperance.jpg',
+    imageUrl: '/images/tarot/temperance.webp',
     meaningUpright:
       'Moderación, balance, equilibrio, paz interior, amor, cooperación, apoyo mutuo, estabilidad. Esta carta indica que todo fluye y está en equilibrio.',
     meaningReversed:
@@ -239,8 +224,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Diablo',
     number: 15,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/5/55/RWS_Tarot_15_Devil.jpg',
+    imageUrl: '/images/tarot/the-devil.webp',
     meaningUpright:
       'Advierte estar muy enfocado en lo material y mundano, incluso con excesos como ambición desmedida, adicciones, dominado por la lujuria, actitudes destructivas, sentimientos de culpa. Al hablar de adicciones incluye alcohol, comida, sexo, apuestas, entre otras. En las relaciones habla de pasión, celos, peleas, manipulación, lujuria y querer dominar al otro. También de inestabilidad emocional.',
     meaningReversed:
@@ -253,8 +237,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Torre',
     number: 16,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg',
+    imageUrl: '/images/tarot/the-tower.webp',
     meaningUpright:
       'Cambio brusco y repentino, caos, situaciones que se desestabilizan y provocan confusión. Creencias e ideales son cuestionados. En relaciones habla de separación, rupturas, peleas, dudas y cuestionamiento. Momento de cuidar el dinero e inversiones para evitar inestabilidad. En el trabajo evitar conflictos y cuidar lo que decimos y hacemos.',
     meaningReversed:
@@ -267,8 +250,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Estrella',
     number: 17,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/db/RWS_Tarot_17_Star.jpg',
+    imageUrl: '/images/tarot/the-star.webp',
     meaningUpright:
       'Sensación de armonía, bienestar, confianza en el futuro y certeza de estar en el camino correcto. Momento positivo y favorable donde los obstáculos han sido superados. En el amor, futuro sentimental feliz con armonía, comprensión y comunicación si se está en pareja. Para solteros, inicio de relación duradera. En trabajo y finanzas está muy bien aspectada, con suerte y situaciones favorables con buenas retribuciones.',
     meaningReversed:
@@ -281,8 +263,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'La Luna',
     number: 18,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/7/7f/RWS_Tarot_18_Moon.jpg',
+    imageUrl: '/images/tarot/the-moon.webp',
     meaningUpright:
       'Tiempo de confusión donde algo no es lo que parece o nos rehusamos a aceptar la realidad. Algo importante se oculta, peligros o enemigos ocultos, chismes, habladurías enturbian la situación. En el amor, relaciones de poco compromiso o de idas y vueltas cargadas de emociones y sensualidad. Momento de cuidarse en las finanzas y de ofertas tentadoras que no lo son, invita a estar atentos.',
     meaningReversed:
@@ -295,8 +276,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Sol',
     number: 19,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/1/17/RWS_Tarot_19_Sun.jpg',
+    imageUrl: '/images/tarot/the-sun.webp',
     meaningUpright:
       'Éxito, abundancia, satisfacción, felicidad, positividad. Momento de claridad sobre el camino a seguir. Unión, bienestar, equilibrio, armonía, perdones y reconciliaciones; salir de una etapa difícil. Si el consultante no está en relación, augura la llegada de una persona que lo llenará de emociones. En finanzas es muy positiva, augura llegada de dinero inesperado, suerte en el azar, estado de mejoría.',
     meaningReversed:
@@ -309,8 +289,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Juicio',
     number: 20,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/dd/RWS_Tarot_20_Judgement.jpg',
+    imageUrl: '/images/tarot/judgement.webp',
     meaningUpright:
       'Renacimiento, renovación, cambiar para mejorar, transformarse, ruptura de lo convencional. En cuanto al amor es un muy buen periodo para sentar las bases y mejorar la relación. Buen momento para acuerdos, contratos, actividades nuevas con impactos económicos. Momento positivo para dejar malos hábitos e iniciar una vida más saludable.',
     meaningReversed:
@@ -324,8 +303,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     name: 'El Mundo',
     number: 21,
     category: 'arcanos_mayores',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/f/ff/RWS_Tarot_21_World.jpg',
+    imageUrl: '/images/tarot/the-world.webp',
     meaningUpright:
       'Triunfo en cualquier actividad que se emprenda, finalización y logro. Libertad para elegir los caminos, todo está a nuestro favor. Momento propicio para el amor y la unión; si está solo es momento de conocer a alguien. En lo laboral se recoge los frutos del buen trabajo realizado y si se está buscando tener nuevas oportunidades. Favorable en lo económico, salida de las dificultades financieras.',
     meaningReversed:
@@ -344,7 +322,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'As de Bastos',
     number: 1,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/11/Wands01.jpg',
+    imageUrl: '/images/tarot/ace-of-wands.webp',
     meaningUpright:
       'Chispa divina, semilla, inicio. Impulso hacia una dirección. Don de la fuerza, la energía sexual absoluta, llena de pasión, amor y vida. Capacidad de decisión. Atención puesta en toda la tensión creadora. Momento de ser valiente, atrevido y arriesgar sin miedos, siendo el entusiasmo su guía y defensa. En el amor: inicio de una relación llena de energía, entusiasmo y atracción sexual. Pura pasión sin ahondar en las emociones.',
     meaningReversed:
@@ -358,7 +336,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Dos de Bastos',
     number: 2,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Wands02.jpg',
+    imageUrl: '/images/tarot/two-of-wands.webp',
     meaningUpright:
       'Energía de la creatividad espiritual, la energía de la voluntad, conquista, dominio, belicosa, llena de intensidad y dinamismo. Energía de la posición personal "yo domino el mundo". El dominio puesto a lo terrenal y material, seguridad de sus posesiones. Es hora de tomar el mando así lograr ver florecer nuestras ambiciones nos llenará de satisfacción. Es abrirse y permitir que se acerquen.',
     meaningReversed:
@@ -371,7 +349,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Tres de Bastos',
     number: 3,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Wands03.jpg',
+    imageUrl: '/images/tarot/three-of-wands.webp',
     meaningUpright:
       'Desarrollo de la creatividad espiritual, liderazgo, planes seguros. Oportunidad, aventura, realización y éxito, esfuerzo, sociedades, negocios. Todo se logra de manera paciente y meditada. Es el inicio de una búsqueda donde los valores y virtudes estarán presentes. Época para planificar y viajar. En el amor: el amor y la sexualidad se viven con conciencia espiritual, es el sentido de la pareja virtuosa, pareja perfecta.',
     meaningReversed:
@@ -384,7 +362,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Cuatro de Bastos',
     number: 4,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Wands04.jpg',
+    imageUrl: '/images/tarot/four-of-wands.webp',
     meaningUpright:
       'La consumación, conseguir nuestros objetivos, recompensa por el trabajo realizado. Mayor actividad sexual, periodo de creatividad floreciente. La carta invita a romper limitaciones físicas, mentales y emocionales para buscar una vida más plena. En el amor: el espejo de nuestras virtudes puesto en nuestra pareja, relación estable y armoniosa. Invita a buscar los condimentos en la relación para no caer en la rutina.',
     meaningReversed:
@@ -397,7 +375,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Cinco de Bastos',
     number: 5,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Wands05.jpg',
+    imageUrl: '/images/tarot/five-of-wands.webp',
     meaningUpright:
       'Aspecto destructivo de la fuerza, energía desintegradora, romper límites, retos, competición, ambición y determinación, rebelión, revolución y mando. Movimiento evolutivo y dinámico, compulsiones, impulsos, tensión, debates, concurso. Energía usada con fuerza para competir y ser reconocido y recompensado. Confusión, conflicto, pugna, desacuerdos. Hay competición sin intención de destruir. Así enfrentamos nuestras debilidades y exteriorizamos nuestros poderes. En el amor: despertar del erotismo y canalización de la energía sexual. Poco o nulo romanticismo.',
     meaningReversed:
@@ -410,7 +388,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Seis de Bastos',
     number: 6,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3b/Wands06.jpg',
+    imageUrl: '/images/tarot/six-of-wands.webp',
     meaningUpright:
       'Energía dinámica, fluida y autoconfianza. El 6 representa la victoria, triunfos, éxito, logros, placer tras la lucha, valentía, optimismo, riquezas, claridad, unificación, calidez emocional, oportunidades. Cuando esta carta aparece nos habla de nuevas oportunidades que se harán presentes en nuestra vida. Encontramos armonía en nuestros logros emocionales. En su interior existe una fuerte necesidad de expansión y de realización personal. En el amor: nos habla de una exitosa unión de emociones intensas, alegría y compatibilidad perfecta. Sexualidad plena lo que energiza a la relación y favorece a la realización profesional.',
     meaningReversed:
@@ -423,7 +401,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Siete de Bastos',
     number: 7,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Wands07.jpg',
+    imageUrl: '/images/tarot/seven-of-wands.webp',
     meaningUpright:
       'Aspecto fogoso, instinto y emociones. Tensión, el 7 viene a romper la estabilidad del 6. Oposición, lucha en la profesión, coraje y determinación, resistencia, firmeza. Ventaja sobre las adversidades. Enfrentar el miedo y asumir el riesgo confiando nuestros instintos, uso de destrezas y habilidades aprendidas. Nos invita a mantenerse firme para bloquear la energía que avanza en contra. A veces sentimos que aún dar lo mejor de nosotros no es suficiente, lo que genera una gran presión. En el amor: debe superar obstáculos y la tensión. Quizás la pareja impone cosas al compañero y corta sus alas.',
     meaningReversed:
@@ -436,7 +414,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Ocho de Bastos',
     number: 8,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Wands08.jpg',
+    imageUrl: '/images/tarot/eight-of-wands.webp',
     meaningUpright:
       'Ritmo de la voluntad/velocidad. Acción rápida, conclusión, noticias de progreso, de lo que llega a su fin y se completa. Lo que comienza como una idea se plasma en lo concreto. Momento de aprovechar la oportunidad. Puede haber alguien que nos atemoriza (personas o situaciones). El consultante lleva un tiempo acumulando rabia y dolor, su equilibrio psicofísico se ve alterado, le cuesta conectarse consigo mismo. En el amor: romances tempestuosos, pasiones repentinas e instintivas, desbordadas, es una llamarada que pronto llegará a su fin. Canaliza la ira y las frustraciones a través del sexo, por lo que las relaciones no son duraderas.',
     meaningReversed:
@@ -449,8 +427,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Nueve de Bastos',
     number: 9,
     category: 'bastos',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/4/4d/Tarot_Nine_of_Wands.jpg',
+    imageUrl: '/images/tarot/nine-of-wands.webp',
     meaningUpright:
       'La energía se asienta y se estructura sobre bases sólidas. Después de la tormenta llega la calma. Fortaleza, resistencia y decisión. Fortaleza interior, ambición, logros, dedicación, la fuerza espiritual del guerrero. Curación de las viejas heridas, armonía entre lo consciente y lo inconsciente, defensa de nuestros recursos. Esta carta nos indica precaución. Si seguimos en el camino actual o si ponemos un freno. El cambio es estabilidad y la estabilidad es fortaleza. En el amor: se afirma la relación, la pareja está consolidada y unida por objetivos en común, floreciendo su crecimiento y maduración. La relación podrá ser fogosa pero falta de expresión de cariño.',
     meaningReversed:
@@ -463,7 +440,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Diez de Bastos',
     number: 10,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Wands10.jpg',
+    imageUrl: '/images/tarot/ten-of-wands.webp',
     meaningUpright:
       'Nos muestra la situación límite y está impedida de avanzar. Presión, resistencia, perseverancia, determinación, exceso de obligaciones. "Quien mucho abarca, poco aprieta". Pesada carga que estamos llevando nuestras espaldas. Nos enseña a liberarnos de los miedos racionales, la moral rígida y el autoengaño y ver con claridad las imposiciones autoimpuestas como barreras psicológicas. Invita a reconsiderar tu forma de trabajar, de equilibrar las obligaciones y cuidar la salud. Invita a aprender a parar y respirar. Dejar el trabajo en el trabajo. En el amor: la relación se volvió una carga pesada, ya no vive su propia vida. Sentimientos de saturación y angustia. La relación ya no da para más.',
     meaningReversed:
@@ -476,7 +453,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Sota de Bastos',
     number: 11,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Wands11.jpg',
+    imageUrl: '/images/tarot/page-of-wands.webp',
     meaningUpright:
       'Mirada hacia el futuro, gustoso de la aventura, proyectos laborales. Espíritu emprendedor, inquieto. Curiosidad. Audaz, actividad, acción inicial, entusiasmo.',
     meaningReversed:
@@ -489,7 +466,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Caballero de Bastos',
     number: 12,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/16/Wands12.jpg',
+    imageUrl: '/images/tarot/knight-of-wands.webp',
     meaningUpright:
       'Es la carta con mayor poder sexual. Representa a un joven con mucha acción, propositivo que le gusta ir a la batalla y viajar. Romanticismo, fogosidad, ambición, pasión, potencia, sexualidad.',
     meaningReversed:
@@ -502,7 +479,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Reina de Bastos',
     number: 13,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Wands13.jpg',
+    imageUrl: '/images/tarot/queen-of-wands.webp',
     meaningUpright:
       'Tiene la fama de tener gran conexión con la sexualidad, con lo místico, lo mágico. Muestra una persona con facilidad a lo exterior o magia natural. Mujer líder que proyecta y ejecuta con independencia y seguridad, sabe dirigirse a otras personas y su mirada es hacia el futuro. Liderazgo, magnetismo vivaz.',
     meaningReversed:
@@ -516,7 +493,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     name: 'Rey de Bastos',
     number: 14,
     category: 'bastos',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Wands14.jpg',
+    imageUrl: '/images/tarot/king-of-wands.webp',
     meaningUpright:
       'Persona muy sexual, el más carismático de los reyes. Sabe dirigir, buen líder, sabio en tomar decisiones correctas en el momento preciso. (Jefe, padre, dirigente social) Carisma, poder, emprendedor, justo, determinación.',
     meaningReversed:
@@ -535,7 +512,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'As de Copas',
     number: 1,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/36/Cups01.jpg',
+    imageUrl: '/images/tarot/ace-of-cups.webp',
     meaningUpright:
       'Amor perfecto, inicio de relación, alegría, nacimiento, emociones intensas, creatividad, intuición, intimidad, atracción, felicidad, potencial emocional.',
     meaningReversed:
@@ -549,7 +526,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Dos de Copas',
     number: 2,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Cups02.jpg',
+    imageUrl: '/images/tarot/two-of-cups.webp',
     meaningUpright:
       'Unión, asociación, amor recíproco, compatibilidad, armonía, comunicación, equilibrio emocional, amistad, sociedades.',
     meaningReversed:
@@ -562,7 +539,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Tres de Copas',
     number: 3,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/7a/Cups03.jpg',
+    imageUrl: '/images/tarot/three-of-cups.webp',
     meaningUpright:
       'Celebración, amistad, comunidad, reuniones, abundancia emocional, creatividad compartida, alegría, satisfacción.',
     meaningReversed:
@@ -575,7 +552,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Cuatro de Copas',
     number: 4,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Cups04.jpg',
+    imageUrl: '/images/tarot/four-of-cups.webp',
     meaningUpright:
       'Apatía, descontento, meditación, reevaluación, introspección, oportunidades perdidas, aburrimiento.',
     meaningReversed:
@@ -588,7 +565,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Cinco de Copas',
     number: 5,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Cups05.jpg',
+    imageUrl: '/images/tarot/five-of-cups.webp',
     meaningUpright:
       'Pérdida, duelo, decepción, tristeza, remordimiento, lamentación, enfoque en lo negativo.',
     meaningReversed:
@@ -601,7 +578,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Seis de Copas',
     number: 6,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Cups06.jpg',
+    imageUrl: '/images/tarot/six-of-cups.webp',
     meaningUpright:
       'Nostalgia, recuerdos, inocencia, generosidad, niñez, pasado, reencuentros, felicidad simple.',
     meaningReversed:
@@ -614,7 +591,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Siete de Copas',
     number: 7,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ae/Cups07.jpg',
+    imageUrl: '/images/tarot/seven-of-cups.webp',
     meaningUpright:
       'Opciones, fantasía, ilusiones, imaginación, elecciones, confusión, deseos, sueños.',
     meaningReversed:
@@ -627,7 +604,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Ocho de Copas',
     number: 8,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/60/Cups08.jpg',
+    imageUrl: '/images/tarot/eight-of-cups.webp',
     meaningUpright:
       'Abandono, búsqueda espiritual, dejar atrás, desilusión, crecimiento personal, cambio necesario.',
     meaningReversed:
@@ -640,7 +617,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Nueve de Copas',
     number: 9,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Cups09.jpg',
+    imageUrl: '/images/tarot/nine-of-cups.webp',
     meaningUpright:
       'Satisfacción, contentamiento, deseos cumplidos, gratificación, placer, abundancia emocional.',
     meaningReversed:
@@ -654,7 +631,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Diez de Copas',
     number: 10,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/84/Cups10.jpg',
+    imageUrl: '/images/tarot/ten-of-cups.webp',
     meaningUpright:
       'Felicidad familiar, armonía, amor duradero, plenitud emocional, paz, alegría compartida.',
     meaningReversed:
@@ -667,7 +644,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Sota de Copas',
     number: 11,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Cups11.jpg',
+    imageUrl: '/images/tarot/page-of-cups.webp',
     meaningUpright:
       'Mensajero emocional, creatividad, intuición, sensibilidad, romance juvenil, ofertas emocionales.',
     meaningReversed:
@@ -680,7 +657,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Caballero de Copas',
     number: 12,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Cups12.jpg',
+    imageUrl: '/images/tarot/knight-of-cups.webp',
     meaningUpright:
       'Romántico, seductor, idealista, propuestas amorosas, caballerosidad, imaginación, arte.',
     meaningReversed:
@@ -693,7 +670,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Reina de Copas',
     number: 13,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/62/Cups13.jpg',
+    imageUrl: '/images/tarot/queen-of-cups.webp',
     meaningUpright:
       'Intuición profunda, compasión, amor maternal, empatía, sanación emocional, espiritualidad.',
     meaningReversed:
@@ -706,7 +683,7 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     name: 'Rey de Copas',
     number: 14,
     category: 'copas',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Cups14.jpg',
+    imageUrl: '/images/tarot/king-of-cups.webp',
     meaningUpright:
       'Control emocional, diplomacia, sabiduría emocional, compasión, equilibrio, consejero.',
     meaningReversed:
@@ -725,8 +702,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'As de Espadas',
     number: 1,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/1/1a/Swords01.jpg',
+    imageUrl: '/images/tarot/ace-of-swords.webp',
     meaningUpright:
       'Claridad mental, verdad, justicia, nuevas ideas, momento decisivo, corte con el pasado, victoria intelectual.',
     meaningReversed:
@@ -739,8 +715,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Dos de Espadas',
     number: 2,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/9/9e/Swords02.jpg',
+    imageUrl: '/images/tarot/two-of-swords.webp',
     meaningUpright:
       'Indecisión, estancamiento, evitar conflictos, elección difícil, bloqueo mental, negación.',
     meaningReversed:
@@ -753,8 +728,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Tres de Espadas',
     number: 3,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/0/02/Swords03.jpg',
+    imageUrl: '/images/tarot/three-of-swords.webp',
     meaningUpright:
       'Dolor emocional, traición, ruptura, tristeza profunda, corazón roto, sufrimiento.',
     meaningReversed:
@@ -766,8 +740,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Cuatro de Espadas',
     number: 4,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/b/bf/Swords04.jpg',
+    imageUrl: '/images/tarot/four-of-swords.webp',
     meaningUpright:
       'Descanso, recuperación, meditación, pausa necesaria, retiro, contemplación, sanación.',
     meaningReversed:
@@ -779,8 +752,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Cinco de Espadas',
     number: 5,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/2/23/Swords05.jpg',
+    imageUrl: '/images/tarot/five-of-swords.webp',
     meaningUpright:
       'Conflicto, derrota, deshonra, traición, victoria vacía, hostilidad, pérdida.',
     meaningReversed:
@@ -793,8 +765,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Seis de Espadas',
     number: 6,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/2/29/Swords06.jpg',
+    imageUrl: '/images/tarot/six-of-swords.webp',
     meaningUpright:
       'Transición, viaje, alejarse de problemas, recuperación, cambio gradual, calma después de tormenta.',
     meaningReversed:
@@ -807,8 +778,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Siete de Espadas',
     number: 7,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/3/34/Swords07.jpg',
+    imageUrl: '/images/tarot/seven-of-swords.webp',
     meaningUpright:
       'Engaño, estrategia, traición, robo, actuar a escondidas, astucia, deshonestidad.',
     meaningReversed:
@@ -820,8 +790,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Ocho de Espadas',
     number: 8,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/a/a7/Swords08.jpg',
+    imageUrl: '/images/tarot/eight-of-swords.webp',
     meaningUpright:
       'Restricción, prisión mental, limitaciones autoimpuestas, víctima, impotencia, miedo.',
     meaningReversed:
@@ -834,8 +803,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Nueve de Espadas',
     number: 9,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/2/2f/Swords09.jpg',
+    imageUrl: '/images/tarot/nine-of-swords.webp',
     meaningUpright:
       'Ansiedad, pesadillas, preocupación extrema, miedo, culpa, tormento mental, insomnio.',
     meaningReversed:
@@ -848,8 +816,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Diez de Espadas',
     number: 10,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/d4/Swords10.jpg',
+    imageUrl: '/images/tarot/ten-of-swords.webp',
     meaningUpright:
       'Fin doloroso, traición profunda, colapso, toque fondo, crisis, derrota total.',
     meaningReversed:
@@ -862,8 +829,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Sota de Espadas',
     number: 11,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/4/4c/Swords11.jpg',
+    imageUrl: '/images/tarot/page-of-swords.webp',
     meaningUpright:
       'Vigilancia, curiosidad, ideas nuevas, comunicación directa, observador, investigación.',
     meaningReversed:
@@ -875,8 +841,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Caballero de Espadas',
     number: 12,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/b/b0/Swords12.jpg',
+    imageUrl: '/images/tarot/knight-of-swords.webp',
     meaningUpright:
       'Acción rápida, ambición, determinación, intelectual, directo, impulsivo, agresivo.',
     meaningReversed:
@@ -888,8 +853,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Reina de Espadas',
     number: 13,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/d4/Swords13.jpg',
+    imageUrl: '/images/tarot/queen-of-swords.webp',
     meaningUpright:
       'Inteligencia, independencia, claridad mental, honestidad directa, viuda, soledad elegida.',
     meaningReversed:
@@ -902,8 +866,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     name: 'Rey de Espadas',
     number: 14,
     category: 'espadas',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/3/33/Swords14.jpg',
+    imageUrl: '/images/tarot/king-of-swords.webp',
     meaningUpright:
       'Autoridad intelectual, verdad, lógica, juicio imparcial, disciplina mental, honestidad.',
     meaningReversed:
@@ -921,7 +884,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'As de Oros',
     number: 1,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Pents01.jpg',
+    imageUrl: '/images/tarot/ace-of-pentacles.webp',
     meaningUpright:
       'Nueva oportunidad financiera, prosperidad, abundancia, manifestación, comienzo material, éxito.',
     meaningReversed:
@@ -934,7 +897,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Dos de Oros',
     number: 2,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Pents02.jpg',
+    imageUrl: '/images/tarot/two-of-pentacles.webp',
     meaningUpright:
       'Equilibrio, adaptabilidad, prioridades, malabarismo, múltiples responsabilidades.',
     meaningReversed:
@@ -948,7 +911,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Tres de Oros',
     number: 3,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Pents03.jpg',
+    imageUrl: '/images/tarot/three-of-pentacles.webp',
     meaningUpright:
       'Trabajo en equipo, colaboración, maestría, aprendizaje, calidad, construcción.',
     meaningReversed:
@@ -960,7 +923,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Cuatro de Oros',
     number: 4,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Pents04.jpg',
+    imageUrl: '/images/tarot/four-of-pentacles.webp',
     meaningUpright:
       'Avaricia, control, posesividad, seguridad material, ahorro excesivo, miedo a perder.',
     meaningReversed: 'Generosidad, liberación, dejar ir el control, gastar.',
@@ -971,7 +934,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Cinco de Oros',
     number: 5,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Pents05.jpg',
+    imageUrl: '/images/tarot/five-of-pentacles.webp',
     meaningUpright:
       'Pobreza, dificultades financieras, enfermedad, aislamiento, pérdida, necesidad.',
     meaningReversed:
@@ -983,7 +946,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Seis de Oros',
     number: 6,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Pents06.jpg',
+    imageUrl: '/images/tarot/six-of-pentacles.webp',
     meaningUpright:
       'Generosidad, caridad, compartir riqueza, dar y recibir, equilibrio financiero.',
     meaningReversed:
@@ -995,7 +958,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Siete de Oros',
     number: 7,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Pents07.jpg',
+    imageUrl: '/images/tarot/seven-of-pentacles.webp',
     meaningUpright:
       'Paciencia, inversión a largo plazo, espera de resultados, evaluación, perseverancia.',
     meaningReversed:
@@ -1007,7 +970,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Ocho de Oros',
     number: 8,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/49/Pents08.jpg',
+    imageUrl: '/images/tarot/eight-of-pentacles.webp',
     meaningUpright:
       'Maestría, dedicación, trabajo duro, habilidad, aprendizaje, perfeccionamiento.',
     meaningReversed:
@@ -1019,7 +982,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Nueve de Oros',
     number: 9,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Pents09.jpg',
+    imageUrl: '/images/tarot/nine-of-pentacles.webp',
     meaningUpright:
       'Abundancia, lujo, autosuficiencia, éxito material, independencia financiera.',
     meaningReversed:
@@ -1031,7 +994,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Diez de Oros',
     number: 10,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Pents10.jpg',
+    imageUrl: '/images/tarot/ten-of-pentacles.webp',
     meaningUpright:
       'Riqueza familiar, legado, estabilidad financiera, tradiciones, herencias, prosperidad.',
     meaningReversed:
@@ -1043,7 +1006,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Sota de Oros',
     number: 11,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Pents11.jpg',
+    imageUrl: '/images/tarot/page-of-pentacles.webp',
     meaningUpright:
       'Estudiante aplicado, oportunidad de aprendizaje, noticias financieras, manifestación.',
     meaningReversed:
@@ -1055,7 +1018,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Caballero de Oros',
     number: 12,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Pents12.jpg',
+    imageUrl: '/images/tarot/knight-of-pentacles.webp',
     meaningUpright:
       'Responsabilidad, trabajo duro, confiabilidad, rutina, conservador, metódico.',
     meaningReversed:
@@ -1067,7 +1030,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Reina de Oros',
     number: 13,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/88/Pents13.jpg',
+    imageUrl: '/images/tarot/queen-of-pentacles.webp',
     meaningUpright:
       'Nutrición, abundancia práctica, seguridad, confort, generosidad maternal, estabilidad.',
     meaningReversed:
@@ -1079,7 +1042,7 @@ export const ARCANOS_MENORES_OROS: TarotCardData[] = [
     name: 'Rey de Oros',
     number: 14,
     category: 'oros',
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Pents14.jpg',
+    imageUrl: '/images/tarot/king-of-pentacles.webp',
     meaningUpright:
       'Riqueza, éxito empresarial, liderazgo práctico, seguridad, abundancia, generosidad.',
     meaningReversed:
