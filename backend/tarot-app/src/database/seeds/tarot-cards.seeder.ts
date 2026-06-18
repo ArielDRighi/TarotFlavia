@@ -152,10 +152,13 @@ function validateCardContent(
     }
   }
 
-  // Validate imageUrl
-  if (!cardData.imageUrl || !cardData.imageUrl.match(/^https?:\/\/.+/)) {
+  // Validate imageUrl — must be a local WebP path under /images/tarot/
+  if (
+    !cardData.imageUrl ||
+    !cardData.imageUrl.match(/^\/images\/tarot\/.+\.webp$/)
+  ) {
     errors.push(
-      `ImageUrl missing or invalid: ${cardData.imageUrl || 'undefined'}`,
+      `ImageUrl missing or invalid (expected /images/tarot/*.webp): ${cardData.imageUrl || 'undefined'}`,
     );
   }
 

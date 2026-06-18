@@ -307,8 +307,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'colapso',
       ],
     },
-    imageUrl:
-      '/images/tarot/nine-of-wands.webp',
+    imageUrl: '/images/tarot/nine-of-wands.webp',
   },
   {
     slug: 'ten-of-wands',
@@ -991,8 +990,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'caos mental',
       ],
     },
-    imageUrl:
-      '/images/tarot/ace-of-swords.webp',
+    imageUrl: '/images/tarot/ace-of-swords.webp',
   },
   {
     slug: 'two-of-swords',
@@ -1025,8 +1023,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'claridad',
       ],
     },
-    imageUrl:
-      '/images/tarot/two-of-swords.webp',
+    imageUrl: '/images/tarot/two-of-swords.webp',
   },
   {
     slug: 'three-of-swords',
@@ -1059,8 +1056,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'superación del dolor',
       ],
     },
-    imageUrl:
-      '/images/tarot/three-of-swords.webp',
+    imageUrl: '/images/tarot/three-of-swords.webp',
   },
   {
     slug: 'four-of-swords',
@@ -1093,8 +1089,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'estrés',
       ],
     },
-    imageUrl:
-      '/images/tarot/four-of-swords.webp',
+    imageUrl: '/images/tarot/four-of-swords.webp',
   },
   {
     slug: 'five-of-swords',
@@ -1127,8 +1122,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'rendición',
       ],
     },
-    imageUrl:
-      '/images/tarot/five-of-swords.webp',
+    imageUrl: '/images/tarot/five-of-swords.webp',
   },
   {
     slug: 'six-of-swords',
@@ -1161,8 +1155,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'regreso difícil',
       ],
     },
-    imageUrl:
-      '/images/tarot/six-of-swords.webp',
+    imageUrl: '/images/tarot/six-of-swords.webp',
   },
   {
     slug: 'seven-of-swords',
@@ -1195,8 +1188,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'abandonar el engaño',
       ],
     },
-    imageUrl:
-      '/images/tarot/seven-of-swords.webp',
+    imageUrl: '/images/tarot/seven-of-swords.webp',
   },
   {
     slug: 'eight-of-swords',
@@ -1229,8 +1221,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'salida encontrada',
       ],
     },
-    imageUrl:
-      '/images/tarot/eight-of-swords.webp',
+    imageUrl: '/images/tarot/eight-of-swords.webp',
   },
   {
     slug: 'nine-of-swords',
@@ -1263,8 +1254,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'esperanza',
       ],
     },
-    imageUrl:
-      '/images/tarot/nine-of-swords.webp',
+    imageUrl: '/images/tarot/nine-of-swords.webp',
   },
   {
     slug: 'ten-of-swords',
@@ -1297,8 +1287,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'sobrevivir',
       ],
     },
-    imageUrl:
-      '/images/tarot/ten-of-swords.webp',
+    imageUrl: '/images/tarot/ten-of-swords.webp',
   },
   {
     slug: 'page-of-swords',
@@ -1332,8 +1321,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'pensamiento dañino',
       ],
     },
-    imageUrl:
-      '/images/tarot/page-of-swords.webp',
+    imageUrl: '/images/tarot/page-of-swords.webp',
   },
   {
     slug: 'knight-of-swords',
@@ -1367,8 +1355,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'agresión verbal',
       ],
     },
-    imageUrl:
-      '/images/tarot/knight-of-swords.webp',
+    imageUrl: '/images/tarot/knight-of-swords.webp',
   },
   {
     slug: 'queen-of-swords',
@@ -1402,8 +1389,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'juicio duro',
       ],
     },
-    imageUrl:
-      '/images/tarot/queen-of-swords.webp',
+    imageUrl: '/images/tarot/queen-of-swords.webp',
   },
   {
     slug: 'king-of-swords',
@@ -1437,8 +1423,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'distorsión de la verdad',
       ],
     },
-    imageUrl:
-      '/images/tarot/king-of-swords.webp',
+    imageUrl: '/images/tarot/king-of-swords.webp',
   },
 ];
 

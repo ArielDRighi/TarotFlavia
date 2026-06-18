@@ -43,8 +43,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'riesgo excesivo',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-fool.webp',
+    imageUrl: '/images/tarot/the-fool.webp',
   },
   {
     slug: 'the-magician',
@@ -78,8 +77,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'ilusión',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-magician.webp',
+    imageUrl: '/images/tarot/the-magician.webp',
   },
   {
     slug: 'the-high-priestess',
@@ -113,8 +111,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'desconexión espiritual',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-high-priestess.webp',
+    imageUrl: '/images/tarot/the-high-priestess.webp',
   },
   {
     slug: 'the-empress',
@@ -148,8 +145,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'infertilidad',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-empress.webp',
+    imageUrl: '/images/tarot/the-empress.webp',
   },
   {
     slug: 'the-emperor',
@@ -183,8 +179,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'control excesivo',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-emperor.webp',
+    imageUrl: '/images/tarot/the-emperor.webp',
   },
   {
     slug: 'the-hierophant',
@@ -218,8 +213,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'rechazo a la tradición',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-hierophant.webp',
+    imageUrl: '/images/tarot/the-hierophant.webp',
   },
   {
     slug: 'the-lovers',
@@ -253,8 +247,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'relación tóxica',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-lovers.webp',
+    imageUrl: '/images/tarot/the-lovers.webp',
   },
   {
     slug: 'the-chariot',
@@ -288,8 +281,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'derrota',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-chariot.webp',
+    imageUrl: '/images/tarot/the-chariot.webp',
   },
   {
     slug: 'strength',
@@ -323,8 +315,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'impulsividad',
       ],
     },
-    imageUrl:
-      '/images/tarot/strength.webp',
+    imageUrl: '/images/tarot/strength.webp',
   },
   {
     slug: 'the-hermit',
@@ -358,8 +349,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'rechazo',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-hermit.webp',
+    imageUrl: '/images/tarot/the-hermit.webp',
   },
   {
     slug: 'wheel-of-fortune',
@@ -393,8 +383,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'falta de control',
       ],
     },
-    imageUrl:
-      '/images/tarot/wheel-of-fortune.webp',
+    imageUrl: '/images/tarot/wheel-of-fortune.webp',
   },
   {
     slug: 'justice',
@@ -428,8 +417,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'evasión',
       ],
     },
-    imageUrl:
-      '/images/tarot/justice.webp',
+    imageUrl: '/images/tarot/justice.webp',
   },
   {
     slug: 'the-hanged-man',
@@ -457,8 +445,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
       ],
       reversed: ['demora', 'resistencia', 'martirio', 'apego', 'indecisión'],
     },
-    imageUrl:
-      '/images/tarot/the-hanged-man.webp',
+    imageUrl: '/images/tarot/the-hanged-man.webp',
   },
   {
     slug: 'death',
@@ -492,8 +479,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'negación',
       ],
     },
-    imageUrl:
-      '/images/tarot/death.webp',
+    imageUrl: '/images/tarot/death.webp',
   },
   {
     slug: 'temperance',
@@ -527,8 +513,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'falta de moderación',
       ],
     },
-    imageUrl:
-      '/images/tarot/temperance.webp',
+    imageUrl: '/images/tarot/temperance.webp',
   },
   {
     slug: 'the-devil',
@@ -562,8 +547,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'desapego',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-devil.webp',
+    imageUrl: '/images/tarot/the-devil.webp',
   },
   {
     slug: 'the-tower',
@@ -597,8 +581,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'negación',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-tower.webp',
+    imageUrl: '/images/tarot/the-tower.webp',
   },
   {
     slug: 'the-star',
@@ -632,8 +615,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'falta de propósito',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-star.webp',
+    imageUrl: '/images/tarot/the-star.webp',
   },
   {
     slug: 'the-moon',
@@ -667,8 +649,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'realidad',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-moon.webp',
+    imageUrl: '/images/tarot/the-moon.webp',
   },
   {
     slug: 'the-sun',
@@ -702,8 +683,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'falta de claridad',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-sun.webp',
+    imageUrl: '/images/tarot/the-sun.webp',
   },
   {
     slug: 'judgement',
@@ -737,8 +717,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'resistencia',
       ],
     },
-    imageUrl:
-      '/images/tarot/judgement.webp',
+    imageUrl: '/images/tarot/judgement.webp',
   },
   {
     slug: 'the-world',
@@ -772,7 +751,6 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
         'estancamiento',
       ],
     },
-    imageUrl:
-      '/images/tarot/the-world.webp',
+    imageUrl: '/images/tarot/the-world.webp',
   },
 ];

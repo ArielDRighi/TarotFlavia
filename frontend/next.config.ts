@@ -9,14 +9,8 @@ const nextConfig: NextConfig = {
 
   // Image optimization configuration
   images: {
-    // Wikimedia URLs still used by tarot_card table (readings flow) until migrated
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'upload.wikimedia.org',
-        pathname: '/wikipedia/commons/**',
-      },
-    ],
+    // All card images are now served locally from /images/tarot/*.webp
+    remotePatterns: [],
 
     // Image formats to support (AVIF provides better compression than WebP)
     formats: ['image/avif', 'image/webp'],
