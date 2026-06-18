@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LoggingInterceptor } from './logging.interceptor';
 import { LoggerService } from '../logger/logger.service';
 import { CorrelationIdService } from '../logger/correlation-id.service';
-import { ExecutionContext, CallHandler } from '@nestjs/common';
+import {
+  ExecutionContext,
+  CallHandler,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 
@@ -41,6 +46,7 @@ describe('LoggingInterceptor', () => {
           useValue: {
             http: jest.fn(),
             error: jest.fn(),
+            warn: jest.fn(),
           },
         },
         CorrelationIdService,
@@ -180,7 +186,7 @@ describe('LoggingInterceptor', () => {
       });
     });
 
-    it('should log errors', (done) => {
+    it('should log non-HTTP errors at error level', (done) => {
       const testError = new Error('Test error');
       (mockCallHandler.handle as jest.Mock).mockReturnValue(
         throwError(() => testError),
@@ -198,7 +204,61 @@ describe('LoggingInterceptor', () => {
               error: testError.message,
             }),
           );
+          expect(loggerService.warn).not.toHaveBeenCalled();
           expect(error).toBe(testError);
+          done();
+        },
+      });
+    });
+
+    it('should log 4xx HttpExceptions at warn level', (done) => {
+      const clientError = new BadRequestException(
+        'Configura tu fecha de nacimiento',
+      );
+      (mockCallHandler.handle as jest.Mock).mockReturnValue(
+        throwError(() => clientError),
+      );
+
+      interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
+        error: (error) => {
+          expect(loggerService.warn).toHaveBeenCalledWith(
+            'HTTP Request Warning',
+            'HTTPLogger',
+            expect.objectContaining({
+              method: 'GET',
+              url: '/test-endpoint',
+              error: clientError.message,
+            }),
+          );
+          expect(loggerService.error).not.toHaveBeenCalled();
+          expect(error).toBe(clientError);
+          done();
+        },
+      });
+    });
+
+    it('should log 5xx HttpExceptions at error level', (done) => {
+      const serverError = new InternalServerErrorException(
+        'Unexpected failure',
+      );
+      (mockCallHandler.handle as jest.Mock).mockReturnValue(
+        throwError(() => serverError),
+      );
+
+      interceptor.intercept(mockExecutionContext, mockCallHandler).subscribe({
+        error: (error) => {
+          expect(loggerService.error).toHaveBeenCalledWith(
+            'HTTP Request Error',
+            expect.any(String),
+            'HTTPLogger',
+            expect.objectContaining({
+              method: 'GET',
+              url: '/test-endpoint',
+              error: serverError.message,
+            }),
+          );
+          expect(loggerService.warn).not.toHaveBeenCalled();
+          expect(error).toBe(serverError);
           done();
         },
       });
