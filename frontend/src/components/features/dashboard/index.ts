@@ -4,7 +4,7 @@
  * Export all dashboard-related components for authenticated users.
  */
 
-export { WelcomeHeader } from './WelcomeHeader';
+export { DashboardHero } from './DashboardHero';
 export { QuickActions } from './QuickActions';
 export { DidYouKnowSection } from './DidYouKnowSection';
 export { StatsSection } from './StatsSection';

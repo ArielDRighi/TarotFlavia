@@ -1,7 +1,7 @@
 'use client';
 
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
-import { WelcomeHeader } from './WelcomeHeader';
+import { DashboardHero } from './DashboardHero';
 import { QuickActions } from './QuickActions';
 import { DidYouKnowSection } from './DidYouKnowSection';
 import { StatsSection } from './StatsSection';
@@ -50,8 +50,8 @@ export function UserDashboard() {
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="space-y-8">
-        {/* Welcome Header */}
-        <WelcomeHeader />
+        {/* Welcome Header - mystic band coherent with the Encyclopedia canon */}
+        <DashboardHero />
 
         {/* Quick Actions */}
         <section>
