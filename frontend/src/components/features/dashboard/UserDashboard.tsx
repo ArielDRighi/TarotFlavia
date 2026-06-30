@@ -29,7 +29,13 @@ import { MyServicesWidget } from './MyServicesWidget';
  * - Stats section (Premium only)
  * - Upgrade banner (Free users only)
  *
- * Layout is responsive and adapts to different screen sizes.
+ * Layout (T-DASH-001): the themed widgets are laid out in a single full-width
+ * responsive grid (1 col on mobile, 2 on tablet, 3 on desktop) so the user can
+ * scan all of them "at a glance" instead of having them stacked in a narrow
+ * 1/3 side column with a large empty area beside it. `items-start` keeps each
+ * card at its natural height. Plan-gated widgets (Stats / Upgrade banner) and
+ * the self-hiding `MyServicesWidget` simply occupy (or free) a grid slot, so
+ * the grid stays balanced for both FREE and PREMIUM users.
  *
  * @example
  * ```tsx
@@ -51,41 +57,38 @@ export function UserDashboard() {
           <QuickActions />
         </section>
 
-        {/* Two-column layout for desktop */}
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Left column (2/3 width) */}
-          <div className="space-y-8 lg:col-span-2">
-            {/* Did You Know Section */}
-            <DidYouKnowSection />
+        {/* Did You Know - full-width strip above the widget grid */}
+        <DidYouKnowSection />
 
-            {/* My Services Widget */}
-            <MyServicesWidget />
+        {/* Themed widgets - single full-width responsive grid */}
+        <section
+          data-testid="dashboard-widget-grid"
+          className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 xl:grid-cols-3"
+        >
+          {/* Horoscope Widget (Western) - For all users */}
+          <HoroscopeWidget />
 
-            {/* Upgrade Banner - Only for non-Premium users */}
-            {!isPremium && <UpgradeBanner />}
-          </div>
+          {/* Chinese Horoscope Widget - For all users */}
+          <ChineseHoroscopeWidget />
 
-          {/* Right column (1/3 width) */}
-          <div className="space-y-8">
-            {/* Horoscope Widget (Western) - For all users */}
-            <HoroscopeWidget />
+          {/* Numerology Widget - For all users */}
+          <NumerologyWidget />
 
-            {/* Chinese Horoscope Widget - For all users */}
-            <ChineseHoroscopeWidget />
+          {/* Sacred Events Widget - For all users */}
+          <SacredEventsWidget />
 
-            {/* Numerology Widget - For all users */}
-            <NumerologyWidget />
+          {/* Personalized Rituals Widget - For all users (Premium features) */}
+          <PersonalizedRitualsWidget />
 
-            {/* Sacred Events Widget - For all users */}
-            <SacredEventsWidget />
+          {/* My Services Widget - hidden when there are no purchases */}
+          <MyServicesWidget />
 
-            {/* Personalized Rituals Widget - For all users (Premium features) */}
-            <PersonalizedRitualsWidget />
+          {/* Stats Section - Only for Premium users */}
+          {isPremium && <StatsSection />}
+        </section>
 
-            {/* Stats Section - Only for Premium users */}
-            {isPremium && <StatsSection />}
-          </div>
-        </div>
+        {/* Upgrade Banner - full-width footer, only for non-Premium users */}
+        {!isPremium && <UpgradeBanner />}
       </div>
     </div>
   );
