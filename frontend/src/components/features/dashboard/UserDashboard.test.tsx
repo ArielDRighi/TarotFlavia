@@ -917,13 +917,17 @@ describe('UserDashboard', () => {
 
     const grid = screen.getByTestId('dashboard-widget-grid');
     expect(grid).toBeInTheDocument();
-    // Full-width contract: widgets spread across columns (up to 3 on xl),
-    // never collapsed into a single narrow 1/3 column.
+    // Full-width contract: widgets spread across columns (1 → 2 on tablet → 3 on
+    // wide desktop), never collapsed into a single narrow 1/3 column.
     expect(grid.className).toContain('grid-cols-1');
+    expect(grid.className).toContain('sm:grid-cols-2');
     expect(grid.className).toContain('xl:grid-cols-3');
     // Themed widgets live inside the grid (not in a separate side column).
     expect(within(grid).getByTestId('horoscope-widget')).toBeInTheDocument();
     expect(within(grid).getByTestId('numerology-widget')).toBeInTheDocument();
+    // MyServicesWidget self-hides when there are no purchases (default mock),
+    // freeing its grid cell without leaving an empty bordered slot.
+    expect(screen.queryByTestId('my-services-widget')).not.toBeInTheDocument();
   });
 
   it('should place StatsSection inside the widget grid for premium users', () => {

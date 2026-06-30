@@ -30,8 +30,9 @@ import { MyServicesWidget } from './MyServicesWidget';
  * - Upgrade banner (Free users only)
  *
  * Layout (T-DASH-001): the themed widgets are laid out in a single full-width
- * responsive grid (1 col on mobile, 2 on tablet, 3 on desktop) so the user can
- * scan all of them "at a glance" instead of having them stacked in a narrow
+ * responsive grid (1 col on mobile, 2 on tablet via `sm`, 3 on wide desktop via
+ * `xl` — kept at `xl` to avoid 3 cramped columns on smaller laptops) so the user
+ * can scan all of them "at a glance" instead of having them stacked in a narrow
  * 1/3 side column with a large empty area beside it. `items-start` keeps each
  * card at its natural height. Plan-gated widgets (Stats / Upgrade banner) and
  * the self-hiding `MyServicesWidget` simply occupy (or free) a grid slot, so
