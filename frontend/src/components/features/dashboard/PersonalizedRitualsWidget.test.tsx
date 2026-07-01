@@ -204,8 +204,8 @@ describe('PersonalizedRitualsWidget', () => {
 
       const { container } = render(<PersonalizedRitualsWidget />, { wrapper });
 
-      // Check that icon wrapper exists
-      const iconWrapper = container.querySelector('.bg-purple-500\\/20');
+      // Check that icon wrapper exists (brand token background)
+      const iconWrapper = container.querySelector('.bg-primary\\/10');
       expect(iconWrapper).toBeInTheDocument();
     });
   });
@@ -237,6 +237,18 @@ describe('PersonalizedRitualsWidget', () => {
       expect(
         container.querySelector('[data-testid="personalized-rituals-widget"]')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('T-DASH-003 · Encabezado unificado (WidgetCard)', () => {
+    it('renders the title as a serif heading', () => {
+      mockAuthStore('free');
+      mockRecommendationsHook(undefined);
+
+      render(<PersonalizedRitualsWidget />, { wrapper });
+
+      const heading = screen.getByRole('heading', { name: 'Rituales Recomendados para Ti' });
+      expect(heading).toHaveClass('font-serif');
     });
   });
 });

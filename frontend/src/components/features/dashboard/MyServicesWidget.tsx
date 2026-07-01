@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { HandHeart, ArrowRight, CalendarDays, Clock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { WidgetCard } from './WidgetCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { useMyPurchases } from '@/hooks/api/useHolisticServices';
@@ -43,10 +44,10 @@ function PurchaseItem({ purchase }: PurchaseItemProps) {
   return (
     <div
       data-testid={`widget-purchase-${purchase.id}`}
-      className="flex items-center justify-between gap-3 rounded-lg border bg-white p-3"
+      className="bg-card flex items-center justify-between gap-3 rounded-lg border p-3"
     >
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900">{serviceName}</p>
+        <p className="text-foreground truncate text-sm font-medium">{serviceName}</p>
         <div className="mt-1 flex items-center gap-2">
           <span
             className={cn(
@@ -58,11 +59,11 @@ function PurchaseItem({ purchase }: PurchaseItemProps) {
           </span>
           {hasAppointment && (
             <>
-              <span className="flex items-center gap-1 text-xs text-gray-500">
+              <span className="text-muted-foreground flex items-center gap-1 text-xs">
                 <CalendarDays className="h-3 w-3" />
                 {formatDateShort(purchase.selectedDate as string)}
               </span>
-              <span className="flex items-center gap-1 text-xs text-gray-500">
+              <span className="text-muted-foreground flex items-center gap-1 text-xs">
                 <Clock className="h-3 w-3" />
                 {purchase.selectedTime}
               </span>
@@ -117,13 +118,12 @@ export function MyServicesWidget() {
   const remainingCount = purchases.length - MAX_VISIBLE_PURCHASES;
 
   return (
-    <Card className="p-6" data-testid="my-services-widget">
-      {/* Header */}
-      <div className="mb-4 flex items-center gap-2">
-        <HandHeart className="h-5 w-5 text-purple-600" />
-        <h3 className="font-serif text-lg font-semibold text-gray-900">Mis Servicios</h3>
-      </div>
-
+    <WidgetCard
+      title="Mis Servicios"
+      titleAs="h3"
+      icon={<HandHeart className="h-5 w-5" />}
+      data-testid="my-services-widget"
+    >
       {/* Purchase list */}
       <div className="space-y-2">
         {visiblePurchases.map((purchase) => (
@@ -134,12 +134,12 @@ export function MyServicesWidget() {
       {/* Footer link */}
       <Link
         href={ROUTES.MIS_SERVICIOS}
-        className="mt-4 flex items-center justify-center gap-1 text-sm font-medium text-purple-600 hover:text-purple-800"
+        className="text-primary hover:text-primary/80 mt-4 flex items-center justify-center gap-1 text-sm font-medium"
         data-testid="widget-view-all-link"
       >
         {remainingCount > 0 ? `Ver todos (${purchases.length})` : 'Ver todos mis servicios'}
         <ArrowRight className="h-4 w-4" />
       </Link>
-    </Card>
+    </WidgetCard>
   );
 }

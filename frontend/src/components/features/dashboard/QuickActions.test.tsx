@@ -124,10 +124,10 @@ describe('QuickActions', () => {
     const newReadingButton = screen.getByText('Nueva Lectura');
     const buttonElement = newReadingButton.closest('a');
 
-    // Check for primary styling classes (purple gradient)
+    // Check for primary styling classes (brand gradient using design tokens)
     expect(buttonElement).toHaveClass('bg-gradient-to-r');
-    expect(buttonElement).toHaveClass('from-purple-600');
-    expect(buttonElement).toHaveClass('to-pink-600');
+    expect(buttonElement).toHaveClass('from-primary');
+    expect(buttonElement).toHaveClass('to-secondary');
   });
 
   it('should have secondary styling on other buttons', () => {

@@ -422,4 +422,13 @@ describe('SacredEventsWidget', () => {
       expect(link).toHaveAttribute('href', '/premium');
     });
   });
+
+  describe('T-DASH-003 · Encabezado unificado (WidgetCard)', () => {
+    it('renders the title as a serif heading', () => {
+      renderComponent();
+
+      const heading = screen.getByRole('heading', { name: 'Calendario Sagrado' });
+      expect(heading).toHaveClass('font-serif');
+    });
+  });
 });

@@ -434,4 +434,16 @@ describe('NumerologyWidget', () => {
       expect(screen.getByRole('link', { name: /ver informe completo/i })).toBeInTheDocument();
     });
   });
+
+  describe('T-DASH-003 · Encabezado unificado (WidgetCard)', () => {
+    it('renders the title as a serif heading', () => {
+      mockUseMyNumerologyProfile.mockReturnValue({ data: null, isLoading: false, error: null });
+      mockUseDayNumber.mockReturnValue({ data: null, isLoading: false, error: null });
+
+      render(<NumerologyWidget />);
+
+      const heading = screen.getByRole('heading', { name: 'Tu Numerología' });
+      expect(heading).toHaveClass('font-serif');
+    });
+  });
 });

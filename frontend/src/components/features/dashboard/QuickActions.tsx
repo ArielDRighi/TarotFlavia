@@ -34,36 +34,29 @@ function QuickActionCard({
         'block rounded-lg p-6 transition-all duration-200',
         'hover:scale-105 hover:shadow-lg',
         isPrimary
-          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-          : 'border border-gray-200 bg-white hover:border-purple-300 dark:border-gray-700 dark:bg-gray-800'
+          ? 'from-primary to-secondary bg-gradient-to-r text-white shadow-md'
+          : 'border-border bg-card hover:border-primary/40 border'
       )}
     >
       <div className="flex items-start gap-4">
         <div
           className={cn(
             'flex h-12 w-12 items-center justify-center rounded-full',
-            isPrimary ? 'bg-white/20' : 'bg-purple-100 dark:bg-purple-900/30'
+            isPrimary ? 'bg-white/20' : 'bg-primary/10'
           )}
         >
-          <div className={cn(isPrimary ? 'text-white' : 'text-purple-600 dark:text-purple-400')}>
-            {icon}
-          </div>
+          <div className={cn(isPrimary ? 'text-white' : 'text-primary')}>{icon}</div>
         </div>
         <div className="flex-1">
           <h3
             className={cn(
               'mb-1 font-serif text-xl font-semibold',
-              isPrimary ? 'text-white' : 'text-gray-900 dark:text-gray-100'
+              isPrimary ? 'text-white' : 'text-foreground'
             )}
           >
             {title}
           </h3>
-          <p
-            className={cn(
-              'text-sm',
-              isPrimary ? 'text-white/90' : 'text-gray-600 dark:text-gray-400'
-            )}
-          >
+          <p className={cn('text-sm', isPrimary ? 'text-white/90' : 'text-muted-foreground')}>
             {description}
           </p>
         </div>

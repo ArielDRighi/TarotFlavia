@@ -294,4 +294,18 @@ describe('MyServicesWidget', () => {
     const viewAllLink = screen.getByTestId('widget-view-all-link');
     expect(viewAllLink).toHaveAttribute('href', '/mis-servicios');
   });
+
+  describe('T-DASH-003 · Encabezado unificado (WidgetCard)', () => {
+    it('renders the title as a serif heading', () => {
+      vi.mocked(useHolisticServicesHook.useMyPurchases).mockReturnValue({
+        data: [createMockPurchase({ id: 1 })],
+        isLoading: false,
+      } as unknown as ReturnType<typeof useHolisticServicesHook.useMyPurchases>);
+
+      render(<MyServicesWidget />, { wrapper });
+
+      const heading = screen.getByRole('heading', { name: 'Mis Servicios' });
+      expect(heading).toHaveClass('font-serif');
+    });
+  });
 });
