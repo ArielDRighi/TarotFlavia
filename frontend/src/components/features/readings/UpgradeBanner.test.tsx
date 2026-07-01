@@ -67,12 +67,21 @@ describe('UpgradeBanner', () => {
     expect(icon).toBeInTheDocument();
   });
 
-  it('should have purple-pink gradient styles', () => {
+  it('should have brand gradient styles using design tokens', () => {
     const { container } = render(<UpgradeBanner />);
 
     const banner = container.firstChild as HTMLElement;
-    expect(banner.className).toMatch(/from-purple-500/);
-    expect(banner.className).toMatch(/to-pink-500/);
+    expect(banner.className).toMatch(/from-primary/);
+    expect(banner.className).toMatch(/to-primary\/80/);
+  });
+
+  it('should render the title with the serif brand typography', () => {
+    render(<UpgradeBanner />);
+
+    const title = screen.getByRole('heading', {
+      name: /Desbloquea interpretaciones personalizadas/i,
+    });
+    expect(title).toHaveClass('font-serif');
   });
 
   it('should have rounded border style', () => {

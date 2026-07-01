@@ -1,7 +1,7 @@
 'use client';
 
 import { CalendarHeart, Moon, Sun, Sparkles, ChevronRight } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { WidgetCard } from './WidgetCard';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -59,24 +59,26 @@ const EventItem = ({ event, showDate = false }: EventItemProps) => {
   const importanceInfo = IMPORTANCE_INFO[event.importance];
 
   return (
-    <div className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3 transition-colors hover:border-purple-300">
+    <div className="border-border bg-card hover:border-primary/40 flex items-start justify-between gap-3 rounded-lg border p-3 transition-colors">
       <div className="flex flex-1 items-start gap-3">
         <div className="mt-0.5">
-          <Icon className="h-5 w-5 text-purple-600" />
+          <Icon className="text-secondary h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h4 className="text-sm font-medium text-gray-900">{event.name}</h4>
+            <h4 className="text-foreground text-sm font-medium">{event.name}</h4>
             <Badge variant="secondary" className={importanceInfo.color}>
               {getImportanceBadgeText(event.importance)}
             </Badge>
           </div>
-          {showDate && <p className="mt-1 text-xs text-gray-500">{getDaysUntilLabel(daysUntil)}</p>}
+          {showDate && (
+            <p className="text-muted-foreground mt-1 text-xs">{getDaysUntilLabel(daysUntil)}</p>
+          )}
         </div>
       </div>
       <Link
         href={`/rituales?event=${event.eventType}`}
-        className="flex items-center gap-1 text-xs font-medium whitespace-nowrap text-purple-600 hover:text-purple-700"
+        className="text-primary hover:text-primary/80 flex items-center gap-1 text-xs font-medium whitespace-nowrap"
       >
         Ver rituales
         <ChevronRight className="h-3 w-3" />
@@ -114,24 +116,23 @@ export function SacredEventsWidget() {
   const hasAnyEvents = hasTodayEvents || hasUpcomingEvents;
 
   return (
-    <Card className="p-6" data-testid="sacred-events-widget">
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <CalendarHeart className="h-5 w-5 text-purple-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Calendario Sagrado</h3>
-        </div>
-        {isPremium && (
+    <WidgetCard
+      title="Calendario Sagrado"
+      titleAs="h3"
+      icon={<CalendarHeart className="h-5 w-5" />}
+      data-testid="sacred-events-widget"
+      action={
+        isPremium && (
           <Link
             href="/rituales"
-            className="flex items-center gap-1 text-sm font-medium text-purple-600 hover:text-purple-700"
+            className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-medium"
           >
             Ver todo
             <ChevronRight className="h-4 w-4" />
           </Link>
-        )}
-      </div>
-
+        )
+      }
+    >
       {/* Loading State */}
       {isLoading && (
         <div className="py-8">
@@ -166,8 +167,8 @@ export function SacredEventsWidget() {
           {/* Today Events */}
           {hasTodayEvents && (
             <div>
-              <h4 className="mb-3 flex items-center gap-2 text-sm font-medium text-gray-700">
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-xs font-semibold text-purple-700">
+              <h4 className="text-foreground mb-3 flex items-center gap-2 text-sm font-medium">
+                <span className="bg-primary/10 text-primary inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
                   !
                 </span>
                 Hoy
@@ -184,7 +185,7 @@ export function SacredEventsWidget() {
           {hasUpcomingEvents && (
             <div>
               {hasTodayEvents && (
-                <h4 className="mt-4 mb-3 text-sm font-medium text-gray-700">Próximos eventos</h4>
+                <h4 className="text-foreground mt-4 mb-3 text-sm font-medium">Próximos eventos</h4>
               )}
               <div className="space-y-2">
                 {upcomingEvents.map((event) => (
@@ -198,7 +199,7 @@ export function SacredEventsWidget() {
 
       {/* Premium Upsell for Free Users */}
       {!isPremium && !isLoading && (
-        <div className="mt-4 border-t border-gray-200 pt-4">
+        <div className="border-border mt-4 border-t pt-4">
           <PremiumUpsellCard
             title="Desbloquea el calendario completo"
             description="Accede a todos los eventos sagrados del año y planifica tus rituales con anticipación."
@@ -207,6 +208,6 @@ export function SacredEventsWidget() {
           />
         </div>
       )}
-    </Card>
+    </WidgetCard>
   );
 }

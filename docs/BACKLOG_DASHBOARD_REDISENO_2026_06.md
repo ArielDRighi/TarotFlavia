@@ -405,16 +405,29 @@ Reemplazar el layout 2/3 + 1/3 de `UserDashboard` por una distribución que use 
 **Estimación:** 2.5 puntos
 **Dependencias:** ninguna (idealmente antes de T-DASH-006)
 **Cubre Hallazgo:** DASH-003
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-DASH-003-widget-card-tokens`)
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `DashboardCard`/`WidgetCard` con encabezado estandarizado (ícono + título `font-serif` + acción opcional) y tratamiento de marca coherente.
-- [ ] Migrar los widgets a ese contenedor sin alterar su lógica de datos ni `data-testid`.
-- [ ] Normalizar `NumerologyWidget` y `UpgradeBanner` a `font-serif` en títulos.
-- [ ] Reemplazar grises/acentos hardcodeados por tokens; quitar todas las clases `dark:` del dashboard.
-- [ ] Tests de regresión visual mínima (encabezado, título serif, tokens) por widget tocado.
-- [ ] Coverage ≥ 80%.
+- [x] Crear `DashboardCard`/`WidgetCard` con encabezado estandarizado (ícono + título `font-serif` + acción opcional) y tratamiento de marca coherente.
+- [x] Migrar los widgets a ese contenedor sin alterar su lógica de datos ni `data-testid`.
+- [x] Normalizar `NumerologyWidget` y `UpgradeBanner` a `font-serif` en títulos.
+- [x] Reemplazar grises/acentos hardcodeados por tokens; quitar todas las clases `dark:` del dashboard.
+- [x] Tests de regresión visual mínima (encabezado, título serif, tokens) por widget tocado.
+- [x] Coverage ≥ 80%.
+
+> **Notas de implementación:**
+> - Nuevo componente compartido `WidgetCard` (`components/features/dashboard/WidgetCard.tsx`):
+>   `Card` + encabezado estándar (slot de ícono con **acento dorado** `text-secondary`, título
+>   `font-serif text-xl`, acción opcional) que reenvía `data-testid` y `className`.
+> - Migrados a `WidgetCard`: `NumerologyWidget`, `SacredEventsWidget`, `MyServicesWidget`,
+>   `PersonalizedRitualsWidget`, `StatsSection`, `DidYouKnowSection`.
+> - `HoroscopeWidget` y `ChineseHoroscopeWidget` ya cumplían el canon (título serif + solo colores
+>   semánticos, sin `dark:`) → se auditaron y se dejaron sin cambios.
+> - `QuickActions` y `UpgradeBanner` no son tarjetas de widget: se normalizaron tokens y se añadió
+>   `font-serif` al título del banner. **Todas** las clases `dark:` del dashboard fueron eliminadas.
+> - Se conservan los colores **semánticos** de estado (verde/ámbar/rojo/rosa en `STATUS_CONFIG`,
+>   `IMPORTANCE_INFO`, colores por número de numerología, scores de horóscopo).
 
 #### 🎯 Criterios de Aceptación
 

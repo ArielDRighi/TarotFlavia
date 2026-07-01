@@ -5,6 +5,8 @@
  */
 
 export { DashboardHero } from './DashboardHero';
+export { WidgetCard } from './WidgetCard';
+export type { WidgetCardProps } from './WidgetCard';
 export { QuickActions } from './QuickActions';
 export { DidYouKnowSection } from './DidYouKnowSection';
 export { StatsSection } from './StatsSection';

@@ -2,6 +2,7 @@
 
 import { Sparkles, Heart, DollarSign, Shield, Brain } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { WidgetCard } from './WidgetCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRitualRecommendations } from '@/hooks/api/useRitualRecommendations';
@@ -60,14 +61,12 @@ export function PersonalizedRitualsWidget() {
   // Free user: Show upsell
   if (!isPremium) {
     return (
-      <Card
-        className="bg-gradient-to-br from-purple-500/5 to-amber-500/5 p-6"
+      <WidgetCard
+        title="Rituales Recomendados para Ti"
+        icon={<Sparkles className="h-5 w-5" />}
+        className="bg-secondary/5"
         data-testid="personalized-rituals-widget"
       >
-        <div className="mb-4 flex items-center gap-3">
-          <Sparkles className="h-6 w-6 text-amber-500" />
-          <h2 className="font-serif text-xl">Rituales Recomendados para Ti</h2>
-        </div>
         <p className="text-muted-foreground mb-4 text-sm">
           Con Premium, analizamos tus lecturas para sugerirte rituales personalizados según tu
           momento energético actual.
@@ -75,7 +74,7 @@ export function PersonalizedRitualsWidget() {
         <Button asChild>
           <Link href="/premium">Desbloquear recomendaciones</Link>
         </Button>
-      </Card>
+      </WidgetCard>
     );
   }
 
@@ -87,72 +86,67 @@ export function PersonalizedRitualsWidget() {
   // Error state
   if (isError) {
     return (
-      <Card className="p-6" data-testid="personalized-rituals-widget">
-        <div className="mb-4 flex items-center gap-3">
-          <Sparkles className="h-6 w-6 text-purple-500" />
-          <h2 className="font-serif text-xl">Rituales para Ti</h2>
-        </div>
+      <WidgetCard
+        title="Rituales para Ti"
+        icon={<Sparkles className="h-5 w-5" />}
+        data-testid="personalized-rituals-widget"
+      >
         <p className="text-sm text-red-600">
           Error al cargar recomendaciones. Inténtalo de nuevo más tarde.
         </p>
-      </Card>
+      </WidgetCard>
     );
   }
 
   // No recommendations available
   if (!data?.hasRecommendations) {
     return (
-      <Card className="p-6" data-testid="personalized-rituals-widget">
-        <div className="mb-4 flex items-center gap-3">
-          <Sparkles className="h-6 w-6 text-purple-500" />
-          <h2 className="font-serif text-xl">Rituales para Ti</h2>
-        </div>
+      <WidgetCard
+        title="Rituales para Ti"
+        icon={<Sparkles className="h-5 w-5" />}
+        data-testid="personalized-rituals-widget"
+      >
         <p className="text-muted-foreground text-sm">
           Realiza algunas lecturas más para que podamos analizar tu energía y recomendarte rituales
           personalizados.
         </p>
-      </Card>
+      </WidgetCard>
     );
   }
 
   // Show recommendations
   return (
-    <Card className="p-6" data-testid="personalized-rituals-widget">
-      <div className="mb-4 flex items-center gap-3">
-        <Sparkles className="h-6 w-6 text-purple-500" />
-        <h2 className="font-serif text-xl">Recomendado para Ti</h2>
-      </div>
+    <WidgetCard
+      title="Recomendado para Ti"
+      icon={<Sparkles className="h-5 w-5" />}
+      data-testid="personalized-rituals-widget"
+      contentClassName="space-y-4"
+    >
+      {data.recommendations.slice(0, 2).map((rec) => {
+        const Icon = PATTERN_ICONS[rec.pattern] || Sparkles;
 
-      <div className="space-y-4">
-        {data.recommendations.slice(0, 2).map((rec) => {
-          const Icon = PATTERN_ICONS[rec.pattern] || Sparkles;
-
-          return (
-            <div
-              key={rec.pattern}
-              className="rounded-lg bg-gradient-to-r from-purple-500/10 to-transparent p-4"
-            >
-              <div className="flex items-start gap-3">
-                <div className="rounded-full bg-purple-500/20 p-2">
-                  <Icon className="h-5 w-5 text-purple-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-muted-foreground mb-2 text-sm">{rec.message}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {rec.suggestedCategories.map((cat) => (
-                      <Link key={cat} href={`/rituales?category=${cat}`}>
-                        <Button variant="outline" size="sm">
-                          Ver rituales de {cat}
-                        </Button>
-                      </Link>
-                    ))}
-                  </div>
+        return (
+          <div key={rec.pattern} className="bg-primary/5 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="bg-primary/10 rounded-full p-2">
+                <Icon className="text-primary h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-muted-foreground mb-2 text-sm">{rec.message}</p>
+                <div className="flex flex-wrap gap-2">
+                  {rec.suggestedCategories.map((cat) => (
+                    <Link key={cat} href={`/rituales?category=${cat}`}>
+                      <Button variant="outline" size="sm">
+                        Ver rituales de {cat}
+                      </Button>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div>
-    </Card>
+          </div>
+        );
+      })}
+    </WidgetCard>
   );
 }
