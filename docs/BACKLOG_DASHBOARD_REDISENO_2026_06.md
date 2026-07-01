@@ -318,7 +318,7 @@ El rediseño introduce fondo oscuro (banda) e imágenes; hay que garantizar cont
 | T-DASH-001 | Reestructurar el layout a grilla de widgets full-width (masonry/auto-fit)   | Frontend | 🔴 Crítica | 3 pts      |
 | T-DASH-002 | Banda de bienvenida mística (`DashboardHero`) reutilizando el canon         | Frontend | 🟠 Alta    | 2.5 pts    |
 | T-DASH-003 | Tarjeta de widget común + normalización de tokens (quitar `dark:`/grises)   | Frontend | 🟡 Media   | 2.5 pts    |
-| T-DASH-004 | Generación y optimización de assets del dashboard (WebP)                    | Assets   | 🟠 Alta    | 2 pts      |
+| T-DASH-004 | ✅ Generación y optimización de assets del dashboard (WebP)                 | Assets   | 🟠 Alta    | 2 pts      |
 | T-DASH-005 | Empty states ilustrados y consistentes                                      | Frontend | 🟡 Media   | 2 pts      |
 | T-DASH-006 | Micro-interacciones + `Reveal` escalonado (componentes compartidos)         | Frontend | 🟢 Baja    | 1.5 pts    |
 | T-DASH-007 | Accesibilidad del home (AA en banda, `alt`, foco, reduced-motion)           | Frontend | 🟡 Media   | 1.5 pts    |
@@ -447,22 +447,33 @@ Reemplazar el layout 2/3 + 1/3 de `UserDashboard` por una distribución que use 
 **Estimación:** 2 puntos
 **Dependencias:** ninguna (habilita DASH-002/005)
 **Cubre Hallazgo:** DASH-004
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Generar set mínimo (`dashboard-hero.webp`, `empty-calendar.webp`, `empty-rituals.webp`) con la fórmula de prompts del canon (violeta/índigo + dorado, etéreo, `no text`).
-- [ ] Evaluar reaprovechar assets existentes de `public/images/enciclopedia/` antes de generar nuevos.
-- [ ] Exportar a WebP optimizado en `frontend/public/images/dashboard/`; `alt` en español por imagen.
-- [ ] Seguir `frontend/docs/IMAGE_OPTIMIZATION.md`.
+- [x] Generar set mínimo (`dashboard-hero.webp`, `empty-calendar.webp`, `empty-rituals.webp`) coherente con el canon (violeta/índigo + dorado, etéreo, `no text`).
+- [x] Evaluar reaprovechar assets existentes de `public/images/enciclopedia/` antes de generar nuevos → **se reutilizaron** (decisión de producto: sin generación IA nueva).
+- [x] Exportar a WebP optimizado en `frontend/public/images/dashboard/`; `alt` en español por imagen.
+- [x] Seguir `frontend/docs/IMAGE_OPTIMIZATION.md` (WebP, `-strip`, calidad ~80).
+- [x] Cablear `dashboard-hero.webp` en `UserDashboard` (prop `image` de `DashboardHero`) con `alt` en español.
 
 #### 🎯 Criterios de Aceptación
 
-- Set disponible y optimizado, consistente con la marca; cada imagen con `alt`.
+- [x] Set disponible y optimizado, consistente con la marca; cada imagen con `alt`.
 
 #### 📁 Archivos involucrados
 
-- `frontend/public/images/dashboard/*` (nuevos)
+- `frontend/public/images/dashboard/dashboard-hero.webp` (nuevo, 48 KB) ← `enciclopedia/astro-tarot-fondo.webp`
+- `frontend/public/images/dashboard/empty-calendar.webp` (nuevo, 76 KB) ← `enciclopedia/rituales-rueda-tiempo.webp`
+- `frontend/public/images/dashboard/empty-rituals.webp` (nuevo, 46 KB) ← `enciclopedia/rituales-espacio.webp`
+- `frontend/src/components/features/dashboard/UserDashboard.tsx` (cableado del hero)
+- `frontend/src/components/features/dashboard/UserDashboard.test.tsx` (test del cableado)
+
+#### 📝 Notas de implementación
+
+- **Sin generación por IA:** el agente no dispone de herramienta de generación de imágenes; por decisión de producto se reutilizaron assets de la Enciclopedia (ya en el canon violeta/índigo + dorado, etéreo, sin texto) reoptimizados con ImageMagick (`-strip -quality 80`). Los prompts de la §6 de `FEEDBACK_ENCICLOPEDIA_DISENO.md` quedan disponibles si más adelante se generan piezas bespoke.
+- Los assets `empty-calendar.webp` / `empty-rituals.webp` quedan listos para su consumo en **T-DASH-005** (empty states ilustrados).
+- `DashboardHero` mantiene el fallback elegante a gradiente si la imagen no carga.
 
 ---
 

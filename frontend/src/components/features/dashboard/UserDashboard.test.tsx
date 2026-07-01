@@ -156,6 +156,38 @@ describe('UserDashboard', () => {
     expect(screen.getByText('¡Hola, María!')).toBeInTheDocument();
   });
 
+  it('should wire the dashboard hero image with a Spanish alt (T-DASH-004)', () => {
+    const mockUser = createMockAuthUser({ name: 'María' });
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      checkAuth: vi.fn(),
+    });
+
+    vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+      plan: 'free',
+      planLabel: 'GRATUITO',
+      canUseAI: false,
+      canUseCategories: false,
+      canUseCustomQuestions: false,
+      canShare: true,
+      isPremium: false,
+      isFree: true,
+      isAnonymous: false,
+    });
+
+    render(<UserDashboard />);
+
+    const heroImage = screen.getByAltText(/tarot etéreas sobre un cielo nocturno violeta/i);
+    expect(heroImage).toBeInTheDocument();
+    expect(heroImage).toHaveAttribute('src', expect.stringContaining('dashboard-hero.webp'));
+  });
+
   it('should render QuickActions', () => {
     const mockUser = createMockAuthUser({ name: 'Carlos', plan: 'free' });
 
