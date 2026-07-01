@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DashboardHero } from './DashboardHero';
 import * as useAuthModule from '@/hooks/useAuth';
 import * as useUserPlanFeaturesModule from '@/hooks/utils/useUserPlanFeatures';
@@ -93,6 +94,16 @@ describe('DashboardHero', () => {
     expect(profileLink).toHaveAttribute('href', '/perfil');
     // Visible keyboard focus is required for AA accessibility.
     expect(profileLink.className).toMatch(/focus-visible:/);
+  });
+
+  it('should move keyboard focus to the profile link when tabbed to', async () => {
+    mockHooks({ user: createMockAuthUser({ name: 'Luis' }), plan: 'free' });
+
+    render(<DashboardHero />);
+
+    await userEvent.tab();
+
+    expect(screen.getByRole('link', { name: 'Ver perfil' })).toHaveFocus();
   });
 
   it('should render an optional contextual subtitle', () => {

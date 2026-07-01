@@ -3,12 +3,12 @@
 // 1. React & Next.js
 import Image from 'next/image';
 import Link from 'next/link';
-// 4. Custom hooks
+// 2. Custom hooks
 import { useAuth } from '@/hooks/useAuth';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
-// 5. Components (ui → features)
+// 3. Components (ui → features)
 import { PlanBadge } from '@/components/ui/plan-badge';
-// 6. Utils & types
+// 4. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
 import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
@@ -75,6 +75,7 @@ export function DashboardHero({ subtitle, image, className }: DashboardHeroProps
   return (
     <header
       data-testid="dashboard-hero"
+      aria-label="Panel de bienvenida"
       className={cn('relative overflow-hidden rounded-2xl', className)}
       style={{ background: HERO_GRADIENT }}
     >
