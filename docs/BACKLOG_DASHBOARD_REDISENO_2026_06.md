@@ -375,16 +375,16 @@ Reemplazar el layout 2/3 + 1/3 de `UserDashboard` por una distribución que use 
 **Estimación:** 2.5 puntos
 **Dependencias:** T-DASH-004 (asset opcional; con fallback a gradiente puede ir antes)
 **Cubre Hallazgo:** DASH-002
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ Completada (rama `feature/T-DASH-002-dashboard-hero-mistico`)
 
 #### ✅ Tareas específicas
 
-- [ ] Crear `DashboardHero` (o evolucionar `WelcomeHeader`) con `HERO_GRADIENT`, estrellas `animate-twinkle`, luna creciente CSS y filete dorado, reutilizando el patrón de `ArticleHero`.
-- [ ] Saludo `¡Hola, {nombre}!` en Cormorant crema + `PlanBadge` + acceso a perfil; subtítulo contextual opcional.
-- [ ] Capa de imagen opcional con overlay de legibilidad y **fallback** al gradiente si no hay asset.
-- [ ] Eliminar clases `dark:` y grises hardcodeados de la cabecera.
-- [ ] Tests (saludo, badge por plan, foco visible del link de perfil, alt si hay imagen).
-- [ ] Coverage ≥ 80%.
+- [x] Crear `DashboardHero` (o evolucionar `WelcomeHeader`) con `HERO_GRADIENT`, estrellas `animate-twinkle`, luna creciente CSS y filete dorado, reutilizando el patrón de `ArticleHero`. (Se creó `DashboardHero` nuevo y se retiró el `WelcomeHeader` huérfano.)
+- [x] Saludo `¡Hola, {nombre}!` en Cormorant crema + `PlanBadge` + acceso a perfil; subtítulo contextual opcional (prop `subtitle`).
+- [x] Capa de imagen opcional con overlay de legibilidad y **fallback** al gradiente si no hay asset (prop `image`; sin asset → solo gradiente).
+- [x] Eliminar clases `dark:` y grises hardcodeados de la cabecera (colores crema/dorado vía constantes del canon).
+- [x] Tests (saludo, fallback de nombre, badge por plan, foco visible del link de perfil, alt si hay imagen, fallback a gradiente).
+- [x] Coverage ≥ 80% (`DashboardHero.tsx`: 100% stmts/branch/funcs/lines).
 
 #### 🎯 Criterios de Aceptación
 

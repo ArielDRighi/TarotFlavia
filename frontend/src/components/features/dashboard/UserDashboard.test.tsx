@@ -126,7 +126,7 @@ describe('UserDashboard', () => {
     } as unknown as ReturnType<typeof useHolisticServicesModule.useMyPurchases>);
   });
 
-  it('should render WelcomeHeader', () => {
+  it('should render DashboardHero', () => {
     const mockUser = createMockAuthUser({ name: 'María' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
