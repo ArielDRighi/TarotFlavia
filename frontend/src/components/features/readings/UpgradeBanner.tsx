@@ -32,7 +32,7 @@ export default function UpgradeBanner() {
   return (
     <div
       data-testid="upgrade-banner"
-      className="from-primary to-primary/80 rounded-lg bg-gradient-to-r p-6 text-white shadow-lg"
+      className="from-primary to-secondary rounded-lg bg-gradient-to-r p-6 text-white shadow-lg"
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-start gap-3">

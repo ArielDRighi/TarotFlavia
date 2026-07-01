@@ -72,7 +72,7 @@ describe('UpgradeBanner', () => {
 
     const banner = container.firstChild as HTMLElement;
     expect(banner.className).toMatch(/from-primary/);
-    expect(banner.className).toMatch(/to-primary\/80/);
+    expect(banner.className).toMatch(/to-secondary/);
   });
 
   it('should render the title with the serif brand typography', () => {

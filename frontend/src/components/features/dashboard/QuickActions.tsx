@@ -34,7 +34,7 @@ function QuickActionCard({
         'block rounded-lg p-6 transition-all duration-200',
         'hover:scale-105 hover:shadow-lg',
         isPrimary
-          ? 'from-primary to-primary/80 bg-gradient-to-r text-white shadow-md'
+          ? 'from-primary to-secondary bg-gradient-to-r text-white shadow-md'
           : 'border-border bg-card hover:border-primary/40 border'
       )}
     >

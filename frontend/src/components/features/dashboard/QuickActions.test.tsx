@@ -127,7 +127,7 @@ describe('QuickActions', () => {
     // Check for primary styling classes (brand gradient using design tokens)
     expect(buttonElement).toHaveClass('bg-gradient-to-r');
     expect(buttonElement).toHaveClass('from-primary');
-    expect(buttonElement).toHaveClass('to-primary/80');
+    expect(buttonElement).toHaveClass('to-secondary');
   });
 
   it('should have secondary styling on other buttons', () => {
