@@ -14,6 +14,20 @@ import { SacredEventsWidget } from './SacredEventsWidget';
 import { PersonalizedRitualsWidget } from './PersonalizedRitualsWidget';
 import { MyServicesWidget } from './MyServicesWidget';
 
+// ─── Constants ──────────────────────────────────────────────────────────────────
+
+/**
+ * Themed header image for the welcome band (T-DASH-004). Reuses the Encyclopedia
+ * canon (violeta/índigo + dorado, etéreo, sin texto); `DashboardHero` degrades to
+ * its gradient band if the asset ever fails to load.
+ */
+const DASHBOARD_HERO_IMAGE: EditorialImage = {
+  src: '/images/dashboard/dashboard-hero.webp',
+  alt: 'Cartas de tarot etéreas sobre un cielo nocturno violeta con destellos dorados',
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 /**
  * User Dashboard component for authenticated users
  *
@@ -45,16 +59,6 @@ import { MyServicesWidget } from './MyServicesWidget';
  * {isAuthenticated && <UserDashboard />}
  * ```
  */
-/**
- * Themed header image for the welcome band (T-DASH-004). Reuses the Encyclopedia
- * canon (violeta/índigo + dorado, etéreo, sin texto); `DashboardHero` degrades to
- * its gradient band if the asset ever fails to load.
- */
-const DASHBOARD_HERO_IMAGE: EditorialImage = {
-  src: '/images/dashboard/dashboard-hero.webp',
-  alt: 'Cartas de tarot etéreas sobre un cielo nocturno violeta con destellos dorados',
-};
-
 export function UserDashboard() {
   const { isPremium } = useUserPlanFeatures();
 
