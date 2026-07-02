@@ -5,6 +5,7 @@ import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
 import { DashboardHero } from './DashboardHero';
 import { QuickActions } from './QuickActions';
 import { DidYouKnowSection } from './DidYouKnowSection';
+import { RevealWidget } from './RevealWidget';
 import { StatsSection } from './StatsSection';
 import UpgradeBanner from '@/components/features/readings/UpgradeBanner';
 import { HoroscopeWidget } from '@/components/features/horoscope';
@@ -76,31 +77,52 @@ export function UserDashboard() {
         {/* Did You Know - full-width strip above the widget grid */}
         <DidYouKnowSection />
 
-        {/* Themed widgets - single full-width responsive grid */}
+        {/*
+          Themed widgets - single full-width responsive grid.
+
+          Micro-interacciones de marca (T-DASH-006 / hallazgo DASH-006): cada widget
+          aparece con un reveal fade-up escalonado (por `index`) al entrar en viewport
+          y tiene hover de marca (lift + glow dorado). Los widgets que siempre
+          renderizan van envueltos en `RevealWidget`; los que pueden auto-ocultarse
+          (`StatsSection`, `MyServicesWidget`) reciben `index` y se envuelven ellos
+          mismos, para que su `return null` siga liberando la celda del grid (T-DASH-001)
+          sin dejar una celda "fantasma" vacía. `prefers-reduced-motion` se respeta en
+          `Reveal` (aparición inmediata, sin animación).
+        */}
         <section
           data-testid="dashboard-widget-grid"
           className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 xl:grid-cols-3"
         >
           {/* Horoscope Widget (Western) - For all users */}
-          <HoroscopeWidget />
+          <RevealWidget index={0}>
+            <HoroscopeWidget />
+          </RevealWidget>
 
           {/* Chinese Horoscope Widget - For all users */}
-          <ChineseHoroscopeWidget />
+          <RevealWidget index={1}>
+            <ChineseHoroscopeWidget />
+          </RevealWidget>
 
           {/* Numerology Widget - For all users */}
-          <NumerologyWidget />
+          <RevealWidget index={2}>
+            <NumerologyWidget />
+          </RevealWidget>
 
           {/* Sacred Events Widget - For all users */}
-          <SacredEventsWidget />
+          <RevealWidget index={3}>
+            <SacredEventsWidget />
+          </RevealWidget>
 
           {/* Personalized Rituals Widget - For all users (Premium features) */}
-          <PersonalizedRitualsWidget />
+          <RevealWidget index={4}>
+            <PersonalizedRitualsWidget />
+          </RevealWidget>
 
-          {/* My Services Widget - hidden when there are no purchases */}
-          <MyServicesWidget />
+          {/* My Services Widget - self-hides (returns null) when there are no purchases */}
+          <MyServicesWidget index={5} />
 
-          {/* Stats Section - Only for Premium users */}
-          {isPremium && <StatsSection />}
+          {/* Stats Section - Only for Premium users; self-hides without capabilities */}
+          {isPremium && <StatsSection index={6} />}
         </section>
 
         {/* Upgrade Banner - full-width footer, only for non-Premium users */}

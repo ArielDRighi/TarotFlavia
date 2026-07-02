@@ -7,6 +7,7 @@
 export { DashboardHero } from './DashboardHero';
 export { WidgetCard } from './WidgetCard';
 export type { WidgetCardProps } from './WidgetCard';
+export { RevealWidget } from './RevealWidget';
 export { WidgetEmptyState } from './WidgetEmptyState';
 export type { WidgetEmptyStateProps } from './WidgetEmptyState';
 export { QuickActions } from './QuickActions';

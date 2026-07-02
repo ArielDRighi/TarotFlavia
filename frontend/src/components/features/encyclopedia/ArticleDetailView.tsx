@@ -7,7 +7,7 @@ import { ArticleHero } from './ArticleHero';
 import { ArticleToc } from './ArticleToc';
 import { MarkdownArticle } from './MarkdownArticle';
 import { RelatedTarotCards } from './RelatedTarotCards';
-import { Reveal } from './Reveal';
+import { Reveal } from '@/components/common';
 import { ROUTES } from '@/lib/constants/routes';
 import {
   getArticleEditorial,

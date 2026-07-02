@@ -320,7 +320,7 @@ El rediseño introduce fondo oscuro (banda) e imágenes; hay que garantizar cont
 | T-DASH-003 | Tarjeta de widget común + normalización de tokens (quitar `dark:`/grises)   | Frontend | 🟡 Media   | 2.5 pts    |
 | T-DASH-004 | ✅ Generación y optimización de assets del dashboard (WebP)                 | Assets   | 🟠 Alta    | 2 pts      |
 | T-DASH-005 | ✅ Empty states ilustrados y consistentes                                   | Frontend | 🟡 Media   | 2 pts      |
-| T-DASH-006 | Micro-interacciones + `Reveal` escalonado (componentes compartidos)         | Frontend | 🟢 Baja    | 1.5 pts    |
+| T-DASH-006 | ✅ Micro-interacciones + `Reveal` escalonado (componentes compartidos)      | Frontend | 🟢 Baja    | 1.5 pts    |
 | T-DASH-007 | Accesibilidad del home (AA en banda, `alt`, foco, reduced-motion)           | Frontend | 🟡 Media   | 1.5 pts    |
 
 **Estimación total:** ~15 puntos.
@@ -524,24 +524,33 @@ Reemplazar el layout 2/3 + 1/3 de `UserDashboard` por una distribución que use 
 **Estimación:** 1.5 puntos
 **Dependencias:** T-DASH-001, T-DASH-003
 **Cubre Hallazgo:** DASH-006
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Reutilizar `Reveal` + `useReducedMotion` (evaluar moverlos a ubicación compartida) para fade-up escalonado de los widgets.
-- [ ] Hover de marca (lift + glow dorado) en widgets interactivos.
-- [ ] Respetar `prefers-reduced-motion` (aparición inmediata, sin animaciones en bucle).
-- [ ] Tests donde aplique / verificación visual.
-- [ ] Coverage ≥ 80%.
+- [x] Reutilizar `Reveal` + `useReducedMotion` para fade-up escalonado de los widgets. `Reveal` se movió a la ubicación compartida `components/common/` (con `git mv`, preservando historial y tests) para desacoplar dashboard ↔ encyclopedia; `useReducedMotion` ya vivía en `hooks/utils/` (compartido).
+- [x] Hover de marca (lift + glow dorado) en widgets interactivos, con el mismo patrón que `SectionCard` del hub (`hover:-translate-y-1` + `hover:shadow-[0_18px_40px_-12px_rgba(214,158,46,0.45)]`).
+- [x] Respetar `prefers-reduced-motion` (aparición inmediata, sin animaciones en bucle) — heredado de `Reveal` + reglas de `globals.css`.
+- [x] Tests: `RevealWidget.test.tsx` (nuevo) + integración en `UserDashboard.test.tsx` (reveal escalonado + hover + regresión de "celda fantasma").
+- [x] Coverage ≥ 80% (RevealWidget 100 %, StatsSection 100 %, Reveal 95.65 %).
 
 #### 🎯 Criterios de Aceptación
 
-- Animaciones sutiles y performantes que respetan `prefers-reduced-motion`.
-- Ciclo de calidad frontend completo pasa.
+- ✅ Animaciones sutiles y performantes (solo `opacity`/`transform`, compuestas por GPU) que respetan `prefers-reduced-motion`.
+- ✅ Ciclo de calidad frontend completo pasa (format, lint, type-check, 5060 tests, build, validate-architecture).
 
 #### 📁 Archivos involucrados
 
-- `UserDashboard` + widgets; posible relocalización de `Reveal`/`useReducedMotion`
+- `components/common/Reveal.tsx` (+ test, + `index.ts`) — relocalizado desde `features/encyclopedia/`.
+- `components/features/dashboard/RevealWidget.tsx` (+ test) — nuevo wrapper (Reveal escalonado + hover de marca).
+- `components/features/dashboard/UserDashboard.tsx` — envuelve los widgets del grid.
+- `components/features/dashboard/StatsSection.tsx` y `MyServicesWidget.tsx` — reciben `index` y se auto-envuelven (preservan `return null` → no dejan celda vacía).
+- Imports de `Reveal` en `features/encyclopedia/*` actualizados a `@/components/common`.
+
+#### 🧠 Notas técnicas
+
+- **Dos elementos anidados en `RevealWidget`**: la entrada (`Reveal`) y el hover viven en contenedores separados a propósito, para que ambas transformaciones no compitan por la misma propiedad `transform` (el `transform: none` del estado revelado pisaría el `hover:-translate-y-1`).
+- **Widgets auto-ocultables** (`StatsSection`, `MyServicesWidget`) se envuelven a sí mismos en vez de hacerlo el padre: así su `return null` sigue liberando la celda del grid (contrato de T-DASH-001) sin dejar una celda "fantasma" vacía.
 
 ---
 

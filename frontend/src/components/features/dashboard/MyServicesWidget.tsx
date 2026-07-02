@@ -1,8 +1,10 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { HandHeart, ArrowRight, CalendarDays, Clock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { RevealWidget } from './RevealWidget';
 import { WidgetCard } from './WidgetCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorDisplay } from '@/components/ui/error-display';
@@ -79,28 +81,40 @@ function PurchaseItem({ purchase }: PurchaseItemProps) {
 // Main Component
 // ============================================================================
 
+interface MyServicesWidgetProps {
+  /**
+   * Posición en el grid del dashboard; define el retardo del reveal escalonado
+   * (T-DASH-006). Por defecto `0` para uso aislado.
+   */
+  index?: number;
+}
+
 /**
  * MyServicesWidget Component
  *
  * Dashboard widget showing the user's recent holistic service purchases.
  * Displays up to 3 purchases with status badges and a link to see all.
  * Hidden when the user has no purchases.
+ *
+ * Se auto-oculta (`return null`) cuando no hay compras. Por eso envuelve su propia
+ * salida no-nula en `RevealWidget` (en lugar de que lo haga el padre): así el `null`
+ * sigue liberando la celda del grid sin dejar una celda "fantasma" vacía (T-DASH-001).
  */
-export function MyServicesWidget() {
+export function MyServicesWidget({ index = 0 }: MyServicesWidgetProps) {
   const { data: purchases, isLoading, isError, refetch } = useMyPurchases();
 
+  let content: ReactNode;
+
   if (isLoading) {
-    return (
+    content = (
       <Card className="p-6" data-testid="my-services-widget-loading">
         <Skeleton className="mb-4 h-6 w-40" />
         <Skeleton className="mb-2 h-12 w-full" />
         <Skeleton className="h-12 w-full" />
       </Card>
     );
-  }
-
-  if (isError) {
-    return (
+  } else if (isError) {
+    content = (
       <Card data-testid="my-services-widget-error">
         <ErrorDisplay
           message="No se pudieron cargar tus servicios."
@@ -108,38 +122,38 @@ export function MyServicesWidget() {
         />
       </Card>
     );
-  }
-
-  if (!purchases || purchases.length === 0) {
+  } else if (!purchases || purchases.length === 0) {
     return null;
+  } else {
+    const visiblePurchases = purchases.slice(0, MAX_VISIBLE_PURCHASES);
+    const remainingCount = purchases.length - MAX_VISIBLE_PURCHASES;
+
+    content = (
+      <WidgetCard
+        title="Mis Servicios"
+        titleAs="h3"
+        icon={<HandHeart className="h-5 w-5" />}
+        data-testid="my-services-widget"
+      >
+        {/* Purchase list */}
+        <div className="space-y-2">
+          {visiblePurchases.map((purchase) => (
+            <PurchaseItem key={purchase.id} purchase={purchase} />
+          ))}
+        </div>
+
+        {/* Footer link */}
+        <Link
+          href={ROUTES.MIS_SERVICIOS}
+          className="text-primary hover:text-primary/80 mt-4 flex items-center justify-center gap-1 text-sm font-medium"
+          data-testid="widget-view-all-link"
+        >
+          {remainingCount > 0 ? `Ver todos (${purchases.length})` : 'Ver todos mis servicios'}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </WidgetCard>
+    );
   }
 
-  const visiblePurchases = purchases.slice(0, MAX_VISIBLE_PURCHASES);
-  const remainingCount = purchases.length - MAX_VISIBLE_PURCHASES;
-
-  return (
-    <WidgetCard
-      title="Mis Servicios"
-      titleAs="h3"
-      icon={<HandHeart className="h-5 w-5" />}
-      data-testid="my-services-widget"
-    >
-      {/* Purchase list */}
-      <div className="space-y-2">
-        {visiblePurchases.map((purchase) => (
-          <PurchaseItem key={purchase.id} purchase={purchase} />
-        ))}
-      </div>
-
-      {/* Footer link */}
-      <Link
-        href={ROUTES.MIS_SERVICIOS}
-        className="text-primary hover:text-primary/80 mt-4 flex items-center justify-center gap-1 text-sm font-medium"
-        data-testid="widget-view-all-link"
-      >
-        {remainingCount > 0 ? `Ver todos (${purchases.length})` : 'Ver todos mis servicios'}
-        <ArrowRight className="h-4 w-4" />
-      </Link>
-    </WidgetCard>
-  );
+  return <RevealWidget index={index}>{content}</RevealWidget>;
 }
