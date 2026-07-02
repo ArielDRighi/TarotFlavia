@@ -148,6 +148,27 @@ describe('QuickActions', () => {
     expect(icons.length).toBeGreaterThanOrEqual(3);
   });
 
+  describe('Accesibilidad (T-DASH-007)', () => {
+    it('should give every quick-action card a visible keyboard focus ring', () => {
+      render(<QuickActions />);
+
+      const links = screen.getAllByRole('link');
+      expect(links.length).toBeGreaterThanOrEqual(3);
+      // Cada tarjeta-enlace debe exponer foco visible de teclado (AA).
+      links.forEach((link) => {
+        expect(link.className).toMatch(/focus-visible:ring/);
+      });
+    });
+
+    it('should keep an accessible label describing each action', () => {
+      render(<QuickActions />);
+
+      expect(
+        screen.getByRole('link', { name: /Nueva Lectura: Comienza una nueva tirada de tarot/i })
+      ).toBeInTheDocument();
+    });
+  });
+
   describe('Premium user — acceso a Carta Astral Historial', () => {
     beforeEach(() => {
       mockUseAuthStore.mockReturnValue({

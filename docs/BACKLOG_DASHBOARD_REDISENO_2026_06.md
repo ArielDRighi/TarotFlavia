@@ -321,7 +321,7 @@ El rediseño introduce fondo oscuro (banda) e imágenes; hay que garantizar cont
 | T-DASH-004 | ✅ Generación y optimización de assets del dashboard (WebP)                 | Assets   | 🟠 Alta    | 2 pts      |
 | T-DASH-005 | ✅ Empty states ilustrados y consistentes                                   | Frontend | 🟡 Media   | 2 pts      |
 | T-DASH-006 | ✅ Micro-interacciones + `Reveal` escalonado (componentes compartidos)      | Frontend | 🟢 Baja    | 1.5 pts    |
-| T-DASH-007 | Accesibilidad del home (AA en banda, `alt`, foco, reduced-motion)           | Frontend | 🟡 Media   | 1.5 pts    |
+| T-DASH-007 | ✅ Accesibilidad del home (AA en banda, `alt`, foco, reduced-motion)        | Frontend | 🟡 Media   | 1.5 pts    |
 
 **Estimación total:** ~15 puntos.
 
@@ -560,23 +560,31 @@ Reemplazar el layout 2/3 + 1/3 de `UserDashboard` por una distribución que use 
 **Estimación:** 1.5 puntos
 **Dependencias:** T-DASH-002, T-DASH-005
 **Cubre Hallazgo:** DASH-007
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Contraste AA del texto sobre la banda; chips dorados con texto noche (`#1a0a2e`).
-- [ ] `alt` en imágenes nuevas; foco visible en CTAs/links del home.
-- [ ] Verificación con fórmula de contraste WCAG; tests que fijen contrato de `alt`/foco/contraste.
-- [ ] Coverage ≥ 80% donde aplique.
+- [x] Contraste AA del texto sobre la banda; chips dorados con texto noche (`#1a0a2e`).
+- [x] `alt` en imágenes nuevas; foco visible en CTAs/links del home.
+- [x] Verificación con fórmula de contraste WCAG; tests que fijen contrato de `alt`/foco/contraste.
+- [x] Coverage ≥ 80% donde aplique.
 
 #### 🎯 Criterios de Aceptación
 
-- Texto sobre fondos oscuros cumple AA; imágenes con `alt`; foco visible; movimiento reducido respetado.
-- Ciclo de calidad frontend completo pasa.
+- [x] Texto sobre fondos oscuros cumple AA; imágenes con `alt`; foco visible; movimiento reducido respetado.
+- [x] Ciclo de calidad frontend completo pasa.
 
 #### 📁 Archivos involucrados
 
-- banda de bienvenida, tarjetas, empty states + tests
+- `lib/utils/contrast.ts` (+ test, + export en `lib/utils/index.ts`) — utilidad WCAG (`getContrastRatio`, `meetsWcagAA`) que fija el contrato de contraste de forma ejecutable.
+- `components/features/dashboard/QuickActions.tsx` (+ test) — foco visible de teclado (anillo dorado) en las tarjetas-enlace.
+- `components/features/dashboard/MyServicesWidget.tsx` (+ test) — foco visible en el enlace "Ver todos" del pie.
+
+#### 🧠 Notas técnicas
+
+- **Contraste como contrato ejecutable**: en lugar de dejar los ratios AA solo en comentarios (como en T-ENC-009), se añadió `contrast.ts` con la fórmula oficial de luminancia WCAG 2.1. Los tests fijan que crema `#f9f7f2` sobre noche `#1a0a2e` y el chip dorado `#d69e2e` con texto noche cumplen AA, y que el mismo chip **con texto blanco falla** (documenta por qué se usa texto noche).
+- **Foco visible coherente con el canon**: se replicó el patrón `focus-visible:ring-secondary focus-visible:ring-offset-background` de la Enciclopedia en los CTAs del home que carecían de anillo (`QuickActions`, enlace de `MyServicesWidget`). El resto (banda `DashboardHero`, CTA de `WidgetEmptyState` vía `Button`) ya lo tenía.
+- **`alt` y `prefers-reduced-motion`**: ya cubiertos por tareas previas — `alt` obligatorio en `DashboardHero`/`WidgetEmptyState`, y `globals.css` neutraliza el reveal y las animaciones decorativas en bucle bajo movimiento reducido. Esta tarea fija el contrato con tests sin reintroducir un reset global.
 
 ---
 

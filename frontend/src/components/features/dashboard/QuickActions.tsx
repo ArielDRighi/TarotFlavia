@@ -33,6 +33,8 @@ function QuickActionCard({
       className={cn(
         'block rounded-lg p-6 transition-all duration-200',
         'hover:scale-105 hover:shadow-lg',
+        // Foco visible de teclado (T-DASH-007), coherente con el canon (anillo dorado).
+        'focus-visible:ring-secondary focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
         isPrimary
           ? 'from-primary to-secondary bg-gradient-to-r text-white shadow-md'
           : 'border-border bg-card hover:border-primary/40 border'

@@ -12,3 +12,5 @@ export {
   formatDateCompact,
   formatDateLocalized,
 } from './date';
+export { getContrastRatio, meetsWcagAA } from './contrast';
+export type { WcagAaOptions } from './contrast';
