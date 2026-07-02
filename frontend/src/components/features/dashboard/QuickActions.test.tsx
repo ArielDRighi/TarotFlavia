@@ -160,6 +160,15 @@ describe('QuickActions', () => {
       });
     });
 
+    it('should neutralize the hover scale under prefers-reduced-motion', () => {
+      render(<QuickActions />);
+
+      // Bajo movimiento reducido, el transform de hover se anula (criterio T-DASH-007).
+      screen.getAllByRole('link').forEach((link) => {
+        expect(link.className).toMatch(/motion-reduce:hover:scale-100/);
+      });
+    });
+
     it('should keep an accessible label describing each action', () => {
       render(<QuickActions />);
 

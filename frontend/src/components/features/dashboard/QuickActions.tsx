@@ -32,7 +32,8 @@ function QuickActionCard({
       aria-label={`${title}: ${description}`}
       className={cn(
         'block rounded-lg p-6 transition-all duration-200',
-        'hover:scale-105 hover:shadow-lg',
+        // El lift de hover es movimiento: se anula bajo prefers-reduced-motion (T-DASH-007).
+        'hover:scale-105 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:scale-100',
         // Foco visible de teclado (T-DASH-007), coherente con el canon (anillo dorado).
         'focus-visible:ring-secondary focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
         isPrimary
