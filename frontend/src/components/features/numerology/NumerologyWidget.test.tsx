@@ -138,6 +138,23 @@ describe('NumerologyWidget', () => {
       expect(screen.getByText(/configura tu fecha de nacimiento/i)).toBeInTheDocument();
     });
 
+    it('should render the illustrated empty state title (T-DASH-005)', () => {
+      mockUseMyNumerologyProfile.mockReturnValue({
+        data: null,
+        isLoading: false,
+        error: null,
+      });
+      mockUseDayNumber.mockReturnValue({
+        data: createMockDayNumber(),
+        isLoading: false,
+        error: null,
+      });
+
+      render(<NumerologyWidget />);
+
+      expect(screen.getByText('Descubre tu numerología')).toBeInTheDocument();
+    });
+
     it('should render link to profile page in no data state', () => {
       mockUseMyNumerologyProfile.mockReturnValue({
         data: null,

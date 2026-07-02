@@ -374,6 +374,34 @@ describe('SacredEventsWidget', () => {
         screen.getByText('No hay eventos próximos en el calendario sagrado.')
       ).toBeInTheDocument();
     });
+
+    it('should render an illustrated empty state with an accessible CTA (T-DASH-005)', () => {
+      vi.spyOn(useSacredCalendarHook, 'useTodayEvents').mockReturnValue({
+        data: [],
+        isLoading: false,
+        error: null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      vi.spyOn(useSacredCalendarHook, 'useUpcomingEvents').mockReturnValue({
+        data: [],
+        isLoading: false,
+        error: null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      renderComponent();
+
+      // Título del estado vacío + ilustración de marca con alt en español
+      expect(screen.getByText('Sin eventos próximos')).toBeInTheDocument();
+      expect(
+        screen.getByAltText('Rueda del año y fases lunares sobre un fondo violeta etéreo')
+      ).toBeInTheDocument();
+
+      // CTA claro con href correcto
+      const cta = screen.getByRole('link', { name: /explorar rituales/i });
+      expect(cta).toHaveAttribute('href', '/rituales');
+    });
   });
 
   describe('Links & Navigation', () => {

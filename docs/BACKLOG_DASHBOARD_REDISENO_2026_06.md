@@ -319,7 +319,7 @@ El rediseño introduce fondo oscuro (banda) e imágenes; hay que garantizar cont
 | T-DASH-002 | Banda de bienvenida mística (`DashboardHero`) reutilizando el canon         | Frontend | 🟠 Alta    | 2.5 pts    |
 | T-DASH-003 | Tarjeta de widget común + normalización de tokens (quitar `dark:`/grises)   | Frontend | 🟡 Media   | 2.5 pts    |
 | T-DASH-004 | ✅ Generación y optimización de assets del dashboard (WebP)                 | Assets   | 🟠 Alta    | 2 pts      |
-| T-DASH-005 | Empty states ilustrados y consistentes                                      | Frontend | 🟡 Media   | 2 pts      |
+| T-DASH-005 | ✅ Empty states ilustrados y consistentes                                   | Frontend | 🟡 Media   | 2 pts      |
 | T-DASH-006 | Micro-interacciones + `Reveal` escalonado (componentes compartidos)         | Frontend | 🟢 Baja    | 1.5 pts    |
 | T-DASH-007 | Accesibilidad del home (AA en banda, `alt`, foco, reduced-motion)           | Frontend | 🟡 Media   | 1.5 pts    |
 
@@ -483,24 +483,38 @@ Reemplazar el layout 2/3 + 1/3 de `UserDashboard` por una distribución que use 
 **Estimación:** 2 puntos
 **Dependencias:** T-DASH-003, T-DASH-004
 **Cubre Hallazgo:** DASH-005
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Sub-componente de empty state reutilizable (ilustración/ícono + título + texto + CTA).
-- [ ] Aplicarlo en Calendario Sagrado, Rituales, Horóscopo (sin fecha) y Numerología (sin perfil).
-- [ ] Conservar condiciones de negocio (loading/error/empty) y CTAs existentes.
-- [ ] Tests (render del empty state + CTA con href correcto + foco).
-- [ ] Coverage ≥ 80%.
+- [x] Sub-componente de empty state reutilizable (ilustración/ícono + título + texto + CTA).
+- [x] Aplicarlo en Calendario Sagrado, Rituales, Horóscopo (sin fecha) y Numerología (sin perfil).
+- [x] Conservar condiciones de negocio (loading/error/empty) y CTAs existentes.
+- [x] Tests (render del empty state + CTA con href correcto + foco).
+- [x] Coverage ≥ 80%.
 
 #### 🎯 Criterios de Aceptación
 
-- Los estados vacíos se ven cuidados y consistentes, con CTA claro y accesible.
-- Ciclo de calidad frontend completo pasa.
+- [x] Los estados vacíos se ven cuidados y consistentes, con CTA claro y accesible.
+- [x] Ciclo de calidad frontend completo pasa.
 
 #### 📁 Archivos involucrados
 
-- widgets afectados + nuevo sub-componente de empty state + tests
+- `frontend/src/components/features/dashboard/WidgetEmptyState.tsx` (nuevo sub-componente)
+- `frontend/src/components/features/dashboard/WidgetEmptyState.test.tsx` (nuevo, 13 tests, 100% cobertura)
+- `frontend/src/components/features/dashboard/index.ts` (export del sub-componente)
+- `frontend/src/components/features/dashboard/SacredEventsWidget.tsx` (empty state → `empty-calendar.webp` + CTA "Explorar rituales")
+- `frontend/src/components/features/dashboard/PersonalizedRitualsWidget.tsx` (empty state → `empty-rituals.webp` + CTA "Hacer una lectura")
+- `frontend/src/components/features/horoscope/HoroscopeWidget.tsx` (sin fecha → ícono dorado + CTA "Configurar")
+- `frontend/src/components/features/numerology/NumerologyWidget.tsx` (sin perfil → ícono dorado + CTA "Configurar")
+- Tests de los 4 widgets actualizados (render del empty state + CTA con href correcto)
+
+#### 📝 Notas de implementación
+
+- **Sub-componente `WidgetEmptyState`:** compone ilustración de marca (asset WebP de T-DASH-004) **o** ícono Lucide con acento dorado (`text-secondary`) cuando no hay ilustración dedicada, + título `font-serif` + mensaje atenuado + CTA opcional como enlace accesible (foco visible heredado de la primitiva `Button`).
+- **Se conservan las condiciones de negocio:** cada widget sigue resolviendo loading/error/empty; solo se enriqueció la presentación de la rama vacía. Se mantuvieron los textos y hrefs existentes (`/perfil` en Horóscopo/Numerología).
+- **Assets:** Calendario → `empty-calendar.webp`; Rituales → `empty-rituals.webp`. Horóscopo y Numerología usan íconos Lucide (`Sparkles`/`Hash`) con acento dorado (no había asset dedicado).
+- **A11y:** `alt` en español por ilustración; CTA con foco visible. Prepara terreno para T-DASH-007.
 
 ---
 

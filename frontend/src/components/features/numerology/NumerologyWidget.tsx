@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WidgetCard } from '@/components/features/dashboard/WidgetCard';
+import { WidgetEmptyState } from '@/components/features/dashboard/WidgetEmptyState';
 import { useMyNumerologyProfile, useDayNumber } from '@/hooks/api/useNumerology';
 import { NUMEROLOGY_NUMBERS_INFO } from '@/lib/utils/numerology';
 import { cn } from '@/lib/utils';
@@ -39,17 +40,17 @@ export function NumerologyWidget() {
         title="Tu Numerología"
         icon={<Hash className="h-5 w-5" />}
         data-testid="numerology-widget-no-data"
-        contentClassName="py-8 text-center"
       >
-        <p className="text-muted-foreground mb-4">
-          Configura tu fecha de nacimiento para ver tu perfil numerológico
-        </p>
-        <Button asChild size="sm">
-          <Link href={ROUTES.PERFIL}>
-            <Settings className="mr-2 h-4 w-4" />
-            Configurar
-          </Link>
-        </Button>
+        <WidgetEmptyState
+          icon={<Hash />}
+          title="Descubre tu numerología"
+          message="Configura tu fecha de nacimiento para ver tu perfil numerológico"
+          cta={{
+            label: 'Configurar',
+            href: ROUTES.PERFIL,
+            icon: <Settings className="h-4 w-4" />,
+          }}
+        />
       </WidgetCard>
     );
   }

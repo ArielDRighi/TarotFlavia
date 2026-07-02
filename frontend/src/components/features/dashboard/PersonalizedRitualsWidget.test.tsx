@@ -110,6 +110,23 @@ describe('PersonalizedRitualsWidget', () => {
       ).toBeInTheDocument();
     });
 
+    it('should render an illustrated empty state with an accessible CTA (T-DASH-005)', () => {
+      mockAuthStore('premium');
+      mockRecommendationsHook({ hasRecommendations: false, recommendations: [] });
+
+      render(<PersonalizedRitualsWidget />, { wrapper });
+
+      // Título del estado vacío + ilustración de marca con alt en español
+      expect(screen.getByText('Aún no hay recomendaciones')).toBeInTheDocument();
+      expect(
+        screen.getByAltText('Altar ritual con velas y elementos místicos en tonos violeta y dorado')
+      ).toBeInTheDocument();
+
+      // CTA claro con href correcto
+      const cta = screen.getByRole('link', { name: /hacer una lectura/i });
+      expect(cta).toHaveAttribute('href', '/tarot');
+    });
+
     it('should render recommendations correctly', () => {
       mockAuthStore('premium');
       mockRecommendationsHook({
