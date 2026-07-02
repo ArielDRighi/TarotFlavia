@@ -2,13 +2,15 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { AlertCircle, ArrowRight, Clock, RefreshCw, Settings } from 'lucide-react';
+import { AlertCircle, ArrowRight, Clock, RefreshCw, Settings, Sparkles } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { WidgetEmptyState } from '@/components/features/dashboard';
 import { useMySignHoroscope } from '@/hooks/api/useHoroscope';
 import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
+import { ROUTES } from '@/lib/constants/routes';
 
 import { ZodiacSymbol } from './ZodiacSymbol';
 
@@ -49,15 +51,16 @@ export function HoroscopeWidget() {
     return (
       <Card className="p-6" data-testid="horoscope-widget-no-birthdate">
         <h2 className="mb-2 font-serif text-xl">Tu Horóscopo</h2>
-        <p className="text-muted-foreground mb-4 text-sm">
-          Configura tu fecha de nacimiento para ver tu horóscopo personalizado
-        </p>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/perfil">
-            <Settings className="mr-2 h-4 w-4" />
-            Configurar
-          </Link>
-        </Button>
+        <WidgetEmptyState
+          icon={<Sparkles />}
+          title="Tu horóscopo te espera"
+          message="Configura tu fecha de nacimiento para ver tu horóscopo personalizado"
+          cta={{
+            label: 'Configurar',
+            href: ROUTES.PERFIL,
+            icon: <Settings className="h-4 w-4" />,
+          }}
+        />
       </Card>
     );
   }

@@ -102,6 +102,18 @@ describe('HoroscopeWidget', () => {
       expect(screen.getByRole('link', { name: /configurar/i })).toHaveAttribute('href', '/perfil');
     });
 
+    it('should render the illustrated empty state title (T-DASH-005)', () => {
+      mockHook({
+        isError: true,
+        errorState: 'no-birthdate',
+        error: new Error('birthDate required'),
+      });
+
+      render(<HoroscopeWidget />);
+
+      expect(screen.getByText('Tu horóscopo te espera')).toBeInTheDocument();
+    });
+
     it('should NOT show the "not-generated" message', () => {
       mockHook({
         isError: true,

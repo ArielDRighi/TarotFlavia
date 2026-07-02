@@ -2,10 +2,11 @@
 
 import { CalendarHeart, Moon, Sun, Sparkles, ChevronRight } from 'lucide-react';
 import { WidgetCard } from './WidgetCard';
+import { WidgetEmptyState } from './WidgetEmptyState';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
-import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorDisplay } from '@/components/ui/error-display';
+import { ROUTES } from '@/lib/constants/routes';
 import { PremiumUpsellCard } from '@/components/ui/premium-upsell-card';
 import { useTodayEvents, useUpcomingEvents } from '@/hooks/api/useSacredCalendar';
 import { useAuthStore } from '@/stores/authStore';
@@ -154,9 +155,14 @@ export function SacredEventsWidget() {
 
       {/* Empty State */}
       {!isLoading && !hasError && !hasAnyEvents && (
-        <EmptyState
+        <WidgetEmptyState
+          illustration={{
+            src: '/images/dashboard/empty-calendar.webp',
+            alt: 'Rueda del año y fases lunares sobre un fondo violeta etéreo',
+          }}
           title="Sin eventos próximos"
           message="No hay eventos próximos en el calendario sagrado."
+          cta={{ label: 'Explorar rituales', href: ROUTES.RITUALES }}
           className="py-4"
         />
       )}

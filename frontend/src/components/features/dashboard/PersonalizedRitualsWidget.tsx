@@ -3,11 +3,13 @@
 import { Sparkles, Heart, DollarSign, Shield, Brain } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { WidgetCard } from './WidgetCard';
+import { WidgetEmptyState } from './WidgetEmptyState';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRitualRecommendations } from '@/hooks/api/useRitualRecommendations';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
+import { ROUTES } from '@/lib/constants/routes';
 import type { RecommendationPattern } from '@/types';
 
 const PATTERN_ICONS: Record<RecommendationPattern, React.ComponentType<{ className?: string }>> = {
@@ -106,10 +108,15 @@ export function PersonalizedRitualsWidget() {
         icon={<Sparkles className="h-5 w-5" />}
         data-testid="personalized-rituals-widget"
       >
-        <p className="text-muted-foreground text-sm">
-          Realiza algunas lecturas más para que podamos analizar tu energía y recomendarte rituales
-          personalizados.
-        </p>
+        <WidgetEmptyState
+          illustration={{
+            src: '/images/dashboard/empty-rituals.webp',
+            alt: 'Altar ritual con velas y elementos místicos en tonos violeta y dorado',
+          }}
+          title="Aún no hay recomendaciones"
+          message="Realiza algunas lecturas más para que podamos analizar tu energía y recomendarte rituales personalizados."
+          cta={{ label: 'Hacer una lectura', href: ROUTES.TAROT }}
+        />
       </WidgetCard>
     );
   }
