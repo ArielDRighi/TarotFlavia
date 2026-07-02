@@ -50,6 +50,7 @@ export function HoroscopeWidget() {
   if (errorState === 'no-birthdate') {
     return (
       <Card className="p-6" data-testid="horoscope-widget-no-birthdate">
+        <h2 className="mb-2 font-serif text-xl">Tu Horóscopo</h2>
         <WidgetEmptyState
           icon={<Sparkles />}
           title="Tu horóscopo te espera"
