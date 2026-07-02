@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Reveal } from './Reveal';
+import { Reveal } from '@/components/common';
 import { ROUTES } from '@/lib/constants/routes';
 
 // ─── Constants ────────────────────────────────────────────────────────────────

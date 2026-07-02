@@ -4,8 +4,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-// 5. Components (ui → features)
-import { Reveal } from './Reveal';
+// 5. Components (common → ui → features)
+import { Reveal } from '@/components/common';
 // 6. Utils & types
 import { useArticlesByCategory } from '@/hooks/api/useEncyclopediaArticles';
 import { ROUTES } from '@/lib/constants/routes';

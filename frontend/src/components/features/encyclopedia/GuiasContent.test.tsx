@@ -33,7 +33,7 @@ vi.mock('next/image', () => ({
 }));
 
 // Mock Reveal so the IntersectionObserver-driven wrapper renders children directly.
-vi.mock('./Reveal', () => ({
+vi.mock('@/components/common', () => ({
   Reveal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 

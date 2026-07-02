@@ -962,6 +962,142 @@ describe('UserDashboard', () => {
     expect(screen.queryByTestId('my-services-widget')).not.toBeInTheDocument();
   });
 
+  // T-DASH-006: Micro-interacciones + reveal escalonado
+  describe('T-DASH-006 · Micro-interacciones + reveal escalonado', () => {
+    function mockFreeUserWithWidgetData() {
+      const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
+
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: mockUser,
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+        plan: 'free',
+        planLabel: 'GRATUITO',
+        canUseAI: false,
+        canUseCategories: false,
+        canUseCustomQuestions: false,
+        canShare: true,
+        isPremium: false,
+        isFree: true,
+        isAnonymous: false,
+      });
+
+      vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+        data: {
+          id: 1,
+          zodiacSign: ZodiacSign.TAURUS,
+          horoscopeDate: '2026-01-17',
+          generalContent: 'Hoy es un buen día para ti.',
+          areas: {
+            love: { content: 'Amor positivo', score: 8 },
+            wellness: { content: 'Bienestar alto', score: 7 },
+            money: { content: 'Finanzas estables', score: 6 },
+          },
+          luckyNumber: 7,
+          luckyColor: 'Verde',
+          luckyTime: 'Mañana',
+        },
+        isLoading: false,
+        error: null,
+        errorState: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
+
+      vi.spyOn(useNumerologyModule, 'useMyNumerologyProfile').mockReturnValue({
+        data: {
+          lifePath: {
+            value: 7,
+            name: 'El Buscador',
+            keywords: ['Análisis'],
+            description: 'Persona analítica',
+            isMaster: false,
+          },
+          birthday: {
+            value: 15,
+            name: 'El Creativo',
+            keywords: ['Creatividad'],
+            description: 'Día especial',
+            isMaster: false,
+          },
+          expression: null,
+          soulUrge: null,
+          personality: null,
+          personalYear: 5,
+          personalMonth: 8,
+          birthDate: '1990-05-15',
+          fullName: null,
+        },
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as UseQueryResult<NumerologyResponseDto, Error>);
+
+      vi.spyOn(useNumerologyModule, 'useDayNumber').mockReturnValue({
+        data: {
+          date: '2026-01-21',
+          dayNumber: 3,
+          meaning: {
+            number: 3,
+            name: 'El Creativo',
+            keywords: ['Creatividad'],
+            description: 'Día creativo',
+            strengths: [],
+            challenges: [],
+            careers: [],
+            isMaster: false,
+          },
+        },
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as UseQueryResult<DayNumberResponse, Error>);
+    }
+
+    it('wraps each grid widget in a staggered Reveal (fade-up entrance)', () => {
+      mockFreeUserWithWidgetData();
+
+      render(<UserDashboard />);
+
+      // Los widgets del grid quedan envueltos en un contenedor Reveal.
+      const horoscopeReveal = screen.getByTestId('horoscope-widget').closest('[data-reveal]');
+      const numerologyReveal = screen.getByTestId('numerology-widget').closest('[data-reveal]');
+      expect(horoscopeReveal).not.toBeNull();
+      expect(numerologyReveal).not.toBeNull();
+    });
+
+    it('applies the brand hover micro-interaction (lift + gold glow) to grid widgets', () => {
+      mockFreeUserWithWidgetData();
+
+      render(<UserDashboard />);
+
+      const reveal = screen.getByTestId('horoscope-widget').closest('[data-reveal]') as HTMLElement;
+      const hoverEl = reveal.firstElementChild as HTMLElement;
+
+      expect(hoverEl.className).toContain('hover:-translate-y-1');
+      expect(hoverEl.className).toContain('hover:shadow-[0_18px_40px_-12px_rgba(214,158,46,0.45)]');
+    });
+
+    it('does not leave an empty reveal cell when a self-hiding widget renders nothing', () => {
+      // Mock por defecto: MyServicesWidget sin compras → se auto-oculta.
+      mockFreeUserWithWidgetData();
+
+      render(<UserDashboard />);
+
+      const grid = screen.getByTestId('dashboard-widget-grid');
+      // Ningún contenedor de reveal debe quedar con su tarjeta vacía (celda fantasma).
+      expect(grid.querySelector('[data-reveal] > div:empty')).toBeNull();
+      // El widget auto-ocultable no aporta celda alguna al grid.
+      expect(screen.queryByTestId('my-services-widget')).not.toBeInTheDocument();
+    });
+  });
+
   it('should place StatsSection inside the widget grid for premium users', () => {
     const mockUser = createMockAuthUser({ name: 'Premium User', plan: 'premium' });
 

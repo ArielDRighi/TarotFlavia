@@ -40,9 +40,6 @@ export { ArticleDetailPageContent } from './ArticleDetailPageContent';
 export { ArticleListPageContent } from './ArticleListPageContent';
 export { GuiasContent } from './GuiasContent';
 
-// Shared UI helpers
-export { Reveal } from './Reveal';
-
 // List components
 export { CardThumbnail } from './CardThumbnail';
 export { CardGrid } from './CardGrid';
