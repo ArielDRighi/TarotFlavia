@@ -1,6 +1,7 @@
 'use client';
 
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
+import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
 import { DashboardHero } from './DashboardHero';
 import { QuickActions } from './QuickActions';
 import { DidYouKnowSection } from './DidYouKnowSection';
@@ -12,6 +13,20 @@ import { NumerologyWidget } from '@/components/features/numerology';
 import { SacredEventsWidget } from './SacredEventsWidget';
 import { PersonalizedRitualsWidget } from './PersonalizedRitualsWidget';
 import { MyServicesWidget } from './MyServicesWidget';
+
+// ─── Constants ──────────────────────────────────────────────────────────────────
+
+/**
+ * Themed header image for the welcome band (T-DASH-004). Reuses the Encyclopedia
+ * canon (violeta/índigo + dorado, etéreo, sin texto); `DashboardHero` degrades to
+ * its gradient band if the asset ever fails to load.
+ */
+const DASHBOARD_HERO_IMAGE: EditorialImage = {
+  src: '/images/dashboard/dashboard-hero.webp',
+  alt: 'Cartas de tarot etéreas sobre un cielo nocturno violeta con destellos dorados',
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 /**
  * User Dashboard component for authenticated users
@@ -51,7 +66,7 @@ export function UserDashboard() {
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="space-y-8">
         {/* Welcome Header - mystic band coherent with the Encyclopedia canon */}
-        <DashboardHero />
+        <DashboardHero image={DASHBOARD_HERO_IMAGE} />
 
         {/* Quick Actions */}
         <section>
