@@ -28,7 +28,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]" aria-label="Modal de bienvenida">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl text-purple-700 dark:text-purple-400">
+          <DialogTitle className="font-serif text-2xl text-purple-700">
             ¡Bienvenido al Oráculo de Tarot! ✨
           </DialogTitle>
           <DialogDescription className="text-base">
@@ -39,9 +39,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
         <div className="space-y-4 py-4">
           {/* FREE Plan Features */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-purple-600 dark:text-purple-400">
-              Con tu plan FREE puedes:
-            </h3>
+            <h3 className="font-semibold text-purple-600">Con tu plan FREE puedes:</h3>
 
             <div className="space-y-2">
               <div className="flex items-start gap-3">

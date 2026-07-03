@@ -56,8 +56,8 @@ export function NotificationDropdown() {
   return (
     <div className="w-80 max-w-sm">
       {/* Header with "Mark all as read" button */}
-      <div className="flex items-center justify-between border-b border-gray-200 p-3 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Notificaciones</h3>
+      <div className="flex items-center justify-between border-b border-gray-200 p-3">
+        <h3 className="text-sm font-semibold text-gray-900">Notificaciones</h3>
         {hasUnread && (
           <Button
             variant="ghost"
@@ -74,7 +74,7 @@ export function NotificationDropdown() {
       {/* Notifications List */}
       <div
         data-testid="notifications-list"
-        className="max-h-96 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-700"
+        className="max-h-96 divide-y divide-gray-200 overflow-y-auto"
       >
         {notifications.map((notification) => (
           <NotificationItem
