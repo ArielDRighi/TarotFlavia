@@ -145,7 +145,7 @@ export function MyServicesWidget({ index = 0 }: MyServicesWidgetProps) {
         {/* Footer link */}
         <Link
           href={ROUTES.MIS_SERVICIOS}
-          className="text-primary hover:text-primary/80 mt-4 flex items-center justify-center gap-1 text-sm font-medium"
+          className="text-primary hover:text-primary/80 focus-visible:ring-secondary focus-visible:ring-offset-background mt-4 flex items-center justify-center gap-1 rounded-sm text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
           data-testid="widget-view-all-link"
         >
           {remainingCount > 0 ? `Ver todos (${purchases.length})` : 'Ver todos mis servicios'}
