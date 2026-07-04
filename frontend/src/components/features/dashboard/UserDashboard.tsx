@@ -45,14 +45,20 @@ const DASHBOARD_HERO_IMAGE: EditorialImage = {
  * - Stats section (Premium only)
  * - Upgrade banner (Free users only)
  *
- * Layout (T-DASH-001): the themed widgets are laid out in a single full-width
- * responsive grid (1 col on mobile, 2 on tablet via `sm`, 3 on wide desktop via
- * `xl` — kept at `xl` to avoid 3 cramped columns on smaller laptops) so the user
- * can scan all of them "at a glance" instead of having them stacked in a narrow
- * 1/3 side column with a large empty area beside it. `items-start` keeps each
- * card at its natural height. Plan-gated widgets (Stats / Upgrade banner) and
- * the self-hiding `MyServicesWidget` simply occupy (or free) a grid slot, so
- * the grid stays balanced for both FREE and PREMIUM users.
+ * Layout (T-DASH-001): the themed widgets are laid out full-width across columns
+ * (1 on mobile, 2 on tablet via `sm`, 3 on wide desktop via `xl` — kept at `xl`
+ * to avoid 3 cramped columns on smaller laptops) so the user can scan them "at a
+ * glance" instead of having them stacked in a narrow 1/3 side column.
+ *
+ * It uses a **CSS multi-column masonry** (`columns-*` + `break-inside-avoid`)
+ * rather than a `grid`: with widgets of very different heights a grid with
+ * `items-start` left large vertical holes under the shorter cards (a short
+ * Horóscopo next to a tall Numerología). The masonry packs each column densely
+ * (Pinterest-style), so short cards no longer leave gaps. Plan-gated widgets
+ * (Stats / Upgrade banner) and the self-hiding `MyServicesWidget` simply add or
+ * free a column item, keeping the layout balanced for FREE and PREMIUM users.
+ * Reading/keyboard order follows the DOM order (unaffected by the visual
+ * column flow); the reveal stagger keeps using each widget's `index`.
  *
  * @example
  * ```tsx
@@ -91,7 +97,7 @@ export function UserDashboard() {
         */}
         <section
           data-testid="dashboard-widget-grid"
-          className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 xl:grid-cols-3"
+          className="columns-1 gap-6 sm:columns-2 xl:columns-3 [&>*]:mb-6 [&>*]:break-inside-avoid"
         >
           {/* Horoscope Widget (Western) - For all users */}
           <RevealWidget index={0}>
