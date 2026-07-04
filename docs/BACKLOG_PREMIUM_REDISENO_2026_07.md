@@ -419,17 +419,25 @@ Los prompts de upgrade y el modal de bienvenida usan `text-purple-600/700 dark:t
 **Estimación:** 1.5 puntos
 **Dependencias:** ninguna
 **Cubre Hallazgo:** PREM-004
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Generar `premium-hero.webp` (y opcionalmente `premium-crown.webp`, `premium-activacion.webp`) con los prompts de PREM-004.
-- [ ] Optimizar a WebP (calidad ~80, sin metadata) según `frontend/docs/IMAGE_OPTIMIZATION.md`; guardar en `public/images/premium/`.
-- [ ] Definir `alt` en español para cada uso.
+- [x] Generar `premium-hero.webp` (y opcionalmente `premium-crown.webp`, `premium-activacion.webp`) con los prompts de PREM-004.
+- [x] Optimizar a WebP (calidad ~80, sin metadata) según `frontend/docs/IMAGE_OPTIMIZATION.md`; guardar en `public/images/premium/`.
+- [x] Definir `alt` en español para cada uso.
 
 #### 🎯 Criterios de Aceptación
 
 - Set mínimo disponible y optimizado, coherente con el canon; fallback a gradiente garantizado.
+
+#### 📝 Notas de implementación
+
+- Set completo (3 assets) generado a partir de los prompts de PREM-004 y optimizado a WebP con ImageMagick (`-strip -quality 80 -define webp:method=6`):
+  - `premium-hero.webp` — 1920×815 (21:9), ~129 KB.
+  - `premium-crown.webp` — 1080×1080 (1:1), ~108 KB.
+  - `premium-activacion.webp` — 1600×893 (16:9), ~136 KB.
+- `alt` en español, uso previsto y **contrato de fallback a gradiente** documentados en `frontend/public/images/premium/README.md` (consumidores: T-PREM-002/003).
 
 ---
 
