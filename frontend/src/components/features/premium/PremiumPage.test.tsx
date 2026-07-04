@@ -23,6 +23,13 @@ vi.mock('next/link', () => ({
   },
 }));
 
+// Mock Next.js Image (PremiumHero uses next/image for the mystic band asset)
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="next-image" />
+  ),
+}));
+
 // Mock toast
 vi.mock('@/hooks/utils/useToast', () => ({
   toast: {
@@ -165,6 +172,36 @@ describe('PremiumPage', () => {
       renderWithProviders(<PremiumPage />);
 
       expect(screen.getByText(/cancelá cuando quieras/i)).toBeInTheDocument();
+    });
+
+    // Canon visual (T-PREM-002 / PREM-002)
+    it('should render the mystic premium hero band', () => {
+      mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+
+      renderWithProviders(<PremiumPage />);
+
+      expect(screen.getByTestId('premium-hero')).toBeInTheDocument();
+    });
+
+    it('should render the "Recomendado" chip with night text on gold for AA contrast', () => {
+      mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+
+      renderWithProviders(<PremiumPage />);
+
+      const chip = screen.getByText('Recomendado');
+      // Texto noche (#1a0a2e) sobre dorado (#d69e2e) ≈ 7:1 (AA); blanco falla.
+      expect(chip).toHaveClass('text-bg-hero');
+      expect(chip).not.toHaveClass('text-white');
+    });
+
+    it('should not use raw purple/gray utility classes (brand canon, only tokens)', () => {
+      mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+
+      const { container } = renderWithProviders(<PremiumPage />);
+
+      expect(container.querySelector('[class*="purple"]')).toBeNull();
+      expect(container.querySelector('[class*="text-gray-"]')).toBeNull();
+      expect(container.querySelector('[class*="bg-gray-"]')).toBeNull();
     });
   });
 

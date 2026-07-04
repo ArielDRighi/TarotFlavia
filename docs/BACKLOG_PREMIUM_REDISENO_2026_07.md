@@ -367,16 +367,16 @@ Los prompts de upgrade y el modal de bienvenida usan `text-purple-600/700 dark:t
 **Estimación:** 3.5 puntos
 **Dependencias:** T-PREM-001, T-PREM-004 (asset opcional; con fallback a gradiente puede ir antes)
 **Cubre Hallazgo:** PREM-002
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Banda mística `PremiumHero` (gradiente noche, imagen opcional + overlay, estrellas/luna, filete dorado, título Cormorant crema, subtítulo con precio en dorado).
-- [ ] Tarjetas de plan con `Card`/`WidgetCard` del canon; "Recomendado" como chip dorado con `text-bg-hero`.
-- [ ] Tabla comparativa legible: encabezado noche + crema, filas con `text-foreground`, check dorado / cruz atenuada.
-- [ ] Secciones "Sin compromiso" y FAQ con tokens y (opcional) callouts del canon.
-- [ ] CTAs con botón de marca + foco visible; `Reveal` escalonado; `prefers-reduced-motion` respetado.
-- [ ] No romper `usePublicPlans`/`useCreatePreapproval`/gates por plan ni los `data-testid` (`cta-hero`, `plan-comparison`, `faq-section`, etc.).
+- [x] Banda mística `PremiumHero` (gradiente noche, imagen opcional + overlay, estrellas/luna, filete dorado, título Cormorant crema, subtítulo con precio en dorado).
+- [x] Tarjetas de plan con `Card`/`WidgetCard` del canon; "Recomendado" como chip dorado con `text-bg-hero`.
+- [x] Tabla comparativa legible: encabezado noche + crema, filas con `text-foreground`, check dorado / cruz atenuada.
+- [x] Secciones "Sin compromiso" y FAQ con tokens y (opcional) callouts del canon.
+- [x] CTAs con botón de marca + foco visible; `Reveal` escalonado; `prefers-reduced-motion` respetado.
+- [x] No romper `usePublicPlans`/`useCreatePreapproval`/gates por plan ni los `data-testid` (`cta-hero`, `plan-comparison`, `faq-section`, etc.).
 
 #### 🎯 Criterios de Aceptación
 
