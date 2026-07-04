@@ -108,14 +108,11 @@ function PremiumCtaButton({ premiumPlan, testId }: PremiumCtaButtonProps) {
   if (user?.plan === 'premium') {
     return (
       <div className="flex flex-col items-center gap-2" data-testid={testId}>
-        <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+        <div className="flex items-center gap-2 text-purple-600">
           <Star className="h-5 w-5" />
           <span className="font-semibold">Ya tenés Premium</span>
         </div>
-        <Link
-          href={ROUTES.PERFIL}
-          className="text-sm text-gray-500 underline hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-        >
+        <Link href={ROUTES.PERFIL} className="text-sm text-gray-500 underline hover:text-gray-700">
           Ver mi cuenta
         </Link>
       </div>
@@ -155,20 +152,20 @@ export function PremiumPage() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-purple-50 to-white px-4 py-16 text-center dark:from-purple-950 dark:to-gray-900">
+      <section className="bg-gradient-to-b from-purple-50 to-white px-4 py-16 text-center">
         <div className="container mx-auto max-w-3xl">
-          <Badge className="mb-4 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+          <Badge className="mb-4 bg-purple-100 text-purple-700">
             <Zap className="mr-1 h-3 w-3" />
             Plan Premium
           </Badge>
-          <h1 className="mb-6 font-serif text-4xl font-bold text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+          <h1 className="mb-6 font-serif text-4xl font-bold text-gray-900 md:text-5xl lg:text-6xl">
             Desbloquea todo el potencial del Tarot
           </h1>
-          <p className="mb-8 text-xl text-gray-600 dark:text-gray-300">
+          <p className="mb-8 text-xl text-gray-600">
             Interpretaciones personalizadas con IA, tiradas avanzadas, historial completo y mucho
             más por{' '}
             {premiumPlan ? (
-              <span className="font-bold text-purple-600 dark:text-purple-400">
+              <span className="font-bold text-purple-600">
                 {formatPriceArs(premiumPlan.price)}/mes
               </span>
             ) : (
@@ -181,20 +178,20 @@ export function PremiumPage() {
 
       {/* Plan Comparison Section */}
       <section data-testid="plan-comparison" className="container mx-auto px-4 py-16">
-        <h2 className="mb-12 text-center font-serif text-3xl font-bold text-gray-900 dark:text-white">
+        <h2 className="mb-12 text-center font-serif text-3xl font-bold text-gray-900">
           ¿Qué plan se adapta a ti?
         </h2>
 
         {/* Plan Cards */}
         <div className="mb-16 grid gap-8 md:grid-cols-2 lg:mx-auto lg:max-w-3xl">
           {/* Free Plan Card */}
-          <Card className="border-gray-200 dark:border-gray-700">
+          <Card className="border-gray-200">
             <CardHeader className="text-center">
-              <h3 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+              <h3 className="mb-2 font-serif text-2xl font-bold text-gray-900">
                 {freePlan?.name ?? 'Free'}
               </h3>
-              <p className="mb-4 text-4xl font-bold text-gray-600 dark:text-gray-300">Gratis</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="mb-4 text-4xl font-bold text-gray-600">Gratis</p>
+              <p className="text-sm text-gray-500">
                 {freePlan?.description ?? 'Empieza tu viaje espiritual'}
               </p>
             </CardHeader>
@@ -206,19 +203,19 @@ export function PremiumPage() {
           </Card>
 
           {/* Premium Plan Card */}
-          <Card className="relative border-purple-300 shadow-lg dark:border-purple-700">
+          <Card className="relative border-purple-300 shadow-lg">
             <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 transform bg-purple-600 px-4 py-1">
               Recomendado
             </Badge>
             <CardHeader className="text-center">
-              <h3 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+              <h3 className="mb-2 font-serif text-2xl font-bold text-gray-900">
                 {premiumPlan?.name ?? 'Premium'}
               </h3>
-              <p className="mb-4 text-4xl font-bold text-purple-600 dark:text-purple-400">
+              <p className="mb-4 text-4xl font-bold text-purple-600">
                 {premiumPlan ? formatPriceArs(premiumPlan.price) : '---'}
                 <span className="text-lg font-normal">/mes</span>
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500">
                 {premiumPlan?.description ?? 'Desbloquea todo el potencial'}
               </p>
             </CardHeader>
@@ -229,39 +226,35 @@ export function PremiumPage() {
         </div>
 
         {/* Feature Comparison Table */}
-        <div className="mx-auto max-w-2xl overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="mx-auto max-w-2xl overflow-hidden rounded-xl border border-gray-200">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 dark:bg-gray-800">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+              <tr className="bg-gray-50">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   Característica
                 </th>
-                <th className="px-4 py-4 text-center text-sm font-semibold text-gray-600 dark:text-gray-300">
-                  Free
-                </th>
-                <th className="px-4 py-4 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                <th className="px-4 py-4 text-center text-sm font-semibold text-gray-600">Free</th>
+                <th className="px-4 py-4 text-center text-sm font-semibold text-purple-600">
                   Premium
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            <tbody className="divide-y divide-gray-100">
               {COMPARISON_FEATURES.map((feature) => (
-                <tr key={feature.text} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="px-6 py-3 text-sm text-gray-700 dark:text-gray-300">
-                    {feature.text}
-                  </td>
+                <tr key={feature.text} className="hover:bg-gray-50">
+                  <td className="px-6 py-3 text-sm text-gray-700">{feature.text}</td>
                   <td className="px-4 py-3 text-center">
                     {feature.free ? (
-                      <Check className="mx-auto h-5 w-5 text-green-600 dark:text-green-400" />
+                      <Check className="mx-auto h-5 w-5 text-green-600" />
                     ) : (
-                      <X className="mx-auto h-5 w-5 text-gray-300 dark:text-gray-600" />
+                      <X className="mx-auto h-5 w-5 text-gray-300" />
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
                     {feature.premium ? (
-                      <Check className="mx-auto h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      <Check className="mx-auto h-5 w-5 text-purple-600" />
                     ) : (
-                      <X className="mx-auto h-5 w-5 text-gray-300 dark:text-gray-600" />
+                      <X className="mx-auto h-5 w-5 text-gray-300" />
                     )}
                   </td>
                 </tr>
@@ -272,13 +265,11 @@ export function PremiumPage() {
       </section>
 
       {/* Guarantee Section */}
-      <section className="bg-purple-50 px-4 py-12 text-center dark:bg-purple-950/30">
+      <section className="bg-purple-50 px-4 py-12 text-center">
         <div className="container mx-auto max-w-xl">
-          <Shield className="mx-auto mb-4 h-12 w-12 text-purple-600 dark:text-purple-400" />
-          <h2 className="mb-3 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-            Sin compromiso
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300">
+          <Shield className="mx-auto mb-4 h-12 w-12 text-purple-600" />
+          <h2 className="mb-3 font-serif text-2xl font-bold text-gray-900">Sin compromiso</h2>
+          <p className="text-gray-600">
             Cancelá cuando quieras, sin compromiso ni cargos adicionales. Tu historial y lecturas se
             conservan siempre.
           </p>
@@ -287,20 +278,17 @@ export function PremiumPage() {
 
       {/* FAQ Section */}
       <section data-testid="faq-section" className="container mx-auto max-w-2xl px-4 py-16">
-        <h2 className="mb-10 text-center font-serif text-3xl font-bold text-gray-900 dark:text-white">
+        <h2 className="mb-10 text-center font-serif text-3xl font-bold text-gray-900">
           Preguntas frecuentes
         </h2>
         <div className="space-y-6">
           {FAQ_ITEMS.map((item) => (
-            <div
-              key={item.question}
-              className="rounded-xl border border-gray-200 p-6 dark:border-gray-700"
-            >
+            <div key={item.question} className="rounded-xl border border-gray-200 p-6">
               <div className="mb-3 flex items-start gap-3">
-                <HelpCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-purple-600 dark:text-purple-400" />
-                <h3 className="font-semibold text-gray-900 dark:text-white">{item.question}</h3>
+                <HelpCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-purple-600" />
+                <h3 className="font-semibold text-gray-900">{item.question}</h3>
               </div>
-              <p className="pl-8 text-gray-600 dark:text-gray-300">{item.answer}</p>
+              <p className="pl-8 text-gray-600">{item.answer}</p>
             </div>
           ))}
         </div>
@@ -308,10 +296,8 @@ export function PremiumPage() {
 
       {/* Bottom CTA */}
       <section className="container mx-auto max-w-xl px-4 pb-16 text-center">
-        <h2 className="mb-4 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          ¿Listo para comenzar?
-        </h2>
-        <p className="mb-8 text-gray-600 dark:text-gray-300">
+        <h2 className="mb-4 font-serif text-2xl font-bold text-gray-900">¿Listo para comenzar?</h2>
+        <p className="mb-8 text-gray-600">
           Únete a nuestra comunidad y descubre el poder del tarot con interpretaciones
           personalizadas.
         </p>

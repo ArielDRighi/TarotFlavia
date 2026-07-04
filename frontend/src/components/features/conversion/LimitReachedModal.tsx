@@ -86,7 +86,7 @@ export default function LimitReachedModal({
         </DialogHeader>
 
         {/* Premium benefits */}
-        <div className="space-y-3 rounded-lg border bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-4 dark:from-purple-950/20 dark:to-pink-950/20">
+        <div className="space-y-3 rounded-lg border bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-4">
           <p className="text-foreground text-center text-sm font-semibold">Con Premium tendrías:</p>
           {PREMIUM_BENEFITS_LIMIT.map((benefit) => (
             <div key={benefit.text} className="flex items-center gap-2">

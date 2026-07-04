@@ -206,7 +206,7 @@ export default function PremiumUpgradePrompt({
           </DialogHeader>
 
           {/* Premium benefits */}
-          <div className="space-y-2 rounded-lg border bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-4 dark:from-purple-950/20 dark:to-pink-950/20">
+          <div className="space-y-2 rounded-lg border bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-4">
             {PREMIUM_BENEFITS.map((benefit) => (
               <div key={benefit} className="flex items-center gap-2">
                 <Sparkles className="text-accent h-4 w-4 flex-shrink-0" aria-hidden="true" />
@@ -230,7 +230,7 @@ export default function PremiumUpgradePrompt({
   if (variant === 'inline') {
     return (
       <div
-        className="relative overflow-hidden rounded-lg border bg-gradient-to-br from-purple-50/80 to-pink-50/80 p-6 text-center dark:from-purple-950/20 dark:to-pink-950/20"
+        className="relative overflow-hidden rounded-lg border bg-gradient-to-br from-purple-50/80 to-pink-50/80 p-6 text-center"
         data-testid="premium-upgrade-prompt-inline"
       >
         <div className="flex flex-col items-center gap-4">

@@ -44,12 +44,12 @@ function sanitizeRedirectPath(raw: string | null): string {
 function LoadingState() {
   return (
     <div data-testid="activation-loading" className="flex flex-col items-center gap-6 text-center">
-      <Loader2 className="h-16 w-16 animate-spin text-purple-600 dark:text-purple-400" />
+      <Loader2 className="h-16 w-16 animate-spin text-purple-600" />
       <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900">
           Activando tu plan Premium...
         </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <p className="text-gray-600">
           Estamos confirmando tu suscripción. Esto puede tomar unos segundos.
         </p>
       </div>
@@ -62,14 +62,12 @@ function SuccessState() {
     <div data-testid="activation-success" className="flex flex-col items-center gap-6 text-center">
       <CheckCircle className="h-16 w-16 text-green-500" />
       <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          ¡Bienvenido a Premium!
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900">¡Bienvenido a Premium!</h1>
+        <p className="text-gray-600">
           Tu plan Premium fue activado exitosamente. Ahora tenés acceso a todas las funciones.
         </p>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400">Redirigiendo en unos segundos...</p>
+      <p className="text-sm text-gray-500">Redirigiendo en unos segundos...</p>
     </div>
   );
 }
@@ -79,10 +77,8 @@ function TimeoutState() {
     <div data-testid="activation-timeout" className="flex flex-col items-center gap-6 text-center">
       <Clock className="h-16 w-16 text-yellow-500" />
       <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          Pago en procesamiento
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900">Pago en procesamiento</h1>
+        <p className="text-gray-600">
           Estamos procesando tu pago. Tu plan Premium se activará automáticamente en unos minutos.
         </p>
       </div>
@@ -100,10 +96,8 @@ function PendingState() {
     <div data-testid="activation-pending" className="flex flex-col items-center gap-6 text-center">
       <Clock className="h-16 w-16 text-yellow-500" />
       <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          Pago en proceso
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900">Pago en proceso</h1>
+        <p className="text-gray-600">
           Tu pago está siendo procesado. Te notificaremos cuando se confirme.
         </p>
       </div>
@@ -123,10 +117,8 @@ function FailureState() {
     <div data-testid="activation-failure" className="flex flex-col items-center gap-6 text-center">
       <XCircle className="h-16 w-16 text-red-500" />
       <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          Problema con el pago
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900">Problema con el pago</h1>
+        <p className="text-gray-600">
           Hubo un problema con tu pago. Por favor, intentá nuevamente.
         </p>
       </div>

@@ -171,7 +171,7 @@ export function AISynthesis({
       {isExpanded && (
         <CardContent id="synthesis-content" className="relative pt-0">
           {/* Contenido de la síntesis */}
-          <div className="prose prose-sm dark:prose-invert max-w-none">
+          <div className="prose prose-sm max-w-none">
             {isRegenerating ? (
               <div className="text-muted-foreground flex flex-col items-center justify-center py-12">
                 <Sparkles className="mb-4 h-8 w-8 animate-pulse text-amber-500" />

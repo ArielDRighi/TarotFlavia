@@ -2,6 +2,18 @@
 @import 'tw-animate-css';
 
 /* ============================================
+   Neutralizador de "modo oscuro fantasma" (T-PREM-001 / PREM-001)
+   La app es light-only. Por defecto Tailwind v4 liga `dark:` a
+   @media (prefers-color-scheme: dark), por lo que esas variantes se
+   activaban con el SO en modo oscuro (texto claro sobre fondo claro).
+   Redefinimos `dark:` como variante por CLASE: solo aplicaría bajo un
+   ancestro `.dark`, que nunca existe (no hay ThemeProvider/toggle).
+   Así toda `dark:` residual queda inerte de forma global (red de
+   seguridad, incluidos los primitivos de components/ui). No quitar.
+   ============================================ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================
    Auguria Design Tokens - Tailwind v4
    Based on DESIGN_HAND-OFF.md
    Mode: Light only (NO dark mode)

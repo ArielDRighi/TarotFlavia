@@ -10,6 +10,7 @@
  * 2. Nomenclatura de archivos (PascalCase componentes, camelCase hooks)
  * 3. Importaciones correctas (no relativas largas, usar @/ alias)
  * 4. No 'any' en TypeScript
+ * 4.5 No "modo oscuro fantasma" (variantes dark: fuera de components/ui/)
  * 5. No eslint-disable o ts-ignore
  * 6. Componentes en features/ organizados por dominio
  * 7. No lógica de negocio en app/ (solo rutas)
@@ -209,6 +210,55 @@ function validateNoDisables() {
     console.log('   ✅ No se detectaron disable directives');
   } else {
     console.log(`   ❌ ${disableCount} disable directives detectados`);
+  }
+}
+
+// =============================================================================
+// VALIDACIÓN 3.5: SIN "MODO OSCURO FANTASMA" (variantes dark: en app light-only)
+// =============================================================================
+
+function validateNoGhostDarkMode() {
+  console.log('\n🌗 Validando ausencia de "modo oscuro fantasma" (dark:)...\n');
+
+  // Variante Tailwind `dark:` seguida de una utilidad (letra o `[` arbitrario).
+  // No matchea nombres de token CSS (`--color-...-dark:` va seguido de espacio)
+  // ni menciones en comentarios (p.ej. "sin clases `dark:`." seguido de backtick).
+  const DARK_VARIANT = /dark:[a-zA-Z[]/;
+
+  const allFiles = getAllFiles(SRC_DIR).filter((filePath) => {
+    // Los primitivos de components/ui/ (shadcn) no se modifican; sus `dark:`
+    // residuales quedan inertes por el neutralizador global de globals.css
+    // (@custom-variant dark por clase, sin ancestro .dark en la app).
+    const rel = getRelativePath(filePath);
+    return !rel.split(path.sep).join('/').includes('components/ui/');
+  });
+
+  let ghostCount = 0;
+
+  allFiles.forEach((filePath) => {
+    const content = readFileContent(filePath);
+    if (!content) return;
+
+    const relativePath = getRelativePath(filePath);
+
+    content.split('\n').forEach((line, index) => {
+      if (DARK_VARIANT.test(line)) {
+        ghostCount++;
+        errors.push({
+          file: relativePath,
+          line: index + 1,
+          message: `Variante "dark:" en app light-only (modo oscuro fantasma). Usa la clase base clara / tokens de marca.`,
+          rule: 'NO_GHOST_DARK',
+          code: line.trim(),
+        });
+      }
+    });
+  });
+
+  if (ghostCount === 0) {
+    console.log('   ✅ Sin variantes "dark:" fuera de components/ui/');
+  } else {
+    console.log(`   ❌ ${ghostCount} variantes "dark:" detectadas`);
   }
 }
 
@@ -484,6 +534,7 @@ function main() {
   validateFileNaming();
   validateNoAny();
   validateNoDisables();
+  validateNoGhostDarkMode();
   validateImports();
   validateAppDirectory();
   validateFeatureStructure();

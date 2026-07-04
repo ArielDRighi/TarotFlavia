@@ -334,24 +334,30 @@ Los prompts de upgrade y el modal de bienvenida usan `text-purple-600/700 dark:t
 **Estimación:** 2 puntos
 **Dependencias:** ninguna (habilita al resto)
 **Cubre Hallazgo:** PREM-001, PREM-008
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Purgar las variantes `dark:` de los 11 archivos del inventario, reemplazando por tokens de marca (`text-foreground`, `text-muted-foreground`, `bg-card`, `border-border`, `text-secondary`, etc.).
-- [ ] En bloques `prose`: quitar `dark:prose-invert` (o fijar el tema claro).
-- [ ] Añadir un **guardarraíl** (test de arquitectura o regla de lint) que falle si reaparece `dark:` en `src/`.
-- [ ] (Opcional, red de seguridad) forzar `color-scheme: light` en `globals.css`.
-- [ ] Tests que fijen el contrato (sin `dark:` en los componentes tocados).
+- [x] Purgar las variantes `dark:` de los 11 archivos del inventario (purga mínima: se elimina el sufijo `dark:` conservando la clase base clara; la migración de `purple-*`/`gray-*` a tokens de marca la harán PREM-002/003 al reescribir esas páginas). **84 tokens `dark:` eliminados.**
+- [x] En bloques `prose`: quitar `dark:prose-invert` (`DailyReadingCard`, `AISynthesis`).
+- [x] Añadir un **guardarraíl** (test de arquitectura) que falle si reaparece `dark:` en `src/` → `validateNoGhostDarkMode()` en `frontend/scripts/validate-architecture.js` (excluye `components/ui/`, cubiertos por el neutralizador global).
+- [x] **Red de seguridad global (estrategia B):** neutralizador `@custom-variant dark (&:where(.dark, .dark *))` en `globals.css` que vuelve inertes TODAS las `dark:` residuales (incluidas las de los primitivos shadcn de `components/ui/`, que no se modifican).
+- [x] Tests que fijen el contrato (sin `dark:` en los componentes tocados) → `frontend/src/test/no-ghost-dark-mode.test.ts` (12 casos).
 
 #### 🎯 Criterios de Aceptación
 
-- La app se ve idéntica en SO claro y oscuro; no hay texto claro sobre fondo claro.
-- Ciclo de calidad frontend completo pasa.
+- [x] La app se ve idéntica en SO claro y oscuro; no hay texto claro sobre fondo claro. **Verificado a nivel de CSS compilado: 0 `@media (prefers-color-scheme: dark)` en el build; toda `dark:` residual compila bajo el selector `.dark` (inexistente en la app).**
+- [x] Ciclo de calidad frontend completo pasa (`format` · `lint:fix` 0 errores · `type-check` · `test:run` 5085 ✓ · `build` · `validate-architecture` ✓).
 
 #### 📁 Archivos involucrados
 
-- Los 11 del inventario (PremiumPage, ActivationPage, registro, notifications×2, HoroscopeAreaCard, WelcomeModal, PremiumUpgradePrompt, LimitReachedModal, DailyReadingCard, AISynthesis) + tests + guardarraíl.
+- Los 11 del inventario (PremiumPage, ActivationPage, registro, notifications×2, HoroscopeAreaCard, WelcomeModal, PremiumUpgradePrompt, LimitReachedModal, DailyReadingCard, AISynthesis) + `globals.css` (neutralizador) + `validate-architecture.js` (guardarraíl) + `src/test/no-ghost-dark-mode.test.ts` (contrato).
+
+#### 📝 Notas de implementación (hallazgos)
+
+- **Enfoque A+B combinado:** purga de los 11 archivos de features (A) + neutralizador global (B). Doble red de seguridad.
+- **El inventario original omitía los primitivos `components/ui/`** (`button.tsx`, `switch.tsx`, `select.tsx`, `textarea.tsx`), que también contienen `dark:` reales (basadas en tokens). No se modifican (regla "no tocar `components/ui/`"); quedan inertes gracias al neutralizador global.
+- **Corrección técnica al backlog:** forzar `color-scheme: light` NO neutraliza las `dark:` basadas en media query (`color-scheme` solo afecta el render UA de controles/scrollbars, no `prefers-color-scheme`). El mecanismo correcto en Tailwind v4 es redefinir la variante `dark:` como estrategia por clase (`@custom-variant dark`), que es lo aplicado. Es seguro porque no existe `ThemeProvider`/toggle que añada la clase `.dark`.
 
 ---
 
