@@ -28,6 +28,7 @@ const DARK_VARIANT = /dark:[a-zA-Z[]/;
 // Archivos de features purgados en T-PREM-001 (inventario del backlog).
 const PURGED_FILES = [
   'components/features/premium/PremiumPage.tsx',
+  'components/features/premium/PremiumHero.tsx',
   'components/features/premium/ActivationPage.tsx',
   'app/registro/page.tsx',
   'components/features/notifications/NotificationItem.tsx',
