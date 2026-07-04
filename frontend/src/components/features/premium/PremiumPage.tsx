@@ -164,7 +164,7 @@ function PremiumCtaButton({ premiumPlan, testId, onDark = false }: PremiumCtaBut
       disabled={isPending}
       size="lg"
       data-testid={testId}
-      className="focus-visible:ring-secondary w-full"
+      className="focus-visible:ring-secondary/50 w-full"
     >
       {isPending ? 'Redirigiendo...' : CTA_PREMIUM.PURCHASE}
       {premiumPlan && !isPending && (
