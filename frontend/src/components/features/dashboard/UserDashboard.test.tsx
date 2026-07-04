@@ -949,11 +949,14 @@ describe('UserDashboard', () => {
 
     const grid = screen.getByTestId('dashboard-widget-grid');
     expect(grid).toBeInTheDocument();
-    // Full-width contract: widgets spread across columns (1 → 2 on tablet → 3 on
-    // wide desktop), never collapsed into a single narrow 1/3 column.
-    expect(grid.className).toContain('grid-cols-1');
-    expect(grid.className).toContain('sm:grid-cols-2');
-    expect(grid.className).toContain('xl:grid-cols-3');
+    // Full-width contract: masonry por columnas CSS (1 → 2 on tablet → 3 on wide
+    // desktop) que empaqueta densamente y evita los huecos verticales que dejaba
+    // el grid con alturas dispares. Nunca colapsa a una única columna estrecha.
+    expect(grid.className).toContain('columns-1');
+    expect(grid.className).toContain('sm:columns-2');
+    expect(grid.className).toContain('xl:columns-3');
+    // Cada tarjeta no debe partirse entre columnas (break-inside-avoid).
+    expect(grid.className).toContain('break-inside-avoid');
     // Themed widgets live inside the grid (not in a separate side column).
     expect(within(grid).getByTestId('horoscope-widget')).toBeInTheDocument();
     expect(within(grid).getByTestId('numerology-widget')).toBeInTheDocument();

@@ -356,6 +356,13 @@ Reemplazar el layout 2/3 + 1/3 de `UserDashboard` por una distribución que use 
 - **Verificación visual con Playwright** (sesiones reales `free@test.com` / `premium@test.com`, build de producción en `localhost:3001`): el vacío blanco lateral desapareció; en PREMIUM la página pasó de ~2.046 px a ~1.290 px de alto con los 6 widgets visibles en una grilla 3×2; en FREE los 5 widgets se distribuyen en 3 columnas con el banner de upgrade full-width al pie.
 - Ciclo de calidad frontend completo en verde: `format`, `lint:fix` (0 errores), `type-check`, `test:run` (403 archivos / 5017 tests), `build` y `validate-architecture.js`.
 
+#### 🔧 Ajuste posterior — Opción B → Opción A (masonry) · rama `fix/T-DASH-001-masonry-widgets-home`
+
+- **Motivo:** en QA visual (Playwright, `premium@test.com`/`free@test.com`, 1440×900) se confirmó que la Opción B (`grid … items-start`) dejaba **huecos verticales grandes** bajo las tarjetas cortas (p. ej. "Tu Horóscopo" ~166 px junto a "Tu Numerología" ~442 px → ~276 px de vacío), porque la fila 2 no arranca hasta pasar la tarjeta más alta de la fila 1. Es exactamente la contra que el hallazgo DASH-001 anticipaba para la Opción B.
+- **Cambio:** la grilla pasó a **masonry por columnas CSS** — la Opción A que el hallazgo marcaba como recomendada: `columns-1 sm:columns-2 xl:columns-3 gap-6` con `[&>*]:mb-6 [&>*]:break-inside-avoid`. Cada columna fluye densa (estilo Pinterest) y las tarjetas cortas dejan de generar huecos.
+- **Accesibilidad:** el orden DOM (y por tanto lectura por teclado/lector de pantalla) se conserva; solo cambia el flujo visual a por-columnas. El reveal escalonado sigue usando el `index` de cada widget.
+- **Tests:** el contrato de `UserDashboard.test.tsx` se actualizó (`columns-1`/`sm:columns-2`/`xl:columns-3` + `break-inside-avoid`). 19/19 del archivo en verde; suite completa 5073 tests.
+
 #### 🎯 Criterios de Aceptación
 
 - Los widgets ocupan el ancho disponible; sin columna casi vacía ni tira angosta desbordando hacia abajo.
