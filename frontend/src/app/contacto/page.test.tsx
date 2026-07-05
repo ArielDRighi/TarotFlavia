@@ -49,10 +49,16 @@ describe('ContactoPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('should have proper styling for alternative contact section', () => {
+  it('should style the alternative contact section as a gold canon callout', () => {
+    render(<ContactoPage />);
+    const altContactSection = screen.getByText('Otras formas de contacto').closest('div');
+    expect(altContactSection?.className).toContain('bg-secondary/10');
+    expect(altContactSection?.className).toContain('border-secondary');
+  });
+
+  it('should NOT use raw purple palette (off-canon)', () => {
     const { container } = render(<ContactoPage />);
-    const altContactSection = container.querySelector('.bg-purple-50');
-    expect(altContactSection).toBeInTheDocument();
+    expect(container.querySelector('.bg-purple-50')).not.toBeInTheDocument();
   });
 
   it('should render the disclaimer banner', () => {
@@ -63,5 +69,19 @@ describe('ContactoPage', () => {
   it('should render submit button from ContactForm', () => {
     render(<ContactoPage />);
     expect(screen.getByRole('button', { name: /enviar mensaje/i })).toBeInTheDocument();
+  });
+
+  describe('Canon styling', () => {
+    it('should render the title with the Cormorant serif and brand primary tokens', () => {
+      render(<ContactoPage />);
+      const title = screen.getByRole('heading', { name: 'Contacto', level: 1 });
+      expect(title).toHaveClass('font-serif');
+      expect(title.className).toContain('text-primary');
+    });
+
+    it('should render a gold accent icon in the header', () => {
+      render(<ContactoPage />);
+      expect(screen.getByTestId('contact-accent')).toBeInTheDocument();
+    });
   });
 });

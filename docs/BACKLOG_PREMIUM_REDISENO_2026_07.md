@@ -480,15 +480,23 @@ Los prompts de upgrade y el modal de bienvenida usan `text-purple-600/700 dark:t
 **Estimación:** 1 punto
 **Dependencias:** T-PREM-001
 **Cubre Hallazgo:** PREM-006
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] CTA y acentos de marca; caja de nota como callout del canon; tokens.
+- [x] CTA y acentos de marca; caja de nota como callout del canon; tokens.
 
 #### 🎯 Criterios de Aceptación
 
-- `/contacto` coherente con la marca; contraste AA.
+- [x] `/contacto` coherente con la marca; contraste AA.
+
+#### 🛠️ Notas de Implementación
+
+- **Cabecera al canon:** acento dorado `Sparkles` (`text-secondary`), título Cormorant con `text-primary` y subtítulo con `text-muted-foreground`; secciones envueltas en `Reveal` escalonado (index 0/1/2).
+- **Caja de nota → callout dorado de marca:** `bg-purple-50` reemplazado por `border-secondary/40 bg-secondary/10` con icono `Mail` dorado; texto migrado a tokens (`text-foreground`/`text-muted-foreground`).
+- **CTA `Enviar Mensaje`:** foco dorado visible `focus-visible:ring-secondary/50` (patrón hermano de T-PREM-005). El botón mantiene el `bg-primary` de marca.
+- **Tokenización:** errores inline del formulario de `text-red-600` crudo a `text-destructive`.
+- **Tests:** actualizados a canon (`page.test.tsx` verifica callout dorado, ausencia de púrpura crudo, título `text-primary` y acento; `ContactForm.test.tsx` fija el foco dorado). 26/26 verdes.
 
 ---
 
