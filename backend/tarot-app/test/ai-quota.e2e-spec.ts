@@ -122,20 +122,18 @@ describe('AI Quota (E2E)', () => {
         .expect(403)
         .expect((res) => {
           const body = res.body as { message: string };
-          expect(body.message).toContain('Has alcanzado tu límite mensual');
-          expect(body.message).toContain('0 interpretaciones');
+          expect(body.message).toContain('exclusivas de Premium');
         });
     });
 
-    it('should block POST /daily-reading/regenerate when quota exceeded', async () => {
-      // User still has quota exceeded from previous test
+    it('should block POST /daily-reading/regenerate for FREE user (sin IA)', async () => {
       return request(getServer())
         .post('/api/v1/daily-reading/regenerate')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(403)
         .expect((res) => {
           const body = res.body as { message: string };
-          expect(body.message).toContain('Has alcanzado tu límite mensual');
+          expect(body.message).toContain('exclusivas de Premium');
         });
     });
 
@@ -153,7 +151,7 @@ describe('AI Quota (E2E)', () => {
         .expect(403)
         .expect((res) => {
           const body = res.body as { message: string };
-          expect(body.message).toContain('Has alcanzado tu límite mensual');
+          expect(body.message).toContain('exclusivas de Premium');
         });
     });
 

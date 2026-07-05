@@ -14,9 +14,16 @@ export class AlignPremiumAiQuotaToUnlimited1776500000000 implements MigrationInt
     await queryRunner.query(
       `UPDATE "plans" SET "aiQuotaMonthly" = -1 WHERE "planType" = 'premium' AND "aiQuotaMonthly" = 100`,
     );
+    // Alinea el default de la columna con la fuente de verdad (0 = sin IA).
+    await queryRunner.query(
+      `ALTER TABLE "plans" ALTER COLUMN "aiQuotaMonthly" SET DEFAULT 0`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "plans" ALTER COLUMN "aiQuotaMonthly" SET DEFAULT 100`,
+    );
     await queryRunner.query(
       `UPDATE "plans" SET "aiQuotaMonthly" = 100 WHERE "planType" = 'premium' AND "aiQuotaMonthly" = -1`,
     );

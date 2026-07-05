@@ -6,6 +6,7 @@ import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto, SortBy, SortOrder } from './dto/query-readings.dto';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
+import { RequiresPremiumForAIGuard } from './guards/requires-premium-for-ai.guard';
 import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
 import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { IncrementUsageInterceptor } from '../../usage-limits/interceptors/increment-usage.interceptor';
@@ -156,6 +157,9 @@ describe('ReadingsController', () => {
       ) ?? []) as unknown[];
 
       expect(guards).not.toContain(AIQuotaGuard);
+      // Pero el gate real de IA (RequiresPremiumForAIGuard) debe seguir presente:
+      // su remoción accidental abriría IA a Free sin que ningún test falle.
+      expect(guards).toContain(RequiresPremiumForAIGuard);
     });
 
     it('mantiene AIQuotaGuard en la regeneración de interpretación (flujo exclusivo de IA)', () => {

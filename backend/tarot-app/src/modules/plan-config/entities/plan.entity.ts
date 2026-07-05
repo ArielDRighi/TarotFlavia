@@ -86,10 +86,12 @@ export class Plan {
   tarotReadingsLimit: number;
 
   @ApiProperty({
-    example: 100,
-    description: 'Cuota mensual de solicitudes IA (-1 para ilimitado)',
+    example: -1,
+    description:
+      'Cuota mensual de solicitudes IA (-1 para ilimitado, 0 para sin IA)',
   })
-  @Column({ type: 'int', default: 100 })
+  // T-FBK-006: default 0 (sin IA) como valor seguro; Free = 0, Premium = -1.
+  @Column({ type: 'int', default: 0 })
   aiQuotaMonthly: number;
 
   @ApiProperty({
