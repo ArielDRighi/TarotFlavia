@@ -405,4 +405,73 @@ describe('PremiumUpgradePrompt', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
   });
+
+  // ── Canon místico (T-PREM-007) ────────────────────────────────────────────
+
+  describe('Canon styling', () => {
+    it('el CTA del modal tiene foco dorado visible (focus-visible:ring-secondary)', () => {
+      setupFreeUser();
+      render(
+        <PremiumUpgradePrompt
+          open={true}
+          onClose={vi.fn()}
+          feature="preguntas personalizadas"
+          variant="modal"
+        />
+      );
+
+      const ctaButton = screen.getByRole('button', { name: /premium/i });
+      expect(ctaButton.className).toContain('focus-visible:ring-secondary');
+    });
+
+    it('la caja de beneficios del modal es un callout dorado de marca', () => {
+      setupFreeUser();
+      render(
+        <PremiumUpgradePrompt
+          open={true}
+          onClose={vi.fn()}
+          feature="preguntas personalizadas"
+          variant="modal"
+        />
+      );
+
+      const benefit = screen.getByText('Lecturas ilimitadas');
+      const callout = benefit.closest('[class*="bg-secondary/"]');
+      expect(callout).not.toBeNull();
+      expect(callout?.className).toContain('border-secondary');
+    });
+
+    it('el CTA del banner (botón noche) tiene foco visible sobre la banda dorada', () => {
+      setupFreeUser();
+      render(<PremiumUpgradePrompt feature="interpretaciones personalizadas" variant="banner" />);
+
+      // Un anillo dorado sería invisible sobre la banda dorada: el foco usa el token noche.
+      const ctaButton = screen.getByRole('button', { name: /premium/i });
+      expect(ctaButton.className).toContain('focus-visible:ring-bg-hero');
+    });
+
+    it.each(['modal', 'inline', 'banner'] as const)(
+      'no usa paleta púrpura/rosa cruda (off-canon) en variant %s',
+      (variant) => {
+        setupFreeUser();
+        const { container } = render(
+          variant === 'modal' ? (
+            <PremiumUpgradePrompt
+              open={true}
+              onClose={vi.fn()}
+              feature="preguntas personalizadas"
+              variant="modal"
+            />
+          ) : (
+            <PremiumUpgradePrompt feature="preguntas personalizadas" variant={variant} />
+          )
+        );
+
+        // El modal se portalea fuera del container: se busca en todo el documento.
+        const root = variant === 'modal' ? document.body : container;
+        expect(root.querySelector('[class*="purple"]')).toBeNull();
+        expect(root.querySelector('[class*="pink"]')).toBeNull();
+      }
+    );
+  });
 });

@@ -74,8 +74,8 @@ export default function LimitReachedModal({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <div className="bg-accent/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-            <Clock className="text-accent h-8 w-8" />
+          <div className="bg-secondary/15 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+            <Clock className="text-secondary h-8 w-8" aria-hidden="true" />
           </div>
           <DialogTitle className="text-center font-serif text-2xl">
             Has alcanzado tu límite diario
@@ -85,12 +85,12 @@ export default function LimitReachedModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Premium benefits */}
-        <div className="space-y-3 rounded-lg border bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-4">
+        {/* Premium benefits — callout dorado de marca */}
+        <div className="border-secondary/40 bg-secondary/10 space-y-3 rounded-lg border p-4">
           <p className="text-foreground text-center text-sm font-semibold">Con Premium tendrías:</p>
           {PREMIUM_BENEFITS_LIMIT.map((benefit) => (
             <div key={benefit.text} className="flex items-center gap-2">
-              <benefit.icon className="text-accent h-5 w-5 flex-shrink-0" />
+              <benefit.icon className="text-secondary h-5 w-5 flex-shrink-0" aria-hidden="true" />
               <span className="text-foreground text-sm">{benefit.text}</span>
             </div>
           ))}
@@ -98,14 +98,15 @@ export default function LimitReachedModal({
 
         {/* CTA Buttons */}
         <DialogFooter className="flex-col gap-3 sm:flex-col">
-          <Button
-            onClick={onUpgrade}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
-            size="lg"
-          >
+          <Button onClick={onUpgrade} className="focus-visible:ring-secondary/50 w-full" size="lg">
             {CTA_PREMIUM.LIMIT_REACHED}
           </Button>
-          <Button variant="outline" onClick={onClose} className="w-full" size="lg">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="focus-visible:ring-secondary/50 w-full"
+            size="lg"
+          >
             Volver mañana
           </Button>
         </DialogFooter>
