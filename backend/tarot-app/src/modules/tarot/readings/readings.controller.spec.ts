@@ -145,6 +145,29 @@ describe('ReadingsController', () => {
     });
   });
 
+  // T-FBK-006: la cuota mensual de IA (0 para Free) NO debe bloquear la creación
+  // de lecturas, que para Free se sirven desde contenido de DB (sin IA). El acceso
+  // a IA lo gatea RequiresPremiumForAIGuard, no AIQuotaGuard.
+  describe('guards de cuota de IA (T-FBK-006)', () => {
+    it('no aplica AIQuotaGuard en la creación de lecturas (Free recibe contenido de DB)', () => {
+      const guards = (Reflect.getMetadata(
+        '__guards__',
+        ReadingsController.prototype.createReading,
+      ) ?? []) as unknown[];
+
+      expect(guards).not.toContain(AIQuotaGuard);
+    });
+
+    it('mantiene AIQuotaGuard en la regeneración de interpretación (flujo exclusivo de IA)', () => {
+      const guards = (Reflect.getMetadata(
+        '__guards__',
+        ReadingsController.prototype.regenerateInterpretation,
+      ) ?? []) as unknown[];
+
+      expect(guards).toContain(AIQuotaGuard);
+    });
+  });
+
   describe('getTrashedReadings', () => {
     it('should return trashed readings for the user', async () => {
       const trashedReadings = [

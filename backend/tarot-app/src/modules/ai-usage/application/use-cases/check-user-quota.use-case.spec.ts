@@ -54,27 +54,14 @@ describe('CheckUserQuotaUseCase', () => {
       expect(userRepo.findById).toHaveBeenCalledWith(1);
     });
 
-    it('should return true for FREE users within quota', async () => {
+    it('should throw ForbiddenException for FREE users (sin IA: cuota 0)', async () => {
+      // T-FBK-006: Free NO consume IA. Incluso sin uso previo, el guard bloquea
+      // toda IA para Free (aiQuota = 0).
       const user = {
         id: 1,
         email: 'test@example.com',
         plan: UserPlan.FREE,
-        aiRequestsUsedMonth: 50,
-      } as unknown as User;
-
-      userRepo.findById.mockResolvedValue(user);
-
-      const result = await useCase.execute(1);
-
-      expect(result).toBe(true);
-    });
-
-    it('should throw ForbiddenException for FREE users exceeding quota', async () => {
-      const user = {
-        id: 1,
-        email: 'test@example.com',
-        plan: UserPlan.FREE,
-        aiRequestsUsedMonth: 100,
+        aiRequestsUsedMonth: 0,
       } as unknown as User;
 
       userRepo.findById.mockResolvedValue(user);
@@ -115,22 +102,25 @@ describe('CheckUserQuotaUseCase', () => {
       expect(result.plan).toBe(UserPlan.PREMIUM);
     });
 
-    it('should return correct quota info for FREE users', async () => {
+    it('should return zero-quota info for FREE users without division-by-zero', async () => {
+      // T-FBK-006: Free tiene cuota de IA 0. getQuotaInfo debe devolver 0 sin
+      // producir NaN/Infinity al calcular el porcentaje.
       const user = {
         id: 1,
         email: 'test@example.com',
         plan: UserPlan.FREE,
-        aiRequestsUsedMonth: 30,
+        aiRequestsUsedMonth: 0,
       } as unknown as User;
 
       userRepo.findById.mockResolvedValue(user);
 
       const result = await useCase.getQuotaInfo(1);
 
-      expect(result.quotaLimit).toBe(100);
-      expect(result.requestsUsed).toBe(30);
-      expect(result.requestsRemaining).toBe(70);
-      expect(result.percentageUsed).toBe(30);
+      expect(result.quotaLimit).toBe(0);
+      expect(result.requestsUsed).toBe(0);
+      expect(result.requestsRemaining).toBe(0);
+      expect(result.percentageUsed).toBe(0);
+      expect(Number.isFinite(result.percentageUsed)).toBe(true);
       expect(result.plan).toBe(UserPlan.FREE);
     });
   });

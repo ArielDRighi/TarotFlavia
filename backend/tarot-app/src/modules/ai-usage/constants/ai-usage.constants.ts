@@ -8,12 +8,16 @@ export interface QuotaConfig {
 
 /**
  * Cuotas mensuales de IA por plan de usuario
- * IMPORTANTE: Estos valores por defecto pueden ser sobrescritos por variables de entorno
- * Ver .env.example para configuración (AI_QUOTA_*_MONTHLY)
+ *
+ * Fuente de verdad única (T-FBK-006): debe coincidir con la seed de la DB
+ * (plans.seeder.ts) y con la UI (premium-only).
  *
  * ANONYMOUS: Sin IA (usuarios no registrados)
- * FREE: 100 requests/mes (usuarios registrados gratuitos)
- * PREMIUM: Ilimitado
+ * FREE: Sin IA. Regla de negocio (decisión de Ariel): Free NO consume IA; sus
+ *       interpretaciones se sirven desde contenido ya existente en la DB. La IA
+ *       es exclusiva de Premium. Por eso la cuota es 0 (no configurable).
+ * PREMIUM: Ilimitado (-1). El uso real de Premium ya está acotado por los
+ *          límites diarios por actividad (ver usage-limits), no por esta cuota.
  */
 export const AI_MONTHLY_QUOTAS: Record<UserPlan, QuotaConfig> = {
   [UserPlan.ANONYMOUS]: {
@@ -22,11 +26,9 @@ export const AI_MONTHLY_QUOTAS: Record<UserPlan, QuotaConfig> = {
     hardLimit: 0,
   },
   [UserPlan.FREE]: {
-    maxRequests: Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100, // ~3 lecturas/día promedio
-    softLimit: Math.round(
-      (Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100) * 0.8,
-    ), // Advertencia al 80%
-    hardLimit: Number(process.env.AI_QUOTA_FREE_MONTHLY) || 100, // Bloqueo al 100%
+    maxRequests: 0, // Free NO consume IA (exclusiva de Premium)
+    softLimit: 0,
+    hardLimit: 0, // El guard bloquea toda IA para Free
   },
   [UserPlan.PREMIUM]: {
     maxRequests: Number(process.env.AI_QUOTA_PREMIUM_MONTHLY) || -1, // Ilimitado

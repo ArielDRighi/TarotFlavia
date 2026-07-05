@@ -326,7 +326,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts |
 | T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts |
 | T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts |
-| T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts |
+| T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
 | T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts |
 | T-FBK-008 | "Tu signo/animal" sin agrandar la tarjeta (solo borde + a11y) | Frontend | 🟡 Media | 1 pt |
 
@@ -469,17 +469,17 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 2 puntos
 **Dependencias:** ninguna (regla de negocio ya decidida — ver abajo)
 **Cubre Hallazgo:** FBK-004 (punto D)
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 > **Regla de negocio (decisión de Ariel):** Free = **cero IA** (interpretaciones desde contenido existente en la DB); IA **exclusiva de Premium**. Fuente de verdad: FREE `aiQuota = 0`.
 
 #### ✅ Tareas específicas
 
-- [ ] Corregir la **constante de enforcement** `ai-usage.constants.ts`: FREE `100 → 0` (para que coincida con la seed y con la UI premium-only).
-- [ ] Verificar que PREMIUM quede coherente entre seed (`aiQuotaMonthly`) y enforcement (hoy seed=100 vs constante=-1/ilimitado); dejar **un único** criterio para premium.
-- [ ] Confirmar que las interpretaciones de Free se sirven **solo desde contenido de DB** (sin llamada a IA) en todos los flujos (carta del día, tarot, numerología).
-- [ ] Migración de datos si cambia `aiQuotaMonthly` en filas existentes de `plans`.
-- [ ] Tests que fijen la coherencia (mismo valor en seed/enforcement/UI) y que el guard **bloquee toda IA para Free**.
+- [x] Corregir la **constante de enforcement** `ai-usage.constants.ts`: FREE `100 → 0` (para que coincida con la seed y con la UI premium-only). FREE queda fijo en 0 (no configurable por env, por regla de negocio).
+- [x] Verificar que PREMIUM quede coherente entre seed (`aiQuotaMonthly`) y enforcement. Criterio único: **PREMIUM = ilimitado (`-1`)** (seed `100 → -1`); el uso real de Premium ya está acotado por los límites diarios por actividad (usage-limits), no por esta cuota.
+- [x] Confirmar que las interpretaciones de Free se sirven **solo desde contenido de DB** (sin llamada a IA) en todos los flujos. **Hallazgo:** con FREE=0, `AIQuotaGuard` bloqueaba **toda** creación de lectura de Free (endpoint compartido `POST /readings`), no solo la IA. Se **removió `AIQuotaGuard` de `POST /readings`** (la IA la sigue gateando `RequiresPremiumForAIGuard`); se mantiene en los endpoints exclusivos de IA (regenerar interpretación/carta, interpretaciones, numerología).
+- [x] Migración de datos: `AlignPremiumAiQuotaToUnlimited` (plans premium `aiQuotaMonthly 100 → -1`, con `down`).
+- [x] Tests que fijen la coherencia (constante FREE=0/PREMIUM=-1, seed premium=-1) y que el guard **bloquee toda IA para Free**; blindaje de división por cero en `getQuotaInfo`/`getRemainingQuota`/`trackMonthlyUsage` y en `findUsersApproachingQuota`.
 
 #### 🎯 Criterios de Aceptación
 

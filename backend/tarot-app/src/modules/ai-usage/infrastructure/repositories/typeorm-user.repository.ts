@@ -30,6 +30,13 @@ export class TypeOrmUserRepository implements IUserRepository {
 
   async findUsersApproachingQuota(): Promise<User[]> {
     const quota = AI_MONTHLY_QUOTAS[UserPlan.FREE];
+
+    // T-FBK-006: Free no consume IA (cuota 0). Con hardLimit 0 el umbral sería 0
+    // y devolvería a TODOS los Free; no hay nadie "acercándose" a una cuota nula.
+    if (quota.hardLimit <= 0) {
+      return [];
+    }
+
     const threshold = Math.floor(quota.hardLimit * 0.8);
 
     return this.repository.find({

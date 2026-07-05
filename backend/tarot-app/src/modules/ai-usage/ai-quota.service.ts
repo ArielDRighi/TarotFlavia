@@ -151,6 +151,14 @@ export class AIQuotaService {
     }
 
     const quota = AI_MONTHLY_QUOTAS[user.plan];
+
+    // Planes sin cuota mensual de IA positiva (FREE/ANONYMOUS = sin IA) no
+    // disparan avisos de cuota; blinda la división por cero y evita falsos avisos.
+    // (Free nunca llega acá porque el guard lo bloquea antes; defensivo.)
+    if (quota.maxRequests <= 0) {
+      return;
+    }
+
     // user.aiRequestsUsedMonth already includes the atomic increment above
     const usageAfterUpdate = user.aiRequestsUsedMonth;
     const percentageUsed = (usageAfterUpdate / quota.maxRequests) * 100;
