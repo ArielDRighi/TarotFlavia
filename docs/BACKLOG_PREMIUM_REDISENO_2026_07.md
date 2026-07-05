@@ -532,18 +532,30 @@ Los prompts de upgrade y el modal de bienvenida usan `text-purple-600/700 dark:t
 **Estimación:** 1.5 puntos
 **Dependencias:** T-PREM-002, T-PREM-003
 **Cubre Hallazgo:** PREM-001, PREM-008 (verificación)
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Verificar contraste AA con la utilidad `lib/utils/contrast.ts` (getContrastRatio/meetsWcagAA, de T-DASH-007): banda, chips dorados con texto noche, tabla, FAQ.
-- [ ] Foco visible en CTAs/links; `alt` en imágenes nuevas; `prefers-reduced-motion` respetado.
-- [ ] Tests que fijen el contrato de contraste/alt/foco (análogo T-DASH-007).
+- [x] Verificar contraste AA con la utilidad `lib/utils/contrast.ts` (getContrastRatio/meetsWcagAA, de T-DASH-007): banda, chips dorados con texto noche, tabla, FAQ.
+- [x] Foco visible en CTAs/links; `alt` en imágenes nuevas; `prefers-reduced-motion` respetado.
+- [x] Tests que fijen el contrato de contraste/alt/foco (análogo T-DASH-007).
 
 #### 🎯 Criterios de Aceptación
 
-- Todo el circuito premium cumple AA; imágenes con `alt`; foco visible; movimiento reducido respetado.
-- Ciclo de calidad frontend completo pasa.
+- [x] Todo el circuito premium cumple AA; imágenes con `alt`; foco visible; movimiento reducido respetado.
+- [x] Ciclo de calidad frontend completo pasa.
+
+#### 🛠️ Notas de Implementación
+
+- **Verificación (no requirió cambios de código):** el circuito premium ya satisfacía el contrato tras T-PREM-002/003/004. Los ratios de contraste medidos con la fórmula WCAG de `contrast.ts` cumplen AA con holgura: crema sobre banda noche ≈ 17.4:1, chip dorado con texto noche ≈ 7.8:1, crema atenuada del subtítulo/encabezado "Free" ≥ 7.5:1 incluso sobre el punto más claro del gradiente (índigo `#2d1b69`), texto `foreground` de tabla/FAQ sobre superficie blanca ≈ 12:1.
+- **Contrato de contraste (nuevo, análogo T-DASH-007):** `components/features/premium/premium-a11y.test.ts` (8 casos) fija con `getContrastRatio`/`meetsWcagAA` los pares de color que el hero/tabla/activación controlan con hex hardcodeados. Como esas cremas se usan con alfa (`rgba(…, 0.72)`), el test las **compone** sobre el fondo noche y verifica el color resultante (lo que ve el usuario), no el token con transparencia.
+- **Contratos de foco/alt/reduced-motion/aria (verificación de cierre):** añadidos a los tests de componentes reutilizando sus harnesses — `PremiumHero.test.tsx` (overlay/estrellas/luna decorativos `aria-hidden`), `PremiumPage.test.tsx` (foco dorado visible en `cta-hero`/`cta-card`/`cta-bottom`, `aria-label` "Incluido"/"No incluido" en los iconos de la tabla, secciones envueltas en `Reveal` → `prefers-reduced-motion` respetado, `alt` no vacío en la banda), `ActivationPage.test.tsx` (foco dorado del CTA "Intentar de nuevo", iconos de estado `aria-hidden`, `alt` de la banda de éxito).
+- **Motion reducido:** ya garantizado por `Reveal` (deriva estado visible inmediato con `prefers-reduced-motion`) y por `globals.css`, que neutraliza `animate-twinkle`/reveal bajo movimiento reducido sin apagar los spinners informativos.
+- **Suite completa:** 5144 verdes (+18); ciclo de calidad frontend completo pasa (`format` · `lint:fix` 0 errores · `type-check` · `test:run` · `build` · `validate-architecture` ✓).
+
+#### 📁 Archivos involucrados
+
+- `components/features/premium/premium-a11y.test.ts` (nuevo, contrato de contraste) + `PremiumHero.test.tsx` / `PremiumPage.test.tsx` / `ActivationPage.test.tsx` (asserts de foco/alt/reduced-motion/aria). Sin cambios en código de producción (verificación de cierre).
 
 ---
 

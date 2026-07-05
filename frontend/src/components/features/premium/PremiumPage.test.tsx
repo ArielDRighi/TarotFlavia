@@ -203,6 +203,46 @@ describe('PremiumPage', () => {
       expect(container.querySelector('[class*="text-gray-"]')).toBeNull();
       expect(container.querySelector('[class*="bg-gray-"]')).toBeNull();
     });
+
+    // Accesibilidad — cierre del circuito premium (T-PREM-008)
+    describe('Accesibilidad (T-PREM-008)', () => {
+      beforeEach(() => {
+        mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+      });
+
+      it('should render a visible focus ring on every plan CTA (foco visible)', () => {
+        renderWithProviders(<PremiumPage />);
+
+        for (const testId of ['cta-hero', 'cta-card', 'cta-bottom']) {
+          const cta = screen.getByTestId(testId);
+          expect(cta.className).toMatch(/focus-visible:ring-secondary/);
+        }
+      });
+
+      it('should label the comparison table check/cross icons for screen readers', () => {
+        renderWithProviders(<PremiumPage />);
+
+        // Cada fila aporta un icono por columna (Free/Premium) con etiqueta textual.
+        expect(screen.getAllByLabelText('Incluido').length).toBeGreaterThan(0);
+        expect(screen.getAllByLabelText('No incluido').length).toBeGreaterThan(0);
+      });
+
+      it('should wrap sections in Reveal so prefers-reduced-motion is respected', () => {
+        const { container } = renderWithProviders(<PremiumPage />);
+
+        // `Reveal` marca sus contenedores con `data-reveal`; su lógica ya deriva
+        // el estado visible inmediato bajo movimiento reducido (ver Reveal.tsx).
+        expect(container.querySelectorAll('[data-reveal]').length).toBeGreaterThan(0);
+      });
+
+      it('should render the hero band asset with a Spanish alt (imagen con alt)', () => {
+        renderWithProviders(<PremiumPage />);
+
+        const heroImage = screen.getByTestId('next-image');
+        expect(heroImage).toHaveAttribute('alt');
+        expect(heroImage.getAttribute('alt')?.trim().length).toBeGreaterThan(0);
+      });
+    });
   });
 
   describe('CTA - Unauthenticated user', () => {

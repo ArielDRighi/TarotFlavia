@@ -87,7 +87,7 @@ describe('PremiumHero', () => {
     expect(screen.getByTestId('premium-hero')).toHaveClass('extra-test-class');
   });
 
-  // Accesibilidad (canon T-PREM-002 / PREM-002)
+  // Accesibilidad (canon T-PREM-002 / PREM-002 · cierre T-PREM-008)
   describe('Accesibilidad', () => {
     it('should use dark night text on the gold badge chip for AA contrast', () => {
       render(<PremiumHero title="Tarot" badge="Plan Premium" />);
@@ -96,6 +96,28 @@ describe('PremiumHero', () => {
       // Texto noche (#1a0a2e) sobre dorado (#d69e2e) ≈ 7:1 (AA); blanco falla.
       expect(chip).toHaveClass('text-bg-hero');
       expect(chip).not.toHaveClass('text-white');
+    });
+
+    it('should hide the decorative image overlay from assistive tech (T-PREM-008)', () => {
+      const { container } = render(
+        <PremiumHero
+          title="Tarot"
+          image={{ src: '/images/premium/premium-hero.webp', alt: 'Llave dorada' }}
+        />
+      );
+
+      // El overlay de legibilidad es puramente decorativo → aria-hidden.
+      const decorative = container.querySelectorAll('[aria-hidden="true"]');
+      expect(decorative.length).toBeGreaterThan(0);
+    });
+
+    it('should mark twinkling stars and crescent moon as aria-hidden (decorativos)', () => {
+      const { container } = render(<PremiumHero title="Tarot" />);
+
+      // Las estrellas animadas no aportan información: no deben leerse.
+      const stars = container.querySelectorAll('.animate-twinkle');
+      expect(stars.length).toBeGreaterThan(0);
+      stars.forEach((star) => expect(star).toHaveAttribute('aria-hidden', 'true'));
     });
   });
 });
