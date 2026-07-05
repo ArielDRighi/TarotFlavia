@@ -73,6 +73,14 @@ describe('ContactForm', () => {
     });
   });
 
+  describe('Canon styling', () => {
+    it('should give the submit CTA a visible gold focus ring', () => {
+      render(<ContactForm />);
+      const submitButton = screen.getByRole('button', { name: /enviar mensaje/i });
+      expect(submitButton.className).toContain('focus-visible:ring-secondary');
+    });
+  });
+
   describe('Form Structure', () => {
     it('should use React Hook Form integration', () => {
       render(<ContactForm />);

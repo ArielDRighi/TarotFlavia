@@ -82,7 +82,7 @@ export function ContactForm() {
           disabled={isSubmitting}
           {...register('name')}
         />
-        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+        {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
       </div>
 
       {/* Email */}
@@ -98,7 +98,7 @@ export function ContactForm() {
           disabled={isSubmitting}
           {...register('email')}
         />
-        {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
+        {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
       </div>
 
       {/* Subject */}
@@ -114,7 +114,7 @@ export function ContactForm() {
           disabled={isSubmitting}
           {...register('subject')}
         />
-        {errors.subject && <p className="text-sm text-red-600">{errors.subject.message}</p>}
+        {errors.subject && <p className="text-destructive text-sm">{errors.subject.message}</p>}
       </div>
 
       {/* Message */}
@@ -127,11 +127,16 @@ export function ContactForm() {
           disabled={isSubmitting}
           {...register('message')}
         />
-        {errors.message && <p className="text-sm text-red-600">{errors.message.message}</p>}
+        {errors.message && <p className="text-destructive text-sm">{errors.message.message}</p>}
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full" disabled={isSubmitting} size="lg">
+      <Button
+        type="submit"
+        className="focus-visible:ring-secondary/50 w-full"
+        disabled={isSubmitting}
+        size="lg"
+      >
         {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
       </Button>
 
