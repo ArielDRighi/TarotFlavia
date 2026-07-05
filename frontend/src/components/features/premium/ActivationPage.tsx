@@ -64,8 +64,6 @@ interface StatusPanelProps {
   title: string;
   /** Descripción del estado. */
   description: string;
-  /** Nota secundaria opcional (p. ej. "Redirigiendo..."). */
-  note?: string;
   /** Acciones opcionales (botones). */
   children?: ReactNode;
 }
@@ -74,10 +72,12 @@ interface StatusPanelProps {
  * Panel de estado del canon: tarjeta crema centrada con icono dorado, título
  * Cormorant y texto con tokens. Compartido por los estados de carga, pendiente,
  * procesamiento y error para mantener una atmósfera de marca coherente.
+ *
+ * Usa `<section>` (no `<main>`): el landmark `main` ya lo aporta el root layout.
  */
-function StatusPanel({ testId, icon, title, description, note, children }: StatusPanelProps) {
+function StatusPanel({ testId, icon, title, description, children }: StatusPanelProps) {
   return (
-    <main className="container mx-auto flex min-h-[60vh] max-w-xl items-center justify-center px-4 py-12">
+    <section className="container mx-auto flex min-h-[60vh] max-w-xl items-center justify-center px-4 py-12">
       <Reveal index={0} className="w-full">
         <Card data-testid={testId} className="p-8 text-center sm:p-10">
           <div className="flex justify-center">{icon}</div>
@@ -86,14 +86,13 @@ function StatusPanel({ testId, icon, title, description, note, children }: Statu
               {title}
             </h1>
             <p className="text-muted-foreground leading-relaxed">{description}</p>
-            {note && <p className="text-muted-foreground/80 mt-4 text-sm">{note}</p>}
           </div>
           {children && (
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">{children}</div>
           )}
         </Card>
       </Reveal>
-    </main>
+    </section>
   );
 }
 
@@ -110,7 +109,7 @@ function LoadingState() {
 
 function SuccessState() {
   return (
-    <main
+    <section
       data-testid="activation-success"
       className="container mx-auto max-w-3xl px-4 py-10 sm:py-12"
     >
@@ -125,7 +124,7 @@ function SuccessState() {
       <p className="text-muted-foreground mt-6 text-center text-sm">
         Redirigiendo en unos segundos...
       </p>
-    </main>
+    </section>
   );
 }
 
@@ -176,7 +175,7 @@ function FailureState() {
       <Button
         data-testid="btn-retry"
         onClick={() => router.push(ROUTES.PREMIUM)}
-        className="focus-visible:ring-secondary/50"
+        className="focus-visible:ring-secondary focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2"
       >
         Intentar de nuevo
       </Button>

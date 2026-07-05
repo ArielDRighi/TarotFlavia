@@ -511,7 +511,7 @@ describe('ActivationPage', () => {
         isLoading: false,
       });
 
-      renderWithProviders(<ActivationPage />);
+      const { container } = renderWithProviders(<ActivationPage />);
 
       await waitFor(() => {
         expect(screen.getByTestId('activation-success')).toBeInTheDocument();
@@ -524,6 +524,11 @@ describe('ActivationPage', () => {
         '/images/premium/premium-activacion.webp'
       );
       expect(screen.getByRole('heading', { level: 1 })).toHaveClass('font-serif');
+
+      // La banda de éxito tampoco usa la paleta cruda púrpura/gris
+      expect(container.querySelector('[class*="purple"]')).toBeNull();
+      expect(container.querySelector('[class*="text-gray-"]')).toBeNull();
+      expect(container.querySelector('[class*="bg-gray-"]')).toBeNull();
     });
 
     it('should not use the raw purple/gray palette in any state', () => {
