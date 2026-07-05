@@ -152,7 +152,7 @@ El texto de cara al usuario no debe mencionar "IA" / "inteligencia artificial". 
 | `email/templates/quota-warning-80.hbs:5,109,118,180` | "Advertencia de Cuota de IA", "Interpretaciones ilimitadas con IA" | Email |
 | `email/templates/plan-change.hbs:169` | "Interpretaciones más profundas con IA avanzada" | Email |
 
-**Zona gris (decidir):** el **panel de admin** (`app/admin/ai-usage/page.tsx`, `admin/PlanComparisonTable.tsx`, etc.) dice "Inteligencia Artificial" pero solo lo ven administradores. Definir si la regla aplica al panel interno.
+**Panel de admin — FUERA DE ALCANCE (decisión de Ariel, 5-jul-2026):** el panel de admin (`app/admin/ai-usage/page.tsx`, `admin/PlanComparisonTable.tsx`, etc.) dice "Inteligencia Artificial", pero **la regla de "no IA" NO aplica al panel interno** (solo lo ven administradores). No se modifica.
 
 **No cuentan como violación:** nombres de variables/componentes (`AISynthesis`, `AIProvider`), `OPENAI_*`, logs, comentarios, Swagger, prompts al modelo, tests y docs `.md`.
 
@@ -208,6 +208,8 @@ Los beneficios de Premium están dispersos en **4 fuentes que ya se contradicen 
 - UI (`useUserPlanFeatures.ts:83`, `DailyCardExperience.tsx:66`): trata la IA como **premium-only**.
 
 El guard usa la constante (FREE=100), pero ninguna ruta de UI ofrece esos 100 requests a free. Hay que definir la fuente de verdad única y alinear las tres capas.
+
+> **Decisión de Ariel (5-jul-2026):** **Free NO tiene ningún uso de IA.** El usuario Free recibe interpretaciones y demás **a partir de contenido ya existente en la base de datos** (pre-generado/canónico), nunca generado por IA. La IA es **exclusiva de Premium**. → Fuente de verdad: **FREE `aiQuota = 0`**, PREMIUM con IA. Esto valida la seed (`FREE=0`) y la UI (`canUseAI` premium-only); lo que hay que corregir es la **constante de enforcement** (`ai-usage.constants.ts` FREE `100 → 0`).
 
 #### Números reales (fuente de verdad para validar todo el copy)
 
@@ -266,7 +268,7 @@ El mismo emoji crudo del chino se reutiliza en ~5 lugares más (`AnimalCalculato
 
 #### Notas Técnicas
 
-- **Decisión de diseño necesaria:** a diferencia de los glifos astrológicos (U+2648–U+2653, que tienen presentación de texto nativa), **los emojis de animales NO tienen equivalente monocromático limpio** bajo `font-variant-emoji: text`. Para paridad visual real la vía natural del proyecto es **iconos SVG monocromáticos** (o una icon-font) coloreados con `text-primary`, encapsulados en un componente análogo a `ZodiacSymbol` (ej. `ChineseAnimalSymbol`).
+- **Decisión de Ariel (5-jul-2026):** usar **la opción que sea consistente con el diseño de la página**. Dado que los emojis de animales NO tienen equivalente monocromático limpio bajo `font-variant-emoji: text` (a diferencia de los glifos astrológicos U+2648–U+2653), la vía elegida es **iconos SVG monocromáticos** coloreados con `text-primary`, encapsulados en un componente análogo a `ZodiacSymbol` (ej. `ChineseAnimalSymbol`) — mismo tratamiento visual que el Horóscopo Occidental.
 - Reemplazar el render en `ChineseAnimalCard.tsx:89` y propagar el nuevo componente a los ~5 usos restantes.
 - Conservar accesibilidad (`role="img"` + `aria-label` con el nombre del animal, como hace `ZodiacSymbol`).
 
@@ -420,8 +422,8 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 - [ ] **Backend — mensajes:** reformular guards (`requires-premium-for-ai.guard.ts`, `requires-premium-for-numerology-ai.guard.ts`), DTO (`create-reading.dto.ts:53`) y asunto de email (`email.service.ts:173`).
 - [ ] **Backend — plan:** actualizar `plans.seeder.ts:67` **y** crear una **migración de datos** para reformular la descripción del plan en las filas existentes de la tabla `plans`.
 - [ ] **Backend — emails:** reformular las plantillas `.hbs` (welcome, quota-limit-reached, quota-warning-80, plan-change).
-- [ ] Decidir con Ariel si aplica al **panel de admin** (zona gris) y actuar en consecuencia.
-- [ ] Añadir un **guardarraíl** (test/lint) que falle si reaparece "IA"/"inteligencia artificial" en texto user-facing.
+- [ ] **Panel de admin: NO se toca** (decisión de Ariel — la regla no aplica al panel interno).
+- [ ] Añadir un **guardarraíl** (test/lint) que falle si reaparece "IA"/"inteligencia artificial" en texto user-facing (excluyendo `app/admin/**` y `components/features/admin/**`).
 
 #### 🎯 Criterios de Aceptación
 
@@ -465,20 +467,24 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 
 **Prioridad:** 🔴 Crítica
 **Estimación:** 2 puntos
-**Dependencias:** decisión de producto (¿free tiene cuota de interpretación o no?)
+**Dependencias:** ninguna (regla de negocio ya decidida — ver abajo)
 **Cubre Hallazgo:** FBK-004 (punto D)
 **Estado:** 🔲 PENDIENTE
 
+> **Regla de negocio (decisión de Ariel):** Free = **cero IA** (interpretaciones desde contenido existente en la DB); IA **exclusiva de Premium**. Fuente de verdad: FREE `aiQuota = 0`.
+
 #### ✅ Tareas específicas
 
-- [ ] Definir con Ariel la **regla de negocio** real: ¿la interpretación personalizada es premium-only, o free tiene una cuota mensual?
-- [ ] Establecer **una sola fuente de verdad** y alinear las tres capas: seed/DB (`plans.seeder.ts`, `aiQuotaMonthly`), constante de enforcement (`ai-usage.constants.ts`) y la UI (`useUserPlanFeatures.ts`, `DailyCardExperience.tsx`).
-- [ ] Migración de datos si cambia `aiQuotaMonthly` en filas existentes.
-- [ ] Tests que fijen la coherencia (mismo valor en las tres capas) y el comportamiento del guard.
+- [ ] Corregir la **constante de enforcement** `ai-usage.constants.ts`: FREE `100 → 0` (para que coincida con la seed y con la UI premium-only).
+- [ ] Verificar que PREMIUM quede coherente entre seed (`aiQuotaMonthly`) y enforcement (hoy seed=100 vs constante=-1/ilimitado); dejar **un único** criterio para premium.
+- [ ] Confirmar que las interpretaciones de Free se sirven **solo desde contenido de DB** (sin llamada a IA) en todos los flujos (carta del día, tarot, numerología).
+- [ ] Migración de datos si cambia `aiQuotaMonthly` en filas existentes de `plans`.
+- [ ] Tests que fijen la coherencia (mismo valor en seed/enforcement/UI) y que el guard **bloquee toda IA para Free**.
 
 #### 🎯 Criterios de Aceptación
 
-- La cuota de interpretación por plan es un único valor coherente en seed/DB, enforcement y UI; el guard bloquea/permite exactamente lo que la UI ofrece.
+- Free no consume IA en ningún flujo (recibe contenido de DB); el guard bloquea IA para Free de forma consistente con la UI.
+- La cuota por plan es un único valor coherente en seed/DB, enforcement y UI.
 - Ciclo de calidad backend completo pasa.
 
 #### 📁 Archivos involucrados
@@ -491,13 +497,15 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 
 **Prioridad:** 🟡 Media
 **Estimación:** 2 puntos
-**Dependencias:** decisión de diseño (SVG monocromático vs. icon-font)
+**Dependencias:** ninguna (dirección de diseño ya decidida — SVG monocromático `text-primary`)
 **Cubre Hallazgo:** FBK-005
 **Estado:** 🔲 PENDIENTE
 
+> **Decisión de Ariel:** la opción consistente con el diseño de la página → **iconos SVG monocromáticos** coloreados con `text-primary` (mismo tratamiento que el Horóscopo Occidental).
+
 #### ✅ Tareas específicas
 
-- [ ] Decidir con Ariel el set de iconos monocromáticos para los 12 animales (SVG de marca vs. icon-font).
+- [ ] Conseguir/crear el set de **12 SVG monocromáticos** de marca (Rata…Cerdo), aptos para colorear con `currentColor`/`text-primary`.
 - [ ] Crear un componente `ChineseAnimalSymbol` análogo a `ZodiacSymbol` (icono monocromático + `text-primary` + `role="img"`/`aria-label`).
 - [ ] Reemplazar el render en `ChineseAnimalCard.tsx:89` y propagar a los ~5 usos restantes (`AnimalCalculator`, `ChineseHoroscopeDetail`, `ChineseHoroscopeWidget`, `ChineseCompatibility`, `AnimalHoroscopePage`).
 - [ ] Tests del nuevo componente y de las tarjetas.
