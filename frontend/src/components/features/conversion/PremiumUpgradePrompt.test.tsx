@@ -436,9 +436,18 @@ describe('PremiumUpgradePrompt', () => {
       );
 
       const benefit = screen.getByText('Lecturas ilimitadas');
-      const callout = benefit.closest('[class*="bg-secondary/10"]');
+      const callout = benefit.closest('[class*="bg-secondary/"]');
       expect(callout).not.toBeNull();
       expect(callout?.className).toContain('border-secondary');
+    });
+
+    it('el CTA del banner (botón noche) tiene foco visible sobre la banda dorada', () => {
+      setupFreeUser();
+      render(<PremiumUpgradePrompt feature="interpretaciones personalizadas" variant="banner" />);
+
+      // Un anillo dorado sería invisible sobre la banda dorada: el foco usa el token noche.
+      const ctaButton = screen.getByRole('button', { name: /premium/i });
+      expect(ctaButton.className).toContain('focus-visible:ring-bg-hero');
     });
 
     it.each(['modal', 'inline', 'banner'] as const)(

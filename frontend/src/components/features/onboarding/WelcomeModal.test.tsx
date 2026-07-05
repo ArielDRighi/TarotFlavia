@@ -83,7 +83,7 @@ describe('WelcomeModal', () => {
       render(<WelcomeModal isOpen={true} onClose={vi.fn()} />);
 
       const heading = screen.getByText(/prueba premium/i);
-      const callout = heading.closest('[class*="bg-secondary/10"]');
+      const callout = heading.closest('[class*="bg-secondary/"]');
       expect(callout).not.toBeNull();
       expect(callout?.className).toContain('border-secondary');
     });

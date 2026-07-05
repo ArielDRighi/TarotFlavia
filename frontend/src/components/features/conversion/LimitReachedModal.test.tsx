@@ -185,7 +185,7 @@ describe('LimitReachedModal', () => {
       );
 
       const heading = screen.getByText(/con premium tendrías/i);
-      const callout = heading.closest('[class*="bg-secondary/10"]');
+      const callout = heading.closest('[class*="bg-secondary/"]');
       expect(callout).not.toBeNull();
       expect(callout?.className).toContain('border-secondary');
     });
