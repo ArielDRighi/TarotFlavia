@@ -563,4 +563,63 @@ describe('ActivationPage', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveClass('font-serif');
     });
   });
+
+  // ============================================================================
+  // Accesibilidad — cierre del circuito premium (T-PREM-008)
+  // ============================================================================
+
+  describe('Accesibilidad (T-PREM-008)', () => {
+    it('should give the failure retry CTA a visible focus ring (foco visible)', () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'failure';
+        return null;
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      const retryBtn = screen.getByTestId('btn-retry');
+      expect(retryBtn.className).toMatch(/focus-visible:ring-secondary/);
+    });
+
+    it('should mark the state icon as decorative (aria-hidden)', () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'failure';
+        return null;
+      });
+
+      const { container } = renderWithProviders(<ActivationPage />);
+
+      // El icono de estado (XCircle, `text-destructive`) es decorativo: el título
+      // "Problema con el pago" ya comunica el estado a lectores de pantalla.
+      const stateIcon = container.querySelector('.text-destructive');
+      expect(stateIcon).not.toBeNull();
+      expect(stateIcon).toHaveAttribute('aria-hidden', 'true');
+    });
+
+    it('should render the success band asset with a non-empty Spanish alt (imagen con alt)', async () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'authorized';
+        return null;
+      });
+      mockUseSubscriptionStatus.mockReturnValue({
+        data: {
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-04-01T00:00:00Z',
+          mpPreapprovalId: 'mp_123',
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('activation-success')).toBeInTheDocument();
+      });
+
+      const bandImage = screen.getByTestId('next-image');
+      expect(bandImage).toHaveAttribute('alt');
+      expect(bandImage.getAttribute('alt')?.trim().length).toBeGreaterThan(0);
+    });
+  });
 });
