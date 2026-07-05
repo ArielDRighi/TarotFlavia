@@ -19,6 +19,7 @@ import { useAuthStore } from '@/stores/authStore';
 // 6. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { PLAN_MATRIX, type PlanCell } from '@/lib/constants/premium-benefits';
 import { formatPriceArs } from '@/lib/utils/format';
 import { cn } from '@/lib/utils';
 import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
@@ -45,24 +46,16 @@ const PREMIUM_HERO_IMAGE: EditorialImage = {
   alt: 'Llave dorada abriendo una carta de tarot con geometría sagrada, bajo un cielo nocturno violeta con luna creciente y estrellas',
 };
 
-interface PlanFeature {
-  text: string;
-  free: boolean;
-  premium: boolean;
-}
-
-const COMPARISON_FEATURES: PlanFeature[] = [
-  { text: 'Carta del día', free: true, premium: true },
-  { text: 'Lecturas de tarot', free: true, premium: true },
-  { text: 'Tiradas básicas (1 carta)', free: true, premium: true },
-  { text: 'Tiradas avanzadas (3, 5 cartas y Cruz Céltica)', free: false, premium: true },
-  { text: 'Interpretación con IA personalizada', free: false, premium: true },
-  { text: 'Preguntas personalizadas', free: false, premium: true },
-  { text: 'Historial de 365 días', free: false, premium: true },
-  { text: 'Compartir lecturas', free: false, premium: true },
-  { text: 'Horóscopo y numerología', free: true, premium: true },
-  { text: 'Rituales recomendados por IA', free: false, premium: true },
-];
+/**
+ * Comparativa Free vs Premium. Deriva de la fuente única `PLAN_MATRIX` para que
+ * los números nunca vuelvan a divergir de la implementación real (T-FBK-005).
+ */
+const COMPARISON_FEATURES = PLAN_MATRIX.map((row) => ({
+  key: row.key,
+  text: row.feature,
+  free: row.free,
+  premium: row.premium,
+}));
 
 const FAQ_ITEMS = [
   {
@@ -90,6 +83,23 @@ const FAQ_ITEMS = [
 // ============================================================================
 // Sub-components
 // ============================================================================
+
+/**
+ * Renderiza una celda de la comparativa:
+ * - `true`  → check dorado.
+ * - `false` → cruz atenuada.
+ * - texto   → el matiz de cantidad (ej. "3 por día", "365 días").
+ */
+function ComparisonCell({ value }: { value: PlanCell }) {
+  if (typeof value === 'string') {
+    return <span className="text-foreground text-sm">{value}</span>;
+  }
+  return value ? (
+    <Check className="text-secondary mx-auto h-5 w-5" aria-label="Incluido" />
+  ) : (
+    <X className="text-muted-foreground mx-auto h-5 w-5" aria-label="No incluido" />
+  );
+}
 
 function PremiumPageSkeleton() {
   return (
@@ -294,27 +304,13 @@ export function PremiumPage() {
               </thead>
               <tbody className="divide-border divide-y">
                 {COMPARISON_FEATURES.map((feature) => (
-                  <tr key={feature.text} className="hover:bg-muted/40">
+                  <tr key={feature.key} className="hover:bg-muted/40">
                     <td className="text-foreground px-6 py-3 text-sm">{feature.text}</td>
                     <td className="px-4 py-3 text-center">
-                      {feature.free ? (
-                        <Check className="text-secondary mx-auto h-5 w-5" aria-label="Incluido" />
-                      ) : (
-                        <X
-                          className="text-muted-foreground mx-auto h-5 w-5"
-                          aria-label="No incluido"
-                        />
-                      )}
+                      <ComparisonCell value={feature.free} />
                     </td>
                     <td className="px-4 py-3 text-center">
-                      {feature.premium ? (
-                        <Check className="text-secondary mx-auto h-5 w-5" aria-label="Incluido" />
-                      ) : (
-                        <X
-                          className="text-muted-foreground mx-auto h-5 w-5"
-                          aria-label="No incluido"
-                        />
-                      )}
+                      <ComparisonCell value={feature.premium} />
                     </td>
                   </tr>
                 ))}

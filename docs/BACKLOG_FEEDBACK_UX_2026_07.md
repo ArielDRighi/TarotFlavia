@@ -325,7 +325,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | T-FBK-002 | (Deuda) Unificar el sistema de upsell (tokens de marca + convergencia de banners) | Frontend | 🟢 Baja | 3 pts |
 | T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts |
 | T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts |
-| T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts |
+| T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts | ✅ COMPLETADA |
 | T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
 | T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts |
 | T-FBK-008 | "Tu signo/animal" sin agrandar la tarjeta (solo borde + a11y) | Frontend | 🟡 Media | 1 pt |
@@ -442,24 +442,37 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 2.5 puntos
 **Dependencias:** decisiones de producto de Ariel (qué features exhibir); coordinar con T-FBK-004 y T-FBK-006
 **Cubre Hallazgo:** FBK-004 (puntos A, B, C)
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Eliminar/corregir las **promesas sin sustento** (lecturas ilimitadas, sin publicidad, acceso prioritario, estadísticas, tiradas "Herradura/Año completo", historial ilimitado de rituales).
-- [ ] Corregir las **clasificaciones engañosas** (tirada de 3 cartas es free, no premium; numerología con IA es premium; free tiene 30 días de historial).
-- [ ] Decidir con Ariel qué **features reales no listadas** exhibir (péndulo, carta astral, oráculo, regeneración) y reflejarlas.
-- [ ] **Unificar las 4 fuentes de beneficios** en una sola constante consumida por página, modales y home.
-- [ ] Actualizar tests que fijen la comparativa contra los números reales.
+- [x] Eliminar/corregir las **promesas sin sustento** (lecturas ilimitadas, sin publicidad, acceso prioritario, estadísticas, tiradas "Herradura/Año completo", historial ilimitado de rituales).
+- [x] Corregir las **clasificaciones engañosas** (tirada de 3 cartas es free, no premium; interpretación personalizada es premium; free tiene 30 días de historial vs 365 de premium).
+- [x] Decidir con Ariel qué **features reales no listadas** exhibir y reflejarlas.
+- [x] **Unificar las fuentes de beneficios** en una sola constante consumida por página, modales y home.
+- [x] Actualizar tests que fijen la comparativa contra los números reales.
 
 #### 🎯 Criterios de Aceptación
 
-- Cada beneficio mostrado en `/premium` (y home/modales) tiene contraparte real en el código; los números coinciden con la tabla de "números reales" de FBK-004.
-- Existe una única fuente de beneficios; ciclo de calidad frontend completo pasa.
+- [x] Cada beneficio mostrado en `/premium` (y home/modales) tiene contraparte real en el código; los números coinciden con la tabla de "números reales" de FBK-004.
+- [x] Existe una única fuente de beneficios; ciclo de calidad frontend completo pasa.
 
 #### 📁 Archivos involucrados
 
-- `premium/PremiumPage.tsx`, `lib/constants/premium-benefits.ts`, `home/PremiumBenefitsSection.tsx`, `conversion/PremiumUpgradePrompt.tsx`, `conversion/LimitReachedModal.tsx` (+ tests).
+- `premium/PremiumPage.tsx`, `lib/constants/premium-benefits.ts`, `home/PremiumBenefitsSection.tsx`, `home/PlanComparison.tsx`, `conversion/PremiumUpgradePrompt.tsx`, `readings/UpgradeModal.tsx`, `readings/UpgradeBanner.tsx`, `onboarding/WelcomeModal.tsx` (+ tests).
+
+#### 🛠️ Notas de Implementación (5-jul-2026)
+
+**Decisiones de producto de Ariel incorporadas:**
+
+- **Oráculo:** NO existe como feature en la web (aunque el backend tenga constantes) → erradicado de todo el copy.
+- **Regeneración de interpretaciones:** no se exhibe como diferenciador comercial.
+- **Carta astral:** cantidad **ilimitada en ambos planes**; el diferenciador Premium es el **resumen personalizado** (síntesis con IA de `AISynthesis`), que Free no tiene.
+- **IA:** exclusiva de Premium (coherente con FBK-006); Free usa contenido pre-generado.
+
+**Fuente única:** `lib/constants/premium-benefits.ts` es ahora la ÚNICA fuente, con `PLAN_MATRIX` (comparativas), `PREMIUM_BENEFITS` (callouts), `PREMIUM_HOME_BENEFITS` (home) y `PREMIUM_UPGRADE_HIGHLIGHTS` (modales). `PremiumPage` y `PlanComparison` derivan su comparativa de `PLAN_MATRIX` para no volver a divergir.
+
+**Correcciones clave:** la tirada de **3 cartas es Free** (solo 5 cartas y Cruz Céltica son premium); se purgaron "lecturas ilimitadas", "sin publicidad", "acceso prioritario", "historial y estadísticas", "Herradura/Año completo" e "historial ilimitado de rituales" de todos los puntos de venta (incl. `UpgradeBanner` y `WelcomeModal`, hallados fuera de la lista original).
 
 ---
 

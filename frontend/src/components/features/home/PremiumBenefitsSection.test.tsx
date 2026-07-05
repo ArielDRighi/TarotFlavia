@@ -38,20 +38,31 @@ describe('PremiumBenefitsSection', () => {
     expect(questionsBenefit).toBeInTheDocument();
   });
 
-  it('should render statistics benefit', () => {
+  it('should render the real 365-day history benefit', () => {
     render(<PremiumBenefitsSection />);
 
-    const statsBenefit = screen.getByText(/historial y estadísticas/i);
+    const historyBenefit = screen.getByText(/historial de 365 días/i);
 
-    expect(statsBenefit).toBeInTheDocument();
+    expect(historyBenefit).toBeInTheDocument();
   });
 
-  it('should render no ads benefit', () => {
+  it('should render the premium birth-chart summary benefit', () => {
     render(<PremiumBenefitsSection />);
 
-    const noAdsBenefit = screen.getByText(/sin publicidad/i);
+    const chartBenefit = screen.getByText(/carta astral con resumen personalizado/i);
 
-    expect(noAdsBenefit).toBeInTheDocument();
+    expect(chartBenefit).toBeInTheDocument();
+  });
+
+  it('should NOT promise unsubstantiated or nonexistent benefits', () => {
+    const { container } = render(<PremiumBenefitsSection />);
+    const text = (container.textContent ?? '').toLowerCase();
+
+    expect(text).not.toContain('estadística'); // no hay módulo de estadísticas
+    expect(text).not.toContain('publicidad'); // no hay sistema de ads
+    expect(text).not.toContain('prioritario'); // sin lógica de acceso prioritario
+    expect(text).not.toContain('herradura'); // tirada inexistente
+    expect(text).not.toContain('año completo'); // tirada inexistente
   });
 
   it('should display pricing information', () => {

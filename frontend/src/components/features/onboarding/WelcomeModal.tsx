@@ -77,8 +77,8 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
               <div>
                 <p className="text-foreground font-semibold">¿Quieres más? Prueba PREMIUM</p>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Lecturas ilimitadas con interpretación de IA personalizada para profundizar en
-                  cada tirada
+                  3 lecturas por día con interpretación personalizada para profundizar en cada
+                  tirada
                 </p>
               </div>
             </div>

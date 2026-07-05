@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Sparkles, Lock, MessageCircle, TrendingUp } from 'lucide-react';
+import { Check, Sparkles, Star, MessageCircle, TrendingUp } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -42,7 +42,7 @@ const PREMIUM_BENEFITS = [
   {
     icon: TrendingUp,
     text: 'Todas las tiradas disponibles',
-    description: 'Acceso ilimitado a todos los tipos de tiradas',
+    description: 'Incluye la tirada de 5 cartas y la Cruz Céltica',
   },
   {
     icon: MessageCircle,
@@ -50,9 +50,9 @@ const PREMIUM_BENEFITS = [
     description: 'Crea tus propias preguntas para lecturas únicas',
   },
   {
-    icon: Lock,
-    text: 'Sin publicidad',
-    description: 'Experiencia premium sin interrupciones',
+    icon: Star,
+    text: 'Carta astral con resumen personalizado',
+    description: 'Tu carta natal con una síntesis exclusiva de Premium',
   },
 ] as const;
 

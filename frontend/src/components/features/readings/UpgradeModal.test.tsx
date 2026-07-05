@@ -73,7 +73,15 @@ describe('UpgradeModal', () => {
       expect(screen.getByText(/Interpretaciones personalizadas y profundas/i)).toBeInTheDocument();
       expect(screen.getByText(/Todas las tiradas disponibles/i)).toBeInTheDocument();
       expect(screen.getByText(/Preguntas personalizadas/i)).toBeInTheDocument();
-      expect(screen.getByText(/Sin publicidad/i)).toBeInTheDocument();
+      expect(screen.getByText(/Carta astral con resumen personalizado/i)).toBeInTheDocument();
+    });
+
+    it('should NOT promise nonexistent benefits (sin publicidad)', () => {
+      const { container } = render(<UpgradeModal open={true} onClose={mockOnClose} />);
+      const text = (container.textContent ?? '').toLowerCase();
+
+      expect(text).not.toContain('publicidad');
+      expect(text).not.toContain('ilimitad');
     });
 
     it('should render pricing information', () => {
@@ -221,7 +229,7 @@ describe('UpgradeModal', () => {
       expect(benefits[0]).toHaveTextContent(/personalizadas y profundas/i);
       expect(benefits[1]).toHaveTextContent(/tiradas/i);
       expect(benefits[2]).toHaveTextContent(/preguntas/i);
-      expect(benefits[3]).toHaveTextContent(/publicidad/i);
+      expect(benefits[3]).toHaveTextContent(/carta astral/i);
     });
   });
 
