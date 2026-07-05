@@ -1,24 +1,49 @@
 'use client';
 
+// 1. React & Next.js
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Check, X, Shield, Star, Zap, HelpCircle } from 'lucide-react';
+// 2. Icons
+import { Check, X, Shield, Star, HelpCircle } from 'lucide-react';
+// 5. Components (ui → features)
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Reveal } from '@/components/common/Reveal';
+import { PremiumHero } from './PremiumHero';
+// 4. Custom hooks
 import { usePublicPlans } from '@/hooks/api/usePublicPlans';
 import { useCreatePreapproval } from '@/hooks/api/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
+// 6. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { formatPriceArs } from '@/lib/utils/format';
+import { cn } from '@/lib/utils';
+import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
 import type { PlanConfig } from '@/types/admin.types';
 
 // ============================================================================
 // Constants
 // ============================================================================
+
+/**
+ * Brand-night gradient reused as the comparison table header background, kept in
+ * sync with `PremiumHero`/`DashboardHero` and the `--color-bg-hero` tokens.
+ */
+const HERO_GRADIENT = 'linear-gradient(160deg, #1a0a2e 0%, #2d1b69 55%, #1a0a2e 100%)';
+const CREAM = '#f9f7f2';
+const CREAM_MUTED = 'rgba(249, 247, 242, 0.72)';
+
+/**
+ * Themed header image for the mystic welcome band (T-PREM-004). `PremiumHero`
+ * degrades to its gradient band if the asset ever fails to load.
+ */
+const PREMIUM_HERO_IMAGE: EditorialImage = {
+  src: '/images/premium/premium-hero.webp',
+  alt: 'Llave dorada abriendo una carta de tarot con geometría sagrada, bajo un cielo nocturno violeta con luna creciente y estrellas',
+};
 
 interface PlanFeature {
   text: string;
@@ -68,12 +93,12 @@ const FAQ_ITEMS = [
 
 function PremiumPageSkeleton() {
   return (
-    <div data-testid="premium-page-loading" className="container mx-auto px-4 py-12">
-      <Skeleton className="mx-auto mb-4 h-12 w-2/3" />
-      <Skeleton className="mx-auto mb-12 h-6 w-1/2" />
-      <div className="grid gap-8 md:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-96 rounded-xl" />
+    <div data-testid="premium-page-loading" className="container mx-auto max-w-5xl px-4 py-10">
+      <Skeleton className="mb-8 h-64 w-full rounded-2xl" />
+      <Skeleton className="mx-auto mb-10 h-8 w-2/3" />
+      <div className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
+        {[1, 2].map((i) => (
+          <Skeleton key={i} className="h-80 rounded-xl" />
         ))}
       </div>
     </div>
@@ -83,9 +108,11 @@ function PremiumPageSkeleton() {
 interface PremiumCtaButtonProps {
   premiumPlan: PlanConfig | undefined;
   testId?: string;
+  /** When rendered over the dark hero band, adapt the "already premium" text to cream. */
+  onDark?: boolean;
 }
 
-function PremiumCtaButton({ premiumPlan, testId }: PremiumCtaButtonProps) {
+function PremiumCtaButton({ premiumPlan, testId, onDark = false }: PremiumCtaButtonProps) {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { mutate: createPreapproval, isPending } = useCreatePreapproval();
@@ -108,11 +135,23 @@ function PremiumCtaButton({ premiumPlan, testId }: PremiumCtaButtonProps) {
   if (user?.plan === 'premium') {
     return (
       <div className="flex flex-col items-center gap-2" data-testid={testId}>
-        <div className="flex items-center gap-2 text-purple-600">
-          <Star className="h-5 w-5" />
-          <span className="font-semibold">Ya tenés Premium</span>
+        <div
+          className={cn('flex items-center gap-2 font-semibold', !onDark && 'text-foreground')}
+          style={onDark ? { color: CREAM } : undefined}
+        >
+          <Star className="text-secondary h-5 w-5" aria-hidden="true" />
+          <span>Ya tenés Premium</span>
         </div>
-        <Link href={ROUTES.PERFIL} className="text-sm text-gray-500 underline hover:text-gray-700">
+        <Link
+          href={ROUTES.PERFIL}
+          className={cn(
+            'focus-visible:ring-secondary rounded-sm text-sm underline transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+            onDark
+              ? 'focus-visible:ring-offset-bg-hero'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
+          style={onDark ? { color: CREAM_MUTED } : undefined}
+        >
           Ver mi cuenta
         </Link>
       </div>
@@ -125,7 +164,7 @@ function PremiumCtaButton({ premiumPlan, testId }: PremiumCtaButtonProps) {
       disabled={isPending}
       size="lg"
       data-testid={testId}
-      className="w-full bg-purple-600 text-white hover:bg-purple-700"
+      className="focus-visible:ring-secondary/50 w-full"
     >
       {isPending ? 'Redirigiendo...' : CTA_PREMIUM.PURCHASE}
       {premiumPlan && !isPending && (
@@ -149,160 +188,196 @@ export function PremiumPage() {
   const freePlan = plans?.find((p) => p.planType === 'free');
   const premiumPlan = plans?.find((p) => p.planType === 'premium');
 
+  const heroSubtitle = (
+    <>
+      Interpretaciones personalizadas con IA, tiradas avanzadas, historial completo y mucho más
+      {premiumPlan ? (
+        <>
+          {' '}
+          por{' '}
+          <span className="text-secondary font-bold">{formatPriceArs(premiumPlan.price)}/mes</span>
+        </>
+      ) : (
+        ' por un precio accesible'
+      )}
+    </>
+  );
+
   return (
-    <main className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-purple-50 to-white px-4 py-16 text-center">
-        <div className="container mx-auto max-w-3xl">
-          <Badge className="mb-4 bg-purple-100 text-purple-700">
-            <Zap className="mr-1 h-3 w-3" />
-            Plan Premium
-          </Badge>
-          <h1 className="mb-6 font-serif text-4xl font-bold text-gray-900 md:text-5xl lg:text-6xl">
-            Desbloquea todo el potencial del Tarot
-          </h1>
-          <p className="mb-8 text-xl text-gray-600">
-            Interpretaciones personalizadas con IA, tiradas avanzadas, historial completo y mucho
-            más por{' '}
-            {premiumPlan ? (
-              <span className="font-bold text-purple-600">
-                {formatPriceArs(premiumPlan.price)}/mes
+    <main className="container mx-auto max-w-5xl px-4 py-8 sm:py-10">
+      {/* Banda mística de bienvenida */}
+      <Reveal index={0}>
+        <PremiumHero
+          badge="Plan Premium"
+          title="Desbloquea todo el potencial del Tarot"
+          subtitle={heroSubtitle}
+          image={PREMIUM_HERO_IMAGE}
+        >
+          <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-hero" onDark />
+        </PremiumHero>
+      </Reveal>
+
+      {/* Comparativa de planes */}
+      <Reveal index={1}>
+        <section data-testid="plan-comparison" className="py-14 sm:py-16">
+          <h2 className="text-foreground mb-12 text-center font-serif text-3xl font-bold">
+            ¿Qué plan se adapta a ti?
+          </h2>
+
+          {/* Tarjetas de plan */}
+          <div className="mb-16 grid items-stretch gap-8 md:grid-cols-2 lg:mx-auto lg:max-w-3xl">
+            {/* Plan Free */}
+            <Card className="flex flex-col">
+              <CardHeader className="text-center">
+                <h3 className="text-card-foreground mb-2 font-serif text-2xl font-bold">
+                  {freePlan?.name ?? 'Free'}
+                </h3>
+                <p className="text-foreground mb-4 text-4xl font-bold">Gratis</p>
+                <p className="text-muted-foreground text-sm">
+                  {freePlan?.description ?? 'Empieza tu viaje espiritual'}
+                </p>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <Button asChild variant="outline" className="w-full" size="lg">
+                  <Link href={ROUTES.REGISTER}>Registrarse gratis</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Plan Premium (destacado) */}
+            <Card className="border-secondary relative flex flex-col shadow-[var(--shadow-soft)]">
+              <span className="bg-secondary text-bg-hero absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-xs font-semibold tracking-[0.08em] uppercase">
+                Recomendado
               </span>
-            ) : (
-              'un precio accesible'
-            )}
-          </p>
-          <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-hero" />
-        </div>
-      </section>
+              <CardHeader className="text-center">
+                <h3 className="text-card-foreground mb-2 font-serif text-2xl font-bold">
+                  {premiumPlan?.name ?? 'Premium'}
+                </h3>
+                <p className="text-foreground mb-4 text-4xl font-bold">
+                  {premiumPlan ? formatPriceArs(premiumPlan.price) : '---'}
+                  <span className="text-muted-foreground text-lg font-normal">/mes</span>
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {premiumPlan?.description ?? 'Desbloquea todo el potencial'}
+                </p>
+              </CardHeader>
+              <CardContent className="mt-auto">
+                <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-card" />
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Plan Comparison Section */}
-      <section data-testid="plan-comparison" className="container mx-auto px-4 py-16">
-        <h2 className="mb-12 text-center font-serif text-3xl font-bold text-gray-900">
-          ¿Qué plan se adapta a ti?
-        </h2>
-
-        {/* Plan Cards */}
-        <div className="mb-16 grid gap-8 md:grid-cols-2 lg:mx-auto lg:max-w-3xl">
-          {/* Free Plan Card */}
-          <Card className="border-gray-200">
-            <CardHeader className="text-center">
-              <h3 className="mb-2 font-serif text-2xl font-bold text-gray-900">
-                {freePlan?.name ?? 'Free'}
-              </h3>
-              <p className="mb-4 text-4xl font-bold text-gray-600">Gratis</p>
-              <p className="text-sm text-gray-500">
-                {freePlan?.description ?? 'Empieza tu viaje espiritual'}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline" className="w-full" size="lg">
-                <Link href={ROUTES.REGISTER}>Registrarse gratis</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Premium Plan Card */}
-          <Card className="relative border-purple-300 shadow-lg">
-            <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 transform bg-purple-600 px-4 py-1">
-              Recomendado
-            </Badge>
-            <CardHeader className="text-center">
-              <h3 className="mb-2 font-serif text-2xl font-bold text-gray-900">
-                {premiumPlan?.name ?? 'Premium'}
-              </h3>
-              <p className="mb-4 text-4xl font-bold text-purple-600">
-                {premiumPlan ? formatPriceArs(premiumPlan.price) : '---'}
-                <span className="text-lg font-normal">/mes</span>
-              </p>
-              <p className="text-sm text-gray-500">
-                {premiumPlan?.description ?? 'Desbloquea todo el potencial'}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-card" />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Feature Comparison Table */}
-        <div className="mx-auto max-w-2xl overflow-hidden rounded-xl border border-gray-200">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Característica
-                </th>
-                <th className="px-4 py-4 text-center text-sm font-semibold text-gray-600">Free</th>
-                <th className="px-4 py-4 text-center text-sm font-semibold text-purple-600">
-                  Premium
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {COMPARISON_FEATURES.map((feature) => (
-                <tr key={feature.text} className="hover:bg-gray-50">
-                  <td className="px-6 py-3 text-sm text-gray-700">{feature.text}</td>
-                  <td className="px-4 py-3 text-center">
-                    {feature.free ? (
-                      <Check className="mx-auto h-5 w-5 text-green-600" />
-                    ) : (
-                      <X className="mx-auto h-5 w-5 text-gray-300" />
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {feature.premium ? (
-                      <Check className="mx-auto h-5 w-5 text-purple-600" />
-                    ) : (
-                      <X className="mx-auto h-5 w-5 text-gray-300" />
-                    )}
-                  </td>
+          {/* Tabla comparativa */}
+          <div className="border-border mx-auto max-w-2xl overflow-hidden rounded-xl border">
+            <table className="w-full">
+              <thead>
+                <tr style={{ background: HERO_GRADIENT }}>
+                  <th
+                    className="px-6 py-4 text-left text-sm font-semibold"
+                    style={{ color: CREAM }}
+                  >
+                    Característica
+                  </th>
+                  <th
+                    className="px-4 py-4 text-center text-sm font-semibold"
+                    style={{ color: CREAM_MUTED }}
+                  >
+                    Free
+                  </th>
+                  <th
+                    className="px-4 py-4 text-center text-sm font-semibold"
+                    style={{ color: CREAM }}
+                  >
+                    Premium
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              </thead>
+              <tbody className="divide-border divide-y">
+                {COMPARISON_FEATURES.map((feature) => (
+                  <tr key={feature.text} className="hover:bg-muted/40">
+                    <td className="text-foreground px-6 py-3 text-sm">{feature.text}</td>
+                    <td className="px-4 py-3 text-center">
+                      {feature.free ? (
+                        <Check className="text-secondary mx-auto h-5 w-5" aria-label="Incluido" />
+                      ) : (
+                        <X
+                          className="text-muted-foreground mx-auto h-5 w-5"
+                          aria-label="No incluido"
+                        />
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {feature.premium ? (
+                        <Check className="text-secondary mx-auto h-5 w-5" aria-label="Incluido" />
+                      ) : (
+                        <X
+                          className="text-muted-foreground mx-auto h-5 w-5"
+                          aria-label="No incluido"
+                        />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </Reveal>
 
-      {/* Guarantee Section */}
-      <section className="bg-purple-50 px-4 py-12 text-center">
-        <div className="container mx-auto max-w-xl">
-          <Shield className="mx-auto mb-4 h-12 w-12 text-purple-600" />
-          <h2 className="mb-3 font-serif text-2xl font-bold text-gray-900">Sin compromiso</h2>
-          <p className="text-gray-600">
-            Cancelá cuando quieras, sin compromiso ni cargos adicionales. Tu historial y lecturas se
-            conservan siempre.
+      {/* Sin compromiso */}
+      <Reveal index={2}>
+        <section className="pb-14">
+          <Card className="mx-auto max-w-xl p-8 text-center">
+            <Shield className="text-secondary mx-auto mb-4 h-12 w-12" aria-hidden="true" />
+            <h2 className="text-card-foreground mb-3 font-serif text-2xl font-bold">
+              Sin compromiso
+            </h2>
+            <p className="text-muted-foreground">
+              Cancelá cuando quieras, sin compromiso ni cargos adicionales. Tu historial y lecturas
+              se conservan siempre.
+            </p>
+          </Card>
+        </section>
+      </Reveal>
+
+      {/* Preguntas frecuentes */}
+      <Reveal index={3}>
+        <section data-testid="faq-section" className="mx-auto max-w-2xl pb-14">
+          <h2 className="text-foreground mb-10 text-center font-serif text-3xl font-bold">
+            Preguntas frecuentes
+          </h2>
+          <div className="space-y-4">
+            {FAQ_ITEMS.map((item) => (
+              <Card key={item.question} className="p-6">
+                <div className="mb-2 flex items-start gap-3">
+                  <HelpCircle
+                    className="text-secondary mt-0.5 h-5 w-5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <h3 className="text-card-foreground font-semibold">{item.question}</h3>
+                </div>
+                <p className="text-muted-foreground pl-8">{item.answer}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+      </Reveal>
+
+      {/* CTA final */}
+      <Reveal index={4}>
+        <section className="mx-auto max-w-xl pb-8 text-center">
+          <h2 className="text-foreground mb-4 font-serif text-2xl font-bold">
+            ¿Listo para comenzar?
+          </h2>
+          <p className="text-muted-foreground mb-8">
+            Únete a nuestra comunidad y descubre el poder del tarot con interpretaciones
+            personalizadas.
           </p>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section data-testid="faq-section" className="container mx-auto max-w-2xl px-4 py-16">
-        <h2 className="mb-10 text-center font-serif text-3xl font-bold text-gray-900">
-          Preguntas frecuentes
-        </h2>
-        <div className="space-y-6">
-          {FAQ_ITEMS.map((item) => (
-            <div key={item.question} className="rounded-xl border border-gray-200 p-6">
-              <div className="mb-3 flex items-start gap-3">
-                <HelpCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-purple-600" />
-                <h3 className="font-semibold text-gray-900">{item.question}</h3>
-              </div>
-              <p className="pl-8 text-gray-600">{item.answer}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="container mx-auto max-w-xl px-4 pb-16 text-center">
-        <h2 className="mb-4 font-serif text-2xl font-bold text-gray-900">¿Listo para comenzar?</h2>
-        <p className="mb-8 text-gray-600">
-          Únete a nuestra comunidad y descubre el poder del tarot con interpretaciones
-          personalizadas.
-        </p>
-        <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-bottom" />
-      </section>
+          <div className="mx-auto max-w-xs">
+            <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-bottom" />
+          </div>
+        </section>
+      </Reveal>
     </main>
   );
 }
