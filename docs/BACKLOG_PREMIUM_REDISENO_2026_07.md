@@ -395,21 +395,28 @@ Los prompts de upgrade y el modal de bienvenida usan `text-purple-600/700 dark:t
 **Estimación:** 2 puntos
 **Dependencias:** T-PREM-001, T-PREM-002
 **Cubre Hallazgo:** PREM-003
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Alinear estados (éxito/pendiente/error) con el canon (tokens, dorado, Cormorant, banda si aplica).
-- [ ] Conservar la lógica de activación y los estados existentes.
+- [x] Alinear estados (éxito/pendiente/error) con el canon (tokens, dorado, Cormorant, banda si aplica).
+- [x] Conservar la lógica de activación y los estados existentes.
 
 #### 🎯 Criterios de Aceptación
 
-- La pantalla post-pago luce premium y de marca; contraste AA.
-- Ciclo de calidad frontend completo pasa.
+- [x] La pantalla post-pago luce premium y de marca; contraste AA.
+- [x] Ciclo de calidad frontend completo pasa.
 
 #### 📁 Archivos involucrados
 
 - `ActivationPage.tsx` (+ test).
+
+#### 📝 Notas de implementación
+
+- Estado de **éxito** (`activation-success`): banda mística `PremiumHero` con `premium-activacion.webp` (fallback a gradiente noche/índigo garantizado por el propio hero), badge dorado "¡Pago confirmado!", título Cormorant crema y nota "Redirigiendo…" con tokens.
+- Estados de **carga/pendiente/procesamiento/error**: nuevo `StatusPanel` reutilizable (tarjeta `Card` crema centrada, `Reveal` escalonado, título Cormorant, texto `muted-foreground`). Iconos dorados (`text-secondary`) salvo el error, que usa `text-destructive`.
+- Erradicada la paleta cruda `purple-*`/`gray-*` y las variantes `dark:` del componente; CTA "Intentar de nuevo" con `Button` de marca + foco dorado (`focus-visible:ring-secondary/50`).
+- Lógica de activación (polling, timeout 30s, sanitización de `redirect`, actualización de store/capabilities) **intacta**. Cobertura `ActivationPage.tsx` ≈ 98.7% líneas.
 
 ---
 
