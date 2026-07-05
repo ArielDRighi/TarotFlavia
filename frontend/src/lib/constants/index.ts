@@ -7,6 +7,7 @@ export {
   PREMIUM_BENEFITS,
   PLAN_MATRIX,
   PREMIUM_HOME_BENEFITS,
+  PREMIUM_MODAL_BENEFITS,
   PREMIUM_UPGRADE_HIGHLIGHTS,
 } from './premium-benefits';
 export type {
@@ -15,6 +16,7 @@ export type {
   PlanCell,
   PlanMatrixRow,
   PremiumHomeBenefit,
+  PremiumModalBenefit,
 } from './premium-benefits';
 export { CTA_PREMIUM } from './cta-copy';
 export type { CtaPremiumKey } from './cta-copy';

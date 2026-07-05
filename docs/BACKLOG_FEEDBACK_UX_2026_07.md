@@ -474,6 +474,8 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 
 **Correcciones clave:** la tirada de **3 cartas es Free** (solo 5 cartas y Cruz Céltica son premium); se purgaron "lecturas ilimitadas", "sin publicidad", "acceso prioritario", "historial y estadísticas", "Herradura/Año completo" e "historial ilimitado de rituales" de todos los puntos de venta (incl. `UpgradeBanner` y `WelcomeModal`, hallados fuera de la lista original).
 
+**⚠️ Revisor local — corrección de dato (carta astral):** la decisión de producto "carta astral ilimitada en ambos planes" **NO está implementada en el backend**: `usage-limits.constants.ts` aplica **FREE 3/mes** (PREMIUM ilimitada) y la propia UI de carta astral lo enforcea. Para no reintroducir una promesa sin sustento, el copy refleja la implementación real: **Free 3/mes · Premium ilimitada + resumen personalizado**. Si se quiere liberar la carta astral ilimitada para Free, requiere una tarea de **backend** (cambiar `USAGE_LIMITS`) — fuera del alcance de esta tarea frontend. También se migró `UpgradeModal` a la fuente única (`PREMIUM_MODAL_BENEFITS`) para cerrar la última lista de beneficios hardcodeada.
+
 ---
 
 ### T-FBK-006: Resolver la Incoherencia de la Cuota de IA

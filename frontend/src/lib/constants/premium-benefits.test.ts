@@ -123,12 +123,14 @@ describe('PLAN_MATRIX', () => {
     }
   });
 
-  it('offers unlimited birth charts to both plans, with the summary only on Premium', () => {
+  it('matches the real birth-chart limits (Free 3/mes, Premium unlimited + summary)', () => {
     const chart = byKey('birth-chart');
-    expect(String(chart.free).toLowerCase()).toContain('ilimitada');
+    // Backend: BIRTH_CHART FREE = 3/mes, PREMIUM = -1 (ilimitada)
+    expect(String(chart.free).toLowerCase()).toContain('3 por mes');
+    expect(String(chart.free).toLowerCase()).not.toContain('ilimitada');
     expect(String(chart.premium).toLowerCase()).toContain('ilimitada');
+    // El resumen personalizado (síntesis con IA) es exclusivo de Premium
     expect(String(chart.premium).toLowerCase()).toContain('resumen');
-    // Free no tiene el resumen personalizado
     expect(String(chart.free).toLowerCase()).not.toContain('resumen');
   });
 

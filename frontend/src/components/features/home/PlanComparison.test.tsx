@@ -73,10 +73,10 @@ describe('PlanComparison', () => {
       ).toBeInTheDocument();
     });
 
-    it('should offer unlimited birth charts to Free (without the summary)', () => {
+    it('should show the real Free birth-chart limit (3 por mes, without the summary)', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/^carta astral: ilimitada$/i)).toBeInTheDocument();
+      expect(screen.getByText(/carta astral: 3 por mes/i)).toBeInTheDocument();
     });
 
     it('should show "Interpretación personalizada" as not included', () => {

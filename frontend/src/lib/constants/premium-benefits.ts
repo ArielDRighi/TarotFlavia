@@ -11,8 +11,8 @@
  * Números reales validados contra el backend:
  * - Tiradas de tarot: FREE 1/día (tiradas de 1 y 3 cartas) · PREMIUM 3/día (todas).
  * - Tiradas premium-only: SOLO 5 cartas y Cruz Céltica (la de 3 cartas es FREE).
- * - Carta astral: cantidad ilimitada en ambos planes; el resumen personalizado es
- *   exclusivo de Premium (Free no tiene IA — ver decisión de producto FBK-004).
+ * - Carta astral: FREE 3/mes · PREMIUM ilimitada; además el resumen personalizado
+ *   (síntesis con IA) es exclusivo de Premium — Free no tiene IA (ver FBK-004).
  * - Péndulo: FREE 1/día · PREMIUM 3/día.
  * - Historial: FREE 30 días · PREMIUM 365 días.
  * - NO existen: Oráculo, regeneración como feature comercial, tiradas
@@ -91,7 +91,7 @@ export const PLAN_MATRIX: readonly PlanMatrixRow[] = [
     key: 'birth-chart',
     feature: 'Carta astral',
     anonymous: '1 carta',
-    free: 'Ilimitada',
+    free: '3 por mes',
     premium: 'Ilimitada con resumen personalizado',
   },
   {
@@ -230,6 +230,39 @@ export const PREMIUM_HOME_BENEFITS: readonly PremiumHomeBenefit[] = [
     icon: 'TrendingUp',
     title: '3 lecturas de tarot por día',
     description: 'Triplicá tu límite diario de lecturas respecto del plan gratuito.',
+  },
+] as const;
+
+export interface PremiumModalBenefit {
+  readonly icon: string;
+  readonly text: string;
+  readonly description: string;
+}
+
+/**
+ * Beneficios con descripción para el modal persuasivo `UpgradeModal`.
+ * Cada ítem tiene contraparte real (ver `PLAN_MATRIX`).
+ */
+export const PREMIUM_MODAL_BENEFITS: readonly PremiumModalBenefit[] = [
+  {
+    icon: 'Sparkles',
+    text: 'Interpretaciones personalizadas y profundas',
+    description: 'Análisis profundos adaptados a tu situación',
+  },
+  {
+    icon: 'TrendingUp',
+    text: 'Todas las tiradas disponibles',
+    description: 'Incluye la tirada de 5 cartas y la Cruz Céltica',
+  },
+  {
+    icon: 'MessageCircle',
+    text: 'Preguntas personalizadas',
+    description: 'Crea tus propias preguntas para lecturas únicas',
+  },
+  {
+    icon: 'Star',
+    text: 'Carta astral con resumen personalizado',
+    description: 'Tu carta natal con una síntesis exclusiva de Premium',
   },
 ] as const;
 
