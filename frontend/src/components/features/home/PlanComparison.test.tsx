@@ -27,7 +27,14 @@ describe('PlanComparison', () => {
     it('should show daily card feature', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/carta del día \(1 vez al día\)/i)).toBeInTheDocument();
+      // "Carta del día" aparece en los tres planes (derivado de PLAN_MATRIX)
+      expect(screen.getAllByText(/carta del día/i).length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('should offer a single lifetime birth chart to visitors', () => {
+      render(<PlanComparison />);
+
+      expect(screen.getByText(/carta astral: 1 carta/i)).toBeInTheDocument();
     });
 
     it('should show "Sin registro" price', () => {
@@ -57,16 +64,19 @@ describe('PlanComparison', () => {
       expect(dailyCards.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('should show "1 lectura de tarot / día" feature', () => {
+    it('should show "1 por día" tarot readings including the 3-card spread', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/1 lectura de tarot \/ día/i)).toBeInTheDocument();
+      // La tirada de 3 cartas es FREE (solo 5 cartas y Cruz Céltica son premium)
+      expect(
+        screen.getByText(/lecturas de tarot: 1 por día \(1 y 3 cartas\)/i)
+      ).toBeInTheDocument();
     });
 
-    it('should show spread limitation feature', () => {
+    it('should show the real Free birth-chart limit (3 por mes, without the summary)', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/1.*3 cartas/i)).toBeInTheDocument();
+      expect(screen.getByText(/carta astral: 3 por mes/i)).toBeInTheDocument();
     });
 
     it('should show "Interpretación personalizada" as not included', () => {
@@ -95,28 +105,39 @@ describe('PlanComparison', () => {
   });
 
   describe('Premium plan', () => {
-    it('should show "3 lecturas de tarot / día" feature', () => {
+    it('should show "3 por día" tarot readings feature', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/3 lecturas de tarot \/ día/i)).toBeInTheDocument();
+      expect(screen.getByText(/lecturas de tarot: 3 por día/i)).toBeInTheDocument();
     });
 
-    it('should show "Interpretación personalizada y profunda" feature in Premium plan', () => {
+    it('should show the premium-only advanced spreads (5 cards & Cruz Céltica)', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/interpretación personalizada y profunda/i)).toBeInTheDocument();
+      // Aparece en varias columnas (incluido en Premium, tachado en Free/Visitante)
+      expect(
+        screen.getAllByText(/tiradas de 5 cartas y cruz céltica/i).length
+      ).toBeGreaterThanOrEqual(1);
     });
 
-    it('should show "Carta astral ilimitada" feature in Premium plan', () => {
+    it('should show "Interpretación personalizada" feature in Premium plan', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/carta astral ilimitada y detallada/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/interpretación personalizada/i).length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should show the birth chart with a personalized summary in Premium plan', () => {
+      render(<PlanComparison />);
+
+      expect(
+        screen.getByText(/carta astral: ilimitada con resumen personalizado/i)
+      ).toBeInTheDocument();
     });
 
     it('should show "Preguntas personalizadas" feature', () => {
       render(<PlanComparison />);
 
-      expect(screen.getByText(/preguntas personalizadas/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/preguntas personalizadas/i).length).toBeGreaterThanOrEqual(1);
     });
 
     it('should show price "$7.000"', () => {

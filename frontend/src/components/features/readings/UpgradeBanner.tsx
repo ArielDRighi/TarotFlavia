@@ -42,7 +42,7 @@ export default function UpgradeBanner() {
               💎 Desbloquea interpretaciones personalizadas
             </h3>
             <p className="text-sm text-white/90">
-              Con Premium, obtén análisis detallados, lecturas ilimitadas y acceso a todas las
+              Con Premium, obtén análisis detallados, 3 lecturas por día y acceso a todas las
               tiradas especiales.
             </p>
           </div>

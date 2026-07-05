@@ -435,7 +435,7 @@ describe('PremiumUpgradePrompt', () => {
         />
       );
 
-      const benefit = screen.getByText('Lecturas ilimitadas');
+      const benefit = screen.getByText('3 lecturas de tarot por día');
       const callout = benefit.closest('[class*="bg-secondary/"]');
       expect(callout).not.toBeNull();
       expect(callout?.className).toContain('border-secondary');

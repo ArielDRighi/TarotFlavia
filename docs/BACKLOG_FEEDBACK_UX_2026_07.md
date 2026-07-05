@@ -325,10 +325,11 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | T-FBK-002 | (Deuda) Unificar el sistema de upsell (tokens de marca + convergencia de banners) | Frontend | 🟢 Baja | 3 pts |
 | T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts |
 | T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts |
-| T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts |
+| T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts | ✅ COMPLETADA |
 | T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
 | T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts |
 | T-FBK-008 | "Tu signo/animal" sin agrandar la tarjeta (solo borde + a11y) | Frontend | 🟡 Media | 1 pt |
+| T-FBK-009 | Carta astral ilimitada para Free + gestión de límite por admin (fuente única en DB) | Backend | 🟠 Alta | 3 pts |
 
 ---
 
@@ -442,24 +443,39 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 2.5 puntos
 **Dependencias:** decisiones de producto de Ariel (qué features exhibir); coordinar con T-FBK-004 y T-FBK-006
 **Cubre Hallazgo:** FBK-004 (puntos A, B, C)
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Eliminar/corregir las **promesas sin sustento** (lecturas ilimitadas, sin publicidad, acceso prioritario, estadísticas, tiradas "Herradura/Año completo", historial ilimitado de rituales).
-- [ ] Corregir las **clasificaciones engañosas** (tirada de 3 cartas es free, no premium; numerología con IA es premium; free tiene 30 días de historial).
-- [ ] Decidir con Ariel qué **features reales no listadas** exhibir (péndulo, carta astral, oráculo, regeneración) y reflejarlas.
-- [ ] **Unificar las 4 fuentes de beneficios** en una sola constante consumida por página, modales y home.
-- [ ] Actualizar tests que fijen la comparativa contra los números reales.
+- [x] Eliminar/corregir las **promesas sin sustento** (lecturas ilimitadas, sin publicidad, acceso prioritario, estadísticas, tiradas "Herradura/Año completo", historial ilimitado de rituales).
+- [x] Corregir las **clasificaciones engañosas** (tirada de 3 cartas es free, no premium; interpretación personalizada es premium; free tiene 30 días de historial vs 365 de premium).
+- [x] Decidir con Ariel qué **features reales no listadas** exhibir y reflejarlas.
+- [x] **Unificar las fuentes de beneficios** en una sola constante consumida por página, modales y home.
+- [x] Actualizar tests que fijen la comparativa contra los números reales.
 
 #### 🎯 Criterios de Aceptación
 
-- Cada beneficio mostrado en `/premium` (y home/modales) tiene contraparte real en el código; los números coinciden con la tabla de "números reales" de FBK-004.
-- Existe una única fuente de beneficios; ciclo de calidad frontend completo pasa.
+- [x] Cada beneficio mostrado en `/premium` (y home/modales) tiene contraparte real en el código; los números coinciden con la tabla de "números reales" de FBK-004.
+- [x] Existe una única fuente de beneficios; ciclo de calidad frontend completo pasa.
 
 #### 📁 Archivos involucrados
 
-- `premium/PremiumPage.tsx`, `lib/constants/premium-benefits.ts`, `home/PremiumBenefitsSection.tsx`, `conversion/PremiumUpgradePrompt.tsx`, `conversion/LimitReachedModal.tsx` (+ tests).
+- `premium/PremiumPage.tsx`, `lib/constants/premium-benefits.ts`, `home/PremiumBenefitsSection.tsx`, `home/PlanComparison.tsx`, `conversion/PremiumUpgradePrompt.tsx`, `readings/UpgradeModal.tsx`, `readings/UpgradeBanner.tsx`, `onboarding/WelcomeModal.tsx` (+ tests).
+
+#### 🛠️ Notas de Implementación (5-jul-2026)
+
+**Decisiones de producto de Ariel incorporadas:**
+
+- **Oráculo:** NO existe como feature en la web (aunque el backend tenga constantes) → erradicado de todo el copy.
+- **Regeneración de interpretaciones:** no se exhibe como diferenciador comercial.
+- **Carta astral:** cantidad **ilimitada en ambos planes**; el diferenciador Premium es el **resumen personalizado** (síntesis con IA de `AISynthesis`), que Free no tiene.
+- **IA:** exclusiva de Premium (coherente con FBK-006); Free usa contenido pre-generado.
+
+**Fuente única:** `lib/constants/premium-benefits.ts` es ahora la ÚNICA fuente, con `PLAN_MATRIX` (comparativas), `PREMIUM_BENEFITS` (callouts), `PREMIUM_HOME_BENEFITS` (home) y `PREMIUM_UPGRADE_HIGHLIGHTS` (modales). `PremiumPage` y `PlanComparison` derivan su comparativa de `PLAN_MATRIX` para no volver a divergir.
+
+**Correcciones clave:** la tirada de **3 cartas es Free** (solo 5 cartas y Cruz Céltica son premium); se purgaron "lecturas ilimitadas", "sin publicidad", "acceso prioritario", "historial y estadísticas", "Herradura/Año completo" e "historial ilimitado de rituales" de todos los puntos de venta (incl. `UpgradeBanner` y `WelcomeModal`, hallados fuera de la lista original).
+
+**⚠️ Revisor local — corrección de dato (carta astral):** la decisión de producto "carta astral ilimitada en ambos planes" **NO está implementada en el backend**: `usage-limits.constants.ts` aplica **FREE 3/mes** (PREMIUM ilimitada) y la propia UI de carta astral lo enforcea. Para no reintroducir una promesa sin sustento, el copy refleja la implementación real: **Free 3/mes · Premium ilimitada + resumen personalizado**. Si se quiere liberar la carta astral ilimitada para Free, requiere una tarea de **backend** (cambiar `USAGE_LIMITS`) — fuera del alcance de esta tarea frontend. También se migró `UpgradeModal` a la fuente única (`PREMIUM_MODAL_BENEFITS`) para cerrar la última lista de beneficios hardcodeada.
 
 ---
 
@@ -547,10 +563,49 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 
 ---
 
+### T-FBK-009: Carta Astral Ilimitada para Free + Gestión de Límites de Carta Astral por Admin
+
+**Prioridad:** 🟠 Alta
+**Estimación:** 3 puntos
+**Dependencias:** ninguna (desbloquea revertir el copy de T-FBK-005 a "ilimitada" para ambos planes)
+**Cubre Hallazgo:** decisión de producto de Ariel (5-jul-2026) surgida en la revisión de T-FBK-005
+**Estado:** 🔲 PENDIENTE
+
+#### Descripción del Problema
+
+Decisión de producto de Ariel: **la carta astral debe ser de cantidad ilimitada para todos los planes** (el diferenciador Premium es solo el *resumen personalizado* con IA, no la cantidad). Hoy la implementación **contradice** esa decisión: el límite de carta astral está **hardcodeado** en `usage-limits.constants.ts` (`BIRTH_CHART`: FREE `3/mes`, PREMIUM `-1`) y se enforcea leyendo esa constante en `birth-chart-facade.service.ts:216`, **no** desde la configuración de plan de la DB.
+
+Esto genera además una **fragmentación** (misma clase de bug que FBK-006): existe un endpoint admin `PUT /admin/limits/birth-chart` (`admin-limits.controller.ts`) con auditoría, pero la fuente que **realmente** aplica es la constante, por lo que ese panel no gobierna el límite efectivo.
+
+> Mientras esta tarea no se complete, el copy de `/premium` (T-FBK-005) refleja el **estado real** (Free 3/mes) para no prometer algo que el sistema no entrega.
+
+#### ✅ Tareas específicas
+
+- [ ] Mover el límite de carta astral a la config de plan de la DB: agregar columna `birthChartMonthlyLimit` a `plan-config/entities/plan.entity.ts` (+ migración; FREE `-1`, PREMIUM `-1`) y método `getBirthChartLimit()` en `PlanConfigService`.
+- [ ] Que `birth-chart-facade.service.ts` (y el `check-usage-limit.guard.ts`) lean el límite desde `PlanConfigService` en lugar de la constante `USAGE_LIMITS` (fuente única).
+- [ ] Reconciliar/retirar el endpoint `admin-limits birth-chart` para que apunte a la misma fuente (config de plan) — sin dos fuentes de verdad.
+- [ ] Exponer `birthChartMonthlyLimit` en el CRUD de `plan-config` (DTOs) y en el panel admin de planes (`PlanesConfigContainer`/`PlanConfigCard`) para que el admin pueda gestionarlo.
+- [ ] Seed/migración: FREE `birthChartMonthlyLimit = -1` (ilimitada).
+- [ ] **Coordinar con T-FBK-005:** una vez ilimitada real, revertir el copy de carta astral en `PLAN_MATRIX` (`premium-benefits.ts`) a `free: 'Ilimitada'` (premium sigue "Ilimitada con resumen personalizado").
+- [ ] Tests (servicio, guard, controller, migración) y ciclo de calidad backend + frontend.
+
+#### 🎯 Criterios de Aceptación
+
+- Free puede generar cartas astrales sin tope de cantidad; el único diferenciador Premium es el resumen personalizado con IA.
+- El límite de carta astral tiene **una sola fuente de verdad** (config de plan en DB), gestionable desde el panel de admin; el copy de `/premium` coincide con ella.
+
+#### 📌 Nota — Gestión de límites/IA por admin (estado actual, para contexto)
+
+**Ya existe** (panel admin de planes → `plan-config.controller` con `AdminGuard`, UI `PlanesConfigContainer`): edición por plan de `dailyCardLimit`, `tarotReadingsLimit`, `pendulumDailyLimit`/`pendulumMonthlyLimit`, **`aiQuotaMonthly`** (0 = bloquear IA; N o -1 = permitir) y `price`. La IA se gobierna con `aiQuotaMonthly` (guard `ai-quota.guard.ts` → `PlanConfigService.getAiQuota`).
+**Aún hardcodeado en `USAGE_LIMITS`** (no gestionable por admin): carta astral (esta tarea lo resuelve), oráculo (feature inexistente) y regeneración de interpretación.
+
+---
+
 ## ORDEN DE EJECUCIÓN SUGERIDO
 
 1. **T-FBK-006** y **T-FBK-005** (contratos de Premium: resolver el bug de cuota de IA y alinear el copy — mayor impacto de producto; requieren decisiones de Ariel primero).
 2. **T-FBK-004** (erradicar "IA" del texto user-facing — coordinar con T-FBK-005 para tocar las filas de la comparativa una sola vez).
+2b. **T-FBK-009** (backend: carta astral ilimitada para Free + gestión del límite por admin; al cerrarse, se revierte el copy de carta astral de T-FBK-005 a "ilimitada").
 3. **T-FBK-001** (quick win de consistencia del upsell en el dashboard).
 4. **T-FBK-003** (reubicar fichas informativas — mecánico, 9 páginas).
 5. **T-FBK-008** (arreglo de grilla "tu signo/animal").

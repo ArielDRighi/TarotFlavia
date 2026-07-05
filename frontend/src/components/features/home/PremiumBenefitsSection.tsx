@@ -1,41 +1,32 @@
+import type { ComponentType } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/constants/routes';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
-import { Sparkles, Layers, MessageSquare, BarChart3, ShieldOff, Crown } from 'lucide-react';
+import { PREMIUM_HOME_BENEFITS } from '@/lib/constants/premium-benefits';
+import {
+  Sparkles,
+  Layers,
+  MessageSquare,
+  Star,
+  CalendarClock,
+  TrendingUp,
+  Crown,
+  type LucideProps,
+} from 'lucide-react';
 
-const benefits = [
-  {
-    icon: Sparkles,
-    title: 'Interpretaciones profundas y personalizadas',
-    description: 'Análisis detallados adaptados a tu situación personal y las cartas que elegiste.',
-  },
-  {
-    icon: Layers,
-    title: 'Todas las tiradas disponibles',
-    description: 'Acceso a tiradas complejas: Cruz Celta, Herradura, Año completo y más.',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Preguntas personalizadas',
-    description: 'Formula tus propias consultas. El tarot responde exactamente lo que necesitás.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Historial y estadísticas',
-    description: 'Revisá tus lecturas pasadas y descubrí patrones en tu camino espiritual.',
-  },
-  {
-    icon: ShieldOff,
-    title: 'Experiencia sin publicidad',
-    description: 'Lecturas en paz, sin interrupciones. Totalmente enfocada en vos.',
-  },
-  {
-    icon: Crown,
-    title: 'Acceso prioritario',
-    description: 'Primero en recibir nuevas funcionalidades y contenidos exclusivos.',
-  },
-];
+/**
+ * Mapa de nombre de icono (string en la fuente única) → componente de Lucide.
+ * Los beneficios se leen de `PREMIUM_HOME_BENEFITS` para no duplicar copy.
+ */
+const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
+  Sparkles,
+  Layers,
+  MessageSquare,
+  Star,
+  CalendarClock,
+  TrendingUp,
+};
 
 export function PremiumBenefitsSection() {
   return (
@@ -78,8 +69,8 @@ export function PremiumBenefitsSection() {
 
         {/* Benefits Grid */}
         <div className="mb-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {benefits.map((benefit) => {
-            const Icon = benefit.icon;
+          {PREMIUM_HOME_BENEFITS.map((benefit) => {
+            const Icon = ICON_MAP[benefit.icon] ?? Sparkles;
             return (
               <div
                 key={benefit.title}

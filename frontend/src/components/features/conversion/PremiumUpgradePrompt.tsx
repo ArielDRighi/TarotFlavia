@@ -16,17 +16,7 @@ import { useCreatePreapproval } from '@/hooks/api/useSubscription';
 import type { CreatePreapprovalResponse } from '@/types';
 import { ROUTES } from '@/lib/constants/routes';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const PREMIUM_BENEFITS = [
-  'Interpretaciones personalizadas y profundas',
-  'Lecturas ilimitadas',
-  'Todas las tiradas disponibles',
-  'Preguntas personalizadas',
-] as const;
+import { PREMIUM_UPGRADE_HIGHLIGHTS } from '@/lib/constants/premium-benefits';
 
 // ============================================================================
 // Types
@@ -207,7 +197,7 @@ export default function PremiumUpgradePrompt({
 
           {/* Premium benefits — callout dorado de marca */}
           <div className="border-secondary/40 bg-secondary/10 space-y-2 rounded-lg border p-4">
-            {PREMIUM_BENEFITS.map((benefit) => (
+            {PREMIUM_UPGRADE_HIGHLIGHTS.map((benefit) => (
               <div key={benefit} className="flex items-center gap-2">
                 <Sparkles className="text-secondary h-4 w-4 flex-shrink-0" aria-hidden="true" />
                 <span className="text-foreground text-sm">{benefit}</span>
