@@ -105,6 +105,22 @@ describe('RegisterForm', () => {
     });
   });
 
+  describe('Canon styling', () => {
+    it('should render the title with the Cormorant serif token', () => {
+      render(<RegisterForm />);
+
+      const title = screen.getByText('Únete al Oráculo');
+      expect(title).toHaveClass('font-serif');
+    });
+
+    it('should give the submit CTA a visible gold focus ring', () => {
+      render(<RegisterForm />);
+
+      const submitButton = screen.getByRole('button', { name: /crear cuenta/i });
+      expect(submitButton.className).toContain('focus-visible:ring-secondary');
+    });
+  });
+
   describe('Form Validation', () => {
     it('should show error when name is empty', async () => {
       const user = userEvent.setup();
