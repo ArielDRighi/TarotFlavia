@@ -6,6 +6,7 @@ import { CreateReadingDto } from './dto/create-reading.dto';
 import { QueryReadingsDto, SortBy, SortOrder } from './dto/query-readings.dto';
 import { JwtAuthGuard } from '../../auth/infrastructure/guards/jwt-auth.guard';
 import { RequiresPremiumForCustomQuestionGuard } from './guards/requires-premium-for-custom-question.guard';
+import { RequiresPremiumForAIGuard } from './guards/requires-premium-for-ai.guard';
 import { CheckUsageLimitGuard } from '../../usage-limits/guards/check-usage-limit.guard';
 import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { IncrementUsageInterceptor } from '../../usage-limits/interceptors/increment-usage.interceptor';
@@ -142,6 +143,32 @@ describe('ReadingsController', () => {
         createDto,
       );
       expect(result.customQuestion).toBe(createDto.customQuestion);
+    });
+  });
+
+  // T-FBK-006: la cuota mensual de IA (0 para Free) NO debe bloquear la creación
+  // de lecturas, que para Free se sirven desde contenido de DB (sin IA). El acceso
+  // a IA lo gatea RequiresPremiumForAIGuard, no AIQuotaGuard.
+  describe('guards de cuota de IA (T-FBK-006)', () => {
+    it('no aplica AIQuotaGuard en la creación de lecturas (Free recibe contenido de DB)', () => {
+      const guards = (Reflect.getMetadata(
+        '__guards__',
+        ReadingsController.prototype.createReading,
+      ) ?? []) as unknown[];
+
+      expect(guards).not.toContain(AIQuotaGuard);
+      // Pero el gate real de IA (RequiresPremiumForAIGuard) debe seguir presente:
+      // su remoción accidental abriría IA a Free sin que ningún test falle.
+      expect(guards).toContain(RequiresPremiumForAIGuard);
+    });
+
+    it('mantiene AIQuotaGuard en la regeneración de interpretación (flujo exclusivo de IA)', () => {
+      const guards = (Reflect.getMetadata(
+        '__guards__',
+        ReadingsController.prototype.regenerateInterpretation,
+      ) ?? []) as unknown[];
+
+      expect(guards).toContain(AIQuotaGuard);
     });
   });
 

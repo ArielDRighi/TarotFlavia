@@ -69,7 +69,7 @@ describe('AIQuotaGuard', () => {
       expect(aiQuotaService.checkMonthlyQuota).toHaveBeenCalledWith(1);
     });
 
-    it('should throw ForbiddenException when FREE user has no quota', async () => {
+    it('should throw quota-exhausted message for a plan with finite quota', async () => {
       const context = createMockExecutionContext({
         userId: 1,
         plan: UserPlan.FREE,
@@ -94,6 +94,31 @@ describe('AIQuotaGuard', () => {
       );
       await expect(guard.canActivate(context)).rejects.toThrow(
         /Has alcanzado tu límite mensual de 100 interpretaciones/,
+      );
+    });
+
+    it('should throw premium-only message when quota is 0 (Free = sin IA, T-FBK-006)', async () => {
+      const context = createMockExecutionContext({
+        userId: 1,
+        plan: UserPlan.FREE,
+      });
+      aiQuotaService.checkMonthlyQuota.mockResolvedValue(false);
+      aiQuotaService.getRemainingQuota.mockResolvedValue({
+        quotaLimit: 0,
+        requestsUsed: 0,
+        requestsRemaining: 0,
+        percentageUsed: 0,
+        resetDate: new Date('2025-12-01'),
+        warningTriggered: false,
+        plan: UserPlan.FREE,
+        tokensUsed: 0,
+        costEstimated: 0,
+        providerPrimarilyUsed: null,
+      });
+      reflector.getAllAndOverride.mockReturnValue(false);
+
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        /exclusivas de Premium/,
       );
     });
 

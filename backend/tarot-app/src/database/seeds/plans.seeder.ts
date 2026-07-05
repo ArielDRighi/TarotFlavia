@@ -12,7 +12,11 @@ import { UserPlan } from '../../modules/users/entities/user.entity';
  * - Configures limits and features for each plan
  * - ANONYMOUS: For non-registered users (1 daily card reading, no AI)
  * - FREE: For registered users (2 readings, no AI - cost optimization)
- * - PREMIUM: Paid plan (4 readings, 100 AI requests monthly, all features)
+ * - PREMIUM: Paid plan (4 readings, unlimited AI, all features)
+ *
+ * Cuota de IA (aiQuotaMonthly) — fuente de verdad única (T-FBK-006):
+ * ANONYMOUS/FREE = 0 (sin IA); PREMIUM = -1 (ilimitado). Debe coincidir con el
+ * enforcement (AI_MONTHLY_QUOTAS en ai-usage.constants.ts).
  */
 export async function seedPlans(
   planRepository: Repository<Plan>,
@@ -69,7 +73,7 @@ export async function seedPlans(
       readingsLimit: 4, // DEPRECATED: Use dailyCardLimit + tarotReadingsLimit (1 + 3)
       dailyCardLimit: 1, // 1 daily card per day (same as FREE, but with AI interpretation)
       tarotReadingsLimit: 3,
-      aiQuotaMonthly: 100,
+      aiQuotaMonthly: -1, // Ilimitado (acotado por los límites diarios por actividad)
       allowCustomQuestions: true,
       allowSharing: true,
       allowAdvancedSpreads: true,

@@ -82,10 +82,14 @@ export class CheckUserQuotaUseCase {
     const resetDate = this.getNextMonthStart();
     const requestsUsed = user.aiRequestsUsedMonth;
     const quotaLimit = isPremium ? -1 : quota.hardLimit;
-    const requestsRemaining = isPremium ? -1 : quota.hardLimit - requestsUsed;
-    const percentageUsed = isPremium
-      ? 0
-      : (requestsUsed / quota.hardLimit) * 100;
+    const requestsRemaining = isPremium
+      ? -1
+      : Math.max(0, quota.hardLimit - requestsUsed);
+    // quota.hardLimit === 0 (p. ej. FREE sin IA) evita división por cero → 0%
+    const percentageUsed =
+      isPremium || quota.hardLimit === 0
+        ? 0
+        : (requestsUsed / quota.hardLimit) * 100;
 
     return {
       quotaLimit,
