@@ -581,7 +581,7 @@ describe('ActivationPage', () => {
       expect(retryBtn.className).toMatch(/focus-visible:ring-secondary/);
     });
 
-    it('should mark the state icons as decorative (aria-hidden)', () => {
+    it('should mark the state icon as decorative (aria-hidden)', () => {
       mockSearchParams.get.mockImplementation((key: string) => {
         if (key === 'status') return 'failure';
         return null;
@@ -589,8 +589,11 @@ describe('ActivationPage', () => {
 
       const { container } = renderWithProviders(<ActivationPage />);
 
-      // El icono de estado (XCircle) es decorativo: el título ya comunica el estado.
-      expect(container.querySelectorAll('[aria-hidden="true"]').length).toBeGreaterThan(0);
+      // El icono de estado (XCircle, `text-destructive`) es decorativo: el título
+      // "Problema con el pago" ya comunica el estado a lectores de pantalla.
+      const stateIcon = container.querySelector('.text-destructive');
+      expect(stateIcon).not.toBeNull();
+      expect(stateIcon).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('should render the success band asset with a non-empty Spanish alt (imagen con alt)', async () => {

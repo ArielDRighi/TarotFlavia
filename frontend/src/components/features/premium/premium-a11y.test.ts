@@ -6,12 +6,15 @@ import { getContrastRatio, meetsWcagAA } from '@/lib/utils/contrast';
  * Contrato de contraste WCAG del circuito premium (T-PREM-008 / hallazgos
  * PREM-001, PREM-008 — verificación de cierre).
  *
- * Análogo a `lib/utils/contrast.test.ts` (T-DASH-007): fija con la fórmula de
- * luminancia WCAG que los pares de color que la banda mística `PremiumHero`, la
- * tabla comparativa de `/premium` y la pantalla de activación controlan de forma
- * directa (hex hardcodeados en esos componentes) cumplen AA. Si alguien regresa
- * el dorado a texto blanco, aclara la banda noche o baja el tono de la crema
- * atenuada, este contrato falla antes de llegar a producción.
+ * Análogo a `lib/utils/contrast.test.ts` (T-DASH-007): fija, con la fórmula de
+ * luminancia WCAG, el INVARIANTE DE DISEÑO del circuito — que la paleta elegida
+ * (crema sobre banda noche, dorado con texto noche, `foreground` sobre blanco)
+ * cumple AA. Sirve para no regresar la paleta al diseñar variantes futuras.
+ *
+ * Alcance: verifica los PARES DE COLOR, no qué clase aplica cada componente. La
+ * garantía de que el chip use `text-bg-hero` (y no `text-white`) vive en los
+ * tests de componente (`PremiumHero.test.tsx` / `PremiumPage.test.tsx`), que sí
+ * fallan si alguien cambia la clase.
  *
  * Colores de marca (sincronizados con `globals.css`, `PremiumHero.tsx` y
  * `PremiumPage.tsx`):

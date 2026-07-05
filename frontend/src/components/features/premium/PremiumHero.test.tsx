@@ -106,9 +106,12 @@ describe('PremiumHero', () => {
         />
       );
 
-      // El overlay de legibilidad es puramente decorativo → aria-hidden.
-      const decorative = container.querySelectorAll('[aria-hidden="true"]');
-      expect(decorative.length).toBeGreaterThan(0);
+      // La imagen SÍ es significativa (tiene alt) y no debe ocultarse…
+      expect(screen.getByTestId('next-image')).not.toHaveAttribute('aria-hidden', 'true');
+      // …pero el overlay de legibilidad (`.inset-0`) es decorativo → aria-hidden.
+      const overlay = container.querySelector('.inset-0');
+      expect(overlay).not.toBeNull();
+      expect(overlay).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('should mark twinkling stars and crescent moon as aria-hidden (decorativos)', () => {
