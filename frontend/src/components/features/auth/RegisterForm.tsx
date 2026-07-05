@@ -14,6 +14,7 @@ import { Reveal } from '@/components/common/Reveal';
 import { WelcomeModal } from '@/components/features/onboarding';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/utils/useToast';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth.schemas';
 
 /**
@@ -205,7 +206,7 @@ export function RegisterForm() {
                     Creando...
                   </>
                 ) : (
-                  'Crear Cuenta'
+                  CTA_AUTH.REGISTER
                 )}
               </Button>
             </form>
