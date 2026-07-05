@@ -454,17 +454,23 @@ Los prompts de upgrade y el modal de bienvenida usan `text-purple-600/700 dark:t
 **Estimación:** 2.5 puntos
 **Dependencias:** T-PREM-001
 **Cubre Hallazgo:** PREM-005
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Rediseñar `/registro` y `/login` con atmósfera mística (Cormorant + dorado, CTA de marca, foco visible), sin `purple-*` crudo.
-- [ ] Mover la lógica de `registro/page.tsx` a `components/features/auth/`; `app/` solo enruta.
+- [x] Rediseñar `/registro` y `/login` con atmósfera mística (Cormorant + dorado, CTA de marca, foco visible), sin `purple-*` crudo.
+- [x] Mover la lógica de `registro/page.tsx` a `components/features/auth/`; `app/` solo enruta.
 
 #### 🎯 Criterios de Aceptación
 
-- Primera impresión de marca coherente; contraste AA; `app/` sin lógica.
-- Ciclo de calidad frontend completo pasa.
+- [x] Primera impresión de marca coherente; contraste AA; `app/` sin lógica.
+- [x] Ciclo de calidad frontend completo pasa.
+
+#### 📝 Notas de implementación
+
+- Nuevo `components/features/auth/RegisterPage.tsx` concentra la lógica de `?message=` y whitelist; `app/registro/page.tsx` ahora solo enruta (validado por `validate-architecture.js`).
+- `RegisterForm`/`LoginForm` al canon: acento dorado (`Sparkles text-secondary`), título Cormorant (`font-serif`), subtítulo místico, entrada con `Reveal` y CTA con foco dorado visible (`focus-visible:ring-secondary/50`).
+- Callouts de aviso migrados de `purple-*`/`amber-*` crudos a tokens de marca (`border-secondary/*`, `bg-secondary/10`, `text-secondary`, `text-text-primary`).
 
 ---
 

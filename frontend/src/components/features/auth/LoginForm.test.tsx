@@ -92,6 +92,22 @@ describe('LoginForm', () => {
     });
   });
 
+  describe('Canon styling', () => {
+    it('should render the title with the Cormorant serif token', () => {
+      render(<LoginForm />);
+
+      const title = screen.getByText('Bienvenido al Oráculo');
+      expect(title).toHaveClass('font-serif');
+    });
+
+    it('should give the submit CTA a visible gold focus ring', () => {
+      render(<LoginForm />);
+
+      const submitButton = screen.getByRole('button', { name: /iniciar sesión/i });
+      expect(submitButton.className).toContain('focus-visible:ring-secondary');
+    });
+  });
+
   describe('Form Validation', () => {
     it('should show error when email is empty', async () => {
       const user = userEvent.setup();
