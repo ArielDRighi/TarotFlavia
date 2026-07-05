@@ -51,14 +51,14 @@ describe('ContactoPage', () => {
 
   it('should style the alternative contact section as a gold canon callout', () => {
     render(<ContactoPage />);
-    const altContactSection = screen.getByText('Otras formas de contacto').closest('div');
-    expect(altContactSection?.className).toContain('bg-secondary/10');
-    expect(altContactSection?.className).toContain('border-secondary');
+    const callout = screen.getByTestId('contact-callout');
+    expect(callout.className).toContain('bg-secondary/10');
+    expect(callout.className).toContain('border-secondary');
   });
 
   it('should NOT use raw purple palette (off-canon)', () => {
     const { container } = render(<ContactoPage />);
-    expect(container.querySelector('.bg-purple-50')).not.toBeInTheDocument();
+    expect(container.querySelector('[class*="purple"]')).not.toBeInTheDocument();
   });
 
   it('should render the disclaimer banner', () => {

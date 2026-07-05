@@ -42,7 +42,10 @@ export default function ContactoPage() {
 
         {/* Alternative Contact Info — callout dorado de marca */}
         <Reveal index={2}>
-          <div className="border-secondary/40 bg-secondary/10 rounded-lg border p-6">
+          <div
+            className="border-secondary/40 bg-secondary/10 rounded-lg border p-6"
+            data-testid="contact-callout"
+          >
             <h2 className="text-foreground mb-3 flex items-center gap-2 font-semibold">
               <Mail className="text-secondary h-4 w-4" aria-hidden="true" />
               Otras formas de contacto
