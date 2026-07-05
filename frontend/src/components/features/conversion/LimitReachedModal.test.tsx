@@ -156,4 +156,52 @@ describe('LimitReachedModal', () => {
       expect(mockOnClose).toHaveBeenCalled();
     }
   });
+
+  // ── Canon místico (T-PREM-007) ────────────────────────────────────────────
+
+  describe('Canon styling', () => {
+    it('el CTA de upgrade tiene foco dorado visible (focus-visible:ring-secondary)', () => {
+      render(
+        <LimitReachedModal
+          open={true}
+          onClose={mockOnClose}
+          onUpgrade={mockOnUpgrade}
+          currentLimit={2}
+        />
+      );
+
+      const upgradeButton = screen.getByRole('button', { name: /mejorar a premium/i });
+      expect(upgradeButton.className).toContain('focus-visible:ring-secondary');
+    });
+
+    it('la caja de beneficios es un callout dorado de marca', () => {
+      render(
+        <LimitReachedModal
+          open={true}
+          onClose={mockOnClose}
+          onUpgrade={mockOnUpgrade}
+          currentLimit={2}
+        />
+      );
+
+      const heading = screen.getByText(/con premium tendrías/i);
+      const callout = heading.closest('[class*="bg-secondary/10"]');
+      expect(callout).not.toBeNull();
+      expect(callout?.className).toContain('border-secondary');
+    });
+
+    it('no usa paleta púrpura/rosa cruda (off-canon)', () => {
+      render(
+        <LimitReachedModal
+          open={true}
+          onClose={mockOnClose}
+          onUpgrade={mockOnUpgrade}
+          currentLimit={2}
+        />
+      );
+
+      expect(document.body.querySelector('[class*="purple"]')).toBeNull();
+      expect(document.body.querySelector('[class*="pink"]')).toBeNull();
+    });
+  });
 });

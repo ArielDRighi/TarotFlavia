@@ -506,15 +506,23 @@ Los prompts de upgrade y el modal de bienvenida usan `text-purple-600/700 dark:t
 **Estimación:** 2 puntos
 **Dependencias:** T-PREM-001
 **Cubre Hallazgo:** PREM-007
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] `PremiumUpgradePrompt`, `LimitReachedModal`, `WelcomeModal`: reemplazar púrpura por dorado/tokens; foco visible; sin `dark:`.
+- [x] `PremiumUpgradePrompt`, `LimitReachedModal`, `WelcomeModal`: reemplazar púrpura por dorado/tokens; foco visible; sin `dark:`.
 
 #### 🎯 Criterios de Aceptación
 
-- Los puntos de conversión lucen premium y de marca; contraste AA.
+- [x] Los puntos de conversión lucen premium y de marca; contraste AA.
+
+#### 🛠️ Notas de Implementación
+
+- **Contexto:** las variantes `dark:` de estos tres archivos ya habían sido erradicadas en T-PREM-001 (están en la lista `PURGED_FILES` del guard `no-ghost-dark-mode.test.ts`), por lo que el alcance real fue **paleta púrpura cruda → dorado/tokens de marca + foco dorado visible**.
+- **`PremiumUpgradePrompt`:** CTA (`CtaButton`) migrado del gradiente `purple→pink` al `Button` de marca con `focus-visible:ring-secondary/50`; cajas de beneficios (modal e inline) de `from-purple-50/pink-50` a callout dorado `border-secondary/40 bg-secondary/10`; círculos e íconos `Lock` de `accent` (lavanda) a dorado `text-secondary`/`bg-secondary/15`; banner reconstruido como **banda dorada** de marca (`bg-secondary text-bg-hero`) con botón noche (`bg-bg-hero text-secondary`) y foco visible.
+- **`LimitReachedModal`:** caja de beneficios a callout dorado; ícono `Clock` y beneficios a `text-secondary`; CTA de upgrade al `Button` de marca con foco dorado; "Volver mañana" (outline) también con foco dorado.
+- **`WelcomeModal`:** título `text-purple-700` → `text-primary` (Cormorant); subhead `text-purple-600` → `text-foreground`; íconos `text-purple-500` → `text-secondary`; caja de conversión PREMIUM migrada del `Alert variant="info"` (azul, off-canon) a callout dorado de marca; CTA con foco dorado.
+- **Tests:** contrato de canon añadido a los tres `*.test.tsx` (foco dorado del CTA, ausencia de púrpura/rosa crudo, callout dorado, título `text-primary`). 50/50 verdes; suite completa 5126 verdes; ciclo de calidad frontend completo pasa.
 
 ---
 

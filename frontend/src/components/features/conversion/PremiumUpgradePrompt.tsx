@@ -99,7 +99,7 @@ function CtaButton({ isPending, onClick }: CtaButtonProps) {
     <Button
       onClick={onClick}
       disabled={isPending}
-      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+      className="focus-visible:ring-secondary/50 w-full"
       size="lg"
     >
       {isPending ? (
@@ -195,8 +195,8 @@ export default function PremiumUpgradePrompt({
       <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
         <DialogContent className="max-w-lg" data-testid="premium-upgrade-prompt-modal">
           <DialogHeader>
-            <div className="bg-accent/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-              <Lock className="text-accent h-8 w-8" aria-hidden="true" />
+            <div className="bg-secondary/15 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+              <Lock className="text-secondary h-8 w-8" aria-hidden="true" />
             </div>
             <DialogTitle className="text-center font-serif text-2xl">{title}</DialogTitle>
             <DialogDescription className="text-center text-base">
@@ -205,11 +205,11 @@ export default function PremiumUpgradePrompt({
             </DialogDescription>
           </DialogHeader>
 
-          {/* Premium benefits */}
-          <div className="space-y-2 rounded-lg border bg-gradient-to-br from-purple-50/50 to-pink-50/50 p-4">
+          {/* Premium benefits — callout dorado de marca */}
+          <div className="border-secondary/40 bg-secondary/10 space-y-2 rounded-lg border p-4">
             {PREMIUM_BENEFITS.map((benefit) => (
               <div key={benefit} className="flex items-center gap-2">
-                <Sparkles className="text-accent h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                <Sparkles className="text-secondary h-4 w-4 flex-shrink-0" aria-hidden="true" />
                 <span className="text-foreground text-sm">{benefit}</span>
               </div>
             ))}
@@ -230,12 +230,12 @@ export default function PremiumUpgradePrompt({
   if (variant === 'inline') {
     return (
       <div
-        className="relative overflow-hidden rounded-lg border bg-gradient-to-br from-purple-50/80 to-pink-50/80 p-6 text-center"
+        className="border-secondary/40 bg-secondary/10 relative overflow-hidden rounded-lg border p-6 text-center"
         data-testid="premium-upgrade-prompt-inline"
       >
         <div className="flex flex-col items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-            <Lock className="text-accent h-7 w-7" aria-hidden="true" />
+          <div className="bg-secondary/15 flex h-14 w-14 items-center justify-center rounded-full">
+            <Lock className="text-secondary h-7 w-7" aria-hidden="true" />
           </div>
           <div className="space-y-1">
             <h3 className="text-foreground font-serif text-lg font-semibold">{title}</h3>
@@ -249,10 +249,10 @@ export default function PremiumUpgradePrompt({
     );
   }
 
-  // ── Variant: banner ────────────────────────────────────────────────────────
+  // ── Variant: banner — banda dorada de marca ─────────────────────────────────
   return (
     <div
-      className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white shadow-lg"
+      className="bg-secondary text-bg-hero rounded-lg p-6 shadow-lg"
       data-testid="premium-upgrade-prompt-banner"
     >
       <div className="flex items-center justify-between gap-4">
@@ -260,7 +260,7 @@ export default function PremiumUpgradePrompt({
           <Gem className="mt-1 h-6 w-6 flex-shrink-0" aria-hidden="true" />
           <div>
             <h3 className="mb-1 font-semibold">Desbloquea {feature}</h3>
-            <p className="text-sm text-white/90">
+            <p className="text-bg-hero/80 text-sm">
               Con Premium obtienes acceso a todas las funcionalidades avanzadas y análisis
               personalizados.
             </p>
@@ -269,8 +269,7 @@ export default function PremiumUpgradePrompt({
         <Button
           onClick={handleUpgradeClick}
           disabled={isPending}
-          variant="secondary"
-          className="flex-shrink-0 bg-white text-purple-600 hover:bg-white/90"
+          className="bg-bg-hero text-secondary hover:bg-bg-hero/90 focus-visible:ring-bg-hero/50 flex-shrink-0"
         >
           {isPending ? 'Cargando...' : CTA_PREMIUM.PURCHASE}
         </Button>
