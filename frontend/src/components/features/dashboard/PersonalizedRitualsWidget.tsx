@@ -5,11 +5,13 @@ import { Card } from '@/components/ui/card';
 import { WidgetCard } from './WidgetCard';
 import { WidgetEmptyState } from './WidgetEmptyState';
 import { Button } from '@/components/ui/button';
+import { PremiumUpsellCard } from '@/components/ui/premium-upsell-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRitualRecommendations } from '@/hooks/api/useRitualRecommendations';
 import { useAuthStore } from '@/stores/authStore';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants/routes';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import type { RecommendationPattern } from '@/types';
 
 const PATTERN_ICONS: Record<RecommendationPattern, React.ComponentType<{ className?: string }>> = {
@@ -69,13 +71,13 @@ export function PersonalizedRitualsWidget() {
         className="bg-secondary/5"
         data-testid="personalized-rituals-widget"
       >
-        <p className="text-muted-foreground mb-4 text-sm">
-          Con Premium, analizamos tus lecturas para sugerirte rituales personalizados según tu
-          momento energético actual.
-        </p>
-        <Button asChild>
-          <Link href="/premium">Desbloquear recomendaciones</Link>
-        </Button>
+        <PremiumUpsellCard
+          title="Rituales personalizados para tu momento"
+          description="Con Premium, analizamos tus lecturas para sugerirte rituales personalizados según tu momento energético actual."
+          href={ROUTES.PREMIUM}
+          ctaLabel={CTA_PREMIUM.UPSELL_SOFT}
+          data-testid="rituals-premium-upsell"
+        />
       </WidgetCard>
     );
   }
