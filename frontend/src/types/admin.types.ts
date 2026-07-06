@@ -162,6 +162,7 @@ export interface PlanConfig {
   price: number; // Precio mensual en USD (decimal)
   readingsLimit: number; // Límite de lecturas mensuales (-1 para ilimitado)
   aiQuotaMonthly: number; // Cuota mensual de solicitudes IA (-1 para ilimitado)
+  birthChartMonthlyLimit: number; // Límite mensual de Carta Astral (-1 para ilimitado)
   allowCustomQuestions: boolean; // Permite preguntas personalizadas
   allowSharing: boolean; // Permite compartir lecturas
   allowAdvancedSpreads: boolean; // Permite tiradas avanzadas
@@ -180,6 +181,7 @@ export interface UpdatePlanConfigDto {
   price?: number;
   readingsLimit?: number;
   aiQuotaMonthly?: number;
+  birthChartMonthlyLimit?: number;
   allowCustomQuestions?: boolean;
   allowSharing?: boolean;
   allowAdvancedSpreads?: boolean;

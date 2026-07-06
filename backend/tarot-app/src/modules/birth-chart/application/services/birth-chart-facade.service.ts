@@ -5,7 +5,7 @@ import { parseBirthDate } from '../../domain/utils/date-utils';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { AnonymousTrackingService } from '../../../usage-limits/services/anonymous-tracking.service';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
-import { USAGE_LIMITS } from '../../../usage-limits/usage-limits.constants';
+import { PlanConfigService } from '../../../plan-config/plan-config.service';
 import { UserPlan } from '../../../users/entities/user.entity';
 import { BirthChart, ChartData } from '../../entities/birth-chart.entity';
 import {
@@ -57,6 +57,7 @@ export class BirthChartFacadeService {
     private readonly pdfService: ChartPdfService,
     private readonly usageLimitsService: UsageLimitsService,
     private readonly anonymousTrackingService: AnonymousTrackingService,
+    private readonly planConfigService: PlanConfigService,
   ) {}
 
   async generateChart(
@@ -213,7 +214,10 @@ export class BirthChartFacadeService {
       };
     }
 
-    const planLimit = USAGE_LIMITS[user.plan]?.[UsageFeature.BIRTH_CHART] ?? 1;
+    // Fuente única de verdad: config de plan en DB (T-FBK-009), no la constante.
+    const planLimit = await this.planConfigService.getBirthChartLimit(
+      user.plan,
+    );
     const isUnlimited = planLimit === -1;
 
     try {

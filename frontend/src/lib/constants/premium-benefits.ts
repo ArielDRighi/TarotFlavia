@@ -11,8 +11,9 @@
  * Números reales validados contra el backend:
  * - Tiradas de tarot: FREE 1/día (tiradas de 1 y 3 cartas) · PREMIUM 3/día (todas).
  * - Tiradas premium-only: SOLO 5 cartas y Cruz Céltica (la de 3 cartas es FREE).
- * - Carta astral: FREE 3/mes · PREMIUM ilimitada; además el resumen personalizado
- *   (síntesis con IA) es exclusivo de Premium — Free no tiene IA (ver FBK-004).
+ * - Carta astral: FREE ilimitada · PREMIUM ilimitada; el diferenciador Premium es
+ *   el resumen personalizado (síntesis con IA), exclusivo de Premium — Free no tiene
+ *   IA (ver FBK-004 y T-FBK-009).
  * - Péndulo: FREE 1/día · PREMIUM 3/día.
  * - Historial: FREE 30 días · PREMIUM 365 días.
  * - NO existen: Oráculo, regeneración como feature comercial, tiradas
@@ -91,7 +92,7 @@ export const PLAN_MATRIX: readonly PlanMatrixRow[] = [
     key: 'birth-chart',
     feature: 'Carta astral',
     anonymous: '1 carta',
-    free: '3 por mes',
+    free: 'Ilimitada',
     premium: 'Ilimitada con resumen personalizado',
   },
   {

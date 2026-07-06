@@ -329,7 +329,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
 | T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts |
 | T-FBK-008 | "Tu signo/animal" sin agrandar la tarjeta (solo borde + a11y) | Frontend | 🟡 Media | 1 pt |
-| T-FBK-009 | Carta astral ilimitada para Free + gestión de límite por admin (fuente única en DB) | Backend | 🟠 Alta | 3 pts |
+| T-FBK-009 | Carta astral ilimitada para Free + gestión de límite por admin (fuente única en DB) ✅ | Backend | 🟠 Alta | 3 pts |
 
 ---
 
@@ -569,7 +569,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 3 puntos
 **Dependencias:** ninguna (desbloquea revertir el copy de T-FBK-005 a "ilimitada" para ambos planes)
 **Cubre Hallazgo:** decisión de producto de Ariel (5-jul-2026) surgida en la revisión de T-FBK-005
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### Descripción del Problema
 
@@ -581,13 +581,13 @@ Esto genera además una **fragmentación** (misma clase de bug que FBK-006): exi
 
 #### ✅ Tareas específicas
 
-- [ ] Mover el límite de carta astral a la config de plan de la DB: agregar columna `birthChartMonthlyLimit` a `plan-config/entities/plan.entity.ts` (+ migración; FREE `-1`, PREMIUM `-1`) y método `getBirthChartLimit()` en `PlanConfigService`.
-- [ ] Que `birth-chart-facade.service.ts` (y el `check-usage-limit.guard.ts`) lean el límite desde `PlanConfigService` en lugar de la constante `USAGE_LIMITS` (fuente única).
-- [ ] Reconciliar/retirar el endpoint `admin-limits birth-chart` para que apunte a la misma fuente (config de plan) — sin dos fuentes de verdad.
-- [ ] Exponer `birthChartMonthlyLimit` en el CRUD de `plan-config` (DTOs) y en el panel admin de planes (`PlanesConfigContainer`/`PlanConfigCard`) para que el admin pueda gestionarlo.
-- [ ] Seed/migración: FREE `birthChartMonthlyLimit = -1` (ilimitada).
-- [ ] **Coordinar con T-FBK-005:** una vez ilimitada real, revertir el copy de carta astral en `PLAN_MATRIX` (`premium-benefits.ts`) a `free: 'Ilimitada'` (premium sigue "Ilimitada con resumen personalizado").
-- [ ] Tests (servicio, guard, controller, migración) y ciclo de calidad backend + frontend.
+- [x] Mover el límite de carta astral a la config de plan de la DB: agregar columna `birthChartMonthlyLimit` a `plan-config/entities/plan.entity.ts` (+ migración `1776600000000-AddBirthChartMonthlyLimitToPlans`; FREE `-1`, PREMIUM `-1`, ANONYMOUS `-1`) y método `getBirthChartLimit()` en `PlanConfigService`.
+- [x] Que `birth-chart-facade.service.ts` (y el `check-usage-limit.guard.ts`) lean el límite desde `PlanConfigService` en lugar de la constante `USAGE_LIMITS` (fuente única).
+- [x] **Retirar** el endpoint `admin-limits birth-chart` (SystemConfig + caché en memoria) — era una fuente fantasma que el enforcement no leía y el frontend no consumía. El límite ahora se gobierna 100% desde el panel de planes (`plan-config`). Sin dos fuentes de verdad. _(La entidad genérica `SystemConfig` se deja intacta para reutilización futura; ya no la inyecta ningún servicio.)_
+- [x] Exponer `birthChartMonthlyLimit` en el CRUD de `plan-config` (DTO `CreatePlanDto` → heredado por `UpdatePlanDto`) y en el panel admin de planes (`PlanConfigCard`) para que el admin pueda gestionarlo.
+- [x] Seed/migración: FREE `birthChartMonthlyLimit = -1` (ilimitada) en `plans.seeder.ts`.
+- [x] **Coordinar con T-FBK-005:** revertido el copy de carta astral en `PLAN_MATRIX` (`premium-benefits.ts`) a `free: 'Ilimitada'` (premium sigue "Ilimitada con resumen personalizado").
+- [x] Tests (entidad, servicio, guard, facade, DTO, seeder) y ciclo de calidad backend + frontend.
 
 #### 🎯 Criterios de Aceptación
 
@@ -596,8 +596,8 @@ Esto genera además una **fragmentación** (misma clase de bug que FBK-006): exi
 
 #### 📌 Nota — Gestión de límites/IA por admin (estado actual, para contexto)
 
-**Ya existe** (panel admin de planes → `plan-config.controller` con `AdminGuard`, UI `PlanesConfigContainer`): edición por plan de `dailyCardLimit`, `tarotReadingsLimit`, `pendulumDailyLimit`/`pendulumMonthlyLimit`, **`aiQuotaMonthly`** (0 = bloquear IA; N o -1 = permitir) y `price`. La IA se gobierna con `aiQuotaMonthly` (guard `ai-quota.guard.ts` → `PlanConfigService.getAiQuota`).
-**Aún hardcodeado en `USAGE_LIMITS`** (no gestionable por admin): carta astral (esta tarea lo resuelve), oráculo (feature inexistente) y regeneración de interpretación.
+**Ya existe** (panel admin de planes → `plan-config.controller` con `AdminGuard`, UI `PlanesConfigContainer`): edición por plan de `dailyCardLimit`, `tarotReadingsLimit`, `pendulumDailyLimit`/`pendulumMonthlyLimit`, **`aiQuotaMonthly`** (0 = bloquear IA; N o -1 = permitir), **`birthChartMonthlyLimit`** (T-FBK-009; -1 = ilimitada) y `price`. La IA se gobierna con `aiQuotaMonthly` (guard `ai-quota.guard.ts` → `PlanConfigService.getAiQuota`); la carta astral con `birthChartMonthlyLimit` (guard `check-usage-limit.guard.ts` → `PlanConfigService.getBirthChartLimit`).
+**Aún hardcodeado en `USAGE_LIMITS`** (no gestionable por admin): oráculo (feature inexistente) y regeneración de interpretación.
 
 ---
 

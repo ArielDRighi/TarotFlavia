@@ -123,11 +123,11 @@ describe('PLAN_MATRIX', () => {
     }
   });
 
-  it('matches the real birth-chart limits (Free 3/mes, Premium unlimited + summary)', () => {
+  it('matches the real birth-chart limits (Free unlimited, Premium unlimited + summary)', () => {
     const chart = byKey('birth-chart');
-    // Backend: BIRTH_CHART FREE = 3/mes, PREMIUM = -1 (ilimitada)
-    expect(String(chart.free).toLowerCase()).toContain('3 por mes');
-    expect(String(chart.free).toLowerCase()).not.toContain('ilimitada');
+    // T-FBK-009: BIRTH_CHART FREE = -1 (ilimitada), PREMIUM = -1 (ilimitada).
+    // El único diferenciador Premium es el resumen personalizado con IA.
+    expect(String(chart.free).toLowerCase()).toContain('ilimitada');
     expect(String(chart.premium).toLowerCase()).toContain('ilimitada');
     // El resumen personalizado (síntesis con IA) es exclusivo de Premium
     expect(String(chart.premium).toLowerCase()).toContain('resumen');

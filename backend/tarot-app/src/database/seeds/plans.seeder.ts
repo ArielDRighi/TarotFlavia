@@ -44,6 +44,7 @@ export async function seedPlans(
       dailyCardLimit: 1,
       tarotReadingsLimit: 0,
       aiQuotaMonthly: 0, // No AI for anonymous users
+      birthChartMonthlyLimit: -1, // T-FBK-009: ilimitada (el lifetime anónimo lo gobierna el tracking anónimo)
       allowCustomQuestions: false,
       allowSharing: false,
       allowAdvancedSpreads: false,
@@ -59,6 +60,7 @@ export async function seedPlans(
       dailyCardLimit: 1,
       tarotReadingsLimit: 1,
       aiQuotaMonthly: 0,
+      birthChartMonthlyLimit: -1, // T-FBK-009: Free tiene carta astral ilimitada
       allowCustomQuestions: false,
       allowSharing: false,
       allowAdvancedSpreads: false,
@@ -74,6 +76,7 @@ export async function seedPlans(
       dailyCardLimit: 1, // 1 daily card per day (same as FREE, but with AI interpretation)
       tarotReadingsLimit: 3,
       aiQuotaMonthly: -1, // Ilimitado (acotado por los límites diarios por actividad)
+      birthChartMonthlyLimit: -1, // T-FBK-009: ilimitada; el extra Premium es el resumen con IA
       allowCustomQuestions: true,
       allowSharing: true,
       allowAdvancedSpreads: true,

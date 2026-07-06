@@ -386,6 +386,51 @@ describe('PlanConfigService', () => {
     });
   });
 
+  describe('getBirthChartLimit (T-FBK-009)', () => {
+    it('should return unlimited (-1) for a FREE plan configured as unlimited', async () => {
+      const mockPlan = {
+        id: 1,
+        planType: UserPlan.FREE,
+        name: 'Plan Gratuito',
+        birthChartMonthlyLimit: -1,
+        isActive: true,
+      } as Plan;
+
+      mockRepository.findOne.mockResolvedValue(mockPlan);
+
+      const result = await service.getBirthChartLimit(UserPlan.FREE);
+
+      expect(result).toBe(-1);
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { planType: UserPlan.FREE },
+      });
+    });
+
+    it('should return the finite monthly limit configured by admin', async () => {
+      const mockPlan = {
+        id: 1,
+        planType: UserPlan.FREE,
+        name: 'Plan Gratuito',
+        birthChartMonthlyLimit: 3,
+        isActive: true,
+      } as Plan;
+
+      mockRepository.findOne.mockResolvedValue(mockPlan);
+
+      const result = await service.getBirthChartLimit(UserPlan.FREE);
+
+      expect(result).toBe(3);
+    });
+
+    it('should throw NotFoundException when the plan does not exist', async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.getBirthChartLimit(UserPlan.PREMIUM),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
   describe('hasFeature', () => {
     it('should return true when feature is enabled', async () => {
       const mockPlan = {

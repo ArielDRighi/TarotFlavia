@@ -285,6 +285,64 @@ describe('CreatePlanDto', () => {
     });
   });
 
+  describe('birthChartMonthlyLimit validation (T-FBK-009)', () => {
+    it('should accept -1 for unlimited', async () => {
+      const dto = plainToInstance(CreatePlanDto, {
+        planType: UserPlan.FREE,
+        name: 'Free Plan',
+        price: 0,
+        readingsLimit: 10,
+        aiQuotaMonthly: 0,
+        birthChartMonthlyLimit: -1,
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should accept a positive finite limit', async () => {
+      const dto = plainToInstance(CreatePlanDto, {
+        planType: UserPlan.FREE,
+        name: 'Free Plan',
+        price: 0,
+        readingsLimit: 10,
+        aiQuotaMonthly: 0,
+        birthChartMonthlyLimit: 3,
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should be optional (omitted is valid)', async () => {
+      const dto = plainToInstance(CreatePlanDto, {
+        planType: UserPlan.FREE,
+        name: 'Free Plan',
+        price: 0,
+        readingsLimit: 10,
+        aiQuotaMonthly: 0,
+      });
+
+      const errors = await validate(dto);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should fail if birthChartMonthlyLimit is less than -1', async () => {
+      const dto = plainToInstance(CreatePlanDto, {
+        planType: UserPlan.FREE,
+        name: 'Free Plan',
+        price: 0,
+        readingsLimit: 10,
+        aiQuotaMonthly: 0,
+        birthChartMonthlyLimit: -5,
+      });
+
+      const errors = await validate(dto);
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors[0].property).toBe('birthChartMonthlyLimit');
+    });
+  });
+
   describe('boolean flags validation', () => {
     it('should accept boolean true', async () => {
       const dto = plainToInstance(CreatePlanDto, {
