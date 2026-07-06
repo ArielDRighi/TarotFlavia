@@ -200,7 +200,7 @@ export function PremiumPage() {
 
   const heroSubtitle = (
     <>
-      Interpretaciones personalizadas con IA, tiradas avanzadas, historial completo y mucho más
+      Interpretaciones personalizadas, tiradas avanzadas, historial completo y mucho más
       {premiumPlan ? (
         <>
           {' '}

@@ -54,7 +54,7 @@ export class AIQuotaGuard implements CanActivate {
       // la IA es exclusiva de Premium. Mensaje coherente con la nueva semántica.
       if (quotaInfo.quotaLimit === 0) {
         throw new ForbiddenException(
-          'Las interpretaciones con IA son exclusivas de Premium. ' +
+          'Las interpretaciones personalizadas son exclusivas de Premium. ' +
             'Actualiza tu plan para desbloquearlas.',
         );
       }
@@ -64,7 +64,7 @@ export class AIQuotaGuard implements CanActivate {
       });
 
       throw new ForbiddenException(
-        `Has alcanzado tu límite mensual de ${quotaInfo.quotaLimit} interpretaciones de IA. ` +
+        `Has alcanzado tu límite mensual de ${quotaInfo.quotaLimit} interpretaciones personalizadas. ` +
           `Tu cuota se renovará el ${resetDateFormatted}. ` +
           `Actualiza a Premium para interpretaciones ilimitadas.`,
       );

@@ -64,7 +64,7 @@ export interface PremiumHeroProps {
  * <PremiumHero
  *   badge="Plan Premium"
  *   title="Desbloquea todo el potencial del Tarot"
- *   subtitle={<>Interpretaciones con IA por <span className="text-secondary">$7.000/mes</span></>}
+ *   subtitle={<>Interpretaciones personalizadas por <span className="text-secondary">$7.000/mes</span></>}
  *   image={{ src: '/images/premium/premium-hero.webp', alt: '…' }}
  * >
  *   <PremiumCtaButton testId="cta-hero" />

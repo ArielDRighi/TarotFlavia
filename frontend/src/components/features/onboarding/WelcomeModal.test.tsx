@@ -33,8 +33,8 @@ describe('WelcomeModal', () => {
   it('should explain limitations and differences with PREMIUM', () => {
     render(<WelcomeModal isOpen={true} onClose={vi.fn()} />);
 
-    // Verificar que se menciona la limitación FREE (sin IA)
-    expect(screen.getByText(/sin interpretación de ia/i)).toBeInTheDocument();
+    // Verificar que se menciona la limitación FREE (sin interpretación premium)
+    expect(screen.getByText(/sin interpretación profunda/i)).toBeInTheDocument();
 
     // Verificar que se menciona la ventaja PREMIUM
     expect(screen.getByText(/premium/i)).toBeInTheDocument();

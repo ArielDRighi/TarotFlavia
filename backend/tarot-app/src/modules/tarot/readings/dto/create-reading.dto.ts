@@ -50,7 +50,7 @@ export class HasQuestionConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(): string {
-    return 'Debes proporcionar una pregunta predefinida o una pregunta personalizada cuando se solicita interpretación con IA';
+    return 'Debes proporcionar una pregunta predefinida o una pregunta personalizada cuando se solicita una interpretación personalizada';
   }
 }
 

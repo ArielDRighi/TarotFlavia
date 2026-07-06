@@ -40,7 +40,7 @@ export class RequiresPremiumForAIGuard implements CanActivate {
       if (body.useAI === true) {
         if (user.plan !== UserPlan.PREMIUM) {
           throw new ForbiddenException(
-            'Las funciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+            'Las funciones personalizadas están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
           );
         }
         return true;
@@ -56,7 +56,7 @@ export class RequiresPremiumForAIGuard implements CanActivate {
     if (body.generateInterpretation === true) {
       if (user.plan !== UserPlan.PREMIUM) {
         throw new ForbiddenException(
-          'Las interpretaciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+          'Las interpretaciones personalizadas están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
         );
       }
       return true;

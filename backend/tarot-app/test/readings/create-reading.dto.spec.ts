@@ -84,7 +84,7 @@ describe('CreateReadingDto', () => {
         Object.values(e.constraints || {}),
       );
       expect(errorMessages.flat()).toContain(
-        'Debes proporcionar una pregunta predefinida o una pregunta personalizada cuando se solicita interpretación con IA',
+        'Debes proporcionar una pregunta predefinida o una pregunta personalizada cuando se solicita una interpretación personalizada',
       );
     });
 

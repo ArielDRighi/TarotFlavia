@@ -60,7 +60,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                 <div>
                   <p className="font-medium">1 Lectura por Día</p>
                   <p className="text-muted-foreground text-sm">
-                    Crea 1 lectura personalizada con múltiples cartas (sin interpretación de IA)
+                    Crea 1 lectura personalizada con múltiples cartas (sin interpretación profunda)
                   </p>
                 </div>
               </div>

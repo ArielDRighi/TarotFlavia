@@ -35,7 +35,7 @@ describe('RequiresPremiumForAIGuard', () => {
 
       expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las funciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+        'Las funciones personalizadas están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     });
 
@@ -51,7 +51,7 @@ describe('RequiresPremiumForAIGuard', () => {
 
       expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las funciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+        'Las funciones personalizadas están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     });
 
@@ -160,7 +160,7 @@ describe('RequiresPremiumForAIGuard', () => {
 
       expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las funciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+        'Las funciones personalizadas están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     });
 
@@ -190,7 +190,7 @@ describe('RequiresPremiumForAIGuard', () => {
 
       expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las funciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+        'Las funciones personalizadas están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     });
 
@@ -247,7 +247,7 @@ describe('RequiresPremiumForAIGuard', () => {
 
       expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las interpretaciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+        'Las interpretaciones personalizadas están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     });
 
@@ -263,7 +263,7 @@ describe('RequiresPremiumForAIGuard', () => {
 
       expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las interpretaciones con IA están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
+        'Las interpretaciones personalizadas están disponibles solo para usuarios Premium. Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     });
 

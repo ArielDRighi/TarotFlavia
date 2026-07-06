@@ -266,7 +266,7 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-600">✓</span>
-                  Interpretaciones personalizadas con IA
+                  Interpretaciones personalizadas
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-green-600">✓</span>

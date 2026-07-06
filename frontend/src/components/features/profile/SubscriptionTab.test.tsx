@@ -265,7 +265,7 @@ describe('SubscriptionTab', () => {
       render(<SubscriptionTab profile={profile} />, { wrapper: createWrapper() });
 
       expect(screen.getByText(/3 tiradas de tarot por día/i)).toBeInTheDocument();
-      expect(screen.getByText(/interpretaciones personalizadas con ia/i)).toBeInTheDocument();
+      expect(screen.getByText(/interpretaciones personalizadas/i)).toBeInTheDocument();
       expect(screen.getByText(/acceso a todas las tiradas/i)).toBeInTheDocument();
       expect(screen.getByText(/preguntas personalizadas/i)).toBeInTheDocument();
     });

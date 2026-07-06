@@ -493,7 +493,7 @@ export class ChineseHoroscopeService {
       this.logger.error('Error parsing AI response:', error);
       this.logger.error('Content received:', content);
       throw new InternalServerErrorException(
-        'Error al procesar la respuesta de la IA',
+        'Error al procesar la interpretación. Por favor intenta de nuevo.',
       );
     }
   }
