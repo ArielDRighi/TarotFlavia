@@ -95,6 +95,16 @@ export class Plan {
   aiQuotaMonthly: number;
 
   @ApiProperty({
+    example: -1,
+    description: 'Límite mensual de Carta Astral (-1 para ilimitado)',
+  })
+  // T-FBK-009: fuente única del límite de carta astral (antes hardcodeado en
+  // USAGE_LIMITS). Free = -1 (ilimitada); el diferenciador Premium es solo el
+  // resumen personalizado con IA, no la cantidad.
+  @Column({ type: 'int', default: -1, name: 'birth_chart_monthly_limit' })
+  birthChartMonthlyLimit: number;
+
+  @ApiProperty({
     example: false,
     description: 'Permite preguntas personalizadas',
   })
@@ -193,6 +203,14 @@ export class Plan {
       throw new Error(`Invalid feature name: ${feature}`);
     }
     return this[feature] === true;
+  }
+
+  /**
+   * Verifica si el plan tiene Carta Astral ilimitada
+   * @returns true si birthChartMonthlyLimit es -1 (ilimitado)
+   */
+  isBirthChartUnlimited(): boolean {
+    return this.birthChartMonthlyLimit === -1;
   }
 
   /**

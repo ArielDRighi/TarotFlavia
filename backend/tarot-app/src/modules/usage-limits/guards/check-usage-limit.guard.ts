@@ -20,7 +20,6 @@ import { PlanConfigService } from '../../plan-config/plan-config.service';
 import { UserPlan } from '../../users/entities/user.entity';
 import { USAGE_LIMIT_FEATURE_KEY } from '../decorators/check-usage-limit.decorator';
 import { ALLOW_ANONYMOUS_KEY } from '../decorators/allow-anonymous.decorator';
-import { USAGE_LIMITS } from '../usage-limits.constants';
 import {
   getTodayUTCDateString,
   getStartOfTodayUTC,
@@ -207,9 +206,8 @@ export class CheckUsageLimitGuard implements CanActivate {
   /**
    * Checks if user has reached their birth chart generation limit for the month.
    *
-   * Limits by plan:
-   * - FREE: 3 per month
-   * - PREMIUM: 5 per month
+   * The limit is read from the plan configuration in the database (single source
+   * of truth, T-FBK-009), not from the USAGE_LIMITS constant. `-1` means unlimited.
    *
    * Uses centralized usage tracking from usage_limits table for accurate counting.
    */
@@ -224,7 +222,7 @@ export class CheckUsageLimitGuard implements CanActivate {
     }
 
     const plan = user.plan;
-    const limit = USAGE_LIMITS[plan][UsageFeature.BIRTH_CHART];
+    const limit = await this.planConfigService.getBirthChartLimit(plan);
 
     this.logger.debug(`User plan: ${plan}, limit: ${limit}`);
 

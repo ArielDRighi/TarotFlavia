@@ -94,6 +94,18 @@ export class CreatePlanDto {
   aiQuotaMonthly: number;
 
   @ApiProperty({
+    description: 'Límite mensual de Carta Astral (-1 para ilimitado)',
+    example: -1,
+    minimum: -1,
+    required: false,
+    default: -1,
+  })
+  @IsNumber()
+  @Min(-1)
+  @IsOptional()
+  birthChartMonthlyLimit?: number;
+
+  @ApiProperty({
     description: 'Permite preguntas personalizadas',
     example: false,
     required: false,

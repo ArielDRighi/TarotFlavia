@@ -130,6 +130,43 @@ describe('Plan Entity', () => {
     });
   });
 
+  describe('birthChartMonthlyLimit (T-FBK-009)', () => {
+    it('should default to unlimited (-1) as a fresh entity property when set', () => {
+      const plan = new Plan();
+      plan.birthChartMonthlyLimit = -1;
+
+      expect(plan.birthChartMonthlyLimit).toBe(-1);
+    });
+
+    it('should allow a finite monthly limit configured by admin', () => {
+      const plan = new Plan();
+      plan.birthChartMonthlyLimit = 3;
+
+      expect(plan.birthChartMonthlyLimit).toBe(3);
+    });
+
+    it('isBirthChartUnlimited should return true when limit is -1', () => {
+      const plan = new Plan();
+      plan.birthChartMonthlyLimit = -1;
+
+      expect(plan.isBirthChartUnlimited()).toBe(true);
+    });
+
+    it('isBirthChartUnlimited should return false when limit is a positive number', () => {
+      const plan = new Plan();
+      plan.birthChartMonthlyLimit = 3;
+
+      expect(plan.isBirthChartUnlimited()).toBe(false);
+    });
+
+    it('isBirthChartUnlimited should return false when limit is 0', () => {
+      const plan = new Plan();
+      plan.birthChartMonthlyLimit = 0;
+
+      expect(plan.isBirthChartUnlimited()).toBe(false);
+    });
+  });
+
   describe('hasFeature method', () => {
     it('should return true when feature is enabled', () => {
       const plan = new Plan();
