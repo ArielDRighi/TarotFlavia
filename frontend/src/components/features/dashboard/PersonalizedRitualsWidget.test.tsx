@@ -8,6 +8,7 @@ import type { AuthUser, AuthStore } from '@/types';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { RitualRecommendationsResponse } from '@/types';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { ROUTES } from '@/lib/constants/routes';
 
 // Mock dependencies
 vi.mock('@/hooks/api/useRitualRecommendations');
@@ -89,10 +90,8 @@ describe('PersonalizedRitualsWidget', () => {
 
       render(<PersonalizedRitualsWidget />, { wrapper });
 
-      const cta = screen.getByRole('link', {
-        name: new RegExp(CTA_PREMIUM.UPSELL_SOFT, 'i'),
-      });
-      expect(cta).toHaveAttribute('href', '/premium');
+      const cta = screen.getByRole('link', { name: CTA_PREMIUM.UPSELL_SOFT });
+      expect(cta).toHaveAttribute('href', ROUTES.PREMIUM);
     });
 
     it('should not call useRitualRecommendations for free users', () => {

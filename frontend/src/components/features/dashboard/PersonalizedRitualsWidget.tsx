@@ -74,7 +74,7 @@ export function PersonalizedRitualsWidget() {
         <PremiumUpsellCard
           title="Rituales personalizados para tu momento"
           description="Con Premium, analizamos tus lecturas para sugerirte rituales personalizados según tu momento energético actual."
-          href="/premium"
+          href={ROUTES.PREMIUM}
           ctaLabel={CTA_PREMIUM.UPSELL_SOFT}
           data-testid="rituals-premium-upsell"
         />
