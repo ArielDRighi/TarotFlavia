@@ -87,10 +87,10 @@ export function ZodiacSignCard({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
+      aria-label={isUserSign ? `${signInfo.nameEs} (tu signo)` : undefined}
     >
       <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-4xl" />
       <p className="mt-2 font-serif text-lg">{signInfo.nameEs}</p>
-      {isUserSign && <span className="text-muted-foreground text-xs">Tu signo</span>}
     </Card>
   );
 }
