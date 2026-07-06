@@ -321,7 +321,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 
 | ID | Tarea | Tipo | Prioridad | Estimación |
 | ---------- | --------------------------------------------------------------------------- | ---------- | ---------- | ---------- |
-| T-FBK-001 | Unificar la invitación a Premium del dashboard (Rituales → `PremiumUpsellCard`) | Frontend | 🟠 Alta | 1 pt |
+| T-FBK-001 | Unificar la invitación a Premium del dashboard (Rituales → `PremiumUpsellCard`) | Frontend | 🟠 Alta | 1 pt | ✅ COMPLETADA |
 | T-FBK-002 | (Deuda) Unificar el sistema de upsell (tokens de marca + convergencia de banners) | Frontend | 🟢 Baja | 3 pts |
 | T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts |
 | T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts | ✅ COMPLETADA |
@@ -339,13 +339,13 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 1 punto
 **Dependencias:** ninguna
 **Cubre Hallazgo:** FBK-001
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Reemplazar el markup inline de `PersonalizedRitualsWidget.tsx:64-81` por `<PremiumUpsellCard>` (mismo patrón que `SacredEventsWidget.tsx:206-216`), con `title`/`description` adecuados a rituales personalizados.
-- [ ] Migrar el CTA hardcodeado `"Desbloquear recomendaciones"` a una constante de `CTA_PREMIUM` (reutilizar `UPSELL_SOFT` o añadir una específica si Ariel prefiere ese texto).
-- [ ] Actualizar/añadir tests del widget para fijar el uso del componente compartido.
+- [x] Reemplazar el markup inline de `PersonalizedRitualsWidget.tsx:64-81` por `<PremiumUpsellCard>` (mismo patrón que `SacredEventsWidget.tsx:206-216`), con `title`/`description` adecuados a rituales personalizados.
+- [x] Migrar el CTA hardcodeado `"Desbloquear recomendaciones"` a una constante de `CTA_PREMIUM` (se reutiliza `UPSELL_SOFT` → "Upgrade a Premium", coherente con `SacredEventsWidget`).
+- [x] Actualizar/añadir tests del widget para fijar el uso del componente compartido.
 
 #### 🎯 Criterios de Aceptación
 
