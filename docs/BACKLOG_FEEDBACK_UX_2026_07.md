@@ -328,7 +328,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts | ✅ COMPLETADA |
 | T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
 | T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts |
-| T-FBK-008 | "Tu signo/animal" sin agrandar la tarjeta (solo borde + a11y) | Frontend | 🟡 Media | 1 pt |
+| T-FBK-008 | "Tu signo/animal" sin agrandar la tarjeta (solo borde + a11y) ✅ | Frontend | 🟡 Media | 1 pt |
 | T-FBK-009 | Carta astral ilimitada para Free + gestión de límite por admin (fuente única en DB) ✅ | Backend | 🟠 Alta | 3 pts |
 
 ---
@@ -550,14 +550,14 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 1 punto
 **Dependencias:** ninguna
 **Cubre Hallazgo:** FBK-006
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Quitar (o reposicionar como `absolute`/altura fija) el `<span>` "Tu signo" (`ZodiacSignCard.tsx:93`) y "Tu animal" (`ChineseAnimalCard.tsx:91`) para que no altere el alto de la card.
-- [ ] Apoyar el destacado solo en el borde existente; **unificar** el borde del chino de `border-red-500` a `border-accent`.
-- [ ] Añadir `aria-label` a la `Card` para conservar la accesibilidad del estado "tu signo/animal".
-- [ ] Migrar tests que dependan del texto visible al `aria-label`.
+- [x] Quitar el `<span>` "Tu signo" (`ZodiacSignCard.tsx`) y "Tu animal" (`ChineseAnimalCard.tsx`) para que no altere el alto de la card.
+- [x] Apoyar el destacado solo en el borde existente; **unificado** el borde del chino de `border-red-500` a `border-accent`.
+- [x] Añadido `aria-label` condicional a la `Card` (`"{nombre} (tu signo/animal)"` solo en la card del usuario) para conservar la accesibilidad del estado.
+- [x] Migrados los tests que dependían del texto visible al nombre accesible (`getByRole('button', { name: /tu signo|tu animal/i })`).
 
 #### 🎯 Criterios de Aceptación
 

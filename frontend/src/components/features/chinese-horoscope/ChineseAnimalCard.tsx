@@ -78,17 +78,17 @@ export function ChineseAnimalCard({
         'cursor-pointer p-4 text-center transition-all',
         'hover:scale-105 hover:shadow-md',
         isSelected && 'ring-primary ring-2',
-        isUserAnimal && 'border-2 border-red-500',
+        isUserAnimal && 'border-accent border-2',
         className
       )}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
+      aria-label={isUserAnimal ? `${animalInfo.nameEs} (tu animal)` : undefined}
     >
       <span className="text-4xl">{animalInfo.emoji}</span>
       <p className="mt-2 font-serif text-lg">{animalInfo.nameEs}</p>
-      {isUserAnimal && <span className="text-xs font-medium text-red-500">Tu animal</span>}
     </Card>
   );
 }

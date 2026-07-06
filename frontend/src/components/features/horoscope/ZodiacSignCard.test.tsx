@@ -59,28 +59,37 @@ describe('ZodiacSignCard', () => {
       expect(screen.getByTestId('zodiac-card-leo')).toBeInTheDocument();
     });
 
-    it('should show "Tu signo" label when isUserSign is true', () => {
+    it('should not render a visible "Tu signo" label that alters card height', () => {
       const signInfo = createTestSignInfo();
 
       render(<ZodiacSignCard signInfo={signInfo} isUserSign={true} onClick={mockOnClick} />);
 
-      expect(screen.getByText('Tu signo')).toBeInTheDocument();
+      // El destacado se apoya solo en el borde: no debe agregarse texto visible.
+      expect(screen.queryByText('Tu signo')).not.toBeInTheDocument();
     });
 
-    it('should not show "Tu signo" label when isUserSign is false', () => {
+    it('should expose the "tu signo" state via aria-label when isUserSign is true', () => {
+      const signInfo = createTestSignInfo();
+
+      render(<ZodiacSignCard signInfo={signInfo} isUserSign={true} onClick={mockOnClick} />);
+
+      expect(screen.getByRole('button', { name: /tu signo/i })).toBeInTheDocument();
+    });
+
+    it('should not expose the "tu signo" state via aria-label when isUserSign is false', () => {
       const signInfo = createTestSignInfo();
 
       render(<ZodiacSignCard signInfo={signInfo} isUserSign={false} onClick={mockOnClick} />);
 
-      expect(screen.queryByText('Tu signo')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /tu signo/i })).not.toBeInTheDocument();
     });
 
-    it('should not show "Tu signo" label by default', () => {
+    it('should not expose the "tu signo" state via aria-label by default', () => {
       const signInfo = createTestSignInfo();
 
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-      expect(screen.queryByText('Tu signo')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /tu signo/i })).not.toBeInTheDocument();
     });
   });
 
