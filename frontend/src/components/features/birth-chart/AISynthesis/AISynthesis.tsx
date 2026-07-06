@@ -103,7 +103,7 @@ export function AISynthesis({
                   Premium
                 </Badge>
               </CardTitle>
-              <CardDescription>Análisis único generado por inteligencia artificial</CardDescription>
+              <CardDescription>Análisis único, profundo y personalizado</CardDescription>
             </div>
           </div>
 
@@ -236,8 +236,8 @@ export function AISynthesisPlaceholder({ className }: { className?: string }) {
           </div>
           <h3 className="mb-2 text-lg font-semibold">Síntesis Personalizada</h3>
           <p className="text-muted-foreground mx-auto mb-6 max-w-md text-sm">
-            Obtén un análisis único generado por inteligencia artificial que conecta todos los
-            elementos de tu carta y revela patrones ocultos.
+            Obtén un análisis único, profundo y personalizado que conecta todos los elementos de tu
+            carta y revela patrones ocultos.
           </p>
           <Button
             type="button"

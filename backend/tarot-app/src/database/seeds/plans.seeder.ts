@@ -70,7 +70,7 @@ export async function seedPlans(
       planType: UserPlan.PREMIUM,
       name: 'Plan Premium',
       description:
-        'Plan completo con 1 carta del día + 3 tiradas diarias, interpretaciones con IA y preguntas personalizadas',
+        'Plan completo con 1 carta del día + 3 tiradas diarias, interpretaciones profundas y preguntas personalizadas',
       price: 7000,
       readingsLimit: 4, // DEPRECATED: Use dailyCardLimit + tarotReadingsLimit (1 + 3)
       dailyCardLimit: 1, // 1 daily card per day (same as FREE, but with AI interpretation)

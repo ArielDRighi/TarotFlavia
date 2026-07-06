@@ -324,7 +324,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | T-FBK-001 | Unificar la invitación a Premium del dashboard (Rituales → `PremiumUpsellCard`) | Frontend | 🟠 Alta | 1 pt |
 | T-FBK-002 | (Deuda) Unificar el sistema de upsell (tokens de marca + convergencia de banners) | Frontend | 🟢 Baja | 3 pts |
 | T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts |
-| T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts |
+| T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts | ✅ COMPLETADA |
 | T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts | ✅ COMPLETADA |
 | T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
 | T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts |
@@ -415,21 +415,21 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 3 puntos
 **Dependencias:** glosario de reemplazos aprobado por Ariel; coordinar con T-FBK-005
 **Cubre Hallazgo:** FBK-003
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] **Frontend:** reformular las 8 apariciones del inventario (PremiumPage, premium-benefits, AISynthesis, BirthChartPageContent, SubscriptionTab).
-- [ ] **Backend — mensajes:** reformular guards (`requires-premium-for-ai.guard.ts`, `requires-premium-for-numerology-ai.guard.ts`), DTO (`create-reading.dto.ts:53`) y asunto de email (`email.service.ts:173`).
-- [ ] **Backend — plan:** actualizar `plans.seeder.ts:67` **y** crear una **migración de datos** para reformular la descripción del plan en las filas existentes de la tabla `plans`.
-- [ ] **Backend — emails:** reformular las plantillas `.hbs` (welcome, quota-limit-reached, quota-warning-80, plan-change).
-- [ ] **Panel de admin: NO se toca** (decisión de Ariel — la regla no aplica al panel interno).
-- [ ] Añadir un **guardarraíl** (test/lint) que falle si reaparece "IA"/"inteligencia artificial" en texto user-facing (excluyendo `app/admin/**` y `components/features/admin/**`).
+- [x] **Frontend:** reformular las apariciones vigentes del inventario (AISynthesis, BirthChartPageContent, PremiumPage, SubscriptionTab, WelcomeModal). Nota: `PremiumPage:59/64` y `premium-benefits.ts:63` ya habían sido reformulados por T-FBK-005; se detectaron y corrigieron apariciones nuevas no listadas en el inventario original (`BirthChartPageContent`, `WelcomeModal`).
+- [x] **Backend — mensajes:** reformular guards (`requires-premium-for-ai.guard.ts`, `requires-premium-for-numerology-ai.guard.ts`, `ai-quota.guard.ts` — nuevo, de T-FBK-006), DTO (`create-reading.dto.ts`), asuntos de email (`email.service.ts:145` y `173`) y las constantes de mensaje `QUOTA_WARNING_MESSAGE`/`QUOTA_LIMIT_REACHED_MESSAGE`.
+- [x] **Backend — plan:** actualizar `plans.seeder.ts` **y** crear una **migración de datos** (`1776700000000-RemoveAiMentionFromPremiumPlanDescription.ts`) para reformular la descripción del plan en las filas existentes de la tabla `plans`.
+- [x] **Backend — emails:** reformular las plantillas `.hbs` (welcome, quota-limit-reached, quota-warning-80, plan-change).
+- [x] **Panel de admin: NO se tocó** (decisión de Ariel — la regla no aplica al panel interno).
+- [x] Añadir un **guardarraíl** (tests Jest + Vitest) que falla si reaparece "IA"/"inteligencia artificial" en texto user-facing (`no-ia-user-facing.spec.ts` / `no-ia-user-facing.test.ts`; excluyen admin, Swagger, comentarios y nombres). El error interno de infra "no hay proveedor de IA configurado" queda fuera de alcance (decisión de Ariel).
 
 #### 🎯 Criterios de Aceptación
 
-- Ningún texto de cara al usuario (UI, errores de API, emails, descripción del plan renderizada) menciona "IA".
-- Ciclos de calidad frontend y backend completos pasan.
+- [x] Ningún texto de cara al usuario (UI, errores de API, emails, descripción del plan renderizada) menciona "IA".
+- [x] Ciclos de calidad frontend y backend completos pasan (backend: 4450 tests, cobertura 84.6%; frontend: 5151 tests).
 
 #### 📁 Archivos involucrados
 

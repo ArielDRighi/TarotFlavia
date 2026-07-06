@@ -233,8 +233,7 @@ export function BirthChartPageContent() {
               {isAuthenticated && user?.plan === 'free' && (
                 <div className="space-y-2">
                   <p className="text-sm">
-                    Actualiza a Premium para obtener cartas ilimitadas y síntesis personalizada con
-                    IA.
+                    Actualiza a Premium para obtener cartas ilimitadas y síntesis personalizada.
                   </p>
                   <Button asChild>
                     <Link href="/premium">Ver planes Premium</Link>
@@ -265,7 +264,7 @@ export function BirthChartPageContent() {
               )}
               {user?.plan === 'premium' && (
                 <>
-                  <li>✓ Síntesis personalizada con IA</li>
+                  <li>✓ Síntesis personalizada</li>
                   <li>✓ Historial de cartas</li>
                 </>
               )}

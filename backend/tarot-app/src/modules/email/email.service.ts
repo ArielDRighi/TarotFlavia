@@ -142,7 +142,8 @@ export class EmailService {
     try {
       await this.mailerService.sendMail({
         to,
-        subject: '⚠️ Has usado el 80% de tu cuota mensual de IA',
+        subject:
+          '⚠️ Has usado el 80% de tu cuota mensual de interpretaciones personalizadas',
         template: 'quota-warning-80',
         context: quotaData,
       });
@@ -170,7 +171,7 @@ export class EmailService {
       await this.mailerService.sendMail({
         to,
         subject:
-          '🚫 Has alcanzado tu límite mensual de interpretaciones con IA',
+          '🚫 Has alcanzado tu límite mensual de interpretaciones personalizadas',
         template: 'quota-limit-reached',
         context: quotaData,
       });
