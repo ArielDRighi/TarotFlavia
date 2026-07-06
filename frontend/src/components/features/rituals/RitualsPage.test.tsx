@@ -91,6 +91,15 @@ describe('RitualsPage', () => {
     expect(widget).toBeInTheDocument();
   });
 
+  it('debe ubicar ServiceIntro debajo de la actividad (lista de rituales)', () => {
+    renderWithProviders(<RitualsPage />);
+
+    const activity = screen.getByTestId('ritual-grid');
+    const intro = screen.getByTestId('rituals-intro');
+
+    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('debe renderizar correctamente la página con la tarjeta informativa', () => {
     renderWithProviders(<RitualsPage />);
 

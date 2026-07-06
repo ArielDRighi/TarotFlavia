@@ -29,8 +29,6 @@ export default function HoroscopoPage() {
         <p className="text-muted-foreground">Selecciona tu signo para ver las predicciones</p>
       </div>
 
-      <ServiceIntro data={SERVICE_INTROS['western-horoscope']} className="mb-6" />
-
       {!isAuthenticated && (
         <div className="bg-muted/50 mb-8 rounded-lg p-4 text-center">
           <p className="text-muted-foreground text-sm">
@@ -57,6 +55,8 @@ export default function HoroscopoPage() {
       ) : (
         <ZodiacSignSelector userSign={userSign} onSelect={handleSignSelect} />
       )}
+
+      <ServiceIntro data={SERVICE_INTROS['western-horoscope']} className="mt-6" />
     </div>
   );
 }

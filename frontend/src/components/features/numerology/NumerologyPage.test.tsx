@@ -64,6 +64,15 @@ describe('NumerologyPage', () => {
     expect(screen.getByTestId('numerology-intro')).toBeInTheDocument();
   });
 
+  it('debe ubicar NumerologyIntro debajo de la actividad (calculadora)', () => {
+    renderWithProviders(<NumerologyPage />);
+
+    const activity = screen.getByTestId('calculate-button');
+    const intro = screen.getByTestId('numerology-intro');
+
+    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('debe renderizar correctamente la página sin errores', () => {
     renderWithProviders(<NumerologyPage />);
 

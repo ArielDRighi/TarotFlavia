@@ -180,6 +180,23 @@ describe('CartaDelDiaPage', () => {
       expect(screen.getByTestId('unrevealed-state')).toBeInTheDocument();
     });
 
+    it('should render ServiceIntro below the activity', () => {
+      mockUseDailyReadingToday.mockReturnValue({
+        data: null,
+        isLoading: false,
+        error: null,
+      });
+
+      renderWithProviders(<CartaDelDiaPage />);
+
+      const activity = screen.getByTestId('unrevealed-state');
+      const intro = screen.getByTestId('service-intro');
+
+      expect(
+        activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
     it('should display mystical prompt text', () => {
       mockUseDailyReadingToday.mockReturnValue({
         data: null,

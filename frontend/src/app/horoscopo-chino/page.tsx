@@ -37,8 +37,6 @@ export default function HoroscopoChinoPage() {
         <p className="text-muted-foreground">Descubre las predicciones anuales según tu animal</p>
       </div>
 
-      <ServiceIntro data={SERVICE_INTROS['chinese-horoscope']} className="mb-6" />
-
       {/* User's horoscope card (if authenticated and has birthDate) */}
       {isAuthenticated && userBirthDate && myHoroscope && (
         <div className="mx-auto mb-8 max-w-2xl">
@@ -99,6 +97,8 @@ export default function HoroscopoChinoPage() {
 
       {/* Selector de animales */}
       <ChineseAnimalSelector userAnimal={userAnimal} onSelect={handleAnimalSelect} />
+
+      <ServiceIntro data={SERVICE_INTROS['chinese-horoscope']} className="mt-6" />
 
       {/* Element Selector Modal */}
       {selectedAnimalForModal && (

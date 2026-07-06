@@ -187,6 +187,24 @@ describe('HoroscopoPage', () => {
     expect(widget).toHaveAttribute('data-key', 'western-horoscope-intro');
   });
 
+  it('debe ubicar ServiceIntro debajo de la actividad (selector de signos)', () => {
+    mockUseAuthStore.mockReturnValue({
+      user: null,
+      isAuthenticated: false,
+    });
+    mockUseTodayAllHoroscopes.mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+
+    renderWithProviders(<HoroscopoPage />);
+
+    const activity = screen.getByTestId('zodiac-selector');
+    const intro = screen.getByTestId('service-intro');
+
+    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('debe renderizar correctamente la página con la tarjeta informativa', () => {
     mockUseAuthStore.mockReturnValue({
       user: null,

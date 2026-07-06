@@ -76,8 +76,6 @@ export function NumerologyPage() {
           <p className="text-muted-foreground">Descubre los números que rigen tu vida</p>
         </div>
 
-        <NumerologyIntro className="mb-8" />
-
         {/* Alert for incomplete profile */}
         {hasIncompleteProfile && (
           <Alert className="mb-8 border-amber-200 bg-amber-50">
@@ -212,6 +210,8 @@ export function NumerologyPage() {
             <NumerologyProfile profile={calculatedResult} />
           </div>
         )}
+
+        <NumerologyIntro className="mt-8" />
       </div>
     </div>
   );

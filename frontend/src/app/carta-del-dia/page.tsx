@@ -17,11 +17,11 @@ export default function CartaDelDiaPage() {
           Tarot del Día
         </h1>
 
-        {/* Encyclopedia Widget */}
-        <ServiceIntro data={SERVICE_INTROS['daily-card']} className="mb-8 w-full" />
-
         {/* Main Content - All logic delegated to feature component */}
         <DailyCardExperience />
+
+        {/* Encyclopedia Widget */}
+        <ServiceIntro data={SERVICE_INTROS['daily-card']} className="mt-8 w-full" />
       </div>
     </div>
   );

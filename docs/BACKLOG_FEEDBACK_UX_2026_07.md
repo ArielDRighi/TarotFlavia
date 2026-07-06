@@ -323,7 +323,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | ---------- | --------------------------------------------------------------------------- | ---------- | ---------- | ---------- |
 | T-FBK-001 | Unificar la invitación a Premium del dashboard (Rituales → `PremiumUpsellCard`) | Frontend | 🟠 Alta | 1 pt | ✅ COMPLETADA |
 | T-FBK-002 | (Deuda) Unificar el sistema de upsell (tokens de marca + convergencia de banners) | Frontend | 🟢 Baja | 3 pts |
-| T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts |
+| T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts | ✅ COMPLETADA |
 | T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts | ✅ COMPLETADA |
 | T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts | ✅ COMPLETADA |
 | T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
@@ -389,23 +389,30 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 1.5 puntos
 **Dependencias:** ninguna
 **Cubre Hallazgo:** FBK-002
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Mover el `<ServiceIntro>` (o `<NumerologyIntro>`) debajo de la actividad en las 9 páginas del alcance.
-- [ ] Cambiar el margen de separación de `mb-*` a `mt-*` en las 9 llamadas.
-- [ ] En páginas con varios bloques de actividad, ubicar el intro al final de todos ellos.
-- [ ] Actualizar tests que asuman el orden previo.
+- [x] Mover el `<ServiceIntro>` (o `<NumerologyIntro>`) debajo de la actividad en las 9 páginas del alcance.
+- [x] Cambiar el margen de separación de `mb-*` a `mt-*` en las 9 llamadas.
+- [x] En páginas con varios bloques de actividad, ubicar el intro al final de todos ellos.
+- [x] Actualizar tests que asuman el orden previo.
 
 #### 🎯 Criterios de Aceptación
 
-- Las 9 páginas muestran la ficha informativa debajo de la actividad, con separación consistente.
-- Ciclo de calidad frontend completo pasa.
+- [x] Las 9 páginas muestran la ficha informativa debajo de la actividad, con separación consistente.
+- [x] Ciclo de calidad frontend completo pasa.
 
 #### 📁 Archivos involucrados
 
 - Los 9 del alcance (ver tabla de FBK-002) + sus tests.
+
+#### 🛠️ Notas de Implementación (6-jul-2026)
+
+- Reubicación puramente de orden de JSX: el intro compartido (`ServiceIntro`/`NumerologyIntro`) se movió del tope al final del bloque de actividad en las 9 páginas, con `mb-*` → `mt-*`.
+- En páginas con múltiples bloques de actividad el intro va al final de todos ellos: **Numerología** (tras perfil + calculadora + resultado), **Carta Astral** (tras el form + info "¿Qué incluye?"/"Importante"), **Horóscopo Chino** (tras el selector de animales, antes del modal overlay), **Péndulo** (tras el área del péndulo + controles), **Rituales** (tras la lista completa), **Horóscopo** (tras el selector de signos).
+- **TDD:** se añadió un test de orden por página que verifica con `compareDocumentPosition` que el intro queda **después** de un ancla de actividad (`calculate-button`, `unrevealed-state`, `birth-data-form`, `zodiac-selector`, `chinese-animal-selector`, `pendulum-animation`, `ritual-grid`, `category-selector`). Los tests de presencia previos se mantienen.
+- Ciclo de calidad frontend completo: format ✅, lint (0 errores) ✅, type-check ✅, 5162 tests ✅, build ✅, validate-architecture ✅.
 
 ---
 
