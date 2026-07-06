@@ -201,6 +201,20 @@ describe('HoroscopoChinoPage', () => {
     expect(widget).toHaveAttribute('data-key', 'chinese-horoscope-intro');
   });
 
+  it('debe ubicar ServiceIntro debajo de la actividad (selector de animales)', () => {
+    mockUseChineseHoroscopesByYear.mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+
+    renderWithProviders(<HoroscopoChinoPage />);
+
+    const activity = screen.getByTestId('chinese-animal-selector');
+    const intro = screen.getByTestId('service-intro');
+
+    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('debe renderizar correctamente la página con la tarjeta informativa', () => {
     mockUseChineseHoroscopesByYear.mockReturnValue({
       isLoading: false,

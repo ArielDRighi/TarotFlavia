@@ -124,8 +124,6 @@ export function PendulumConsultation() {
           <p className="text-muted-foreground">Formula tu pregunta y deja que el péndulo te guíe</p>
         </div>
 
-        <ServiceIntro data={SERVICE_INTROS.pendulum} className="mb-6" />
-
         {/* Límites */}
         <PendulumLimitBanner />
 
@@ -217,6 +215,8 @@ export function PendulumConsultation() {
             Nueva consulta
           </Button>
         )}
+
+        <ServiceIntro data={SERVICE_INTROS.pendulum} className="mt-6" />
       </div>
 
       {/* Modal de contenido bloqueado */}

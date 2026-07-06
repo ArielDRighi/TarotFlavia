@@ -109,6 +109,15 @@ describe('BirthChartPageContent', () => {
     expect(widget).toBeInTheDocument();
   });
 
+  it('debe ubicar ServiceIntro debajo de la actividad (formulario)', () => {
+    renderWithProviders(<BirthChartPageContent />);
+
+    const activity = screen.getByTestId('birth-data-form');
+    const intro = screen.getByTestId('birth-chart-intro');
+
+    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('debe renderizar correctamente la página con la tarjeta informativa', () => {
     renderWithProviders(<BirthChartPageContent />);
 

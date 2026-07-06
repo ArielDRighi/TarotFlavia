@@ -64,8 +64,6 @@ export function RitualsPage() {
         )}
       </div>
 
-      <ServiceIntro data={SERVICE_INTROS.rituals} className="mb-6" />
-
       {/* Rituales destacados */}
       {!hasFilters && (
         <section className="mb-12">
@@ -110,6 +108,8 @@ export function RitualsPage() {
           />
         )}
       </section>
+
+      <ServiceIntro data={SERVICE_INTROS.rituals} className="mt-6" />
     </div>
   );
 }

@@ -184,8 +184,6 @@ export function BirthChartPageContent() {
         )}
       </div>
 
-      <ServiceIntro data={SERVICE_INTROS['birth-chart']} className="mb-6" />
-
       {/* Error global */}
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -284,6 +282,8 @@ export function BirthChartPageContent() {
           </CardContent>
         </Card>
       </div>
+
+      <ServiceIntro data={SERVICE_INTROS['birth-chart']} className="mt-6" />
     </div>
   );
 }
