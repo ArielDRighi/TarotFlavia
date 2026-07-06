@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
 import type { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
+import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
+
 /**
  * ChineseCompatibility Component Props
  */
@@ -45,7 +47,12 @@ export function ChineseCompatibility({ compatibility }: ChineseCompatibilityProp
             className={variantClass}
             data-testid={`compatibility-badge-${animal}`}
           >
-            {info.emoji} {info.nameEs}
+            <ChineseAnimalSymbol
+              animal={info.animal}
+              label={info.nameEs}
+              className="mr-1 text-base"
+            />
+            {info.nameEs}
           </Badge>
         );
       })}

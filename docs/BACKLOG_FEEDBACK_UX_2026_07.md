@@ -327,7 +327,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts | ✅ COMPLETADA |
 | T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts | ✅ COMPLETADA |
 | T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
-| T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts |
+| T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts | ✅ COMPLETADA |
 | T-FBK-008 | "Tu signo/animal" sin agrandar la tarjeta (solo borde + a11y) ✅ | Frontend | 🟡 Media | 1 pt |
 | T-FBK-009 | Carta astral ilimitada para Free + gestión de límite por admin (fuente única en DB) ✅ | Backend | 🟠 Alta | 3 pts |
 
@@ -522,25 +522,25 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 2 puntos
 **Dependencias:** ninguna (dirección de diseño ya decidida — SVG monocromático `text-primary`)
 **Cubre Hallazgo:** FBK-005
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
-> **Decisión de Ariel:** la opción consistente con el diseño de la página → **iconos SVG monocromáticos** coloreados con `text-primary` (mismo tratamiento que el Horóscopo Occidental).
+> **Decisión de Ariel:** la opción consistente con el diseño de la página → **iconos SVG monocromáticos** coloreados con `text-primary` (mismo tratamiento que el Horóscopo Occidental). Estilo elegido: **línea/contorno** (`stroke=currentColor`, `fill=none`), coherente con los glifos de trazo `♈`–`♓` del zodiaco occidental.
 
 #### ✅ Tareas específicas
 
-- [ ] Conseguir/crear el set de **12 SVG monocromáticos** de marca (Rata…Cerdo), aptos para colorear con `currentColor`/`text-primary`.
-- [ ] Crear un componente `ChineseAnimalSymbol` análogo a `ZodiacSymbol` (icono monocromático + `text-primary` + `role="img"`/`aria-label`).
-- [ ] Reemplazar el render en `ChineseAnimalCard.tsx:89` y propagar a los ~5 usos restantes (`AnimalCalculator`, `ChineseHoroscopeDetail`, `ChineseHoroscopeWidget`, `ChineseCompatibility`, `AnimalHoroscopePage`).
-- [ ] Tests del nuevo componente y de las tarjetas.
+- [x] Creado el set de **12 SVG monocromáticos** de marca (Rata…Cerdo) como arte de línea inline en `ChineseAnimalSymbol`, coloreable con `currentColor`/`text-primary`. Se descartó el truco Unicode U+FE0E de `ZodiacSymbol` porque los animales chinos no tienen glifo Unicode monocromático (solo emoji pictográficos), por eso se usa SVG propio.
+- [x] Creado el componente `ChineseAnimalSymbol` análogo a `ZodiacSymbol` (icono monocromático de trazo + `text-primary` + `role="img"`/`aria-label` obligatorio + `width/height="1em"` para escalar con `text-Nxl`).
+- [x] Reemplazado el render en `ChineseAnimalCard.tsx` y propagado a los consumidores restantes: `AnimalCalculator`, `ChineseHoroscopeDetail`, `ChineseHoroscopeWidget`, `ChineseCompatibility` y `ElementSelectorModal` (se le retiró la prop redundante `animalEmoji`, ya recibía `animal`; se actualizaron sus dos llamadores). `YearSelectorModal` quedó intacto por ser código muerto (no se renderiza en ninguna parte).
+- [x] Tests del nuevo componente (8) y migración de las aserciones de emoji de las tarjetas/consumidores al símbolo accesible (`getByRole('img', { name })`).
 
 #### 🎯 Criterios de Aceptación
 
-- Los animales del Horóscopo Chino se ven monocromáticos y coherentes con el Horóscopo Occidental (paleta de marca).
-- Ciclo de calidad frontend completo pasa.
+- Los animales del Horóscopo Chino se ven monocromáticos y coherentes con el Horóscopo Occidental (paleta de marca). ✅
+- Ciclo de calidad frontend completo pasa. ✅ (format, lint, type-check, 5172 tests, build, validate-architecture)
 
 #### 📁 Archivos involucrados
 
-- Nuevo `ChineseAnimalSymbol` (+ assets si SVG), `ChineseAnimalCard.tsx` y los ~5 consumidores del emoji (+ tests).
+- Nuevo `ChineseAnimalSymbol.tsx` (+ test), `ChineseAnimalCard.tsx`, `AnimalCalculator.tsx`, `ChineseHoroscopeDetail.tsx`, `ChineseHoroscopeWidget.tsx`, `ChineseCompatibility.tsx`, `ElementSelectorModal.tsx`, `AnimalHoroscopePage.tsx`, `app/horoscopo-chino/page.tsx` (+ tests migrados).
 
 ---
 

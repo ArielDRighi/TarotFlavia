@@ -177,7 +177,7 @@ describe('ChineseHoroscopeWidget', () => {
       expect(screen.getByTestId('chinese-horoscope-widget')).toBeInTheDocument();
     });
 
-    it('should display animal emoji', () => {
+    it('should display the monochrome animal symbol', () => {
       mockUseMyAnimalHoroscope.mockReturnValue({
         data: createMockHoroscope(),
         isLoading: false,
@@ -186,7 +186,9 @@ describe('ChineseHoroscopeWidget', () => {
 
       render(<ChineseHoroscopeWidget />);
 
-      expect(screen.getByText('🐉')).toBeInTheDocument();
+      const symbol = screen.getByRole('img', { name: 'Dragón' });
+      expect(symbol).toBeInTheDocument();
+      expect(symbol).toHaveClass('text-primary');
     });
 
     it('should display animal name in Spanish', () => {
@@ -369,7 +371,7 @@ describe('ChineseHoroscopeWidget', () => {
 
       render(<ChineseHoroscopeWidget />);
 
-      expect(screen.getByText('🐀')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Rata' })).toBeInTheDocument();
       expect(screen.getByText('Rata de Agua')).toBeInTheDocument();
     });
 
@@ -387,7 +389,7 @@ describe('ChineseHoroscopeWidget', () => {
 
       render(<ChineseHoroscopeWidget />);
 
-      expect(screen.getByText('🐍')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Serpiente' })).toBeInTheDocument();
       expect(screen.getByText('Serpiente de Fuego')).toBeInTheDocument();
     });
 

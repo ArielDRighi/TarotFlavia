@@ -62,11 +62,13 @@ describe('ChineseHoroscopeDetail', () => {
       expect(container).toBeInTheDocument();
     });
 
-    it('should display animal emoji', () => {
+    it('should display the monochrome animal symbol', () => {
       const horoscope = createMockHoroscope();
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('🐉')).toBeInTheDocument();
+      const symbol = screen.getByRole('img', { name: 'Dragón' });
+      expect(symbol).toBeInTheDocument();
+      expect(symbol).toHaveClass('text-primary');
     });
 
     it('should display animal name in Spanish when no element provided', () => {
@@ -281,7 +283,7 @@ describe('ChineseHoroscopeDetail', () => {
       const horoscope = createMockHoroscope({ animal: ChineseZodiacAnimal.RAT });
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('🐀')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Rata' })).toBeInTheDocument();
       expect(screen.getByText('Rata')).toBeInTheDocument();
     });
 
@@ -289,7 +291,7 @@ describe('ChineseHoroscopeDetail', () => {
       const horoscope = createMockHoroscope({ animal: ChineseZodiacAnimal.TIGER });
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('🐅')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Tigre' })).toBeInTheDocument();
       expect(screen.getByText('Tigre')).toBeInTheDocument();
     });
 
@@ -297,7 +299,7 @@ describe('ChineseHoroscopeDetail', () => {
       const horoscope = createMockHoroscope({ animal: ChineseZodiacAnimal.SNAKE });
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('🐍')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Serpiente' })).toBeInTheDocument();
       expect(screen.getByText('Serpiente')).toBeInTheDocument();
     });
   });

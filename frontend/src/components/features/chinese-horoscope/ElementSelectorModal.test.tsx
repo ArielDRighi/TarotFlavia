@@ -19,7 +19,6 @@ describe('ElementSelectorModal', () => {
     open: true,
     animal: ChineseZodiacAnimal.MONKEY,
     animalNameEs: 'Mono',
-    animalEmoji: '🐒',
     onSelectElement: mockOnSelectElement,
     onOpenChange: mockOnOpenChange,
   };
@@ -48,10 +47,12 @@ describe('ElementSelectorModal', () => {
       expect(screen.getByTestId('element-selector-modal')).toBeInTheDocument();
     });
 
-    it('should show animal emoji in title', () => {
+    it('should show the monochrome animal symbol in title', () => {
       render(<ElementSelectorModal {...defaultProps} />);
 
-      expect(screen.getByText('🐒')).toBeInTheDocument();
+      const symbol = screen.getByRole('img', { name: 'Mono' });
+      expect(symbol).toBeInTheDocument();
+      expect(symbol).toHaveClass('text-primary');
     });
 
     it('should show animal name in title', () => {
@@ -178,7 +179,6 @@ describe('ElementSelectorModal', () => {
           {...defaultProps}
           animal={ChineseZodiacAnimal.DRAGON}
           animalNameEs="Dragón"
-          animalEmoji="🐉"
         />
       );
 
@@ -193,7 +193,6 @@ describe('ElementSelectorModal', () => {
           {...defaultProps}
           animal={ChineseZodiacAnimal.RAT}
           animalNameEs="Rata"
-          animalEmoji="🐀"
         />
       );
 

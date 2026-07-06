@@ -106,7 +106,6 @@ export default function HoroscopoChinoPage() {
           open={isModalOpen}
           animal={selectedAnimalForModal}
           animalNameEs={CHINESE_ZODIAC_INFO[selectedAnimalForModal].nameEs}
-          animalEmoji={CHINESE_ZODIAC_INFO[selectedAnimalForModal].emoji}
           onSelectElement={handleElementSelect}
           onOpenChange={handleModalOpenChange}
         />

@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import type { ChineseZodiacAnimal, ChineseZodiacInfo } from '@/types/chinese-horoscope.types';
 
+import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
+
 /**
  * ChineseAnimalCard Component Props
  */
@@ -87,7 +89,11 @@ export function ChineseAnimalCard({
       role="button"
       aria-label={isUserAnimal ? `${animalInfo.nameEs} (tu animal)` : undefined}
     >
-      <span className="text-4xl">{animalInfo.emoji}</span>
+      <ChineseAnimalSymbol
+        animal={animalInfo.animal}
+        label={animalInfo.nameEs}
+        className="text-4xl"
+      />
       <p className="mt-2 font-serif text-lg">{animalInfo.nameEs}</p>
     </Card>
   );

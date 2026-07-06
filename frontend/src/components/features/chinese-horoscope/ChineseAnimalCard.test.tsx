@@ -27,12 +27,14 @@ describe('ChineseAnimalCard', () => {
   });
 
   describe('Rendering', () => {
-    it('should render animal emoji', () => {
+    it('should render the monochrome animal symbol (colorable with text-primary)', () => {
       const animalInfo = createTestAnimalInfo();
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
-      expect(screen.getByText('🐀')).toBeInTheDocument();
+      const symbol = screen.getByRole('img', { name: 'Rata' });
+      expect(symbol).toBeInTheDocument();
+      expect(symbol).toHaveClass('text-primary');
     });
 
     it('should render animal name in Spanish', () => {
@@ -269,7 +271,7 @@ describe('ChineseAnimalCard', () => {
           <ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />
         );
 
-        expect(screen.getByText(emoji)).toBeInTheDocument();
+        expect(screen.getByRole('img', { name: nameEs })).toBeInTheDocument();
         expect(screen.getByText(nameEs)).toBeInTheDocument();
         expect(screen.getByTestId(`chinese-animal-${animal}`)).toBeInTheDocument();
 

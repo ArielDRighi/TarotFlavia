@@ -10,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useMyAnimalHoroscope } from '@/hooks/api/useChineseHoroscope';
 import { CHINESE_ZODIAC_INFO, getCurrentYear, getElementIcon } from '@/lib/utils/chinese-zodiac';
 
+import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
+
 /**
  * ChineseHoroscopeWidget Component
  *
@@ -73,7 +75,11 @@ export function ChineseHoroscopeWidget() {
     <Card data-testid="chinese-horoscope-widget" className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-3xl">{animalInfo.emoji}</span>
+          <ChineseAnimalSymbol
+            animal={animalInfo.animal}
+            label={animalInfo.nameEs}
+            className="text-3xl"
+          />
           <div>
             <h2 className="font-serif text-xl">{displayName}</h2>
             <div className="flex items-center gap-2">
