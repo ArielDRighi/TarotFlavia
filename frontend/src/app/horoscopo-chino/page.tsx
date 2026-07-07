@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Settings } from 'lucide-react';
 import {
   ChineseAnimalSelector,
+  ChineseAnimalSymbol,
   AnimalCalculator,
   ElementSelectorModal,
 } from '@/components/features/chinese-horoscope';
@@ -43,7 +44,11 @@ export default function HoroscopoChinoPage() {
           <Card className="border-primary/50 bg-primary/5 border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-3xl">{CHINESE_ZODIAC_INFO[myHoroscope.animal].emoji}</span>
+                <ChineseAnimalSymbol
+                  animal={myHoroscope.animal}
+                  label={CHINESE_ZODIAC_INFO[myHoroscope.animal].nameEs}
+                  className="text-3xl"
+                />
                 <span className="text-xl">
                   Tu Horóscopo:{' '}
                   {myHoroscope.fullZodiacType || CHINESE_ZODIAC_INFO[myHoroscope.animal].nameEs}{' '}

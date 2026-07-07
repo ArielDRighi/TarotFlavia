@@ -73,14 +73,18 @@ describe('ChineseAnimalSymbol', () => {
     const animals = Object.values(ChineseZodiacAnimal);
     expect(animals).toHaveLength(12);
 
+    const markups = new Set<string>();
     for (const animal of animals) {
       const { unmount } = render(<ChineseAnimalSymbol animal={animal} label={animal} />);
       const el = screen.getByRole('img', { name: animal });
-      // Each animal must contribute at least one drawn shape.
+      // Each animal must contribute at least one drawn shape...
       expect(
         el.querySelectorAll('path, circle, ellipse, line, polyline, polygon').length
       ).toBeGreaterThan(0);
+      // ...and its glyph must differ from every other animal's.
+      markups.add(el.innerHTML);
       unmount();
     }
+    expect(markups.size).toBe(animals.length);
   });
 });
