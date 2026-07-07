@@ -183,7 +183,7 @@ describe('AnimalCalculator', () => {
       expect(screen.getByTestId('animal-calculator-result')).toBeInTheDocument();
     });
 
-    it('should display animal emoji', () => {
+    it('should display the monochrome animal symbol', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
         isLoading: false,
@@ -192,7 +192,9 @@ describe('AnimalCalculator', () => {
 
       render(<AnimalCalculator />);
 
-      expect(screen.getByText('🐉')).toBeInTheDocument();
+      const symbol = screen.getByRole('img', { name: 'Dragón' });
+      expect(symbol).toBeInTheDocument();
+      expect(symbol).toHaveClass('text-primary');
     });
 
     it('should display full zodiac type (animal + element)', () => {
@@ -295,7 +297,17 @@ describe('AnimalCalculator', () => {
 
     it('should persist birthDate in sessionStorage when viewing horoscope', async () => {
       const user = userEvent.setup();
-      const mockSetItem = vi.spyOn(Storage.prototype, 'setItem');
+
+      // En jsdom 27 `sessionStorage` es un objeto exótico cuyo `setItem` no se puede
+      // interceptar con vi.spyOn (ni vía Storage.prototype ni vía la instancia).
+      // Reemplazamos la instancia por un mock para poder verificar la persistencia.
+      const setItemMock = vi.fn();
+      const originalSessionStorage = window.sessionStorage;
+      Object.defineProperty(window, 'sessionStorage', {
+        value: { getItem: vi.fn(), setItem: setItemMock, removeItem: vi.fn(), clear: vi.fn() },
+        writable: true,
+        configurable: true,
+      });
 
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
@@ -314,8 +326,13 @@ describe('AnimalCalculator', () => {
       const viewButton = screen.getByTestId('animal-calculator-view-button');
       await user.click(viewButton);
 
-      expect(mockSetItem).toHaveBeenCalledWith('anonymousBirthDate', '1988-03-15');
-      mockSetItem.mockRestore();
+      expect(setItemMock).toHaveBeenCalledWith('anonymousBirthDate', '1988-03-15');
+
+      Object.defineProperty(window, 'sessionStorage', {
+        value: originalSessionStorage,
+        writable: true,
+        configurable: true,
+      });
     });
   });
 
@@ -344,7 +361,7 @@ describe('AnimalCalculator', () => {
 
       render(<AnimalCalculator />);
 
-      expect(screen.getByText('🐀')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Rata' })).toBeInTheDocument();
       expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Rata de Metal');
       expect(screen.getByText('Año chino: 2020')).toBeInTheDocument();
       expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: ⚪ Metal');
@@ -374,7 +391,7 @@ describe('AnimalCalculator', () => {
 
       render(<AnimalCalculator />);
 
-      expect(screen.getByText('🐍')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Serpiente' })).toBeInTheDocument();
       expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Serpiente de Madera');
       expect(screen.getByText('Año chino: 2025')).toBeInTheDocument();
       expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: 🟢 Madera');

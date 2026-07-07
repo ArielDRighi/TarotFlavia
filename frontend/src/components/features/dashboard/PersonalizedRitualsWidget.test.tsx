@@ -7,6 +7,8 @@ import { useAuthStore } from '@/stores/authStore';
 import type { AuthUser, AuthStore } from '@/types';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { RitualRecommendationsResponse } from '@/types';
+import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { ROUTES } from '@/lib/constants/routes';
 
 // Mock dependencies
 vi.mock('@/hooks/api/useRitualRecommendations');
@@ -71,10 +73,25 @@ describe('PersonalizedRitualsWidget', () => {
       expect(
         screen.getByText(/analizamos tus lecturas para sugerirte rituales personalizados/i)
       ).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /desbloquear recomendaciones/i })).toHaveAttribute(
-        'href',
-        '/premium'
-      );
+    });
+
+    it('should render the shared PremiumUpsellCard component', () => {
+      mockAuthStore('free');
+      mockRecommendationsHook(undefined);
+
+      render(<PersonalizedRitualsWidget />, { wrapper });
+
+      expect(screen.getByTestId('rituals-premium-upsell')).toBeInTheDocument();
+    });
+
+    it('should use the canonical CTA_PREMIUM copy pointing to /premium', () => {
+      mockAuthStore('free');
+      mockRecommendationsHook(undefined);
+
+      render(<PersonalizedRitualsWidget />, { wrapper });
+
+      const cta = screen.getByRole('link', { name: CTA_PREMIUM.UPSELL_SOFT });
+      expect(cta).toHaveAttribute('href', ROUTES.PREMIUM);
     });
 
     it('should not call useRitualRecommendations for free users', () => {
@@ -108,6 +125,23 @@ describe('PersonalizedRitualsWidget', () => {
       expect(
         screen.getByText(/realiza algunas lecturas más para que podamos analizar/i)
       ).toBeInTheDocument();
+    });
+
+    it('should render an illustrated empty state with an accessible CTA (T-DASH-005)', () => {
+      mockAuthStore('premium');
+      mockRecommendationsHook({ hasRecommendations: false, recommendations: [] });
+
+      render(<PersonalizedRitualsWidget />, { wrapper });
+
+      // Título del estado vacío + ilustración de marca con alt en español
+      expect(screen.getByText('Aún no hay recomendaciones')).toBeInTheDocument();
+      expect(
+        screen.getByAltText('Altar ritual con velas y elementos místicos en tonos violeta y dorado')
+      ).toBeInTheDocument();
+
+      // CTA claro con href correcto
+      const cta = screen.getByRole('link', { name: /hacer una lectura/i });
+      expect(cta).toHaveAttribute('href', '/tarot');
     });
 
     it('should render recommendations correctly', () => {
@@ -204,8 +238,8 @@ describe('PersonalizedRitualsWidget', () => {
 
       const { container } = render(<PersonalizedRitualsWidget />, { wrapper });
 
-      // Check that icon wrapper exists
-      const iconWrapper = container.querySelector('.bg-purple-500\\/20');
+      // Check that icon wrapper exists (brand token background)
+      const iconWrapper = container.querySelector('.bg-primary\\/10');
       expect(iconWrapper).toBeInTheDocument();
     });
   });
@@ -237,6 +271,18 @@ describe('PersonalizedRitualsWidget', () => {
       expect(
         container.querySelector('[data-testid="personalized-rituals-widget"]')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('T-DASH-003 · Encabezado unificado (WidgetCard)', () => {
+    it('renders the title as a serif heading', () => {
+      mockAuthStore('free');
+      mockRecommendationsHook(undefined);
+
+      render(<PersonalizedRitualsWidget />, { wrapper });
+
+      const heading = screen.getByRole('heading', { name: 'Rituales Recomendados para Ti' });
+      expect(heading).toHaveClass('font-serif');
     });
   });
 });

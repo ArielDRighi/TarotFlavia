@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AIProviderService } from '../../../ai/application/services/ai-provider.service';
-import { AIMessage } from '../../../ai/domain/interfaces/ai-provider.interface';
+import {
+  AIMessage,
+  AIProviderType,
+} from '../../../ai/domain/interfaces/ai-provider.interface';
 import { ChartData } from '../../entities/birth-chart.entity';
 import {
   ZodiacSign,
@@ -81,6 +84,7 @@ export class ChartAISynthesisService {
           maxTokens: this.MAX_TOKENS,
           temperature: this.TEMPERATURE,
         },
+        AIProviderType.DEEPSEEK, // IA principal de carta astral (fallback automático)
       );
 
       const durationMs = Date.now() - startTime;

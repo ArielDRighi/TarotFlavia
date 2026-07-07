@@ -13,6 +13,9 @@ export type { ChineseAnimalCardProps } from './ChineseAnimalCard';
 export { ChineseAnimalSelector } from './ChineseAnimalSelector';
 export type { ChineseAnimalSelectorProps } from './ChineseAnimalSelector';
 
+export { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
+export type { ChineseAnimalSymbolProps } from './ChineseAnimalSymbol';
+
 export { ChineseCompatibility } from './ChineseCompatibility';
 export type { ChineseCompatibilityProps } from './ChineseCompatibility';
 

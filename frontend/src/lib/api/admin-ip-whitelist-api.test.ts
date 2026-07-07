@@ -52,10 +52,9 @@ describe('admin-ip-whitelist-api', () => {
 
       const result = await addIpToWhitelist({ ip: '203.0.113.45' });
 
-      expect(apiClient.post).toHaveBeenCalledWith(
-        API_ENDPOINTS.ADMIN.IP_WHITELIST,
-        { ip: '203.0.113.45' },
-      );
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.ADMIN.IP_WHITELIST, {
+        ip: '203.0.113.45',
+      });
       expect(result).toEqual(mockResponse);
     });
 
@@ -76,10 +75,9 @@ describe('admin-ip-whitelist-api', () => {
 
       const result = await removeIpFromWhitelist({ ip: '203.0.113.45' });
 
-      expect(apiClient.delete).toHaveBeenCalledWith(
-        API_ENDPOINTS.ADMIN.IP_WHITELIST,
-        { data: { ip: '203.0.113.45' } },
-      );
+      expect(apiClient.delete).toHaveBeenCalledWith(API_ENDPOINTS.ADMIN.IP_WHITELIST, {
+        data: { ip: '203.0.113.45' },
+      });
       expect(result).toEqual(mockResponse);
     });
 

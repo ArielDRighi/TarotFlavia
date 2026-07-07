@@ -16,6 +16,11 @@ export interface CardThumbnailProps {
   card: CardSummary;
   /** Additional CSS classes */
   className?: string;
+  /**
+   * Optional href override for the card link.
+   * Defaults to `/enciclopedia/{slug}` to preserve existing behavior.
+   */
+  href?: string;
 }
 
 /**
@@ -34,12 +39,15 @@ export interface CardThumbnailProps {
  * <CardThumbnail card={card} />
  * ```
  */
-export function CardThumbnail({ card, className }: CardThumbnailProps) {
+export function CardThumbnail({ card, className, href }: CardThumbnailProps) {
   const isMajor = card.arcanaType === ArcanaType.MAJOR;
   const badgeLabel = isMajor ? 'Arcanos Mayores' : card.suit ? SUIT_INFO[card.suit].nameEs : null;
 
   return (
-    <Link href={`/enciclopedia/${card.slug}`} className="group block">
+    <Link
+      href={href ?? `/enciclopedia/${card.slug}`}
+      className="group focus-visible:ring-secondary focus-visible:ring-offset-background block rounded-lg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+    >
       <div
         data-testid={`card-thumbnail-${card.slug}`}
         className={cn('overflow-hidden rounded-lg', className)}
@@ -52,7 +60,6 @@ export function CardThumbnail({ card, className }: CardThumbnailProps) {
             fill
             className="object-cover transition-transform duration-200 group-hover:scale-105"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-            unoptimized
           />
           {/* Type badge */}
           {badgeLabel && (

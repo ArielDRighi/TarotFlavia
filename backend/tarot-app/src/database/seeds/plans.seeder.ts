@@ -12,7 +12,11 @@ import { UserPlan } from '../../modules/users/entities/user.entity';
  * - Configures limits and features for each plan
  * - ANONYMOUS: For non-registered users (1 daily card reading, no AI)
  * - FREE: For registered users (2 readings, no AI - cost optimization)
- * - PREMIUM: Paid plan (4 readings, 100 AI requests monthly, all features)
+ * - PREMIUM: Paid plan (4 readings, unlimited AI, all features)
+ *
+ * Cuota de IA (aiQuotaMonthly) — fuente de verdad única (T-FBK-006):
+ * ANONYMOUS/FREE = 0 (sin IA); PREMIUM = -1 (ilimitado). Debe coincidir con el
+ * enforcement (AI_MONTHLY_QUOTAS en ai-usage.constants.ts).
  */
 export async function seedPlans(
   planRepository: Repository<Plan>,
@@ -40,6 +44,7 @@ export async function seedPlans(
       dailyCardLimit: 1,
       tarotReadingsLimit: 0,
       aiQuotaMonthly: 0, // No AI for anonymous users
+      birthChartMonthlyLimit: -1, // T-FBK-009: ilimitada (el lifetime anónimo lo gobierna el tracking anónimo)
       allowCustomQuestions: false,
       allowSharing: false,
       allowAdvancedSpreads: false,
@@ -55,6 +60,7 @@ export async function seedPlans(
       dailyCardLimit: 1,
       tarotReadingsLimit: 1,
       aiQuotaMonthly: 0,
+      birthChartMonthlyLimit: -1, // T-FBK-009: Free tiene carta astral ilimitada
       allowCustomQuestions: false,
       allowSharing: false,
       allowAdvancedSpreads: false,
@@ -64,12 +70,13 @@ export async function seedPlans(
       planType: UserPlan.PREMIUM,
       name: 'Plan Premium',
       description:
-        'Plan completo con 1 carta del día + 3 tiradas diarias, interpretaciones con IA y preguntas personalizadas',
+        'Plan completo con 1 carta del día + 3 tiradas diarias, interpretaciones profundas y preguntas personalizadas',
       price: 7000,
       readingsLimit: 4, // DEPRECATED: Use dailyCardLimit + tarotReadingsLimit (1 + 3)
       dailyCardLimit: 1, // 1 daily card per day (same as FREE, but with AI interpretation)
       tarotReadingsLimit: 3,
-      aiQuotaMonthly: 100,
+      aiQuotaMonthly: -1, // Ilimitado (acotado por los límites diarios por actividad)
+      birthChartMonthlyLimit: -1, // T-FBK-009: ilimitada; el extra Premium es el resumen con IA
       allowCustomQuestions: true,
       allowSharing: true,
       allowAdvancedSpreads: true,

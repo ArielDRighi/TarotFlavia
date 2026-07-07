@@ -1,13 +1,28 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
+import { ArticleHero } from './ArticleHero';
+import { ArticleToc } from './ArticleToc';
+import { MarkdownArticle } from './MarkdownArticle';
+import { RelatedTarotCards } from './RelatedTarotCards';
+import { Reveal } from '@/components/common';
 import { ROUTES } from '@/lib/constants/routes';
+import {
+  getArticleEditorial,
+  getAstroCategoryHero,
+  isAstroCategory,
+} from '@/lib/data/encyclopedia-editorial.data';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleDetail, ArticleSummary } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
+import {
+  extractArticleHeadings,
+  extractAstroHeadings,
+  getArticleReadingMeta,
+  stripLeadingMarkdownHeading,
+} from '@/lib/utils/text';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -47,6 +62,15 @@ const GUIDE_CTA_MAP: Partial<Record<ArticleCategory, GuideCta>> = {
   },
 };
 
+/**
+ * Whether a category is one of the activity guides (`guide_*`). Drives the
+ * editorial template (hero + editorial Markdown), independent of whether the
+ * guide has a module CTA configured above.
+ */
+function isGuideCategory(category: ArticleCategory): boolean {
+  return category.startsWith('guide_');
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ArticleDetailViewProps {
@@ -81,6 +105,56 @@ function getArticleRoute(article: ArticleSummary): string {
   }
 }
 
+interface SimpleArticleHeaderProps {
+  title: string;
+  categoryLabel: string;
+  snippet?: string;
+}
+
+/**
+ * Plain header used for articles that are neither activity guides nor astrology
+ * categories: breadcrumb + title + category badge + snippet. Kept as a defensive
+ * fallback for any future category without a themed treatment.
+ */
+function SimpleArticleHeader({ title, categoryLabel, snippet }: SimpleArticleHeaderProps) {
+  return (
+    <>
+      {/* Breadcrumb de navegación */}
+      <nav aria-label="Navegación" className="flex items-center gap-2 text-sm">
+        <Link
+          data-testid="breadcrumb-enciclopedia"
+          href={ROUTES.ENCICLOPEDIA}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Enciclopedia
+        </Link>
+        <span className="text-muted-foreground" aria-hidden="true">
+          /
+        </span>
+        <span
+          data-testid="breadcrumb-current"
+          className="text-foreground font-medium"
+          aria-current="page"
+        >
+          {title}
+        </span>
+      </nav>
+
+      {/* Header: nombre del artículo + badge de categoría */}
+      <div className="space-y-3">
+        <h1 className="font-serif text-4xl font-bold">{title}</h1>
+        <span
+          data-testid="article-category-badge"
+          className="bg-secondary text-bg-hero inline-block rounded-full px-3 py-1 text-sm font-medium"
+        >
+          {categoryLabel}
+        </span>
+        {snippet && <p className="text-muted-foreground text-lg">{snippet}</p>}
+      </div>
+    </>
+  );
+}
+
 function RelatedArticleItem({ article }: RelatedArticleItemProps) {
   return (
     <Link
@@ -113,91 +187,142 @@ function RelatedArticleItem({ article }: RelatedArticleItemProps) {
 export function ArticleDetailView({ article, className }: ArticleDetailViewProps) {
   const categoryLabel = ARTICLE_CATEGORY_LABELS[article.category];
   const cta = GUIDE_CTA_MAP[article.category];
-  const isGuide = cta !== undefined;
+  const isGuide = isGuideCategory(article.category);
+  // Astrology categories (signs, planets, houses, elements, modalities) get a
+  // themed hero band and a TOC when the article has H2 sections — but NOT the
+  // full editorial mode (no drop-cap, no numbered badges). The image is optional:
+  // when absent, ArticleHero renders the gradient band on its own.
+  const isAstro = !isGuide && isAstroCategory(article.category);
+  const astroHero = isAstro ? getAstroCategoryHero(article.category) : undefined;
+  const editorial = getArticleEditorial(article.slug);
+  const readingMeta = getArticleReadingMeta(article.content);
+  // Memoized so the array identity is stable across re-renders: ArticleToc keys
+  // its IntersectionObserver effect on `headings`, so a fresh array each render
+  // would tear down and rebuild the observer needlessly.
+  //
+  // Guides: only numbered H2s (`## N. Título`) become TOC entries.
+  // Astro: all H2s (numbered or not) are indexed sequentially — real astro
+  // articles use unnumbered thematic H2s (e.g. `## Significado Astrológico`).
+  const headings = useMemo(
+    () =>
+      isGuide
+        ? extractArticleHeadings(article.content)
+        : isAstro
+          ? extractAstroHeadings(article.content)
+          : [],
+    [isGuide, isAstro, article.content]
+  );
+  const hasToc = headings.length > 0;
   const hasRelatedTarotCards =
     article.relatedTarotCards !== null && article.relatedTarotCards.length > 0;
   const hasRelatedArticles = article.relatedArticles.length > 0;
 
-  return (
-    <div data-testid="article-detail-view" className={cn('space-y-8', className)}>
-      {/* Breadcrumb de navegación */}
-      <nav aria-label="Navegación" className="flex items-center gap-2 text-sm">
-        <Link
-          data-testid="breadcrumb-enciclopedia"
-          href={ROUTES.ENCICLOPEDIA}
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Enciclopedia
-        </Link>
-        <span className="text-muted-foreground" aria-hidden="true">
-          /
-        </span>
-        <span
-          data-testid="breadcrumb-current"
-          className="text-foreground font-medium"
-          aria-current="page"
-        >
-          {article.nameEs}
-        </span>
-      </nav>
+  // Reading column body — shared between the guide layout (centered column with a
+  // lateral TOC) and the simple layout (signs, planets, …) so it stays DRY.
+  const articleBody = (
+    <>
+      {/* Contenido Markdown — se elimina el título `#` inicial para no duplicar
+          el <h1> de la página (ya renderizado en el hero/cabecera). En guías se
+          activa el modo editorial (drop-cap, badges numerados, ✦, imágenes y
+          callouts por sección modelados como datos). */}
+      <MarkdownArticle
+        content={stripLeadingMarkdownHeading(article.content)}
+        editorial={isGuide}
+        astro={isAstro}
+        sections={editorial?.sections}
+        className={cn(isGuide && 'max-w-none')}
+      />
 
-      {/* Header: nombre del artículo + badge de categoría */}
-      <div className="space-y-3">
-        <h1 className="font-serif text-4xl font-bold">{article.nameEs}</h1>
-        <span
-          data-testid="article-category-badge"
-          className="bg-secondary text-secondary-foreground inline-block rounded-full px-3 py-1 text-sm font-medium"
-        >
-          {categoryLabel}
-        </span>
-        {article.snippet && <p className="text-muted-foreground text-lg">{article.snippet}</p>}
-      </div>
-
-      {/* Contenido Markdown */}
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
-      </div>
-
-      {/* Cartas de tarot relacionadas */}
+      {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
+          completa (título incluido) o nada si ningún ID resuelve. Las secciones
+          complementarias se revelan con un fade-up escalonado al hacer scroll. */}
       {hasRelatedTarotCards && (
-        <section data-testid="related-tarot-cards" className="space-y-4">
-          <h2 className="text-foreground text-xl font-bold">Cartas de Tarot Relacionadas</h2>
-          <div className="flex flex-wrap gap-2">
-            {article.relatedTarotCards!.map((cardId) => (
-              <span
-                key={cardId}
-                className="bg-muted text-muted-foreground rounded-md px-3 py-1 text-sm"
-              >
-                #{cardId}
-              </span>
-            ))}
-          </div>
-        </section>
+        <Reveal index={0}>
+          <RelatedTarotCards cardIds={article.relatedTarotCards!} />
+        </Reveal>
       )}
 
       {/* Artículos relacionados */}
       {hasRelatedArticles && (
-        <section data-testid="related-articles" className="space-y-4">
-          <h2 className="text-foreground text-xl font-bold">Artículos Relacionados</h2>
-          <div className="flex flex-col gap-3">
-            {article.relatedArticles.map((relatedArticle) => (
-              <RelatedArticleItem key={relatedArticle.id} article={relatedArticle} />
-            ))}
-          </div>
-        </section>
+        <Reveal index={1}>
+          <section data-testid="related-articles" className="space-y-4">
+            <h2 className="text-foreground text-xl font-bold">Artículos Relacionados</h2>
+            <div className="flex flex-col gap-3">
+              {article.relatedArticles.map((relatedArticle) => (
+                <RelatedArticleItem key={relatedArticle.id} article={relatedArticle} />
+              ))}
+            </div>
+          </section>
+        </Reveal>
       )}
 
-      {/* CTA al módulo correspondiente (solo guías) */}
-      {isGuide && cta && (
-        <div className="border-t pt-6">
-          <Link
-            data-testid="article-cta"
-            href={cta.href}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center rounded-lg px-6 py-3 font-semibold transition-colors"
-          >
-            {cta.label}
-          </Link>
+      {/* CTA al módulo correspondiente (guías con herramienta asociada) */}
+      {cta && (
+        <Reveal index={2}>
+          <div className="border-t pt-6">
+            <Link
+              data-testid="article-cta"
+              href={cta.href}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center rounded-lg px-6 py-3 font-semibold transition-colors"
+            >
+              {cta.label}
+            </Link>
+          </div>
+        </Reveal>
+      )}
+    </>
+  );
+
+  return (
+    <div data-testid="article-detail-view" className={cn('space-y-8', className)}>
+      {isGuide ? (
+        /* Guías: plantilla editorial con hero inmersivo (imagen opcional) */
+        <ArticleHero
+          category={categoryLabel}
+          title={article.nameEs}
+          lead={article.snippet}
+          image={editorial?.hero}
+          readingTimeMinutes={readingMeta.readingTimeMinutes}
+          sectionCount={readingMeta.sectionCount}
+        />
+      ) : isAstro ? (
+        /* Astrología (signos, planetas, casas, elementos, modalidades): banda
+           temática con imagen genérica por categoría, SIN el modo editorial
+           completo (sin meta de lectura, drop-cap ni TOC). Si el asset aún no
+           existe, ArticleHero degrada a la banda con gradiente sola. */
+        <ArticleHero
+          category={categoryLabel}
+          title={article.nameEs}
+          lead={article.snippet}
+          image={astroHero}
+        />
+      ) : (
+        /* Cualquier otra categoría: cabecera simple (fallback defensivo). */
+        <SimpleArticleHeader
+          title={article.nameEs}
+          categoryLabel={categoryLabel}
+          snippet={article.snippet}
+        />
+      )}
+
+      {/* Columna de lectura. En guías y artículos de astrología se centra en
+          una columna de lectura (max-w-[68ch]) con TOC lateral opcional en
+          desktop cuando el artículo tiene secciones H2. El resto de artículos
+          conserva su flujo simple. */}
+      {isGuide || isAstro ? (
+        <div className="lg:flex lg:items-start lg:justify-center lg:gap-10">
+          {hasToc && (
+            <ArticleToc
+              headings={headings}
+              className="mb-8 lg:order-2 lg:mb-0 lg:w-60 lg:shrink-0"
+            />
+          )}
+          <div className="mx-auto w-full max-w-[68ch] space-y-8 lg:order-1 lg:mx-0">
+            {articleBody}
+          </div>
         </div>
+      ) : (
+        <div className="space-y-8">{articleBody}</div>
       )}
     </div>
   );

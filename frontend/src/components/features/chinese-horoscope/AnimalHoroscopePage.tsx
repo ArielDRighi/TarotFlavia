@@ -82,7 +82,7 @@ export function AnimalHoroscopePage() {
         Todos los animales
       </Button>
 
-      <div className="mb-8 overflow-x-auto pb-2">
+      <div className="mb-8 overflow-x-auto px-1 py-2">
         <ChineseAnimalSelector
           selectedAnimal={animal}
           userAnimal={userAnimal}
@@ -98,7 +98,6 @@ export function AnimalHoroscopePage() {
         open={shouldShowModal}
         animal={animal}
         animalNameEs={animalInfo.nameEs}
-        animalEmoji={animalInfo.emoji}
         onSelectElement={handleElementSelect}
         onOpenChange={handleModalClose}
       />

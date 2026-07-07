@@ -51,11 +51,16 @@ export class ReadingsController {
     private readonly shareTextGenerator: ShareTextGeneratorService,
   ) {}
 
+  // T-FBK-006: NO se aplica AIQuotaGuard aquí. La creación de lecturas es un
+  // flujo compartido: Free recibe interpretación desde contenido de DB (sin IA)
+  // y Premium con IA. El acceso a IA ya lo gatea RequiresPremiumForAIGuard
+  // (solo Premium); la cuota mensual de IA (0 para Free) no debe bloquear las
+  // lecturas de contenido de DB de Free. La cuota se aplica en los endpoints
+  // exclusivamente de IA (regenerar interpretación / carta, interpretaciones).
   @UseGuards(
     JwtAuthGuard,
     RequiresPremiumForCustomQuestionGuard,
     RequiresPremiumForAIGuard,
-    AIQuotaGuard,
     CheckUsageLimitGuard,
   )
   @UseInterceptors(IncrementUsageInterceptor)

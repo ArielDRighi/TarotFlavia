@@ -9,24 +9,8 @@ const nextConfig: NextConfig = {
 
   // Image optimization configuration
   images: {
-    // Remote patterns for external images
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'upload.wikimedia.org',
-        pathname: '/wikipedia/commons/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.wikimedia.org',
-      },
-      // Add patterns for avatar/profile images if using external CDN
-      // {
-      //   protocol: 'https',
-      //   hostname: 'cdn.auguria.com',
-      //   pathname: '/avatars/**',
-      // },
-    ],
+    // All card images are now served locally from /images/tarot/*.webp
+    remotePatterns: [],
 
     // Image formats to support (AVIF provides better compression than WebP)
     formats: ['image/avif', 'image/webp'],

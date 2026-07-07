@@ -15,6 +15,35 @@ import {
 import type { ZodiacSign } from '@/types/horoscope.types';
 
 /**
+ * Estados de error tipados para `useMySignHoroscope`.
+ *
+ * - `no-birthdate`: el backend respondió 400 porque el usuario no tiene
+ *   fecha de nacimiento configurada → mostrar CTA a `/perfil`.
+ * - `not-generated`: el backend respondió 404 porque el horóscopo del día
+ *   para el signo del usuario todavía no fue generado → mostrar mensaje
+ *   "se está preparando".
+ * - `error`: cualquier otro error (5xx, red, desconocido) → mostrar
+ *   mensaje de error genérico con opción de reintentar.
+ */
+export type MySignHoroscopeErrorState = 'no-birthdate' | 'not-generated' | 'error';
+
+/**
+ * Extrae el HTTP status code de un error (tipo AxiosError) si existe.
+ */
+function getHttpStatus(error: unknown): number | undefined {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const response = (error as { response?: unknown }).response;
+    if (response && typeof response === 'object' && 'status' in response) {
+      const status = (response as { status?: unknown }).status;
+      if (typeof status === 'number') {
+        return status;
+      }
+    }
+  }
+  return undefined;
+}
+
+/**
  * Query keys para horóscopos
  * Organizados jerárquicamente para facilitar invalidaciones
  */
@@ -78,28 +107,58 @@ export function useTodayHoroscope(sign: ZodiacSign) {
 
 /**
  * Hook para obtener el horóscopo del usuario autenticado
- * basado en su fecha de nacimiento
+ * basado en su fecha de nacimiento.
  *
- * IMPORTANTE: Este hook puede fallar si el usuario no tiene configurada
- * su fecha de nacimiento. Por eso retry está deshabilitado.
+ * Retorna además `errorState` que diferencia los distintos motivos de
+ * fallo (ver {@link MySignHoroscopeErrorState}) para que los componentes
+ * no confundan "fecha no configurada" con "horóscopo no generado" o
+ * con un error transitorio.
+ *
+ * Política de reintentos:
+ * - 400 / 404 (cualquier 4xx) → NO reintenta (es un error legítimo).
+ * - 5xx, red u otros → reintenta hasta 2 veces.
  *
  * @example
  * ```tsx
  * function MyHoroscope() {
- *   const { data, isLoading, error } = useMySignHoroscope();
+ *   const { data, isLoading, errorState, refetch } = useMySignHoroscope();
  *
  *   if (isLoading) return <Spinner />;
- *   if (error) return <ConfigureBirthDate />;
+ *   if (errorState === 'no-birthdate') return <ConfigureBirthDate />;
+ *   if (errorState === 'not-generated') return <PreparingMessage />;
+ *   if (errorState === 'error') return <ErrorWithRetry onRetry={refetch} />;
  *
- *   return <HoroscopeCard horoscope={data} />;
+ *   return <HoroscopeCard horoscope={data!} />;
  * }
  * ```
  */
 export function useMySignHoroscope() {
-  return useQuery({
+  const query = useQuery({
     queryKey: horoscopeQueryKeys.mySign(),
     queryFn: getMySignHoroscope,
     staleTime: 1000 * 60 * 60, // 1 hora
-    retry: false, // No reintentar si falla (probablemente por falta de birthDate)
+    retry: (failureCount, error) => {
+      const status = getHttpStatus(error);
+      // 4xx (400 sin birthDate, 404 sin generar, etc.) → no reintentar
+      if (status !== undefined && status >= 400 && status < 500) {
+        return false;
+      }
+      // 5xx / red / desconocido → hasta 2 reintentos
+      return failureCount < 2;
+    },
   });
+
+  let errorState: MySignHoroscopeErrorState | null = null;
+  if (query.error) {
+    const status = getHttpStatus(query.error);
+    if (status === 400) {
+      errorState = 'no-birthdate';
+    } else if (status === 404) {
+      errorState = 'not-generated';
+    } else {
+      errorState = 'error';
+    }
+  }
+
+  return { ...query, errorState };
 }

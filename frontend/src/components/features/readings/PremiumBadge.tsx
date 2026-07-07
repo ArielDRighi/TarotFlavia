@@ -78,9 +78,9 @@ export function PremiumBadge({
       title={tooltip}
       className={cn(
         'inline-flex items-center gap-1.5',
-        'bg-gradient-to-r from-purple-600 to-pink-600',
-        'border-none text-white',
-        'hover:from-purple-700 hover:to-pink-700',
+        'bg-secondary text-bg-hero',
+        'border-none',
+        'hover:bg-secondary/90',
         'transition-all duration-200',
         'font-semibold',
         SIZE_CLASSES[size],

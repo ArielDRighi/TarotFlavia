@@ -13,6 +13,7 @@ import { ChartCacheService } from './chart-cache.service';
 import { ChartPdfService } from './chart-pdf.service';
 import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import { AnonymousTrackingService } from '../../../usage-limits/services/anonymous-tracking.service';
+import { PlanConfigService } from '../../../plan-config/plan-config.service';
 
 describe('BirthChartFacadeService', () => {
   let service: BirthChartFacadeService;
@@ -148,6 +149,13 @@ describe('BirthChartFacadeService', () => {
     canAccessLifetime: jest.fn().mockResolvedValue(true),
   };
 
+  // T-FBK-009: la fuente del límite de carta astral es la config de plan en DB.
+  // Por defecto ilimitada (-1); los tests que necesiten un límite finito lo
+  // sobrescriben con mockResolvedValueOnce.
+  const planConfigServiceMock = {
+    getBirthChartLimit: jest.fn().mockResolvedValue(-1),
+  };
+
   const savedChart: Partial<BirthChart> = { id: 77 };
 
   const chartRepositoryMock = {
@@ -198,6 +206,10 @@ describe('BirthChartFacadeService', () => {
         {
           provide: AnonymousTrackingService,
           useValue: anonymousTrackingServiceMock,
+        },
+        {
+          provide: PlanConfigService,
+          useValue: planConfigServiceMock,
         },
       ],
     }).compile();
@@ -344,7 +356,26 @@ describe('BirthChartFacadeService', () => {
     );
   });
 
-  it('should return usage status for authenticated free user', async () => {
+  it('should return unlimited usage status for authenticated free user (T-FBK-009)', async () => {
+    // Free ahora es ilimitada: el límite se lee de la config de plan en DB (-1).
+    const result = await service.getUsageStatus(
+      { userId: 1, email: 'test@example.com', plan: UserPlan.FREE },
+      'fingerprint',
+    );
+
+    expect(planConfigServiceMock.getBirthChartLimit).toHaveBeenCalledWith(
+      UserPlan.FREE,
+    );
+    expect(result.limit).toBe(-1);
+    expect(result.remaining).toBe(-1);
+    expect(result.canGenerate).toBe(true);
+    expect(result.resetsAt).toBeNull();
+  });
+
+  it('should compute used/remaining when admin configured a finite limit', async () => {
+    // Escenario admin-configurado: Free con límite finito de 3/mes.
+    planConfigServiceMock.getBirthChartLimit.mockResolvedValueOnce(3);
+
     const result = await service.getUsageStatus(
       { userId: 1, email: 'test@example.com', plan: UserPlan.FREE },
       'fingerprint',
@@ -358,6 +389,7 @@ describe('BirthChartFacadeService', () => {
     expect(result.limit).toBe(3);
     expect(result.used).toBe(2);
     expect(result.remaining).toBe(1);
+    expect(result.canGenerate).toBe(true);
   });
 
   it('should return usage status for authenticated premium user', async () => {

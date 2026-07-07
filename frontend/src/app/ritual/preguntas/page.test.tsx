@@ -39,6 +39,10 @@ vi.mock('@/hooks/useAuth', () => ({
 vi.mock('@/hooks/api/useSubscription', () => ({
   useCreatePreapproval: vi.fn().mockReturnValue({ mutate: vi.fn(), isPending: false }),
 }));
+// usePublicPlans (useQuery) lo usa UpgradeModal para mostrar el precio Premium.
+vi.mock('@/hooks/api/usePublicPlans', () => ({
+  usePublicPlans: vi.fn().mockReturnValue({ data: [{ planType: 'premium', price: 9.99 }] }),
+}));
 
 // Mock data
 const mockCategory = {

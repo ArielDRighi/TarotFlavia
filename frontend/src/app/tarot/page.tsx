@@ -2,8 +2,8 @@
 
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { TarotPageContent } from '@/components/features/readings/TarotPageContent';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
-import { ROUTES } from '@/lib/constants/routes';
+import { ServiceIntro } from '@/components/features/encyclopedia';
+import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
 
 /**
  * Tarot Page - Category Selector
@@ -23,10 +23,10 @@ export default function TarotPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mx-auto mb-8 max-w-2xl">
-        <EncyclopediaInfoWidget slug="guia-tarot" href={ROUTES.ENCICLOPEDIA_GUIA('guia-tarot')} />
-      </div>
       <TarotPageContent />
+      <div className="mx-auto mt-8 max-w-2xl">
+        <ServiceIntro data={SERVICE_INTROS.tarot} />
+      </div>
     </div>
   );
 }

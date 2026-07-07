@@ -44,5 +44,12 @@ export interface IAIProvider {
 
   isAvailable(): Promise<boolean>;
 
+  /**
+   * Synchronous check: whether the provider has an API key configured.
+   * Used to skip unconfigured providers in the fallback chain without
+   * attempting a call (and without polluting usage metrics with errors).
+   */
+  isConfigured(): boolean;
+
   getProviderType(): AIProviderType;
 }

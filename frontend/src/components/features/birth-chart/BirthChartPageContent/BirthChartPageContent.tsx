@@ -29,8 +29,8 @@ import type { ChartResponse, GenerateChartRequest } from '@/types/birth-chart-ap
 import { isPremiumChartResponse } from '@/types/birth-chart-api.types';
 
 import { BirthChartLoading } from '@/components/features/birth-chart/BirthChartLoading';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
-import { ROUTES } from '@/lib/constants/routes';
+import { ServiceIntro } from '@/components/features/encyclopedia';
+import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -184,12 +184,6 @@ export function BirthChartPageContent() {
         )}
       </div>
 
-      <EncyclopediaInfoWidget
-        slug="guia-carta-astral"
-        href={ROUTES.ENCICLOPEDIA_GUIA('guia-carta-astral')}
-        className="mb-6"
-      />
-
       {/* Error global */}
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -237,8 +231,7 @@ export function BirthChartPageContent() {
               {isAuthenticated && user?.plan === 'free' && (
                 <div className="space-y-2">
                   <p className="text-sm">
-                    Actualiza a Premium para obtener cartas ilimitadas y síntesis personalizada con
-                    IA.
+                    Actualiza a Premium para obtener cartas ilimitadas y síntesis personalizada.
                   </p>
                   <Button asChild>
                     <Link href="/premium">Ver planes Premium</Link>
@@ -269,7 +262,7 @@ export function BirthChartPageContent() {
               )}
               {user?.plan === 'premium' && (
                 <>
-                  <li>✓ Síntesis personalizada con IA</li>
+                  <li>✓ Síntesis personalizada</li>
                   <li>✓ Historial de cartas</li>
                 </>
               )}
@@ -289,6 +282,8 @@ export function BirthChartPageContent() {
           </CardContent>
         </Card>
       </div>
+
+      <ServiceIntro data={SERVICE_INTROS['birth-chart']} className="mt-6" />
     </div>
   );
 }

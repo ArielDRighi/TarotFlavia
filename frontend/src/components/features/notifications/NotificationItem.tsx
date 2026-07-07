@@ -21,7 +21,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
 
   const baseClassName = cn(
     'w-full p-4 text-left transition-colors',
-    isUnread ? 'bg-purple-50 dark:bg-purple-950/20' : 'bg-white dark:bg-gray-800'
+    isUnread ? 'bg-purple-50' : 'bg-white'
   );
 
   const notificationContent = (
@@ -37,13 +37,11 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
       <div className="min-w-0 flex-1">
         {/* Title and Time */}
         <div className="mb-1 flex items-start justify-between gap-2">
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-            {notification.title}
-          </h4>
+          <h4 className="text-sm font-semibold text-gray-900">{notification.title}</h4>
           <time
             dateTime={notification.createdAt}
             data-testid="notification-time"
-            className="flex-shrink-0 text-xs text-gray-500 dark:text-gray-400"
+            className="flex-shrink-0 text-xs text-gray-500"
           >
             {/* BUGFIX: Use formatTimeAgo to avoid UTC timezone issues */}
             {formatTimeAgo(notification.createdAt)}
@@ -51,10 +49,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
         </div>
 
         {/* Message */}
-        <p
-          data-testid="notification-message"
-          className="line-clamp-2 text-sm text-gray-700 dark:text-gray-300"
-        >
+        <p data-testid="notification-message" className="line-clamp-2 text-sm text-gray-700">
           {notification.message}
         </p>
 
@@ -85,7 +80,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
       type="button"
       data-testid="notification-item"
       onClick={handleClick}
-      className={cn(baseClassName, 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700')}
+      className={cn(baseClassName, 'cursor-pointer hover:bg-gray-100')}
     >
       {notificationContent}
     </button>

@@ -98,11 +98,7 @@ export default function RegisterCTAModal({ open, onClose, onRegister }: Register
 
         {/* CTA Buttons */}
         <DialogFooter className="flex-col gap-3 sm:flex-col">
-          <Button
-            onClick={onRegister}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
-            size="lg"
-          >
+          <Button onClick={onRegister} className="focus-visible:ring-secondary/50 w-full" size="lg">
             Registrarme Gratis
           </Button>
           <Button variant="outline" onClick={onClose} className="w-full" size="lg">

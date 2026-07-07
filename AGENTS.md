@@ -282,6 +282,7 @@ node scripts/validate-architecture.js   # ⚠️ CRÍTICO: Validar arquitectura 
 7. Actualizar backlog (marcar tarea completada)
 8. Crear commit
 9. Push y crear PR apuntando a develop
+10. Preguntar si lanzar el revisor local (Rule 5)
 ```
 
 **Para tareas de FRONTEND:**
@@ -296,6 +297,7 @@ node scripts/validate-architecture.js   # ⚠️ CRÍTICO: Validar arquitectura 
 8. Actualizar backlog (marcar tarea completada)
 9. Crear commit
 10. Push y crear PR apuntando a develop
+11. Preguntar si lanzar el revisor local (Rule 5)
 ```
 
 **Marcar cada ítem INMEDIATAMENTE después de completarlo.**
@@ -311,6 +313,40 @@ node scripts/validate-architecture.js   # ⚠️ CRÍTICO: Validar arquitectura 
 - Usar TODO list para tracking
 - Verificar que TODOS los pasos estén ✅ antes del commit
 - Actualizar backlog ANTES del commit final
+
+---
+
+### Rule 5: Revisor Local Tras Crear el PR
+
+**CRÍTICO:** Inmediatamente DESPUÉS de crear un PR (último paso del workflow), el agente **DEBE preguntar automáticamente** al usuario si quiere lanzar el **revisor local** sobre ese PR. No esperar a que el usuario lo pida.
+
+**Formato obligatorio de la pregunta (tras crear el PR):**
+
+```
+PR #XXX creado. ¿Lanzo el revisor local sobre los cambios?
+```
+
+#### ¿Qué es el revisor local?
+
+Un **sub-agente revisor** (lanzado con la herramienta Agent, tipo `general-purpose`) que:
+
+- Analiza el diff de la rama contra `develop` (`git --no-pager diff develop...HEAD`).
+- **NO modifica archivos ni publica nada en GitHub** — devuelve un informe en el chat.
+- Revisa estas dimensiones: corrección y edge cases, cumplimiento de criterios de aceptación, **reglas duras del proyecto** (sin `any`/`eslint-disable`/`@ts-ignore`, IDs numéricos, endpoints/rutas centralizadas, español en texto user-facing, `'use client'`, `data-testid`, TS estricto), reutilización/simplicidad/eficiencia, calidad y cobertura de tests, y posibles regresiones.
+- Entrega: **Veredicto** (APROBADO / APROBADO CON OBSERVACIONES / CAMBIOS REQUERIDOS) + hallazgos por severidad (🔴 Bloqueante / 🟠 Importante / 🟡 Menor / 💡 Sugerencia) con `archivo:línea` y sugerencia concreta.
+
+#### Modos ofrecidos al preguntar
+
+1. **Sub-agente local** (default): informe en el chat, sin tocar GitHub.
+2. **`/code-review --comment`**: publica los hallazgos como comentarios inline en el PR de GitHub.
+3. **`/code-review`** sin postear: hallazgos solo en el chat.
+4. **`/security-review`**: revisión enfocada en seguridad.
+
+> Publicar en GitHub es una acción de cara al exterior: confirmar el modo antes de postear.
+
+#### Tras recibir el informe del revisor
+
+El feedback del revisor local se trata **con el mismo criterio que el feedback de un PR humano**: aplicar `docs/WORKFLOW_PR_FEEDBACK_BACKEND.md` o `docs/WORKFLOW_PR_FEEDBACK_FRONTEND.md` (validar archivos contra el PR, categorizar ✅ APLICAR / ⚠️ DISCUTIR / ℹ️ ACLARAR, esperar confirmación, y crear **un NUEVO commit** — nunca `--amend`).
 
 ---
 

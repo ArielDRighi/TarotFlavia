@@ -27,12 +27,26 @@ describe('ChineseAnimalCard', () => {
   });
 
   describe('Rendering', () => {
-    it('should render animal emoji', () => {
+    it('should render the monochrome animal symbol (colorable with text-primary)', () => {
       const animalInfo = createTestAnimalInfo();
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
-      expect(screen.getByText('🐀')).toBeInTheDocument();
+      const symbol = screen.getByRole('img', { name: 'Rata' });
+      expect(symbol).toBeInTheDocument();
+      expect(symbol).toHaveClass('text-primary');
+    });
+
+    it('should center the animal symbol like the western zodiac card', () => {
+      const animalInfo = createTestAnimalInfo();
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
+
+      // El <svg> es display:block por el preflight de Tailwind, así que `text-center`
+      // no lo centra: se fuerza `block mx-auto` para alinearlo igual que el occidental.
+      const symbol = screen.getByRole('img', { name: 'Rata' });
+      expect(symbol).toHaveClass('block');
+      expect(symbol).toHaveClass('mx-auto');
     });
 
     it('should render animal name in Spanish', () => {
@@ -51,32 +65,43 @@ describe('ChineseAnimalCard', () => {
       expect(screen.getByTestId('chinese-animal-dragon')).toBeInTheDocument();
     });
 
-    it('should show "Tu animal" label when isUserAnimal is true', () => {
+    it('should not render a visible "Tu animal" label that alters card height', () => {
       const animalInfo = createTestAnimalInfo();
 
       render(
         <ChineseAnimalCard animalInfo={animalInfo} isUserAnimal={true} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText('Tu animal')).toBeInTheDocument();
+      // El destacado se apoya solo en el borde: no debe agregarse texto visible.
+      expect(screen.queryByText('Tu animal')).not.toBeInTheDocument();
     });
 
-    it('should not show "Tu animal" label when isUserAnimal is false', () => {
+    it('should expose the "tu animal" state via aria-label when isUserAnimal is true', () => {
+      const animalInfo = createTestAnimalInfo();
+
+      render(
+        <ChineseAnimalCard animalInfo={animalInfo} isUserAnimal={true} onClick={mockOnClick} />
+      );
+
+      expect(screen.getByRole('button', { name: /tu animal/i })).toBeInTheDocument();
+    });
+
+    it('should not expose the "tu animal" state via aria-label when isUserAnimal is false', () => {
       const animalInfo = createTestAnimalInfo();
 
       render(
         <ChineseAnimalCard animalInfo={animalInfo} isUserAnimal={false} onClick={mockOnClick} />
       );
 
-      expect(screen.queryByText('Tu animal')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /tu animal/i })).not.toBeInTheDocument();
     });
 
-    it('should not show "Tu animal" label by default', () => {
+    it('should not expose the "tu animal" state via aria-label by default', () => {
       const animalInfo = createTestAnimalInfo();
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
-      expect(screen.queryByText('Tu animal')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /tu animal/i })).not.toBeInTheDocument();
     });
   });
 
@@ -103,7 +128,7 @@ describe('ChineseAnimalCard', () => {
       expect(card).not.toHaveClass('ring-primary');
     });
 
-    it('should have border-red-500 border-2 when isUserAnimal is true', () => {
+    it('should have border-accent border-2 when isUserAnimal is true', () => {
       const animalInfo = createTestAnimalInfo();
 
       render(
@@ -111,7 +136,7 @@ describe('ChineseAnimalCard', () => {
       );
 
       const card = screen.getByTestId(`chinese-animal-${animalInfo.animal}`);
-      expect(card).toHaveClass('border-red-500');
+      expect(card).toHaveClass('border-accent');
       expect(card).toHaveClass('border-2');
     });
 
@@ -258,7 +283,7 @@ describe('ChineseAnimalCard', () => {
           <ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />
         );
 
-        expect(screen.getByText(emoji)).toBeInTheDocument();
+        expect(screen.getByRole('img', { name: nameEs })).toBeInTheDocument();
         expect(screen.getByText(nameEs)).toBeInTheDocument();
         expect(screen.getByTestId(`chinese-animal-${animal}`)).toBeInTheDocument();
 

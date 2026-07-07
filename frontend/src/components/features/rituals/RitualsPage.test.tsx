@@ -84,21 +84,26 @@ describe('RitualsPage', () => {
     });
   });
 
-  it('debe renderizar EncyclopediaInfoWidget con slug="guia-rituales"', () => {
+  it('debe renderizar ServiceIntro de rituales', () => {
     renderWithProviders(<RitualsPage />);
 
-    const widget = screen.getByTestId('encyclopedia-info-widget');
+    const widget = screen.getByTestId('rituals-intro');
     expect(widget).toBeInTheDocument();
   });
 
-  it('debe renderizar correctamente si EncyclopediaInfoWidget retorna null', () => {
-    // Simulate widget returning null (error state)
-    mockUseArticleSnippet.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error('API error'),
-    });
+  it('debe ubicar ServiceIntro debajo de la actividad (lista de rituales)', () => {
+    renderWithProviders(<RitualsPage />);
 
+    // Anclamos en la última grilla (la de "Todos los Rituales"); si un test
+    // futuro renderiza destacados habría más de un 'ritual-grid'.
+    const grids = screen.getAllByTestId('ritual-grid');
+    const activity = grids[grids.length - 1];
+    const intro = screen.getByTestId('rituals-intro');
+
+    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('debe renderizar correctamente la página con la tarjeta informativa', () => {
     renderWithProviders(<RitualsPage />);
 
     // The page should still render without errors

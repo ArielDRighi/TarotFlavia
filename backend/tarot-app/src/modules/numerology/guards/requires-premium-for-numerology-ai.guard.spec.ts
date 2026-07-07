@@ -33,7 +33,7 @@ describe('RequiresPremiumForNumerologyAIGuard', () => {
 
       expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las interpretaciones numerológicas con IA están disponibles solo para usuarios Premium. ' +
+        'Las interpretaciones numerológicas personalizadas están disponibles solo para usuarios Premium. ' +
           'Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     });
@@ -49,7 +49,7 @@ describe('RequiresPremiumForNumerologyAIGuard', () => {
 
       expect(() => guard.canActivate(mockContext)).toThrow(ForbiddenException);
       expect(() => guard.canActivate(mockContext)).toThrow(
-        'Las interpretaciones numerológicas con IA están disponibles solo para usuarios Premium. ' +
+        'Las interpretaciones numerológicas personalizadas están disponibles solo para usuarios Premium. ' +
           'Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     });

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/constants/routes';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { PLAN_MATRIX, type PlanCell } from '@/lib/constants/premium-benefits';
 import { Check, X, Star } from 'lucide-react';
 
 interface PlanFeature {
@@ -9,50 +10,36 @@ interface PlanFeature {
   included: boolean;
 }
 
+type PlanColumn = 'anonymous' | 'free' | 'premium';
+
 interface Plan {
   name: string;
   price: string;
   priceNote?: string;
   description: string;
-  features: PlanFeature[];
+  column: PlanColumn;
   cta: { text: string; href: string };
   recommended?: boolean;
 }
 
-const plans: Plan[] = [
+/**
+ * Metadatos de cada plan. Las FEATURES se derivan de la fuente única `PLAN_MATRIX`
+ * (misma verdad que la página `/premium`), de modo que el copy no pueda divergir
+ * de la implementación real (T-FBK-005).
+ */
+const PLANS: Plan[] = [
   {
     name: 'Visitante',
     price: 'Sin registro',
     description: 'Prueba el tarot sin compromiso',
-    features: [
-      { text: 'Carta del día (1 vez al día)', included: true },
-      { text: 'Horóscopos (occidental y chino)', included: true },
-      { text: 'Numerología', included: true },
-      { text: 'Rituales (acceso básico)', included: true },
-      { text: 'Enciclopedia mística', included: true },
-      { text: '1 consulta de péndulo', included: true },
-      { text: '1 carta astral', included: true },
-      { text: 'Lecturas de tarot', included: false },
-      { text: 'Interpretación personalizada', included: false },
-    ],
+    column: 'anonymous',
     cta: { text: 'Probar carta del día', href: ROUTES.CARTA_DEL_DIA },
   },
   {
     name: 'Free',
     price: 'Gratis',
     description: 'Empieza tu viaje espiritual',
-    features: [
-      { text: 'Carta del día', included: true },
-      { text: '1 lectura de tarot / día (1–3 cartas)', included: true },
-      { text: 'Horóscopos con widget personalizado', included: true },
-      { text: 'Numerología con widget personalizado', included: true },
-      { text: 'Rituales (ventajas adicionales)', included: true },
-      { text: 'Enciclopedia mística', included: true },
-      { text: 'Carta astral ilimitada', included: true },
-      { text: '1 consulta péndulo / día', included: true },
-      { text: 'Compartir lecturas', included: true },
-      { text: 'Interpretación personalizada', included: false },
-    ],
+    column: 'free',
     cta: { text: 'Registrarse gratis', href: ROUTES.REGISTER },
   },
   {
@@ -60,22 +47,26 @@ const plans: Plan[] = [
     price: '$7.000',
     priceNote: 'por mes',
     description: 'Desbloquea todo el potencial',
-    features: [
-      { text: 'Carta del día', included: true },
-      { text: '3 lecturas de tarot / día — todas las tiradas', included: true },
-      { text: 'Interpretación personalizada y profunda', included: true },
-      { text: 'Preguntas personalizadas', included: true },
-      { text: 'Carta astral ilimitada y detallada', included: true },
-      { text: 'Horóscopos y numerología con widget', included: true },
-      { text: 'Rituales (acceso completo)', included: true },
-      { text: 'Enciclopedia mística', included: true },
-      { text: '3 consultas péndulo / día', included: true },
-      { text: 'Compartir lecturas e historial completo', included: true },
-    ],
+    column: 'premium',
     cta: { text: CTA_PREMIUM.PURCHASE, href: ROUTES.PREMIUM },
     recommended: true,
   },
 ];
+
+/** Convierte una celda de la matriz en la línea a mostrar para un plan. */
+function toPlanFeature(feature: string, cell: PlanCell): PlanFeature {
+  if (cell === false) {
+    return { text: feature, included: false };
+  }
+  if (cell === true) {
+    return { text: feature, included: true };
+  }
+  return { text: `${feature}: ${cell}`, included: true };
+}
+
+function featuresForPlan(column: PlanColumn): PlanFeature[] {
+  return PLAN_MATRIX.map((row) => toPlanFeature(row.feature, row[column]));
+}
 
 export function PlanComparison() {
   return (
@@ -94,7 +85,7 @@ export function PlanComparison() {
 
         {/* Cards */}
         <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3 md:items-start">
-          {plans.map((plan) => (
+          {PLANS.map((plan) => (
             <div
               key={plan.name}
               className="relative flex flex-col overflow-hidden rounded-2xl shadow-md transition-shadow hover:shadow-xl"
@@ -168,7 +159,7 @@ export function PlanComparison() {
 
                 {/* Features */}
                 <ul className="mb-8 flex-1 space-y-3">
-                  {plan.features.map((feature) => (
+                  {featuresForPlan(plan.column).map((feature) => (
                     <li key={feature.text} className="flex items-center gap-2.5">
                       {feature.included ? (
                         <Check

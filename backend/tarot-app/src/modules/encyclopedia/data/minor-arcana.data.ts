@@ -43,7 +43,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'impotencia',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/11/Wands01.jpg',
+    imageUrl: '/images/tarot/ace-of-wands.webp',
   },
   {
     slug: 'two-of-wands',
@@ -76,7 +76,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'falta de visión',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Wands02.jpg',
+    imageUrl: '/images/tarot/two-of-wands.webp',
   },
   {
     slug: 'three-of-wands',
@@ -109,7 +109,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'retroceso',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Wands03.jpg',
+    imageUrl: '/images/tarot/three-of-wands.webp',
   },
   {
     slug: 'four-of-wands',
@@ -142,7 +142,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'celebración postergada',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Wands04.jpg',
+    imageUrl: '/images/tarot/four-of-wands.webp',
   },
   {
     slug: 'five-of-wands',
@@ -175,7 +175,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'armonía restaurada',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Wands05.jpg',
+    imageUrl: '/images/tarot/five-of-wands.webp',
   },
   {
     slug: 'six-of-wands',
@@ -208,7 +208,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'fracaso temporal',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3b/Wands06.jpg',
+    imageUrl: '/images/tarot/six-of-wands.webp',
   },
   {
     slug: 'seven-of-wands',
@@ -241,7 +241,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'derrota por fatiga',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Wands07.jpg',
+    imageUrl: '/images/tarot/seven-of-wands.webp',
   },
   {
     slug: 'eight-of-wands',
@@ -274,7 +274,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'espera',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Wands08.jpg',
+    imageUrl: '/images/tarot/eight-of-wands.webp',
   },
   {
     slug: 'nine-of-wands',
@@ -307,8 +307,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'colapso',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/4/4d/Tarot_Nine_of_Wands.jpg',
+    imageUrl: '/images/tarot/nine-of-wands.webp',
   },
   {
     slug: 'ten-of-wands',
@@ -342,7 +341,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'prioridades',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Wands10.jpg',
+    imageUrl: '/images/tarot/ten-of-wands.webp',
   },
   {
     slug: 'page-of-wands',
@@ -376,7 +375,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'falta de dirección',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Wands11.jpg',
+    imageUrl: '/images/tarot/page-of-wands.webp',
   },
   {
     slug: 'knight-of-wands',
@@ -410,7 +409,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'dispersión',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/16/Wands12.jpg',
+    imageUrl: '/images/tarot/knight-of-wands.webp',
   },
   {
     slug: 'queen-of-wands',
@@ -444,7 +443,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'autoritarismo',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Wands13.jpg',
+    imageUrl: '/images/tarot/queen-of-wands.webp',
   },
   {
     slug: 'king-of-wands',
@@ -478,7 +477,7 @@ const WANDS_CARDS: CardSeedData[] = [
         'dominio excesivo',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Wands14.jpg',
+    imageUrl: '/images/tarot/king-of-wands.webp',
   },
 ];
 
@@ -518,7 +517,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'egoísmo',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/36/Cups01.jpg',
+    imageUrl: '/images/tarot/ace-of-cups.webp',
   },
   {
     slug: 'two-of-cups',
@@ -551,7 +550,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'falta de armonía',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Cups02.jpg',
+    imageUrl: '/images/tarot/two-of-cups.webp',
   },
   {
     slug: 'three-of-cups',
@@ -584,7 +583,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'conformismo',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/7a/Cups03.jpg',
+    imageUrl: '/images/tarot/three-of-cups.webp',
   },
   {
     slug: 'four-of-cups',
@@ -617,7 +616,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'reconexión',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Cups04.jpg',
+    imageUrl: '/images/tarot/four-of-cups.webp',
   },
   {
     slug: 'five-of-cups',
@@ -650,7 +649,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'superación',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Cups05.jpg',
+    imageUrl: '/images/tarot/five-of-cups.webp',
   },
   {
     slug: 'six-of-cups',
@@ -683,7 +682,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'idealización',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Cups06.jpg',
+    imageUrl: '/images/tarot/six-of-cups.webp',
   },
   {
     slug: 'seven-of-cups',
@@ -716,7 +715,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'desengaño',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ae/Cups07.jpg',
+    imageUrl: '/images/tarot/seven-of-cups.webp',
   },
   {
     slug: 'eight-of-cups',
@@ -749,7 +748,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'evasión',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/60/Cups08.jpg',
+    imageUrl: '/images/tarot/eight-of-cups.webp',
   },
   {
     slug: 'nine-of-cups',
@@ -782,7 +781,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'insatisfacción profunda',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Cups09.jpg',
+    imageUrl: '/images/tarot/nine-of-cups.webp',
   },
   {
     slug: 'ten-of-cups',
@@ -815,7 +814,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'ideales rotos',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/84/Cups10.jpg',
+    imageUrl: '/images/tarot/ten-of-cups.webp',
   },
   {
     slug: 'page-of-cups',
@@ -849,7 +848,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'bloqueo creativo',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Cups11.jpg',
+    imageUrl: '/images/tarot/page-of-cups.webp',
   },
   {
     slug: 'knight-of-cups',
@@ -883,7 +882,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'drama emocional',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Cups12.jpg',
+    imageUrl: '/images/tarot/knight-of-cups.webp',
   },
   {
     slug: 'queen-of-cups',
@@ -917,7 +916,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'falta de límites',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/62/Cups13.jpg',
+    imageUrl: '/images/tarot/queen-of-cups.webp',
   },
   {
     slug: 'king-of-cups',
@@ -951,7 +950,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'control afectivo',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Cups14.jpg',
+    imageUrl: '/images/tarot/king-of-cups.webp',
   },
 ];
 
@@ -991,8 +990,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'caos mental',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/1/1a/Swords01.jpg',
+    imageUrl: '/images/tarot/ace-of-swords.webp',
   },
   {
     slug: 'two-of-swords',
@@ -1025,8 +1023,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'claridad',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/9/9e/Swords02.jpg',
+    imageUrl: '/images/tarot/two-of-swords.webp',
   },
   {
     slug: 'three-of-swords',
@@ -1059,8 +1056,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'superación del dolor',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/0/02/Swords03.jpg',
+    imageUrl: '/images/tarot/three-of-swords.webp',
   },
   {
     slug: 'four-of-swords',
@@ -1093,8 +1089,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'estrés',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/b/bf/Swords04.jpg',
+    imageUrl: '/images/tarot/four-of-swords.webp',
   },
   {
     slug: 'five-of-swords',
@@ -1127,8 +1122,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'rendición',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/2/23/Swords05.jpg',
+    imageUrl: '/images/tarot/five-of-swords.webp',
   },
   {
     slug: 'six-of-swords',
@@ -1161,8 +1155,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'regreso difícil',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/2/29/Swords06.jpg',
+    imageUrl: '/images/tarot/six-of-swords.webp',
   },
   {
     slug: 'seven-of-swords',
@@ -1195,8 +1188,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'abandonar el engaño',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/3/34/Swords07.jpg',
+    imageUrl: '/images/tarot/seven-of-swords.webp',
   },
   {
     slug: 'eight-of-swords',
@@ -1229,8 +1221,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'salida encontrada',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/a/a7/Swords08.jpg',
+    imageUrl: '/images/tarot/eight-of-swords.webp',
   },
   {
     slug: 'nine-of-swords',
@@ -1263,8 +1254,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'esperanza',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/2/2f/Swords09.jpg',
+    imageUrl: '/images/tarot/nine-of-swords.webp',
   },
   {
     slug: 'ten-of-swords',
@@ -1297,8 +1287,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'sobrevivir',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/d4/Swords10.jpg',
+    imageUrl: '/images/tarot/ten-of-swords.webp',
   },
   {
     slug: 'page-of-swords',
@@ -1332,8 +1321,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'pensamiento dañino',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/4/4c/Swords11.jpg',
+    imageUrl: '/images/tarot/page-of-swords.webp',
   },
   {
     slug: 'knight-of-swords',
@@ -1367,8 +1355,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'agresión verbal',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/b/b0/Swords12.jpg',
+    imageUrl: '/images/tarot/knight-of-swords.webp',
   },
   {
     slug: 'queen-of-swords',
@@ -1402,8 +1389,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'juicio duro',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/d/d4/Swords13.jpg',
+    imageUrl: '/images/tarot/queen-of-swords.webp',
   },
   {
     slug: 'king-of-swords',
@@ -1437,8 +1423,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'distorsión de la verdad',
       ],
     },
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/3/33/Swords14.jpg',
+    imageUrl: '/images/tarot/king-of-swords.webp',
   },
 ];
 
@@ -1478,7 +1463,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'materialismo',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Pents01.jpg',
+    imageUrl: '/images/tarot/ace-of-pentacles.webp',
   },
   {
     slug: 'two-of-pentacles',
@@ -1511,7 +1496,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'agotamiento',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Pents02.jpg',
+    imageUrl: '/images/tarot/two-of-pentacles.webp',
   },
   {
     slug: 'three-of-pentacles',
@@ -1544,7 +1529,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'conflicto grupal',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Pents03.jpg',
+    imageUrl: '/images/tarot/three-of-pentacles.webp',
   },
   {
     slug: 'four-of-pentacles',
@@ -1577,7 +1562,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'apertura',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Pents04.jpg',
+    imageUrl: '/images/tarot/four-of-pentacles.webp',
   },
   {
     slug: 'five-of-pentacles',
@@ -1610,7 +1595,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'esperanza',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Pents05.jpg',
+    imageUrl: '/images/tarot/five-of-pentacles.webp',
   },
   {
     slug: 'six-of-pentacles',
@@ -1643,7 +1628,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'tacañería disfrazada',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Pents06.jpg',
+    imageUrl: '/images/tarot/six-of-pentacles.webp',
   },
   {
     slug: 'seven-of-pentacles',
@@ -1676,7 +1661,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'frustración',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Pents07.jpg',
+    imageUrl: '/images/tarot/seven-of-pentacles.webp',
   },
   {
     slug: 'eight-of-pentacles',
@@ -1709,7 +1694,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'trabajo mediocre',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/49/Pents08.jpg',
+    imageUrl: '/images/tarot/eight-of-pentacles.webp',
   },
   {
     slug: 'nine-of-pentacles',
@@ -1742,7 +1727,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'autoestima baja',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Pents09.jpg',
+    imageUrl: '/images/tarot/nine-of-pentacles.webp',
   },
   {
     slug: 'ten-of-pentacles',
@@ -1775,7 +1760,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'inestabilidad',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/42/Pents10.jpg',
+    imageUrl: '/images/tarot/ten-of-pentacles.webp',
   },
   {
     slug: 'page-of-pentacles',
@@ -1809,7 +1794,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'dispersión',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Pents11.jpg',
+    imageUrl: '/images/tarot/page-of-pentacles.webp',
   },
   {
     slug: 'knight-of-pentacles',
@@ -1843,7 +1828,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'estancamiento',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Pents12.jpg',
+    imageUrl: '/images/tarot/knight-of-pentacles.webp',
   },
   {
     slug: 'queen-of-pentacles',
@@ -1877,7 +1862,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'falta de cuidado',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/88/Pents13.jpg',
+    imageUrl: '/images/tarot/queen-of-pentacles.webp',
   },
   {
     slug: 'king-of-pentacles',
@@ -1911,7 +1896,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
         'pérdida del sentido',
       ],
     },
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Pents14.jpg',
+    imageUrl: '/images/tarot/king-of-pentacles.webp',
   },
 ];
 

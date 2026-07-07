@@ -5,14 +5,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Reveal } from '@/components/common/Reveal';
 import { WelcomeModal } from '@/components/features/onboarding';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/utils/useToast';
+import { CTA_AUTH } from '@/lib/constants/cta-copy';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth.schemas';
 
 /**
@@ -84,132 +86,142 @@ export function RegisterForm() {
 
   return (
     <>
-      <Card className="shadow-soft w-full max-w-md rounded-2xl">
-        <CardHeader className="text-center">
-          <h1 className="text-primary font-serif text-3xl">Únete al Oráculo</h1>
-        </CardHeader>
+      <Reveal className="w-full max-w-md">
+        <Card className="shadow-soft w-full rounded-2xl">
+          <CardHeader className="space-y-2 text-center">
+            <Sparkles className="text-secondary mx-auto h-8 w-8" aria-hidden="true" />
+            <h1 className="text-primary font-serif text-3xl">Únete al Oráculo</h1>
+            <p className="text-muted-foreground text-sm">
+              Creá tu cuenta y comenzá tu viaje místico
+            </p>
+          </CardHeader>
 
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name Field */}
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">
-                Nombre
-              </label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Tu nombre"
-                autoComplete="name"
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* Name Field */}
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">
+                  Nombre
+                </label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Tu nombre"
+                  autoComplete="name"
+                  disabled={isSubmitting}
+                  className="focus:border-primary bg-gray-50"
+                  {...register('name')}
+                  aria-invalid={errors.name ? 'true' : 'false'}
+                />
+                {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+              </div>
+
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="tu@email.com"
+                  autoComplete="email"
+                  disabled={isSubmitting}
+                  className="focus:border-primary bg-gray-50"
+                  {...register('email')}
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                />
+                {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+              </div>
+
+              {/* Birth Date Field (optional) */}
+              <div className="space-y-2">
+                <label htmlFor="birthDate" className="text-sm font-medium">
+                  Fecha de Nacimiento{' '}
+                  <span className="text-muted-foreground font-normal">(opcional)</span>
+                </label>
+                <Input
+                  id="birthDate"
+                  type="date"
+                  disabled={isSubmitting}
+                  className="focus:border-primary bg-gray-50"
+                  {...register('birthDate')}
+                  aria-invalid={errors.birthDate ? 'true' : 'false'}
+                />
+                {errors.birthDate && (
+                  <p className="text-destructive text-sm">{errors.birthDate.message}</p>
+                )}
+                <p className="text-muted-foreground text-xs">
+                  Para personalizar tu horóscopo según tu signo zodiacal
+                </p>
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Contraseña
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  disabled={isSubmitting}
+                  className="focus:border-primary bg-gray-50"
+                  {...register('password')}
+                  aria-invalid={errors.password ? 'true' : 'false'}
+                />
+                {errors.password && (
+                  <p className="text-destructive text-sm">{errors.password.message}</p>
+                )}
+              </div>
+
+              {/* Confirm Password Field */}
+              <div className="space-y-2">
+                <label htmlFor="confirmPassword" className="text-sm font-medium">
+                  Confirmar Contraseña
+                </label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  disabled={isSubmitting}
+                  className="focus:border-primary bg-gray-50"
+                  {...register('confirmPassword')}
+                  aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-destructive text-sm">{errors.confirmPassword.message}</p>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="focus-visible:ring-secondary/50 w-full"
                 disabled={isSubmitting}
-                className="focus:border-primary bg-gray-50"
-                {...register('name')}
-                aria-invalid={errors.name ? 'true' : 'false'}
-              />
-              {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
-            </div>
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creando...
+                  </>
+                ) : (
+                  CTA_AUTH.REGISTER
+                )}
+              </Button>
+            </form>
+          </CardContent>
 
-            {/* Email Field */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tu@email.com"
-                autoComplete="email"
-                disabled={isSubmitting}
-                className="focus:border-primary bg-gray-50"
-                {...register('email')}
-                aria-invalid={errors.email ? 'true' : 'false'}
-              />
-              {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
-            </div>
-
-            {/* Birth Date Field (optional) */}
-            <div className="space-y-2">
-              <label htmlFor="birthDate" className="text-sm font-medium">
-                Fecha de Nacimiento{' '}
-                <span className="text-muted-foreground font-normal">(opcional)</span>
-              </label>
-              <Input
-                id="birthDate"
-                type="date"
-                disabled={isSubmitting}
-                className="focus:border-primary bg-gray-50"
-                {...register('birthDate')}
-                aria-invalid={errors.birthDate ? 'true' : 'false'}
-              />
-              {errors.birthDate && (
-                <p className="text-destructive text-sm">{errors.birthDate.message}</p>
-              )}
-              <p className="text-muted-foreground text-xs">
-                Para personalizar tu horóscopo según tu signo zodiacal
-              </p>
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Contraseña
-              </label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                disabled={isSubmitting}
-                className="focus:border-primary bg-gray-50"
-                {...register('password')}
-                aria-invalid={errors.password ? 'true' : 'false'}
-              />
-              {errors.password && (
-                <p className="text-destructive text-sm">{errors.password.message}</p>
-              )}
-            </div>
-
-            {/* Confirm Password Field */}
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirmar Contraseña
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                disabled={isSubmitting}
-                className="focus:border-primary bg-gray-50"
-                {...register('confirmPassword')}
-                aria-invalid={errors.confirmPassword ? 'true' : 'false'}
-              />
-              {errors.confirmPassword && (
-                <p className="text-destructive text-sm">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creando...
-                </>
-              ) : (
-                'Crear Cuenta'
-              )}
-            </Button>
-          </form>
-        </CardContent>
-
-        <CardFooter className="flex justify-center">
-          <p className="text-muted-foreground text-sm">
-            ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="text-primary hover:underline">
-              Inicia sesión
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+          <CardFooter className="flex justify-center">
+            <p className="text-muted-foreground text-sm">
+              ¿Ya tienes cuenta?{' '}
+              <Link href="/login" className="text-primary hover:underline">
+                Inicia sesión
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </Reveal>
 
       <WelcomeModal isOpen={showWelcomeModal} onClose={handleWelcomeModalClose} />
     </>

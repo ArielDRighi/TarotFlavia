@@ -87,9 +87,9 @@ describe('PremiumBadge', () => {
       const { container } = render(<PremiumBadge />);
 
       const badge = container.querySelector('[data-slot="badge"]');
-      expect(badge).toHaveClass('bg-gradient-to-r');
-      expect(badge).toHaveClass('from-purple-600');
-      expect(badge).toHaveClass('to-pink-600');
+      // Circuito premium en dorado (secondary) tras T-PREM-007/T-FBK-002.
+      expect(badge).toHaveClass('bg-secondary');
+      expect(badge?.className).not.toMatch(/purple|pink/);
     });
 
     it('should apply custom className', () => {

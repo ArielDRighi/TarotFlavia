@@ -4,13 +4,15 @@ import Link from 'next/link';
 import { Settings } from 'lucide-react';
 import {
   ChineseAnimalSelector,
+  ChineseAnimalSymbol,
   AnimalCalculator,
   ElementSelectorModal,
 } from '@/components/features/chinese-horoscope';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useChineseHoroscopeMainPage } from '@/hooks/utils/useChineseHoroscopeMainPage';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
+import { ServiceIntro } from '@/components/features/encyclopedia';
+import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
 import { ROUTES } from '@/lib/constants/routes';
 import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
 
@@ -36,19 +38,17 @@ export default function HoroscopoChinoPage() {
         <p className="text-muted-foreground">Descubre las predicciones anuales según tu animal</p>
       </div>
 
-      <EncyclopediaInfoWidget
-        slug="guia-horoscopo-chino"
-        href={ROUTES.ENCICLOPEDIA_GUIA('guia-horoscopo-chino')}
-        className="mb-6"
-      />
-
       {/* User's horoscope card (if authenticated and has birthDate) */}
       {isAuthenticated && userBirthDate && myHoroscope && (
         <div className="mx-auto mb-8 max-w-2xl">
           <Card className="border-primary/50 bg-primary/5 border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="text-3xl">{CHINESE_ZODIAC_INFO[myHoroscope.animal].emoji}</span>
+                <ChineseAnimalSymbol
+                  animal={myHoroscope.animal}
+                  label={CHINESE_ZODIAC_INFO[myHoroscope.animal].nameEs}
+                  className="text-3xl"
+                />
                 <span className="text-xl">
                   Tu Horóscopo:{' '}
                   {myHoroscope.fullZodiacType || CHINESE_ZODIAC_INFO[myHoroscope.animal].nameEs}{' '}
@@ -103,13 +103,14 @@ export default function HoroscopoChinoPage() {
       {/* Selector de animales */}
       <ChineseAnimalSelector userAnimal={userAnimal} onSelect={handleAnimalSelect} />
 
+      <ServiceIntro data={SERVICE_INTROS['chinese-horoscope']} className="mt-6" />
+
       {/* Element Selector Modal */}
       {selectedAnimalForModal && (
         <ElementSelectorModal
           open={isModalOpen}
           animal={selectedAnimalForModal}
           animalNameEs={CHINESE_ZODIAC_INFO[selectedAnimalForModal].nameEs}
-          animalEmoji={CHINESE_ZODIAC_INFO[selectedAnimalForModal].emoji}
           onSelectElement={handleElementSelect}
           onOpenChange={handleModalOpenChange}
         />

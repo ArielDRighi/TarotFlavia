@@ -56,7 +56,11 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
     const newErrors: Record<string, string> = {};
 
     // Validar que los números sean positivos o -1 (ilimitado)
-    const numberFields: (keyof PlanConfig)[] = ['readingsLimit', 'aiQuotaMonthly'];
+    const numberFields: (keyof PlanConfig)[] = [
+      'readingsLimit',
+      'aiQuotaMonthly',
+      'birthChartMonthlyLimit',
+    ];
 
     numberFields.forEach((field) => {
       const value = formData[field] as number;
@@ -83,6 +87,7 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
       price: formData.price,
       readingsLimit: formData.readingsLimit,
       aiQuotaMonthly: formData.aiQuotaMonthly,
+      birthChartMonthlyLimit: formData.birthChartMonthlyLimit,
       allowCustomQuestions: formData.allowCustomQuestions,
       allowSharing: formData.allowSharing,
       allowAdvancedSpreads: formData.allowAdvancedSpreads,
@@ -172,6 +177,24 @@ export function PlanConfigCard({ plan, onSave, isLoading }: PlanConfigCardProps)
             className={errors.aiQuotaMonthly ? 'border-red-500' : ''}
           />
           {errors.aiQuotaMonthly && <p className="text-sm text-red-600">{errors.aiQuotaMonthly}</p>}
+        </div>
+
+        {/* Límite mensual de Carta Astral */}
+        <div className="space-y-2">
+          <Label htmlFor={`birthChartMonthlyLimit-${plan.planType}`}>
+            Carta astral mensual (-1 = ilimitado)
+          </Label>
+          <Input
+            id={`birthChartMonthlyLimit-${plan.planType}`}
+            type="number"
+            value={formData.birthChartMonthlyLimit}
+            onChange={(e) => handleNumberChange('birthChartMonthlyLimit', e.target.value)}
+            disabled={isAnonymousPlan || isLoading}
+            className={errors.birthChartMonthlyLimit ? 'border-red-500' : ''}
+          />
+          {errors.birthChartMonthlyLimit && (
+            <p className="text-sm text-red-600">{errors.birthChartMonthlyLimit}</p>
+          )}
         </div>
 
         {/* Precio */}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Lightbulb } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { WidgetCard } from './WidgetCard';
 
 /**
  * Collection of interesting tarot facts
@@ -44,18 +44,10 @@ export function DidYouKnowSection() {
   const [fact] = useState<string>(() => getRandomFact());
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5 text-yellow-500" />
-          <CardTitle className="font-serif text-xl">¿Sabías que...?</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-gray-700 dark:text-gray-300" data-testid="tarot-fact">
-          {fact}
-        </p>
-      </CardContent>
-    </Card>
+    <WidgetCard title="¿Sabías que...?" icon={<Lightbulb className="h-5 w-5" />}>
+      <p className="text-muted-foreground" data-testid="tarot-fact">
+        {fact}
+      </p>
+    </WidgetCard>
   );
 }

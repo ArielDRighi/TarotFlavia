@@ -1,24 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toast } from '@/hooks/utils/useToast';
+import { toast } from 'sonner';
 import { ContactForm } from './ContactForm';
 
-vi.mock('@/hooks/utils/useToast', () => ({
+// ContactForm muestra el feedback usando `toast` de sonner (ver ContactForm.tsx),
+// por lo que el mock debe apuntar a 'sonner' y no al wrapper interno useToast.
+vi.mock('sonner', () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
     info: vi.fn(),
     dismiss: vi.fn(),
   },
-  useToast: () => ({
-    toast: {
-      success: vi.fn(),
-      error: vi.fn(),
-      info: vi.fn(),
-      dismiss: vi.fn(),
-    },
-  }),
 }));
 
 describe('ContactForm', () => {
@@ -76,6 +70,14 @@ describe('ContactForm', () => {
       const form = container.querySelector('form');
       expect(form).toBeInTheDocument();
       expect(form).toHaveClass('space-y-6');
+    });
+  });
+
+  describe('Canon styling', () => {
+    it('should give the submit CTA a visible gold focus ring', () => {
+      render(<ContactForm />);
+      const submitButton = screen.getByRole('button', { name: /enviar mensaje/i });
+      expect(submitButton.className).toContain('focus-visible:ring-secondary');
     });
   });
 

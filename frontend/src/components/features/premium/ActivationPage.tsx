@@ -1,14 +1,19 @@
 'use client';
 
 import { startTransition, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, Clock, XCircle, Loader2 } from 'lucide-react';
+import { Clock, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Reveal } from '@/components/common/Reveal';
+import { PremiumHero } from './PremiumHero';
 import { useSubscriptionStatus } from '@/hooks/api/useSubscription';
 import { useInvalidateCapabilities } from '@/hooks/api/useUserCapabilities';
 import { useAuthStore } from '@/stores/authStore';
 import { ROUTES } from '@/lib/constants/routes';
+import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
 
 // ============================================================================
 // Constants
@@ -16,6 +21,15 @@ import { ROUTES } from '@/lib/constants/routes';
 
 const POLLING_INTERVAL_MS = 2000;
 const POLLING_TIMEOUT_MS = 30000;
+
+/**
+ * Themed image for the success band (T-PREM-004). `PremiumHero` degrades to its
+ * gradient band if the asset ever fails to load, so contrast never breaks.
+ */
+const ACTIVATION_SUCCESS_IMAGE: EditorialImage = {
+  src: '/images/premium/premium-activacion.webp',
+  alt: 'Mandala dorado de luz floreciendo entre estrellas, en un cielo nocturno violeta con luna creciente',
+};
 
 const VALID_CHECKOUT_STATUSES = ['authorized', 'pending', 'failure'] as const;
 type CheckoutStatus = (typeof VALID_CHECKOUT_STATUSES)[number];
@@ -41,78 +55,110 @@ function sanitizeRedirectPath(raw: string | null): string {
 // Sub-components
 // ============================================================================
 
+interface StatusPanelProps {
+  /** `data-testid` del panel para las pruebas. */
+  testId: string;
+  /** Icono superior (dorado o destructivo según el estado). */
+  icon: ReactNode;
+  /** Título en Cormorant. */
+  title: string;
+  /** Descripción del estado. */
+  description: string;
+  /** Acciones opcionales (botones). */
+  children?: ReactNode;
+}
+
+/**
+ * Panel de estado del canon: tarjeta crema centrada con icono dorado, título
+ * Cormorant y texto con tokens. Compartido por los estados de carga, pendiente,
+ * procesamiento y error para mantener una atmósfera de marca coherente.
+ *
+ * Usa `<section>` (no `<main>`): el landmark `main` ya lo aporta el root layout.
+ */
+function StatusPanel({ testId, icon, title, description, children }: StatusPanelProps) {
+  return (
+    <section className="container mx-auto flex min-h-[60vh] max-w-xl items-center justify-center px-4 py-12">
+      <Reveal index={0} className="w-full">
+        <Card data-testid={testId} className="p-8 text-center sm:p-10">
+          <div className="flex justify-center">{icon}</div>
+          <div>
+            <h1 className="text-card-foreground mb-3 font-serif text-2xl font-bold sm:text-3xl">
+              {title}
+            </h1>
+            <p className="text-muted-foreground leading-relaxed">{description}</p>
+          </div>
+          {children && (
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">{children}</div>
+          )}
+        </Card>
+      </Reveal>
+    </section>
+  );
+}
+
 function LoadingState() {
   return (
-    <div data-testid="activation-loading" className="flex flex-col items-center gap-6 text-center">
-      <Loader2 className="h-16 w-16 animate-spin text-purple-600 dark:text-purple-400" />
-      <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          Activando tu plan Premium...
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Estamos confirmando tu suscripción. Esto puede tomar unos segundos.
-        </p>
-      </div>
-    </div>
+    <StatusPanel
+      testId="activation-loading"
+      icon={<Loader2 className="text-secondary h-14 w-14 animate-spin" aria-hidden="true" />}
+      title="Activando tu plan Premium..."
+      description="Estamos confirmando tu suscripción. Esto puede tomar unos segundos."
+    />
   );
 }
 
 function SuccessState() {
   return (
-    <div data-testid="activation-success" className="flex flex-col items-center gap-6 text-center">
-      <CheckCircle className="h-16 w-16 text-green-500" />
-      <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          ¡Bienvenido a Premium!
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Tu plan Premium fue activado exitosamente. Ahora tenés acceso a todas las funciones.
-        </p>
-      </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400">Redirigiendo en unos segundos...</p>
-    </div>
+    <section
+      data-testid="activation-success"
+      className="container mx-auto max-w-3xl px-4 py-10 sm:py-12"
+    >
+      <Reveal index={0}>
+        <PremiumHero
+          badge="¡Pago confirmado!"
+          title="¡Bienvenido a Premium!"
+          subtitle="Tu plan Premium fue activado exitosamente. Ahora tenés acceso a todas las funciones."
+          image={ACTIVATION_SUCCESS_IMAGE}
+        />
+      </Reveal>
+      <p className="text-muted-foreground mt-6 text-center text-sm">
+        Redirigiendo en unos segundos...
+      </p>
+    </section>
   );
 }
 
 function TimeoutState() {
   return (
-    <div data-testid="activation-timeout" className="flex flex-col items-center gap-6 text-center">
-      <Clock className="h-16 w-16 text-yellow-500" />
-      <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          Pago en procesamiento
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Estamos procesando tu pago. Tu plan Premium se activará automáticamente en unos minutos.
-        </p>
-      </div>
+    <StatusPanel
+      testId="activation-timeout"
+      icon={<Clock className="text-secondary h-14 w-14" aria-hidden="true" />}
+      title="Pago en procesamiento"
+      description="Estamos procesando tu pago. Tu plan Premium se activará automáticamente en unos minutos."
+    >
       <div data-testid="btn-go-home-timeout">
-        <Button asChild variant="outline" className="mt-2">
+        <Button asChild variant="outline">
           <Link href={ROUTES.HOME}>Ir al inicio</Link>
         </Button>
       </div>
-    </div>
+    </StatusPanel>
   );
 }
 
 function PendingState() {
   return (
-    <div data-testid="activation-pending" className="flex flex-col items-center gap-6 text-center">
-      <Clock className="h-16 w-16 text-yellow-500" />
-      <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          Pago en proceso
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Tu pago está siendo procesado. Te notificaremos cuando se confirme.
-        </p>
-      </div>
+    <StatusPanel
+      testId="activation-pending"
+      icon={<Clock className="text-secondary h-14 w-14" aria-hidden="true" />}
+      title="Pago en proceso"
+      description="Tu pago está siendo procesado. Te notificaremos cuando se confirme."
+    >
       <div data-testid="btn-go-home-pending">
-        <Button asChild variant="outline" className="mt-2">
+        <Button asChild variant="outline">
           <Link href={ROUTES.HOME}>Ir al inicio</Link>
         </Button>
       </div>
-    </div>
+    </StatusPanel>
   );
 }
 
@@ -120,31 +166,25 @@ function FailureState() {
   const router = useRouter();
 
   return (
-    <div data-testid="activation-failure" className="flex flex-col items-center gap-6 text-center">
-      <XCircle className="h-16 w-16 text-red-500" />
-      <div>
-        <h1 className="mb-2 font-serif text-2xl font-bold text-gray-900 dark:text-white">
-          Problema con el pago
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Hubo un problema con tu pago. Por favor, intentá nuevamente.
-        </p>
-      </div>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button
-          data-testid="btn-retry"
-          onClick={() => router.push(ROUTES.PREMIUM)}
-          className="bg-purple-600 text-white hover:bg-purple-700"
-        >
-          Intentar de nuevo
+    <StatusPanel
+      testId="activation-failure"
+      icon={<XCircle className="text-destructive h-14 w-14" aria-hidden="true" />}
+      title="Problema con el pago"
+      description="Hubo un problema con tu pago. Por favor, intentá nuevamente."
+    >
+      <Button
+        data-testid="btn-retry"
+        onClick={() => router.push(ROUTES.PREMIUM)}
+        className="focus-visible:ring-secondary focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2"
+      >
+        Intentar de nuevo
+      </Button>
+      <div data-testid="btn-go-home-failure">
+        <Button asChild variant="outline">
+          <Link href={ROUTES.HOME}>Ir al inicio</Link>
         </Button>
-        <div data-testid="btn-go-home-failure">
-          <Button asChild variant="outline">
-            <Link href={ROUTES.HOME}>Ir al inicio</Link>
-          </Button>
-        </div>
       </div>
-    </div>
+    </StatusPanel>
   );
 }
 

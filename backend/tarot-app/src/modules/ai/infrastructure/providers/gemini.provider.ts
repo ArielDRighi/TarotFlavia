@@ -224,6 +224,10 @@ export class GeminiProvider implements IAIProvider {
     return AIProviderType.GEMINI;
   }
 
+  isConfigured(): boolean {
+    return this.client !== null;
+  }
+
   /**
    * Convert OpenAI-style messages to Gemini Content format
    * Gemini uses 'user' and 'model' roles instead of 'user' and 'assistant'

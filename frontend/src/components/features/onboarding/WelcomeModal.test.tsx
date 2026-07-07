@@ -33,8 +33,8 @@ describe('WelcomeModal', () => {
   it('should explain limitations and differences with PREMIUM', () => {
     render(<WelcomeModal isOpen={true} onClose={vi.fn()} />);
 
-    // Verificar que se menciona la limitación FREE (sin IA)
-    expect(screen.getByText(/sin interpretación de ia/i)).toBeInTheDocument();
+    // Verificar que se menciona la limitación FREE (sin interpretación premium)
+    expect(screen.getByText(/sin interpretación profunda/i)).toBeInTheDocument();
 
     // Verificar que se menciona la ventaja PREMIUM
     expect(screen.getByText(/premium/i)).toBeInTheDocument();
@@ -66,5 +66,40 @@ describe('WelcomeModal', () => {
     await user.click(closeButton);
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  // ── Canon místico (T-PREM-007) ────────────────────────────────────────────
+
+  describe('Canon styling', () => {
+    it('el título usa Cormorant serif y el token de marca text-primary', () => {
+      render(<WelcomeModal isOpen={true} onClose={vi.fn()} />);
+
+      const title = screen.getByText(/bienvenid[ao]/i);
+      expect(title).toHaveClass('font-serif');
+      expect(title.className).toContain('text-primary');
+    });
+
+    it('la caja de conversión PREMIUM es un callout dorado de marca', () => {
+      render(<WelcomeModal isOpen={true} onClose={vi.fn()} />);
+
+      const heading = screen.getByText(/prueba premium/i);
+      const callout = heading.closest('[class*="bg-secondary/"]');
+      expect(callout).not.toBeNull();
+      expect(callout?.className).toContain('border-secondary');
+    });
+
+    it('el CTA principal tiene foco dorado visible (focus-visible:ring-secondary)', () => {
+      render(<WelcomeModal isOpen={true} onClose={vi.fn()} />);
+
+      const ctaButton = screen.getByRole('button', { name: /comenzar|explorar|empezar/i });
+      expect(ctaButton.className).toContain('focus-visible:ring-secondary');
+    });
+
+    it('no usa paleta púrpura/rosa cruda (off-canon)', () => {
+      render(<WelcomeModal isOpen={true} onClose={vi.fn()} />);
+
+      expect(document.body.querySelector('[class*="purple"]')).toBeNull();
+      expect(document.body.querySelector('[class*="pink"]')).toBeNull();
+    });
   });
 });

@@ -49,12 +49,22 @@ export class AIQuotaGuard implements CanActivate {
       const quotaInfo = await this.aiQuotaService.getRemainingQuota(
         user.userId,
       );
+
+      // T-FBK-006: un plan con cuota 0 (Free = sin IA) no "alcanzó" un límite;
+      // la IA es exclusiva de Premium. Mensaje coherente con la nueva semántica.
+      if (quotaInfo.quotaLimit === 0) {
+        throw new ForbiddenException(
+          'Las interpretaciones personalizadas son exclusivas de Premium. ' +
+            'Actualiza tu plan para desbloquearlas.',
+        );
+      }
+
       const resetDateFormatted = format(quotaInfo.resetDate, 'd/M/yyyy', {
         locale: es,
       });
 
       throw new ForbiddenException(
-        `Has alcanzado tu límite mensual de ${quotaInfo.quotaLimit} interpretaciones de IA. ` +
+        `Has alcanzado tu límite mensual de ${quotaInfo.quotaLimit} interpretaciones personalizadas. ` +
           `Tu cuota se renovará el ${resetDateFormatted}. ` +
           `Actualiza a Premium para interpretaciones ilimitadas.`,
       );

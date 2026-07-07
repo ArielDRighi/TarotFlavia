@@ -39,6 +39,13 @@ vi.mock('next/link', () => ({
   },
 }));
 
+// Mock next/image (render a plain img so we can assert src/alt of the mystic band)
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="next-image" />
+  ),
+}));
+
 // Mock subscription hook
 const mockUseSubscriptionStatus = vi.fn();
 vi.mock('@/hooks/api/useSubscription', () => ({
@@ -481,6 +488,138 @@ describe('ActivationPage', () => {
       expect(mockUseSubscriptionStatus).toHaveBeenCalledWith(
         expect.objectContaining({ refetchInterval: false, enabled: false })
       );
+    });
+  });
+
+  // ============================================================================
+  // Canon visual (T-PREM-003) — banda mística, tokens y sin púrpura/dark
+  // ============================================================================
+
+  describe('Canon visual', () => {
+    it('should show the mystic band with the activation image on success', async () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'authorized';
+        return null;
+      });
+      mockUseSubscriptionStatus.mockReturnValue({
+        data: {
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-04-01T00:00:00Z',
+          mpPreapprovalId: 'mp_123',
+        },
+        isLoading: false,
+      });
+
+      const { container } = renderWithProviders(<ActivationPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('activation-success')).toBeInTheDocument();
+      });
+
+      // Banda mística del canon con la imagen de activación
+      expect(screen.getByTestId('premium-hero')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: /mandala dorado/i })).toHaveAttribute(
+        'src',
+        '/images/premium/premium-activacion.webp'
+      );
+      expect(screen.getByRole('heading', { level: 1 })).toHaveClass('font-serif');
+
+      // La banda de éxito tampoco usa la paleta cruda púrpura/gris
+      expect(container.querySelector('[class*="purple"]')).toBeNull();
+      expect(container.querySelector('[class*="text-gray-"]')).toBeNull();
+      expect(container.querySelector('[class*="bg-gray-"]')).toBeNull();
+    });
+
+    it('should not use the raw purple/gray palette in any state', () => {
+      const states: Array<string | null> = ['authorized', 'pending', 'failure'];
+
+      for (const status of states) {
+        mockSearchParams.get.mockImplementation((key: string) => {
+          if (key === 'status') return status;
+          return null;
+        });
+
+        const { container, unmount } = renderWithProviders(<ActivationPage />);
+
+        // El canon usa tokens (dorado/crema/noche), nunca la paleta cruda púrpura/gris.
+        expect(container.querySelector('[class*="purple"]')).toBeNull();
+        expect(container.querySelector('[class*="text-gray-"]')).toBeNull();
+        expect(container.querySelector('[class*="bg-gray-"]')).toBeNull();
+
+        unmount();
+      }
+    });
+
+    it('should render the loading title with a serif (Cormorant) heading', () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'authorized';
+        return null;
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      expect(screen.getByTestId('activation-loading')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1 })).toHaveClass('font-serif');
+    });
+  });
+
+  // ============================================================================
+  // Accesibilidad — cierre del circuito premium (T-PREM-008)
+  // ============================================================================
+
+  describe('Accesibilidad (T-PREM-008)', () => {
+    it('should give the failure retry CTA a visible focus ring (foco visible)', () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'failure';
+        return null;
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      const retryBtn = screen.getByTestId('btn-retry');
+      expect(retryBtn.className).toMatch(/focus-visible:ring-secondary/);
+    });
+
+    it('should mark the state icon as decorative (aria-hidden)', () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'failure';
+        return null;
+      });
+
+      const { container } = renderWithProviders(<ActivationPage />);
+
+      // El icono de estado (XCircle, `text-destructive`) es decorativo: el título
+      // "Problema con el pago" ya comunica el estado a lectores de pantalla.
+      const stateIcon = container.querySelector('.text-destructive');
+      expect(stateIcon).not.toBeNull();
+      expect(stateIcon).toHaveAttribute('aria-hidden', 'true');
+    });
+
+    it('should render the success band asset with a non-empty Spanish alt (imagen con alt)', async () => {
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === 'status') return 'authorized';
+        return null;
+      });
+      mockUseSubscriptionStatus.mockReturnValue({
+        data: {
+          plan: 'premium',
+          subscriptionStatus: 'active',
+          planExpiresAt: '2026-04-01T00:00:00Z',
+          mpPreapprovalId: 'mp_123',
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('activation-success')).toBeInTheDocument();
+      });
+
+      const bandImage = screen.getByTestId('next-image');
+      expect(bandImage).toHaveAttribute('alt');
+      expect(bandImage.getAttribute('alt')?.trim().length).toBeGreaterThan(0);
     });
   });
 });

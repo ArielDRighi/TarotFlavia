@@ -185,6 +185,7 @@ Los aspectos en tu carta sugieren una tensión creativa que te impulsa constante
           maxTokens: expect.any(Number),
           temperature: expect.any(Number),
         }),
+        AIProviderType.DEEPSEEK, // IA principal de carta astral
       );
     });
 

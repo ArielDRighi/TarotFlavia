@@ -2,6 +2,18 @@
 @import 'tw-animate-css';
 
 /* ============================================
+   Neutralizador de "modo oscuro fantasma" (T-PREM-001 / PREM-001)
+   La app es light-only. Por defecto Tailwind v4 liga `dark:` a
+   @media (prefers-color-scheme: dark), por lo que esas variantes se
+   activaban con el SO en modo oscuro (texto claro sobre fondo claro).
+   Redefinimos `dark:` como variante por CLASE: solo aplicaría bajo un
+   ancestro `.dark`, que nunca existe (no hay ThemeProvider/toggle).
+   Así toda `dark:` residual queda inerte de forma global (red de
+   seguridad, incluidos los primitivos de components/ui). No quitar.
+   ============================================ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================
    Auguria Design Tokens - Tailwind v4
    Based on DESIGN_HAND-OFF.md
    Mode: Light only (NO dark mode)
@@ -183,6 +195,12 @@ body {
 @layer utilities {
   .rotate-y-180 {
     transform: rotateY(180deg);
+  }
+
+  /* Fuerza presentación de texto (monocromática) en glifos que el sistema
+     podría renderizar como emoji multicolor — ej. símbolos zodiacales. */
+  .zodiac-symbol {
+    font-variant-emoji: text;
   }
 }
 
@@ -391,4 +409,52 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: shimmer-gold 3s linear infinite;
+}
+
+/* ===========================================
+   Scroll Reveal — fade-up escalonado (T-ENC-008)
+   El estado lo controla el componente <Reveal> vía `data-revealed`; el retardo
+   escalonado llega por la variable `--reveal-delay`.
+   =========================================== */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal][data-revealed='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Sin JS el observer no corre: mostrar el contenido para no dejarlo oculto. */
+@media (scripting: none) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ===========================================
+   Respeto a prefers-reduced-motion
+   Desactiva el reveal y neutraliza solo las animaciones DECORATIVAS en bucle.
+   Se evita un reset global (`*`) a propósito: dejaría sin girar a los spinners
+   de carga (`animate-spin`) y rompería la motion informativa del péndulo.
+   =========================================== */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .animate-twinkle,
+  .animate-float-slow,
+  .animate-shimmer-gold,
+  .animate-bounce-slow {
+    animation: none !important;
+  }
 }

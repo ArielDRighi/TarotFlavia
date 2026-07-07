@@ -32,15 +32,17 @@ export default function UpgradeBanner() {
   return (
     <div
       data-testid="upgrade-banner"
-      className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white shadow-lg"
+      className="from-primary to-secondary rounded-lg bg-gradient-to-r p-6 text-white shadow-lg"
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <Gem className="mt-1 h-6 w-6 flex-shrink-0" />
           <div>
-            <h3 className="mb-1 font-semibold">💎 Desbloquea interpretaciones personalizadas</h3>
+            <h3 className="mb-1 font-serif text-lg font-semibold">
+              💎 Desbloquea interpretaciones personalizadas
+            </h3>
             <p className="text-sm text-white/90">
-              Con Premium, obtén análisis detallados, lecturas ilimitadas y acceso a todas las
+              Con Premium, obtén análisis detallados, 3 lecturas por día y acceso a todas las
               tiradas especiales.
             </p>
           </div>
@@ -49,7 +51,7 @@ export default function UpgradeBanner() {
           onClick={handleUpgradeClick}
           disabled={isPending}
           variant="secondary"
-          className="flex-shrink-0 bg-white text-purple-600 hover:bg-white/90"
+          className="text-primary flex-shrink-0 bg-white hover:bg-white/90"
         >
           {isPending ? 'Cargando...' : CTA_PREMIUM.UPSELL_SOFT}
         </Button>

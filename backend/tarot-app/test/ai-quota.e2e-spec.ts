@@ -88,10 +88,11 @@ describe('AI Quota (E2E)', () => {
         .expect(200)
         .expect((res) => {
           const body = res.body as Record<string, unknown>;
-          expect(body).toHaveProperty('quotaLimit', 100);
+          // T-FBK-006: Free NO consume IA → cuota 0 (sin división por cero).
+          expect(body).toHaveProperty('quotaLimit', 0);
           expect(body).toHaveProperty('requestsUsed', 50);
-          expect(body).toHaveProperty('requestsRemaining', 50);
-          expect(body).toHaveProperty('percentageUsed', 50);
+          expect(body).toHaveProperty('requestsRemaining', 0);
+          expect(body).toHaveProperty('percentageUsed', 0);
           expect(body).toHaveProperty('resetDate');
           expect(body).toHaveProperty('warningTriggered', false);
           expect(body).toHaveProperty('plan', UserPlan.FREE);
@@ -107,11 +108,12 @@ describe('AI Quota (E2E)', () => {
   });
 
   describe('AIQuotaGuard Integration', () => {
-    it('should block POST /readings/:id/regenerate when quota exceeded (FREE user)', async () => {
-      // Update user to exceed quota
+    it('should block POST /readings/:id/regenerate for FREE user (sin IA: cuota 0)', async () => {
+      // T-FBK-006: Free NO consume IA. El guard bloquea la regeneración con IA
+      // (cuota 0) independientemente del uso previo.
       const userRepository = dataSource.getRepository(User);
       await userRepository.update(testUserId, {
-        aiRequestsUsedMonth: 100, // FREE limit is 100
+        aiRequestsUsedMonth: 50,
       });
 
       return request(getServer())
@@ -120,45 +122,36 @@ describe('AI Quota (E2E)', () => {
         .expect(403)
         .expect((res) => {
           const body = res.body as { message: string };
-          expect(body.message).toContain('Has alcanzado tu límite mensual');
-          expect(body.message).toContain('100 interpretaciones');
+          expect(body.message).toContain('exclusivas de Premium');
         });
     });
 
-    it('should block POST /daily-reading/regenerate when quota exceeded', async () => {
-      // User still has quota exceeded from previous test
+    it('should block POST /daily-reading/regenerate for FREE user (sin IA)', async () => {
       return request(getServer())
         .post('/api/v1/daily-reading/regenerate')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(403)
         .expect((res) => {
           const body = res.body as { message: string };
-          expect(body.message).toContain('Has alcanzado tu límite mensual');
+          expect(body.message).toContain('exclusivas de Premium');
         });
     });
 
-    it('should allow POST /readings/:id/regenerate when quota available', async () => {
-      // Reset quota
+    it('should block FREE user even with zero AI usage (sin IA, no "cuota agotada")', async () => {
+      // T-FBK-006: a diferencia del modelo anterior (cuota 100), Free se bloquea
+      // aunque no haya usado IA: su cuota es 0 por diseño (IA exclusiva de Premium).
       const userRepository = dataSource.getRepository(User);
       await userRepository.update(testUserId, {
-        aiRequestsUsedMonth: 50,
+        aiRequestsUsedMonth: 0,
       });
 
-      // Note: This will fail because reading 999 doesn't exist,
-      // but the important part is that it passes the AIQuotaGuard (not 403 quota)
       return request(getServer())
         .post('/api/v1/readings/999/regenerate')
         .set('Authorization', `Bearer ${authToken}`)
+        .expect(403)
         .expect((res) => {
-          // Should get 404 (not found) or 403 (premium/owner check), NOT 403 quota
-          // The key is that the error message should NOT be about quota
-          if (res.status === 403) {
-            const body = res.body as { message: string };
-            expect(body.message).not.toContain('límite mensual');
-            expect(body.message).not.toContain('cuota');
-          }
-          // Any other status (404, 500, etc) is fine - guard passed
-          expect([403, 404, 500]).toContain(res.status);
+          const body = res.body as { message: string };
+          expect(body.message).toContain('exclusivas de Premium');
         });
     });
 
@@ -285,10 +278,11 @@ describe('AI Quota (E2E)', () => {
         .expect(200)
         .expect((res) => {
           const body = res.body as Record<string, unknown>;
-          expect(body).toHaveProperty('quotaLimit', 100);
+          // T-FBK-006: Free = cuota 0. No hay "porcentaje usado" (evita /0 → 0%).
+          expect(body).toHaveProperty('quotaLimit', 0);
           expect(body).toHaveProperty('requestsUsed', 100);
           expect(body).toHaveProperty('requestsRemaining', 0);
-          expect(body).toHaveProperty('percentageUsed', 100);
+          expect(body).toHaveProperty('percentageUsed', 0);
         });
     });
   });

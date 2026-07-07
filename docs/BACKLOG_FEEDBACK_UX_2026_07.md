@@ -1,0 +1,651 @@
+# BACKLOG: FEEDBACK DE CONSISTENCIA UX Y CONTRATOS PREMIUM — Julio 2026
+
+## PARTE A: REPORTE DE HALLAZGOS
+
+**Proyecto:** Auguria - Plataforma de Servicios Místicos
+**Tipo:** Ronda de feedback transversal de UX/UI + auditoría de contratos y copy de Premium
+**Versión:** 1.0
+**Fecha:** 5 de julio de 2026
+**Preparado por:** Ariel (Product Owner) + Claude (Asistente de desarrollo)
+**Verificación:** Relevamiento de código (agentes exploradores sobre `frontend/` y `backend/tarot-app/`) + capturas aportadas por Ariel navegando `localhost:3001`.
+**Canon visual de referencia:** rediseños de Dashboard (`BACKLOG_DASHBOARD_REDISENO_2026_06.md`), Enciclopedia (`BACKLOG_ENCICLOPEDIA_REDISENO_2026_05.md`) y Premium (`BACKLOG_PREMIUM_REDISENO_2026_07.md`) + tokens de `globals.css`.
+**Convención de IDs:** nueva serie `FBK-XXX` (hallazgos) / `T-FBK-XXX` (tareas) propia de este backlog.
+
+---
+
+## CONTEXTO
+
+Ariel realizó una ronda de feedback navegando la app y detectó seis frentes distintos: (1) invitaciones a Premium con estilos distintos entre widgets del dashboard, (2) la ficha informativa "¿Qué es…?" siempre ubicada **arriba** de la actividad, (3) menciones prohibidas a "IA" en texto de cara al usuario, (4) discrepancias entre lo que **promete** la página `/premium` y lo que el sistema **entrega**, (5) iconos del Horóscopo Chino que no acompañan el canon visual, y (6) el destacado "Tu signo/Tu animal" que agranda la tarjeta y rompe la grilla.
+
+El relevamiento confirmó que la mayoría son cambios de bajo riesgo y alcance acotado, con **dos excepciones de fondo**: la auditoría de contratos de Premium (FBK-004) revela **promesas sin sustento** y una **incoherencia sistémica en la cuota de IA** (tres fuentes de verdad contradictorias), que es un bug de contrato, no solo de copy.
+
+---
+
+## ÍNDICE DE HALLAZGOS
+
+| ID | Hallazgo | Severidad | Módulo afectado |
+| -------- | --------------------------------------------------------------------------------------- | ---------- | ---------------------------------- |
+| FBK-001 | Invitación a Premium inconsistente entre widgets del dashboard + fragmentación del upsell | 🟠 Alta | Frontend — Dashboard / upsell |
+| FBK-002 | Ficha informativa "¿Qué es…?" ubicada arriba de la actividad en 9 páginas (debe ir abajo) | 🟡 Media | Frontend — 9 páginas de actividad |
+| FBK-003 | Menciones a "IA" en texto user-facing (regla dura del proyecto) | 🟠 Alta | Frontend + Backend (transversal) |
+| FBK-004 | Contratos de Premium: la página promete lo que el sistema no entrega (incl. cuota IA incoherente) | 🔴 Crítica | Frontend + Backend — Premium |
+| FBK-005 | Iconos del Horóscopo Chino off-canon (emojis crudos multicolor) | 🟡 Media | Frontend — Horóscopo Chino |
+| FBK-006 | Destacado "Tu signo/Tu animal" agranda la tarjeta y rompe la grilla | 🟡 Media | Frontend — Horóscopo occidental/chino |
+
+---
+
+## DETALLE DE HALLAZGOS
+
+### FBK-001: Invitación a Premium Inconsistente en el Dashboard
+
+**Severidad:** 🟠 Alta
+**Módulo:** [SacredEventsWidget.tsx](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx), [PersonalizedRitualsWidget.tsx](../frontend/src/components/features/dashboard/PersonalizedRitualsWidget.tsx)
+**Reportado por:** Ariel — "los widgets tienen distintos estilos de diseño y la invitación a premium es distinta en ambos; ¿no existe una genérica?".
+
+#### Descripción del Problema
+
+Dos widgets del dashboard que conviven ([UserDashboard.tsx:119-124](../frontend/src/components/features/dashboard/UserDashboard.tsx#L119-L124)) resuelven el upsell a Premium de forma distinta:
+
+- **Calendario Sagrado** SÍ usa el componente compartido [`PremiumUpsellCard`](../frontend/src/components/ui/premium-upsell-card.tsx) ([SacredEventsWidget.tsx:206-216](../frontend/src/components/features/dashboard/SacredEventsWidget.tsx#L206-L216)): tarjeta con gradiente, icono `Zap`, botón degradado y copy desde la constante `CTA_PREMIUM.UPSELL_SOFT`.
+- **Rituales Recomendados** NO usa ningún componente compartido ([PersonalizedRitualsWidget.tsx:64-81](../frontend/src/components/features/dashboard/PersonalizedRitualsWidget.tsx#L64-L81)): markup inline con un `<p>` + `<Button>` sólido, sin tarjeta, sin icono, sin gradiente, y con el CTA **hardcodeado** (`"Desbloquear recomendaciones"`) fuera del sistema de constantes.
+
+El componente genérico **ya existe** (`PremiumUpsellCard`), pero solo uno de los dos lo consume. Funcionalmente los widgets **no** son el mismo (uno invita al calendario completo, otro a recomendaciones personalizadas), por lo que **no** se fusionan; pero deben compartir el mismo lenguaje visual de invitación.
+
+Además existe una **fragmentación general del upsell**: hay ~10 componentes de upgrade/upsell dispersos con al menos 3 sistemas de estilo compitiendo, sin base común:
+
+- `PremiumUpsellCard` → gradiente `purple/pink` **hardcodeado**.
+- Banners en `readings/` (`UpgradeBanner` → `from-primary to-secondary`, `FreeReadingUpgradeBanner` → `from-violet-600`) → tokens de marca.
+- `PremiumUpgradePrompt` (conversion) → tokens `bg-secondary`, iconos `Lock`/`Gem`/`Sparkles`.
+
+#### Criterios de Aceptación
+
+1. **Dado** el dashboard de un usuario Free
+   **Cuando** se muestran los widgets "Calendario Sagrado" y "Rituales Recomendados"
+   **Entonces** ambas invitaciones a Premium usan el **mismo componente y lenguaje visual** (`PremiumUpsellCard` o su sucesor de marca) y el CTA viene de `CTA_PREMIUM` (sin strings hardcodeados).
+
+#### Notas Técnicas
+
+- **Quick win (T-FBK-001):** hacer que `PersonalizedRitualsWidget` consuma `PremiumUpsellCard` con una constante de `CTA_PREMIUM`.
+- **Deuda de diseño (T-FBK-002, opcional):** migrar `PremiumUpsellCard` a tokens de marca (hoy usa `purple/pink` crudo, tras el rediseño de T-PREM-007 el resto del circuito ya está en dorado/tokens) y converger los banners dispersos hacia una base común.
+- Ojo: el CTA "por IA" que aparece en la página premium (no en estos widgets) se atiende en FBK-003; este hallazgo es solo consistencia visual del upsell.
+
+---
+
+### FBK-002: Ficha Informativa "¿Qué es…?" Arriba de la Actividad
+
+**Severidad:** 🟡 Media
+**Módulo:** [ServiceIntro.tsx](../frontend/src/components/features/encyclopedia/ServiceIntro.tsx) + 9 páginas de actividad
+**Reportado por:** Ariel — "la información de las actividades está arriba de la propia actividad; debería estar abajo en todas las páginas".
+
+#### Descripción del Problema
+
+Cada página de actividad muestra la ficha educativa "¿Qué es…?" (título + intro + bullets + nota + botón "Ver más en la Enciclopedia") **antes** de la actividad real (formulario/herramienta/resultado). El usuario quiere el orden inverso: **primero la actividad, después la explicación**, de forma consistente en todas las páginas.
+
+Todas las páginas usan **un único componente compartido**, `ServiceIntro`, alimentado por datos centralizados en [service-intros.data.ts](../frontend/src/lib/constants/service-intros.data.ts). No hay markup duplicado: cada página hace `<ServiceIntro data={...} />` arriba de la actividad. Invertir el orden es, en cada caso, **mover una línea de JSX** dentro del mismo archivo.
+
+#### Alcance (9 páginas)
+
+| # | Actividad | Archivo | Línea del intro |
+| -- | ---------------- | ------------------------------------------------------------------------------------ | -------- |
+| 1 | Numerología | `components/features/numerology/NumerologyPage.tsx` | 79 |
+| 2 | Tarot del Día | `app/carta-del-dia/page.tsx` | 21 |
+| 3 | Carta Astral | `components/features/birth-chart/BirthChartPageContent/BirthChartPageContent.tsx` | 187 |
+| 4 | Horóscopo | `app/horoscopo/page.tsx` | 32 |
+| 5 | Horóscopo Chino | `app/horoscopo-chino/page.tsx` | 40 |
+| 6 | Péndulo | `components/features/pendulum/PendulumConsultation.tsx` | 127 |
+| 7 | Rituales | `components/features/rituals/RitualsPage.tsx` | 67 |
+| 8 | Tirada de Tarot | `app/tarot/page.tsx` | 27 |
+| 9 | Ritual | `app/ritual/page.tsx` | 27 |
+
+Fuera de alcance: `Servicios` no usa `ServiceIntro`, y las subpáginas de flujo (`tarot/preguntas`, `tarot/tirada`, etc.) tampoco lo renderizan.
+
+#### Criterios de Aceptación
+
+1. **Dado** cualquiera de las 9 páginas de actividad
+   **Cuando** carga
+   **Entonces** la ficha "¿Qué es…?" aparece **debajo** de toda la actividad (formulario/herramienta/resultado), con separación visual consistente.
+
+#### Notas Técnicas
+
+- Al mover el intro abajo, cambiar el margen de separación de `mb-6`/`mb-8` (hacia abajo) a `mt-6`/`mt-8` (hacia arriba) en las 9 llamadas para mantener la coherencia.
+- En páginas con varios bloques de actividad (ej. Horóscopo Chino: calculadora + selector + tarjeta), el criterio por defecto es: **el intro va al final, después de todos los bloques de actividad**.
+- Verificar que no se rompan `data-testid` ni tests que asuman el orden actual.
+
+---
+
+### FBK-003: Menciones a "IA" en Texto User-Facing
+
+**Severidad:** 🟠 Alta (viola una regla dura del proyecto)
+**Módulo:** transversal — Frontend (8) + Backend (guards, seed, plantillas de email)
+**Reportado por:** Ariel — "está prohibido nombrar 'IA'; debe referirse a recomendaciones personalizadas, profundas, etc.".
+
+#### Descripción del Problema
+
+El texto de cara al usuario no debe mencionar "IA" / "inteligencia artificial". Debe reformularse como "recomendaciones personalizadas", "interpretaciones profundas/personalizadas", "análisis personalizado", etc. Se detectaron violaciones tanto en frontend como en textos que el backend devuelve al usuario (mensajes de error, descripción del plan renderizada en `/premium`, y plantillas de email).
+
+#### Inventario de Violaciones
+
+**Frontend (user-facing):**
+
+| Archivo:línea | Texto |
+| ---- | ---- |
+| `premium/PremiumPage.tsx:59` | "Interpretación con IA personalizada" |
+| `premium/PremiumPage.tsx:64` | "Rituales recomendados por IA" |
+| `premium/PremiumPage.tsx:193` | "Interpretaciones personalizadas con IA, tiradas avanzadas…" |
+| `lib/constants/premium-benefits.ts:63` | "Interpretaciones con IA avanzada" |
+| `birth-chart/AISynthesis/AISynthesis.tsx:106` | "Análisis único generado por inteligencia artificial" |
+| `birth-chart/AISynthesis/AISynthesis.tsx:239` | "…análisis único generado por inteligencia artificial que conecta…" |
+| `birth-chart/BirthChartPageContent/BirthChartPageContent.tsx:268` | "✓ Síntesis personalizada con IA" |
+| `profile/SubscriptionTab.tsx:269` | "Interpretaciones personalizadas con IA" |
+
+**Backend (texto devuelto al usuario):**
+
+| Archivo:línea | Texto | Vía |
+| ---- | ---- | ---- |
+| `database/seeds/plans.seeder.ts:67` | "…interpretaciones con IA y preguntas personalizadas" | Descripción del plan renderizada en `PremiumPage.tsx:261` |
+| `tarot/readings/dto/create-reading.dto.ts:53` | "…cuando se solicita interpretación con IA" | Validación 400 |
+| `tarot/readings/guards/requires-premium-for-ai.guard.ts:43,59` | "Las funciones/interpretaciones con IA están disponibles solo para usuarios Premium…" | ForbiddenException |
+| `numerology/guards/requires-premium-for-numerology-ai.guard.ts:36` | "Las interpretaciones numerológicas con IA…" | ForbiddenException |
+| `email/email.service.ts:173` | "🚫 Has alcanzado tu límite mensual de interpretaciones con IA" | Asunto de email |
+| `email/templates/welcome.hbs:117` | "Realizar lecturas de tarot personalizadas con IA" | Email |
+| `email/templates/quota-limit-reached.hbs:5,125` | "Cuota de IA Alcanzada", "interpretaciones con IA." | Email |
+| `email/templates/quota-warning-80.hbs:5,109,118,180` | "Advertencia de Cuota de IA", "Interpretaciones ilimitadas con IA" | Email |
+| `email/templates/plan-change.hbs:169` | "Interpretaciones más profundas con IA avanzada" | Email |
+
+**Panel de admin — FUERA DE ALCANCE (decisión de Ariel, 5-jul-2026):** el panel de admin (`app/admin/ai-usage/page.tsx`, `admin/PlanComparisonTable.tsx`, etc.) dice "Inteligencia Artificial", pero **la regla de "no IA" NO aplica al panel interno** (solo lo ven administradores). No se modifica.
+
+**No cuentan como violación:** nombres de variables/componentes (`AISynthesis`, `AIProvider`), `OPENAI_*`, logs, comentarios, Swagger, prompts al modelo, tests y docs `.md`.
+
+#### Criterios de Aceptación
+
+1. **Dado** cualquier texto que ve el usuario final (UI, mensajes de error de la API, emails)
+   **Cuando** se refiere a la funcionalidad de interpretación/recomendación
+   **Entonces** NO menciona "IA" / "inteligencia artificial"; usa reformulaciones de marca (ej. "interpretaciones personalizadas", "análisis profundo").
+
+2. **Dado** la descripción del plan Premium
+   **Cuando** se muestra en `/premium`
+   **Entonces** el texto correcto proviene del backend (seed + migración de datos), no solo del frontend.
+
+#### Notas Técnicas
+
+- Corregir **solo el frontend no alcanza**: la descripción del plan se renderiza desde `plans.seeder.ts:67`, por lo que hace falta actualizar el seed **y** una migración de datos para las filas ya existentes en la tabla `plans`.
+- Coordinar con FBK-004/T-FBK-005: varias de estas líneas (filas de la tabla comparativa) también se tocan al alinear el copy con la implementación real. Reformular una sola vez.
+- Definir un **glosario de reemplazos** aprobado por Ariel antes de aplicar, para uniformidad.
+
+---
+
+### FBK-004: Contratos de Premium — La Página Promete lo que el Sistema no Entrega
+
+**Severidad:** 🔴 Crítica (incluye un bug de contrato en la cuota de IA)
+**Módulo:** Frontend (4 fuentes de copy) + Backend (límites, seed, constantes)
+**Reportado por:** Ariel — "revisar los contratos de premium contra lo que indica su página".
+
+#### Descripción del Problema
+
+Los beneficios de Premium están dispersos en **4 fuentes que ya se contradicen entre sí** ([PremiumPage.tsx](../frontend/src/components/features/premium/PremiumPage.tsx), [premium-benefits.ts](../frontend/src/lib/constants/premium-benefits.ts), [PremiumBenefitsSection.tsx](../frontend/src/components/features/home/PremiumBenefitsSection.tsx) y la descripción del plan que viene del backend). Al cruzarlas con la implementación real surgen tres tipos de discrepancia.
+
+**A) Promesas sin sustento (la página afirma algo que el código no hace):**
+
+1. **"Lecturas ilimitadas"** (`PremiumUpgradePrompt.tsx:26`) → **falso**: Premium tiene tope duro de **3 tiradas/día** (`plans.seeder.ts:71`) + 1 carta/día. Contradice incluso a otras piezas de la propia UI que dicen "3 lecturas por día".
+2. **"Experiencia sin publicidad"** (`PremiumBenefitsSection.tsx:30`) → no existe sistema de anuncios en el código.
+3. **"Acceso prioritario / nuevas funcionalidades primero"** (`PremiumBenefitsSection.tsx:35`) → sin lógica que lo implemente.
+4. **"Historial y estadísticas / descubrí patrones"** (`PremiumBenefitsSection.tsx:25`) → no hay módulo de estadísticas; solo retención de historial.
+5. **Tiradas "Herradura" y "Año completo"** (`PremiumBenefitsSection.tsx:16`) → esas tiradas **no existen** (solo 1, 3, 5 cartas y Cruz Céltica en `tarot-spreads.data.ts`).
+6. **"Historial ilimitado de rituales"** (`premium-benefits.ts:53`) → no hay límite de historial de rituales por plan.
+
+**B) Clasificaciones engañosas:**
+
+7. La tabla comparativa vende la **tirada de 3 cartas como premium-only** (`PremiumPage.tsx:58`), pero en el backend es `requiredPlan: ANONYMOUS` (`tarot-spreads.data.ts:92`) → **free ya puede hacerla**. Solo 5 cartas y Cruz Céltica son realmente premium.
+8. **"Horóscopo y numerología" marcado como free ✓** (`PremiumPage.tsx:63`), pero la numerología **con IA** está gateada a premium (`requires-premium-for-numerology-ai.guard.ts:34`).
+9. La comparativa muestra **"Historial de 365 días" como exclusivo premium (free ✗)**, pero free tiene **30 días** de retención (`readings.constants.ts:11`), no cero.
+
+**C) Features reales que la página NO menciona:** Carta astral (free 3/mes vs premium ∞), Péndulo (1 vs 3/día), Oráculo (5/día vs ∞), regeneración de interpretación (premium ∞).
+
+**D) 🔴 Incoherencia sistémica de la cuota de IA (bug de contrato):** hay **3 valores contradictorios** para lo mismo:
+
+- Seed de DB (`plans.seeder.ts:57,72`): FREE `aiQuotaMonthly=0`, PREMIUM `=100`.
+- Constante que realmente enforcea (`ai-usage/constants/ai-usage.constants.ts:25,32`): FREE `=100/mes`, PREMIUM `=-1` (ilimitado).
+- UI (`useUserPlanFeatures.ts:83`, `DailyCardExperience.tsx:66`): trata la IA como **premium-only**.
+
+El guard usa la constante (FREE=100), pero ninguna ruta de UI ofrece esos 100 requests a free. Hay que definir la fuente de verdad única y alinear las tres capas.
+
+> **Decisión de Ariel (5-jul-2026):** **Free NO tiene ningún uso de IA.** El usuario Free recibe interpretaciones y demás **a partir de contenido ya existente en la base de datos** (pre-generado/canónico), nunca generado por IA. La IA es **exclusiva de Premium**. → Fuente de verdad: **FREE `aiQuota = 0`**, PREMIUM con IA. Esto valida la seed (`FREE=0`) y la UI (`canUseAI` premium-only); lo que hay que corregir es la **constante de enforcement** (`ai-usage.constants.ts` FREE `100 → 0`).
+
+#### Números reales (fuente de verdad para validar todo el copy)
+
+| Feature | FREE | PREMIUM | Fuente |
+| ---- | ---- | ---- | ---- |
+| Carta del día | 1/día | 1/día (con interpretación personalizada) | `plans.seeder.ts` |
+| Tiradas de tarot | 1/día | 3/día | `plans.seeder.ts:56,71` |
+| Oráculo | 5/día | ∞ | `usage-limits.constants.ts:25,33` |
+| Péndulo | 1/día | 3/día | `usage-limits.constants.ts:26,34` |
+| Carta astral | 3/mes | ∞ | `usage-limits.constants.ts:27,35` |
+| Retención de historial | 30 días | 365 días | `readings.constants.ts:11-12` |
+| Tiradas premium-only | — | solo 5 cartas y Cruz Céltica | `tarot-spreads.data.ts` |
+| Precio | — | $7.000/mes | `plans.seeder.ts:68` |
+
+#### Criterios de Aceptación
+
+1. **Dado** la página `/premium` y todas las fuentes de beneficios
+   **Cuando** se auditan contra la implementación
+   **Entonces** cada beneficio listado tiene una contraparte real en el código; se eliminan o corrigen las promesas sin sustento (puntos A) y las clasificaciones engañosas (puntos B).
+
+2. **Dado** las features gateadas reales (péndulo, carta astral, oráculo, regeneración)
+   **Cuando** se decide su relevancia comercial
+   **Entonces** se reflejan correctamente en la comparativa o se documenta por qué se omiten.
+
+3. **Dado** la cuota de IA
+   **Cuando** se resuelve la incoherencia
+   **Entonces** existe **una sola fuente de verdad** y las tres capas (seed/DB, constante de enforcement, UI) coinciden.
+
+#### Notas Técnicas
+
+- Idealmente **unificar las 4 fuentes de beneficios** en una sola constante consumida por todos los puntos de venta (página, modales, home), para que no vuelvan a divergir.
+- Este hallazgo se divide en dos tareas por alcance: **T-FBK-005** (copy/beneficios frontend, con decisiones de producto de Ariel) y **T-FBK-006** (bug de la cuota de IA, backend).
+- Coordinar con FBK-003: al reescribir las filas de la comparativa se elimina también la mención a "IA".
+
+---
+
+### FBK-005: Iconos del Horóscopo Chino Off-Canon
+
+**Severidad:** 🟡 Media
+**Módulo:** [ChineseAnimalCard.tsx](../frontend/src/components/features/chinese-horoscope/ChineseAnimalCard.tsx) + usos del emoji
+**Reportado por:** Ariel — "buscar iconos más acordes al diseño de la página para el horóscopo chino".
+
+#### Descripción del Problema
+
+El Horóscopo Chino renderiza los animales como **emojis Unicode multicolor** del sistema (🐀🐂🐅… en `chinese-zodiac.ts:9-106`), en un `<span className="text-4xl">` sin tratamiento ([ChineseAnimalCard.tsx:89](../frontend/src/components/features/chinese-horoscope/ChineseAnimalCard.tsx#L89)). Esos emojis a todo color **desentonan** con la paleta lila/`primary` del canon.
+
+En cambio, el Horóscopo Occidental **se ve bien** porque usa un componente dedicado, [`ZodiacSymbol`](../frontend/src/components/features/horoscope/ZodiacSymbol.tsx), que combina: **glifo Unicode astrológico** (♈–♓) + **selector de presentación de texto `︎`** (fuerza monocromático) + clase `.zodiac-symbol` (`font-variant-emoji: text` en `globals.css:202-204`) + `text-primary`.
+
+El mismo emoji crudo del chino se reutiliza en ~5 lugares más (`AnimalCalculator.tsx:103`, `ChineseHoroscopeDetail.tsx:49`, `ChineseHoroscopeWidget.tsx:76`, `ChineseCompatibility.tsx:48`, `AnimalHoroscopePage.tsx:101`).
+
+#### Criterios de Aceptación
+
+1. **Dado** el selector y las tarjetas del Horóscopo Chino
+   **Cuando** se muestran los 12 animales
+   **Entonces** los iconos son **monocromáticos y coloreados con `text-primary`** (u otro token de marca), coherentes con el tratamiento del Horóscopo Occidental.
+
+#### Notas Técnicas
+
+- **Decisión de Ariel (5-jul-2026):** usar **la opción que sea consistente con el diseño de la página**. Dado que los emojis de animales NO tienen equivalente monocromático limpio bajo `font-variant-emoji: text` (a diferencia de los glifos astrológicos U+2648–U+2653), la vía elegida es **iconos SVG monocromáticos** coloreados con `text-primary`, encapsulados en un componente análogo a `ZodiacSymbol` (ej. `ChineseAnimalSymbol`) — mismo tratamiento visual que el Horóscopo Occidental.
+- Reemplazar el render en `ChineseAnimalCard.tsx:89` y propagar el nuevo componente a los ~5 usos restantes.
+- Conservar accesibilidad (`role="img"` + `aria-label` con el nombre del animal, como hace `ZodiacSymbol`).
+
+---
+
+### FBK-006: El Destacado "Tu Signo / Tu Animal" Rompe la Grilla
+
+**Severidad:** 🟡 Media
+**Módulo:** [ZodiacSignCard.tsx](../frontend/src/components/features/horoscope/ZodiacSignCard.tsx), [ChineseAnimalCard.tsx](../frontend/src/components/features/chinese-horoscope/ChineseAnimalCard.tsx)
+**Reportado por:** Ariel — "en el horóscopo occidental y chino, el 'tu signo' agranda la tarjeta y la fila rompiendo el diseño; basta con un recuadro que lo destaque, como ya existe".
+
+#### Descripción del Problema
+
+Cuando una tarjeta corresponde al signo/animal del usuario, se añade un **`<span>` de texto extra dentro de la card** ("Tu signo" / "Tu animal") que ocupa una línea adicional de altura. Como la grilla no fija altura de fila, esa card queda **más alta** que las demás y **desalinea toda la fila**. No es `scale` ni padding condicional: es contenido extra sin altura reservada.
+
+- Occidental: badge en [ZodiacSignCard.tsx:93](../frontend/src/components/features/horoscope/ZodiacSignCard.tsx#L93) — `{isUserSign && <span className="text-muted-foreground text-xs">Tu signo</span>}`.
+- Chino: badge en [ChineseAnimalCard.tsx:91](../frontend/src/components/features/chinese-horoscope/ChineseAnimalCard.tsx#L91) — `{isUserAnimal && <span className="text-xs font-medium text-red-500">Tu animal</span>}`.
+
+El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `isUserSign && 'border-accent border-2'` (occidental, línea 83) / `isUserAnimal && 'border-2 border-red-500'` (chino, línea 81). Ese borde destaca sin agrandar; el problema es exclusivamente el `<span>` de texto.
+
+#### Criterios de Aceptación
+
+1. **Dado** el selector de signos (occidental) o animales (chino)
+   **Cuando** una tarjeta es la del usuario
+   **Entonces** se destaca **solo con el borde** (sin agregar altura), manteniendo todas las tarjetas de la fila del **mismo tamaño**.
+
+2. **Dado** el destacado del chino
+   **Cuando** se compara con el occidental
+   **Entonces** usa el **mismo token de borde** (`accent`), no `border-red-500` (que además desentona con el lila).
+
+3. **Dado** que se quita el texto visible "Tu signo/Tu animal"
+   **Cuando** un lector de pantalla recorre la tarjeta
+   **Entonces** la condición de "tu signo" sigue siendo perceptible vía `aria-label` en la `Card` (no se pierde accesibilidad).
+
+#### Notas Técnicas
+
+- Solución mínima: eliminar el `<span>` de texto y apoyarse en el borde existente, agregando `aria-label` a la `Card`. Alternativa si se quiere conservar la etiqueta: posicionarla **absolute** (o reservarle altura fija) para que no altere el flujo.
+- Grillas idénticas en ambos (`grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-6`): `ZodiacSignSelector.tsx:57` y `ChineseAnimalSelector.tsx:55`.
+- Verificar tests que dependan del texto "Tu signo"/"Tu animal" (migrarlos a `aria-label`).
+
+---
+
+## PARTE B: TAREAS TÉCNICAS
+
+> **Convención de IDs:** serie `T-FBK-XXX` propia de este backlog.
+> Estimación en puntos de historia (1 punto ≈ 0.5 día).
+> Cada tarea se ejecuta siguiendo `docs/WORKFLOW_FRONTEND.md` o `docs/WORKFLOW_BACKEND.md` según su tipo (TDD, ciclo de calidad y PR a `develop`).
+
+### Índice de Tareas Técnicas
+
+| ID | Tarea | Tipo | Prioridad | Estimación |
+| ---------- | --------------------------------------------------------------------------- | ---------- | ---------- | ---------- |
+| T-FBK-001 | Unificar la invitación a Premium del dashboard (Rituales → `PremiumUpsellCard`) | Frontend | 🟠 Alta | 1 pt | ✅ COMPLETADA |
+| T-FBK-002 | (Deuda) Unificar el sistema de upsell (tokens de marca + convergencia de banners) ✅ | Frontend | 🟢 Baja | 3 pts |
+| T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts | ✅ COMPLETADA |
+| T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts | ✅ COMPLETADA |
+| T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts | ✅ COMPLETADA |
+| T-FBK-006 | Resolver la incoherencia de la cuota de IA (fuente de verdad única) | Backend | 🔴 Crítica | 2 pts | ✅ COMPLETADA |
+| T-FBK-007 | Alinear los iconos del Horóscopo Chino al canon | Frontend | 🟡 Media | 2 pts | ✅ COMPLETADA |
+| T-FBK-008 | "Tu signo/animal" sin agrandar la tarjeta (solo borde + a11y) ✅ | Frontend | 🟡 Media | 1 pt |
+| T-FBK-009 | Carta astral ilimitada para Free + gestión de límite por admin (fuente única en DB) ✅ | Backend | 🟠 Alta | 3 pts |
+
+---
+
+### T-FBK-001: Unificar la Invitación a Premium del Dashboard
+
+**Prioridad:** 🟠 Alta
+**Estimación:** 1 punto
+**Dependencias:** ninguna
+**Cubre Hallazgo:** FBK-001
+**Estado:** ✅ COMPLETADA
+
+#### ✅ Tareas específicas
+
+- [x] Reemplazar el markup inline de `PersonalizedRitualsWidget.tsx:64-81` por `<PremiumUpsellCard>` (mismo patrón que `SacredEventsWidget.tsx:206-216`), con `title`/`description` adecuados a rituales personalizados.
+- [x] Migrar el CTA hardcodeado `"Desbloquear recomendaciones"` a una constante de `CTA_PREMIUM` (se reutiliza `UPSELL_SOFT` → "Upgrade a Premium", coherente con `SacredEventsWidget`).
+- [x] Actualizar/añadir tests del widget para fijar el uso del componente compartido.
+
+#### 🎯 Criterios de Aceptación
+
+- Ambos widgets del dashboard muestran la misma invitación visual; el CTA proviene de `CTA_PREMIUM`.
+- Ciclo de calidad frontend completo pasa.
+
+#### 📁 Archivos involucrados
+
+- `PersonalizedRitualsWidget.tsx` (+ test), `lib/constants/cta-copy.ts` (si se agrega constante).
+
+---
+
+### T-FBK-002: Unificar el Sistema de Upsell (Deuda de Diseño)
+
+**Prioridad:** 🟢 Baja
+**Estimación:** 3 puntos
+**Dependencias:** T-FBK-001
+**Cubre Hallazgo:** FBK-001 (fragmentación general)
+**Estado:** ✅ COMPLETADA
+
+#### ✅ Tareas específicas
+
+- [x] Migrar `PremiumUpsellCard` de `purple/pink` hardcodeado a **tokens de marca** (dorado/`secondary`), coherente con el rediseño del circuito premium (T-PREM-007).
+- [x] Inventariar los ~10 componentes de upgrade/upsell dispersos y definir una base común (o cuáles convergen hacia `PremiumUpsellCard` vs. cuáles son banners específicos legítimos).
+- [x] Documentar la guía de uso (cuándo usar tarjeta de upsell vs. banner vs. modal).
+
+#### 🎯 Criterios de Aceptación
+
+- [x] El upsell usa un lenguaje visual único de marca (sin `purple/pink` crudo) en todos los puntos de conversión.
+- [x] Ciclo de calidad frontend completo pasa.
+
+#### 📁 Archivos involucrados
+
+- `ui/premium-upsell-card.tsx` + banners de `readings/` y `conversion/` (según inventario).
+
+#### 🛠️ Notas de Implementación (6-jul-2026)
+
+**Base común vs. formas específicas.** El inventario confirmó que la unificación NO significa
+colapsar todo en un solo componente: `PremiumUpsellCard` es la **base común** (invitación inline
+discreta, ya consumida por `SacredEventsWidget` y `PersonalizedRitualsWidget` desde T-FBK-001), y
+el resto son **formas específicas legítimas** (modal, banner prominente, sección de límite, overlay
+de preview, badge) que responden a momentos de conversión distintos. Lo que se unificó fue el
+**lenguaje visual**: todos migraron al token dorado `secondary` (T-PREM-007), erradicando la clase
+cruda `purple/pink`.
+
+**Migración de tokens (raw `purple/pink` → `secondary`):**
+
+- `ui/premium-upsell-card.tsx`: fondo `from-purple-50 to-pink-50` → `border-secondary/40 bg-secondary/10`; icono `text-secondary`; CTA `<Button>` por defecto + `focus-visible:ring-secondary/50`; textos a `text-foreground`/`text-muted-foreground`.
+- `readings/PremiumBadge.tsx`: gradiente `from-purple-600 to-pink-600` → chip sólido `bg-secondary text-bg-hero` (coherente con el chip "PREMIUM" de `PremiumPage`).
+- `readings/FreeReadingUpgradeBanner.tsx`: `from-violet-600 to-purple-600` → `from-primary to-secondary` (unificado con `UpgradeBanner`); botón blanco `text-primary`.
+- `conversion/PremiumPreview.tsx`, `conversion/RegisterCTAModal.tsx`, `readings/UpgradeModal.tsx`, `readings/DailyLimitReachedModal.tsx`, `daily-reading/DailyCardLimitReached.tsx`, `readings/ReadingLimitReached.tsx`: círculos de icono → `bg-secondary/15`, iconos/acentos → `text-secondary`, cajas de beneficios → `border-secondary/40 bg-secondary/10`, CTAs → `<Button>` por defecto con foco dorado (se eliminaron los gradientes `from-purple-600 to-*`).
+
+**Ya en tokens (referencia, sin cambios):** `LimitReachedModal`, `PremiumUpgradePrompt`, `UpgradeBanner`, `AnonymousLimitReached`, `SubscriptionTab`, `PremiumBenefitsSection`.
+
+**Fuera de alcance (color de dominio, no upsell):** encyclopedia, numerología, birth-chart (aspectos/elementos), admin (badges de plan), notifications, holistic-services, pendulum. `UsageLimitBanner` usa ámbar/naranja (no `purple/pink`) — queda como deuda menor futura.
+
+**Guía de uso:** nueva en `frontend/docs/UPSELL_SYSTEM.md` (tabla de tokens + cuándo usar cada forma + árbol de decisión + checklist).
+
+**TDD:** se actualizaron los tests que fijaban las clases crudas (`premium-upsell-card`, `PremiumBadge`, `ReadingLimitReached`, `RegisterCTAModal`) para verificar los tokens de marca y la **ausencia** de `purple/pink`.
+
+**Ciclo de calidad frontend completo:** format ✅, lint (0 errores) ✅, type-check ✅, 5173 tests ✅, build ✅, validate-architecture ✅.
+
+---
+
+### T-FBK-003: Reubicar la Ficha "¿Qué es…?" Debajo de la Actividad
+
+**Prioridad:** 🟡 Media
+**Estimación:** 1.5 puntos
+**Dependencias:** ninguna
+**Cubre Hallazgo:** FBK-002
+**Estado:** ✅ COMPLETADA
+
+#### ✅ Tareas específicas
+
+- [x] Mover el `<ServiceIntro>` (o `<NumerologyIntro>`) debajo de la actividad en las 9 páginas del alcance.
+- [x] Cambiar el margen de separación de `mb-*` a `mt-*` en las 9 llamadas.
+- [x] En páginas con varios bloques de actividad, ubicar el intro al final de todos ellos.
+- [x] Actualizar tests que asuman el orden previo.
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Las 9 páginas muestran la ficha informativa debajo de la actividad, con separación consistente.
+- [x] Ciclo de calidad frontend completo pasa.
+
+#### 📁 Archivos involucrados
+
+- Los 9 del alcance (ver tabla de FBK-002) + sus tests.
+
+#### 🛠️ Notas de Implementación (6-jul-2026)
+
+- Reubicación puramente de orden de JSX: el intro compartido (`ServiceIntro`/`NumerologyIntro`) se movió del tope al final del bloque de actividad en las 9 páginas, con `mb-*` → `mt-*`.
+- En páginas con múltiples bloques de actividad el intro va al final de todos ellos: **Numerología** (tras perfil + calculadora + resultado), **Carta Astral** (tras el form + info "¿Qué incluye?"/"Importante"), **Horóscopo Chino** (tras el selector de animales, antes del modal overlay), **Péndulo** (tras el área del péndulo + controles), **Rituales** (tras la lista completa), **Horóscopo** (tras el selector de signos).
+- **TDD:** se añadió un test de orden por página que verifica con `compareDocumentPosition` que el intro queda **después** de un ancla de actividad (`calculate-button`, `unrevealed-state`, `birth-data-form`, `zodiac-selector`, `chinese-animal-selector`, `pendulum-animation`, `ritual-grid`, `category-selector`). Los tests de presencia previos se mantienen.
+- Ciclo de calidad frontend completo: format ✅, lint (0 errores) ✅, type-check ✅, 5162 tests ✅, build ✅, validate-architecture ✅.
+
+---
+
+### T-FBK-004: Erradicar "IA" del Texto User-Facing
+
+**Prioridad:** 🟠 Alta
+**Estimación:** 3 puntos
+**Dependencias:** glosario de reemplazos aprobado por Ariel; coordinar con T-FBK-005
+**Cubre Hallazgo:** FBK-003
+**Estado:** ✅ COMPLETADA
+
+#### ✅ Tareas específicas
+
+- [x] **Frontend:** reformular las apariciones vigentes del inventario (AISynthesis, BirthChartPageContent, PremiumPage, SubscriptionTab, WelcomeModal). Nota: `PremiumPage:59/64` y `premium-benefits.ts:63` ya habían sido reformulados por T-FBK-005; se detectaron y corrigieron apariciones nuevas no listadas en el inventario original (`BirthChartPageContent`, `WelcomeModal`).
+- [x] **Backend — mensajes:** reformular guards (`requires-premium-for-ai.guard.ts`, `requires-premium-for-numerology-ai.guard.ts`, `ai-quota.guard.ts` — nuevo, de T-FBK-006), DTO (`create-reading.dto.ts`), asuntos de email (`email.service.ts:145` y `173`) y las constantes de mensaje `QUOTA_WARNING_MESSAGE`/`QUOTA_LIMIT_REACHED_MESSAGE`.
+- [x] **Backend — plan:** actualizar `plans.seeder.ts` **y** crear una **migración de datos** (`1776700000000-RemoveAiMentionFromPremiumPlanDescription.ts`) para reformular la descripción del plan en las filas existentes de la tabla `plans`.
+- [x] **Backend — emails:** reformular las plantillas `.hbs` (welcome, quota-limit-reached, quota-warning-80, plan-change).
+- [x] **Panel de admin: NO se tocó** (decisión de Ariel — la regla no aplica al panel interno).
+- [x] Añadir un **guardarraíl** (tests Jest + Vitest) que falla si reaparece "IA"/"inteligencia artificial" en texto user-facing (`no-ia-user-facing.spec.ts` / `no-ia-user-facing.test.ts`; excluyen admin, Swagger, comentarios y nombres). El error interno de infra "no hay proveedor de IA configurado" queda fuera de alcance (decisión de Ariel).
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Ningún texto de cara al usuario (UI, errores de API, emails, descripción del plan renderizada) menciona "IA".
+- [x] Ciclos de calidad frontend y backend completos pasan (backend: 4450 tests, cobertura 84.6%; frontend: 5151 tests).
+
+#### 📁 Archivos involucrados
+
+- 8 archivos frontend + guards/DTO/email service + 4 plantillas `.hbs` + seed + nueva migración de datos.
+
+---
+
+### T-FBK-005: Alinear el Copy/Beneficios de Premium con la Implementación Real
+
+**Prioridad:** 🔴 Crítica
+**Estimación:** 2.5 puntos
+**Dependencias:** decisiones de producto de Ariel (qué features exhibir); coordinar con T-FBK-004 y T-FBK-006
+**Cubre Hallazgo:** FBK-004 (puntos A, B, C)
+**Estado:** ✅ COMPLETADA
+
+#### ✅ Tareas específicas
+
+- [x] Eliminar/corregir las **promesas sin sustento** (lecturas ilimitadas, sin publicidad, acceso prioritario, estadísticas, tiradas "Herradura/Año completo", historial ilimitado de rituales).
+- [x] Corregir las **clasificaciones engañosas** (tirada de 3 cartas es free, no premium; interpretación personalizada es premium; free tiene 30 días de historial vs 365 de premium).
+- [x] Decidir con Ariel qué **features reales no listadas** exhibir y reflejarlas.
+- [x] **Unificar las fuentes de beneficios** en una sola constante consumida por página, modales y home.
+- [x] Actualizar tests que fijen la comparativa contra los números reales.
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Cada beneficio mostrado en `/premium` (y home/modales) tiene contraparte real en el código; los números coinciden con la tabla de "números reales" de FBK-004.
+- [x] Existe una única fuente de beneficios; ciclo de calidad frontend completo pasa.
+
+#### 📁 Archivos involucrados
+
+- `premium/PremiumPage.tsx`, `lib/constants/premium-benefits.ts`, `home/PremiumBenefitsSection.tsx`, `home/PlanComparison.tsx`, `conversion/PremiumUpgradePrompt.tsx`, `readings/UpgradeModal.tsx`, `readings/UpgradeBanner.tsx`, `onboarding/WelcomeModal.tsx` (+ tests).
+
+#### 🛠️ Notas de Implementación (5-jul-2026)
+
+**Decisiones de producto de Ariel incorporadas:**
+
+- **Oráculo:** NO existe como feature en la web (aunque el backend tenga constantes) → erradicado de todo el copy.
+- **Regeneración de interpretaciones:** no se exhibe como diferenciador comercial.
+- **Carta astral:** cantidad **ilimitada en ambos planes**; el diferenciador Premium es el **resumen personalizado** (síntesis con IA de `AISynthesis`), que Free no tiene.
+- **IA:** exclusiva de Premium (coherente con FBK-006); Free usa contenido pre-generado.
+
+**Fuente única:** `lib/constants/premium-benefits.ts` es ahora la ÚNICA fuente, con `PLAN_MATRIX` (comparativas), `PREMIUM_BENEFITS` (callouts), `PREMIUM_HOME_BENEFITS` (home) y `PREMIUM_UPGRADE_HIGHLIGHTS` (modales). `PremiumPage` y `PlanComparison` derivan su comparativa de `PLAN_MATRIX` para no volver a divergir.
+
+**Correcciones clave:** la tirada de **3 cartas es Free** (solo 5 cartas y Cruz Céltica son premium); se purgaron "lecturas ilimitadas", "sin publicidad", "acceso prioritario", "historial y estadísticas", "Herradura/Año completo" e "historial ilimitado de rituales" de todos los puntos de venta (incl. `UpgradeBanner` y `WelcomeModal`, hallados fuera de la lista original).
+
+**⚠️ Revisor local — corrección de dato (carta astral):** la decisión de producto "carta astral ilimitada en ambos planes" **NO está implementada en el backend**: `usage-limits.constants.ts` aplica **FREE 3/mes** (PREMIUM ilimitada) y la propia UI de carta astral lo enforcea. Para no reintroducir una promesa sin sustento, el copy refleja la implementación real: **Free 3/mes · Premium ilimitada + resumen personalizado**. Si se quiere liberar la carta astral ilimitada para Free, requiere una tarea de **backend** (cambiar `USAGE_LIMITS`) — fuera del alcance de esta tarea frontend. También se migró `UpgradeModal` a la fuente única (`PREMIUM_MODAL_BENEFITS`) para cerrar la última lista de beneficios hardcodeada.
+
+---
+
+### T-FBK-006: Resolver la Incoherencia de la Cuota de IA
+
+**Prioridad:** 🔴 Crítica
+**Estimación:** 2 puntos
+**Dependencias:** ninguna (regla de negocio ya decidida — ver abajo)
+**Cubre Hallazgo:** FBK-004 (punto D)
+**Estado:** ✅ COMPLETADA
+
+> **Regla de negocio (decisión de Ariel):** Free = **cero IA** (interpretaciones desde contenido existente en la DB); IA **exclusiva de Premium**. Fuente de verdad: FREE `aiQuota = 0`.
+
+#### ✅ Tareas específicas
+
+- [x] Corregir la **constante de enforcement** `ai-usage.constants.ts`: FREE `100 → 0` (para que coincida con la seed y con la UI premium-only). FREE queda fijo en 0 (no configurable por env, por regla de negocio).
+- [x] Verificar que PREMIUM quede coherente entre seed (`aiQuotaMonthly`) y enforcement. Criterio único: **PREMIUM = ilimitado (`-1`)** (seed `100 → -1`); el uso real de Premium ya está acotado por los límites diarios por actividad (usage-limits), no por esta cuota.
+- [x] Confirmar que las interpretaciones de Free se sirven **solo desde contenido de DB** (sin llamada a IA) en todos los flujos. **Hallazgo:** con FREE=0, `AIQuotaGuard` bloqueaba **toda** creación de lectura de Free (endpoint compartido `POST /readings`), no solo la IA. Se **removió `AIQuotaGuard` de `POST /readings`** (la IA la sigue gateando `RequiresPremiumForAIGuard`); se mantiene en los endpoints exclusivos de IA (regenerar interpretación/carta, interpretaciones, numerología).
+- [x] Migración de datos: `AlignPremiumAiQuotaToUnlimited` (plans premium `aiQuotaMonthly 100 → -1`, con `down`).
+- [x] Tests que fijen la coherencia (constante FREE=0/PREMIUM=-1, seed premium=-1) y que el guard **bloquee toda IA para Free**; blindaje de división por cero en `getQuotaInfo`/`getRemainingQuota`/`trackMonthlyUsage` y en `findUsersApproachingQuota`.
+
+#### 🎯 Criterios de Aceptación
+
+- Free no consume IA en ningún flujo (recibe contenido de DB); el guard bloquea IA para Free de forma consistente con la UI.
+- La cuota por plan es un único valor coherente en seed/DB, enforcement y UI.
+- Ciclo de calidad backend completo pasa.
+
+#### 📁 Archivos involucrados
+
+- `ai-usage/constants/ai-usage.constants.ts`, `database/seeds/plans.seeder.ts`, `ai-quota.service.ts`/`check-user-quota.use-case.ts`, migración; en frontend `useUserPlanFeatures.ts` si aplica.
+
+---
+
+### T-FBK-007: Alinear los Iconos del Horóscopo Chino al Canon
+
+**Prioridad:** 🟡 Media
+**Estimación:** 2 puntos
+**Dependencias:** ninguna (dirección de diseño ya decidida — SVG monocromático `text-primary`)
+**Cubre Hallazgo:** FBK-005
+**Estado:** ✅ COMPLETADA
+
+> **Decisión de Ariel:** la opción consistente con el diseño de la página → **iconos SVG monocromáticos** coloreados con `text-primary` (mismo tratamiento que el Horóscopo Occidental). Estilo elegido: **línea/contorno** (`stroke=currentColor`, `fill=none`), coherente con los glifos de trazo `♈`–`♓` del zodiaco occidental.
+
+#### ✅ Tareas específicas
+
+- [x] Creado el set de **12 SVG monocromáticos** de marca (Rata…Cerdo) como arte de línea inline en `ChineseAnimalSymbol`, coloreable con `currentColor`/`text-primary`. Se descartó el truco Unicode U+FE0E de `ZodiacSymbol` porque los animales chinos no tienen glifo Unicode monocromático (solo emoji pictográficos), por eso se usa SVG propio.
+- [x] Creado el componente `ChineseAnimalSymbol` análogo a `ZodiacSymbol` (icono monocromático de trazo + `text-primary` + `role="img"`/`aria-label` obligatorio + `width/height="1em"` para escalar con `text-Nxl`).
+- [x] Reemplazado el render en `ChineseAnimalCard.tsx` y propagado a los consumidores restantes: `AnimalCalculator`, `ChineseHoroscopeDetail`, `ChineseHoroscopeWidget`, `ChineseCompatibility` y `ElementSelectorModal` (se le retiró la prop redundante `animalEmoji`, ya recibía `animal`; se actualizaron sus dos llamadores). `YearSelectorModal` quedó intacto por ser código muerto (no se renderiza en ninguna parte).
+- [x] Tests del nuevo componente (8) y migración de las aserciones de emoji de las tarjetas/consumidores al símbolo accesible (`getByRole('img', { name })`).
+
+#### 🎯 Criterios de Aceptación
+
+- Los animales del Horóscopo Chino se ven monocromáticos y coherentes con el Horóscopo Occidental (paleta de marca). ✅
+- Ciclo de calidad frontend completo pasa. ✅ (format, lint, type-check, 5172 tests, build, validate-architecture)
+
+#### 📁 Archivos involucrados
+
+- Nuevo `ChineseAnimalSymbol.tsx` (+ test), `ChineseAnimalCard.tsx`, `AnimalCalculator.tsx`, `ChineseHoroscopeDetail.tsx`, `ChineseHoroscopeWidget.tsx`, `ChineseCompatibility.tsx`, `ElementSelectorModal.tsx`, `AnimalHoroscopePage.tsx`, `app/horoscopo-chino/page.tsx` (+ tests migrados).
+
+---
+
+### T-FBK-008: "Tu Signo/Animal" sin Agrandar la Tarjeta
+
+**Prioridad:** 🟡 Media
+**Estimación:** 1 punto
+**Dependencias:** ninguna
+**Cubre Hallazgo:** FBK-006
+**Estado:** ✅ COMPLETADA
+
+#### ✅ Tareas específicas
+
+- [x] Quitar el `<span>` "Tu signo" (`ZodiacSignCard.tsx`) y "Tu animal" (`ChineseAnimalCard.tsx`) para que no altere el alto de la card.
+- [x] Apoyar el destacado solo en el borde existente; **unificado** el borde del chino de `border-red-500` a `border-accent`.
+- [x] Añadido `aria-label` condicional a la `Card` (`"{nombre} (tu signo/animal)"` solo en la card del usuario) para conservar la accesibilidad del estado.
+- [x] Migrados los tests que dependían del texto visible al nombre accesible (`getByRole('button', { name: /tu signo|tu animal/i })`).
+
+#### 🎯 Criterios de Aceptación
+
+- Todas las tarjetas de una fila mantienen el mismo tamaño; la del usuario se destaca solo con el borde (token `accent`); la accesibilidad se conserva.
+- Ciclo de calidad frontend completo pasa.
+
+#### 📁 Archivos involucrados
+
+- `horoscope/ZodiacSignCard.tsx`, `chinese-horoscope/ChineseAnimalCard.tsx` (+ tests).
+
+---
+
+### T-FBK-009: Carta Astral Ilimitada para Free + Gestión de Límites de Carta Astral por Admin
+
+**Prioridad:** 🟠 Alta
+**Estimación:** 3 puntos
+**Dependencias:** ninguna (desbloquea revertir el copy de T-FBK-005 a "ilimitada" para ambos planes)
+**Cubre Hallazgo:** decisión de producto de Ariel (5-jul-2026) surgida en la revisión de T-FBK-005
+**Estado:** ✅ COMPLETADA
+
+#### Descripción del Problema
+
+Decisión de producto de Ariel: **la carta astral debe ser de cantidad ilimitada para todos los planes** (el diferenciador Premium es solo el *resumen personalizado* con IA, no la cantidad). Hoy la implementación **contradice** esa decisión: el límite de carta astral está **hardcodeado** en `usage-limits.constants.ts` (`BIRTH_CHART`: FREE `3/mes`, PREMIUM `-1`) y se enforcea leyendo esa constante en `birth-chart-facade.service.ts:216`, **no** desde la configuración de plan de la DB.
+
+Esto genera además una **fragmentación** (misma clase de bug que FBK-006): existe un endpoint admin `PUT /admin/limits/birth-chart` (`admin-limits.controller.ts`) con auditoría, pero la fuente que **realmente** aplica es la constante, por lo que ese panel no gobierna el límite efectivo.
+
+> Mientras esta tarea no se complete, el copy de `/premium` (T-FBK-005) refleja el **estado real** (Free 3/mes) para no prometer algo que el sistema no entrega.
+
+#### ✅ Tareas específicas
+
+- [x] Mover el límite de carta astral a la config de plan de la DB: agregar columna `birthChartMonthlyLimit` a `plan-config/entities/plan.entity.ts` (+ migración `1776600000000-AddBirthChartMonthlyLimitToPlans`; FREE `-1`, PREMIUM `-1`, ANONYMOUS `-1`) y método `getBirthChartLimit()` en `PlanConfigService`.
+- [x] Que `birth-chart-facade.service.ts` (y el `check-usage-limit.guard.ts`) lean el límite desde `PlanConfigService` en lugar de la constante `USAGE_LIMITS` (fuente única).
+- [x] **Retirar** el endpoint `admin-limits birth-chart` (SystemConfig + caché en memoria) — era una fuente fantasma que el enforcement no leía y el frontend no consumía. El límite ahora se gobierna 100% desde el panel de planes (`plan-config`). Sin dos fuentes de verdad. _(La entidad genérica `SystemConfig` se deja intacta para reutilización futura; ya no la inyecta ningún servicio.)_
+- [x] Exponer `birthChartMonthlyLimit` en el CRUD de `plan-config` (DTO `CreatePlanDto` → heredado por `UpdatePlanDto`) y en el panel admin de planes (`PlanConfigCard`) para que el admin pueda gestionarlo.
+- [x] Seed/migración: FREE `birthChartMonthlyLimit = -1` (ilimitada) en `plans.seeder.ts`.
+- [x] **Coordinar con T-FBK-005:** revertido el copy de carta astral en `PLAN_MATRIX` (`premium-benefits.ts`) a `free: 'Ilimitada'` (premium sigue "Ilimitada con resumen personalizado").
+- [x] Tests (entidad, servicio, guard, facade, DTO, seeder) y ciclo de calidad backend + frontend.
+
+#### 🎯 Criterios de Aceptación
+
+- Free puede generar cartas astrales sin tope de cantidad; el único diferenciador Premium es el resumen personalizado con IA.
+- El límite de carta astral tiene **una sola fuente de verdad** (config de plan en DB), gestionable desde el panel de admin; el copy de `/premium` coincide con ella.
+
+#### 📌 Nota — Gestión de límites/IA por admin (estado actual, para contexto)
+
+**Ya existe** (panel admin de planes → `plan-config.controller` con `AdminGuard`, UI `PlanesConfigContainer`): edición por plan de `dailyCardLimit`, `tarotReadingsLimit`, `pendulumDailyLimit`/`pendulumMonthlyLimit`, **`aiQuotaMonthly`** (0 = bloquear IA; N o -1 = permitir), **`birthChartMonthlyLimit`** (T-FBK-009; -1 = ilimitada) y `price`. La IA se gobierna con `aiQuotaMonthly` (guard `ai-quota.guard.ts` → `PlanConfigService.getAiQuota`); la carta astral con `birthChartMonthlyLimit` (guard `check-usage-limit.guard.ts` → `PlanConfigService.getBirthChartLimit`).
+**Aún hardcodeado en `USAGE_LIMITS`** (no gestionable por admin): oráculo (feature inexistente) y regeneración de interpretación.
+
+---
+
+## ORDEN DE EJECUCIÓN SUGERIDO
+
+1. **T-FBK-006** y **T-FBK-005** (contratos de Premium: resolver el bug de cuota de IA y alinear el copy — mayor impacto de producto; requieren decisiones de Ariel primero).
+2. **T-FBK-004** (erradicar "IA" del texto user-facing — coordinar con T-FBK-005 para tocar las filas de la comparativa una sola vez).
+2b. **T-FBK-009** (backend: carta astral ilimitada para Free + gestión del límite por admin; al cerrarse, se revierte el copy de carta astral de T-FBK-005 a "ilimitada").
+3. **T-FBK-001** (quick win de consistencia del upsell en el dashboard).
+4. **T-FBK-003** (reubicar fichas informativas — mecánico, 9 páginas).
+5. **T-FBK-008** (arreglo de grilla "tu signo/animal").
+6. **T-FBK-007** (iconos del Horóscopo Chino — requiere decisión de diseño).
+7. **T-FBK-002** (deuda de unificación del sistema de upsell — de cierre, prioridad baja).
+
+---
+
+> **Nota:** este backlog deriva de una ronda de feedback de Ariel navegando `localhost:3001` (julio 2026) y de un relevamiento de código sobre `frontend/` y `backend/tarot-app/`. Los hallazgos FBK-005/FBK-006 se apoyan en el canon visual ya establecido (Dashboard, Enciclopedia, Premium) para garantizar coherencia; FBK-003/FBK-004 nacen de reglas duras del proyecto (prohibición de "IA" en texto user-facing) y de la necesidad de que la página de Premium describa fielmente lo que el sistema entrega.

@@ -1,6 +1,7 @@
 'use client';
 
-import { Check, Sparkles, Lock, MessageCircle, TrendingUp } from 'lucide-react';
+import type { ComponentType } from 'react';
+import { Check, Sparkles, Star, MessageCircle, TrendingUp, type LucideProps } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import { usePublicPlans } from '@/hooks/api/usePublicPlans';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants/routes';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { PREMIUM_MODAL_BENEFITS } from '@/lib/constants/premium-benefits';
 import { formatPriceArs } from '@/lib/utils/format';
 import type { CreatePreapprovalResponse } from '@/types';
 
@@ -31,30 +33,15 @@ export interface UpgradeModalProps {
 }
 
 /**
- * Premium benefits list
+ * Mapa de nombre de icono (fuente única `PREMIUM_MODAL_BENEFITS`) → componente Lucide.
+ * Los beneficios se leen de la fuente única para no duplicar copy.
  */
-const PREMIUM_BENEFITS = [
-  {
-    icon: Sparkles,
-    text: 'Interpretaciones personalizadas y profundas',
-    description: 'Análisis profundos adaptados a tu situación',
-  },
-  {
-    icon: TrendingUp,
-    text: 'Todas las tiradas disponibles',
-    description: 'Acceso ilimitado a todos los tipos de tiradas',
-  },
-  {
-    icon: MessageCircle,
-    text: 'Preguntas personalizadas',
-    description: 'Crea tus propias preguntas para lecturas únicas',
-  },
-  {
-    icon: Lock,
-    text: 'Sin publicidad',
-    description: 'Experiencia premium sin interrupciones',
-  },
-] as const;
+const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
+  Sparkles,
+  TrendingUp,
+  MessageCircle,
+  Star,
+};
 
 /**
  * UpgradeModal Component
@@ -132,8 +119,8 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
         {/* Benefits List */}
         <div className="my-6 space-y-4">
           <ul role="list" className="space-y-3">
-            {PREMIUM_BENEFITS.map((benefit, index) => {
-              const Icon = benefit.icon;
+            {PREMIUM_MODAL_BENEFITS.map((benefit, index) => {
+              const Icon = ICON_MAP[benefit.icon] ?? Sparkles;
               return (
                 <li key={index} className="flex items-start gap-3">
                   <div className="bg-primary/10 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
@@ -141,7 +128,7 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-purple-600" aria-hidden="true" />
+                      <Icon className="text-secondary h-4 w-4" aria-hidden="true" />
                       <p className="text-text-primary font-semibold">{benefit.text}</p>
                     </div>
                     <p className="text-muted-foreground mt-1 text-sm">{benefit.description}</p>
@@ -153,9 +140,9 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
         </div>
 
         {/* Pricing */}
-        <div className="rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 text-center">
+        <div className="border-secondary/40 bg-secondary/10 rounded-lg border p-6 text-center">
           <div className="flex items-baseline justify-center gap-1">
-            <span className="text-4xl font-bold text-purple-900">
+            <span className="text-foreground text-4xl font-bold">
               {premiumPrice != null ? formatPriceArs(premiumPrice) : '---'}
             </span>
             <span className="text-muted-foreground">/ mes</span>
@@ -171,7 +158,7 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
             onClick={handleUpgradeClick}
             disabled={isPending}
             size="lg"
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            className="focus-visible:ring-secondary/50 w-full"
           >
             <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
             {isPending

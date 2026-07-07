@@ -30,7 +30,7 @@ const mockSetChartResult = vi.fn();
 const mockRouterPush = vi.fn();
 
 vi.mock('@/components/features/encyclopedia', () => ({
-  EncyclopediaInfoWidget: () => null,
+  ServiceIntro: () => null,
 }));
 
 vi.mock('@/stores/authStore');
@@ -283,7 +283,7 @@ describe('BirthChartPage', () => {
       expect(screen.getByText(/posiciones planetarias/i)).toBeInTheDocument();
       expect(screen.getByText(/big three/i)).toBeInTheDocument();
       expect(screen.queryByText(/interpretaciones completas/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/síntesis personalizada con ia/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/síntesis personalizada/i)).not.toBeInTheDocument();
     });
 
     it('should show additional features for authenticated free users', () => {
@@ -296,7 +296,7 @@ describe('BirthChartPage', () => {
 
       expect(screen.getByText(/interpretaciones completas/i)).toBeInTheDocument();
       expect(screen.getByText(/descarga en pdf/i)).toBeInTheDocument();
-      expect(screen.queryByText(/síntesis personalizada con ia/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/síntesis personalizada/i)).not.toBeInTheDocument();
     });
 
     it('should show all features for Premium users', () => {
@@ -309,7 +309,7 @@ describe('BirthChartPage', () => {
 
       expect(screen.getByText(/interpretaciones completas/i)).toBeInTheDocument();
       expect(screen.getByText(/descarga en pdf/i)).toBeInTheDocument();
-      expect(screen.getByText(/síntesis personalizada con ia/i)).toBeInTheDocument();
+      expect(screen.getByText(/síntesis personalizada/i)).toBeInTheDocument();
       expect(screen.getByText(/historial de cartas/i)).toBeInTheDocument();
     });
   });

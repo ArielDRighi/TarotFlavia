@@ -46,7 +46,7 @@ describe('Plans Seeder', () => {
         name: 'Plan Premium',
         price: 7000,
         readingsLimit: 3,
-        aiQuotaMonthly: 100,
+        aiQuotaMonthly: -1,
       },
     ];
 
@@ -77,6 +77,7 @@ describe('Plans Seeder', () => {
         price: 0,
         readingsLimit: 1,
         aiQuotaMonthly: 0,
+        birthChartMonthlyLimit: -1,
         allowCustomQuestions: false,
       }),
     );
@@ -89,6 +90,7 @@ describe('Plans Seeder', () => {
         price: 0,
         readingsLimit: 2,
         aiQuotaMonthly: 0,
+        birthChartMonthlyLimit: -1,
         allowCustomQuestions: false,
       }),
     );
@@ -100,7 +102,8 @@ describe('Plans Seeder', () => {
         name: 'Plan Premium',
         price: 7000,
         readingsLimit: 4,
-        aiQuotaMonthly: 100,
+        aiQuotaMonthly: -1,
+        birthChartMonthlyLimit: -1,
         allowCustomQuestions: true,
       }),
     );

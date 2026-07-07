@@ -3,6 +3,7 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  HttpException,
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
@@ -57,22 +58,29 @@ export class LoggingInterceptor implements NestInterceptor {
         });
       }),
       catchError((error: Error) => {
-        // Log error
         const duration = `${Date.now() - startTime}ms`;
+        const metadata = {
+          method,
+          url,
+          duration,
+          error: error instanceof Error ? error.message : String(error),
+          ...(correlationId && { correlationId }),
+          ...(user && { userId: (user as RequestUser).id }),
+        };
 
-        this.logger.error(
-          'HTTP Request Error',
-          error instanceof Error ? error.stack : undefined,
-          'HTTPLogger',
-          {
-            method,
-            url,
-            duration,
-            error: error instanceof Error ? error.message : String(error),
-            ...(correlationId && { correlationId }),
-            ...(user && { userId: (user as RequestUser).id }),
-          },
-        );
+        const isClientError =
+          error instanceof HttpException && error.getStatus() < 500;
+
+        if (isClientError) {
+          this.logger.warn('HTTP Request Warning', 'HTTPLogger', metadata);
+        } else {
+          this.logger.error(
+            'HTTP Request Error',
+            error instanceof Error ? error.stack : undefined,
+            'HTTPLogger',
+            metadata,
+          );
+        }
 
         return throwError(() => error);
       }),

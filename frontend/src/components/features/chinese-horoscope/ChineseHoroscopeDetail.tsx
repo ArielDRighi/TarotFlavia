@@ -2,6 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
 import { ChineseCompatibility } from './ChineseCompatibility';
 import { CHINESE_ZODIAC_INFO, getElementNameEs } from '@/lib/utils/chinese-zodiac';
 import type { ChineseHoroscope, ChineseElementCode } from '@/types/chinese-horoscope.types';
@@ -46,7 +47,11 @@ export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeD
     <div className="space-y-6" data-testid="chinese-horoscope-detail">
       {/* Header */}
       <div className="text-center">
-        <span className="text-6xl">{animalInfo.emoji}</span>
+        <ChineseAnimalSymbol
+          animal={animalInfo.animal}
+          label={animalInfo.nameEs}
+          className="text-6xl"
+        />
         <h1 className="mt-2 font-serif text-3xl">{displayName}</h1>
         <Badge variant="secondary" className="mt-2">
           Horóscopo {horoscope.year}

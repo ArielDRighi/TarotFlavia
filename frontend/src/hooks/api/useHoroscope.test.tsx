@@ -167,6 +167,30 @@ describe('horoscope hooks', () => {
   });
 
   describe('useMySignHoroscope', () => {
+    // Helper para crear errores tipo Axios con status específico
+    function makeAxiosError(status: number, message = 'Request failed'): Error {
+      const error = new Error(message) as Error & {
+        response?: { status: number; data?: unknown };
+        isAxiosError?: boolean;
+      };
+      error.response = { status };
+      error.isAxiosError = true;
+      return error;
+    }
+
+    beforeEach(() => {
+      // Override queryClient para permitir que el hook controle su política de retry,
+      // pero con retryDelay=0 para que los tests sean rápidos
+      queryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            gcTime: 0,
+            retryDelay: 0,
+          },
+        },
+      });
+    });
+
     it('should fetch user horoscope successfully', async () => {
       vi.mocked(horoscopeApi.getMySignHoroscope).mockResolvedValueOnce(mockHoroscope);
 
@@ -179,12 +203,13 @@ describe('horoscope hooks', () => {
       });
 
       expect(result.current.data).toEqual(mockHoroscope);
+      expect(result.current.errorState).toBeNull();
       expect(horoscopeApi.getMySignHoroscope).toHaveBeenCalledOnce();
     });
 
-    it('should not retry on failure', async () => {
-      const mockError = new Error('User birthDate not configured');
-      vi.mocked(horoscopeApi.getMySignHoroscope).mockRejectedValueOnce(mockError);
+    it('should expose errorState="no-birthdate" on 400 and NOT retry', async () => {
+      const error400 = makeAxiosError(400, 'birthDate is required');
+      vi.mocked(horoscopeApi.getMySignHoroscope).mockRejectedValue(error400);
 
       const { result } = renderHook(() => useMySignHoroscope(), { wrapper });
 
@@ -192,9 +217,55 @@ describe('horoscope hooks', () => {
         expect(result.current.isError).toBe(true);
       });
 
-      expect(result.current.error).toEqual(mockError);
-      // Should only be called once (no retry)
+      expect(result.current.errorState).toBe('no-birthdate');
       expect(horoscopeApi.getMySignHoroscope).toHaveBeenCalledTimes(1);
     });
+
+    it('should expose errorState="not-generated" on 404 and NOT retry', async () => {
+      const error404 = makeAxiosError(404, 'Horoscope not found');
+      vi.mocked(horoscopeApi.getMySignHoroscope).mockRejectedValue(error404);
+
+      const { result } = renderHook(() => useMySignHoroscope(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      expect(result.current.errorState).toBe('not-generated');
+      expect(horoscopeApi.getMySignHoroscope).toHaveBeenCalledTimes(1);
+    });
+
+    it('should expose errorState="error" on 500 and retry up to 2 times', async () => {
+      const error500 = makeAxiosError(500, 'Internal Server Error');
+      vi.mocked(horoscopeApi.getMySignHoroscope).mockRejectedValue(error500);
+
+      const { result } = renderHook(() => useMySignHoroscope(), { wrapper });
+
+      await waitFor(
+        () => {
+          expect(result.current.isError).toBe(true);
+        },
+        { timeout: 5000 }
+      );
+
+      expect(result.current.errorState).toBe('error');
+      // 1 intento original + 2 reintentos = 3 llamadas
+      expect(horoscopeApi.getMySignHoroscope).toHaveBeenCalledTimes(3);
+    }, 10000);
+
+    it('should treat unknown errors (without status) as generic "error"', async () => {
+      vi.mocked(horoscopeApi.getMySignHoroscope).mockRejectedValue(new Error('Network down'));
+
+      const { result } = renderHook(() => useMySignHoroscope(), { wrapper });
+
+      await waitFor(
+        () => {
+          expect(result.current.isError).toBe(true);
+        },
+        { timeout: 5000 }
+      );
+
+      expect(result.current.errorState).toBe('error');
+    }, 10000);
   });
 });

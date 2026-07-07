@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { UserDashboard } from './UserDashboard';
 import * as useAuthModule from '@/hooks/useAuth';
 import * as useUserPlanFeaturesModule from '@/hooks/utils/useUserPlanFeatures';
@@ -15,7 +15,6 @@ import type {
   AuthUser,
   UserProfile,
   UserCapabilities,
-  DailyHoroscope,
   ChineseHoroscope,
   SacredEvent,
 } from '@/types';
@@ -66,8 +65,9 @@ describe('UserDashboard', () => {
       data: undefined,
       isLoading: false,
       error: null,
+      errorState: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<DailyHoroscope, Error>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
 
     // Default mock for useMyAnimalHoroscope (Chinese horoscope widget)
     vi.spyOn(useChineseHoroscopeModule, 'useMyAnimalHoroscope').mockReturnValue({
@@ -126,7 +126,7 @@ describe('UserDashboard', () => {
     } as unknown as ReturnType<typeof useHolisticServicesModule.useMyPurchases>);
   });
 
-  it('should render WelcomeHeader', () => {
+  it('should render DashboardHero', () => {
     const mockUser = createMockAuthUser({ name: 'María' });
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -154,6 +154,38 @@ describe('UserDashboard', () => {
     render(<UserDashboard />);
 
     expect(screen.getByText('¡Hola, María!')).toBeInTheDocument();
+  });
+
+  it('should wire the dashboard hero image with a Spanish alt (T-DASH-004)', () => {
+    const mockUser = createMockAuthUser({ name: 'María' });
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      checkAuth: vi.fn(),
+    });
+
+    vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+      plan: 'free',
+      planLabel: 'GRATUITO',
+      canUseAI: false,
+      canUseCategories: false,
+      canUseCustomQuestions: false,
+      canShare: true,
+      isPremium: false,
+      isFree: true,
+      isAnonymous: false,
+    });
+
+    render(<UserDashboard />);
+
+    const heroImage = screen.getByAltText(/tarot etéreas sobre un cielo nocturno violeta/i);
+    expect(heroImage).toBeInTheDocument();
+    expect(heroImage).toHaveAttribute('src', expect.stringContaining('dashboard-hero.webp'));
   });
 
   it('should render QuickActions', () => {
@@ -514,8 +546,9 @@ describe('UserDashboard', () => {
       },
       isLoading: false,
       error: null,
+      errorState: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<DailyHoroscope, Error>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
 
     render(<UserDashboard />);
 
@@ -601,8 +634,9 @@ describe('UserDashboard', () => {
       },
       isLoading: false,
       error: null,
+      errorState: null,
       refetch: vi.fn(),
-    } as unknown as UseQueryResult<DailyHoroscope, Error>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
 
     render(<UserDashboard />);
 
@@ -812,5 +846,306 @@ describe('UserDashboard', () => {
 
     // Should render NumerologyWidget even for premium users
     expect(screen.getByTestId('numerology-widget')).toBeInTheDocument();
+  });
+
+  // T-DASH-001: Full-width widget grid (replaces the 2/3 + 1/3 asymmetric layout)
+  it('should render the themed widgets inside a single full-width responsive grid', () => {
+    const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      checkAuth: vi.fn(),
+    });
+
+    vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+      plan: 'free',
+      planLabel: 'GRATUITO',
+      canUseAI: false,
+      canUseCategories: false,
+      canUseCustomQuestions: false,
+      canShare: true,
+      isPremium: false,
+      isFree: true,
+      isAnonymous: false,
+    });
+
+    // Provide data so the widgets render their full (testid-bearing) state
+    vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+      data: {
+        id: 1,
+        zodiacSign: ZodiacSign.TAURUS,
+        horoscopeDate: '2026-01-17',
+        generalContent: 'Hoy es un buen día para ti.',
+        areas: {
+          love: { content: 'Amor positivo', score: 8 },
+          wellness: { content: 'Bienestar alto', score: 7 },
+          money: { content: 'Finanzas estables', score: 6 },
+        },
+        luckyNumber: 7,
+        luckyColor: 'Verde',
+        luckyTime: 'Mañana',
+      },
+      isLoading: false,
+      error: null,
+      errorState: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
+
+    vi.spyOn(useNumerologyModule, 'useMyNumerologyProfile').mockReturnValue({
+      data: {
+        lifePath: {
+          value: 7,
+          name: 'El Buscador',
+          keywords: ['Análisis'],
+          description: 'Persona analítica',
+          isMaster: false,
+        },
+        birthday: {
+          value: 15,
+          name: 'El Creativo',
+          keywords: ['Creatividad'],
+          description: 'Día especial',
+          isMaster: false,
+        },
+        expression: null,
+        soulUrge: null,
+        personality: null,
+        personalYear: 5,
+        personalMonth: 8,
+        birthDate: '1990-05-15',
+        fullName: null,
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<NumerologyResponseDto, Error>);
+
+    vi.spyOn(useNumerologyModule, 'useDayNumber').mockReturnValue({
+      data: {
+        date: '2026-01-21',
+        dayNumber: 3,
+        meaning: {
+          number: 3,
+          name: 'El Creativo',
+          keywords: ['Creatividad'],
+          description: 'Día creativo',
+          strengths: [],
+          challenges: [],
+          careers: [],
+          isMaster: false,
+        },
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<DayNumberResponse, Error>);
+
+    render(<UserDashboard />);
+
+    const grid = screen.getByTestId('dashboard-widget-grid');
+    expect(grid).toBeInTheDocument();
+    // Full-width contract: masonry por columnas CSS (1 → 2 on tablet → 3 on wide
+    // desktop) que empaqueta densamente y evita los huecos verticales que dejaba
+    // el grid con alturas dispares. Nunca colapsa a una única columna estrecha.
+    expect(grid.className).toContain('columns-1');
+    expect(grid.className).toContain('sm:columns-2');
+    expect(grid.className).toContain('xl:columns-3');
+    // Cada tarjeta no debe partirse entre columnas (break-inside-avoid).
+    expect(grid.className).toContain('break-inside-avoid');
+    // Themed widgets live inside the grid (not in a separate side column).
+    expect(within(grid).getByTestId('horoscope-widget')).toBeInTheDocument();
+    expect(within(grid).getByTestId('numerology-widget')).toBeInTheDocument();
+    // MyServicesWidget self-hides when there are no purchases (default mock),
+    // freeing its grid cell without leaving an empty bordered slot.
+    expect(screen.queryByTestId('my-services-widget')).not.toBeInTheDocument();
+  });
+
+  // T-DASH-006: Micro-interacciones + reveal escalonado
+  describe('T-DASH-006 · Micro-interacciones + reveal escalonado', () => {
+    function mockFreeUserWithWidgetData() {
+      const mockUser = createMockAuthUser({ name: 'Free User', plan: 'free' });
+
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: mockUser,
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+        plan: 'free',
+        planLabel: 'GRATUITO',
+        canUseAI: false,
+        canUseCategories: false,
+        canUseCustomQuestions: false,
+        canShare: true,
+        isPremium: false,
+        isFree: true,
+        isAnonymous: false,
+      });
+
+      vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+        data: {
+          id: 1,
+          zodiacSign: ZodiacSign.TAURUS,
+          horoscopeDate: '2026-01-17',
+          generalContent: 'Hoy es un buen día para ti.',
+          areas: {
+            love: { content: 'Amor positivo', score: 8 },
+            wellness: { content: 'Bienestar alto', score: 7 },
+            money: { content: 'Finanzas estables', score: 6 },
+          },
+          luckyNumber: 7,
+          luckyColor: 'Verde',
+          luckyTime: 'Mañana',
+        },
+        isLoading: false,
+        error: null,
+        errorState: null,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
+
+      vi.spyOn(useNumerologyModule, 'useMyNumerologyProfile').mockReturnValue({
+        data: {
+          lifePath: {
+            value: 7,
+            name: 'El Buscador',
+            keywords: ['Análisis'],
+            description: 'Persona analítica',
+            isMaster: false,
+          },
+          birthday: {
+            value: 15,
+            name: 'El Creativo',
+            keywords: ['Creatividad'],
+            description: 'Día especial',
+            isMaster: false,
+          },
+          expression: null,
+          soulUrge: null,
+          personality: null,
+          personalYear: 5,
+          personalMonth: 8,
+          birthDate: '1990-05-15',
+          fullName: null,
+        },
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as UseQueryResult<NumerologyResponseDto, Error>);
+
+      vi.spyOn(useNumerologyModule, 'useDayNumber').mockReturnValue({
+        data: {
+          date: '2026-01-21',
+          dayNumber: 3,
+          meaning: {
+            number: 3,
+            name: 'El Creativo',
+            keywords: ['Creatividad'],
+            description: 'Día creativo',
+            strengths: [],
+            challenges: [],
+            careers: [],
+            isMaster: false,
+          },
+        },
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+      } as unknown as UseQueryResult<DayNumberResponse, Error>);
+    }
+
+    it('wraps each grid widget in a staggered Reveal (fade-up entrance)', () => {
+      mockFreeUserWithWidgetData();
+
+      render(<UserDashboard />);
+
+      // Los widgets del grid quedan envueltos en un contenedor Reveal.
+      const horoscopeReveal = screen.getByTestId('horoscope-widget').closest('[data-reveal]');
+      const numerologyReveal = screen.getByTestId('numerology-widget').closest('[data-reveal]');
+      expect(horoscopeReveal).not.toBeNull();
+      expect(numerologyReveal).not.toBeNull();
+    });
+
+    it('applies the brand hover micro-interaction (lift + gold glow) to grid widgets', () => {
+      mockFreeUserWithWidgetData();
+
+      render(<UserDashboard />);
+
+      const reveal = screen.getByTestId('horoscope-widget').closest('[data-reveal]') as HTMLElement;
+      const hoverEl = reveal.firstElementChild as HTMLElement;
+
+      expect(hoverEl.className).toContain('hover:-translate-y-1');
+      expect(hoverEl.className).toContain('hover:shadow-[0_18px_40px_-12px_rgba(214,158,46,0.45)]');
+    });
+
+    it('does not leave an empty reveal cell when a self-hiding widget renders nothing', () => {
+      // Mock por defecto: MyServicesWidget sin compras → se auto-oculta.
+      mockFreeUserWithWidgetData();
+
+      render(<UserDashboard />);
+
+      const grid = screen.getByTestId('dashboard-widget-grid');
+      // Ningún contenedor de reveal debe quedar con su tarjeta vacía (celda fantasma).
+      expect(grid.querySelector('[data-reveal] > div:empty')).toBeNull();
+      // El widget auto-ocultable no aporta celda alguna al grid.
+      expect(screen.queryByTestId('my-services-widget')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should place StatsSection inside the widget grid for premium users', () => {
+    const mockUser = createMockAuthUser({ name: 'Premium User', plan: 'premium' });
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: mockUser,
+      isAuthenticated: true,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      checkAuth: vi.fn(),
+    });
+
+    vi.spyOn(useUserPlanFeaturesModule, 'useUserPlanFeatures').mockReturnValue({
+      plan: 'premium',
+      planLabel: 'PREMIUM',
+      canUseAI: true,
+      canUseCategories: true,
+      canUseCustomQuestions: true,
+      canShare: true,
+      isPremium: true,
+      isFree: false,
+      isAnonymous: false,
+    });
+
+    vi.spyOn(useUserCapabilitiesModule, 'useUserCapabilities').mockReturnValue({
+      data: {
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        tarotReadings: { used: 1, limit: 3, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: true,
+        canUseAI: true,
+        canUseCustomQuestions: true,
+        canUseAdvancedSpreads: true,
+        plan: 'premium',
+        isAuthenticated: true,
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as UseQueryResult<UserCapabilities>);
+
+    render(<UserDashboard />);
+
+    const grid = screen.getByTestId('dashboard-widget-grid');
+    expect(within(grid).getByText('Tus Estadísticas')).toBeInTheDocument();
   });
 });

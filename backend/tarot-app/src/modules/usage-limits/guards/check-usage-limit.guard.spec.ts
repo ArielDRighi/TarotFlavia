@@ -1005,6 +1005,76 @@ describe('CheckUsageLimitGuard', () => {
 
     describe('BIRTH_CHART limits', () => {
       describe('authenticated users - monthly limits', () => {
+        it('FREE (default): should allow unlimited birth charts (-1) without counting usage (T-FBK-009)', async () => {
+          const userId = 1;
+
+          const mockGetUsageByPeriod = jest.fn().mockResolvedValue(50);
+
+          const module: TestingModule = await Test.createTestingModule({
+            providers: [
+              CheckUsageLimitGuard,
+              {
+                provide: UsageLimitsService,
+                useValue: {
+                  checkLimit: jest.fn(),
+                  getRemainingUsage: jest.fn(),
+                  getUsageByPeriod: mockGetUsageByPeriod,
+                },
+              },
+              {
+                provide: AnonymousTrackingService,
+                useValue: { canAccess: jest.fn(), recordUsage: jest.fn() },
+              },
+              {
+                provide: UsersService,
+                useValue: {
+                  findById: jest
+                    .fn()
+                    .mockResolvedValue({ id: userId, plan: 'free' }),
+                },
+              },
+              {
+                provide: PlanConfigService,
+                useValue: {
+                  findByPlanType: jest.fn(),
+                  // Valor por defecto de T-FBK-009: Free ilimitada (-1).
+                  getBirthChartLimit: jest.fn().mockResolvedValue(-1),
+                },
+              },
+              {
+                provide: Reflector,
+                useValue: {
+                  getAllAndOverride: jest
+                    .fn()
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false)
+                    .mockReturnValueOnce(UsageFeature.BIRTH_CHART)
+                    .mockReturnValueOnce(false),
+                },
+              },
+              {
+                provide: getRepositoryToken(DailyReading),
+                useValue: { createQueryBuilder: jest.fn() },
+              },
+              {
+                provide: getRepositoryToken(TarotReading),
+                useValue: { createQueryBuilder: jest.fn() },
+              },
+            ],
+          }).compile();
+
+          const testGuard =
+            module.get<CheckUsageLimitGuard>(CheckUsageLimitGuard);
+
+          const context = mockExecutionContext(userId);
+          const result = await testGuard.canActivate(context);
+
+          expect(result).toBe(true);
+          // Ilimitado (-1): no se cuenta el uso.
+          expect(mockGetUsageByPeriod).not.toHaveBeenCalled();
+          jest.restoreAllMocks();
+        });
+
         it('FREE: should allow birth chart generation when under monthly limit (0/3)', async () => {
           const userId = 1;
 
@@ -1035,7 +1105,11 @@ describe('CheckUsageLimitGuard', () => {
               },
               {
                 provide: PlanConfigService,
-                useValue: { findByPlanType: jest.fn() },
+                useValue: {
+                  findByPlanType: jest.fn(),
+                  // Escenario admin-configurado: Free con límite finito de 3/mes.
+                  getBirthChartLimit: jest.fn().mockResolvedValue(3),
+                },
               },
               {
                 provide: Reflector,
@@ -1104,7 +1178,11 @@ describe('CheckUsageLimitGuard', () => {
               },
               {
                 provide: PlanConfigService,
-                useValue: { findByPlanType: jest.fn() },
+                useValue: {
+                  findByPlanType: jest.fn(),
+                  // Escenario admin-configurado: Free con límite finito de 3/mes.
+                  getBirthChartLimit: jest.fn().mockResolvedValue(3),
+                },
               },
               {
                 provide: Reflector,
@@ -1179,7 +1257,10 @@ describe('CheckUsageLimitGuard', () => {
               },
               {
                 provide: PlanConfigService,
-                useValue: { findByPlanType: jest.fn() },
+                useValue: {
+                  findByPlanType: jest.fn(),
+                  getBirthChartLimit: jest.fn().mockResolvedValue(-1),
+                },
               },
               {
                 provide: Reflector,
@@ -1245,7 +1326,10 @@ describe('CheckUsageLimitGuard', () => {
               },
               {
                 provide: PlanConfigService,
-                useValue: { findByPlanType: jest.fn() },
+                useValue: {
+                  findByPlanType: jest.fn(),
+                  getBirthChartLimit: jest.fn().mockResolvedValue(-1),
+                },
               },
               {
                 provide: Reflector,
@@ -1317,7 +1401,11 @@ describe('CheckUsageLimitGuard', () => {
               },
               {
                 provide: PlanConfigService,
-                useValue: { findByPlanType: jest.fn() },
+                useValue: {
+                  findByPlanType: jest.fn(),
+                  // Escenario admin-configurado: Free con límite finito de 3/mes.
+                  getBirthChartLimit: jest.fn().mockResolvedValue(3),
+                },
               },
               {
                 provide: Reflector,

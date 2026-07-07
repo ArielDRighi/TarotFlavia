@@ -16,11 +16,30 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-// Mock Next.js Link
+// Mock Next.js Link (forward className so focus-ring assertions can inspect it)
 vi.mock('next/link', () => ({
-  default: function MockLink({ href, children }: { href: string; children: React.ReactNode }) {
-    return <a href={href}>{children}</a>;
+  default: function MockLink({
+    href,
+    children,
+    className,
+  }: {
+    href: string;
+    children: React.ReactNode;
+    className?: string;
+  }) {
+    return (
+      <a href={href} className={className}>
+        {children}
+      </a>
+    );
   },
+}));
+
+// Mock Next.js Image (PremiumHero uses next/image for the mystic band asset)
+vi.mock('next/image', () => ({
+  default: ({ src, alt }: { src: string; alt: string }) => (
+    <img src={src} alt={alt} data-testid="next-image" />
+  ),
 }));
 
 // Mock toast
@@ -41,6 +60,7 @@ const mockPremiumPlan: PlanConfig = {
   price: 7000,
   readingsLimit: -1,
   aiQuotaMonthly: -1,
+  birthChartMonthlyLimit: -1,
   allowCustomQuestions: true,
   allowSharing: true,
   allowAdvancedSpreads: true,
@@ -57,6 +77,7 @@ const mockFreePlan: PlanConfig = {
   price: 0,
   readingsLimit: 3,
   aiQuotaMonthly: 0,
+  birthChartMonthlyLimit: -1,
   allowCustomQuestions: false,
   allowSharing: false,
   allowAdvancedSpreads: false,
@@ -165,6 +186,93 @@ describe('PremiumPage', () => {
       renderWithProviders(<PremiumPage />);
 
       expect(screen.getByText(/cancelá cuando quieras/i)).toBeInTheDocument();
+    });
+
+    // Canon visual (T-PREM-002 / PREM-002)
+    it('should render the mystic premium hero band', () => {
+      mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+
+      renderWithProviders(<PremiumPage />);
+
+      expect(screen.getByTestId('premium-hero')).toBeInTheDocument();
+    });
+
+    it('should render the "Recomendado" chip with night text on gold for AA contrast', () => {
+      mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+
+      renderWithProviders(<PremiumPage />);
+
+      const chip = screen.getByText('Recomendado');
+      // Texto noche (#1a0a2e) sobre dorado (#d69e2e) ≈ 7:1 (AA); blanco falla.
+      expect(chip).toHaveClass('text-bg-hero');
+      expect(chip).not.toHaveClass('text-white');
+    });
+
+    it('should not use raw purple/gray utility classes (brand canon, only tokens)', () => {
+      mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+
+      const { container } = renderWithProviders(<PremiumPage />);
+
+      expect(container.querySelector('[class*="purple"]')).toBeNull();
+      expect(container.querySelector('[class*="text-gray-"]')).toBeNull();
+      expect(container.querySelector('[class*="bg-gray-"]')).toBeNull();
+    });
+
+    // Accesibilidad — cierre del circuito premium (T-PREM-008)
+    describe('Accesibilidad (T-PREM-008)', () => {
+      beforeEach(() => {
+        mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+      });
+
+      it('should render a visible focus ring on every plan CTA (foco visible)', () => {
+        renderWithProviders(<PremiumPage />);
+
+        for (const testId of ['cta-hero', 'cta-card', 'cta-bottom']) {
+          const cta = screen.getByTestId(testId);
+          expect(cta.className).toMatch(/focus-visible:ring-secondary/);
+        }
+      });
+
+      it('should render a visible focus ring on the "Ver mi cuenta" link for premium users (foco en links)', () => {
+        // Usuario premium: el CTA se convierte en el link "Ver mi cuenta".
+        mockAuthStore.mockReturnValue({
+          user: { id: 1, email: 'test@test.com', plan: 'premium' },
+          isAuthenticated: true,
+        });
+
+        renderWithProviders(<PremiumPage />);
+
+        const accountLinks = screen.getAllByRole('link', { name: /ver mi cuenta/i });
+        expect(accountLinks.length).toBeGreaterThan(0);
+        accountLinks.forEach((link) =>
+          expect(link.className).toMatch(/focus-visible:ring-secondary/)
+        );
+      });
+
+      it('should label the comparison table check/cross icons for screen readers', () => {
+        renderWithProviders(<PremiumPage />);
+
+        // Cada fila aporta un icono por columna (Free/Premium) con etiqueta textual.
+        expect(screen.getAllByLabelText('Incluido').length).toBeGreaterThan(0);
+        expect(screen.getAllByLabelText('No incluido').length).toBeGreaterThan(0);
+      });
+
+      it('should wrap sections in Reveal (base para respetar prefers-reduced-motion)', () => {
+        const { container } = renderWithProviders(<PremiumPage />);
+
+        // Las secciones se envuelven en `Reveal` (marcado con `data-reveal`). La
+        // lógica de movimiento reducido en sí está testeada en `Reveal.test`/
+        // `useReducedMotion.test`; aquí solo se fija que las secciones la usen.
+        expect(container.querySelectorAll('[data-reveal]').length).toBeGreaterThan(0);
+      });
+
+      it('should render the hero band asset with a Spanish alt (imagen con alt)', () => {
+        renderWithProviders(<PremiumPage />);
+
+        const heroImage = screen.getByTestId('next-image');
+        expect(heroImage).toHaveAttribute('alt');
+        expect(heroImage.getAttribute('alt')?.trim().length).toBeGreaterThan(0);
+      });
     });
   });
 

@@ -85,6 +85,34 @@ describe('PlanConfigCard', () => {
     });
   });
 
+  it('should render and save the birth-chart monthly limit field (T-FBK-009)', async () => {
+    const mockOnSave = vi.fn();
+    const planWithFiniteChart = createMockPlanConfig({
+      id: 2,
+      planType: 'premium',
+      name: 'Plan Premium',
+      birthChartMonthlyLimit: 3,
+    });
+
+    render(<PlanConfigCard plan={planWithFiniteChart} onSave={mockOnSave} isLoading={false} />);
+
+    // El campo muestra el valor actual y su label
+    expect(screen.getByLabelText(/carta astral mensual/i)).toBeInTheDocument();
+    const chartInput = screen.getByDisplayValue('3');
+    fireEvent.change(chartInput, { target: { value: '-1' } });
+
+    const saveButton = screen.getByRole('button', { name: /guardar/i });
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockOnSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          birthChartMonthlyLimit: -1,
+        })
+      );
+    });
+  });
+
   it('should disable inputs when isLoading is true', () => {
     const mockOnSave = vi.fn();
     render(<PlanConfigCard plan={mockPlan} onSave={mockOnSave} isLoading={true} />);

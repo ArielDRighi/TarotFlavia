@@ -5,11 +5,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Reveal } from '@/components/common/Reveal';
 import { useAuth } from '@/hooks/useAuth';
 import { CTA_AUTH } from '@/lib/constants/cta-copy';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth.schemas';
@@ -84,86 +85,94 @@ export function LoginForm() {
   }, [loginError]);
 
   return (
-    <Card className="shadow-soft w-full max-w-md rounded-2xl">
-      <CardHeader className="text-center">
-        <h1 className="text-primary font-serif text-3xl">Bienvenido al Oráculo</h1>
-      </CardHeader>
+    <Reveal className="w-full max-w-md">
+      <Card className="shadow-soft w-full rounded-2xl">
+        <CardHeader className="space-y-2 text-center">
+          <Sparkles className="text-secondary mx-auto h-8 w-8" aria-hidden="true" />
+          <h1 className="text-primary font-serif text-3xl">Bienvenido al Oráculo</h1>
+          <p className="text-muted-foreground text-sm">Ingresá para continuar tu viaje místico</p>
+        </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Login Error Message */}
-          {loginError && (
-            <div
-              className="bg-destructive/10 border-destructive/30 text-destructive rounded-lg border p-4 text-sm"
-              role="alert"
-              aria-live="polite"
-            >
-              <p className="font-medium">{loginError}</p>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Login Error Message */}
+            {loginError && (
+              <div
+                className="bg-destructive/10 border-destructive/30 text-destructive rounded-lg border p-4 text-sm"
+                role="alert"
+                aria-live="polite"
+              >
+                <p className="font-medium">{loginError}</p>
+              </div>
+            )}
+
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@email.com"
+                autoComplete="email"
+                disabled={isSubmitting}
+                className="focus:border-primary bg-gray-50"
+                {...register('email')}
+                aria-invalid={errors.email ? 'true' : 'false'}
+              />
+              {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
             </div>
-          )}
 
-          {/* Email Field */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="tu@email.com"
-              autoComplete="email"
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium">
+                Contraseña
+              </label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                disabled={isSubmitting}
+                className="focus:border-primary bg-gray-50"
+                {...register('password')}
+                aria-invalid={errors.password ? 'true' : 'false'}
+              />
+              {errors.password && (
+                <p className="text-destructive text-sm">{errors.password.message}</p>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="focus-visible:ring-secondary/50 w-full"
               disabled={isSubmitting}
-              className="focus:border-primary bg-gray-50"
-              {...register('email')}
-              aria-invalid={errors.email ? 'true' : 'false'}
-            />
-            {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
-          </div>
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Iniciando...
+                </>
+              ) : (
+                CTA_AUTH.LOGIN
+              )}
+            </Button>
+          </form>
+        </CardContent>
 
-          {/* Password Field */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Contraseña
-            </label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              disabled={isSubmitting}
-              className="focus:border-primary bg-gray-50"
-              {...register('password')}
-              aria-invalid={errors.password ? 'true' : 'false'}
-            />
-            {errors.password && (
-              <p className="text-destructive text-sm">{errors.password.message}</p>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Iniciando...
-              </>
-            ) : (
-              CTA_AUTH.LOGIN
-            )}
-          </Button>
-        </form>
-      </CardContent>
-
-      <CardFooter className="flex flex-col space-y-2 text-center">
-        <Link
-          href="/recuperar-password"
-          className="text-muted-foreground hover:text-primary text-sm"
-        >
-          ¿Olvidaste tu contraseña?
-        </Link>
-        <Link href="/registro" className="text-primary text-sm hover:underline">
-          {CTA_AUTH.REGISTER}
-        </Link>
-      </CardFooter>
-    </Card>
+        <CardFooter className="flex flex-col space-y-2 text-center">
+          <Link
+            href="/recuperar-password"
+            className="text-muted-foreground hover:text-primary text-sm"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+          <Link href="/registro" className="text-primary text-sm hover:underline">
+            {CTA_AUTH.REGISTER}
+          </Link>
+        </CardFooter>
+      </Card>
+    </Reveal>
   );
 }

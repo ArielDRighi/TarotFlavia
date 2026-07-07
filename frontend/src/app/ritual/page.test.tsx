@@ -33,8 +33,8 @@ vi.mock('@/components/features/readings/ReadingLimitReached', () => ({
 }));
 
 vi.mock('@/components/features/encyclopedia', () => ({
-  EncyclopediaInfoWidget: ({ slug }: { slug: string }) => (
-    <div data-testid="encyclopedia-info-widget" data-slug={slug} />
+  ServiceIntro: ({ data }: { data: { testId?: string } }) => (
+    <div data-testid="service-intro" data-key={data?.testId} />
   ),
 }));
 
@@ -223,6 +223,31 @@ describe('RitualPage', () => {
       render(<RitualPage />);
 
       expect(screen.getByTestId('category-selector')).toBeInTheDocument();
+    });
+
+    it('should render ServiceIntro below the activity (category selector)', () => {
+      (useAuth as Mock).mockReturnValue({
+        user: { id: 1, plan: 'premium' },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      (useUserCapabilities as Mock).mockReturnValue({
+        data: {
+          canCreateTarotReading: true,
+          canUseCustomQuestions: true,
+        },
+        isLoading: false,
+      });
+
+      render(<RitualPage />);
+
+      const activity = screen.getByTestId('category-selector');
+      const intro = screen.getByTestId('service-intro');
+
+      expect(
+        activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
     });
 
     it('should NOT redirect PREMIUM users with custom questions capability', () => {

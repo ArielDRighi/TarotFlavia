@@ -137,6 +137,17 @@ export class PlanConfigService {
   }
 
   /**
+   * Obtiene el límite mensual de Carta Astral para un tipo de plan (T-FBK-009).
+   * Fuente única de verdad: la config de plan en DB (antes hardcodeado en USAGE_LIMITS).
+   * @param planType - Tipo de plan
+   * @returns Límite mensual de cartas astrales (-1 para ilimitado)
+   */
+  async getBirthChartLimit(planType: UserPlan): Promise<number> {
+    const plan = await this.findByPlanType(planType);
+    return plan.birthChartMonthlyLimit;
+  }
+
+  /**
    * Verifica si un plan tiene una característica habilitada
    * @param planType - Tipo de plan
    * @param feature - Nombre de la característica

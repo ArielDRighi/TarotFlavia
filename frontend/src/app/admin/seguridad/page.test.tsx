@@ -2,7 +2,7 @@
  * Tests for Admin Seguridad Page
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -25,6 +25,15 @@ const createWrapper = () => {
 };
 
 describe('AdminSeguridadPage', () => {
+  beforeEach(() => {
+    // RateLimitingTab (renderizado por la página) desestructura { mutate, isPending }
+    // de useUnblockIP. Sin este default el auto-mock devuelve undefined y rompe el render.
+    vi.mocked(useAdminSecurity.useUnblockIP).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+    } as never);
+  });
+
   it('should render page title and description', () => {
     vi.mocked(useAdminSecurity.useRateLimitData).mockReturnValue({
       data: {

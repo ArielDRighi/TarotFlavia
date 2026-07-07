@@ -29,6 +29,8 @@ import {
   getElementIcon,
 } from '@/lib/utils/chinese-zodiac';
 
+import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
+
 export interface ElementSelectorModalProps {
   /** Controls modal visibility */
   open: boolean;
@@ -36,8 +38,6 @@ export interface ElementSelectorModalProps {
   animal: ChineseZodiacAnimal;
   /** Animal name in Spanish */
   animalNameEs: string;
-  /** Animal emoji (optional) */
-  animalEmoji?: string;
   /** Callback when element is selected */
   onSelectElement: (element: ChineseElementCode) => void;
   /** Callback when modal open state changes */
@@ -69,7 +69,6 @@ const WU_XING_ELEMENTS: ChineseElementCode[] = ['metal', 'water', 'wood', 'fire'
  *   open={isOpen}
  *   animal={ChineseZodiacAnimal.MONKEY}
  *   animalNameEs="Mono"
- *   animalEmoji="🐒"
  *   onSelectElement={(element) => handleElementSelect(element)}
  *   onOpenChange={setIsOpen}
  * />
@@ -79,7 +78,6 @@ export function ElementSelectorModal({
   open,
   animal,
   animalNameEs,
-  animalEmoji,
   onSelectElement,
   onOpenChange,
 }: ElementSelectorModalProps) {
@@ -101,7 +99,7 @@ export function ElementSelectorModal({
       <DialogContent data-testid="element-selector-modal" className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {animalEmoji && <span className="text-2xl">{animalEmoji}</span>}
+            <ChineseAnimalSymbol animal={animal} label={animalNameEs} className="text-2xl" />
             <span>{animalNameEs}</span>
           </DialogTitle>
           <DialogDescription>Selecciona tu elemento Wu Xing</DialogDescription>

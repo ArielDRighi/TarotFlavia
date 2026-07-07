@@ -216,7 +216,7 @@ describe('AISynthesisPlaceholder', () => {
   it('debe mostrar texto descriptivo', () => {
     render(<AISynthesisPlaceholder />);
     expect(
-      screen.getByText(/Obtén un análisis único generado por inteligencia/i)
+      screen.getByText(/Obtén un análisis único, profundo y personalizado/i)
     ).toBeInTheDocument();
   });
 

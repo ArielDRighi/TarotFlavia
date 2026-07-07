@@ -69,7 +69,7 @@ describe('AIQuotaService', () => {
     };
 
     const mockConfigGet = jest.fn((key: string) => {
-      if (key === 'AI_QUOTA_FREE_MONTHLY') return 100;
+      if (key === 'AI_QUOTA_FREE_MONTHLY') return 0;
       if (key === 'AI_QUOTA_PREMIUM_MONTHLY') return -1;
       if (key === 'FRONTEND_URL') return 'http://localhost:3001';
       return undefined;
@@ -111,25 +111,17 @@ describe('AIQuotaService', () => {
   });
 
   describe('checkMonthlyQuota', () => {
-    it('should return true when FREE user has not exceeded quota', async () => {
-      const user = createMockUser({ aiRequestsUsedMonth: 50 });
-      userRepository.findOne.mockResolvedValue(user);
-
-      const result = await service.checkMonthlyQuota(1);
-
-      expect(result).toBe(true);
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-    });
-
-    it('should return false when FREE user has exceeded quota', async () => {
-      const user = createMockUser({ aiRequestsUsedMonth: 100 });
+    it('should return false for FREE user (sin IA: cuota 0)', async () => {
+      // T-FBK-006: Free NO consume IA. Aún sin uso previo, no hay cuota disponible.
+      const user = createMockUser({ aiRequestsUsedMonth: 0 });
       userRepository.findOne.mockResolvedValue(user);
 
       const result = await service.checkMonthlyQuota(1);
 
       expect(result).toBe(false);
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
     });
 
     it('should return true for PREMIUM user regardless of usage', async () => {
@@ -154,16 +146,18 @@ describe('AIQuotaService', () => {
   });
 
   describe('getRemainingQuota', () => {
-    it('should return correct remaining quota for FREE user', async () => {
-      const user = createMockUser({ aiRequestsUsedMonth: 30 });
+    it('should return zero remaining quota for FREE user without division-by-zero', async () => {
+      // T-FBK-006: Free tiene cuota 0. El porcentaje debe ser 0 (no NaN/Infinity).
+      const user = createMockUser({ aiRequestsUsedMonth: 0 });
       userRepository.findOne.mockResolvedValue(user);
 
       const result = await service.getRemainingQuota(1);
 
-      expect(result.quotaLimit).toBe(100);
-      expect(result.requestsUsed).toBe(30);
-      expect(result.requestsRemaining).toBe(70);
-      expect(result.percentageUsed).toBe(30);
+      expect(result.quotaLimit).toBe(0);
+      expect(result.requestsUsed).toBe(0);
+      expect(result.requestsRemaining).toBe(0);
+      expect(result.percentageUsed).toBe(0);
+      expect(Number.isFinite(result.percentageUsed)).toBe(true);
       expect(result.plan).toBe(UserPlan.FREE);
     });
 
@@ -234,53 +228,35 @@ describe('AIQuotaService', () => {
       expect(userRepository.save).not.toHaveBeenCalled();
     });
 
-    it('should send warning when FREE user reaches 80% quota', async () => {
-      // User already has 80 requests after the atomic update (79 + 1 = 80)
+    it('should NOT send warning email for FREE plan (cuota 0, sin IA)', async () => {
+      // T-FBK-006: Free tiene cuota 0. trackMonthlyUsage no debe disparar avisos
+      // ni dividir por cero (Free nunca llega acá porque el guard lo bloquea antes,
+      // pero se blinda defensivamente).
       const user = createMockUser({
-        aiRequestsUsedMonth: 80, // This is the value AFTER the atomic increment
+        aiRequestsUsedMonth: 0,
         quotaWarningSent: false,
       });
       userRepository.findOne.mockResolvedValue(user);
 
       await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
 
-      expect(userRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          quotaWarningSent: true,
-        }),
-      );
-    });
-
-    it('should not send duplicate warning', async () => {
-      const user = createMockUser({
-        aiRequestsUsedMonth: 85,
-        quotaWarningSent: true,
-      });
-      userRepository.findOne.mockResolvedValue(user);
-
-      await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
-
       expect(userRepository.save).not.toHaveBeenCalled();
+      expect(mockEmailService.sendQuotaWarningEmail).not.toHaveBeenCalled();
     });
 
-    it('should send limit reached email when FREE user reaches 100% quota', async () => {
+    it('should NOT send limit reached email for FREE plan (cuota 0, sin IA)', async () => {
       const user = createMockUser({
         plan: UserPlan.FREE,
-        aiRequestsUsedMonth: 100,
-        quotaWarningSent: true,
+        aiRequestsUsedMonth: 0,
+        quotaWarningSent: false,
       });
       userRepository.findOne.mockResolvedValue(user);
 
       await service.trackMonthlyUsage(1, 1, 1500, 0.005, 'groq');
 
-      expect(mockEmailService.sendQuotaLimitReachedEmail).toHaveBeenCalledWith(
-        user.email,
-        expect.objectContaining({
-          userName: user.name,
-          plan: UserPlan.FREE,
-          quotaLimit: 100,
-        }),
-      );
+      expect(
+        mockEmailService.sendQuotaLimitReachedEmail,
+      ).not.toHaveBeenCalled();
     });
 
     it('should NOT send limit reached email when PREMIUM user reaches high usage', async () => {

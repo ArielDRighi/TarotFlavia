@@ -6,8 +6,12 @@ import { UsageFeature } from './entities/usage-limit.entity';
  * Estructura: USAGE_LIMITS[plan][feature] = límite
  * -1 significa ilimitado
  *
- * NOTA: Para TAROT_READING y PENDULUM_QUERY, la fuente de verdad es la base de datos (tabla plans).
- * Estos valores son fallback para características que aún no están en DB.
+ * NOTA: Para TAROT_READING, PENDULUM_QUERY y BIRTH_CHART, la fuente de verdad es
+ * la base de datos (tabla plans). En particular, BIRTH_CHART se gobierna desde
+ * `plans.birthChartMonthlyLimit` (T-FBK-009) vía `PlanConfigService.getBirthChartLimit`;
+ * los valores BIRTH_CHART de abajo NO se leen en el enforcement — no reactivar como
+ * fuente de límite (quedan solo como referencia histórica).
+ * El resto son fallback para características que aún no están en DB.
  */
 export const USAGE_LIMITS: Record<UserPlan, Record<UsageFeature, number>> = {
   [UserPlan.ANONYMOUS]: {

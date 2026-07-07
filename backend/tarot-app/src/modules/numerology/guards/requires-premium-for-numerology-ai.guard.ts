@@ -33,7 +33,7 @@ export class RequiresPremiumForNumerologyAIGuard implements CanActivate {
     // Solo usuarios PREMIUM pueden generar interpretación IA
     if (user.plan !== UserPlan.PREMIUM) {
       throw new ForbiddenException(
-        'Las interpretaciones numerológicas con IA están disponibles solo para usuarios Premium. ' +
+        'Las interpretaciones numerológicas personalizadas están disponibles solo para usuarios Premium. ' +
           'Actualiza tu plan para desbloquear esta funcionalidad.',
       );
     }

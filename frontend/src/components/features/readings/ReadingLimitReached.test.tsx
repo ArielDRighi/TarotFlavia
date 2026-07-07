@@ -123,11 +123,14 @@ describe('ReadingLimitReached', () => {
     expect(alert).toBeInTheDocument();
   });
 
-  it('should have primary button styling on upgrade button', () => {
+  it('should have brand-token button styling on upgrade button (no raw purple/pink)', () => {
     render(<ReadingLimitReached />);
 
     const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
-    expect(upgradeButton).toHaveClass('bg-gradient-to-r', 'from-purple-600', 'to-amber-600');
+    // Tras T-FBK-002 el CTA usa el Button por defecto (token `primary`) con foco dorado.
+    expect(upgradeButton).toHaveClass('bg-primary');
+    expect(upgradeButton).toHaveClass('focus-visible:ring-secondary/50');
+    expect(upgradeButton.className).not.toMatch(/purple|pink/);
   });
 
   it('should have outline styling on history and daily card buttons', () => {

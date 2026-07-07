@@ -89,7 +89,7 @@ describe('CardDetailPage', () => {
     renderWithProviders(<CardDetailPage />);
 
     expect(screen.getByTestId('card-detail-view')).toBeInTheDocument();
-    expect(screen.getByText('El Loco')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'El Loco' })).toBeInTheDocument();
   });
 
   it('should pass slug to useCard hook', () => {

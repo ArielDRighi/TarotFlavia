@@ -124,10 +124,10 @@ describe('QuickActions', () => {
     const newReadingButton = screen.getByText('Nueva Lectura');
     const buttonElement = newReadingButton.closest('a');
 
-    // Check for primary styling classes (purple gradient)
+    // Check for primary styling classes (brand gradient using design tokens)
     expect(buttonElement).toHaveClass('bg-gradient-to-r');
-    expect(buttonElement).toHaveClass('from-purple-600');
-    expect(buttonElement).toHaveClass('to-pink-600');
+    expect(buttonElement).toHaveClass('from-primary');
+    expect(buttonElement).toHaveClass('to-secondary');
   });
 
   it('should have secondary styling on other buttons', () => {
@@ -146,6 +146,36 @@ describe('QuickActions', () => {
     // Check that all buttons have icons (lucide-react icons)
     const icons = document.querySelectorAll('svg');
     expect(icons.length).toBeGreaterThanOrEqual(3);
+  });
+
+  describe('Accesibilidad (T-DASH-007)', () => {
+    it('should give every quick-action card a visible keyboard focus ring', () => {
+      render(<QuickActions />);
+
+      const links = screen.getAllByRole('link');
+      expect(links.length).toBeGreaterThanOrEqual(3);
+      // Cada tarjeta-enlace debe exponer foco visible de teclado (AA).
+      links.forEach((link) => {
+        expect(link.className).toMatch(/focus-visible:ring/);
+      });
+    });
+
+    it('should neutralize the hover scale under prefers-reduced-motion', () => {
+      render(<QuickActions />);
+
+      // Bajo movimiento reducido, el transform de hover se anula (criterio T-DASH-007).
+      screen.getAllByRole('link').forEach((link) => {
+        expect(link.className).toMatch(/motion-reduce:hover:scale-100/);
+      });
+    });
+
+    it('should keep an accessible label describing each action', () => {
+      render(<QuickActions />);
+
+      expect(
+        screen.getByRole('link', { name: /Nueva Lectura: Comienza una nueva tirada de tarot/i })
+      ).toBeInTheDocument();
+    });
   });
 
   describe('Premium user — acceso a Carta Astral Historial', () => {

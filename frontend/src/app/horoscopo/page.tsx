@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ZodiacSignSelector, HoroscopeSkeleton } from '@/components/features/horoscope';
-import { EncyclopediaInfoWidget } from '@/components/features/encyclopedia';
+import { ServiceIntro } from '@/components/features/encyclopedia';
+import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
 import { useTodayAllHoroscopes } from '@/hooks/api/useHoroscope';
 import { useAuthStore } from '@/stores/authStore';
 import { getZodiacSignFromDate } from '@/lib/utils/zodiac';
@@ -27,12 +28,6 @@ export default function HoroscopoPage() {
         <h1 className="mb-2 font-serif text-4xl">Horóscopo Diario</h1>
         <p className="text-muted-foreground">Selecciona tu signo para ver las predicciones</p>
       </div>
-
-      <EncyclopediaInfoWidget
-        slug="guia-horoscopo-occidental"
-        href={ROUTES.ENCICLOPEDIA_GUIA('guia-horoscopo-occidental')}
-        className="mb-6"
-      />
 
       {!isAuthenticated && (
         <div className="bg-muted/50 mb-8 rounded-lg p-4 text-center">
@@ -60,6 +55,8 @@ export default function HoroscopoPage() {
       ) : (
         <ZodiacSignSelector userSign={userSign} onSelect={handleSignSelect} />
       )}
+
+      <ServiceIntro data={SERVICE_INTROS['western-horoscope']} className="mt-6" />
     </div>
   );
 }
