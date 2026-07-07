@@ -11,6 +11,8 @@ import { useCalculateAnimal } from '@/hooks/api/useChineseHoroscope';
 import { CHINESE_ZODIAC_INFO, getElementIcon } from '@/lib/utils/chinese-zodiac';
 import type { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
+import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
+
 /**
  * Props for AnimalCalculator component
  */
@@ -100,7 +102,11 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
 
       {data && (
         <div className="bg-muted rounded-lg p-4 text-center" data-testid="animal-calculator-result">
-          <span className="text-5xl">{CHINESE_ZODIAC_INFO[data.animal].emoji}</span>
+          <ChineseAnimalSymbol
+            animal={data.animal}
+            label={CHINESE_ZODIAC_INFO[data.animal].nameEs}
+            className="text-5xl"
+          />
           <p className="mt-2 font-serif text-xl" data-testid="full-zodiac-type">
             Eres {data.fullZodiacType || data.animalInfo.nameEs}
           </p>

@@ -98,7 +98,6 @@ export function AnimalHoroscopePage() {
         open={shouldShowModal}
         animal={animal}
         animalNameEs={animalInfo.nameEs}
-        animalEmoji={animalInfo.emoji}
         onSelectElement={handleElementSelect}
         onOpenChange={handleModalClose}
       />

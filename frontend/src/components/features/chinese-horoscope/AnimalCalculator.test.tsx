@@ -183,7 +183,7 @@ describe('AnimalCalculator', () => {
       expect(screen.getByTestId('animal-calculator-result')).toBeInTheDocument();
     });
 
-    it('should display animal emoji', () => {
+    it('should display the monochrome animal symbol', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
         isLoading: false,
@@ -192,7 +192,9 @@ describe('AnimalCalculator', () => {
 
       render(<AnimalCalculator />);
 
-      expect(screen.getByText('🐉')).toBeInTheDocument();
+      const symbol = screen.getByRole('img', { name: 'Dragón' });
+      expect(symbol).toBeInTheDocument();
+      expect(symbol).toHaveClass('text-primary');
     });
 
     it('should display full zodiac type (animal + element)', () => {
@@ -359,7 +361,7 @@ describe('AnimalCalculator', () => {
 
       render(<AnimalCalculator />);
 
-      expect(screen.getByText('🐀')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Rata' })).toBeInTheDocument();
       expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Rata de Metal');
       expect(screen.getByText('Año chino: 2020')).toBeInTheDocument();
       expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: ⚪ Metal');
@@ -389,7 +391,7 @@ describe('AnimalCalculator', () => {
 
       render(<AnimalCalculator />);
 
-      expect(screen.getByText('🐍')).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Serpiente' })).toBeInTheDocument();
       expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Serpiente de Madera');
       expect(screen.getByText('Año chino: 2025')).toBeInTheDocument();
       expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: 🟢 Madera');
