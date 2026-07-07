@@ -45,7 +45,7 @@ export default function HoroscopeSignPage() {
         Todos los signos
       </Button>
 
-      <div className="mb-8 overflow-x-auto pb-2">
+      <div className="mb-8 overflow-x-auto px-1 py-2">
         <ZodiacSignSelector
           selectedSign={sign}
           userSign={userSign}

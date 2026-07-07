@@ -94,8 +94,8 @@ export default function DailyLimitReachedModal({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-purple-100">
-            <Icon className="h-8 w-8 text-purple-600" aria-hidden="true" />
+          <div className="bg-secondary/15 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+            <Icon className="text-secondary h-8 w-8" aria-hidden="true" />
           </div>
           <DialogTitle className="text-center font-serif text-2xl">{content.title}</DialogTitle>
           <DialogDescription className="text-center text-base">
@@ -104,9 +104,9 @@ export default function DailyLimitReachedModal({
         </DialogHeader>
 
         {/* Stats Display */}
-        <div className="my-6 rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 text-center">
+        <div className="border-secondary/40 bg-secondary/10 my-6 rounded-lg border p-6 text-center">
           <div className="flex items-baseline justify-center gap-2">
-            <span className="text-4xl font-bold text-purple-900">{usedReadings}</span>
+            <span className="text-foreground text-4xl font-bold">{usedReadings}</span>
             <span className="text-muted-foreground">/ {totalReadings}</span>
           </div>
           <p className="text-muted-foreground mt-2 text-sm">

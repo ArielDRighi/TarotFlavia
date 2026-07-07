@@ -92,7 +92,7 @@ export function ChineseAnimalCard({
       <ChineseAnimalSymbol
         animal={animalInfo.animal}
         label={animalInfo.nameEs}
-        className="text-4xl"
+        className="mx-auto block text-4xl"
       />
       <p className="mt-2 font-serif text-lg">{animalInfo.nameEs}</p>
     </Card>

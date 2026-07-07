@@ -66,4 +66,21 @@ describe('PremiumUpsellCard', () => {
     );
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
   });
+
+  it('should use brand tokens (gold/secondary) and no raw purple/pink colors', () => {
+    const { container } = render(
+      <PremiumUpsellCard
+        title="Título"
+        description="Descripción"
+        href="/premium"
+        ctaLabel="CTA"
+        data-testid="premium-upsell"
+      />
+    );
+    // El circuito premium quedó en dorado (secondary) tras T-PREM-007:
+    // el upsell no debe usar clases crudas purple/pink en ningún elemento.
+    expect(container.innerHTML).not.toMatch(/purple|pink|fuchsia|violet/);
+    // El contenedor usa el token de marca dorado.
+    expect(screen.getByTestId('premium-upsell').className).toMatch(/secondary/);
+  });
 });

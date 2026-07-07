@@ -322,7 +322,7 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 | ID | Tarea | Tipo | Prioridad | Estimación |
 | ---------- | --------------------------------------------------------------------------- | ---------- | ---------- | ---------- |
 | T-FBK-001 | Unificar la invitación a Premium del dashboard (Rituales → `PremiumUpsellCard`) | Frontend | 🟠 Alta | 1 pt | ✅ COMPLETADA |
-| T-FBK-002 | (Deuda) Unificar el sistema de upsell (tokens de marca + convergencia de banners) | Frontend | 🟢 Baja | 3 pts |
+| T-FBK-002 | (Deuda) Unificar el sistema de upsell (tokens de marca + convergencia de banners) ✅ | Frontend | 🟢 Baja | 3 pts |
 | T-FBK-003 | Reubicar la ficha "¿Qué es…?" debajo de la actividad en las 9 páginas | Frontend | 🟡 Media | 1.5 pts | ✅ COMPLETADA |
 | T-FBK-004 | Erradicar "IA" del texto user-facing (front + back + emails + migración) | Full-stack | 🟠 Alta | 3 pts | ✅ COMPLETADA |
 | T-FBK-005 | Alinear el copy/beneficios de Premium con la implementación real | Frontend | 🔴 Crítica | 2.5 pts | ✅ COMPLETADA |
@@ -364,22 +364,49 @@ El **recuadro de highlight que "ya existe"** es la clase condicional de borde: `
 **Estimación:** 3 puntos
 **Dependencias:** T-FBK-001
 **Cubre Hallazgo:** FBK-001 (fragmentación general)
-**Estado:** 🔲 PENDIENTE
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] Migrar `PremiumUpsellCard` de `purple/pink` hardcodeado a **tokens de marca** (dorado/`secondary`), coherente con el rediseño del circuito premium (T-PREM-007).
-- [ ] Inventariar los ~10 componentes de upgrade/upsell dispersos y definir una base común (o cuáles convergen hacia `PremiumUpsellCard` vs. cuáles son banners específicos legítimos).
-- [ ] Documentar la guía de uso (cuándo usar tarjeta de upsell vs. banner vs. modal).
+- [x] Migrar `PremiumUpsellCard` de `purple/pink` hardcodeado a **tokens de marca** (dorado/`secondary`), coherente con el rediseño del circuito premium (T-PREM-007).
+- [x] Inventariar los ~10 componentes de upgrade/upsell dispersos y definir una base común (o cuáles convergen hacia `PremiumUpsellCard` vs. cuáles son banners específicos legítimos).
+- [x] Documentar la guía de uso (cuándo usar tarjeta de upsell vs. banner vs. modal).
 
 #### 🎯 Criterios de Aceptación
 
-- El upsell usa un lenguaje visual único de marca (sin `purple/pink` crudo) en todos los puntos de conversión.
-- Ciclo de calidad frontend completo pasa.
+- [x] El upsell usa un lenguaje visual único de marca (sin `purple/pink` crudo) en todos los puntos de conversión.
+- [x] Ciclo de calidad frontend completo pasa.
 
 #### 📁 Archivos involucrados
 
 - `ui/premium-upsell-card.tsx` + banners de `readings/` y `conversion/` (según inventario).
+
+#### 🛠️ Notas de Implementación (6-jul-2026)
+
+**Base común vs. formas específicas.** El inventario confirmó que la unificación NO significa
+colapsar todo en un solo componente: `PremiumUpsellCard` es la **base común** (invitación inline
+discreta, ya consumida por `SacredEventsWidget` y `PersonalizedRitualsWidget` desde T-FBK-001), y
+el resto son **formas específicas legítimas** (modal, banner prominente, sección de límite, overlay
+de preview, badge) que responden a momentos de conversión distintos. Lo que se unificó fue el
+**lenguaje visual**: todos migraron al token dorado `secondary` (T-PREM-007), erradicando la clase
+cruda `purple/pink`.
+
+**Migración de tokens (raw `purple/pink` → `secondary`):**
+
+- `ui/premium-upsell-card.tsx`: fondo `from-purple-50 to-pink-50` → `border-secondary/40 bg-secondary/10`; icono `text-secondary`; CTA `<Button>` por defecto + `focus-visible:ring-secondary/50`; textos a `text-foreground`/`text-muted-foreground`.
+- `readings/PremiumBadge.tsx`: gradiente `from-purple-600 to-pink-600` → chip sólido `bg-secondary text-bg-hero` (coherente con el chip "PREMIUM" de `PremiumPage`).
+- `readings/FreeReadingUpgradeBanner.tsx`: `from-violet-600 to-purple-600` → `from-primary to-secondary` (unificado con `UpgradeBanner`); botón blanco `text-primary`.
+- `conversion/PremiumPreview.tsx`, `conversion/RegisterCTAModal.tsx`, `readings/UpgradeModal.tsx`, `readings/DailyLimitReachedModal.tsx`, `daily-reading/DailyCardLimitReached.tsx`, `readings/ReadingLimitReached.tsx`: círculos de icono → `bg-secondary/15`, iconos/acentos → `text-secondary`, cajas de beneficios → `border-secondary/40 bg-secondary/10`, CTAs → `<Button>` por defecto con foco dorado (se eliminaron los gradientes `from-purple-600 to-*`).
+
+**Ya en tokens (referencia, sin cambios):** `LimitReachedModal`, `PremiumUpgradePrompt`, `UpgradeBanner`, `AnonymousLimitReached`, `SubscriptionTab`, `PremiumBenefitsSection`.
+
+**Fuera de alcance (color de dominio, no upsell):** encyclopedia, numerología, birth-chart (aspectos/elementos), admin (badges de plan), notifications, holistic-services, pendulum. `UsageLimitBanner` usa ámbar/naranja (no `purple/pink`) — queda como deuda menor futura.
+
+**Guía de uso:** nueva en `frontend/docs/UPSELL_SYSTEM.md` (tabla de tokens + cuándo usar cada forma + árbol de decisión + checklist).
+
+**TDD:** se actualizaron los tests que fijaban las clases crudas (`premium-upsell-card`, `PremiumBadge`, `ReadingLimitReached`, `RegisterCTAModal`) para verificar los tokens de marca y la **ausencia** de `purple/pink`.
+
+**Ciclo de calidad frontend completo:** format ✅, lint (0 errores) ✅, type-check ✅, 5173 tests ✅, build ✅, validate-architecture ✅.
 
 ---
 

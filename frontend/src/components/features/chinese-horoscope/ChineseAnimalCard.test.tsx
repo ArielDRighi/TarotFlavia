@@ -37,6 +37,18 @@ describe('ChineseAnimalCard', () => {
       expect(symbol).toHaveClass('text-primary');
     });
 
+    it('should center the animal symbol like the western zodiac card', () => {
+      const animalInfo = createTestAnimalInfo();
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
+
+      // El <svg> es display:block por el preflight de Tailwind, así que `text-center`
+      // no lo centra: se fuerza `block mx-auto` para alinearlo igual que el occidental.
+      const symbol = screen.getByRole('img', { name: 'Rata' });
+      expect(symbol).toHaveClass('block');
+      expect(symbol).toHaveClass('mx-auto');
+    });
+
     it('should render animal name in Spanish', () => {
       const animalInfo = createTestAnimalInfo({ nameEs: 'Dragón' });
 

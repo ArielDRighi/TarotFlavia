@@ -54,8 +54,9 @@ describe('RegisterCTAModal', () => {
     const registerButton = screen.getByRole('button', { name: /registrarme gratis/i });
     const closeButton = screen.getByRole('button', { name: /no, gracias/i });
 
-    // Primary button should have gradient classes
-    expect(registerButton).toHaveClass('bg-gradient-to-r');
+    // Primary button uses the default brand token variant (no raw purple/pink) — T-FBK-002.
+    expect(registerButton).toHaveClass('bg-primary');
+    expect(registerButton.className).not.toMatch(/purple|pink/);
     // Secondary button should have outline variant (has border class)
     expect(closeButton.className).toContain('border');
   });

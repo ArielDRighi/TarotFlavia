@@ -27,7 +27,7 @@ export default function FreeReadingUpgradeBanner() {
   return (
     <div
       data-testid="free-reading-upgrade-banner"
-      className="mt-6 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 p-6 text-white shadow-lg"
+      className="from-primary to-secondary mt-6 rounded-lg bg-gradient-to-r p-6 text-white shadow-lg"
     >
       <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
         <div className="flex-shrink-0">
@@ -45,7 +45,7 @@ export default function FreeReadingUpgradeBanner() {
         <Button
           onClick={handleUpgradeClick}
           variant="secondary"
-          className="flex-shrink-0 bg-white text-purple-700 hover:bg-white/90"
+          className="text-primary flex-shrink-0 bg-white hover:bg-white/90"
         >
           Conocer Premium
         </Button>

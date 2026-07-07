@@ -82,7 +82,7 @@ export function AnimalHoroscopePage() {
         Todos los animales
       </Button>
 
-      <div className="mb-8 overflow-x-auto pb-2">
+      <div className="mb-8 overflow-x-auto px-1 py-2">
         <ChineseAnimalSelector
           selectedAnimal={animal}
           userAnimal={userAnimal}
