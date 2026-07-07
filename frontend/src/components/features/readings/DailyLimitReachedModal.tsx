@@ -106,7 +106,7 @@ export default function DailyLimitReachedModal({
         {/* Stats Display */}
         <div className="border-secondary/40 bg-secondary/10 my-6 rounded-lg border p-6 text-center">
           <div className="flex items-baseline justify-center gap-2">
-            <span className="text-secondary text-4xl font-bold">{usedReadings}</span>
+            <span className="text-foreground text-4xl font-bold">{usedReadings}</span>
             <span className="text-muted-foreground">/ {totalReadings}</span>
           </div>
           <p className="text-muted-foreground mt-2 text-sm">

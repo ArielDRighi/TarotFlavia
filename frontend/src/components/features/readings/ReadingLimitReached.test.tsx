@@ -127,7 +127,8 @@ describe('ReadingLimitReached', () => {
     render(<ReadingLimitReached />);
 
     const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
-    // Tras T-FBK-002 el CTA usa el Button por defecto (token) con foco dorado.
+    // Tras T-FBK-002 el CTA usa el Button por defecto (token `primary`) con foco dorado.
+    expect(upgradeButton).toHaveClass('bg-primary');
     expect(upgradeButton).toHaveClass('focus-visible:ring-secondary/50');
     expect(upgradeButton.className).not.toMatch(/purple|pink/);
   });

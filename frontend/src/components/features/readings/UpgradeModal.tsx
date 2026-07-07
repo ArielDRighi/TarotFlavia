@@ -142,7 +142,7 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
         {/* Pricing */}
         <div className="border-secondary/40 bg-secondary/10 rounded-lg border p-6 text-center">
           <div className="flex items-baseline justify-center gap-1">
-            <span className="text-secondary text-4xl font-bold">
+            <span className="text-foreground text-4xl font-bold">
               {premiumPrice != null ? formatPriceArs(premiumPrice) : '---'}
             </span>
             <span className="text-muted-foreground">/ mes</span>
