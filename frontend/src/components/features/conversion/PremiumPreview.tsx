@@ -63,8 +63,8 @@ export default function PremiumPreview({
       {/* Overlay with CTA */}
       <div className="from-background/95 via-background/80 to-background/60 absolute inset-0 flex items-center justify-center bg-gradient-to-t backdrop-blur-sm">
         <div className="flex max-w-sm flex-col items-center gap-4 p-6 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-            <Lock className="text-accent h-8 w-8" />
+          <div className="bg-secondary/15 flex h-16 w-16 items-center justify-center rounded-full">
+            <Lock className="text-secondary h-8 w-8" />
           </div>
           <div className="space-y-2">
             <h3 className="text-foreground font-serif text-lg font-semibold">{message}</h3>
@@ -75,7 +75,7 @@ export default function PremiumPreview({
           <Button
             onClick={handleUpgrade}
             disabled={isPending}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+            className="focus-visible:ring-secondary/50"
             size="lg"
           >
             {isPending ? 'Cargando...' : CTA_PREMIUM.PURCHASE}

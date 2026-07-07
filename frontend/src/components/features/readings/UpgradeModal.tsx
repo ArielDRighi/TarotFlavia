@@ -128,7 +128,7 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-purple-600" aria-hidden="true" />
+                      <Icon className="text-secondary h-4 w-4" aria-hidden="true" />
                       <p className="text-text-primary font-semibold">{benefit.text}</p>
                     </div>
                     <p className="text-muted-foreground mt-1 text-sm">{benefit.description}</p>
@@ -140,9 +140,9 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
         </div>
 
         {/* Pricing */}
-        <div className="rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6 text-center">
+        <div className="border-secondary/40 bg-secondary/10 rounded-lg border p-6 text-center">
           <div className="flex items-baseline justify-center gap-1">
-            <span className="text-4xl font-bold text-purple-900">
+            <span className="text-secondary text-4xl font-bold">
               {premiumPrice != null ? formatPriceArs(premiumPrice) : '---'}
             </span>
             <span className="text-muted-foreground">/ mes</span>
@@ -158,7 +158,7 @@ export default function UpgradeModal({ open, onClose, reason }: UpgradeModalProp
             onClick={handleUpgradeClick}
             disabled={isPending}
             size="lg"
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            className="focus-visible:ring-secondary/50 w-full"
           >
             <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
             {isPending

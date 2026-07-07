@@ -18,7 +18,9 @@ interface PremiumUpsellCardProps {
 /**
  * PremiumUpsellCard — CTA de conversión a plan Premium.
  *
- * Componente dedicado para banners de upsell con gradiente intencional.
+ * Base común del sistema de upsell. Usa los tokens de marca dorados
+ * (`secondary`) alineados con el rediseño del circuito premium (T-PREM-007):
+ * borde y fondo `secondary`, icono `text-secondary` y CTA con foco dorado.
  * NO usar <Alert> aquí ya que es una CTA de conversión, no una notificación.
  */
 export function PremiumUpsellCard({
@@ -34,19 +36,15 @@ export function PremiumUpsellCard({
     <div
       data-testid={testId}
       className={cn(
-        'flex items-start gap-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-3',
+        'border-secondary/40 bg-secondary/10 flex items-start gap-3 rounded-lg border p-3',
         className
       )}
     >
-      {icon ?? <Zap className="mt-0.5 h-5 w-5 flex-shrink-0 text-purple-600" aria-hidden="true" />}
+      {icon ?? <Zap className="text-secondary mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden="true" />}
       <div className="min-w-0 flex-1">
-        <p className="mb-1 text-sm font-medium text-gray-900">{title}</p>
-        <p className="mb-2 text-xs text-gray-600">{description}</p>
-        <Button
-          asChild
-          size="sm"
-          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-        >
+        <p className="text-foreground mb-1 text-sm font-medium">{title}</p>
+        <p className="text-muted-foreground mb-2 text-xs">{description}</p>
+        <Button asChild size="sm" className="focus-visible:ring-secondary/50">
           <Link href={href}>{ctaLabel}</Link>
         </Button>
       </div>

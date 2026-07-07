@@ -107,9 +107,9 @@ export function DailyCardLimitReached() {
         ) : (
           <>
             {/* FREE: Premium Benefits CTA */}
-            <div className="via-primary/10 border-primary/30 rounded-lg border bg-gradient-to-br from-purple-500/10 to-amber-500/10 p-4">
+            <div className="border-secondary/40 bg-secondary/10 rounded-lg border p-4">
               <div className="mb-3 flex items-center gap-2">
-                <Crown className="h-5 w-5 text-amber-500" />
+                <Crown className="text-secondary h-5 w-5" />
                 <p className="text-lg font-semibold">Actualiza a Premium</p>
               </div>
               <ul className="space-y-2 text-sm">
@@ -153,11 +153,9 @@ export function DailyCardLimitReached() {
                   } as const;
                   const IconComponent = iconMap[benefit.icon as keyof typeof iconMap];
                   const colorClass =
-                    benefit.icon === 'CalendarHeart'
-                      ? 'text-purple-500'
-                      : benefit.icon === 'Wand2'
-                        ? 'text-amber-500'
-                        : 'text-primary';
+                    benefit.icon === 'CalendarHeart' || benefit.icon === 'Wand2'
+                      ? 'text-secondary'
+                      : 'text-primary';
                   return (
                     <li key={index} className="flex items-start gap-2">
                       <IconComponent className={`mt-0.5 h-4 w-4 shrink-0 ${colorClass}`} />
@@ -168,7 +166,7 @@ export function DailyCardLimitReached() {
                   );
                 })}
                 <li className="flex items-start gap-2">
-                  <CalendarHeart className="mt-0.5 h-4 w-4 shrink-0 text-purple-500" />
+                  <CalendarHeart className="text-secondary mt-0.5 h-4 w-4 shrink-0" />
                   <span>
                     <strong>Calendario sagrado completo</strong> con notificaciones
                   </span>
@@ -230,7 +228,7 @@ export function DailyCardLimitReached() {
             {/* FREE: Upgrade CTA + secondary actions */}
             <Button
               onClick={handleUpgradePremium}
-              className="w-full bg-gradient-to-r from-purple-600 to-amber-600 hover:from-purple-700 hover:to-amber-700"
+              className="focus-visible:ring-secondary/50 w-full"
               size="lg"
             >
               <Crown className="h-4 w-4" />
