@@ -26,11 +26,11 @@ export function UserMenu() {
   // Show login and register buttons when not authenticated
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
-        <Button variant="outline" asChild>
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Button variant="outline" size="sm" asChild className="sm:h-9 sm:px-4">
           <Link href="/login">{CTA_AUTH.LOGIN}</Link>
         </Button>
-        <Button variant="default" asChild>
+        <Button variant="default" size="sm" asChild className="sm:h-9 sm:px-4">
           <Link href="/registro">{CTA_AUTH.REGISTER}</Link>
         </Button>
       </div>
