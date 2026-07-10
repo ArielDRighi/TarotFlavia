@@ -210,15 +210,6 @@ export interface TrashedReading extends Reading {
 // ============================================================================
 
 /**
- * Card position for reading creation
- */
-export interface CardPositionDto {
-  cardId: number;
-  position: string;
-  isReversed: boolean;
-}
-
-/**
  * DTO for creating a new reading
  * Matches backend CreateReadingDto
  *
@@ -229,8 +220,10 @@ export interface CardPositionDto {
 export interface CreateReadingDto {
   spreadId: number;
   deckId: number;
-  cardIds: number[];
-  cardPositions: CardPositionDto[];
+  // T-PROD-007: el cliente ya NO envía la identidad (`cardIds`) ni la
+  // orientación (`cardPositions`) de las cartas. La mezcla, el reparto y la
+  // orientación se deciden en el backend con azar criptográfico; la identidad
+  // asignada llega en la respuesta de `createReading`.
   predefinedQuestionId?: number;
   customQuestion?: string;
   /**

@@ -1039,10 +1039,18 @@ describe('ReadingExperience', () => {
       await waitFor(() => {
         expect(mockCreateReadingMutateAsync).toHaveBeenCalledWith(
           expect.objectContaining({
-            cardIds: expect.arrayContaining([1]), // index 0 → cardId 1 (El Loco / Arcano Mayor)
+            spreadId: 1,
+            deckId: 1,
           })
         );
       });
+
+      // T-PROD-007: el frontend ya NO decide la identidad ni la orientación de
+      // las cartas. La mezcla la hace el backend, así que el DTO no lleva
+      // cardIds ni cardPositions (la identidad llega en la respuesta).
+      const sentDto = mockCreateReadingMutateAsync.mock.calls[0][0];
+      expect(sentDto).not.toHaveProperty('cardIds');
+      expect(sentDto).not.toHaveProperty('cardPositions');
     });
   });
 });
