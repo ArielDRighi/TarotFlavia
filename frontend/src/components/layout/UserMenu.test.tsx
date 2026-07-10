@@ -58,6 +58,9 @@ describe('UserMenu', () => {
       const loginButton = screen.getByRole('link', { name: CTA_AUTH.LOGIN });
       const registerButton = screen.getByRole('link', { name: CTA_AUTH.REGISTER });
 
+      // Compactos en móvil (size="sm" → h-8) y a altura normal desde sm.
+      expect(loginButton).toHaveClass('h-8');
+      expect(registerButton).toHaveClass('h-8');
       expect(loginButton).toHaveClass('sm:h-9');
       expect(registerButton).toHaveClass('sm:h-9');
     });

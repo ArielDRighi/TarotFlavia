@@ -81,7 +81,7 @@ describe('Header', () => {
       render(<Header />);
 
       const logoLink = screen.getByRole('link', { name: /^auguria$/i });
-      expect(logoLink).toHaveClass('flex-shrink-0');
+      expect(logoLink).toHaveClass('shrink-0');
     });
   });
 

@@ -51,7 +51,7 @@ export function Header() {
         </Sheet>
 
         {/* Logo - in the flex flow so it reserves its width and never overlaps the auth buttons */}
-        <Link href="/" className="flex-shrink-0">
+        <Link href="/" className="shrink-0">
           <span className="text-primary font-serif text-xl font-semibold sm:text-2xl">Auguria</span>
         </Link>
 
