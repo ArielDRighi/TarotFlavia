@@ -49,6 +49,18 @@ describe('UserMenu', () => {
 
       expect(screen.queryByTestId('user-avatar')).not.toBeInTheDocument();
     });
+
+    it('should render compact auth buttons on mobile that scale up from sm (T-PROD-002)', () => {
+      // T-PROD-002: con el logo ya en el flujo flex, los botones de auth se
+      // compactan en móvil (size="sm") y crecen a la altura normal desde sm.
+      render(<UserMenu />);
+
+      const loginButton = screen.getByRole('link', { name: CTA_AUTH.LOGIN });
+      const registerButton = screen.getByRole('link', { name: CTA_AUTH.REGISTER });
+
+      expect(loginButton).toHaveClass('sm:h-9');
+      expect(registerButton).toHaveClass('sm:h-9');
+    });
   });
 
   describe('Authenticated State', () => {
