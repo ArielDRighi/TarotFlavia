@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DailyReading } from './entities/daily-reading.entity';
 import { TarotCard } from '../cards/entities/tarot-card.entity';
+import { ARCANOS_MAYORES_CATEGORY } from '../cards/constants/card-categories';
 import { InterpretationsService } from '../interpretations/interpretations.service';
 import { User, UserPlan } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/users.service';
@@ -414,7 +415,9 @@ export class DailyReadingService {
     isReversed: boolean;
   }> {
     const totalCards = await this.tarotCardRepository.count(
-      onlyMajorArcana ? { where: { category: 'arcanos_mayores' } } : undefined,
+      onlyMajorArcana
+        ? { where: { category: ARCANOS_MAYORES_CATEGORY } }
+        : undefined,
     );
 
     const randomIndex = Math.floor(Math.random() * totalCards);
@@ -428,7 +431,7 @@ export class DailyReadingService {
 
     if (onlyMajorArcana) {
       cardQueryBuilder.where('card.category = :category', {
-        category: 'arcanos_mayores',
+        category: ARCANOS_MAYORES_CATEGORY,
       });
     }
 

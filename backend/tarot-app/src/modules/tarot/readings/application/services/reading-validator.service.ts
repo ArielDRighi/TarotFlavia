@@ -13,6 +13,7 @@ import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { PlanConfigService } from '../../../../plan-config/plan-config.service';
 import { CategoriesService } from '../../../../categories/categories.service';
 import { TarotCard } from '../../../cards/entities/tarot-card.entity';
+import { ARCANOS_MAYORES_CATEGORY } from '../../../cards/constants/card-categories';
 
 @Injectable()
 export class ReadingValidatorService {
@@ -303,7 +304,7 @@ export class ReadingValidatorService {
     }
 
     const hasMinorArcana = cards.some(
-      (card) => card.category !== 'arcanos_mayores',
+      (card) => card.category !== ARCANOS_MAYORES_CATEGORY,
     );
 
     if (hasMinorArcana) {

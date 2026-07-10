@@ -4,6 +4,7 @@ import {
   Logger,
   NotFoundException,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
@@ -11,6 +12,7 @@ import { DeckShufflerService } from '../services/deck-shuffler.service';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { TarotCard } from '../../../cards/entities/tarot-card.entity';
+import { ARCANOS_MAYORES_CATEGORY } from '../../../cards/constants/card-categories';
 import { TarotSpread } from '../../../spreads/entities/tarot-spread.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { InterpretationsService } from '../../../interpretations/interpretations.service';
@@ -242,7 +244,8 @@ export class CreateReadingUseCase {
    * 3. Asigna cada carta a la posición correspondiente de la tirada y decide su
    *    orientación (isReversed) también con `crypto`.
    *
-   * @throws NotFoundException si el pool no tiene suficientes cartas para la tirada.
+   * @throws InternalServerErrorException si el pool no tiene suficientes cartas
+   *   para la tirada (inconsistencia de configuración del mazo, no error del cliente).
    */
   private async drawCardsForReading(
     deckId: number,
@@ -259,7 +262,7 @@ export class CreateReadingUseCase {
     const pool = await this.getEligiblePool(deckId, plan);
 
     if (pool.length < spread.cardCount) {
-      throw new NotFoundException(
+      throw new InternalServerErrorException(
         `No hay suficientes cartas en el mazo ${deckId} para la tirada "${spread.name}": se requieren ${spread.cardCount}, hay ${pool.length}`,
       );
     }
@@ -289,7 +292,9 @@ export class CreateReadingUseCase {
       return deckCards;
     }
 
-    return deckCards.filter((card) => card.category === 'arcanos_mayores');
+    return deckCards.filter(
+      (card) => card.category === ARCANOS_MAYORES_CATEGORY,
+    );
   }
 
   /**

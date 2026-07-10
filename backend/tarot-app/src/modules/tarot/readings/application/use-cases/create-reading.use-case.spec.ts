@@ -482,6 +482,31 @@ describe('CreateReadingUseCase', () => {
       await expect(useCase.execute(mockUser, mockDto)).rejects.toThrow();
       expect(readingRepo.create).not.toHaveBeenCalled();
     });
+
+    it('usa un nombre de posición por defecto cuando el spread tiene menos posiciones que cartas', async () => {
+      const spreadWithFewerPositions = {
+        ...mockSpread,
+        cardCount: 3,
+        positions: [{ name: 'Pasado', description: 'Pasado' }], // solo 1 posición
+      } as unknown as TarotSpread;
+
+      validator.validateUser.mockResolvedValue(mockUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(spreadWithFewerPositions);
+      readingRepo.create.mockResolvedValue(createMockReading());
+
+      await useCase.execute(mockUser, mockDto);
+
+      expect(readingRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cardPositions: [
+            { cardId: 1, position: 'Pasado', isReversed: false },
+            { cardId: 2, position: 'Posición 2', isReversed: false },
+            { cardId: 3, position: 'Posición 3', isReversed: false },
+          ],
+        }),
+      );
+    });
   });
 
   describe('execute - with interpretation', () => {
