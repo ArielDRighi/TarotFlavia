@@ -7,8 +7,11 @@ import {
 } from '@nestjs/common';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
+import { DeckShufflerService } from '../services/deck-shuffler.service';
 import { CreateReadingDto } from '../../dto/create-reading.dto';
 import { TarotReading } from '../../entities/tarot-reading.entity';
+import { TarotCard } from '../../../cards/entities/tarot-card.entity';
+import { TarotSpread } from '../../../spreads/entities/tarot-spread.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { InterpretationsService } from '../../../interpretations/interpretations.service';
 import { CardsService } from '../../../cards/cards.service';
@@ -28,6 +31,7 @@ export class CreateReadingUseCase {
     @Inject('IReadingRepository')
     private readonly readingRepo: IReadingRepository,
     private readonly validator: ReadingValidatorService,
+    private readonly deckShuffler: DeckShufflerService,
     private readonly interpretationsService: InterpretationsService,
     private readonly cardsService: CardsService,
     private readonly spreadsService: SpreadsService,
@@ -97,10 +101,16 @@ export class CreateReadingUseCase {
       `Reading for user ${user.id} will use tarotista ${tarotistaId}`,
     );
 
-    // Obtener las cartas antes de crear la lectura (esto también valida que existan)
-    const cards = await this.cardsService.findByIds(createReadingDto.cardIds);
+    // T-PROD-006: la identidad y la orientación de las cartas se deciden en el
+    // backend con aleatoriedad criptográfica. El cliente ya no las envía.
+    const { cards, cardPositions } = await this.drawCardsForReading(
+      deck.id,
+      spread,
+      validatedUser.plan,
+    );
 
-    // T-FR-B03: Validar que FREE/ANONYMOUS solo use Arcanos Mayores
+    // T-FR-B03: Validación defensiva — FREE/ANONYMOUS solo reciben Arcanos
+    // Mayores (el pool ya se filtra por plan, esto es una segunda barrera).
     this.validator.validateDeckAccess(validatedUser.plan, cards);
 
     // Crear la lectura primero sin interpretación
@@ -113,8 +123,8 @@ export class CreateReadingUseCase {
       spreadId: spread.id,
       spreadName: spread.name,
       deck, // Usar el deck validado
-      cards, // Agregar las cartas a la lectura
-      cardPositions: createReadingDto.cardPositions,
+      cards, // Cartas repartidas por el backend
+      cardPositions, // Posiciones + orientación decididas por el backend
       interpretation: null,
     });
 
@@ -144,7 +154,7 @@ export class CreateReadingUseCase {
         // Generar interpretación con IA (ya tenemos las cards y spread del paso anterior)
         const result = await this.interpretationsService.generateInterpretation(
           cards,
-          createReadingDto.cardPositions,
+          cardPositions,
           question,
           spread,
           undefined, // category - puede agregarse después
@@ -199,7 +209,7 @@ export class CreateReadingUseCase {
       const freeInterpretations =
         await this.cardFreeInterpretationService.findByCardsAndCategory(
           cards,
-          createReadingDto.cardPositions,
+          cardPositions,
           createReadingDto.categoryId,
         );
 
@@ -221,6 +231,65 @@ export class CreateReadingUseCase {
     await this.calculateRevenueForReading(reading, tarotistaId, user.id);
 
     return reading;
+  }
+
+  /**
+   * T-PROD-006: reparte las cartas de la lectura mezclando en el servidor.
+   *
+   * 1. Obtiene el pool elegible según el plan (FREE/ANONYMOUS → solo Arcanos
+   *    Mayores; PREMIUM → mazo completo).
+   * 2. Mezcla con aleatoriedad criptográfica y toma `spread.cardCount` cartas.
+   * 3. Asigna cada carta a la posición correspondiente de la tirada y decide su
+   *    orientación (isReversed) también con `crypto`.
+   *
+   * @throws NotFoundException si el pool no tiene suficientes cartas para la tirada.
+   */
+  private async drawCardsForReading(
+    deckId: number,
+    spread: TarotSpread,
+    plan: UserPlan,
+  ): Promise<{
+    cards: TarotCard[];
+    cardPositions: {
+      cardId: number;
+      position: string;
+      isReversed: boolean;
+    }[];
+  }> {
+    const pool = await this.getEligiblePool(deckId, plan);
+
+    if (pool.length < spread.cardCount) {
+      throw new NotFoundException(
+        `No hay suficientes cartas en el mazo ${deckId} para la tirada "${spread.name}": se requieren ${spread.cardCount}, hay ${pool.length}`,
+      );
+    }
+
+    const cards = this.deckShuffler.draw(pool, spread.cardCount);
+
+    const cardPositions = cards.map((card, index) => ({
+      cardId: card.id,
+      position: spread.positions?.[index]?.name ?? `Posición ${index + 1}`,
+      isReversed: this.deckShuffler.decideReversed(),
+    }));
+
+    return { cards, cardPositions };
+  }
+
+  /**
+   * Devuelve el pool de cartas elegibles del mazo según el plan del usuario.
+   * FREE/ANONYMOUS solo pueden recibir Arcanos Mayores; PREMIUM el mazo completo.
+   */
+  private async getEligiblePool(
+    deckId: number,
+    plan: UserPlan,
+  ): Promise<TarotCard[]> {
+    const deckCards = await this.cardsService.findByDeck(deckId);
+
+    if (plan === UserPlan.PREMIUM) {
+      return deckCards;
+    }
+
+    return deckCards.filter((card) => card.category === 'arcanos_mayores');
   }
 
   /**

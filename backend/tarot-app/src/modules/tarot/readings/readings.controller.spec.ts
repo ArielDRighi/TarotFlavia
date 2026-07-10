@@ -94,12 +94,6 @@ describe('ReadingsController', () => {
         predefinedQuestionId: 5,
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'past', isReversed: false },
-          { cardId: 2, position: 'present', isReversed: true },
-          { cardId: 3, position: 'future', isReversed: false },
-        ],
         useAI: true,
       };
 
@@ -120,12 +114,6 @@ describe('ReadingsController', () => {
         customQuestion: '¿Cuál es mi propósito?',
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'past', isReversed: false },
-          { cardId: 2, position: 'present', isReversed: true },
-          { cardId: 3, position: 'future', isReversed: false },
-        ],
         useAI: true,
       };
 

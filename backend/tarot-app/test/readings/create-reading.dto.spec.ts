@@ -8,12 +8,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         predefinedQuestionId: 5,
         useAI: true,
       });
@@ -26,12 +20,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         customQuestion: '¿Cuál es mi propósito en la vida?',
         useAI: true,
       });
@@ -44,12 +32,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         predefinedQuestionId: 5,
         customQuestion: '¿Cuál es mi propósito en la vida?',
         useAI: true,
@@ -69,12 +51,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         useAI: true,
       });
 
@@ -92,12 +68,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         useAI: false,
       });
 
@@ -109,12 +79,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         // useAI no definido
       });
 
@@ -126,12 +90,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         predefinedQuestionId: 'invalid',
         useAI: true,
       });
@@ -144,12 +102,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         customQuestion: '',
         useAI: true,
       });
@@ -168,12 +120,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         customQuestion: 'a'.repeat(501),
         useAI: true,
       });
@@ -204,12 +150,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         predefinedQuestionId: 3,
         useAI: true,
       });
@@ -226,12 +166,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         predefinedQuestionId: 5,
         useAI: true,
       });
@@ -245,12 +179,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         predefinedQuestionId: 5,
         useAI: false,
       });
@@ -264,12 +192,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         predefinedQuestionId: 5,
         // useAI no se proporciona
       });
@@ -283,12 +205,6 @@ describe('CreateReadingDto', () => {
       const dto = plainToInstance(CreateReadingDto, {
         deckId: 1,
         spreadId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         predefinedQuestionId: 5,
         useAI: 'invalid',
       });
