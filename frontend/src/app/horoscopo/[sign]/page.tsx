@@ -45,12 +45,12 @@ export default function HoroscopeSignPage() {
         Todos los signos
       </Button>
 
-      <div className="mb-8 overflow-x-auto px-1 py-2">
+      <div className="mb-8">
         <ZodiacSignSelector
           selectedSign={sign}
           userSign={userSign}
+          variant="carousel"
           onSelect={(s) => router.push(ROUTES.HOROSCOPO_SIGN(s))}
-          className="!grid-cols-6 lg:!grid-cols-12"
         />
       </div>
 

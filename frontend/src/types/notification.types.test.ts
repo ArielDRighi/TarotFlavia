@@ -2,18 +2,40 @@ import { describe, it, expect } from 'vitest';
 import {
   NotificationType,
   NOTIFICATION_TYPE_INFO,
+  getNotificationTypeInfo,
   type Notification,
   type UnreadCountResponse,
   type NotificationFilters,
 } from './notification.types';
+
+/**
+ * T-PROD-011: valores que el backend emite realmente.
+ * Fuente de verdad: backend/tarot-app/src/modules/notifications/entities/user-notification.entity.ts
+ * El frontend NO los tenía todos → NOTIFICATION_TYPE_INFO[type] devolvía undefined
+ * y NotificationItem crasheaba al leer .icon.
+ */
+const BACKEND_NOTIFICATION_TYPES = [
+  'sacred_event',
+  'sacred_event_reminder',
+  'ritual_reminder',
+  'pattern_insight',
+] as const;
 
 describe('NotificationType', () => {
   it('should have SACRED_EVENT with correct value', () => {
     expect(NotificationType.SACRED_EVENT).toBe('sacred_event');
   });
 
+  it('should have SACRED_EVENT_REMINDER with correct value', () => {
+    expect(NotificationType.SACRED_EVENT_REMINDER).toBe('sacred_event_reminder');
+  });
+
   it('should have RITUAL_REMINDER with correct value', () => {
     expect(NotificationType.RITUAL_REMINDER).toBe('ritual_reminder');
+  });
+
+  it('should have PATTERN_INSIGHT with correct value', () => {
+    expect(NotificationType.PATTERN_INSIGHT).toBe('pattern_insight');
   });
 
   it('should have READING_SHARED with correct value', () => {
@@ -28,9 +50,57 @@ describe('NotificationType', () => {
     expect(NotificationType.PROMOTION).toBe('promotion');
   });
 
-  it('should have exactly 5 notification types', () => {
+  it('should have exactly 7 notification types (4 del backend + 3 reservados)', () => {
     const types = Object.values(NotificationType);
-    expect(types).toHaveLength(5);
+    expect(types).toHaveLength(7);
+  });
+});
+
+describe('Paridad con el enum del backend (T-PROD-011)', () => {
+  it.each(BACKEND_NOTIFICATION_TYPES)(
+    'should include the backend type "%s" in the frontend enum',
+    (backendType) => {
+      const frontendValues: string[] = Object.values(NotificationType);
+
+      expect(frontendValues).toContain(backendType);
+    }
+  );
+
+  it.each(BACKEND_NOTIFICATION_TYPES)(
+    'should have display info for the backend type "%s"',
+    (backendType) => {
+      const info = NOTIFICATION_TYPE_INFO[backendType as NotificationType];
+
+      expect(info).toBeDefined();
+      expect(info.name).toBeTruthy();
+      expect(info.icon).toBeTruthy();
+      expect(info.color).toBeTruthy();
+    }
+  );
+});
+
+describe('getNotificationTypeInfo (T-PROD-011)', () => {
+  it('should return the info of a known type', () => {
+    expect(getNotificationTypeInfo(NotificationType.SACRED_EVENT)).toEqual(
+      NOTIFICATION_TYPE_INFO[NotificationType.SACRED_EVENT]
+    );
+  });
+
+  it('should return the info of the types emitted by the backend cron', () => {
+    const info = getNotificationTypeInfo(NotificationType.SACRED_EVENT_REMINDER);
+
+    expect(info.name).toBeTruthy();
+    expect(info.icon).toBeTruthy();
+  });
+
+  it('should return a fallback for an unknown type instead of undefined', () => {
+    // El backend puede agregar un tipo nuevo sin que este frontend se entere.
+    const info = getNotificationTypeInfo('brand_new_backend_type' as NotificationType);
+
+    expect(info).toBeDefined();
+    expect(info.name).toBeTruthy();
+    expect(info.icon).toBeTruthy();
+    expect(info.color).toBeTruthy();
   });
 });
 

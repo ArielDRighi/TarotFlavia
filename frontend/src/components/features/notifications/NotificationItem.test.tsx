@@ -164,4 +164,46 @@ describe('NotificationItem', () => {
 
     expect(screen.getByText('Luna Llena esta noche')).toBeInTheDocument();
   });
+
+  // T-PROD-011: el enum del frontend estaba desincronizado del backend. El backend
+  // emite sacred_event_reminder y pattern_insight, que NO existían acá: el acceso
+  // directo a NOTIFICATION_TYPE_INFO[type] tiraba TypeError y rompía el header.
+  describe('Tipos del backend y tipos desconocidos (T-PROD-011)', () => {
+    it('should render SACRED_EVENT_REMINDER (emitido por el cron del backend)', () => {
+      const notification: Notification = {
+        ...baseNotification,
+        type: NotificationType.SACRED_EVENT_REMINDER,
+      };
+
+      render(<NotificationItem notification={notification} />);
+
+      expect(screen.getByText('Luna Llena esta noche')).toBeInTheDocument();
+      expect(screen.getByTestId('notification-item')).toBeInTheDocument();
+    });
+
+    it('should render PATTERN_INSIGHT (emitido por el backend)', () => {
+      const notification: Notification = {
+        ...baseNotification,
+        type: NotificationType.PATTERN_INSIGHT,
+      };
+
+      render(<NotificationItem notification={notification} />);
+
+      expect(screen.getByText('Luna Llena esta noche')).toBeInTheDocument();
+      expect(screen.getByTestId('notification-item')).toBeInTheDocument();
+    });
+
+    it('should not crash on an unknown type the backend might add later', () => {
+      // Simula un tipo nuevo del backend que este frontend todavía no conoce.
+      const notification: Notification = {
+        ...baseNotification,
+        type: 'brand_new_backend_type' as NotificationType,
+      };
+
+      expect(() => render(<NotificationItem notification={notification} />)).not.toThrow();
+
+      expect(screen.getByText('Luna Llena esta noche')).toBeInTheDocument();
+      expect(screen.getByTestId('notification-item')).toBeInTheDocument();
+    });
+  });
 });

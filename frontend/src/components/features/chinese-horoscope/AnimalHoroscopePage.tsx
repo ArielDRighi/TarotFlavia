@@ -82,14 +82,14 @@ export function AnimalHoroscopePage() {
         Todos los animales
       </Button>
 
-      <div className="mb-8 overflow-x-auto px-1 py-2">
+      <div className="mb-8">
         <ChineseAnimalSelector
           selectedAnimal={animal}
           userAnimal={userAnimal}
+          variant="carousel"
           onSelect={(a) => {
             router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL(a));
           }}
-          className="!grid-cols-6 lg:!grid-cols-12"
         />
       </div>
 

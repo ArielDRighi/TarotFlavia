@@ -19,6 +19,12 @@ export function Header() {
   const { user } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // T-PROD-011: las notificaciones no están planeadas en la web. La feature existe
+  // completa (backend + frontend) pero queda apagada por defecto. Al no montar
+  // NotificationBell, sus hooks de React Query no corren: cero peticiones a
+  // /notifications. Para reactivarla: NEXT_PUBLIC_NOTIFICATIONS_ENABLED=true.
+  const isNotificationsEnabled = process.env.NEXT_PUBLIC_NOTIFICATIONS_ENABLED === 'true';
+
   return (
     <header className="bg-surface shadow-soft sticky top-0 z-50 w-full border-b" role="banner">
       <nav
@@ -60,7 +66,7 @@ export function Header() {
 
         {/* User menu and notifications - always visible on right */}
         <div className="flex items-center gap-2">
-          {user && <NotificationBell />}
+          {user && isNotificationsEnabled && <NotificationBell />}
           <UserMenu />
         </div>
       </nav>
