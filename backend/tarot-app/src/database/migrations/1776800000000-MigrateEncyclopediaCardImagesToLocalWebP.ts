@@ -16,11 +16,29 @@ export class MigrateEncyclopediaCardImagesToLocalWebP1776800000000 implements Mi
   name = 'MigrateEncyclopediaCardImagesToLocalWebP1776800000000';
 
   async up(queryRunner: QueryRunner): Promise<void> {
+    // Se compara contra el valor canónico (y no con un `NOT LIKE '/images/tarot/%'`) porque la
+    // seed data de la enciclopedia pasó por TRES estados, y hay que cubrir los dos legacy:
+    //   TASK-302 → '/images/tarot/major/00-the-fool.jpg'  (path local, archivo inexistente → 404)
+    //   TASK-323 → 'https://upload.wikimedia.org/...'     (remoto, rechazado por next/image)
+    //   f596e2c9 → '/images/tarot/the-fool.webp'          (actual)
+    // El path de TASK-302 matchea '/images/tarot/%', así que un `NOT LIKE` lo saltaría y dejaría
+    // la fila rota. `IS DISTINCT FROM` cubre los tres estados, es NULL-safe, y sigue siendo
+    // idempotente: no toca ninguna fila que ya esté sana.
     await queryRunner.query(
-      `UPDATE "encyclopedia_tarot_cards" SET "image_url" = '/images/tarot/' || "slug" || '.webp' WHERE "image_url" NOT LIKE '/images/tarot/%'`,
+      `UPDATE "encyclopedia_tarot_cards" SET "image_url" = '/images/tarot/' || "slug" || '.webp' WHERE "image_url" IS DISTINCT FROM '/images/tarot/' || "slug" || '.webp'`,
     );
   }
 
+  /**
+   * Restaura las URLs de Wikimedia carta por carta (mapeo tomado de la seed data previa a
+   * `f596e2c9`).
+   *
+   * ⚠️ El `down()` NO es el inverso exacto del `up()`: el `up()` es condicional, pero esto
+   * reescribe las 78 filas incondicionalmente. En un entorno ya sano, revertir esta migración
+   * *introduce* URLs de Wikimedia que `next/image` rechaza (`remotePatterns: []`), o sea que el
+   * rollback deja las cartas rotas. Es el mismo trade-off que la migración hermana de `tarot_card`
+   * (`1776400000000`): se prioriza poder volver al estado histórico exacto.
+   */
   async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `UPDATE "encyclopedia_tarot_cards" SET "image_url" = 'https://upload.wikimedia.org/wikipedia/commons/9/90/RWS_Tarot_00_Fool.jpg' WHERE "slug" = 'the-fool'`,

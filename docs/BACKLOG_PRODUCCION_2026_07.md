@@ -355,7 +355,7 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 
 1. **Diagnóstico del estado actual del entorno deployado:**
    - [ ] DB (tiradas): `SELECT "imageUrl" FROM tarot_card WHERE name = 'El Loco';` → ¿`/images/tarot/the-fool.webp` o una URL de wikimedia?
-   - [ ] DB (enciclopedia): `SELECT "image_url" FROM encyclopedia_tarot_cards WHERE slug = 'the-fool';` → ídem.
+   - [ ] DB (enciclopedia): `SELECT "image_url" FROM encyclopedia_tarot_cards WHERE slug = 'the-fool';` → puede dar tres cosas: `/images/tarot/the-fool.webp` (sano), una URL de wikimedia, o `/images/tarot/major/00-the-fool.jpg` (path legacy de TASK-302, archivo inexistente → 404). La migración corrige los tres.
    - [ ] Assets: `GET https://<frontend>/images/tarot/the-fool.webp` → ¿200 o 404?
 2. **Deploy del frontend PRIMERO.** La build ya incluye las 78 WebP de `frontend/public/images/tarot/` (el Dockerfile copia `public/`; verificado). Con esto los assets quedan servidos **antes** de que la DB cambie.
 3. **Deploy del backend (aplica las migraciones automáticamente al bootear).** No se corre ningún comando: al arrancar, TypeORM aplica las pendientes —
@@ -372,7 +372,8 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 #### 📝 Notas técnicas
 
 - **Resto pendiente (menor):** `tarot-decks.data.ts:41` todavía tiene una URL de Wikimedia para la tapa del mazo (`tarot_deck.imageUrl`). Hoy es dato muerto —ningún componente del frontend la renderiza— por eso no se tocó. Si alguna vez se muestra el mazo, hay que migrarla también o `next/image` la va a rechazar.
-- La migración de la enciclopedia deriva la URL del `slug` (`'/images/tarot/' || slug || '.webp'`) en una única sentencia con `WHERE image_url NOT LIKE '/images/tarot/%'`, así que es idempotente y no hace nada si el entorno ya estaba sano. Se verificó que los 78 slugs coinciden exactamente con los 78 nombres de archivo WebP.
+- La migración de la enciclopedia deriva la URL del `slug` (`'/images/tarot/' || slug || '.webp'`) en una única sentencia, con `WHERE image_url IS DISTINCT FROM` ese valor canónico: es idempotente (no hace nada si el entorno ya estaba sano) y NULL-safe. Se verificó que los 78 slugs coinciden exactamente con los 78 nombres de archivo WebP.
+- **Ojo, la seed data de la enciclopedia tuvo TRES estados, no dos.** Además de las URLs de Wikimedia (TASK-323), hubo un estado previo (TASK-302) con paths locales **con subcarpeta**: `/images/tarot/major/00-the-fool.jpg`. Esos archivos no existen (el directorio es plano, `<slug>.webp`), así que dan 404 aunque `next/image` los acepte por ser locales. Por eso el `WHERE` compara contra el valor canónico en vez de usar un `NOT LIKE '/images/tarot/%'`, que dejaría ese estado sin corregir. El paso 1 del diagnóstico debe distinguir los tres.
 
 ---
 

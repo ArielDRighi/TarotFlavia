@@ -212,4 +212,25 @@ describe('seedEncyclopediaTarotCards', () => {
       expect(card.meaningReversed.length).toBeGreaterThanOrEqual(20);
     });
   });
+
+  // ---- Imágenes: WebP locales ----------------------------------------------
+  // `next.config.ts` tiene `images.remotePatterns: []`, así que next/image RECHAZA cualquier
+  // host remoto. Un imageUrl remoto acá rompe la ficha de la carta en producción.
+  // La migración 1776800000000 normaliza las bases ya sembradas; estos tests evitan que la
+  // seed data vuelva a introducir el problema.
+
+  it('should not reference remote images (next/image rejects them)', () => {
+    ALL_TAROT_CARDS.forEach((card) => {
+      expect(card.imageUrl).not.toContain('wikimedia.org');
+      expect(card.imageUrl).not.toMatch(/^https?:\/\//);
+    });
+  });
+
+  it('should derive every imageUrl from the slug, matching the local WebP filename', () => {
+    // Invariante del que depende la migración 1776800000000, que deriva la URL del slug:
+    //   image_url = '/images/tarot/' || slug || '.webp'
+    ALL_TAROT_CARDS.forEach((card) => {
+      expect(card.imageUrl).toBe(`/images/tarot/${card.slug}.webp`);
+    });
+  });
 });
