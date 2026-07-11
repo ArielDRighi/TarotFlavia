@@ -193,11 +193,6 @@ describe('ReadingsController', () => {
           predefinedQuestionId: 5,
           deckId: 1,
           spreadId: 1,
-          cardIds: [1, 2],
-          cardPositions: [
-            { cardId: 1, position: 'past', isReversed: false },
-            { cardId: 2, position: 'present', isReversed: true },
-          ],
           useAI: true,
         };
 
@@ -221,11 +216,6 @@ describe('ReadingsController', () => {
           customQuestion: '¿Cuál es mi propósito en la vida?',
           deckId: 1,
           spreadId: 1,
-          cardIds: [1, 2],
-          cardPositions: [
-            { cardId: 1, position: 'past', isReversed: false },
-            { cardId: 2, position: 'present', isReversed: true },
-          ],
           useAI: true,
         };
 
@@ -255,11 +245,6 @@ describe('ReadingsController', () => {
           predefinedQuestionId: 5,
           deckId: 1,
           spreadId: 1,
-          cardIds: [1, 2],
-          cardPositions: [
-            { cardId: 1, position: 'past', isReversed: false },
-            { cardId: 2, position: 'present', isReversed: true },
-          ],
           useAI: false,
         };
 
@@ -287,10 +272,6 @@ describe('ReadingsController', () => {
           predefinedQuestionId: 1, // Daily card question
           deckId: 1,
           spreadId: 1, // Single card spread
-          cardIds: [5],
-          cardPositions: [
-            { cardId: 5, position: 'present', isReversed: false },
-          ],
           useAI: false,
         };
 

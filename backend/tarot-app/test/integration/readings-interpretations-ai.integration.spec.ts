@@ -361,15 +361,20 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
       );
 
       // ASSERT
+      // T-PROD-006: la identidad y la orientación las decide el backend (mezcla
+      // server-side). Se reparten exactamente `spread.cardCount` cartas, con las
+      // posiciones definidas por el spread y la orientación aleatoria.
       expect(reading.cards).toBeDefined();
-      expect(reading.cards).toHaveLength(3);
-      expect(reading.cardPositions).toHaveLength(3);
+      expect(reading.cards).toHaveLength(testSpread.cardCount);
+      expect(reading.cardPositions).toHaveLength(testSpread.cardCount);
 
-      // Verificar que las posiciones están correctas
+      // Las cartas repartidas son válidas (ids reales) y no se repiten
+      const drawnIds = reading.cards.map((card) => card.id);
+      expect(new Set(drawnIds).size).toBe(drawnIds.length);
       reading.cardPositions.forEach((pos, idx) => {
-        expect(pos.cardId).toBe(testCards[idx].id);
+        expect(pos.cardId).toBeGreaterThan(0);
         expect(pos.position).toBe(getPositionName(idx));
-        expect(pos.isReversed).toBe(false);
+        expect(typeof pos.isReversed).toBe('boolean');
       });
     });
   });
@@ -539,25 +544,31 @@ describe('Readings + Interpretations + AI Integration Tests', () => {
       ).rejects.toThrow();
     });
 
-    it('should fail when cards do not exist', async () => {
-      // ARRANGE
-      const createReadingDto = {
+    it('should ignore client-injected cardIds and draw valid cards server-side', async () => {
+      // T-PROD-006: el cliente ya no puede elegir cartas. Aunque un cliente
+      // malicioso inyecte cardIds inexistentes, el backend los ignora y reparte
+      // cartas válidas del mazo con su propia mezcla criptográfica.
+      const injectedIds = [99999, 99998, 99997];
+      const maliciousDto = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
-        cardIds: [99999, 99998, 99997], // Non-existent
-        cardPositions: [
-          { cardId: 99999, position: 'Past', isReversed: false },
-          { cardId: 99998, position: 'Present', isReversed: false },
-          { cardId: 99997, position: 'Future', isReversed: false },
-        ],
-        customQuestion: 'Invalid cards test',
-        useAI: true,
+        cardIds: injectedIds, // inyectados; deben ser ignorados
+        customQuestion: 'Injected cards must be ignored',
+        useAI: false,
       };
 
-      // ACT & ASSERT
-      await expect(
-        createReadingUseCase.execute(testUser, createReadingDto),
-      ).rejects.toThrow();
+      // ACT
+      const reading = await createReadingUseCase.execute(
+        testUser,
+        maliciousDto,
+      );
+
+      // ASSERT — la lectura se crea con cartas reales, no las inyectadas
+      expect(reading.cards).toHaveLength(testSpread.cardCount);
+      reading.cards.forEach((card) => {
+        expect(card.id).toBeGreaterThan(0);
+        expect(injectedIds).not.toContain(card.id);
+      });
     });
 
     it('should handle AI provider errors gracefully', async () => {

@@ -57,7 +57,6 @@ describe('Premium User Edge Cases E2E', () => {
   let premiumUserId: number;
   let deckId: number;
   let spreadId: number;
-  let cardIds: number[];
   const testTimestamp = Date.now();
 
   beforeAll(async () => {
@@ -86,12 +85,6 @@ describe('Premium User Edge Cases E2E', () => {
     const spreads = await ds.query('SELECT id FROM tarot_spread LIMIT 1');
 
     spreadId = spreads[0].id as number;
-
-    // Get cards
-
-    const cards = await ds.query('SELECT id FROM tarot_card LIMIT 3');
-
-    cardIds = cards.map((c: { id: number }) => c.id);
 
     // Register premium user
     const registerResponse = await request(app.getHttpServer())
@@ -161,12 +154,6 @@ describe('Premium User Edge Cases E2E', () => {
             customQuestion: `Test question ${i + 1}`,
             deckId: deckId,
             spreadId: spreadId,
-            cardIds: cardIds,
-            cardPositions: [
-              { cardId: cardIds[0], position: 'past', isReversed: false },
-              { cardId: cardIds[1], position: 'present', isReversed: false },
-              { cardId: cardIds[2], position: 'future', isReversed: false },
-            ],
             useAI: false,
           })
           .expect(201);
@@ -204,12 +191,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: 'Fifth reading attempt (should fail)',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(403);
@@ -235,12 +216,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: '',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(400);
@@ -258,12 +233,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: longQuestion,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(400);
@@ -281,12 +250,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: specialCharQuestion,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -306,12 +269,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: maxQuestion,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -340,12 +297,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: 'Test regeneration count',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -404,12 +355,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: 'Original question',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -483,12 +428,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: 'Premium reading 1',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -504,12 +443,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: 'Premium reading 2',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -557,12 +490,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: 'Should be rejected',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(403);
@@ -595,12 +522,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: 'Multi-tarotista test for premium',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -617,12 +538,6 @@ describe('Premium User Edge Cases E2E', () => {
           customQuestion: 'Persistence test',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);

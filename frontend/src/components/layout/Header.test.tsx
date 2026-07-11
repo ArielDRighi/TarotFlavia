@@ -66,6 +66,23 @@ describe('Header', () => {
       const logoLink = screen.getByRole('link', { name: /^auguria$/i });
       expect(logoLink).toHaveAttribute('href', '/');
     });
+
+    it('should keep the logo in the flex flow on mobile (no absolute centering)', () => {
+      // T-PROD-002: el centrado absoluto sacaba el logo del flujo flex y se
+      // superponía con los botones de auth en viewports de 320-430px.
+      render(<Header />);
+
+      const logoLink = screen.getByRole('link', { name: /^auguria$/i });
+      expect(logoLink).not.toHaveClass('absolute');
+      expect(logoLink).not.toHaveClass('-translate-x-1/2');
+    });
+
+    it('should not shrink the logo below its content width', () => {
+      render(<Header />);
+
+      const logoLink = screen.getByRole('link', { name: /^auguria$/i });
+      expect(logoLink).toHaveClass('shrink-0');
+    });
   });
 
   describe('Surface and Shadow', () => {

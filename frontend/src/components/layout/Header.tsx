@@ -50,9 +50,9 @@ export function Header() {
           </SheetContent>
         </Sheet>
 
-        {/* Logo - centered on mobile, left on desktop */}
-        <Link href="/" className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0">
-          <span className="text-primary font-serif text-2xl font-semibold">Auguria</span>
+        {/* Logo - in the flex flow so it reserves its width and never overlaps the auth buttons */}
+        <Link href="/" className="shrink-0">
+          <span className="text-primary font-serif text-xl font-semibold sm:text-2xl">Auguria</span>
         </Link>
 
         {/* Desktop navigation */}

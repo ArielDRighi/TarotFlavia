@@ -21,11 +21,22 @@ export interface TarotCardProps {
   className?: string;
 }
 
-/** Size configuration mapping */
+/** Card back artwork, shared by every face-down card in the app */
+export const CARD_BACK_IMAGE_SRC = '/images/tarot/card-back.webp';
+
+/**
+ * Aspect ratio of the deck: it matches the card back artwork (591x960),
+ * so the back is shown whole — no letterboxing and no cropping of its golden frame.
+ * Cards derive their height from their width, so every card size stays proportional.
+ * Reuse this class for card-shaped skeletons to avoid layout shift.
+ */
+export const CARD_ASPECT_CLASS = 'aspect-[197/320]';
+
+/** Size configuration mapping (width only — height comes from the aspect ratio) */
 const sizeClasses = {
-  sm: 'w-32 h-48',
-  md: 'w-40 h-60',
-  lg: 'w-48 h-72',
+  sm: 'w-32',
+  md: 'w-40',
+  lg: 'w-48',
 } as const;
 
 /** Image sizes for Next.js Image optimization */
@@ -39,7 +50,7 @@ const imageSizes = {
  * TarotCard Component
  *
  * Displays a tarot card with two states:
- * - Unrevealed (back): Shows a decorative geometric pattern
+ * - Unrevealed (back): Shows the deck's card back artwork
  * - Revealed (front): Shows the card image and name
  *
  * Features:
@@ -72,8 +83,9 @@ export function TarotCard({ card, isRevealed, onClick, size = 'md', className }:
         'relative rounded-xl shadow-lg',
         // Perspective for 3D effect
         '[perspective:1000px]',
-        // Size
+        // Size (width) and deck proportions (height)
         sizeClasses[size],
+        CARD_ASPECT_CLASS,
         // Cursor and hover effects
         onClick && 'cursor-pointer',
         !isRevealed && onClick && 'transition-transform duration-300 hover:-translate-y-1',
@@ -103,36 +115,18 @@ export function TarotCard({ card, isRevealed, onClick, size = 'md', className }:
         <div
           data-testid="card-back"
           className={cn(
-            'absolute inset-0 rounded-xl',
+            'absolute inset-0 overflow-hidden rounded-xl',
             'bg-secondary',
             '[backface-visibility:hidden]'
           )}
         >
-          {/* Geometric pattern overlay */}
-          <div className="absolute inset-0 overflow-hidden rounded-xl">
-            {/* Border frame */}
-            <div className="border-primary/30 absolute inset-2 rounded-lg border-2">
-              {/* Inner decorative border */}
-              <div className="border-primary/20 absolute inset-2 rounded-md border">
-                {/* Center mandala pattern */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative h-16 w-16">
-                    {/* Diamond shape */}
-                    <div className="bg-primary/20 absolute inset-0 rotate-45 rounded-sm" />
-                    {/* Circle */}
-                    <div className="bg-primary/30 absolute inset-2 rounded-full" />
-                    {/* Inner diamond */}
-                    <div className="bg-primary/20 absolute inset-4 rotate-45 rounded-sm" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Corner decorations */}
-            <div className="border-primary/40 absolute top-3 left-3 h-4 w-4 rounded-tl border-t-2 border-l-2" />
-            <div className="border-primary/40 absolute top-3 right-3 h-4 w-4 rounded-tr border-t-2 border-r-2" />
-            <div className="border-primary/40 absolute bottom-3 left-3 h-4 w-4 rounded-bl border-b-2 border-l-2" />
-            <div className="border-primary/40 absolute right-3 bottom-3 h-4 w-4 rounded-br border-r-2 border-b-2" />
-          </div>
+          <Image
+            src={CARD_BACK_IMAGE_SRC}
+            alt=""
+            fill
+            sizes={imageSizes[size]}
+            className="object-cover"
+          />
         </div>
 
         {/* Card Front */}

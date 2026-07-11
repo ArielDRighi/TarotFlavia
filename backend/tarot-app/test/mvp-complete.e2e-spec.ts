@@ -90,7 +90,6 @@ describe('MVP Complete Flow E2E', () => {
   let predefinedQuestionId: number;
   let deckId: number;
   let spreadId: number;
-  let cardIds: number[];
   const testTimestamp = Date.now();
 
   /**
@@ -157,7 +156,6 @@ describe('MVP Complete Flow E2E', () => {
         'Not enough cards found in database. Make sure global setup has run correctly.',
       );
     }
-    cardIds = cards.map((c) => c.id);
   }, 60000);
 
   /**
@@ -271,12 +269,6 @@ describe('MVP Complete Flow E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -301,12 +293,6 @@ describe('MVP Complete Flow E2E', () => {
           customQuestion: '¿Qué me depara el futuro?',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(403);
@@ -354,12 +340,6 @@ describe('MVP Complete Flow E2E', () => {
           customQuestion: '¿Mi pregunta personalizada?',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(403);
@@ -408,12 +388,6 @@ describe('MVP Complete Flow E2E', () => {
             predefinedQuestionId: predefinedQuestionId,
             deckId: deckId,
             spreadId: spreadId,
-            cardIds: cardIds,
-            cardPositions: [
-              { cardId: cardIds[0], position: 'past', isReversed: false },
-              { cardId: cardIds[1], position: 'present', isReversed: false },
-              { cardId: cardIds[2], position: 'future', isReversed: false },
-            ],
             useAI: false,
           })
           .expect(201);
@@ -444,12 +418,6 @@ describe('MVP Complete Flow E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         });
 
@@ -470,12 +438,6 @@ describe('MVP Complete Flow E2E', () => {
           customQuestion: '¿Cuál es mi propósito de vida?',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: true },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -503,12 +465,6 @@ describe('MVP Complete Flow E2E', () => {
           customQuestion: 'Test unlimited reading',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         });
 
@@ -565,12 +521,6 @@ describe('MVP Complete Flow E2E', () => {
           customQuestion: 'Test AI interpretation',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: true },
-          ],
           useAI: false,
         });
 
@@ -686,12 +636,6 @@ describe('MVP Complete Flow E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -708,12 +652,6 @@ describe('MVP Complete Flow E2E', () => {
           customQuestion: 'Multi-tarotista test question',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -731,12 +669,6 @@ describe('MVP Complete Flow E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -764,12 +696,6 @@ describe('MVP Complete Flow E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -799,12 +725,6 @@ describe('MVP Complete Flow E2E', () => {
           customQuestion: 'Test reading para validar tarotistaId en lista',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);

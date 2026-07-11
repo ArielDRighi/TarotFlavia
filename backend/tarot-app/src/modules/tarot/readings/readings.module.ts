@@ -32,6 +32,7 @@ import { TypeOrmReadingRepository } from './infrastructure/repositories/typeorm-
 
 // Services
 import { ReadingValidatorService } from './application/services/reading-validator.service';
+import { DeckShufflerService } from './application/services/deck-shuffler.service';
 import { ReadingShareService } from './application/services/reading-share.service';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { ReadingMapperService } from './application/services/reading-mapper.service';
@@ -89,6 +90,7 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
 
     // Services
     ReadingValidatorService,
+    DeckShufflerService,
     ReadingShareService,
     ReadingsOrchestratorService,
     ReadingMapperService,

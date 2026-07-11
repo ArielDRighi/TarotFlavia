@@ -59,7 +59,6 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
   let deckId: number;
   let spreadId: number;
   let questionId: number;
-  let cardIds: number[];
 
   /**
    * Utility para medir tiempo de query SQL directo
@@ -124,13 +123,6 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
     }[];
     questionId = questions[0].id;
 
-    const cards = (await dbHelper
-      .getDataSource()
-      .query('SELECT id FROM tarot_card LIMIT 3')) as unknown as {
-      id: number;
-    }[];
-    cardIds = cards.map((c) => c.id);
-
     // Create test readings for query testing
     for (let i = 0; i < 20; i++) {
       await request(httpServer)
@@ -140,12 +132,6 @@ describe('Performance Tests - Database Queries (SUBTASK-23)', () => {
           deckId,
           spreadId,
           predefinedQuestionId: questionId,
-          cardIds,
-          cardPositions: cardIds.map((id, idx) => ({
-            cardId: id,
-            position: `pos_${idx}`,
-            isReversed: false,
-          })),
           useAI: false,
         })
         .expect(201);

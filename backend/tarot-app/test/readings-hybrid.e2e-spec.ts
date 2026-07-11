@@ -166,12 +166,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -191,12 +185,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           customQuestion: '¿Cuál es mi propósito en la vida?',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(403);
@@ -212,12 +200,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
         .send({
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(400);
@@ -239,12 +221,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           customQuestion: '¿Cuál es mi propósito en la vida?',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -264,12 +240,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -290,12 +260,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           customQuestion: '¿Cuál es mi futuro?',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(400);
@@ -330,12 +294,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           customQuestion: '¿Cuál es mi destino?',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(403);
@@ -368,12 +326,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           customQuestion: '¿Cuál es mi destino?',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'pasado', isReversed: false },
-            { cardId: 2, position: 'presente', isReversed: false },
-            { cardId: 3, position: 'futuro', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -417,12 +369,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'past', isReversed: false },
-            { cardId: 2, position: 'present', isReversed: false },
-            { cardId: 3, position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -439,12 +385,6 @@ describe('Readings Hybrid Questions (E2E)', () => {
           customQuestion: 'Hybrid test for multi-tarotista',
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'past', isReversed: false },
-            { cardId: 2, position: 'present', isReversed: false },
-            { cardId: 3, position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);

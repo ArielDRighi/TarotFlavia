@@ -477,8 +477,6 @@ describe('useReadings - Spreads Hooks', () => {
       result.current.mutate({
         spreadId: 1,
         deckId: 1,
-        cardIds: [1],
-        cardPositions: [{ cardId: 1, position: 'Respuesta', isReversed: false }],
         customQuestion: 'Nueva pregunta',
       });
 
@@ -489,8 +487,6 @@ describe('useReadings - Spreads Hooks', () => {
       expect(readingsApi.createReading).toHaveBeenCalledWith({
         spreadId: 1,
         deckId: 1,
-        cardIds: [1],
-        cardPositions: [{ cardId: 1, position: 'Respuesta', isReversed: false }],
         customQuestion: 'Nueva pregunta',
       });
     });
@@ -567,12 +563,6 @@ describe('useReadings - Spreads Hooks', () => {
       const createReadingDto: CreateReadingDto = {
         spreadId: 1,
         deckId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'past', isReversed: false },
-          { cardId: 2, position: 'present', isReversed: false },
-          { cardId: 3, position: 'future', isReversed: false },
-        ],
       };
 
       result.current.mutate(createReadingDto);
@@ -604,12 +594,6 @@ describe('useReadings - Spreads Hooks', () => {
       const createReadingDto: CreateReadingDto = {
         spreadId: 1,
         deckId: 1,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'past', isReversed: false },
-          { cardId: 2, position: 'present', isReversed: false },
-          { cardId: 3, position: 'future', isReversed: false },
-        ],
       };
 
       result.current.mutate(createReadingDto);

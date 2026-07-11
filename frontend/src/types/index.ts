@@ -41,7 +41,6 @@ export type {
   ReadingDetail,
   FreeInterpretationEntry,
   TrashedReading,
-  CardPositionDto,
   CreateReadingDto,
   PaginatedReadings,
   PaginationMeta,

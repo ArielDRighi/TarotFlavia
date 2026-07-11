@@ -134,12 +134,6 @@ describe('Readings Share System (e2e)', () => {
         predefinedQuestionId: 1,
         deckId: 1,
         spreadId: 2, // 3-card spread
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'past', isReversed: false },
-          { cardId: 2, position: 'present', isReversed: false },
-          { cardId: 3, position: 'future', isReversed: false },
-        ],
         useAI: false,
       })
       .expect(201);
@@ -390,12 +384,6 @@ describe('Readings Share System (e2e)', () => {
           predefinedQuestionId: 2,
           deckId: 1,
           spreadId: 2,
-          cardIds: [4, 5, 6],
-          cardPositions: [
-            { cardId: 4, position: 'past', isReversed: false },
-            { cardId: 5, position: 'present', isReversed: false },
-            { cardId: 6, position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -441,12 +429,6 @@ describe('Readings Share System (e2e)', () => {
           customQuestion: 'Test reading for multi-tarotista sharing',
           deckId: 1,
           spreadId: 1,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'past', isReversed: false },
-            { cardId: 2, position: 'present', isReversed: false },
-            { cardId: 3, position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -487,12 +469,6 @@ describe('Readings Share System (e2e)', () => {
           customQuestion: 'Test reading for sharing with tarotista',
           deckId: 1,
           spreadId: 1,
-          cardIds: [1, 2, 3],
-          cardPositions: [
-            { cardId: 1, position: 'past', isReversed: false },
-            { cardId: 2, position: 'present', isReversed: false },
-            { cardId: 3, position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);

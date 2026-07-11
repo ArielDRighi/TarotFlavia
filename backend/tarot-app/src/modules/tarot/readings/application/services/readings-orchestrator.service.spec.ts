@@ -192,8 +192,6 @@ describe('ReadingsOrchestratorService', () => {
           customQuestion: 'Test question',
           spreadId: 1,
           deckId: 1,
-          cardIds: [1, 2, 3],
-          cardPositions: [],
           useAI: true,
         };
 
@@ -210,8 +208,6 @@ describe('ReadingsOrchestratorService', () => {
           customQuestion: 'Test question',
           spreadId: 1,
           deckId: 1,
-          cardIds: [1, 2, 3],
-          cardPositions: [],
           useAI: true,
         };
 
@@ -231,8 +227,6 @@ describe('ReadingsOrchestratorService', () => {
           customQuestion: 'Test question',
           spreadId: 1,
           deckId: 1,
-          cardIds: [1, 2, 3],
-          cardPositions: [],
           useAI: true,
         };
 

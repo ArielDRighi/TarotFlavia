@@ -33,7 +33,6 @@ import type {
   ReadingDetail,
   ReadingCard,
   CreateReadingDto,
-  CardPositionDto,
   Interpretation,
   FreeInterpretationEntry,
 } from '@/types';
@@ -400,25 +399,14 @@ export function ReadingExperience({
     setError(null);
 
     try {
-      // Convert selected card indices (0-77) to card IDs (1-78)
-      const selectedCardIndices = Array.from(selectedCards);
-      const cardIds = selectedCardIndices.map((index) => index + 1);
-
-      // Build card positions array using spread's position definitions
-      const cardPositions: CardPositionDto[] = selectedCardIndices.map((index, i) => {
-        const position = spread.positions?.[i];
-        return {
-          cardId: index + 1,
-          position: position?.name ?? `Posición ${i + 1}`,
-          isReversed: Math.random() < 0.3, // 30% chance of reversed
-        };
-      });
-
+      // T-PROD-007: la selección de cartas boca abajo es solo un gesto de UX
+      // (el usuario elige `cardsCount` posiciones). El frontend ya NO decide la
+      // identidad ni la orientación de las cartas: la mezcla, el reparto y la
+      // orientación las hace el backend con azar criptográfico, y la identidad
+      // asignada llega en la respuesta de `createReading` (revelación).
       const createDto: CreateReadingDto = {
         spreadId,
         deckId: DEFAULT_DECK_ID,
-        cardIds,
-        cardPositions,
         ...(questionId ? { predefinedQuestionId: questionId } : {}),
         ...(customQuestion ? { customQuestion } : {}),
         ...(categoryId ? { categoryId } : {}),
