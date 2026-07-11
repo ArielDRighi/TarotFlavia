@@ -76,10 +76,13 @@ describe('UpgradeModal', () => {
       expect(screen.getByText(/Carta astral con resumen personalizado/i)).toBeInTheDocument();
     });
 
-    it('should NOT promise nonexistent benefits (sin publicidad)', () => {
+    it('should NOT promise benefits that are not delivered yet (sin publicidad)', () => {
       const { container } = render(<UpgradeModal open={true} onClose={mockOnClose} />);
       const text = (container.textContent ?? '').toLowerCase();
 
+      // T-PROD-008 dejó lista la infraestructura de ads (AdSense gateado por plan), pero
+      // todavía no hay ningún AdSlot colocado: hasta T-PROD-009 un Free no ve anuncios,
+      // así que "sin publicidad" seguiría siendo una promesa vacía (regla FBK-005).
       expect(text).not.toContain('publicidad');
       expect(text).not.toContain('ilimitad');
     });

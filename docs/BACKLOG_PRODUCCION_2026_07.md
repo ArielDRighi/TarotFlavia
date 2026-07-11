@@ -244,7 +244,7 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 | T-PROD-005 | Dorso final de las cartas (imagen WebP en lugar del patrón CSS) | Frontend | 🟡 Media | 1.5 pts |
 | T-PROD-006 | Mezcla de cartas server-side (backend: shuffle autoritativo con crypto) | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-007 | Mezcla de cartas: adaptar el frontend al nuevo contrato | Frontend | 🔴 Crítica | 2 pts |
-| T-PROD-008 | AdSense fase 1: componente `AdSlot` + carga condicional del script por plan | Frontend | 🟡 Media | 3 pts |
+| T-PROD-008 | ✅ AdSense fase 1: componente `AdSlot` + carga condicional del script por plan | Frontend | 🟡 Media | 3 pts |
 | T-PROD-009 | AdSense fase 2: alta de cuenta, ads.txt, consentimiento y colocación en páginas | Full-stack | 🟡 Media | 3 pts |
 
 ---
@@ -527,8 +527,9 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 
 ---
 
-### T-PROD-008: AdSense Fase 1 — `AdSlot` + Carga Condicional por Plan
+### T-PROD-008: AdSense Fase 1 — `AdSlot` + Carga Condicional por Plan — ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA
 **Prioridad:** 🟡 Media
 **Estimación:** 3 puntos
 **Dependencias:** ninguna (puede desarrollarse con un client ID de prueba; el ID real llega en T-PROD-009)
@@ -537,23 +538,29 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 
 #### ✅ Tareas específicas
 
-- [ ] **Crear la feature `components/features/ads/`** con dos client components:
-  - `AdSenseScript.tsx`: monta el loader oficial con `next/script` (`strategy="afterInteractive"`, `crossOrigin="anonymous"`, `src=".../adsbygoogle.js?client=<NEXT_PUBLIC_ADSENSE_CLIENT>"`). Devuelve `null` si el usuario es premium, si `!_hasHydrated`, o si la env var no está seteada (kill-switch para dev/staging).
-  - `AdSlot.tsx`: renderiza el `<ins className="adsbygoogle">` con `data-ad-client`/`data-ad-slot`/formato responsive + `useEffect` con `(window.adsbygoogle ||= []).push({})`. Mismo gating: `null` hasta hidratar y `null` para premium. Tipar `window.adsbygoogle` con una declaración global (sin `any`).
-- [ ] **Gating (regla de negocio):** mostrar ads si `plan !== 'premium'` usando [useUserPlanFeatures](../frontend/src/hooks/utils/useUserPlanFeatures.ts) + `_hasHydrated` del `authStore` — un premium **jamás** debe ver ni un flash de anuncio (el `AuthProvider` ya bloquea el primer render hasta validar sesión).
-- [ ] **Env var nueva:** `NEXT_PUBLIC_ADSENSE_CLIENT` en `frontend/.env.example` (documentada: vacía = ads apagados).
-- [ ] **Montar `AdSenseScript` en [app/layout.tsx](../frontend/src/app/layout.tsx)** dentro de `AuthProvider` (necesita el plan hidratado).
-- [ ] **Excluir zonas:** ningún `AdSlot` en `/admin/**` ni en flujos de pago (`/premium/activacion`, pago de servicios).
-- [ ] **Tests:** AdSlot/Script no renderizan para premium ni sin env var; renderizan para anónimo y free tras hidratación; actualizar `PremiumBenefitsSection.test.tsx:62` y `UpgradeModal.test.tsx:79-83` (hoy afirman que "publicidad" no existe en la app).
+- [x] **Crear la feature `components/features/ads/`** con dos client components:
+  - [x] `AdSenseScript.tsx`: monta el loader oficial con `next/script` (`strategy="afterInteractive"`, `crossOrigin="anonymous"`, `src=".../adsbygoogle.js?client=<NEXT_PUBLIC_ADSENSE_CLIENT>"`). Devuelve `null` si el usuario es premium, si `!_hasHydrated`, o si la env var no está seteada (kill-switch para dev/staging).
+  - [x] `AdSlot.tsx`: renderiza el `<ins className="adsbygoogle">` con `data-ad-client`/`data-ad-slot`/formato responsive + `useEffect` que encola `window.adsbygoogle.push({})` una sola vez (`useRef`, sin doble push en re-render, con `try/catch` para no romper la página si el loader no está). Mismo gating. `window.adsbygoogle` tipado con una declaración global en [adsense.types.ts](../frontend/src/types/adsense.types.ts) (sin `any`).
+- [x] **Gating (regla de negocio):** centralizado en el hook nuevo [useAdsEnabled](../frontend/src/hooks/utils/useAdsEnabled.ts), que compone `useUserPlanFeatures` + `_hasHydrated` del `authStore` + env var + rutas excluidas. Un premium **jamás** ve un anuncio ni un flash (ni siquiera se descarga `adsbygoogle.js`).
+- [x] **Env var nueva:** `NEXT_PUBLIC_ADSENSE_CLIENT` documentada en `frontend/.env.example` (vacía = ads apagados; se trimea, así que un valor en blanco también apaga).
+- [x] **Montar `AdSenseScript` en [app/layout.tsx](../frontend/src/app/layout.tsx)** dentro de `AuthProvider` (necesita el plan hidratado).
+- [x] **Excluir zonas:** implementado como regla **dura** en `useAdsEnabled` vía `usePathname()` — ni el script ni los slots se activan bajo `/admin/**`, `/premium/**` (incluye `/premium/activacion`) ni en rutas que contengan `/pago` (checkout de servicios y retornos `pago-exitoso`/`pago-fallido`/`pago-pendiente`). Así la exclusión no depende de recordarla al colocar slots en T-PROD-009.
+- [x] **Tests:** 35 tests nuevos (17 del hook + 6 `AdSenseScript` + 12 `AdSlot`), 100 % de cobertura en los 3 archivos nuevos. Cubren: no renderizar para premium / sin hidratar / sin env var / en zonas excluidas; sí renderizar para anónimo y Free; atributos del `<ins>`; push único a la cola.
 
 #### 🎯 Criterios de Aceptación
 
-- Con la env var seteada: anónimos y Free ven slots; Premium nunca (ni flash). Sin env var: cero rastro de AdSense.
-- Ciclo de calidad frontend completo pasa.
+- [x] Con la env var seteada: anónimos y Free ven slots; Premium nunca (ni flash). Sin env var: cero rastro de AdSense.
+- [x] Ciclo de calidad frontend completo pasa (format, lint, type-check, 5217 tests, build, validate-architecture).
 
 #### 📁 Archivos involucrados
 
-- `features/ads/AdSenseScript.tsx`, `features/ads/AdSlot.tsx` (+ tests), `app/layout.tsx`, `frontend/.env.example`.
+- `features/ads/AdSenseScript.tsx`, `features/ads/AdSlot.tsx`, `features/ads/index.ts` (+ tests), `hooks/utils/useAdsEnabled.ts` (+ test), `types/adsense.types.ts`, `types/index.ts`, `app/layout.tsx`, `frontend/.env.example`.
+
+#### 📝 Notas de implementación
+
+- **Ningún `AdSlot` está colocado todavía en ninguna página** — la colocación es el paso 4 de T-PROD-009. Fase 1 entrega la infraestructura + el gating.
+- **Copy premium "Sin publicidad" NO se agregó** (sigue siendo el paso 5, opcional, de T-PROD-009): mientras no haya slots colocados, un Free no ve anuncios y prometer "sin publicidad" sería una promesa vacía (regla FBK-005). Los tests `PremiumBenefitsSection.test.tsx` y `UpgradeModal.test.tsx` mantienen el guard `not.toContain('publicidad')`, con el comentario actualizado para que apunte a T-PROD-009 en vez de decir "no hay sistema de ads".
+- El `slotId` de `AdSlot` es un `string` (identificador del panel de AdSense, no un ID de entidad de la app — la regla de "IDs numéricos" no aplica).
 
 ---
 
