@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { TarotCard } from './TarotCard';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { TarotCard, CARD_BACK_IMAGE_SRC } from './TarotCard';
 import type { ReadingCard } from '@/types/reading.types';
 
 // Mock Next.js Image component
@@ -204,11 +204,46 @@ describe('TarotCard', () => {
   });
 
   describe('Card Back Design', () => {
-    it('should display geometric pattern on the back', () => {
+    it('should display the card back image on the back', () => {
       render(<TarotCard isRevealed={false} />);
 
-      const cardBack = screen.getByTestId('card-back');
-      expect(cardBack).toHaveClass('bg-secondary');
+      const backImage = within(screen.getByTestId('card-back')).getByTestId('next-image');
+      expect(backImage).toHaveAttribute('src', CARD_BACK_IMAGE_SRC);
+    });
+
+    it('should render the card back image as decorative (empty alt)', () => {
+      render(<TarotCard isRevealed={false} />);
+
+      const backImage = within(screen.getByTestId('card-back')).getByTestId('next-image');
+      expect(backImage).toHaveAttribute('alt', '');
+    });
+
+    it('should cover the card back without deforming the image', () => {
+      render(<TarotCard isRevealed={false} />);
+
+      const backImage = within(screen.getByTestId('card-back')).getByTestId('next-image');
+      expect(backImage).toHaveClass('object-cover');
+    });
+
+    it('should show the same card back image regardless of size', () => {
+      const { rerender } = render(<TarotCard isRevealed={false} size="sm" />);
+      expect(within(screen.getByTestId('card-back')).getByTestId('next-image')).toHaveAttribute(
+        'src',
+        CARD_BACK_IMAGE_SRC
+      );
+
+      rerender(<TarotCard isRevealed={false} size="lg" />);
+      expect(within(screen.getByTestId('card-back')).getByTestId('next-image')).toHaveAttribute(
+        'src',
+        CARD_BACK_IMAGE_SRC
+      );
+    });
+
+    it('should keep the card back image when a card is provided but not revealed', () => {
+      render(<TarotCard card={mockCard} isRevealed={false} />);
+
+      const backImage = within(screen.getByTestId('card-back')).getByTestId('next-image');
+      expect(backImage).toHaveAttribute('src', CARD_BACK_IMAGE_SRC);
     });
   });
 
