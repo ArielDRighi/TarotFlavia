@@ -323,7 +323,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-001 | Migrar Mercado Pago a producción (credenciales, webhook, env) | Ops/Config | 🔴 Crítica | 1 pt |
 | T-PROD-002 | Fix header móvil: logo en el flujo flex (sin overlap con auth) | Frontend | 🟠 Alta | 1 pt |
 | T-PROD-003 | Sincronizar cartas HQ en el entorno deployado (migración + assets) | Ops | 🟠 Alta | 1 pt |
-| T-PROD-004 | Email dedicado del dominio en Porkbun + SMTP real en el backend | Ops/Infra | 🟠 Alta | 1 pt |
+| T-PROD-004 | Email del dominio: buzón humano en Porkbun + envío transaccional por Resend (SMTP) | Ops/Infra | 🟠 Alta | 1 pt |
 | T-PROD-005 | Dorso final de las cartas (imagen WebP en lugar del patrón CSS) | Frontend | 🟡 Media | 1.5 pts |
 | T-PROD-006 | Mezcla de cartas server-side (backend: shuffle autoritativo con crypto) | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-007 | Mezcla de cartas: adaptar el frontend al nuevo contrato | Frontend | 🔴 Crítica | 2 pts |
@@ -331,6 +331,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-009 | AdSense fase 2: alta de cuenta, ads.txt, consentimiento y colocación en páginas | Full-stack | 🟡 Media | 3 pts |
 | T-PROD-010 | ✅ Selector de horóscopo: carrusel móvil con nombres completos (occidental + chino) | Frontend | 🟠 Alta | 2 pts |
 | T-PROD-011 | ✅ Ocultar y bloquear notificaciones tras feature flag + sincronizar el enum | Frontend | 🟠 Alta | 1.5 pts |
+| T-PROD-012 | Fail-fast de SMTP en producción (hoy el fallback a jsonTransport es silencioso) + Reply-To | Backend | 🟠 Alta | 1 pt |
 
 ---
 
@@ -466,36 +467,134 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 **Prioridad:** 🟠 Alta
 **Estimación:** 1 punto
-**Dependencias:** acceso a la cuenta de Porkbun donde está el dominio
+**Dependencias:** acceso a la cuenta de Porkbun donde está `auguriatarot.com`
 **Cubre Hallazgo:** PROD-004
 **Tipo:** Ops/Infra (sin PR)
 
+> ### ⚠️ Arquitectura revisada — el plan original de esta tarea era inviable
+>
+> El plan original (mandar los emails del backend por el SMTP de la casilla Porkbun) **lo prohíbe el
+> propio Porkbun**, en el aviso *Bulk / Transactional Email Notice* de su panel de email:
+>
+> > *"Porkbun's email service is **not intended for the sending of bulk or automated transactional
+> > email**."*
+>
+> No es solo entregabilidad: es su política de uso. Un buzón de registrar no es una plataforma de envío
+> (IP compartida con otros clientes, límites pensados para una persona escribiendo mails, y **cero
+> visibilidad de bounces/quejas** — el día que un reset de contraseña no llega, no hay log que mirar).
+>
+> **Arquitectura elegida: Porkbun recibe, Resend envía.**
+>
+> | Pieza | Dirección | Proveedor |
+> |---|---|---|
+> | Buzón humano (consultas de clientes; se lee y se responde) | `consultas@auguriatarot.com` | Casilla paga de Porkbun (IMAP real) |
+> | Remitente transaccional del backend | `noreply@auguriatarot.com` | Resend, vía su **relay SMTP** |
+> | Alias (`hola@`, `pagos@`, `flavia@`) | → reenvían a `consultas@` | Forwarding gratis de Porkbun (20 incluidos) |
+>
+> **Sigue siendo cero código.** El `EmailModule` ya usa `@nestjs-modules/mailer` sobre SMTP puro
+> ([email.module.ts](../backend/tarot-app/src/modules/email/email.module.ts)), y Resend expone un relay
+> SMTP — entra en las mismas 5 variables (`SMTP_HOST/PORT/USER/PASS`, `EMAIL_FROM`) sin tocar el módulo.
+> Resend da DKIM propio, log por envío y webhooks de bounce, y su free tier (3.000 emails/mes, 100/día,
+> 1 dominio) cubre de sobra el volumen del MVP.
+>
+> *(Porkbun sugiere Mailchimp en ese mismo aviso: no aplica — Mailchimp es marketing masivo, no el
+> transaccional de una app.)*
+>
+> ### ⚠️ Mito a no repetir: **no** hay que fusionar dos SPF en uno
+>
+> Resend **no toca el SPF ni el MX de la raíz**: pone su SPF y su MX de feedback en el subdominio
+> `send.auguriatarot.com` (su dominio Envelope-From), y su DKIM en `resend._domainkey.auguriatarot.com`,
+> con selector propio. Los MX/SPF/DKIM de Porkbun quedan intactos en la raíz. Conviven sin pisarse.
+> **Lo único compartido es el DMARC** (uno solo, en la raíz).
+
+#### 💰 Costo
+
+| Ítem | Costo |
+|------|-------|
+| Casilla `consultas@auguriatarot.com` | **US$3/mes/inbox, billed yearly = US$36/año** (verificado en el panel; **el trial de 15 días que menciona su KB no se ofreció** para este dominio) |
+| Alias de forwarding (`hola@`, `pagos@`, `flavia@`) | **gratis** (20 incluidos; adicionales US$3/año c/u) |
+| Resend | **US$0** (free tier); Pro US$20/mes si se superan 3.000/mes o 100/día |
+
+> El forwarding **solo recibe, no envía**: para *responderle* a un cliente desde una dirección del dominio
+> hace falta la casilla paga. Por eso `consultas@` es casilla y no alias.
+
 #### ✅ Paso a paso
 
-1. **Decidir el esquema de casillas:**
-   - `noreply@<dominio>` → remitente transaccional del backend (obligatoria).
-   - `hola@`/`contacto@<dominio>` → casilla humana (opcional; puede resolverse con el **forwarding gratuito** de Porkbun hacia el Gmail personal, sin costo).
-2. **Comprar el email hosting en Porkbun:** panel de Porkbun → dominio → *Email* → contratar el plan de email hosting (por casilla, con trial; ~US$2-3/mes) para la casilla transaccional. Al estar el dominio en Porkbun, **los registros DNS (MX, SPF, DKIM) se configuran automáticamente** al activar el servicio.
-3. **Agregar DMARC** (Porkbun no siempre lo crea solo): registro TXT `_dmarc.<dominio>` → `v=DMARC1; p=quarantine; rua=mailto:<casilla-admin>` (empezar con `p=none` si se prefiere monitorear primero).
-4. **Obtener credenciales SMTP** desde el panel de email de Porkbun (host tipo `smtp.porkbun.com`, puerto 587 STARTTLS o 465 SSL — confirmar los valores exactos que muestre el panel) y configurar el backend productivo:
-   ```bash
-   SMTP_HOST=<host-del-panel-porkbun>
-   SMTP_PORT=587
-   SMTP_USER=noreply@<dominio>
-   SMTP_PASS=<password-de-la-casilla>
-   EMAIL_FROM=noreply@<dominio>
-   ```
-5. **Verificación:**
-   - [ ] Reiniciar el backend y confirmar que el warning de "modo de prueba (jsonTransport)" ya no aparece.
-   - [ ] Registro de un usuario de prueba → llega el email de bienvenida.
-   - [ ] Reset de contraseña → llega el link con `FRONTEND_URL` productivo.
-   - [ ] Validar SPF/DKIM/DMARC con [mail-tester.com](https://www.mail-tester.com) (apuntar a score ≥ 9/10) y revisar que Gmail no lo mande a spam.
-6. **Nota de escala:** el SMTP de una casilla Porkbun es suficiente para volumen transaccional bajo (MVP). Si el volumen crece o aparecen problemas de entregabilidad, migrar a un servicio transaccional (Resend/SES/SendGrid) — solo cambian las 4 variables `SMTP_*`, sin tocar código.
+**Fase 1 — Porkbun: el buzón humano (completarla y verificarla ANTES de tocar Resend)**
+
+1. [ ] Panel → *Domain Management* → `auguriatarot.com` → icono de sobre (columna **EMAIL**).
+2. [ ] Bloque **Porkbun Email Hosting** → *Add Hosted Email Account* → **Add to Cart** → checkout (US$36/año).
+3. [ ] Con la compra hecha, crear la casilla `consultas` con su password. **Anotar ese password aparte**: es el de la *casilla*, no el de la cuenta Porkbun.
+4. [ ] Porkbun agrega sus **MX** en la raíz al activar el servicio. En el panel de email, habilitar **DKIM y DMARC** si no vienen encendidos. Si el DNS quedara inconsistente, el panel tiene un botón **Fix DNS**.
+5. [ ] Verificar que **recibe**: mandar un mail desde Gmail a `consultas@auguriatarot.com` y abrirlo en el **webmail** de Porkbun.
+6. [ ] Verificar que **envía**: responder desde el webmail y confirmar que llega a Gmail (anotar si cae en spam).
+7. [ ] Crear los alias de forwarding gratis: `hola@` y `pagos@` (notificaciones de MercadoPago/Railway) → `consultas@`; `flavia@` → el mail de Flavia. **No** crear un forward para `consultas@` (chocaría con la casilla).
+
+> **⚠️ Gmail web ya no puede leer la casilla.** Google discontinuó el fetch por POP3 en Gmail.com en
+> **enero de 2026** (aviso en el panel de Porkbun). Para leer `consultas@`: el webmail de Porkbun, un
+> cliente IMAP de escritorio (Thunderbird) o la app móvil de Gmail. **Sí** se puede seguir *enviando* como
+> `consultas@` desde Gmail con "Enviar como" + SMTP.
+>
+> Settings ([KB](https://kb.porkbun.com/article/146-email-client-configuration-settings)): IMAP
+> `imap.porkbun.com:993` (SSL/TLS) · SMTP `smtp.porkbun.com:587` (STARTTLS) o `:465` (TLS implícito) ·
+> usuario = la dirección completa.
+
+**Fase 2 — Resend: el remitente transaccional**
+
+8. [ ] Crear cuenta en [resend.com](https://resend.com) → *Domains* → **Add Domain** → `auguriatarot.com` (raíz), eligiendo la región de envío más cercana.
+9. [ ] Resend muestra los registros a cargar. Copiarlos **del panel, en el momento** (varían por región y cuenta — **no** copiarlos de esta doc). La forma que tienen es:
+
+   | Tipo | Host | Valor | Nota |
+   |------|------|-------|------|
+   | `MX` | `send` | `feedback-smtp.<región>.amazonses.com` (prio 10) | **No es el MX de la raíz.** No pisa a Porkbun. |
+   | `TXT` | `send` | `v=spf1 include:amazonses.com ~all` | SPF del Envelope-From, **separado** del SPF raíz de Porkbun. |
+   | `TXT` | `resend._domainkey` | clave pública DKIM | Selector propio → no choca con el DKIM de Porkbun. |
+
+10. [ ] Cargarlos en Porkbun → *DNS Records*. **No tocar los MX ni el TXT de SPF de la raíz.**
+11. [ ] Esperar propagación y darle **Verify** en Resend hasta que el dominio quede `Verified`.
+12. [ ] Crear una **API Key** en Resend (*API Keys*, con permiso de envío). Es el `SMTP_PASS`.
+
+**Fase 3 — DMARC (uno solo, compartido)**
+
+13. [ ] En Porkbun → *DNS Records*, dejar **un único** TXT en `_dmarc` (si el paso 4 ya creó uno, **editarlo**, no agregar otro):
+    ```
+    v=DMARC1; p=none; rua=mailto:consultas@auguriatarot.com
+    ```
+    Arrancar en `p=none` (monitorear sin bloquear). Cuando los reportes confirmen que Porkbun y Resend autentican bien, subirlo a `p=quarantine`.
+
+**Fase 4 — Backend productivo (Railway)**
+
+14. [ ] Cargar las variables (host/puerto/usuario de Resend son **fijos**; ver [docs de SMTP de Resend](https://resend.com/docs/send-with-smtp)):
+    ```bash
+    SMTP_HOST=smtp.resend.com
+    SMTP_PORT=587                          # STARTTLS. El módulo hace secure:true solo si el puerto es 465.
+    SMTP_USER=resend                       # literal, NO es un email
+    SMTP_PASS=re_xxxxxxxxxxxx              # la API Key de Resend
+    EMAIL_FROM=noreply@auguriatarot.com    # el dominio debe estar Verified en Resend
+    FRONTEND_URL=https://<frontend-productivo>   # los links de reset salen de acá
+    ```
+15. [ ] Redeploy del backend.
+
+**Fase 5 — Verificación**
+
+16. [ ] En los logs de arranque, el warning `⚠️ Email configuration is incomplete... TEST MODE with jsonTransport` **ya no aparece**.
+17. [ ] Registrar un usuario de prueba → llega el email de bienvenida a Gmail, **a bandeja de entrada**.
+18. [ ] Pedir un reset de contraseña → llega el mail y el link apunta al `FRONTEND_URL` productivo.
+19. [ ] Dashboard de Resend → *Emails*: ambos envíos aparecen como `Delivered` (esta visibilidad es justamente lo que el SMTP de Porkbun no daba).
+20. [ ] Enviar un mail a [mail-tester.com](https://www.mail-tester.com) desde la app → score ≥ 9/10, con SPF, DKIM y DMARC en verde.
+21. [ ] Repetir el mail-tester **desde el webmail de Porkbun** (`consultas@`): valida la otra mitad del DNS, que es independiente.
 
 #### 🎯 Criterios de Aceptación
 
-- Emails transaccionales reales salen desde la casilla del dominio y llegan a bandeja de entrada (no spam) en Gmail/Outlook.
-- El módulo de email del backend deja de operar en jsonTransport en producción.
+- [ ] Los emails transaccionales salen de `noreply@auguriatarot.com` vía Resend y llegan a **bandeja de entrada** (no spam) en Gmail/Outlook.
+- [ ] El módulo de email del backend deja de operar en `jsonTransport` en producción.
+- [ ] `consultas@auguriatarot.com` recibe **y responde** correctamente (buzón humano operativo).
+- [ ] SPF, DKIM y DMARC pasan en verde para **ambos** caminos (Resend y Porkbun), con un único registro DMARC.
+
+#### 🔗 Tareas derivadas
+
+- **T-PROD-012** (fail-fast de SMTP en producción): el fallback silencioso a `jsonTransport` hace que un typo en una variable de Railway deje a todos los usuarios sin reset de contraseña, con la app aparentemente sana. Conviene mergearla **antes** del cutover de esta tarea.
+- **Reply-To:** hoy `EmailModule` no setea `replyTo`, así que si un cliente le responde a `noreply@` el mail se pierde. Debe apuntar a `consultas@auguriatarot.com` (incluido en T-PROD-012).
 
 ---
 
@@ -771,13 +870,46 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 ---
 
+### T-PROD-012: Fail-Fast de SMTP en Producción + Reply-To
+
+**Prioridad:** 🟠 Alta
+**Estimación:** 1 punto
+**Dependencias:** ninguna (pero cobra sentido junto con T-PROD-004)
+**Origen:** hallazgo al revisar la arquitectura de email de T-PROD-004
+**Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`)
+
+#### 📋 Problema
+
+[email.module.ts:21-36](../backend/tarot-app/src/modules/email/email.module.ts#L21-L36) hace **fallback silencioso** a `jsonTransport` si falta **cualquiera** de las 5 variables (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`). En producción es un modo de fallo peligroso: un typo en una variable de Railway y la app **arranca perfecta**, loguea un `logger.warn` que nadie lee, y **ningún usuario recibe su reset de contraseña**. El bug es invisible hasta que un cliente reclama.
+
+Las 5 variables están declaradas `@IsOptional()` en [env.validation.ts:217-240](../backend/tarot-app/src/config/env.validation.ts#L217-L240), así que la validación de entorno tampoco lo detiene.
+
+Segundo problema, menor: el módulo no setea `replyTo`. Si un cliente le responde a `noreply@auguriatarot.com` (y muchos lo hacen), el mail se pierde.
+
+#### ✅ Tareas específicas
+
+- [ ] En el `useFactory` de `MailerModule`: si `NODE_ENV === 'production'` y la config SMTP está incompleta → **lanzar** (fail-fast al arranque) en lugar de caer a `jsonTransport`. Fuera de producción, mantener el fallback + warning actual (los tests y el dev local dependen de él).
+- [ ] Agregar `defaults: { from: emailFrom, replyTo: EMAIL_REPLY_TO ?? emailFrom }` y declarar `EMAIL_REPLY_TO` (opcional) en `env.validation.ts` con el mismo `@Matches` de email que `EMAIL_FROM`. Valor productivo: `consultas@auguriatarot.com`.
+- [ ] Mover el bloque `template` fuera del `if`: hoy la rama de `jsonTransport` **no** configura el `HandlebarsAdapter`, así que el modo de prueba no ejercita el render real de los `.hbs` — un template roto no se detecta hasta producción.
+- [ ] Tests: (a) en `production` con SMTP incompleto → el factory lanza; (b) en `development` con SMTP incompleto → devuelve `jsonTransport` sin lanzar; (c) con SMTP completo → transport real y `replyTo` presente en `defaults`.
+- [ ] Actualizar `.env.example` y `backend/tarot-app/docs/EMAIL_SETUP.md` (hoy documenta Mailtrap y dice que las variables de email son opcionales — quedó desactualizado y contradice el fail-fast).
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] En `NODE_ENV=production`, arrancar sin SMTP completo **falla el boot** con un mensaje claro, en vez de simular silenciosamente que los emails se envían.
+- [ ] En dev/test, el comportamiento actual (jsonTransport + warning) se conserva intacto.
+- [ ] Las respuestas a `noreply@` aterrizan en el buzón humano.
+- [ ] Ciclo de calidad backend completo pasa (format, lint, test:cov ≥ 80%, build, validate-architecture).
+
+---
+
 ## ORDEN DE EJECUCIÓN SUGERIDO
 
 1. **T-PROD-002** (header móvil) — bug visible, fix acotado, sin dependencias.
 2. **T-PROD-006 → T-PROD-007** (mezcla de cartas) — integridad del producto core; coordinar ambos PRs para mergear juntos o con feature flag.
 3. **T-PROD-005** (dorso final) — se apoya en los mismos componentes que T-PROD-007; conviene después para evitar conflictos.
 4. **T-PROD-003** (deploy cartas HQ) — operativo, puede ir en paralelo a lo anterior.
-5. **T-PROD-004** (email Porkbun) — operativo, desbloquea remitente para MP y AdSense.
+5. **T-PROD-004** (email del dominio: Porkbun + Resend) — operativo, desbloquea el remitente para MP y AdSense. Conviene mergear **T-PROD-012** antes del cutover: así, si una variable SMTP queda mal cargada en Railway, el boot falla en vez de dejar los emails silenciosamente muertos.
 6. **T-PROD-001** (MP producción) — al final de la preparación, cuando dominio + email estén listos; es el gate de cobros reales.
 7. **T-PROD-008 → T-PROD-009** (AdSense) — la fase 1 puede desarrollarse en cualquier momento; la fase 2 requiere el sitio productivo estable (Google revisa el dominio), así que va última.
 8. **T-PROD-010 + T-PROD-011** (segunda ronda: selector móvil + notificaciones) — bugs visibles, fixes acotados, sin dependencias entre sí ni con el resto. Se desarrollan juntos en una sola rama/PR por ser ambos frontend y de la misma ronda de navegación.
