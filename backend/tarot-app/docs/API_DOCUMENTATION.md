@@ -659,13 +659,23 @@ POST /api/readings
 Authorization: Bearer <token>
 ```
 
+> ⚠️ **Cambio de contrato (T-PROD-006 · mezcla server-side):**
+> El cliente **ya NO envía la identidad de las cartas** (`cardIds`) ni su
+> orientación (`cardPositions`). La **mezcla, el reparto y la orientación
+> (invertida/derecha) se deciden exclusivamente en el backend** con
+> aleatoriedad criptográfica. El número de cartas y sus posiciones se derivan de
+> la tirada (`spread.cardCount` / `spread.positions`). Manipular el POST no
+> permite predecir ni forzar qué carta se recibe. La identidad y orientación
+> asignadas vuelven en la **respuesta** (`cards` + `cardPositions`) para que el
+> frontend las revele.
+
 **Body (con pregunta predefinida):**
 
 ```json
 {
+  "deckId": 1,
   "spreadId": 1,
   "predefinedQuestionId": 5,
-  "tarotistaId": 1,
   "useAI": false
 }
 ```
@@ -674,23 +684,27 @@ Authorization: Bearer <token>
 
 ```json
 {
+  "deckId": 1,
   "spreadId": 2,
   "customQuestion": "¿Qué me depara el futuro en mi carrera?",
-  "tarotistaId": 1,
   "useAI": true
 }
 ```
 
 **Campos del Request:**
 
-- `spreadId` (number, requerido): ID de la tirada a usar
+- `deckId` (number, requerido): ID del mazo del que se reparten las cartas
+- `spreadId` (number, requerido): ID de la tirada a usar (define cuántas cartas y sus posiciones)
 - `predefinedQuestionId` (number, opcional): ID de pregunta predefinida
 - `customQuestion` (string, opcional): Pregunta personalizada (requiere plan Premium)
-- `tarotistaId` (number, requerido): ID del tarotista
+- `categoryId` (number, opcional): Categoría elegida (usuarios FREE con interpretación pre-escrita)
 - `useAI` (boolean, opcional): Si se debe usar IA para generar la lectura
   - `true`: Genera interpretación con IA (requiere plan Premium)
   - `false` o `undefined`: Lectura sin IA (disponible para todos los planes)
-  - **Nota:** Este campo controla el acceso a funciones de IA. TASK-005 implementará la lógica de generación dual.
+- ~~`cardIds`~~ / ~~`cardPositions`~~: **eliminados** en T-PROD-006. Ya no se aceptan; la identidad y orientación las decide el backend.
+
+> **Pool por plan:** los usuarios FREE/ANÓNIMO solo pueden recibir Arcanos
+> Mayores; los usuarios PREMIUM reciben cartas del mazo completo.
 
 **Response: `201 Created`**
 

@@ -1,9 +1,7 @@
 import {
-  IsArray,
   IsString,
   IsOptional,
   IsBoolean,
-  ValidateNested,
   IsInt,
   IsNotEmpty,
   MaxLength,
@@ -15,7 +13,6 @@ import {
   MinLength,
   IsPositive,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsExclusiveWithConstraint } from './validators/is-exclusive-with.validator';
 import { SanitizeHtml } from '../../../../common/decorators/sanitize.decorator';
@@ -52,26 +49,6 @@ export class HasQuestionConstraint implements ValidatorConstraintInterface {
   defaultMessage(): string {
     return 'Debes proporcionar una pregunta predefinida o una pregunta personalizada cuando se solicita una interpretación personalizada';
   }
-}
-
-class CardPositionDto {
-  @ApiProperty({ example: 1, description: 'ID de la carta' })
-  @IsInt()
-  cardId: number;
-
-  @ApiProperty({
-    example: 'pasado',
-    description: 'Posición de la carta en la lectura',
-  })
-  @IsString()
-  position: string;
-
-  @ApiProperty({
-    example: false,
-    description: 'Si la carta está invertida o no',
-  })
-  @IsBoolean()
-  isReversed: boolean;
 }
 
 export class CreateReadingDto {
@@ -135,22 +112,11 @@ export class CreateReadingDto {
   @IsNotEmpty({ message: 'El ID de la tirada es requerido' })
   spreadId: number;
 
-  @ApiProperty({
-    type: [Number],
-    example: [1, 5, 9],
-    description: 'IDs de las cartas seleccionadas',
-  })
-  @IsArray()
-  @IsNotEmpty({ each: true })
-  cardIds: number[];
-
-  @ApiProperty({
-    type: [CardPositionDto],
-    description: 'Posición y orientación de cada carta',
-  })
-  @ValidateNested({ each: true })
-  @Type(() => CardPositionDto)
-  cardPositions: CardPositionDto[];
+  // NOTA (T-PROD-006): el cliente ya NO envía la identidad de las cartas
+  // (`cardIds`) ni su orientación (`cardPositions`). La mezcla, el reparto y la
+  // orientación (isReversed) se deciden EXCLUSIVAMENTE en el backend con
+  // aleatoriedad criptográfica (`DeckShufflerService`). El número de cartas y
+  // sus posiciones se derivan de la tirada (`spread.cardCount` / `spread.positions`).
 
   /**
    * Campo para controlar el acceso a funcionalidades con IA (TASK-005)

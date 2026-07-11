@@ -423,10 +423,11 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 **Dependencias:** ninguna (pero coordinar el merge con T-PROD-007)
 **Cubre Hallazgo:** PROD-006
 **Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`)
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] **Crear `DeckShufflerService`** (capa domain/application del módulo readings) con Fisher-Yates sobre `crypto.randomInt` (patrón ya presente en `reading-share.service.ts`; NO usar `Math.random` para identidad):
+- [x] **Crear `DeckShufflerService`** (capa domain/application del módulo readings) con Fisher-Yates sobre `crypto.randomInt` (patrón ya presente en `reading-share.service.ts`; NO usar `Math.random` para identidad):
   ```ts
   import { randomInt } from 'crypto';
   function shuffle<T>(arr: T[]): T[] {
@@ -438,12 +439,20 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
     return a;
   }
   ```
-- [ ] **Cambiar el contrato de `POST /readings`:** el cliente deja de enviar la identidad (`cardIds`); envía `spreadId`, `deckId`, la cantidad/posiciones elegidas y (opcional) metadatos de UX. ⚠️ Es un cambio deliberado del contrato — documentarlo en `API_DOCUMENTATION.md` y versionar el DTO (`CreateReadingDto`): eliminar/deprecar `cardIds` y la orientación client-side.
-- [ ] **En [create-reading.use-case.ts](../backend/tarot-app/src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts) (hoy línea 101):** obtener el pool elegible según plan (preservar `validateDeckAccess`: FREE = solo Arcanos Mayores), mezclar con `DeckShufflerService`, tomar `spread.cardCount` cartas y asignarlas a las posiciones.
-- [ ] **Mover `isReversed` al backend** con `crypto` (hoy `Math.random() < 0.3` en el cliente): mantener la probabilidad de negocio (30 %) en una constante.
-- [ ] **Limpiar `random-cards.dto.ts`** (código muerto de la intención original): eliminarlo o reutilizarlo como base del nuevo contrato.
-- [ ] **Tests (TDD):** con RNG mockeado — determinismo bajo seed fija, variabilidad entre lecturas, respeto del pool FREE (nunca sale un Arcano Menor), distribución de `isReversed`, y que `cardIds` enviados por un cliente malicioso son ignorados/rechazados. Modelo a seguir: `daily-reading.service.spec.ts:537` (`selectRandomCard`).
-- [ ] Respuesta del endpoint: debe devolver las cartas asignadas (identidad + orientación + posición) para que el frontend las revele.
+- [x] **Cambiar el contrato de `POST /readings`:** el cliente deja de enviar la identidad (`cardIds`); envía `spreadId`, `deckId`, la cantidad/posiciones elegidas y (opcional) metadatos de UX. ⚠️ Es un cambio deliberado del contrato — documentarlo en `API_DOCUMENTATION.md` y versionar el DTO (`CreateReadingDto`): eliminar/deprecar `cardIds` y la orientación client-side.
+- [x] **En [create-reading.use-case.ts](../backend/tarot-app/src/modules/tarot/readings/application/use-cases/create-reading.use-case.ts) (hoy línea 101):** obtener el pool elegible según plan (preservar `validateDeckAccess`: FREE = solo Arcanos Mayores), mezclar con `DeckShufflerService`, tomar `spread.cardCount` cartas y asignarlas a las posiciones.
+- [x] **Mover `isReversed` al backend** con `crypto` (hoy `Math.random() < 0.3` en el cliente): mantener la probabilidad de negocio (30 %) en una constante.
+- [x] **Limpiar `random-cards.dto.ts`** (código muerto de la intención original): eliminarlo o reutilizarlo como base del nuevo contrato.
+- [x] **Tests (TDD):** con RNG mockeado — determinismo bajo seed fija, variabilidad entre lecturas, respeto del pool FREE (nunca sale un Arcano Menor), distribución de `isReversed`, y que `cardIds` enviados por un cliente malicioso son ignorados/rechazados. Modelo a seguir: `daily-reading.service.spec.ts:537` (`selectRandomCard`).
+- [x] Respuesta del endpoint: debe devolver las cartas asignadas (identidad + orientación + posición) para que el frontend las revele.
+
+> **Notas de implementación:** El pool se obtiene con `cardsService.findByDeck(deckId)`
+> filtrando `category === 'arcanos_mayores'` para FREE/ANÓNIMO (PREMIUM = mazo
+> completo). `DeckShufflerService.decideReversed()` usa `crypto.randomInt(100)`
+> contra `REVERSED_PROBABILITY = 0.3`. La orientación y la posición se construyen
+> en el use-case (`spread.positions[i].name`) y se persisten en `cardPositions`.
+> Guard adicional: si el pool < `spread.cardCount` se lanza `NotFoundException`.
+> ⚠️ **Merge coordinado con T-PROD-007** (contrato roto hasta que el front se adapte).
 
 #### 🎯 Criterios de Aceptación
 

@@ -3,6 +3,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CreateReadingUseCase } from './create-reading.use-case';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
 import { ReadingValidatorService } from '../services/reading-validator.service';
+import { DeckShufflerService } from '../services/deck-shuffler.service';
 import { InterpretationsService } from '../../../interpretations/interpretations.service';
 import { CardsService } from '../../../cards/cards.service';
 import { SpreadsService } from '../../../spreads/spreads.service';
@@ -23,13 +24,13 @@ describe('CreateReadingUseCase', () => {
   let useCase: CreateReadingUseCase;
   let readingRepo: jest.Mocked<IReadingRepository>;
   let validator: jest.Mocked<ReadingValidatorService>;
+  let deckShuffler: jest.Mocked<DeckShufflerService>;
   let interpretationsService: jest.Mocked<InterpretationsService>;
   let cardsService: jest.Mocked<CardsService>;
   let spreadsService: jest.Mocked<SpreadsService>;
   let decksService: jest.Mocked<DecksService>;
   let predefinedQuestionsService: jest.Mocked<PredefinedQuestionsService>;
   let subscriptionsService: jest.Mocked<SubscriptionsService>;
-  let _revenueCalculationService: jest.Mocked<RevenueCalculationService>;
   let cardFreeInterpretationService: jest.Mocked<CardFreeInterpretationService>;
 
   const mockUser: User = {
@@ -38,28 +39,52 @@ describe('CreateReadingUseCase', () => {
     plan: UserPlan.PREMIUM,
   } as User;
 
+  const mockFreeUser: User = {
+    id: 200,
+    email: 'free@example.com',
+    plan: UserPlan.FREE,
+  } as User;
+
   const mockDeck = { id: 1, name: 'Test Deck' } as unknown as TarotDeck;
+
   const mockSpread = {
     id: 1,
     name: 'Test Spread',
     requiredPlan: UserPlan.FREE,
+    cardCount: 3,
+    positions: [
+      { name: 'Pasado', description: 'Pasado' },
+      { name: 'Presente', description: 'Presente' },
+      { name: 'Futuro', description: 'Futuro' },
+    ],
   } as unknown as TarotSpread;
+
+  // Cartas que el backend "reparte" tras mezclar (identidad decidida server-side)
   const mockCards = [
-    { id: 1, name: 'Card 1' },
-    { id: 2, name: 'Card 2' },
-    { id: 3, name: 'Card 3' },
+    { id: 1, name: 'Card 1', category: 'arcanos_mayores' },
+    { id: 2, name: 'Card 2', category: 'arcanos_mayores' },
+    { id: 3, name: 'Card 3', category: 'arcanos_mayores' },
   ] as unknown as TarotCard[];
 
+  // Posiciones esperadas: cartas sorteadas asignadas a las posiciones del spread,
+  // con isReversed=false (decideReversed mockeado a false por defecto).
+  const expectedCardPositions = [
+    { cardId: 1, position: 'Pasado', isReversed: false },
+    { cardId: 2, position: 'Presente', isReversed: false },
+    { cardId: 3, position: 'Futuro', isReversed: false },
+  ];
+
+  // Nuevo contrato: el cliente ya NO envía la identidad de las cartas.
   const mockDto: CreateReadingDto = {
     deckId: 1,
     spreadId: 1,
-    cardIds: [1, 2, 3],
-    cardPositions: [
-      { cardId: 1, position: 'past', isReversed: false },
-      { cardId: 2, position: 'present', isReversed: false },
-      { cardId: 3, position: 'future', isReversed: true },
-    ],
     customQuestion: 'What is my future?',
+    useAI: false,
+  };
+
+  const mockDtoFree: CreateReadingDto = {
+    deckId: 1,
+    spreadId: 1,
     useAI: false,
   };
 
@@ -79,7 +104,7 @@ describe('CreateReadingUseCase', () => {
       tarotistaId: 1,
       category: null,
       cards: mockCards,
-      cardPositions: mockDto.cardPositions,
+      cardPositions: expectedCardPositions,
       interpretation: null,
       freeInterpretations: null,
       createdAt: new Date(),
@@ -114,6 +139,14 @@ describe('CreateReadingUseCase', () => {
           },
         },
         {
+          provide: DeckShufflerService,
+          useValue: {
+            shuffle: jest.fn(),
+            draw: jest.fn(),
+            decideReversed: jest.fn(),
+          },
+        },
+        {
           provide: InterpretationsService,
           useValue: {
             generateInterpretation: jest.fn(),
@@ -123,6 +156,7 @@ describe('CreateReadingUseCase', () => {
           provide: CardsService,
           useValue: {
             findByIds: jest.fn(),
+            findByDeck: jest.fn(),
           },
         },
         {
@@ -178,6 +212,7 @@ describe('CreateReadingUseCase', () => {
     useCase = module.get<CreateReadingUseCase>(CreateReadingUseCase);
     readingRepo = module.get('IReadingRepository');
     validator = module.get(ReadingValidatorService);
+    deckShuffler = module.get(DeckShufflerService);
     interpretationsService = module.get(InterpretationsService);
     cardsService = module.get(CardsService);
     spreadsService = module.get(SpreadsService);
@@ -185,6 +220,11 @@ describe('CreateReadingUseCase', () => {
     predefinedQuestionsService = module.get(PredefinedQuestionsService);
     subscriptionsService = module.get(SubscriptionsService);
     cardFreeInterpretationService = module.get(CardFreeInterpretationService);
+
+    // Defaults del sorteo server-side: pool completo, reparte mockCards, orientación normal.
+    cardsService.findByDeck.mockResolvedValue(mockCards);
+    deckShuffler.draw.mockReturnValue(mockCards);
+    deckShuffler.decideReversed.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -197,7 +237,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
 
       const result = await useCase.execute(mockUser, mockDto);
@@ -208,7 +247,11 @@ describe('CreateReadingUseCase', () => {
       ).toHaveBeenCalledWith(mockUser.id);
       expect(decksService.findDeckById).toHaveBeenCalledWith(1);
       expect(spreadsService.findById).toHaveBeenCalledWith(1);
-      expect(cardsService.findByIds).toHaveBeenCalledWith([1, 2, 3]);
+      expect(cardsService.findByDeck).toHaveBeenCalledWith(1);
+      expect(deckShuffler.draw).toHaveBeenCalledWith(
+        mockCards,
+        mockSpread.cardCount,
+      );
       expect(readingRepo.create).toHaveBeenCalledWith({
         predefinedQuestionId: null,
         customQuestion: mockDto.customQuestion,
@@ -219,7 +262,7 @@ describe('CreateReadingUseCase', () => {
         spreadName: 'Test Spread',
         deck: mockDeck,
         cards: mockCards,
-        cardPositions: mockDto.cardPositions,
+        cardPositions: expectedCardPositions,
         interpretation: null,
       });
       expect(result).toEqual(mockReading);
@@ -241,7 +284,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
 
       const result = await useCase.execute(mockUser, dtoWithPredefined);
@@ -256,7 +298,7 @@ describe('CreateReadingUseCase', () => {
         spreadName: 'Test Spread',
         deck: mockDeck,
         cards: mockCards,
-        cardPositions: mockDto.cardPositions,
+        cardPositions: expectedCardPositions,
         interpretation: null,
       });
       expect(result).toEqual(mockReading);
@@ -287,7 +329,7 @@ describe('CreateReadingUseCase', () => {
       await expect(useCase.execute(mockUser, mockDto)).rejects.toThrow(
         'Spread with ID 1 not found',
       );
-      expect(cardsService.findByIds).not.toHaveBeenCalled();
+      expect(cardsService.findByDeck).not.toHaveBeenCalled();
       expect(readingRepo.create).not.toHaveBeenCalled();
     });
 
@@ -302,27 +344,167 @@ describe('CreateReadingUseCase', () => {
       expect(decksService.findDeckById).not.toHaveBeenCalled();
     });
 
-    it('should propagate errors from cardsService', async () => {
-      validator.validateUser.mockResolvedValue(mockUser);
-      decksService.findDeckById.mockResolvedValue(mockDeck);
-      spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockRejectedValue(new Error('Cards not found'));
-
-      await expect(useCase.execute(mockUser, mockDto)).rejects.toThrow(
-        'Cards not found',
-      );
-      expect(readingRepo.create).not.toHaveBeenCalled();
-    });
-
     it('should propagate errors from repository create', async () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockRejectedValue(new Error('Database error'));
 
       await expect(useCase.execute(mockUser, mockDto)).rejects.toThrow(
         'Database error',
+      );
+    });
+  });
+
+  describe('mezcla server-side (T-PROD-006)', () => {
+    it('reparte cartas mezcladas por el backend, no las que envía el cliente', async () => {
+      // Un cliente malicioso inyecta cardIds; el contrato ya no los reconoce.
+      const maliciousDto = {
+        ...mockDto,
+        cardIds: [77, 78, 79],
+      } as unknown as CreateReadingDto;
+
+      validator.validateUser.mockResolvedValue(mockUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      readingRepo.create.mockResolvedValue(createMockReading());
+
+      await useCase.execute(mockUser, maliciousDto);
+
+      // Nunca se cargan cartas por id enviado por el cliente.
+      expect(cardsService.findByIds).not.toHaveBeenCalled();
+      // Las cartas persistidas son las sorteadas por el backend (ids 1,2,3).
+      expect(readingRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ cards: mockCards }),
+      );
+    });
+
+    it('asigna la orientación (isReversed) que decide el backend', async () => {
+      deckShuffler.decideReversed
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true);
+
+      validator.validateUser.mockResolvedValue(mockUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      readingRepo.create.mockResolvedValue(createMockReading());
+
+      await useCase.execute(mockUser, mockDto);
+
+      expect(readingRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cardPositions: [
+            { cardId: 1, position: 'Pasado', isReversed: true },
+            { cardId: 2, position: 'Presente', isReversed: false },
+            { cardId: 3, position: 'Futuro', isReversed: true },
+          ],
+        }),
+      );
+    });
+
+    it('vuelve a barajar en cada lectura (variabilidad entre tiradas)', async () => {
+      validator.validateUser.mockResolvedValue(mockUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      readingRepo.create.mockResolvedValue(createMockReading());
+
+      await useCase.execute(mockUser, mockDto);
+      await useCase.execute(mockUser, mockDto);
+
+      expect(deckShuffler.draw).toHaveBeenCalledTimes(2);
+    });
+
+    it('para usuarios FREE solo baraja Arcanos Mayores (nunca un Arcano Menor)', async () => {
+      const mixedPool = [
+        { id: 1, category: 'arcanos_mayores' },
+        { id: 2, category: 'arcanos_mayores' },
+        { id: 3, category: 'arcanos_mayores' },
+        { id: 40, category: 'copas' },
+        { id: 50, category: 'bastos' },
+      ] as unknown as TarotCard[];
+
+      validator.validateUser.mockResolvedValue(mockFreeUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByDeck.mockResolvedValue(mixedPool);
+      deckShuffler.draw.mockReturnValue([
+        mixedPool[0],
+        mixedPool[1],
+        mixedPool[2],
+      ]);
+      readingRepo.create.mockResolvedValue(
+        createMockReading({ user: mockFreeUser }),
+      );
+
+      await useCase.execute(mockFreeUser, mockDtoFree);
+
+      const poolArg = deckShuffler.draw.mock.calls[0][0] as TarotCard[];
+      expect(poolArg).toHaveLength(3);
+      expect(poolArg.every((c) => c.category === 'arcanos_mayores')).toBe(true);
+    });
+
+    it('para usuarios PREMIUM baraja el mazo completo (sin filtrar Arcanos Menores)', async () => {
+      const fullPool = [
+        { id: 1, category: 'arcanos_mayores' },
+        { id: 2, category: 'arcanos_mayores' },
+        { id: 3, category: 'arcanos_mayores' },
+        { id: 40, category: 'copas' },
+        { id: 50, category: 'bastos' },
+      ] as unknown as TarotCard[];
+
+      validator.validateUser.mockResolvedValue(mockUser); // PREMIUM
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(mockSpread);
+      cardsService.findByDeck.mockResolvedValue(fullPool);
+      deckShuffler.draw.mockReturnValue([
+        fullPool[0],
+        fullPool[3],
+        fullPool[4],
+      ]);
+      readingRepo.create.mockResolvedValue(createMockReading());
+
+      await useCase.execute(mockUser, mockDto);
+
+      const poolArg = deckShuffler.draw.mock.calls[0][0] as TarotCard[];
+      expect(poolArg).toHaveLength(fullPool.length);
+    });
+
+    it('lanza error si el pool no alcanza para la cantidad de cartas de la tirada', async () => {
+      validator.validateUser.mockResolvedValue(mockUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue({
+        ...mockSpread,
+        cardCount: 5,
+      } as unknown as TarotSpread);
+      cardsService.findByDeck.mockResolvedValue(mockCards); // solo 3
+
+      await expect(useCase.execute(mockUser, mockDto)).rejects.toThrow();
+      expect(readingRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('usa un nombre de posición por defecto cuando el spread tiene menos posiciones que cartas', async () => {
+      const spreadWithFewerPositions = {
+        ...mockSpread,
+        cardCount: 3,
+        positions: [{ name: 'Pasado', description: 'Pasado' }], // solo 1 posición
+      } as unknown as TarotSpread;
+
+      validator.validateUser.mockResolvedValue(mockUser);
+      decksService.findDeckById.mockResolvedValue(mockDeck);
+      spreadsService.findById.mockResolvedValue(spreadWithFewerPositions);
+      readingRepo.create.mockResolvedValue(createMockReading());
+
+      await useCase.execute(mockUser, mockDto);
+
+      expect(readingRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cardPositions: [
+            { cardId: 1, position: 'Pasado', isReversed: false },
+            { cardId: 2, position: 'Posición 2', isReversed: false },
+            { cardId: 3, position: 'Posición 3', isReversed: false },
+          ],
+        }),
       );
     });
   });
@@ -342,7 +524,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       interpretationsService.generateInterpretation.mockResolvedValue({
         interpretation: 'AI generated interpretation',
@@ -356,7 +537,7 @@ describe('CreateReadingUseCase', () => {
         interpretationsService.generateInterpretation,
       ).toHaveBeenCalledWith(
         mockCards,
-        mockDto.cardPositions,
+        expectedCardPositions,
         mockDto.customQuestion,
         mockSpread,
         undefined,
@@ -392,7 +573,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       predefinedQuestionsService.findOne.mockResolvedValue(
         mockPredefinedQuestion,
@@ -410,7 +590,7 @@ describe('CreateReadingUseCase', () => {
         interpretationsService.generateInterpretation,
       ).toHaveBeenCalledWith(
         mockCards,
-        mockDto.cardPositions,
+        expectedCardPositions,
         'What does the future hold?',
         mockSpread,
         undefined,
@@ -430,7 +610,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       interpretationsService.generateInterpretation.mockResolvedValue({
         interpretation: 'Cached interpretation',
@@ -454,7 +633,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       interpretationsService.generateInterpretation.mockRejectedValue(
         new Error('AI service unavailable'),
@@ -486,7 +664,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       predefinedQuestionsService.findOne.mockResolvedValue(
         null as unknown as PredefinedQuestion,
@@ -495,7 +672,6 @@ describe('CreateReadingUseCase', () => {
 
       const result = await useCase.execute(mockUser, dtoWithPredefined);
 
-      // Should create reading but with fallback interpretation due to NotFoundException
       expect(result.interpretation).toBe(
         'No se pudo generar la interpretación automáticamente. El error ha sido registrado. Por favor, intenta regenerar más tarde.',
       );
@@ -511,7 +687,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       interpretationsService.generateInterpretation.mockResolvedValue({
         interpretation: 'AI generated',
@@ -537,12 +712,10 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
 
         const result = await useCase.execute(mockUser, dtoWithoutAI);
 
-        // No debe llamar a generateInterpretation
         expect(
           interpretationsService.generateInterpretation,
         ).not.toHaveBeenCalled();
@@ -557,7 +730,7 @@ describe('CreateReadingUseCase', () => {
           spreadName: 'Test Spread',
           deck: mockDeck,
           cards: mockCards,
-          cardPositions: mockDto.cardPositions,
+          cardPositions: expectedCardPositions,
           interpretation: null,
         });
       });
@@ -575,14 +748,13 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
 
         const result = await useCase.execute(mockUser, dtoWithoutAI);
 
         expect(result.cards).toEqual(mockCards);
         expect(result.interpretation).toBeNull();
-        expect(cardsService.findByIds).toHaveBeenCalledWith([1, 2, 3]);
+        expect(cardsService.findByDeck).toHaveBeenCalledWith(1);
       });
 
       it('should still increment usage counter when useAI is false', async () => {
@@ -595,12 +767,10 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
 
         await useCase.execute(mockUser, dtoWithoutAI);
 
-        // Verifica que se guardó en DB (contador se incrementa)
         expect(readingRepo.create).toHaveBeenCalled();
       });
     });
@@ -619,7 +789,6 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
         interpretationsService.generateInterpretation.mockResolvedValue({
           interpretation: 'AI-powered interpretation in Markdown format',
@@ -633,7 +802,7 @@ describe('CreateReadingUseCase', () => {
           interpretationsService.generateInterpretation,
         ).toHaveBeenCalledWith(
           mockCards,
-          mockDto.cardPositions,
+          expectedCardPositions,
           mockDto.customQuestion,
           mockSpread,
           undefined,
@@ -658,7 +827,6 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
         interpretationsService.generateInterpretation.mockResolvedValue({
           interpretation: markdownInterpretation,
@@ -684,7 +852,6 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
         interpretationsService.generateInterpretation.mockResolvedValue({
           interpretation: 'AI interpretation',
@@ -710,7 +877,6 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
 
         const result = await useCase.execute(mockUser, dtoUndefinedAI);
@@ -733,7 +899,6 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
 
         await useCase.execute(mockUser, dtoWithoutAI);
@@ -760,7 +925,6 @@ describe('CreateReadingUseCase', () => {
         validator.validateUser.mockResolvedValue(mockUser);
         decksService.findDeckById.mockResolvedValue(mockDeck);
         spreadsService.findById.mockResolvedValue(mockSpread);
-        cardsService.findByIds.mockResolvedValue(mockCards);
         readingRepo.create.mockResolvedValue(mockReading);
         interpretationsService.generateInterpretation.mockResolvedValue({
           interpretation: 'AI interpretation',
@@ -782,25 +946,6 @@ describe('CreateReadingUseCase', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle empty cardIds array', async () => {
-      const dtoWithEmptyCards: CreateReadingDto = {
-        ...mockDto,
-        cardIds: [],
-        cardPositions: [],
-      };
-
-      validator.validateUser.mockResolvedValue(mockUser);
-      decksService.findDeckById.mockResolvedValue(mockDeck);
-      spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue([]);
-      readingRepo.create.mockResolvedValue(createMockReading({ cards: [] }));
-
-      const result = await useCase.execute(mockUser, dtoWithEmptyCards);
-
-      expect(cardsService.findByIds).toHaveBeenCalledWith([]);
-      expect(result.cards).toEqual([]);
-    });
-
     it('should handle null user', async () => {
       await expect(
         useCase.execute(null as unknown as User, mockDto),
@@ -823,7 +968,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
 
       const result = await useCase.execute(mockUser, dtoWithNoQuestion);
@@ -882,7 +1026,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       interpretationsService.generateInterpretation.mockResolvedValue({
         interpretation: 'Generated',
@@ -896,7 +1039,7 @@ describe('CreateReadingUseCase', () => {
         interpretationsService.generateInterpretation,
       ).toHaveBeenCalledWith(
         mockCards,
-        mockDto.cardPositions,
+        expectedCardPositions,
         undefined,
         mockSpread,
         undefined,
@@ -908,21 +1051,9 @@ describe('CreateReadingUseCase', () => {
   });
 
   describe('FREE flow with categoryId (T-FR-B02)', () => {
-    const mockFreeUser: User = {
-      id: 200,
-      email: 'free@example.com',
-      plan: UserPlan.FREE,
-    } as User;
-
-    const mockFreeDto: CreateReadingDto = {
+    const mockFreeDtoWithCategory: CreateReadingDto = {
       deckId: 1,
       spreadId: 1,
-      cardIds: [1, 2, 3],
-      cardPositions: [
-        { cardId: 1, position: 'past', isReversed: false },
-        { cardId: 2, position: 'present', isReversed: false },
-        { cardId: 3, position: 'future', isReversed: true },
-      ],
       customQuestion: '¿Cómo va mi relación?',
       useAI: false,
       categoryId: 1,
@@ -945,14 +1076,13 @@ describe('CreateReadingUseCase', () => {
       validator.validateCategoryAccess.mockResolvedValue(undefined);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       cardFreeInterpretationService.findByCardsAndCategory.mockResolvedValue(
         mockFreeInterpretationsMap,
       );
       readingRepo.update.mockResolvedValue(mockUpdatedReading);
 
-      await useCase.execute(mockFreeUser, mockFreeDto);
+      await useCase.execute(mockFreeUser, mockFreeDtoWithCategory);
 
       expect(validator.validateCategoryAccess).toHaveBeenCalledWith(
         UserPlan.FREE,
@@ -971,18 +1101,20 @@ describe('CreateReadingUseCase', () => {
       validator.validateCategoryAccess.mockResolvedValue(undefined);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       cardFreeInterpretationService.findByCardsAndCategory.mockResolvedValue(
         mockFreeInterpretationsMap,
       );
       readingRepo.update.mockResolvedValue(mockUpdatedReading);
 
-      const result = await useCase.execute(mockFreeUser, mockFreeDto);
+      const result = await useCase.execute(
+        mockFreeUser,
+        mockFreeDtoWithCategory,
+      );
 
       expect(
         cardFreeInterpretationService.findByCardsAndCategory,
-      ).toHaveBeenCalledWith(mockCards, mockFreeDto.cardPositions, 1);
+      ).toHaveBeenCalledWith(mockCards, expectedCardPositions, 1);
       expect(readingRepo.update).toHaveBeenCalledWith(mockReading.id, {
         freeInterpretations: mockFreeInterpretationsMap,
       });
@@ -991,7 +1123,7 @@ describe('CreateReadingUseCase', () => {
 
     it('should NOT call cardFreeInterpretationService when categoryId is absent', async () => {
       const dtoCategoryAbsent: CreateReadingDto = {
-        ...mockFreeDto,
+        ...mockFreeDtoWithCategory,
         categoryId: undefined,
       };
       const mockReading = createMockReading({ user: mockFreeUser });
@@ -999,7 +1131,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockFreeUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
 
       await useCase.execute(mockFreeUser, dtoCategoryAbsent);
@@ -1013,7 +1144,7 @@ describe('CreateReadingUseCase', () => {
 
     it('should NOT call cardFreeInterpretationService when useAI is true (PREMIUM flow takes precedence)', async () => {
       const dtoPremiumAI: CreateReadingDto = {
-        ...mockFreeDto,
+        ...mockFreeDtoWithCategory,
         useAI: true,
         categoryId: 1,
       };
@@ -1026,7 +1157,6 @@ describe('CreateReadingUseCase', () => {
       validator.validateCategoryAccess.mockResolvedValue(undefined);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       interpretationsService.generateInterpretation.mockResolvedValue({
         interpretation: 'AI interpretation',
@@ -1051,11 +1181,10 @@ describe('CreateReadingUseCase', () => {
       );
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
 
-      await expect(useCase.execute(mockFreeUser, mockFreeDto)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        useCase.execute(mockFreeUser, mockFreeDtoWithCategory),
+      ).rejects.toThrow(ForbiddenException);
 
       expect(readingRepo.create).not.toHaveBeenCalled();
     });
@@ -1072,12 +1201,10 @@ describe('CreateReadingUseCase', () => {
       validator.validateCategoryAccess.mockResolvedValue(undefined);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
 
       const result = await useCase.execute(mockUser, premiumDtoWithCategory);
 
-      // PREMIUM nunca debe recibir freeInterpretations aunque envíe categoryId
       expect(
         cardFreeInterpretationService.findByCardsAndCategory,
       ).not.toHaveBeenCalled();
@@ -1100,16 +1227,17 @@ describe('CreateReadingUseCase', () => {
       validator.validateCategoryAccess.mockResolvedValue(undefined);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mockCards);
       readingRepo.create.mockResolvedValue(mockReading);
       cardFreeInterpretationService.findByCardsAndCategory.mockResolvedValue(
         mockFreeInterpretationsMap,
       );
       readingRepo.update.mockResolvedValue(mockUpdatedReading);
 
-      const result = await useCase.execute(mockFreeUser, mockFreeDto);
+      const result = await useCase.execute(
+        mockFreeUser,
+        mockFreeDtoWithCategory,
+      );
 
-      // Only freeInterpretations should be updated — not interpretation
       expect(readingRepo.update).toHaveBeenCalledWith(
         mockReading.id,
         expect.not.objectContaining({ interpretation: expect.anything() }),
@@ -1119,39 +1247,19 @@ describe('CreateReadingUseCase', () => {
   });
 
   describe('execute - deck access validation (T-FR-B03)', () => {
-    const mockFreeUser: User = {
-      id: 200,
-      email: 'free@example.com',
-      plan: UserPlan.FREE,
-    } as User;
-
     const majorArcanaCards = [
       { id: 1, name: 'El Loco', category: 'arcanos_mayores' },
       { id: 2, name: 'El Mago', category: 'arcanos_mayores' },
+      { id: 3, name: 'La Sacerdotisa', category: 'arcanos_mayores' },
     ] as unknown as TarotCard[];
 
-    const mixedCards = [
-      { id: 1, name: 'El Loco', category: 'arcanos_mayores' },
-      { id: 22, name: 'As de Bastos', category: 'bastos' },
-    ] as unknown as TarotCard[];
-
-    const mockDtoFree: CreateReadingDto = {
-      deckId: 1,
-      spreadId: 1,
-      cardIds: [1, 2],
-      cardPositions: [
-        { cardId: 1, position: 'past', isReversed: false },
-        { cardId: 2, position: 'present', isReversed: false },
-      ],
-      useAI: false,
-    };
-
-    it('should call validateDeckAccess with user plan and cards', async () => {
+    it('should call validateDeckAccess with user plan and the drawn cards', async () => {
       const mockReading = createMockReading({ user: mockFreeUser });
       validator.validateUser.mockResolvedValue(mockFreeUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      cardsService.findByDeck.mockResolvedValue(majorArcanaCards);
+      deckShuffler.draw.mockReturnValue(majorArcanaCards);
       readingRepo.create.mockResolvedValue(mockReading);
 
       await useCase.execute(mockFreeUser, mockDtoFree);
@@ -1162,11 +1270,12 @@ describe('CreateReadingUseCase', () => {
       );
     });
 
-    it('should throw ForbiddenException when FREE user sends minor arcana cards', async () => {
+    it('should throw ForbiddenException if the defensive deck access check fails', async () => {
       validator.validateUser.mockResolvedValue(mockFreeUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(mixedCards);
+      cardsService.findByDeck.mockResolvedValue(majorArcanaCards);
+      deckShuffler.draw.mockReturnValue(majorArcanaCards);
       validator.validateDeckAccess.mockImplementation(() => {
         throw new ForbiddenException(
           'El plan FREE solo permite cartas de Arcanos Mayores',
@@ -1178,6 +1287,7 @@ describe('CreateReadingUseCase', () => {
       await expect(executionPromise).rejects.toThrow(
         'El plan FREE solo permite cartas de Arcanos Mayores',
       );
+      expect(readingRepo.create).not.toHaveBeenCalled();
     });
 
     it('should call validateDeckAccess before creating the reading', async () => {
@@ -1185,7 +1295,8 @@ describe('CreateReadingUseCase', () => {
       validator.validateUser.mockResolvedValue(mockFreeUser);
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      cardsService.findByDeck.mockResolvedValue(majorArcanaCards);
+      deckShuffler.draw.mockReturnValue(majorArcanaCards);
       validator.validateDeckAccess.mockImplementation(() => {
         callOrder.push('validateDeckAccess');
       });
@@ -1203,15 +1314,15 @@ describe('CreateReadingUseCase', () => {
     });
 
     it('should still call validateDeckAccess for PREMIUM users (no restriction expected)', async () => {
-      const premiumDto: CreateReadingDto = { ...mockDtoFree, useAI: false };
       const mockReading = createMockReading();
       validator.validateUser.mockResolvedValue(mockUser); // PREMIUM
       decksService.findDeckById.mockResolvedValue(mockDeck);
       spreadsService.findById.mockResolvedValue(mockSpread);
-      cardsService.findByIds.mockResolvedValue(majorArcanaCards);
+      cardsService.findByDeck.mockResolvedValue(majorArcanaCards);
+      deckShuffler.draw.mockReturnValue(majorArcanaCards);
       readingRepo.create.mockResolvedValue(mockReading);
 
-      await useCase.execute(mockUser, premiumDto);
+      await useCase.execute(mockUser, mockDto);
 
       expect(validator.validateDeckAccess).toHaveBeenCalledWith(
         UserPlan.PREMIUM,
