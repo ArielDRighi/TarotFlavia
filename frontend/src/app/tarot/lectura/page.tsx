@@ -4,8 +4,10 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ReadingExperience } from '@/components/features/readings/ReadingExperience';
+import { CARD_ASPECT_CLASS } from '@/components/features/readings/TarotCard';
 import { ROUTES } from '@/lib/constants/routes';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 /**
  * Inner component that uses useSearchParams
@@ -55,7 +57,7 @@ function LecturaPageLoading() {
         <div className="flex justify-center">
           <div className="grid grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={index} className="h-60 w-40 rounded-xl" />
+              <Skeleton key={index} className={cn('w-40 rounded-xl', CARD_ASPECT_CLASS)} />
             ))}
           </div>
         </div>

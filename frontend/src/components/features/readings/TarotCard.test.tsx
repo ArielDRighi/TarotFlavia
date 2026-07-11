@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { TarotCard } from './TarotCard';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { TarotCard, CARD_ASPECT_CLASS, CARD_BACK_IMAGE_SRC } from './TarotCard';
 import type { ReadingCard } from '@/types/reading.types';
 
 // Mock Next.js Image component
@@ -73,28 +73,42 @@ describe('TarotCard', () => {
       render(<TarotCard isRevealed={false} size="sm" />);
 
       const cardContainer = screen.getByTestId('tarot-card');
-      expect(cardContainer).toHaveClass('w-32', 'h-48');
+      expect(cardContainer).toHaveClass('w-32', CARD_ASPECT_CLASS);
     });
 
     it('should render with medium size by default', () => {
       render(<TarotCard isRevealed={false} />);
 
       const cardContainer = screen.getByTestId('tarot-card');
-      expect(cardContainer).toHaveClass('w-40', 'h-60');
+      expect(cardContainer).toHaveClass('w-40', CARD_ASPECT_CLASS);
     });
 
     it('should render with medium size when size="md"', () => {
       render(<TarotCard isRevealed={false} size="md" />);
 
       const cardContainer = screen.getByTestId('tarot-card');
-      expect(cardContainer).toHaveClass('w-40', 'h-60');
+      expect(cardContainer).toHaveClass('w-40', CARD_ASPECT_CLASS);
     });
 
     it('should render with large size when size="lg"', () => {
       render(<TarotCard isRevealed={false} size="lg" />);
 
       const cardContainer = screen.getByTestId('tarot-card');
-      expect(cardContainer).toHaveClass('w-48', 'h-72');
+      expect(cardContainer).toHaveClass('w-48', CARD_ASPECT_CLASS);
+    });
+
+    it('should keep the card back aspect ratio in every size (no fixed height)', () => {
+      const sizes = ['sm', 'md', 'lg'] as const;
+
+      sizes.forEach((size) => {
+        const { unmount } = render(<TarotCard isRevealed={false} size={size} />);
+
+        const cardContainer = screen.getByTestId('tarot-card');
+        expect(cardContainer).toHaveClass(CARD_ASPECT_CLASS);
+        expect(cardContainer.className).not.toMatch(/\bh-\d/);
+
+        unmount();
+      });
     });
   });
 
@@ -204,11 +218,46 @@ describe('TarotCard', () => {
   });
 
   describe('Card Back Design', () => {
-    it('should display geometric pattern on the back', () => {
+    it('should display the card back image on the back', () => {
       render(<TarotCard isRevealed={false} />);
 
-      const cardBack = screen.getByTestId('card-back');
-      expect(cardBack).toHaveClass('bg-secondary');
+      const backImage = within(screen.getByTestId('card-back')).getByTestId('next-image');
+      expect(backImage).toHaveAttribute('src', CARD_BACK_IMAGE_SRC);
+    });
+
+    it('should render the card back image as decorative (empty alt)', () => {
+      render(<TarotCard isRevealed={false} />);
+
+      const backImage = within(screen.getByTestId('card-back')).getByTestId('next-image');
+      expect(backImage).toHaveAttribute('alt', '');
+    });
+
+    it('should cover the card back without deforming the image', () => {
+      render(<TarotCard isRevealed={false} />);
+
+      const backImage = within(screen.getByTestId('card-back')).getByTestId('next-image');
+      expect(backImage).toHaveClass('object-cover');
+    });
+
+    it('should show the same card back image regardless of size', () => {
+      const { rerender } = render(<TarotCard isRevealed={false} size="sm" />);
+      expect(within(screen.getByTestId('card-back')).getByTestId('next-image')).toHaveAttribute(
+        'src',
+        CARD_BACK_IMAGE_SRC
+      );
+
+      rerender(<TarotCard isRevealed={false} size="lg" />);
+      expect(within(screen.getByTestId('card-back')).getByTestId('next-image')).toHaveAttribute(
+        'src',
+        CARD_BACK_IMAGE_SRC
+      );
+    });
+
+    it('should keep the card back image when a card is provided but not revealed', () => {
+      render(<TarotCard card={mockCard} isRevealed={false} />);
+
+      const backImage = within(screen.getByTestId('card-back')).getByTestId('next-image');
+      expect(backImage).toHaveAttribute('src', CARD_BACK_IMAGE_SRC);
     });
   });
 

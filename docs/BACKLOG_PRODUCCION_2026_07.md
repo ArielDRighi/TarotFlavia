@@ -388,8 +388,9 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 
 ---
 
-### T-PROD-005: Dorso Final de las Cartas (Imagen WebP)
+### T-PROD-005: Dorso Final de las Cartas (Imagen WebP) — ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA
 **Prioridad:** 🟡 Media
 **Estimación:** 1.5 puntos
 **Dependencias:** imagen del dorso aportada por Ariel
@@ -398,21 +399,25 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 
 #### ✅ Tareas específicas
 
-- [ ] **Optimizar el asset:** convertir la imagen de Ariel a WebP con el aspect ratio de las cartas del mazo (mismas proporciones que las 78 de `frontend/public/images/tarot/`, target ~20-60 KB; generar también una variante pequeña si los thumbnails lo ameritan). Guardar como `frontend/public/images/tarot/card-back.webp`.
-- [ ] **Reemplazar el patrón CSS** de [TarotCard.tsx:102-136](../frontend/src/components/features/readings/TarotCard.tsx#L102-L136): dentro del contenedor `data-testid="card-back"`, sustituir los divs decorativos por `<Image src="/images/tarot/card-back.webp" alt="" fill className="object-cover" />` (alt vacío: decorativa; mantener bordes/radios/sombras del contenedor).
-- [ ] **Unificar el dorso en [CardThumbnails.tsx](../frontend/src/components/features/readings/CardThumbnails.tsx)** y cualquier otra vista con cartas boca abajo (buscar usos de `card-back` / patrón equivalente).
-- [ ] **Preservar contrato de tests:** mantener `data-testid="card-back"`; actualizar los tests que fijen el markup interno del dorso.
-- [ ] Nota: NO tocar `reversedImageUrl` ni la DB — el dorso es un asset estático del frontend.
-- [ ] Verificación visual: selección de cartas en tirada (grid completo de 22/78), animación de flip si existe, y thumbnails.
+- [x] **Optimizar el asset:** WebP generado en `frontend/public/images/tarot/card-back.webp` (591×960, 53 KB, dentro del target 20-60 KB). El asset conserva **íntegra** la imagen original (788×1280 ≈ 197:320), sin relleno ni recorte.
+- [x] **Ajustar la proporción de la carta al dorso:** `sizeClasses` pasa de altura fija (`w-32 h-48`, `w-40 h-60`, `w-48 h-72` → 2:3) a **solo ancho** (`w-32`, `w-40`, `w-48`) + `CARD_ASPECT_CLASS` (`aspect-[197/320]`), la proporción real del dorso. Ver nota de decisión abajo.
+- [x] **Reemplazar el patrón CSS** de `TarotCard.tsx`: los divs decorativos (marco + mandala geométrica + esquinas) se sustituyeron por `<Image src={CARD_BACK_IMAGE_SRC} alt="" fill sizes={imageSizes[size]} className="object-cover" />` dentro de `data-testid="card-back"`. Se conservaron `rounded-xl`, `shadow-lg`, `bg-secondary` (fallback de carga) y `[backface-visibility:hidden]`; se añadió `overflow-hidden` para que la imagen respete el radio.
+- [x] **Skeletons alineados a la nueva proporción** (evitan layout shift): `app/tarot/lectura/page.tsx`, `app/ritual/lectura/page.tsx` y `DailyCardExperience.tsx` reutilizan `CARD_ASPECT_CLASS` en lugar de `h-60 w-40` / `h-72 w-48`.
+- [x] **Unificar el dorso:** el dorso vive **solo** en `TarotCard.tsx`. `CardThumbnails.tsx` **no requiere cambios** — únicamente renderiza cartas boca arriba (`card.imageUrl` de `CardPreview`), nunca dorsos. El resto de vistas con cartas boca abajo (`ReadingExperience`, `DailyCardExperience`, `ReadingDetail`, `SharedReadingView`) reutilizan `TarotCard`, por lo que heredan el dorso automáticamente. Se exportó `CARD_BACK_IMAGE_SRC` como única fuente de verdad del path.
+- [x] **Preservar contrato de tests:** `data-testid="card-back"` intacto. Se reescribió el bloque `Card Back Design` de `TarotCard.test.tsx` (5 tests: src del asset, `alt=""` decorativo, `object-cover`, mismo dorso en `sm`/`lg`, dorso presente con carta no revelada). `smoke.test.tsx` sigue pasando sin cambios.
+- [x] NO se tocó `reversedImageUrl` ni la DB — el dorso es un asset estático del frontend.
+- [x] Verificación visual con Playwright sobre el componente real (sm/md/lg, grid de 12 cartas y animación de flip dorso→frente): dorso completo, nítido y sin deformación en todos los tamaños; asset servido 200 y sin errores de consola.
+
+> **Nota de decisión (proporción de la carta):** la imagen original (788×1280 ≈ 197:320) es un dorso con marco dorado a sangre, mientras que los contenedores de carta eran 2:3. Ninguna de las dos opciones dentro de un 2:3 era aceptable: con `object-cover` se recortaba ~4% arriba y abajo, **cortando las líneas horizontales del marco dorado**; con relleno lateral aparecían barras negras (**descartado por el Delta**). Solución elegida: **darle a la carta la proporción del dorso** (`aspect-[197/320]`, expuesta como `CARD_ASPECT_CLASS`), de modo que el dorso se muestra íntegro sin barras ni recorte. Efecto colateral **positivo**: los frentes del mazo (300×527 ≈ 1:1.76, más altos que el contenedor) pasan de perder ~15% vertical por `object-cover` a perder solo ~8%. Las cartas quedan levemente más altas en toda la app; los skeletons se ajustaron en consecuencia.
 
 #### 🎯 Criterios de Aceptación
 
-- Todas las cartas boca abajo muestran la imagen final del dorso, nítida y sin deformación en todos los tamaños.
-- Ciclo de calidad frontend completo pasa.
+- [x] Todas las cartas boca abajo muestran la imagen final del dorso, nítida y sin deformación en todos los tamaños.
+- [x] Ciclo de calidad frontend completo pasa (format, lint 0 errores, type-check, 5181 tests, build, validate-architecture).
 
 #### 📁 Archivos involucrados
 
-- `frontend/public/images/tarot/card-back.webp` (nuevo), `readings/TarotCard.tsx`, `readings/CardThumbnails.tsx` + tests.
+- `frontend/public/images/tarot/card-back.webp` (nuevo), `readings/TarotCard.tsx`, `readings/TarotCard.test.tsx`. `CardThumbnails.tsx` sin cambios (no renderiza dorsos).
 
 ---
 
