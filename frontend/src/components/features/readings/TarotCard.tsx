@@ -21,18 +21,22 @@ export interface TarotCardProps {
   className?: string;
 }
 
-/**
- * Card back artwork, shared by every face-down card in the app.
- * The asset is already in the 2:3 ratio of the card containers, so `object-cover`
- * shows the full artwork without cropping the golden frame.
- */
+/** Card back artwork, shared by every face-down card in the app */
 export const CARD_BACK_IMAGE_SRC = '/images/tarot/card-back.webp';
 
-/** Size configuration mapping */
+/**
+ * Aspect ratio of the deck: it matches the card back artwork (591x960),
+ * so the back is shown whole — no letterboxing and no cropping of its golden frame.
+ * Cards derive their height from their width, so every card size stays proportional.
+ * Reuse this class for card-shaped skeletons to avoid layout shift.
+ */
+export const CARD_ASPECT_CLASS = 'aspect-[197/320]';
+
+/** Size configuration mapping (width only — height comes from the aspect ratio) */
 const sizeClasses = {
-  sm: 'w-32 h-48',
-  md: 'w-40 h-60',
-  lg: 'w-48 h-72',
+  sm: 'w-32',
+  md: 'w-40',
+  lg: 'w-48',
 } as const;
 
 /** Image sizes for Next.js Image optimization */
@@ -79,8 +83,9 @@ export function TarotCard({ card, isRevealed, onClick, size = 'md', className }:
         'relative rounded-xl shadow-lg',
         // Perspective for 3D effect
         '[perspective:1000px]',
-        // Size
+        // Size (width) and deck proportions (height)
         sizeClasses[size],
+        CARD_ASPECT_CLASS,
         // Cursor and hover effects
         onClick && 'cursor-pointer',
         !isRevealed && onClick && 'transition-transform duration-300 hover:-translate-y-1',

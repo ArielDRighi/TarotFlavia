@@ -8,7 +8,7 @@ import { ROUTES } from '@/lib/constants/routes';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorDisplay } from '@/components/ui/error-display';
-import { TarotCard } from '@/components/features/readings/TarotCard';
+import { CARD_ASPECT_CLASS, TarotCard } from '@/components/features/readings/TarotCard';
 import { ShareButton } from '@/components/features/shared/ShareButton';
 import FreeReadingUpgradeBanner from '@/components/features/readings/FreeReadingUpgradeBanner';
 import { AnonymousLimitReached } from './AnonymousLimitReached';
@@ -241,7 +241,7 @@ export function DailyCardExperience() {
     return (
       <div className="flex flex-col items-center gap-8" aria-label="Cargando carta del día">
         <Skeleton data-testid="loading-skeleton" className="h-12 w-64" />
-        <Skeleton className="h-72 w-48 rounded-xl" />
+        <Skeleton className={cn('w-48 rounded-xl', CARD_ASPECT_CLASS)} />
         <Skeleton className="h-32 w-full max-w-lg" />
       </div>
     );
@@ -270,7 +270,7 @@ export function DailyCardExperience() {
     return (
       <div className="flex flex-col items-center gap-8" aria-label="Cargando carta del día">
         <Skeleton data-testid="loading-skeleton" className="h-12 w-64" />
-        <Skeleton className="h-72 w-48 rounded-xl" />
+        <Skeleton className={cn('w-48 rounded-xl', CARD_ASPECT_CLASS)} />
         <Skeleton className="h-32 w-full max-w-lg" />
       </div>
     );

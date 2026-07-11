@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { TarotCard, CARD_BACK_IMAGE_SRC } from './TarotCard';
+import { TarotCard, CARD_ASPECT_CLASS, CARD_BACK_IMAGE_SRC } from './TarotCard';
 import type { ReadingCard } from '@/types/reading.types';
 
 // Mock Next.js Image component
@@ -73,28 +73,42 @@ describe('TarotCard', () => {
       render(<TarotCard isRevealed={false} size="sm" />);
 
       const cardContainer = screen.getByTestId('tarot-card');
-      expect(cardContainer).toHaveClass('w-32', 'h-48');
+      expect(cardContainer).toHaveClass('w-32', CARD_ASPECT_CLASS);
     });
 
     it('should render with medium size by default', () => {
       render(<TarotCard isRevealed={false} />);
 
       const cardContainer = screen.getByTestId('tarot-card');
-      expect(cardContainer).toHaveClass('w-40', 'h-60');
+      expect(cardContainer).toHaveClass('w-40', CARD_ASPECT_CLASS);
     });
 
     it('should render with medium size when size="md"', () => {
       render(<TarotCard isRevealed={false} size="md" />);
 
       const cardContainer = screen.getByTestId('tarot-card');
-      expect(cardContainer).toHaveClass('w-40', 'h-60');
+      expect(cardContainer).toHaveClass('w-40', CARD_ASPECT_CLASS);
     });
 
     it('should render with large size when size="lg"', () => {
       render(<TarotCard isRevealed={false} size="lg" />);
 
       const cardContainer = screen.getByTestId('tarot-card');
-      expect(cardContainer).toHaveClass('w-48', 'h-72');
+      expect(cardContainer).toHaveClass('w-48', CARD_ASPECT_CLASS);
+    });
+
+    it('should keep the card back aspect ratio in every size (no fixed height)', () => {
+      const sizes = ['sm', 'md', 'lg'] as const;
+
+      sizes.forEach((size) => {
+        const { unmount } = render(<TarotCard isRevealed={false} size={size} />);
+
+        const cardContainer = screen.getByTestId('tarot-card');
+        expect(cardContainer).toHaveClass(CARD_ASPECT_CLASS);
+        expect(cardContainer.className).not.toMatch(/\bh-\d/);
+
+        unmount();
+      });
     });
   });
 
