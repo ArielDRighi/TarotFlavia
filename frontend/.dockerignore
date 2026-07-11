@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+.env
+.env.*
+!.env.example
+coverage
+*.test.ts
+*.test.tsx
+*.spec.ts
+playwright-report
+test-results
+tests
+docs
+*.md
+.git

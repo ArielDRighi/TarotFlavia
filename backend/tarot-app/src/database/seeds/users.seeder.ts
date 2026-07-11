@@ -4,7 +4,7 @@ import {
   UserPlan,
   UserRole,
 } from '../../modules/users/entities/user.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 /**
  * Seed Users - Test Users for Development and E2E Testing

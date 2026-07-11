@@ -314,3 +314,6 @@ export type {
   AdminReadingsResponse,
   AdminReadingsFilters,
 } from './admin-readings.types';
+
+// AdSense Types (T-PROD-008)
+export type { AdsByGoogleConfig, AdsByGoogleQueue } from './adsense.types';

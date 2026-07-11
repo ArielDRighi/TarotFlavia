@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { User } from '../../modules/users/entities/user.entity';
 import { flaviaUserData } from './data/flavia-user.data';
 

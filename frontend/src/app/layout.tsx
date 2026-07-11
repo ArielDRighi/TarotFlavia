@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Cormorant_Garamond, Lato } from 'next/font/google';
 import { ReactQueryProvider, AuthProvider } from '@/lib/providers';
 import { Toaster } from '@/components/ui/toaster';
+import { AdSenseScript } from '@/components/features/ads';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { defaultMetadata } from '@/lib/metadata/seo';
@@ -43,6 +44,9 @@ export default function RootLayout({
       >
         <ReactQueryProvider>
           <AuthProvider>
+            {/* Dentro del AuthProvider: necesita el plan hidratado para no cargarle
+                el loader de AdSense a un usuario Premium (T-PROD-008) */}
+            <AdSenseScript />
             <div className="flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>

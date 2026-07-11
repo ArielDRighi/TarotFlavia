@@ -59,7 +59,10 @@ describe('PremiumBenefitsSection', () => {
     const text = (container.textContent ?? '').toLowerCase();
 
     expect(text).not.toContain('estadística'); // no hay módulo de estadísticas
-    expect(text).not.toContain('publicidad'); // no hay sistema de ads
+    // T-PROD-008 dejó lista la infraestructura de ads (AdSense gateado por plan), pero
+    // todavía no hay ningún AdSlot colocado: hasta T-PROD-009 un Free no ve anuncios,
+    // así que "sin publicidad" seguiría siendo una promesa vacía (regla FBK-005).
+    expect(text).not.toContain('publicidad');
     expect(text).not.toContain('prioritario'); // sin lógica de acceso prioritario
     expect(text).not.toContain('herradura'); // tirada inexistente
     expect(text).not.toContain('año completo'); // tirada inexistente

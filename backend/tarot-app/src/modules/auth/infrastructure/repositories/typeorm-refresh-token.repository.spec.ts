@@ -5,7 +5,7 @@ import { Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
 import { TypeOrmRefreshTokenRepository } from './typeorm-refresh-token.repository';
 import { RefreshToken } from '../../entities/refresh-token.entity';
 import { User } from '../../../users/entities/user.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 describe('TypeOrmRefreshTokenRepository', () => {
   let repository: TypeOrmRefreshTokenRepository;

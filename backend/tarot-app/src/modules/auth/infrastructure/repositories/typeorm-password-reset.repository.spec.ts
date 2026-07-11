@@ -6,7 +6,7 @@ import { TypeOrmPasswordResetRepository } from './typeorm-password-reset.reposit
 import { PasswordResetToken } from '../../entities/password-reset-token.entity';
 import { UsersService } from '../../../users/users.service';
 import { User } from '../../../users/entities/user.entity';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 describe('TypeOrmPasswordResetRepository', () => {
   let repository: TypeOrmPasswordResetRepository;
