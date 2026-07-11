@@ -211,6 +211,57 @@ describe('ZodiacSignCard', () => {
     });
   });
 
+  // T-PROD-010: el modo compacto es el que usa el carrusel móvil del selector.
+  // El nombre debe entrar completo en una tarjeta angosta (w-28), sin recortarse.
+  describe('Compact mode (T-PROD-010)', () => {
+    it('should render the name at a size that fits a narrow card', () => {
+      const signInfo = createTestSignInfo({ nameEs: 'Capricornio' });
+
+      render(<ZodiacSignCard signInfo={signInfo} compact onClick={mockOnClick} />);
+
+      const name = screen.getByText('Capricornio');
+      expect(name).toHaveClass('text-sm');
+      expect(name).not.toHaveClass('text-lg');
+    });
+
+    it('should let a long name wrap instead of overflowing the card', () => {
+      const signInfo = createTestSignInfo({ nameEs: 'Capricornio' });
+
+      render(<ZodiacSignCard signInfo={signInfo} compact onClick={mockOnClick} />);
+
+      const name = screen.getByText('Capricornio');
+      expect(name).toHaveClass('leading-tight');
+      expect(name).toHaveClass('break-words');
+    });
+
+    it('should use reduced padding in compact mode', () => {
+      const signInfo = createTestSignInfo();
+
+      render(<ZodiacSignCard signInfo={signInfo} compact onClick={mockOnClick} />);
+
+      const card = screen.getByTestId('zodiac-card-aries');
+      expect(card).toHaveClass('p-3');
+      expect(card).not.toHaveClass('p-4');
+    });
+
+    it('should keep the full-size look by default (grid variant untouched)', () => {
+      const signInfo = createTestSignInfo({ nameEs: 'Capricornio' });
+
+      render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
+
+      expect(screen.getByText('Capricornio')).toHaveClass('text-lg');
+      expect(screen.getByTestId('zodiac-card-aries')).toHaveClass('p-4');
+    });
+
+    it('should still render the full name text in compact mode', () => {
+      const signInfo = createTestSignInfo({ nameEs: 'Capricornio' });
+
+      render(<ZodiacSignCard signInfo={signInfo} compact onClick={mockOnClick} />);
+
+      expect(screen.getByText('Capricornio')).toBeInTheDocument();
+    });
+  });
+
   describe('Custom className', () => {
     it('should apply custom className', () => {
       const signInfo = createTestSignInfo();

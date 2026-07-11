@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Header } from './Header';
 import * as nextNavigation from 'next/navigation';
+import { useUnreadCount } from '@/hooks/api/useNotifications';
 import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 // Mock next/navigation
@@ -44,6 +45,62 @@ describe('Header', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseAuthStore.mockReturnValue({ user: null });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  // T-PROD-011: las notificaciones NO están planeadas en la web. La feature existe
+  // completa (backend + frontend) pero queda oculta y bloqueada tras un feature flag
+  // opt-in, para poder reactivarla más adelante sin reescribirla.
+  describe('Notification Bell - Feature Flag (T-PROD-011)', () => {
+    const authenticatedUser = { id: 1, name: 'María', email: 'maria@test.com', plan: 'free' };
+
+    it('should NOT render the notification bell by default (flag off)', () => {
+      mockUseAuthStore.mockReturnValue({ user: authenticatedUser });
+
+      render(<Header />);
+
+      expect(screen.queryByTestId('notification-bell-button')).not.toBeInTheDocument();
+    });
+
+    it('should NOT render the notification bell when the flag is explicitly disabled', () => {
+      vi.stubEnv('NEXT_PUBLIC_NOTIFICATIONS_ENABLED', 'false');
+      mockUseAuthStore.mockReturnValue({ user: authenticatedUser });
+
+      render(<Header />);
+
+      expect(screen.queryByTestId('notification-bell-button')).not.toBeInTheDocument();
+    });
+
+    it('should NOT query the notifications API when the flag is off (bloqueada, no solo oculta)', () => {
+      mockUseAuthStore.mockReturnValue({ user: authenticatedUser });
+
+      render(<Header />);
+
+      // Si NotificationBell no se monta, su hook de React Query nunca corre
+      // → cero peticiones a /notifications/count.
+      expect(vi.mocked(useUnreadCount)).not.toHaveBeenCalled();
+    });
+
+    it('should render the notification bell when the flag is enabled', () => {
+      vi.stubEnv('NEXT_PUBLIC_NOTIFICATIONS_ENABLED', 'true');
+      mockUseAuthStore.mockReturnValue({ user: authenticatedUser });
+
+      render(<Header />);
+
+      expect(screen.getByTestId('notification-bell-button')).toBeInTheDocument();
+    });
+
+    it('should NOT render the notification bell for anonymous users even with the flag on', () => {
+      vi.stubEnv('NEXT_PUBLIC_NOTIFICATIONS_ENABLED', 'true');
+      mockUseAuthStore.mockReturnValue({ user: null });
+
+      render(<Header />);
+
+      expect(screen.queryByTestId('notification-bell-button')).not.toBeInTheDocument();
+    });
   });
 
   describe('Logo', () => {

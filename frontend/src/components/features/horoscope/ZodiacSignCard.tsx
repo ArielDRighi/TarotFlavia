@@ -18,6 +18,11 @@ export interface ZodiacSignCardProps {
   isSelected?: boolean;
   /** Whether this is the user's zodiac sign */
   isUserSign?: boolean;
+  /**
+   * Compact look for narrow containers (carousel variant of the selector).
+   * Smaller padding, symbol and name so long names ("Capricornio") fit whole.
+   */
+  compact?: boolean;
   /** Callback when card is clicked */
   onClick?: (sign: ZodiacSign) => void;
   /** Additional CSS classes */
@@ -52,6 +57,7 @@ export function ZodiacSignCard({
   signInfo,
   isSelected = false,
   isUserSign = false,
+  compact = false,
   onClick,
   className,
 }: ZodiacSignCardProps) {
@@ -77,7 +83,8 @@ export function ZodiacSignCard({
     <Card
       data-testid={`zodiac-card-${signInfo.sign}`}
       className={cn(
-        'cursor-pointer p-4 text-center transition-all',
+        'cursor-pointer text-center transition-all',
+        compact ? 'p-3' : 'p-4',
         'hover:scale-105 hover:shadow-md',
         isSelected && 'ring-primary ring-2',
         isUserSign && 'border-accent border-2',
@@ -89,8 +96,21 @@ export function ZodiacSignCard({
       role="button"
       aria-label={isUserSign ? `${signInfo.nameEs} (tu signo)` : undefined}
     >
-      <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-4xl" />
-      <p className="mt-2 font-serif text-lg">{signInfo.nameEs}</p>
+      <ZodiacSymbol
+        symbol={signInfo.symbol}
+        label={signInfo.nameEs}
+        className={compact ? 'text-3xl' : 'text-4xl'}
+      />
+      <p
+        className={cn(
+          'mt-2 font-serif',
+          // El nombre debe entrar completo aunque la tarjeta sea angosta:
+          // wrap a dos líneas antes que desbordar y recortarse.
+          compact ? 'text-sm leading-tight break-words' : 'text-lg'
+        )}
+      >
+        {signInfo.nameEs}
+      </p>
     </Card>
   );
 }

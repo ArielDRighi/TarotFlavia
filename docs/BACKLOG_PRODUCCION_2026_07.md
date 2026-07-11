@@ -31,6 +31,10 @@ El relevamiento confirmó que la mayoría son tareas acotadas de configuración/
 | PROD-005 | El dorso de las cartas es un patrón CSS; existe la imagen final para reemplazarlo | 🟡 Media | Frontend — componentes de cartas |
 | PROD-006 | Las cartas de las tiradas NO están mezcladas: la selección es determinista | 🔴 Crítica | Full-stack — flujo de tiradas |
 | PROD-007 | Sin monetización por anuncios para usuarios anónimos y Free (Google AdSense) | 🟡 Media | Frontend + Infra — nueva feature |
+| PROD-008 | En móvil, los nombres de signos/animales se cortan en el selector de horóscopo | 🟠 Alta | Frontend — Horóscopo occidental y chino |
+| PROD-009 | Campana de notificaciones visible sin feature planeada (+ enum desincronizado que crashea) | 🟠 Alta | Frontend — Header / Notificaciones |
+
+> **Segunda ronda (11 de julio de 2026):** PROD-008 y PROD-009 se agregaron tras una navegación de Ariel sobre la versión deployada en móvil. Ambos son de frontend y de alcance acotado; PROD-009 incluye además un crash latente que Ariel no había visto.
 
 ---
 
@@ -227,6 +231,76 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 
 ---
 
+### PROD-008: Los Nombres de Signos/Animales se Cortan en Móvil
+
+**Severidad:** 🟠 Alta (bug visual en dos secciones del producto)
+**Módulo:** Frontend — [AnimalHoroscopePage.tsx](../frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx), [horoscopo/[sign]/page.tsx](../frontend/src/app/horoscopo/[sign]/page.tsx), [ChineseAnimalCard.tsx](../frontend/src/components/features/chinese-horoscope/ChineseAnimalCard.tsx), [ZodiacSignCard.tsx](../frontend/src/components/features/horoscope/ZodiacSignCard.tsx)
+**Reportado por:** Ariel — "encontré navegando la aplicación el siguiente problema, calculo también pasa en el horóscopo occidental" (captura del selector chino en móvil: "Caballo" → "Cabal", "Serpiente" → "Serp", "Cerdo" → "Cerc").
+
+#### Descripción del Problema
+
+En la página de detalle de un animal/signo, el selector de las 12 opciones se renderiza dentro de un contenedor `overflow-x-auto` con la grilla **forzada a 6 columnas en móvil**:
+
+```tsx
+<div className="mb-8 overflow-x-auto px-1 py-2">
+  <ChineseAnimalSelector ... className="!grid-cols-6 lg:!grid-cols-12" />
+</div>
+```
+
+El componente es un **CSS grid**, no un carrusel flex. Las 6 columnas se reparten el ancho del viewport (`repeat(6, minmax(0, 1fr))`), así que en un móvil de 380px cada tarjeta queda en ~55px de ancho. El nombre se renderiza en `text-lg` (18px), sin `truncate` ni wrap y sin ancho mínimo de tarjeta: el texto **desborda la tarjeta**, empuja el grid más allá del viewport y queda visualmente cortado. El `overflow-x-auto` produce entonces un scroll horizontal espurio que además parte las tarjetas del borde derecho.
+
+El bug está **duplicado**: `ChineseAnimalSelector`/`ChineseAnimalCard` y `ZodiacSignSelector`/`ZodiacSignCard` son dos copias independientes del mismo patrón (no existe componente compartido), y ambas páginas de detalle usan el mismo override `!grid-cols-6 lg:!grid-cols-12`. La intuición de Ariel es correcta: **pasa igual en el horóscopo occidental**, y ahí es peor porque los nombres son más largos ("Capricornio", "Sagitario").
+
+**Nota:** las páginas de listado (`/horoscopo`, `/horoscopo-chino`) NO tienen el bug: usan la grilla por defecto (`grid-cols-3 md:grid-cols-4 lg:grid-cols-6`), que sí da ancho suficiente.
+
+#### Criterios de Aceptación
+
+1. **Dado** un viewport móvil (320–430px)
+   **Cuando** el usuario abre el detalle de un signo o de un animal
+   **Entonces** los 12 nombres se leen **completos** (ningún texto cortado ni desbordado).
+2. **Dado** ese mismo viewport
+   **Cuando** el usuario recorre el selector
+   **Entonces** el scroll horizontal es **intencional** (carrusel de una fila, tarjetas de ancho fijo), no un desborde accidental del grid.
+3. **Dado** un viewport desktop
+   **Entonces** el selector conserva la fila de 12 tarjetas actual.
+
+---
+
+### PROD-009: Campana de Notificaciones Visible Sin Feature Planeada (+ Crash Latente)
+
+**Severidad:** 🟠 Alta (UI muerta de cara al usuario + `TypeError` latente en el header)
+**Módulo:** Frontend — [Header.tsx](../frontend/src/components/layout/Header.tsx), [notifications/](../frontend/src/components/features/notifications/), [notification.types.ts](../frontend/src/types/notification.types.ts)
+**Reportado por:** Ariel — "veo la campana de notificaciones que no tiene (según entiendo) ninguna función… notificaciones no están planeadas en la web".
+
+#### Descripción del Problema
+
+Son **dos problemas superpuestos**:
+
+**(a) La campana parece muerta.** La feature *sí* está implementada de punta a punta (TASK-400h backend + TASK-414 frontend, ambas completadas en `BACKLOG_RITUALES.md`): dropdown Radix con lista, contador de no leídas, "marcar todas como leídas", y backend con `GET /notifications`, `/count`, `PATCH /:id/read`, `/read-all`. Pero el **único productor de notificaciones** es el cron de eventos sagrados ([sacred-event-notification-cron.service.ts](../backend/tarot-app/src/modules/notifications/application/services/sacred-event-notification-cron.service.ts)), que solo genera notificaciones para usuarios **premium**. Para cualquier usuario Free la campana está siempre vacía → se percibe como un ícono sin función. **Decisión del Delta:** notificaciones no están planeadas en la web; **ocultar y bloquear** la feature sin borrar el código, para poder reactivarla más adelante.
+
+**(b) Crash latente por enums desincronizados.** El enum del backend y el del frontend no coinciden:
+
+| Backend (`user-notification.entity.ts:12-17`) | ¿Existe en el frontend? |
+| --------------------------------------------- | ----------------------- |
+| `sacred_event` | ✅ |
+| `sacred_event_reminder` | ❌ **falta** |
+| `ritual_reminder` | ✅ |
+| `pattern_insight` | ❌ **falta** |
+
+Además el frontend define tres tipos que el backend **nunca emite** (`reading_shared`, `system`, `promotion`). [NotificationItem.tsx:13](../frontend/src/components/features/notifications/NotificationItem.tsx#L13) hace `NOTIFICATION_TYPE_INFO[notification.type]` **sin guard** y luego lee `typeInfo.icon` / `.color` / `.name`: si a un usuario premium le llega un `sacred_event_reminder` (el cron los emite activamente), el dropdown tira `TypeError` y rompe el header. Este bug **hay que arreglarlo igual**, aunque la campana quede oculta, porque el código queda en el repo para reactivarse.
+
+#### Criterios de Aceptación
+
+1. **Dado** cualquier usuario (Free o Premium)
+   **Cuando** carga la app
+   **Entonces** NO ve la campana en el header, y el frontend **no hace ninguna petición** a `/notifications` ni a `/notifications/count`.
+2. **Dado** que se active el flag en el futuro
+   **Cuando** llega una notificación de **cualquier** tipo emitido por el backend
+   **Entonces** el ítem se renderiza sin crashear (tipos sincronizados + fallback defensivo para tipos desconocidos).
+3. El código de la feature (componentes, hooks, API, tipos, tests) **permanece en el repo**, no se borra.
+
+---
+
 ## PARTE B: TAREAS TÉCNICAS
 
 > **Convención de IDs:** serie `T-PROD-XXX` propia de este backlog.
@@ -246,6 +320,8 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 | T-PROD-007 | Mezcla de cartas: adaptar el frontend al nuevo contrato | Frontend | 🔴 Crítica | 2 pts |
 | T-PROD-008 | ✅ AdSense fase 1: componente `AdSlot` + carga condicional del script por plan | Frontend | 🟡 Media | 3 pts |
 | T-PROD-009 | AdSense fase 2: alta de cuenta, ads.txt, consentimiento y colocación en páginas | Full-stack | 🟡 Media | 3 pts |
+| T-PROD-010 | ✅ Selector de horóscopo: carrusel móvil con nombres completos (occidental + chino) | Frontend | 🟠 Alta | 2 pts |
+| T-PROD-011 | ✅ Ocultar y bloquear notificaciones tras feature flag + sincronizar el enum | Frontend | 🟠 Alta | 1.5 pts |
 
 ---
 
@@ -596,6 +672,83 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 
 ---
 
+### T-PROD-010: Selector de Horóscopo — Carrusel Móvil con Nombres Completos — ✅ COMPLETADA
+
+**Estado:** ✅ COMPLETADA
+**Prioridad:** 🟠 Alta
+**Estimación:** 2 puntos
+**Dependencias:** ninguna
+**Cubre Hallazgo:** PROD-008
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### ✅ Tareas específicas
+
+- [x] Prop `variant?: 'grid' | 'carousel'` (default `'grid'`) en `ZodiacSignSelector` y `ChineseAnimalSelector`. En `'carousel'` el contenedor es un flex de una sola fila con scroll horizontal **intencional** (`flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2`) y cada tarjeta recibe ancho fijo (`w-28 shrink-0 snap-start`) en vez de depender de una columna del grid. Se usó `w-28` (112px) y no `w-24`: "Capricornio" (el nombre más largo) no entraba en 96px.
+- [x] Prop `compact` en `ZodiacSignCard` y `ChineseAnimalCard`: `p-3`, símbolo `text-3xl` y nombre `text-sm leading-tight break-words`. El look de las páginas de listado queda **intacto** (sin `compact` siguen en `p-4` / `text-4xl` / `text-lg`), que era el riesgo de bajar el tamaño del nombre globalmente.
+- [x] En [horoscopo/[sign]/page.tsx](../frontend/src/app/horoscopo/[sign]/page.tsx) y [AnimalHoroscopePage.tsx](../frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx), reemplazado el wrapper `overflow-x-auto` + el override `!grid-cols-6 lg:!grid-cols-12` por `variant="carousel"`. El `overflow` ahora vive dentro del selector (dueño de su propio layout), no en la página.
+- [x] **Extra no previsto:** al pasar de 2 filas (grid de 6) a 1 fila, la tarjeta **seleccionada quedaba fuera de pantalla** (Leo es la 5ª, Cabra la 8ª): el usuario no veía cuál estaba activa. Se agregó un `useEffect` que hace `scrollIntoView({ inline: 'center', block: 'nearest' })` sobre la tarjeta seleccionada, solo en la variante carousel.
+- [x] Las páginas de listado (`/horoscopo`, `/horoscopo-chino`) **no cambian**: siguen con el `variant="grid"` por defecto.
+- [x] Tests (TDD): 28 tests nuevos entre selectores y cards (clases de carrusel vs grid, `compact`, nombres completos, auto-scroll a la seleccionada y su ausencia en grid).
+- [x] Verificación real en navegador (Playwright, script de medición del DOM, no solo capturas): en 320/360/390/430px sobre `/horoscopo/[sign]` y `/horoscopo-chino/[animal]` se midió `scrollWidth > clientWidth` de cada uno de los 12 nombres → **cero nombres recortados** en todos los viewports; el scroll horizontal queda contenido en el selector y no en el `body`.
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Los 12 nombres se leen completos en móvil, en el horóscopo **occidental y chino**.
+- [x] El scroll horizontal del selector es intencional (una fila), no un desborde del grid.
+- [x] Desktop conserva la fila de 12 tarjetas.
+- [x] Ciclo de calidad frontend completo pasa (5268 tests, lint 0 errores, type-check, build, validate-architecture).
+
+> **Nota de verificación (320px):** a 320px el `body` sigue desbordando ~19px, pero **no lo causa el selector**: se midió el mismo `scrollWidth=339` en la home (sin selector), en el listado (sin carrusel) y en el detalle, y coincide exactamente con el `scrollWidth` del `header`. Es el desborde preexistente que ya documentó T-PROD-002 y que el Delta aceptó as-is. Dentro del selector, a 320px tampoco se recorta ningún nombre.
+
+#### 📁 Archivos involucrados
+
+- `features/horoscope/ZodiacSignSelector.tsx`, `ZodiacSignCard.tsx` + tests.
+- `features/chinese-horoscope/ChineseAnimalSelector.tsx`, `ChineseAnimalCard.tsx`, `AnimalHoroscopePage.tsx` + tests.
+- `app/horoscopo/[sign]/page.tsx`.
+
+---
+
+### T-PROD-011: Ocultar y Bloquear Notificaciones (Feature Flag) + Sincronizar el Enum — ✅ COMPLETADA
+
+**Estado:** ✅ COMPLETADA
+**Prioridad:** 🟠 Alta
+**Estimación:** 1.5 puntos
+**Dependencias:** ninguna
+**Cubre Hallazgo:** PROD-009
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### ✅ Tareas específicas
+
+**(a) Ocultar y bloquear (sin borrar código):**
+
+- [x] Feature flag `NEXT_PUBLIC_NOTIFICATIONS_ENABLED`, **opt-in** (`=== 'true'`): por defecto **apagado**. Se leyó dentro del render (patrón de `useAdsEnabled`/`AdSlot`, T-PROD-008) y no como constante de módulo, para que sea testeable con `vi.stubEnv`.
+- [x] En [Header.tsx](../frontend/src/components/layout/Header.tsx), el render pasa a `{user && isNotificationsEnabled && <NotificationBell />}`. Al no montarse `NotificationBell`, sus hooks de React Query no corren → **cero peticiones** a `/notifications*` (esto es el "bloquear": no alcanza con ocultarlo por CSS).
+- [x] Variable documentada en `frontend/.env.example` (apagada, con nota de que la feature existe y puede reactivarse).
+- [x] **No se borró** nada: componentes, hooks, API, tipos y tests de notificaciones siguen en el repo.
+
+**(b) Fix del crash (aplica igual, para cuando se reactive):**
+
+- [x] `NotificationType` sincronizado con el enum autoritativo del backend: agregados `SACRED_EVENT_REMINDER` y `PATTERN_INSIGHT` con su entrada en `NOTIFICATION_TYPE_INFO`. Los tres tipos sin productor (`reading_shared`, `system`, `promotion`) quedan como reservados y documentados como tales.
+- [x] Nuevo helper `getNotificationTypeInfo()` en [notification.types.ts](../frontend/src/types/notification.types.ts) con fallback genérico (`🔔 Notificación`) para tipos desconocidos, y [NotificationItem.tsx](../frontend/src/components/features/notifications/NotificationItem.tsx) pasa a usarlo en vez de indexar el `Record` directo. Sin `any`: el lookup se tipa como `Partial<Record<NotificationType, NotificationTypeInfo>>`.
+- [x] Tests (TDD): flag off/on en `Header` (incluido "no se llama a `useUnreadCount`"), `NotificationItem` no crashea ante un tipo desconocido, y un bloque de **paridad con el enum del backend** que falla si el backend agrega un tipo y el frontend no lo mapea. Se corrigió el test `should have exactly 5 notification types`, que era justamente el que fijaba el enum incompleto.
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Ningún usuario ve la campana, y no se dispara ninguna petición a `/notifications*` (verificado en navegador real interceptando el tráfico de red: 0 requests).
+- [x] Con el flag encendido, la campana vuelve a funcionar y ningún tipo de notificación del backend crashea el dropdown.
+- [x] El código de la feature sigue en el repo.
+- [x] Ciclo de calidad frontend completo pasa.
+
+#### 📁 Archivos involucrados
+
+- `layout/Header.tsx` + `Header.test.tsx`.
+- `types/notification.types.ts`, `features/notifications/NotificationItem.tsx` + tests.
+- `frontend/.env.example`.
+
+> **Nota (fuera de alcance):** el cron backend de eventos sagrados sigue escribiendo notificaciones en la DB para usuarios premium aunque la UI esté oculta. Son filas inertes (nadie las lee) y no justifican tocar el backend ahora. Si la feature se descarta definitivamente, crear una tarea aparte para desactivar el cron.
+
+---
+
 ## ORDEN DE EJECUCIÓN SUGERIDO
 
 1. **T-PROD-002** (header móvil) — bug visible, fix acotado, sin dependencias.
@@ -605,7 +758,8 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 5. **T-PROD-004** (email Porkbun) — operativo, desbloquea remitente para MP y AdSense.
 6. **T-PROD-001** (MP producción) — al final de la preparación, cuando dominio + email estén listos; es el gate de cobros reales.
 7. **T-PROD-008 → T-PROD-009** (AdSense) — la fase 1 puede desarrollarse en cualquier momento; la fase 2 requiere el sitio productivo estable (Google revisa el dominio), así que va última.
+8. **T-PROD-010 + T-PROD-011** (segunda ronda: selector móvil + notificaciones) — bugs visibles, fixes acotados, sin dependencias entre sí ni con el resto. Se desarrollan juntos en una sola rama/PR por ser ambos frontend y de la misma ronda de navegación.
 
 ---
 
-**Nota:** las tareas de código (T-PROD-002/005/006/007/008 y las partes PR de 003/009) siguen el workflow correspondiente (`WORKFLOW_FRONTEND.md` / `WORKFLOW_BACKEND.md`): TDD, ciclo de calidad completo, PR a `develop`, y actualización de este backlog al completar cada una.
+**Nota:** las tareas de código (T-PROD-002/005/006/007/008/010/011 y las partes PR de 003/009) siguen el workflow correspondiente (`WORKFLOW_FRONTEND.md` / `WORKFLOW_BACKEND.md`): TDD, ciclo de calidad completo, PR a `develop`, y actualización de este backlog al completar cada una.

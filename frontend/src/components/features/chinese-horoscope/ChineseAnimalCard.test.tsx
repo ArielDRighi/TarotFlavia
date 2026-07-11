@@ -227,6 +227,57 @@ describe('ChineseAnimalCard', () => {
     });
   });
 
+  // T-PROD-010: el modo compacto es el que usa el carrusel móvil del selector.
+  // El nombre debe entrar completo en una tarjeta angosta (w-28), sin recortarse.
+  describe('Compact mode (T-PROD-010)', () => {
+    it('should render the name at a size that fits a narrow card', () => {
+      const animalInfo = createTestAnimalInfo({ nameEs: 'Serpiente' });
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} compact onClick={mockOnClick} />);
+
+      const name = screen.getByText('Serpiente');
+      expect(name).toHaveClass('text-sm');
+      expect(name).not.toHaveClass('text-lg');
+    });
+
+    it('should let a long name wrap instead of overflowing the card', () => {
+      const animalInfo = createTestAnimalInfo({ nameEs: 'Serpiente' });
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} compact onClick={mockOnClick} />);
+
+      const name = screen.getByText('Serpiente');
+      expect(name).toHaveClass('leading-tight');
+      expect(name).toHaveClass('break-words');
+    });
+
+    it('should use reduced padding in compact mode', () => {
+      const animalInfo = createTestAnimalInfo();
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} compact onClick={mockOnClick} />);
+
+      const card = screen.getByTestId('chinese-animal-rat');
+      expect(card).toHaveClass('p-3');
+      expect(card).not.toHaveClass('p-4');
+    });
+
+    it('should keep the full-size look by default (grid variant untouched)', () => {
+      const animalInfo = createTestAnimalInfo({ nameEs: 'Serpiente' });
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
+
+      expect(screen.getByText('Serpiente')).toHaveClass('text-lg');
+      expect(screen.getByTestId('chinese-animal-rat')).toHaveClass('p-4');
+    });
+
+    it('should still render the full name text in compact mode', () => {
+      const animalInfo = createTestAnimalInfo({ nameEs: 'Serpiente' });
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} compact onClick={mockOnClick} />);
+
+      expect(screen.getByText('Serpiente')).toBeInTheDocument();
+    });
+  });
+
   describe('Custom className', () => {
     it('should apply custom className', () => {
       const animalInfo = createTestAnimalInfo();

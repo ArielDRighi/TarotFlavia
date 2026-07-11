@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { formatTimeAgo } from '@/lib/utils/date';
-import { NOTIFICATION_TYPE_INFO, type Notification } from '@/types';
+import { getNotificationTypeInfo, type Notification } from '@/types';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -10,7 +10,9 @@ interface NotificationItemProps {
 }
 
 export function NotificationItem({ notification, onClick }: NotificationItemProps) {
-  const typeInfo = NOTIFICATION_TYPE_INFO[notification.type];
+  // Nunca indexar NOTIFICATION_TYPE_INFO directo: un tipo nuevo del backend
+  // devolvería undefined y rompería el render del header entero.
+  const typeInfo = getNotificationTypeInfo(notification.type);
   const isUnread = !notification.read;
 
   const handleClick = () => {

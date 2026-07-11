@@ -178,8 +178,17 @@ export {
 } from './sacred-calendar.types';
 
 // Notification Types
-export type { Notification, UnreadCountResponse, NotificationFilters } from './notification.types';
-export { NotificationType, NOTIFICATION_TYPE_INFO } from './notification.types';
+export type {
+  Notification,
+  UnreadCountResponse,
+  NotificationFilters,
+  NotificationTypeInfo,
+} from './notification.types';
+export {
+  NotificationType,
+  NOTIFICATION_TYPE_INFO,
+  getNotificationTypeInfo,
+} from './notification.types';
 
 // Pendulum Types
 export type {

@@ -10,17 +10,22 @@ vi.mock('./ZodiacSignCard', () => ({
     signInfo,
     isSelected,
     isUserSign,
+    compact,
     onClick,
+    className,
   }: {
     signInfo: { sign: ZodiacSign; nameEs: string };
     isSelected?: boolean;
     isUserSign?: boolean;
+    compact?: boolean;
     onClick?: (sign: ZodiacSign) => void;
+    className?: string;
   }) => (
     <div
       data-testid={`zodiac-card-${signInfo.sign}`}
+      data-compact={compact ? 'true' : 'false'}
       onClick={() => onClick?.(signInfo.sign)}
-      className={`${isSelected ? 'selected' : ''} ${isUserSign ? 'user-sign' : ''}`}
+      className={`${isSelected ? 'selected' : ''} ${isUserSign ? 'user-sign' : ''} ${className ?? ''}`}
     >
       {signInfo.nameEs}
     </div>
@@ -294,6 +299,106 @@ describe('ZodiacSignSelector', () => {
       expect(mockOnSelect).toHaveBeenLastCalledWith(ZodiacSign.AQUARIUS);
 
       expect(mockOnSelect).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  // T-PROD-010: en móvil la grilla forzada a 6 columnas dejaba tarjetas de ~55px
+  // y los nombres largos ("Capricornio", "Sagitario") se cortaban. La variante
+  // carousel es una fila real con scroll horizontal intencional.
+  describe('Variant carousel (T-PROD-010)', () => {
+    it('should default to the grid variant when no variant is given', () => {
+      render(<ZodiacSignSelector onSelect={mockOnSelect} />);
+
+      const selector = screen.getByTestId('zodiac-selector');
+      expect(selector).toHaveClass('grid');
+      expect(selector).not.toHaveClass('flex');
+    });
+
+    it('should render a single-row flex carousel with intentional horizontal scroll', () => {
+      render(<ZodiacSignSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      const selector = screen.getByTestId('zodiac-selector');
+      expect(selector).toHaveClass('flex');
+      expect(selector).toHaveClass('overflow-x-auto');
+      expect(selector).not.toHaveClass('grid');
+      expect(selector).not.toHaveClass('grid-cols-3');
+    });
+
+    it('should give each card a fixed width so names are not squeezed', () => {
+      render(<ZodiacSignSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      const card = screen.getByTestId('zodiac-card-capricorn');
+      expect(card).toHaveClass('w-28');
+      expect(card).toHaveClass('shrink-0');
+    });
+
+    it('should render the cards in compact mode', () => {
+      render(<ZodiacSignSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      const card = screen.getByTestId('zodiac-card-capricorn');
+      expect(card).toHaveAttribute('data-compact', 'true');
+    });
+
+    it('should NOT render cards in compact mode in the grid variant', () => {
+      render(<ZodiacSignSelector onSelect={mockOnSelect} />);
+
+      const card = screen.getByTestId('zodiac-card-capricorn');
+      expect(card).toHaveAttribute('data-compact', 'false');
+    });
+
+    it('should still render the 12 sign names in full', () => {
+      render(<ZodiacSignSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      expect(screen.getByText('Capricornio')).toBeInTheDocument();
+      expect(screen.getByText('Sagitario')).toBeInTheDocument();
+      expect(screen.getAllByTestId(/zodiac-card-/)).toHaveLength(12);
+    });
+
+    it('should keep selection working in the carousel variant', async () => {
+      const user = userEvent.setup();
+
+      render(<ZodiacSignSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      await user.click(screen.getByTestId('zodiac-card-leo'));
+
+      expect(mockOnSelect).toHaveBeenCalledWith(ZodiacSign.LEO);
+    });
+
+    // En una sola fila la tarjeta seleccionada puede quedar fuera de pantalla
+    // (Leo es la 5ª): hay que traerla a la vista o el usuario no ve cuál está activa.
+    it('should scroll the selected card into view', () => {
+      const scrollIntoView = vi.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      render(
+        <ZodiacSignSelector
+          selectedSign={ZodiacSign.SAGITTARIUS}
+          onSelect={mockOnSelect}
+          variant="carousel"
+        />
+      );
+
+      expect(scrollIntoView).toHaveBeenCalledWith(
+        expect.objectContaining({ inline: 'center', block: 'nearest' })
+      );
+    });
+
+    it('should NOT scroll anything into view in the grid variant', () => {
+      const scrollIntoView = vi.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      render(<ZodiacSignSelector selectedSign={ZodiacSign.SAGITTARIUS} onSelect={mockOnSelect} />);
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('should not scroll when no sign is selected', () => {
+      const scrollIntoView = vi.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      render(<ZodiacSignSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
     });
   });
 

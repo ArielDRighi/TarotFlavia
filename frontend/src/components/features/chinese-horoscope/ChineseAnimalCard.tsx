@@ -18,6 +18,11 @@ export interface ChineseAnimalCardProps {
   isSelected?: boolean;
   /** Whether this is the user's Chinese zodiac animal */
   isUserAnimal?: boolean;
+  /**
+   * Compact look for narrow containers (carousel variant of the selector).
+   * Smaller padding, symbol and name so long names ("Serpiente") fit whole.
+   */
+  compact?: boolean;
   /** Callback when card is clicked */
   onClick?: (animal: ChineseZodiacAnimal) => void;
   /** Additional CSS classes */
@@ -52,6 +57,7 @@ export function ChineseAnimalCard({
   animalInfo,
   isSelected = false,
   isUserAnimal = false,
+  compact = false,
   onClick,
   className,
 }: ChineseAnimalCardProps) {
@@ -77,7 +83,8 @@ export function ChineseAnimalCard({
     <Card
       data-testid={`chinese-animal-${animalInfo.animal}`}
       className={cn(
-        'cursor-pointer p-4 text-center transition-all',
+        'cursor-pointer text-center transition-all',
+        compact ? 'p-3' : 'p-4',
         'hover:scale-105 hover:shadow-md',
         isSelected && 'ring-primary ring-2',
         isUserAnimal && 'border-accent border-2',
@@ -92,9 +99,18 @@ export function ChineseAnimalCard({
       <ChineseAnimalSymbol
         animal={animalInfo.animal}
         label={animalInfo.nameEs}
-        className="mx-auto block text-4xl"
+        className={cn('mx-auto block', compact ? 'text-3xl' : 'text-4xl')}
       />
-      <p className="mt-2 font-serif text-lg">{animalInfo.nameEs}</p>
+      <p
+        className={cn(
+          'mt-2 font-serif',
+          // El nombre debe entrar completo aunque la tarjeta sea angosta:
+          // wrap a dos líneas antes que desbordar y recortarse.
+          compact ? 'text-sm leading-tight break-words' : 'text-lg'
+        )}
+      >
+        {animalInfo.nameEs}
+      </p>
     </Card>
   );
 }

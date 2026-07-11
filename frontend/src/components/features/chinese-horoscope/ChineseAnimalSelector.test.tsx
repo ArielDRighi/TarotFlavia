@@ -10,17 +10,22 @@ vi.mock('./ChineseAnimalCard', () => ({
     animalInfo,
     isSelected,
     isUserAnimal,
+    compact,
     onClick,
+    className,
   }: {
     animalInfo: { animal: ChineseZodiacAnimal; nameEs: string };
     isSelected?: boolean;
     isUserAnimal?: boolean;
+    compact?: boolean;
     onClick?: (animal: ChineseZodiacAnimal) => void;
+    className?: string;
   }) => (
     <div
       data-testid={`chinese-animal-${animalInfo.animal}`}
+      data-compact={compact ? 'true' : 'false'}
       onClick={() => onClick?.(animalInfo.animal)}
-      className={`${isSelected ? 'selected' : ''} ${isUserAnimal ? 'user-animal' : ''}`}
+      className={`${isSelected ? 'selected' : ''} ${isUserAnimal ? 'user-animal' : ''} ${className ?? ''}`}
     >
       {animalInfo.nameEs}
     </div>
@@ -259,6 +264,112 @@ describe('ChineseAnimalSelector', () => {
       const selector = screen.getByTestId('chinese-animal-selector');
       expect(selector).toHaveClass('md:grid-cols-4');
       expect(selector).toHaveClass('lg:grid-cols-6');
+    });
+  });
+
+  // T-PROD-010: en móvil la grilla forzada a 6 columnas dejaba tarjetas de ~55px
+  // y los nombres largos ("Serpiente", "Caballo") se cortaban. La variante
+  // carousel es una fila real con scroll horizontal intencional.
+  describe('Variant carousel (T-PROD-010)', () => {
+    it('should default to the grid variant when no variant is given', () => {
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} />);
+
+      const selector = screen.getByTestId('chinese-animal-selector');
+      expect(selector).toHaveClass('grid');
+      expect(selector).not.toHaveClass('flex');
+    });
+
+    it('should render a single-row flex carousel with intentional horizontal scroll', () => {
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      const selector = screen.getByTestId('chinese-animal-selector');
+      expect(selector).toHaveClass('flex');
+      expect(selector).toHaveClass('overflow-x-auto');
+      expect(selector).not.toHaveClass('grid');
+      expect(selector).not.toHaveClass('grid-cols-3');
+    });
+
+    it('should give each card a fixed width so names are not squeezed', () => {
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      const card = screen.getByTestId('chinese-animal-snake');
+      expect(card).toHaveClass('w-28');
+      expect(card).toHaveClass('shrink-0');
+    });
+
+    it('should render the cards in compact mode', () => {
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      const card = screen.getByTestId('chinese-animal-snake');
+      expect(card).toHaveAttribute('data-compact', 'true');
+    });
+
+    it('should NOT render cards in compact mode in the grid variant', () => {
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} />);
+
+      const card = screen.getByTestId('chinese-animal-snake');
+      expect(card).toHaveAttribute('data-compact', 'false');
+    });
+
+    it('should still render the 12 animal names in full', () => {
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      expect(screen.getByText('Serpiente')).toBeInTheDocument();
+      expect(screen.getByText('Caballo')).toBeInTheDocument();
+      expect(
+        screen.getAllByTestId(
+          /^chinese-animal-(rat|ox|tiger|rabbit|dragon|snake|horse|goat|monkey|rooster|dog|pig)$/
+        )
+      ).toHaveLength(12);
+    });
+
+    it('should keep selection working in the carousel variant', async () => {
+      const user = userEvent.setup();
+
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      await user.click(screen.getByTestId('chinese-animal-horse'));
+
+      expect(mockOnSelect).toHaveBeenCalledWith(ChineseZodiacAnimal.HORSE);
+    });
+
+    // En una sola fila la tarjeta seleccionada puede quedar fuera de pantalla
+    // (Cabra es la 8ª): hay que traerla a la vista o el usuario no ve cuál está activa.
+    it('should scroll the selected card into view', () => {
+      const scrollIntoView = vi.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      render(
+        <ChineseAnimalSelector
+          selectedAnimal={ChineseZodiacAnimal.GOAT}
+          onSelect={mockOnSelect}
+          variant="carousel"
+        />
+      );
+
+      expect(scrollIntoView).toHaveBeenCalledWith(
+        expect.objectContaining({ inline: 'center', block: 'nearest' })
+      );
+    });
+
+    it('should NOT scroll anything into view in the grid variant', () => {
+      const scrollIntoView = vi.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      render(
+        <ChineseAnimalSelector selectedAnimal={ChineseZodiacAnimal.GOAT} onSelect={mockOnSelect} />
+      );
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('should not scroll when no animal is selected', () => {
+      const scrollIntoView = vi.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
     });
   });
 });
