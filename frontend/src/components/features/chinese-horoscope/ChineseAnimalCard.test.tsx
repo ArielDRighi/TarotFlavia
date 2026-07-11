@@ -260,13 +260,36 @@ describe('ChineseAnimalCard', () => {
       expect(card).not.toHaveClass('p-4');
     });
 
-    it('should keep the full-size look by default (grid variant untouched)', () => {
+    it('should restore the full-size look at lg: in compact mode (desktop no cambia)', () => {
+      const animalInfo = createTestAnimalInfo({ nameEs: 'Serpiente' });
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} compact onClick={mockOnClick} />);
+
+      expect(screen.getByText('Serpiente')).toHaveClass('lg:text-lg');
+      expect(screen.getByTestId('chinese-animal-rat')).toHaveClass('lg:p-4');
+    });
+
+    // El listado (/horoscopo-chino) usa la grilla, NO el carrusel, y también recortaba
+    // "Serpiente" en 320-360px. La grilla arranca compacta y recupera el tamaño
+    // original en `md:`, donde ya hay 4 columnas anchas.
+    it('should also fit long names in the grid variant on mobile', () => {
       const animalInfo = createTestAnimalInfo({ nameEs: 'Serpiente' });
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
-      expect(screen.getByText('Serpiente')).toHaveClass('text-lg');
-      expect(screen.getByTestId('chinese-animal-rat')).toHaveClass('p-4');
+      const name = screen.getByText('Serpiente');
+      expect(name).toHaveClass('text-sm');
+      expect(name).toHaveClass('break-words');
+      expect(name).not.toHaveClass('text-lg');
+    });
+
+    it('should restore the full-size look at md: in the grid variant', () => {
+      const animalInfo = createTestAnimalInfo({ nameEs: 'Serpiente' });
+
+      render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
+
+      expect(screen.getByText('Serpiente')).toHaveClass('md:text-lg');
+      expect(screen.getByTestId('chinese-animal-rat')).toHaveClass('md:p-4');
     });
 
     it('should still render the full name text in compact mode', () => {

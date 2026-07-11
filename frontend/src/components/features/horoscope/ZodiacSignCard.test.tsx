@@ -244,13 +244,36 @@ describe('ZodiacSignCard', () => {
       expect(card).not.toHaveClass('p-4');
     });
 
-    it('should keep the full-size look by default (grid variant untouched)', () => {
+    it('should restore the full-size look at lg: in compact mode (desktop no cambia)', () => {
+      const signInfo = createTestSignInfo({ nameEs: 'Capricornio' });
+
+      render(<ZodiacSignCard signInfo={signInfo} compact onClick={mockOnClick} />);
+
+      expect(screen.getByText('Capricornio')).toHaveClass('lg:text-lg');
+      expect(screen.getByTestId('zodiac-card-aries')).toHaveClass('lg:p-4');
+    });
+
+    // El listado (/horoscopo) usa la grilla, NO el carrusel, y también recortaba
+    // "Capricornio" en 320-430px. La grilla arranca compacta y recupera el tamaño
+    // original en `md:`, donde ya hay 4 columnas anchas.
+    it('should also fit long names in the grid variant on mobile', () => {
       const signInfo = createTestSignInfo({ nameEs: 'Capricornio' });
 
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-      expect(screen.getByText('Capricornio')).toHaveClass('text-lg');
-      expect(screen.getByTestId('zodiac-card-aries')).toHaveClass('p-4');
+      const name = screen.getByText('Capricornio');
+      expect(name).toHaveClass('text-sm');
+      expect(name).toHaveClass('break-words');
+      expect(name).not.toHaveClass('text-lg');
+    });
+
+    it('should restore the full-size look at md: in the grid variant', () => {
+      const signInfo = createTestSignInfo({ nameEs: 'Capricornio' });
+
+      render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
+
+      expect(screen.getByText('Capricornio')).toHaveClass('md:text-lg');
+      expect(screen.getByTestId('zodiac-card-aries')).toHaveClass('md:p-4');
     });
 
     it('should still render the full name text in compact mode', () => {

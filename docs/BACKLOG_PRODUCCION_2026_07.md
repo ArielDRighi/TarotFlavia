@@ -251,7 +251,16 @@ El componente es un **CSS grid**, no un carrusel flex. Las 6 columnas se reparte
 
 El bug está **duplicado**: `ChineseAnimalSelector`/`ChineseAnimalCard` y `ZodiacSignSelector`/`ZodiacSignCard` son dos copias independientes del mismo patrón (no existe componente compartido), y ambas páginas de detalle usan el mismo override `!grid-cols-6 lg:!grid-cols-12`. La intuición de Ariel es correcta: **pasa igual en el horóscopo occidental**, y ahí es peor porque los nombres son más largos ("Capricornio", "Sagitario").
 
-**Nota:** las páginas de listado (`/horoscopo`, `/horoscopo-chino`) NO tienen el bug: usan la grilla por defecto (`grid-cols-3 md:grid-cols-4 lg:grid-cols-6`), que sí da ancho suficiente.
+**Las páginas de listado (`/horoscopo`, `/horoscopo-chino`) TAMBIÉN tienen el bug.** (Corregido durante la revisión: la primera versión de este documento afirmaba lo contrario — que la grilla por defecto "daba ancho suficiente" — sin haberlo medido. Es falso.) La grilla de 3 columnas en móvil deja tarjetas de 85–120px y el nombre en `text-lg` no entra:
+
+| viewport | `/horoscopo` | `/horoscopo-chino` |
+| -------- | ------------------------------------------------------------ | ------------------------------------ |
+| 320px | Géminis, Cáncer, Escorpio, Sagitario, Capricornio, Acuario | Conejo, Dragón, Serpiente, Caballo |
+| 360px | Sagitario, Capricornio | Serpiente |
+| 390px | **Capricornio** | — |
+| 430px | **Capricornio** | — |
+
+Es decir: el mismo síntoma que reportó Ariel también estaba en la **página de entrada** del horóscopo occidental, en todo el rango móvil.
 
 #### Criterios de Aceptación
 
@@ -689,16 +698,19 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 - [x] Prop `compact` en `ZodiacSignCard` y `ChineseAnimalCard`: `p-3`, símbolo `text-3xl` y nombre `text-sm leading-tight break-words`, **todo revertido en `lg:`** (`lg:p-4`, `lg:text-4xl`, `lg:text-lg lg:leading-normal lg:break-normal`) para no alterar desktop. El look de las páginas de listado también queda intacto (sin `compact` siguen en `p-4` / `text-4xl` / `text-lg`).
 - [x] En [horoscopo/[sign]/page.tsx](../frontend/src/app/horoscopo/[sign]/page.tsx) y [AnimalHoroscopePage.tsx](../frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx), reemplazado el wrapper `overflow-x-auto` + el override `!grid-cols-6 lg:!grid-cols-12` por `variant="carousel"`. El layout ahora vive dentro del selector (dueño de su propio layout), no en la página.
 - [x] **Extra no previsto:** en el carrusel móvil (una sola fila) la tarjeta **seleccionada quedaba fuera de pantalla** (Leo es la 5ª, Cabra la 8ª): el usuario no veía cuál estaba activa. Se centra automáticamente con el hook compartido [useScrollSelectedIntoView](../frontend/src/hooks/utils/useScrollSelectedIntoView.ts) — compartido a propósito: el bug de abajo habría que arreglarlo dos veces si cada selector tuviera su copia.
-- [x] Las páginas de listado (`/horoscopo`, `/horoscopo-chino`) **no cambian**: siguen con el `variant="grid"` por defecto.
+- [x] **Los listados también se arreglan** (`/horoscopo`, `/horoscopo-chino`): recortaban los mismos nombres en 320–430px (ver tabla en PROD-008). El look de la tarjeta se unificó en `DENSITY_CLASSES`: arranca compacta y recupera el tamaño original en cuanto hay ancho. Lo único que cambia entre densidades es **dónde** está ese punto — `md:` para la grilla (ahí ya hay 4 columnas anchas) y `lg:` para el carrusel (sus tarjetas miden 112px fijos hasta ahí). Tablet y desktop no cambian.
+- [x] `hyphens-auto` en el nombre (el `<html lang="es">` ya estaba, que es lo que habilita el guionado): a 320px "Capricornio" no entra ni en `text-sm`, y sin esto el navegador partía la palabra al medio ("Capricorni/o"). Ahora guiona bien ("Capricor-nio"). De 360px en adelante entra en una línea.
 - [x] Tests unitarios: clases de carrusel vs grid, preservación del `lg:grid-cols-12` de desktop, `compact`, nombres completos, y un **guard de regresión** de que no se usa `scrollIntoView` (ver nota abajo).
 - [x] **Tests e2e** ([tests/e2e/horoscope-selector.spec.ts](../frontend/tests/e2e/horoscope-selector.spec.ts) + script `test:e2e`; estrena la infra de Playwright que ya estaba configurada y sin usar). Motivo: jsdom no tiene motor de layout, así que los tests unitarios **solo pueden afirmar clases de Tailwind** y no habrían detectado **ninguno** de los dos bugs de layout de esta tarea. El e2e verifica en navegador real: ningún nombre recortado en móvil, `window.scrollX === 0`, tarjeta seleccionada a la vista, y desktop sin scroll.
 
 #### 🎯 Criterios de Aceptación
 
-- [x] Los 12 nombres se leen completos en móvil, en el horóscopo **occidental y chino**.
+- [x] Los 12 nombres se leen completos en móvil (320–430px), en el horóscopo **occidental y chino**, tanto en el **detalle** como en el **listado**.
 - [x] El scroll horizontal del selector es intencional (una fila), no un desborde del grid.
 - [x] **Desktop queda exactamente como estaba** (no era parte del bug; el Delta pidió no tocarlo).
-- [x] Ciclo de calidad frontend completo pasa + 8 tests e2e.
+- [x] Ciclo de calidad frontend completo pasa (5270 unit tests) + 16 tests e2e propios (37 en total en la suite).
+
+> **⚠️ Deuda abierta — el e2e NO corre en CI.** El script `test:e2e` es nuevo y `playwright.config.ts` levanta su propio `webServer`, pero ningún job de `.github/workflows/` ejecuta el Playwright del **frontend** (el `npm run test:e2e` de `ci.yml` es el del backend). Consecuencia: la red que atrapa exactamente esta clase de bug —recortes de layout y desplazamiento de página, los dos que se escaparon a 5270 unit tests— **no está enchufada**: si alguien reintroduce el `scrollIntoView`, CI sigue en verde. **Queda como tarea aparte** (agregar un step con `npx playwright install --with-deps chromium` + `npm run test:e2e -- --project=chromium` al job de frontend); no se hizo acá para no meter cambios de CI en un PR de bugfix.
 
 > **🔴 Regresión detectada en la revisión (y corregida):** el auto-scroll se implementó primero con `card.scrollIntoView({ inline: 'center' })`. Por spec, `scrollIntoView` desplaza **todas** las cajas scrolleables ancestras, **incluida la del documento**: como el `body` tiene desborde horizontal preexistente (T-PROD-002), la página entera cargaba corrida hacia la derecha (`window.scrollX` = 19px a 320px, **64px a 768px**). Se reemplazó por escritura directa de `scrollLeft` sobre el contenedor, que no toca ancestros. Queda un test unitario que falla si alguien vuelve a introducir `scrollIntoView`, y un e2e que verifica `window.scrollX === 0`.
 

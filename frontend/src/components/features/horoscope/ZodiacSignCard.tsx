@@ -19,8 +19,9 @@ export interface ZodiacSignCardProps {
   /** Whether this is the user's zodiac sign */
   isUserSign?: boolean;
   /**
-   * Compact look for narrow containers (carousel variant of the selector).
-   * Smaller padding, symbol and name so long names ("Capricornio") fit whole.
+   * `true` when the card lives in the carousel (fixed 112px width up to `lg:`).
+   * Changes only the breakpoint at which the full-size look is restored — see
+   * DENSITY_CLASSES.
    */
   compact?: boolean;
   /** Callback when card is clicked */
@@ -28,6 +29,30 @@ export interface ZodiacSignCardProps {
   /** Additional CSS classes */
   className?: string;
 }
+
+/**
+ * PROD-008: el nombre se recortaba en toda tarjeta angosta. La tarjeta arranca
+ * chica (`text-sm`, con wrap) y recupera el tamaño original en cuanto hay ancho.
+ * Lo único que cambia entre densidades es DÓNDE está ese punto:
+ *
+ * - `grid` (listados): a partir de `md:` hay 4 columnas anchas → look original.
+ * - `carousel` (detalle móvil): las tarjetas miden 112px fijos hasta `lg:`, así que
+ *   el look original recién vuelve ahí, donde el selector pasa a ser grid otra vez.
+ *
+ * Clases literales a propósito: Tailwind no puede escanear strings construidos.
+ */
+const DENSITY_CLASSES = {
+  grid: {
+    padding: 'p-3 md:p-4',
+    symbol: 'text-3xl md:text-4xl',
+    name: 'text-sm leading-tight break-words hyphens-auto md:text-lg md:leading-normal md:break-normal md:hyphens-none',
+  },
+  carousel: {
+    padding: 'p-3 lg:p-4',
+    symbol: 'text-3xl lg:text-4xl',
+    name: 'text-sm leading-tight break-words hyphens-auto lg:text-lg lg:leading-normal lg:break-normal lg:hyphens-none',
+  },
+} as const;
 
 /**
  * ZodiacSignCard Component
@@ -61,6 +86,8 @@ export function ZodiacSignCard({
   onClick,
   className,
 }: ZodiacSignCardProps) {
+  const density = DENSITY_CLASSES[compact ? 'carousel' : 'grid'];
+
   const handleClick = React.useCallback(() => {
     if (onClick) {
       onClick(signInfo.sign);
@@ -84,7 +111,7 @@ export function ZodiacSignCard({
       data-testid={`zodiac-card-${signInfo.sign}`}
       className={cn(
         'cursor-pointer text-center transition-all',
-        compact ? 'p-3 lg:p-4' : 'p-4',
+        density.padding,
         'hover:scale-105 hover:shadow-md',
         isSelected && 'ring-primary ring-2',
         isUserSign && 'border-accent border-2',
@@ -96,23 +123,8 @@ export function ZodiacSignCard({
       role="button"
       aria-label={isUserSign ? `${signInfo.nameEs} (tu signo)` : undefined}
     >
-      <ZodiacSymbol
-        symbol={signInfo.symbol}
-        label={signInfo.nameEs}
-        className={compact ? 'text-3xl lg:text-4xl' : 'text-4xl'}
-      />
-      <p
-        className={cn(
-          'mt-2 font-serif',
-          // `compact` es el look del carrusel MÓVIL: el nombre entra completo en una
-          // tarjeta angosta. En `lg:` vuelve al look original — desktop no cambia.
-          compact
-            ? 'text-sm leading-tight break-words lg:text-lg lg:leading-normal lg:break-normal'
-            : 'text-lg'
-        )}
-      >
-        {signInfo.nameEs}
-      </p>
+      <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className={density.symbol} />
+      <p className={cn('mt-2 font-serif', density.name)}>{signInfo.nameEs}</p>
     </Card>
   );
 }

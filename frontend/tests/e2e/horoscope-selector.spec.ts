@@ -17,16 +17,21 @@ const PAGES = [
     name: 'occidental',
     // Capricornio es el nombre más largo: es el que se recortaba.
     url: '/horoscopo/capricorn',
+    listUrl: '/horoscopo',
     selector: '[data-testid="zodiac-selector"]',
     selectedCard: '[data-testid="zodiac-card-capricorn"]',
   },
   {
     name: 'chino',
     url: '/horoscopo-chino/snake',
+    listUrl: '/horoscopo-chino',
     selector: '[data-testid="chinese-animal-selector"]',
     selectedCard: '[data-testid="chinese-animal-snake"]',
   },
 ];
+
+/** Los viewports móviles reales del criterio de aceptación. */
+const MOBILE_WIDTHS = [320, 360, 390, 430];
 
 /** Nombres cuyo texto no entra en su caja (se están recortando). */
 async function getClippedNames(page: Page, selector: string): Promise<string[]> {
@@ -93,5 +98,17 @@ for (const horoscope of PAGES) {
       expect(scrolls).toBe(false);
       expect(await page.evaluate(() => Math.round(window.scrollX))).toBe(0);
     });
+
+    // La página de LISTADO usa la grilla, no el carrusel, y recortaba los nombres
+    // con el mismo síntoma (en /horoscopo, "Capricornio" se cortaba hasta en 430px).
+    for (const width of MOBILE_WIDTHS) {
+      test(`en el listado a ${width}px, los 12 nombres se leen completos`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 844 });
+        await page.goto(horoscope.listUrl);
+        await page.waitForSelector(horoscope.selector);
+
+        expect(await getClippedNames(page, horoscope.selector)).toEqual([]);
+      });
+    }
   });
 }
