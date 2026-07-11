@@ -128,7 +128,6 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
   let deckId: number;
   let spreadId: number;
   let questionId: number;
-  let cardIds: number[];
 
   // Users para tests de carga
   let freeUserToken: string;
@@ -183,13 +182,6 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
       id: number;
     }[];
     questionId = questions[0].id;
-
-    const cards = (await dbHelper
-      .getDataSource()
-      .query('SELECT id FROM tarot_card LIMIT 3')) as unknown as {
-      id: number;
-    }[];
-    cardIds = cards.map((c) => c.id);
   }, 30000);
 
   afterAll(async () => {
@@ -207,8 +199,6 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
       deckId: 0, // Will be set in test
       spreadId: 0, // Will be set in test
       predefinedQuestionId: 0, // Will be set in test
-      cardIds: [] as number[],
-      cardPositions: [] as unknown[],
       useAI: false, // Skip AI for performance testing
     };
 
@@ -216,12 +206,6 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
       createReadingPayload.deckId = deckId;
       createReadingPayload.spreadId = spreadId;
       createReadingPayload.predefinedQuestionId = questionId;
-      createReadingPayload.cardIds = cardIds;
-      createReadingPayload.cardPositions = cardIds.map((id, idx) => ({
-        cardId: id,
-        position: `position_${idx}`,
-        isReversed: false,
-      }));
     });
 
     it('should create reading in <3s without AI interpretation', async () => {
@@ -476,12 +460,6 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
               deckId,
               spreadId,
               predefinedQuestionId: questionId,
-              cardIds,
-              cardPositions: cardIds.map((id, idx) => ({
-                cardId: id,
-                position: `pos_${idx}`,
-                isReversed: false,
-              })),
               useAI: false,
             }),
         () =>
@@ -492,12 +470,6 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
               deckId,
               spreadId,
               predefinedQuestionId: questionId,
-              cardIds,
-              cardPositions: cardIds.map((id, idx) => ({
-                cardId: id,
-                position: `pos_${idx}`,
-                isReversed: false,
-              })),
               useAI: false,
             }),
         () =>
@@ -508,12 +480,6 @@ describe('Performance Tests - Critical Endpoints (SUBTASK-22)', () => {
               deckId,
               spreadId,
               predefinedQuestionId: questionId,
-              cardIds,
-              cardPositions: cardIds.map((id, idx) => ({
-                cardId: id,
-                position: `pos_${idx}`,
-                isReversed: false,
-              })),
               useAI: false,
             }),
 

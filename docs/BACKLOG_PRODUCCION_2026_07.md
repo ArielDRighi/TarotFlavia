@@ -473,19 +473,22 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 **Dependencias:** T-PROD-006 (nuevo contrato del endpoint)
 **Cubre Hallazgo:** PROD-006
 **Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+**Estado:** ✅ COMPLETADA
 
 #### ✅ Tareas específicas
 
-- [ ] **[ReadingExperience.tsx:404-415](../frontend/src/components/features/readings/ReadingExperience.tsx#L404-L415):** eliminar la derivación `cardId = index + 1` y el `isReversed` client-side; el grid boca abajo pasa a ser un gesto de UX (el usuario elige N posiciones) y la identidad llega en la **respuesta** de `createReading` (revelación con los datos del backend).
-- [ ] **[useTarotDeck.ts:54](../frontend/src/hooks/api/useTarotDeck.ts#L54):** opcional pero recomendado, mezclar visualmente los índices client-side (Fisher-Yates simple) como refuerzo de la sensación de barajado — dejando claro en el código que la aleatoriedad REAL es la del backend.
-- [ ] **Actualizar el DTO/tipos** de `CreateReadingDto` en `types/` y el hook de mutación (`useCreateReading`) al nuevo contrato.
-- [ ] **Tests:** corregir `ReadingExperience.test.tsx:1040-1044` (hoy fija el bug: `cardIds: [1] // index 0 → cardId 1`) y `useTarotDeck.test.ts` (asume orden fijo); añadir tests del nuevo flujo de revelación desde la respuesta.
-- [ ] **Verificación E2E manual:** dos tiradas idénticas seleccionando las mismas posiciones deben revelar cartas distintas; la animación de revelado sigue fluida.
+- [x] **[ReadingExperience.tsx:404-415](../frontend/src/components/features/readings/ReadingExperience.tsx#L404-L415):** eliminar la derivación `cardId = index + 1` y el `isReversed` client-side; el grid boca abajo pasa a ser un gesto de UX (el usuario elige N posiciones) y la identidad llega en la **respuesta** de `createReading` (revelación con los datos del backend).
+- [x] ~~**useTarotDeck.ts:54:** mezclar visualmente los índices~~ — **descartado (con criterio):** con el sorteo independiente del backend, la identidad ya no depende de la posición del grid (el Fool no está en ningún lugar fijo), y las cartas boca abajo son visualmente idénticas → el shuffle client-side no tiene efecto observable. Se omite para no agregar complejidad/superficie de test sin beneficio.
+- [x] **Actualizar el DTO/tipos** de `CreateReadingDto` en `types/` (quitado `cardIds`/`cardPositions` y el tipo `CardPositionDto`); el hook de mutación (`useCreateReading`) usa el nuevo contrato sin cambios.
+- [x] **Tests:** corregido `ReadingExperience.test.tsx` (ya no asume `cardId = index + 1`; verifica que el DTO no lleva `cardIds`/`cardPositions`) y adaptados `readings-api.test.ts` y `useReadings.test.tsx`. `useTarotDeck.test.ts` no requiere cambios (el hook no se modificó).
+- [ ] **Verificación E2E manual:** dos tiradas idénticas seleccionando las mismas posiciones deben revelar cartas distintas; la animación de revelado sigue fluida. *(pendiente de ejecutar por el usuario con backend+front de esta rama levantados — GATE C)*
 
 #### 🎯 Criterios de Aceptación
 
 - La UX de selección se mantiene (elegir cartas boca abajo, revelar), pero las cartas reveladas provienen del backend.
 - Ciclo de calidad frontend completo pasa.
+
+> **Nota de merge:** PR **apilado** sobre `feature/T-PROD-006-...` (base del PR = rama de 006). Al mergear 006 a `develop`, GitHub reapunta la base de este PR a `develop` y queda solo el diff de frontend. Mergear 006 primero.
 
 #### 📁 Archivos involucrados
 

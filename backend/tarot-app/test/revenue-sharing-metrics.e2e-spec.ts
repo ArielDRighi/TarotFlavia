@@ -99,12 +99,6 @@ describe('Revenue Sharing and Metrics (e2e)', () => {
         deckId,
         spreadId,
         predefinedQuestionId,
-        cardIds: [1, 2, 3],
-        cardPositions: [
-          { cardId: 1, position: 'pasado', isReversed: false },
-          { cardId: 2, position: 'presente', isReversed: false },
-          { cardId: 3, position: 'futuro', isReversed: false },
-        ],
         useAI: false, // Skip AI to speed up test
       })
       .expect(201);

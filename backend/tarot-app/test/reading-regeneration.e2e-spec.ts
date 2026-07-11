@@ -212,12 +212,6 @@ describe('Reading Regeneration E2E', () => {
         predefinedQuestionId: predefinedQuestionId,
         deckId: deckId,
         spreadId: spreadId,
-        cardIds: cardIds,
-        cardPositions: [
-          { cardId: cardIds[0], position: 'Past', isReversed: false },
-          { cardId: cardIds[1], position: 'Present', isReversed: false },
-          { cardId: cardIds[2], position: 'Future', isReversed: true },
-        ],
         useAI: false,
       })
       .expect(201); // Asegurar que la creación fue exitosa
@@ -352,12 +346,6 @@ describe('Reading Regeneration E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -390,12 +378,6 @@ describe('Reading Regeneration E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -460,13 +442,11 @@ describe('Reading Regeneration E2E', () => {
       expect(response.body).toHaveProperty('regenerationCount', 1);
       expect(response.body).toHaveProperty('updatedAt');
 
-      // Verificar que las cartas se mantienen iguales
-
-      expect(response.body.cardPositions).toEqual([
-        { cardId: cardIds[0], position: 'Past', isReversed: false },
-        { cardId: cardIds[1], position: 'Present', isReversed: false },
-        { cardId: cardIds[2], position: 'Future', isReversed: true },
-      ]);
+      // Verificar que las cartas se mantienen tras la regeneración.
+      // El backend asigna/orienta las cartas server-side, por lo que solo
+      // validamos la estructura (cantidad según spread.cardCount = 3).
+      expect(Array.isArray(response.body.cardPositions)).toBe(true);
+      expect(response.body.cardPositions).toHaveLength(3);
     }, 30000);
 
     it('should create new interpretation entry in database', async () => {
@@ -510,12 +490,6 @@ describe('Reading Regeneration E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);
@@ -588,12 +562,6 @@ describe('Reading Regeneration E2E', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);

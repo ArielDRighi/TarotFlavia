@@ -283,12 +283,6 @@ describe('readings-api', () => {
       const createData: CreateReadingDto = {
         spreadId: 1,
         deckId: 1,
-        cardIds: [1, 5, 9],
-        cardPositions: [
-          { cardId: 1, position: 'Pasado', isReversed: false },
-          { cardId: 5, position: 'Presente', isReversed: true },
-          { cardId: 9, position: 'Futuro', isReversed: false },
-        ],
         predefinedQuestionId: 5,
       };
 
@@ -304,12 +298,6 @@ describe('readings-api', () => {
       const createData: CreateReadingDto = {
         spreadId: 2,
         deckId: 1,
-        cardIds: [3, 7, 12],
-        cardPositions: [
-          { cardId: 3, position: 'Pasado', isReversed: false },
-          { cardId: 7, position: 'Presente', isReversed: false },
-          { cardId: 12, position: 'Futuro', isReversed: true },
-        ],
         customQuestion: '¿Qué me depara el futuro en mi carrera?',
       };
 
@@ -327,8 +315,6 @@ describe('readings-api', () => {
       const createData: CreateReadingDto = {
         spreadId: 1,
         deckId: 1,
-        cardIds: [1],
-        cardPositions: [{ cardId: 1, position: 'Presente', isReversed: false }],
         predefinedQuestionId: 1,
       };
 
@@ -370,11 +356,6 @@ describe('readings-api', () => {
       const createData: CreateReadingDto = {
         spreadId: 1,
         deckId: 1,
-        cardIds: [23, 1],
-        cardPositions: [
-          { cardId: 23, position: 'Pasado', isReversed: false },
-          { cardId: 1, position: 'Presente', isReversed: false },
-        ],
         customQuestion: '¿Qué me depara el futuro?',
       };
 

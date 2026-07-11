@@ -47,7 +47,6 @@ describe('Readings Soft Delete E2E', () => {
   let predefinedQuestionId: number;
   let deckId: number;
   let spreadId: number;
-  let cardIds: number[];
   const testTimestamp = Date.now();
 
   beforeAll(async () => {
@@ -188,8 +187,7 @@ describe('Readings Soft Delete E2E', () => {
       },
     ];
 
-    const cards = await dataSource.getRepository(TarotCard).save(cardsToCreate);
-    cardIds = cards.map((c) => c.id);
+    await dataSource.getRepository(TarotCard).save(cardsToCreate);
 
     // Crear spread
     const spread = await dataSource.getRepository(TarotSpread).save({
@@ -242,12 +240,6 @@ describe('Readings Soft Delete E2E', () => {
         deckId,
         spreadId,
         predefinedQuestionId,
-        cardIds,
-        cardPositions: [
-          { cardId: cardIds[0], position: 'Past', isReversed: false },
-          { cardId: cardIds[1], position: 'Present', isReversed: false },
-          { cardId: cardIds[2], position: 'Future', isReversed: true },
-        ],
         useAI: false,
       })
       .expect(201);

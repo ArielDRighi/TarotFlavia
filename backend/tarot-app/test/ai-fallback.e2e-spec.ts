@@ -24,7 +24,6 @@ describe('AI Provider Fallback (e2e)', () => {
   let predefinedQuestionId: number;
   let deckId: number;
   let spreadId: number;
-  let cardIds: number[];
 
   beforeAll(async () => {
     // Initialize E2E database helper
@@ -51,14 +50,8 @@ describe('AI Provider Fallback (e2e)', () => {
     );
     const decks = await ds.query('SELECT id FROM tarot_deck LIMIT 1');
     const spreads = await ds.query('SELECT id FROM tarot_spread LIMIT 1');
-    const cards = await ds.query('SELECT id FROM tarot_card LIMIT 3');
 
-    if (
-      !questions.length ||
-      !decks.length ||
-      !spreads.length ||
-      cards.length < 3
-    ) {
+    if (!questions.length || !decks.length || !spreads.length) {
       throw new Error(
         'Seeded data not found. Make sure global setup has run correctly.',
       );
@@ -67,7 +60,6 @@ describe('AI Provider Fallback (e2e)', () => {
     predefinedQuestionId = questions[0].id;
     deckId = decks[0].id;
     spreadId = spreads[0].id;
-    cardIds = cards.map((c: { id: number }) => c.id);
 
     // Login as premium user (to avoid AI quota issues in CI)
     const premiumLoginResponse = await request(app.getHttpServer())
@@ -112,12 +104,6 @@ describe('AI Provider Fallback (e2e)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'pasado', isReversed: false },
-            { cardId: cardIds[1], position: 'presente', isReversed: false },
-            { cardId: cardIds[2], position: 'futuro', isReversed: false },
-          ],
           useAI: true,
         })
         .expect(201);
@@ -148,12 +134,6 @@ describe('AI Provider Fallback (e2e)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'pasado', isReversed: false },
-            { cardId: cardIds[1], position: 'presente', isReversed: false },
-            { cardId: cardIds[2], position: 'futuro', isReversed: false },
-          ],
           useAI: true,
         })
         .expect(201);
@@ -235,12 +215,6 @@ describe('AI Provider Fallback (e2e)', () => {
               predefinedQuestionId: predefinedQuestionId,
               deckId: deckId,
               spreadId: spreadId,
-              cardIds: cardIds,
-              cardPositions: [
-                { cardId: cardIds[0], position: 'pasado', isReversed: false },
-                { cardId: cardIds[1], position: 'presente', isReversed: false },
-                { cardId: cardIds[2], position: 'futuro', isReversed: false },
-              ],
               useAI: true,
             })
             .expect(201),
