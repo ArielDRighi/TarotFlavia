@@ -84,7 +84,7 @@ export function ChineseAnimalCard({
       data-testid={`chinese-animal-${animalInfo.animal}`}
       className={cn(
         'cursor-pointer text-center transition-all',
-        compact ? 'p-3' : 'p-4',
+        compact ? 'p-3 lg:p-4' : 'p-4',
         'hover:scale-105 hover:shadow-md',
         isSelected && 'ring-primary ring-2',
         isUserAnimal && 'border-accent border-2',
@@ -99,14 +99,16 @@ export function ChineseAnimalCard({
       <ChineseAnimalSymbol
         animal={animalInfo.animal}
         label={animalInfo.nameEs}
-        className={cn('mx-auto block', compact ? 'text-3xl' : 'text-4xl')}
+        className={cn('mx-auto block', compact ? 'text-3xl lg:text-4xl' : 'text-4xl')}
       />
       <p
         className={cn(
           'mt-2 font-serif',
-          // El nombre debe entrar completo aunque la tarjeta sea angosta:
-          // wrap a dos líneas antes que desbordar y recortarse.
-          compact ? 'text-sm leading-tight break-words' : 'text-lg'
+          // `compact` es el look del carrusel MÓVIL: el nombre entra completo en una
+          // tarjeta angosta. En `lg:` vuelve al look original — desktop no cambia.
+          compact
+            ? 'text-sm leading-tight break-words lg:text-lg lg:leading-normal lg:break-normal'
+            : 'text-lg'
         )}
       >
         {animalInfo.nameEs}

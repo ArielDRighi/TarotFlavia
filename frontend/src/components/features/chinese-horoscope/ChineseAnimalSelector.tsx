@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 
+import { useScrollSelectedIntoView } from '@/hooks/utils/useScrollSelectedIntoView';
 import { ChineseAnimalCard } from './ChineseAnimalCard';
 import { CHINESE_ZODIAC_INFO } from '@/lib/utils/chinese-zodiac';
 import { cn } from '@/lib/utils';
@@ -32,14 +33,23 @@ export type ChineseAnimalSelectorVariant = 'grid' | 'carousel';
 
 const LAYOUT_CLASSES: Record<ChineseAnimalSelectorVariant, string> = {
   grid: 'grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-6',
-  carousel: 'flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2',
+  // El carrusel es una solución EXCLUSIVAMENTE MÓVIL: es ahí donde la grilla de 6
+  // columnas dejaba tarjetas de ~55px y recortaba los nombres (PROD-008).
+  // En `lg:` se restaura la fila de 12 columnas original, que en desktop se ve bien
+  // y el Delta pidió no tocar. El `px-1 py-2` (que ya tenía el wrapper viejo) le da
+  // aire al ring de la seleccionada y al hover:scale-105.
+  carousel: [
+    'flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 py-2',
+    'lg:grid lg:snap-none lg:grid-cols-12 lg:gap-4',
+  ].join(' '),
 };
 
 /**
  * En el carrusel las tarjetas NO pueden encogerse: con columnas fluidas quedaban
  * de ~55px en móvil y los nombres largos ("Serpiente") se cortaban (PROD-008).
+ * En `lg:` vuelven a ser celdas del grid, como antes.
  */
-const CAROUSEL_CARD_CLASSES = 'w-28 shrink-0 snap-start';
+const CAROUSEL_CARD_CLASSES = 'w-28 shrink-0 snap-start lg:w-auto lg:shrink';
 
 /**
  * ChineseAnimalSelector Component
@@ -74,17 +84,10 @@ export function ChineseAnimalSelector({
   const isCarousel = variant === 'carousel';
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // En el carrusel (una sola fila) la tarjeta activa puede quedar fuera de pantalla:
-  // la traemos al centro para que se vea cuál está seleccionada. En el grid entran
-  // todas, así que no hace falta.
-  React.useEffect(() => {
-    if (!isCarousel || !selectedAnimal) return;
-
-    const card = containerRef.current?.querySelector(
-      `[data-testid="chinese-animal-${selectedAnimal}"]`
-    );
-    card?.scrollIntoView?.({ inline: 'center', block: 'nearest' });
-  }, [isCarousel, selectedAnimal]);
+  // En el carrusel móvil (una sola fila) la tarjeta activa puede quedar fuera de
+  // pantalla: la centramos para que se vea cuál está seleccionada.
+  const selectedIndex = animals.findIndex((info) => info.animal === selectedAnimal);
+  useScrollSelectedIntoView(containerRef, selectedIndex, isCarousel);
 
   return (
     <div

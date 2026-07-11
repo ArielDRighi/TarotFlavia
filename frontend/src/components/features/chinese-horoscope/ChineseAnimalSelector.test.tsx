@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
@@ -142,6 +142,12 @@ describe('ChineseAnimalSelector', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    // No dejar scrollIntoView pisado en el prototipo para el resto de la suite.
+    Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
   });
 
   describe('Rendering', () => {
@@ -333,11 +339,30 @@ describe('ChineseAnimalSelector', () => {
       expect(mockOnSelect).toHaveBeenCalledWith(ChineseZodiacAnimal.HORSE);
     });
 
-    // En una sola fila la tarjeta seleccionada puede quedar fuera de pantalla
-    // (Cabra es la 8ª): hay que traerla a la vista o el usuario no ve cuál está activa.
-    it('should scroll the selected card into view', () => {
+    it('should keep the desktop row of 12 columns untouched', () => {
+      // El Delta pidió explícitamente NO tocar desktop, donde se ve bien: en `lg:` se
+      // restaura la fila de 12 columnas original. El carrusel es solo para móvil.
+      render(<ChineseAnimalSelector onSelect={mockOnSelect} variant="carousel" />);
+
+      const selector = screen.getByTestId('chinese-animal-selector');
+      expect(selector).toHaveClass('lg:grid');
+      expect(selector).toHaveClass('lg:grid-cols-12');
+    });
+
+    // REGRESIÓN: la primera versión de este auto-scroll usaba scrollIntoView, que por
+    // spec desplaza TODAS las cajas scrolleables ancestras, incluida la del documento.
+    // Como el body tiene desborde horizontal preexistente, la página entera cargaba
+    // corrida (hasta 64px en tablet). Ahora se escribe scrollLeft sobre el contenedor.
+    // El centrado real se verifica en tests/e2e (jsdom no tiene layout).
+    it('should NOT use scrollIntoView (arrastraría la página entera)', () => {
+      // jsdom no implementa scrollIntoView, así que hay que definirlo para poder
+      // espiarlo. El afterEach de este bloque lo quita del prototipo.
       const scrollIntoView = vi.fn();
-      Element.prototype.scrollIntoView = scrollIntoView;
+      Object.defineProperty(Element.prototype, 'scrollIntoView', {
+        value: scrollIntoView,
+        configurable: true,
+        writable: true,
+      });
 
       render(
         <ChineseAnimalSelector
@@ -346,28 +371,6 @@ describe('ChineseAnimalSelector', () => {
           variant="carousel"
         />
       );
-
-      expect(scrollIntoView).toHaveBeenCalledWith(
-        expect.objectContaining({ inline: 'center', block: 'nearest' })
-      );
-    });
-
-    it('should NOT scroll anything into view in the grid variant', () => {
-      const scrollIntoView = vi.fn();
-      Element.prototype.scrollIntoView = scrollIntoView;
-
-      render(
-        <ChineseAnimalSelector selectedAnimal={ChineseZodiacAnimal.GOAT} onSelect={mockOnSelect} />
-      );
-
-      expect(scrollIntoView).not.toHaveBeenCalled();
-    });
-
-    it('should not scroll when no animal is selected', () => {
-      const scrollIntoView = vi.fn();
-      Element.prototype.scrollIntoView = scrollIntoView;
-
-      render(<ChineseAnimalSelector onSelect={mockOnSelect} variant="carousel" />);
 
       expect(scrollIntoView).not.toHaveBeenCalled();
     });

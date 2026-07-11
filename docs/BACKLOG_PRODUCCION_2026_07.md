@@ -683,28 +683,36 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 #### ✅ Tareas específicas
 
-- [x] Prop `variant?: 'grid' | 'carousel'` (default `'grid'`) en `ZodiacSignSelector` y `ChineseAnimalSelector`. En `'carousel'` el contenedor es un flex de una sola fila con scroll horizontal **intencional** (`flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2`) y cada tarjeta recibe ancho fijo (`w-28 shrink-0 snap-start`) en vez de depender de una columna del grid. Se usó `w-28` (112px) y no `w-24`: "Capricornio" (el nombre más largo) no entraba en 96px.
-- [x] Prop `compact` en `ZodiacSignCard` y `ChineseAnimalCard`: `p-3`, símbolo `text-3xl` y nombre `text-sm leading-tight break-words`. El look de las páginas de listado queda **intacto** (sin `compact` siguen en `p-4` / `text-4xl` / `text-lg`), que era el riesgo de bajar el tamaño del nombre globalmente.
-- [x] En [horoscopo/[sign]/page.tsx](../frontend/src/app/horoscopo/[sign]/page.tsx) y [AnimalHoroscopePage.tsx](../frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx), reemplazado el wrapper `overflow-x-auto` + el override `!grid-cols-6 lg:!grid-cols-12` por `variant="carousel"`. El `overflow` ahora vive dentro del selector (dueño de su propio layout), no en la página.
-- [x] **Extra no previsto:** al pasar de 2 filas (grid de 6) a 1 fila, la tarjeta **seleccionada quedaba fuera de pantalla** (Leo es la 5ª, Cabra la 8ª): el usuario no veía cuál estaba activa. Se agregó un `useEffect` que hace `scrollIntoView({ inline: 'center', block: 'nearest' })` sobre la tarjeta seleccionada, solo en la variante carousel.
+> **ALCANCE (aclarado por el Delta durante la revisión):** el bug es **solo de móvil**. En desktop el selector se ve bien y **no se toca**. El carrusel aplica únicamente por debajo de `lg:`; en `lg:` se restaura la fila de 12 columnas original.
+
+- [x] Prop `variant?: 'grid' | 'carousel'` (default `'grid'`) en `ZodiacSignSelector` y `ChineseAnimalSelector`. En `'carousel'`, **en móvil**, el contenedor es un flex de una sola fila con scroll horizontal **intencional** (`flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 py-2`) y cada tarjeta recibe ancho fijo (`w-28 shrink-0 snap-start`) en vez de depender de una columna del grid. Se usó `w-28` (112px) y no `w-24`: "Capricornio" (el nombre más largo) no entraba en 96px. En `lg:` el mismo contenedor vuelve a `lg:grid lg:grid-cols-12 lg:gap-4` y las tarjetas a `lg:w-auto lg:shrink`: **desktop queda idéntico a `develop`** (verificado: mismas 12 columnas y mismos anchos de tarjeta — 67px @1024, 89px @1280, 110px @1868).
+- [x] Prop `compact` en `ZodiacSignCard` y `ChineseAnimalCard`: `p-3`, símbolo `text-3xl` y nombre `text-sm leading-tight break-words`, **todo revertido en `lg:`** (`lg:p-4`, `lg:text-4xl`, `lg:text-lg lg:leading-normal lg:break-normal`) para no alterar desktop. El look de las páginas de listado también queda intacto (sin `compact` siguen en `p-4` / `text-4xl` / `text-lg`).
+- [x] En [horoscopo/[sign]/page.tsx](../frontend/src/app/horoscopo/[sign]/page.tsx) y [AnimalHoroscopePage.tsx](../frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx), reemplazado el wrapper `overflow-x-auto` + el override `!grid-cols-6 lg:!grid-cols-12` por `variant="carousel"`. El layout ahora vive dentro del selector (dueño de su propio layout), no en la página.
+- [x] **Extra no previsto:** en el carrusel móvil (una sola fila) la tarjeta **seleccionada quedaba fuera de pantalla** (Leo es la 5ª, Cabra la 8ª): el usuario no veía cuál estaba activa. Se centra automáticamente con el hook compartido [useScrollSelectedIntoView](../frontend/src/hooks/utils/useScrollSelectedIntoView.ts) — compartido a propósito: el bug de abajo habría que arreglarlo dos veces si cada selector tuviera su copia.
 - [x] Las páginas de listado (`/horoscopo`, `/horoscopo-chino`) **no cambian**: siguen con el `variant="grid"` por defecto.
-- [x] Tests (TDD): 28 tests nuevos entre selectores y cards (clases de carrusel vs grid, `compact`, nombres completos, auto-scroll a la seleccionada y su ausencia en grid).
-- [x] Verificación real en navegador (Playwright, script de medición del DOM, no solo capturas): en 320/360/390/430px sobre `/horoscopo/[sign]` y `/horoscopo-chino/[animal]` se midió `scrollWidth > clientWidth` de cada uno de los 12 nombres → **cero nombres recortados** en todos los viewports; el scroll horizontal queda contenido en el selector y no en el `body`.
+- [x] Tests unitarios: clases de carrusel vs grid, preservación del `lg:grid-cols-12` de desktop, `compact`, nombres completos, y un **guard de regresión** de que no se usa `scrollIntoView` (ver nota abajo).
+- [x] **Tests e2e** ([tests/e2e/horoscope-selector.spec.ts](../frontend/tests/e2e/horoscope-selector.spec.ts) + script `test:e2e`; estrena la infra de Playwright que ya estaba configurada y sin usar). Motivo: jsdom no tiene motor de layout, así que los tests unitarios **solo pueden afirmar clases de Tailwind** y no habrían detectado **ninguno** de los dos bugs de layout de esta tarea. El e2e verifica en navegador real: ningún nombre recortado en móvil, `window.scrollX === 0`, tarjeta seleccionada a la vista, y desktop sin scroll.
 
 #### 🎯 Criterios de Aceptación
 
 - [x] Los 12 nombres se leen completos en móvil, en el horóscopo **occidental y chino**.
 - [x] El scroll horizontal del selector es intencional (una fila), no un desborde del grid.
-- [x] Desktop conserva la fila de 12 tarjetas.
-- [x] Ciclo de calidad frontend completo pasa (5268 tests, lint 0 errores, type-check, build, validate-architecture).
+- [x] **Desktop queda exactamente como estaba** (no era parte del bug; el Delta pidió no tocarlo).
+- [x] Ciclo de calidad frontend completo pasa + 8 tests e2e.
 
-> **Nota de verificación (320px):** a 320px el `body` sigue desbordando ~19px, pero **no lo causa el selector**: se midió el mismo `scrollWidth=339` en la home (sin selector), en el listado (sin carrusel) y en el detalle, y coincide exactamente con el `scrollWidth` del `header`. Es el desborde preexistente que ya documentó T-PROD-002 y que el Delta aceptó as-is. Dentro del selector, a 320px tampoco se recorta ningún nombre.
+> **🔴 Regresión detectada en la revisión (y corregida):** el auto-scroll se implementó primero con `card.scrollIntoView({ inline: 'center' })`. Por spec, `scrollIntoView` desplaza **todas** las cajas scrolleables ancestras, **incluida la del documento**: como el `body` tiene desborde horizontal preexistente (T-PROD-002), la página entera cargaba corrida hacia la derecha (`window.scrollX` = 19px a 320px, **64px a 768px**). Se reemplazó por escritura directa de `scrollLeft` sobre el contenedor, que no toca ancestros. Queda un test unitario que falla si alguien vuelve a introducir `scrollIntoView`, y un e2e que verifica `window.scrollX === 0`.
+
+> **Nota de verificación (320px):** a 320px el `body` sigue desbordando ~19px, pero **no lo causa el selector**: se midió el mismo `scrollWidth=339` en la home (sin selector), en el listado (sin carrusel) y en el detalle, y coincide exactamente con el `scrollWidth` del `header`. Es el desborde preexistente que ya documentó T-PROD-002 y que el Delta aceptó as-is.
+
+> **Hallazgo lateral (fuera de alcance, NO se tocó):** el grid de desktop recorta nombres cuando la ventana es angosta — a 1280px se recortan 5 (Géminis, Escorpio, Sagitario, Capricornio, Acuario) y a 1024px once de doce; a 1868px solo roza "Capricornio", por eso en monitores grandes no se percibe. Es preexistente en `develop` y el Delta decidió no tocar desktop en esta tarea. Candidato a hallazgo propio si alguna vez molesta.
 
 #### 📁 Archivos involucrados
 
+- `hooks/utils/useScrollSelectedIntoView.ts` (nuevo, compartido por ambos horóscopos).
 - `features/horoscope/ZodiacSignSelector.tsx`, `ZodiacSignCard.tsx` + tests.
 - `features/chinese-horoscope/ChineseAnimalSelector.tsx`, `ChineseAnimalCard.tsx`, `AnimalHoroscopePage.tsx` + tests.
 - `app/horoscopo/[sign]/page.tsx`.
+- `tests/e2e/horoscope-selector.spec.ts` (nuevo) + script `test:e2e` en `package.json`.
 
 ---
 
@@ -730,7 +738,9 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 - [x] `NotificationType` sincronizado con el enum autoritativo del backend: agregados `SACRED_EVENT_REMINDER` y `PATTERN_INSIGHT` con su entrada en `NOTIFICATION_TYPE_INFO`. Los tres tipos sin productor (`reading_shared`, `system`, `promotion`) quedan como reservados y documentados como tales.
 - [x] Nuevo helper `getNotificationTypeInfo()` en [notification.types.ts](../frontend/src/types/notification.types.ts) con fallback genérico (`🔔 Notificación`) para tipos desconocidos, y [NotificationItem.tsx](../frontend/src/components/features/notifications/NotificationItem.tsx) pasa a usarlo en vez de indexar el `Record` directo. Sin `any`: el lookup se tipa como `Partial<Record<NotificationType, NotificationTypeInfo>>`.
-- [x] Tests (TDD): flag off/on en `Header` (incluido "no se llama a `useUnreadCount`"), `NotificationItem` no crashea ante un tipo desconocido, y un bloque de **paridad con el enum del backend** que falla si el backend agrega un tipo y el frontend no lo mapea. Se corrigió el test `should have exactly 5 notification types`, que era justamente el que fijaba el enum incompleto.
+- [x] Tests (TDD): flag off/on en `Header` (incluido "no se llama a `useUnreadCount`"), `NotificationItem` no crashea ante un tipo desconocido, y un bloque de **paridad con el enum del backend**. Se corrigió el test `should have exactly 5 notification types`, que era justamente el que fijaba el enum incompleto.
+
+> **Corrección honesta (marcada en la revisión):** el bloque de "paridad" **no es un guard automático**. La lista de tipos del backend está *hardcodeada* en el test del frontend, así que si el backend agrega un tipo nuevo, este test **sigue en verde** hasta que alguien actualice la lista a mano — que es exactamente el olvido que causó el bug. Se dejó así a propósito (acoplar un unit test del frontend a un archivo del workspace del backend es peor), pero la red de seguridad real en runtime es el **fallback** de `getNotificationTypeInfo()`, no el test. Sirve como documentación ejecutable del contrato, no como candado.
 
 #### 🎯 Criterios de Aceptación
 
