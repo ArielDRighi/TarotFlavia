@@ -277,12 +277,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
       const createReadingPayload = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
         // Use unique question to avoid cache hits
         customQuestion: `Test question for usage limits - ${Date.now()} - ${Math.random()}`,
         useAI: true,
@@ -313,12 +307,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
         const createReadingPayload = {
           spreadId: testSpread.id,
           deckId: testDeck.id,
-          cardIds: testCards.map((card) => card.id),
-          cardPositions: testCards.map((card, idx) => ({
-            cardId: card.id,
-            position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-            isReversed: false,
-          })),
           // Pregunta única por iteración para evitar cache y asegurar llamada a AI
           customQuestion: `Test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
           useAI: true,
@@ -345,12 +333,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
       const createReadingPayload = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
         // FREE users no pueden usar customQuestion, omitir
         useAI: true,
       };
@@ -381,12 +363,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
       const createReadingPayload = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
         customQuestion: 'Test question for usage limits',
         useAI: true,
       };
@@ -420,12 +396,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
       const createReadingPayload = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
         customQuestion: 'Test question for usage limits',
         useAI: true,
       };
@@ -466,12 +436,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
         const createReadingPayload = {
           spreadId: testSpread.id,
           deckId: testDeck.id,
-          cardIds: testCards.map((card) => card.id),
-          cardPositions: testCards.map((card, idx) => ({
-            cardId: card.id,
-            position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-            isReversed: false,
-          })),
           // Pregunta única por iteración para evitar cache y asegurar llamada a AI
           customQuestion: `Premium test question ${i + 1} - ${Date.now()} - ${Math.random()}`,
           useAI: true,
@@ -517,12 +481,6 @@ describe('UsageLimits + Readings Integration Tests', () => {
       const createReadingPayload = {
         spreadId: testSpread.id,
         deckId: testDeck.id,
-        cardIds: testCards.map((card) => card.id),
-        cardPositions: testCards.map((card, idx) => ({
-          cardId: card.id,
-          position: testSpread.positions[idx]?.name || `Position ${idx + 1}`,
-          isReversed: false,
-        })),
         customQuestion: `Premium test question 4 - ${Date.now()} - ${Math.random()}`,
         useAI: true,
       };
