@@ -6,7 +6,6 @@ import { AppModule } from '../src/app.module';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
 import { TarotDeck } from '../src/modules/tarot/decks/entities/tarot-deck.entity';
 import { TarotSpread } from '../src/modules/tarot/spreads/entities/tarot-spread.entity';
-import { TarotCard } from '../src/modules/tarot/cards/entities/tarot-card.entity';
 import { PredefinedQuestion } from '../src/modules/predefined-questions/entities/predefined-question.entity';
 
 interface LoginResponse {
@@ -52,7 +51,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
   let freeUserId: number;
   let deckId: number;
   let spreadId: number;
-  let cardIds: number[];
   let predefinedQuestionId: number;
   const testTimestamp = Date.now();
 
@@ -72,7 +70,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
     const dataSource = dbHelper.getDataSource();
     const deckRepository = dataSource.getRepository(TarotDeck);
     const spreadRepository = dataSource.getRepository(TarotSpread);
-    const cardRepository = dataSource.getRepository(TarotCard);
     const questionRepository = dataSource.getRepository(PredefinedQuestion);
 
     const decks = await deckRepository.find();
@@ -86,12 +83,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
       throw new Error('No spreads found. Seeders must run first.');
     }
     spreadId = spreads[0].id;
-
-    const cards = await cardRepository.find({ take: 3 });
-    if (cards.length < 3) {
-      throw new Error('Not enough cards found. Seeders must run first.');
-    }
-    cardIds = cards.map((c) => c.id);
 
     const questions = await questionRepository.find();
     if (questions.length === 0) {
@@ -156,12 +147,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
               predefinedQuestionId: predefinedQuestionId,
               deckId: deckId,
               spreadId: spreadId,
-              cardIds: cardIds,
-              cardPositions: [
-                { cardId: cardIds[0], position: 'past', isReversed: false },
-                { cardId: cardIds[1], position: 'present', isReversed: false },
-                { cardId: cardIds[2], position: 'future', isReversed: false },
-              ],
               useAI: false,
             }),
         );
@@ -214,12 +199,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
               predefinedQuestionId: predefinedQuestionId,
               deckId: deckId,
               spreadId: spreadId,
-              cardIds: cardIds,
-              cardPositions: [
-                { cardId: cardIds[0], position: 'past', isReversed: false },
-                { cardId: cardIds[1], position: 'present', isReversed: false },
-                { cardId: cardIds[2], position: 'future', isReversed: false },
-              ],
               useAI: false,
             }),
         );
@@ -273,12 +252,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(401);
@@ -330,12 +303,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(401);
@@ -365,12 +332,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         });
 
@@ -455,12 +416,6 @@ describe('Free User Edge Cases E2E (SUBTASK-18)', () => {
           predefinedQuestionId: predefinedQuestionId,
           deckId: deckId,
           spreadId: spreadId,
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'past', isReversed: false },
-            { cardId: cardIds[1], position: 'present', isReversed: false },
-            { cardId: cardIds[2], position: 'future', isReversed: false },
-          ],
           useAI: false,
         })
         .expect(201);

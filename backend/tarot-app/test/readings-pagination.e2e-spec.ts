@@ -267,12 +267,6 @@ describe('Readings Pagination E2E', () => {
           predefinedQuestionId: predefinedQuestionIds[i % 2],
           deckId: deckId,
           spreadId: spreadIds[i % 2],
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: false },
-          ],
           useAI: false,
         });
 
@@ -290,12 +284,6 @@ describe('Readings Pagination E2E', () => {
           predefinedQuestionId: predefinedQuestionIds[i % 2],
           deckId: deckId,
           spreadId: spreadIds[i % 2],
-          cardIds: cardIds,
-          cardPositions: [
-            { cardId: cardIds[0], position: 'Past', isReversed: false },
-            { cardId: cardIds[1], position: 'Present', isReversed: false },
-            { cardId: cardIds[2], position: 'Future', isReversed: false },
-          ],
           useAI: false,
         });
 
