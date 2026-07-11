@@ -114,14 +114,11 @@ Image optimization settings in `next.config.ts`:
 
 ```typescript
 images: {
+  // No remote images allowed: every card is served locally
+  remotePatterns: [],
+
   // Supported formats (AVIF > WebP > JPEG)
   formats: ['image/avif', 'image/webp'],
-
-  // Remote image patterns
-  remotePatterns: [
-    { hostname: 'upload.wikimedia.org' },
-    { hostname: '*.wikimedia.org' },
-  ],
 
   // Cache optimized images for 30 days
   minimumCacheTTL: 60 * 60 * 24 * 30,
@@ -129,8 +126,27 @@ images: {
   // Device and image sizes for responsive images
   deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
   imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+
+  // Skip optimization in development for faster builds
+  unoptimized: process.env.NODE_ENV === 'development',
 }
 ```
+
+### `remotePatterns` is empty on purpose
+
+The 78 tarot cards used to be loaded from `upload.wikimedia.org`. They are now served
+locally as WebP from `/public/images/tarot/`, so `remotePatterns` is empty and `next/image`
+**rejects any remote host**. Adding a remote URL to `imageUrl` in the database (or to a seed)
+will break the image at render time — the file must live under `/public/images/`.
+
+The database is kept in sync by two migrations, one per table:
+
+| Table | Migration |
+|-------|-----------|
+| `tarot_card` (readings, card of the day) | `1776400000000-MigrateCardImagesToLocalWebP` |
+| `encyclopedia_tarot_cards` (encyclopedia) | `1776800000000-MigrateEncyclopediaCardImagesToLocalWebP` |
+
+Both run automatically when the backend boots (`migrationsRun: true` in `src/config/typeorm.ts`).
 
 ## Best Practices
 

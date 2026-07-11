@@ -329,25 +329,50 @@ No existe hoy ninguna integración de ads ni de analytics activa (los `gtag()` d
 
 ### T-PROD-003: Sincronizar Cartas HQ en el Entorno Deployado
 
+**Estado:** 🔄 Parte de código ✅ COMPLETADA (PR) — pasos de Ops pendientes de ejecución en Railway
 **Prioridad:** 🟠 Alta
 **Estimación:** 1 punto
 **Dependencias:** acceso a la DB y al pipeline de deploy del entorno
 **Cubre Hallazgo:** PROD-003
-**Tipo:** Ops (sin PR, salvo el paso 5)
+**Tipo:** Ops + PR (migración de la enciclopedia + docs)
+
+> ⚠️ **El paso a paso original quedó desactualizado.** El diagnóstico del repo encontró tres cosas
+> que cambian el procedimiento; los pasos de abajo ya están corregidos:
+>
+> 1. El `Dockerfile` del frontend **ya copia `public/`** (`frontend/Dockerfile:43`), así que el
+>    pitfall clásico de `output: 'standalone'` no aplica. Las 79 WebP están trackeadas en git.
+> 2. **`npm run migration:run` no se puede correr en el contenedor deployado**: el script usa
+>    `ts-node` sobre `src/config/data-source.ts`, y la imagen de producción no copia `src/` ni
+>    conserva las devDependencies (`npm prune --omit=dev`). No hace falta: `src/config/typeorm.ts`
+>    tiene **`migrationsRun: true`**, o sea que **el backend aplica las migraciones solo, al arrancar**.
+> 3. **Faltaba una migración.** La enciclopedia usa otra tabla (`encyclopedia_tarot_cards`, columna
+>    `image_url`) y la migración existente solo cubría `tarot_card`. El commit `f596e2c9` pasó la seed
+>    data de la enciclopedia a WebP locales pero nunca creó la migración, y el seeder es idempotente
+>    por omisión (si la tabla ya tiene filas, no las toca). Sin esa migración, un entorno sembrado
+>    antes de `f596e2c9` sigue con URLs de Wikimedia en la enciclopedia y `next/image` las rechaza.
 
 #### ✅ Paso a paso
 
 1. **Diagnóstico del estado actual del entorno deployado:**
-   - [ ] DB: `SELECT "imageUrl" FROM tarot_card WHERE name = 'El Loco';` → ¿devuelve `/images/tarot/the-fool.webp` o una URL de wikimedia?
+   - [ ] DB (tiradas): `SELECT "imageUrl" FROM tarot_card WHERE name = 'El Loco';` → ¿`/images/tarot/the-fool.webp` o una URL de wikimedia?
+   - [ ] DB (enciclopedia): `SELECT "image_url" FROM encyclopedia_tarot_cards WHERE slug = 'the-fool';` → ídem.
    - [ ] Assets: `GET https://<frontend>/images/tarot/the-fool.webp` → ¿200 o 404?
-2. **Deploy del frontend PRIMERO** (o simultáneo): asegurar que la build deployada incluye las 78 WebP de `frontend/public/images/tarot/`. Con `output: 'standalone'` en Docker, **verificar que el Dockerfile copia `public/` a la imagen final** (paso clásico olvidado del modo standalone).
-3. **Correr la migración en la DB del entorno:** `npm run migration:run` en el backend deployado → aplica `1776400000000-MigrateCardImagesToLocalWebP` (78 UPDATEs). ⚠️ Orden importante: si la migración corre pero el frontend viejo no tiene los assets → 404; si el frontend nuevo corre sin la migración → next/image **rechaza** wikimedia (`remotePatterns: []`) y las cartas se ven rotas. Ventana de inconsistencia mínima = frontend primero, migración inmediatamente después.
-4. **Verificación:** repetir el paso 1 (debe dar path local + 200) y navegar una tirada, la carta del día y varias fichas de la **enciclopedia** (tabla y assets distintos: `encyclopedia_tarot_card` + `/images/enciclopedia/`). Probar con caché del navegador vacía.
-5. **(Mini-PR):** actualizar [IMAGE_OPTIMIZATION.md](../frontend/docs/IMAGE_OPTIMIZATION.md), que aún documenta `remotePatterns` con `upload.wikimedia.org` y contradice el `next.config.ts` actual.
+2. **Deploy del frontend PRIMERO.** La build ya incluye las 78 WebP de `frontend/public/images/tarot/` (el Dockerfile copia `public/`; verificado). Con esto los assets quedan servidos **antes** de que la DB cambie.
+3. **Deploy del backend (aplica las migraciones automáticamente al bootear).** No se corre ningún comando: al arrancar, TypeORM aplica las pendientes —
+   `1776400000000-MigrateCardImagesToLocalWebP` (tabla `tarot_card`, 78 UPDATEs) y
+   `1776800000000-MigrateEncyclopediaCardImagesToLocalWebP` (tabla `encyclopedia_tarot_cards`, derivada del slug, idempotente).
+   ⚠️ **Por eso el orden importa:** desplegar el backend es lo que dispara la migración. Si el backend arranca antes de que el frontend nuevo tenga los assets → 404. Si el frontend nuevo va sin la migración → next/image **rechaza** wikimedia (`remotePatterns: []`) y las cartas se ven rotas. Ventana mínima = frontend primero, backend inmediatamente después.
+4. **Verificación:** repetir el paso 1 (debe dar path local + 200) y navegar una tirada, la carta del día y varias fichas de la **enciclopedia**, con caché del navegador vacía. Ojo: las fichas de la enciclopedia usan los mismos assets `/images/tarot/*.webp`; `/images/enciclopedia/` son solo las imágenes de hub/hero, hardcodeadas en el frontend.
+5. **(PR):** [x] migración `1776800000000-MigrateEncyclopediaCardImagesToLocalWebP` + [x] actualizar [IMAGE_OPTIMIZATION.md](../frontend/docs/IMAGE_OPTIMIZATION.md), que documentaba `remotePatterns` con `upload.wikimedia.org` y contradecía el `next.config.ts` actual.
 
 #### 🎯 Criterios de Aceptación
 
 - Todas las superficies (tiradas, carta del día, historial, enciclopedia) muestran las WebP locales en el entorno deployado, sin 404 ni errores de next/image.
+
+#### 📝 Notas técnicas
+
+- **Resto pendiente (menor):** `tarot-decks.data.ts:41` todavía tiene una URL de Wikimedia para la tapa del mazo (`tarot_deck.imageUrl`). Hoy es dato muerto —ningún componente del frontend la renderiza— por eso no se tocó. Si alguna vez se muestra el mazo, hay que migrarla también o `next/image` la va a rechazar.
+- La migración de la enciclopedia deriva la URL del `slug` (`'/images/tarot/' || slug || '.webp'`) en una única sentencia con `WHERE image_url NOT LIKE '/images/tarot/%'`, así que es idempotente y no hace nada si el entorno ya estaba sano. Se verificó que los 78 slugs coinciden exactamente con los 78 nombres de archivo WebP.
 
 ---
 
