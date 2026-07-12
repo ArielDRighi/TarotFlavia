@@ -58,6 +58,9 @@ describe('ResetPasswordForm', () => {
     it('should not render the form when there is no token', () => {
       render(<ResetPasswordForm token={null} />);
 
+      // El testid del formulario no debe existir en el estado de enlace inválido:
+      // si no, un test que afirme "el form se renderiza" pasaría también acá
+      expect(screen.queryByTestId('reset-password-form')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Nueva contraseña')).not.toBeInTheDocument();
     });
 

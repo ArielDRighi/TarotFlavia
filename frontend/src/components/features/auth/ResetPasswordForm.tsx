@@ -82,15 +82,15 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   if (!token) {
     return (
-      <Card className="shadow-soft w-full max-w-md rounded-2xl" data-testid="reset-password-form">
+      <Card
+        className="shadow-soft w-full max-w-md rounded-2xl"
+        data-testid="reset-password-invalid-link"
+      >
         <CardHeader className="text-center">
           <h1 className="text-primary font-serif text-3xl">Enlace inválido</h1>
         </CardHeader>
 
-        <CardContent
-          className="text-muted-foreground text-center text-sm"
-          data-testid="reset-password-invalid-link"
-        >
+        <CardContent className="text-muted-foreground text-center text-sm">
           <p>
             El enlace no es válido: le falta el código de recuperación. Puede que se haya cortado al
             copiarlo del email.
