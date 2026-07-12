@@ -15,6 +15,10 @@ describe('ForgotPasswordUseCase', () => {
   const GENERIC_MESSAGE =
     'Si el email está registrado, recibirás un enlace para restablecer tu contraseña.';
 
+  /** Deja correr los microtasks pendientes (el envío del email va en segundo plano) */
+  const flushPromises = (): Promise<void> =>
+    new Promise((resolve) => setImmediate(resolve));
+
   const mockUser = {
     id: 7,
     email: 'test@example.com',
@@ -128,9 +132,31 @@ describe('ForgotPasswordUseCase', () => {
       const result = await useCase.execute('test@example.com');
 
       expect(result).toEqual({ message: GENERIC_MESSAGE });
+
+      // El envío va en segundo plano: el error se loguea después de responder
+      await flushPromises();
       expect(loggerErrorSpy).toHaveBeenCalled();
 
       loggerErrorSpy.mockRestore();
+    });
+
+    it('should not wait for the SMTP round-trip before answering', async () => {
+      // Enumeración por timing: si la respuesta esperara al envío, tardaría mucho más
+      // para un email registrado que para uno inexistente.
+      let resolveSend: () => void = () => {};
+      emailService.sendPasswordResetEmail.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSend = resolve;
+          }),
+      );
+
+      const result = await useCase.execute('test@example.com');
+
+      expect(result).toEqual({ message: GENERIC_MESSAGE });
+      expect(emailService.sendPasswordResetEmail).toHaveBeenCalled();
+
+      resolveSend();
     });
   });
 });

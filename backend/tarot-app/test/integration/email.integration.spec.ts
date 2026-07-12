@@ -75,6 +75,10 @@ describe('Email Integration Tests', () => {
   });
 
   afterEach(async () => {
+    // Los spies se montan sobre la MISMA instancia de EmailService en todos los tests:
+    // sin restaurarlos, las llamadas se acumulan entre casos y los toHaveBeenCalledTimes fallan.
+    jest.restoreAllMocks();
+
     if (testUser?.id) {
       const userRepo = dataSource.getRepository(User);
       await userRepo.delete({ id: testUser.id });
@@ -84,7 +88,9 @@ describe('Email Integration Tests', () => {
   describe('Welcome Email', () => {
     it('should send welcome email when user registers', async () => {
       // ARRANGE
-      const sendWelcomeSpy = jest.spyOn(emailService, 'sendWelcomeEmail');
+      const sendWelcomeSpy = jest
+        .spyOn(emailService, 'sendWelcomeEmail')
+        .mockResolvedValue(undefined);
 
       // ACT
       await emailService.sendWelcomeEmail(testUser.email, testUser.name);
@@ -106,10 +112,9 @@ describe('Email Integration Tests', () => {
      */
     it('should send password reset email when user requests it', async () => {
       // ARRANGE
-      const sendPasswordResetSpy = jest.spyOn(
-        emailService,
-        'sendPasswordResetEmail',
-      );
+      const sendPasswordResetSpy = jest
+        .spyOn(emailService, 'sendPasswordResetEmail')
+        .mockResolvedValue(undefined);
 
       // ACT
       const result = await authService.forgotPassword(testUser.email);
@@ -127,10 +132,9 @@ describe('Email Integration Tests', () => {
 
     it('should send password reset email with valid token that can be used', async () => {
       // ARRANGE
-      const sendPasswordResetSpy = jest.spyOn(
-        emailService,
-        'sendPasswordResetEmail',
-      );
+      const sendPasswordResetSpy = jest
+        .spyOn(emailService, 'sendPasswordResetEmail')
+        .mockResolvedValue(undefined);
 
       // ACT: Request password reset
       await authService.forgotPassword(testUser.email);
@@ -154,7 +158,9 @@ describe('Email Integration Tests', () => {
   describe('Plan Change Email', () => {
     it('should send plan change notification when user upgrades to premium', async () => {
       // ARRANGE
-      const sendPlanChangeSpy = jest.spyOn(emailService, 'sendPlanChangeEmail');
+      const sendPlanChangeSpy = jest
+        .spyOn(emailService, 'sendPlanChangeEmail')
+        .mockResolvedValue(undefined);
 
       // ACT
       await emailService.sendPlanChangeEmail(testUser.email, {

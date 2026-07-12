@@ -1091,10 +1091,42 @@ Es decir: hoy los únicos emails que la app manda de verdad son los de cuota, la
 - [x] `EmailService` no tiene métodos huérfanos (`sendPlanChangeEmail` cableado; `sendSharedReading` borrado con su template).
 - [x] Ciclo de calidad backend completo pasa (4474 tests, coverage 84.69%, build y arquitectura OK).
 
-> ⚠️ **Pendiente de verificación real:** los tests de integración/e2e tocados **no se corrieron**
-> (no hay Postgres levantado en el entorno de desarrollo). El ciclo obligatorio (unit + coverage +
-> build + arquitectura) sí pasa completo. La prueba de punta a punta contra el SMTP real queda para
-> el cierre de la tarea, con el frontend mergeado.
+#### 🔬 Hallazgos de la revisión (2026-07-12)
+
+- 🔴 **Los templates `.hbs` nunca llegaban a `dist` → en producción NO salía ningún email con template.**
+  `nest build` es tsc puro: no copia assets, y `nest-cli.json` solo declaraba las fuentes de
+  `birth-chart`. El `Dockerfile` copia únicamente `dist/`, así que en Railway
+  `dist/src/modules/email/templates/` **no existe** → `HandlebarsAdapter` hace `readFileSync` → **ENOENT**
+  → `sendMail` rechaza. **Esto afecta a todos los mails con template desde siempre** (cuota de IA,
+  confirmación de compra), no solo a los de esta tarea: los llamadores tragan el error y solo lo
+  loguean, así que falló en silencio todo este tiempo. **Los tests unitarios no lo veían** porque
+  ts-jest corre desde `src/`, donde los templates sí están; T-PROD-004 tampoco, porque validó el
+  transporte con un script suelto de nodemailer, sin pasar por el pipeline de templates.
+  **Corregido:** glob de assets en `nest-cli.json` + `watchAssets`, y un test de regresión
+  (`email-templates.spec.ts`) que falla si el glob se pierde o si falta un template que usa `EmailService`.
+- 🟠 **Enumeración de usuarios por *timing*.** El mensaje genérico no alcanzaba: un email registrado
+  esperaba la ida y vuelta al SMTP (~1 s) y uno inexistente respondía en ~0 ms. Ese delta es un oráculo
+  trivial de medir. **Corregido:** el envío del mail de reset va en segundo plano (`void … .catch()`),
+  así la respuesta no depende de si el usuario existe.
+- 🟠 **`FRONTEND_URL` tenía como default `http://localhost:3000`, que es el puerto del *backend*.**
+  Está declarada con default en `env.validation.ts`, así que `getOrThrow` nunca falla: si Railway no la
+  tiene cargada, **los links de todos los emails salen apuntando a localhost y no se registra ningún
+  error**. **Corregido** el default a `3001` y descomentada en `.env.example`. **Sigue siendo obligatoria
+  en producción** — candidata a sumarse al fail-fast de **T-PROD-012**.
+- 🟡 Los spies de los tests de integración corrían el envío **real** (`jest.spyOn` sin `mockResolvedValue`):
+  con las credenciales de Resend descomentadas en el `.env` local, `npm run test:integration` mandaba
+  mails de verdad a direcciones inexistentes (hard bounces + cuota). **Corregido.**
+- ❗ **Hallazgo sin resolver → tarea nueva:** `EmailService` referencia los templates
+  **`provider-cost-warning` y `provider-cost-limit-reached`, que NO existen** en
+  `src/modules/email/templates/`. Las alertas de costo de IA al admin (`ai-provider-cost.service.ts`)
+  **nunca pudieron enviarse**, ni siquiera con los templates ya copiados al build: el método atrapa el
+  error y no relanza. Es el mismo agujero que denunciaba el hallazgo de T-PROD-004 sobre
+  `ADMIN_EMAIL_COST_ALERTS`: si el gasto de IA se dispara, nadie se entera.
+
+> ⚠️ **Pendiente de verificación real:** los tests de integración/e2e tocados **no se corrieron localmente**
+> (no hay Postgres en el entorno de desarrollo); los corre el CI. La prueba de punta a punta contra el
+> SMTP real queda para el cierre de la tarea, con el frontend mergeado — y ahora es imprescindible,
+> porque el bug de los templates demuestra que el ciclo de calidad no cubre el envío real.
 
 ---
 
