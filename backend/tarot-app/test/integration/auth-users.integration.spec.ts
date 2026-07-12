@@ -58,7 +58,15 @@ describe('Auth + Users Integration Tests', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      // El alta de usuario ahora dispara el email de bienvenida: sin este override, cada
+      // registro de este spec intentaría un envío REAL a una dirección de prueba.
+      .overrideProvider(EmailService)
+      .useValue({
+        sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
+        sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
@@ -388,7 +396,10 @@ describe('Auth + Users Integration Tests', () => {
      * ni se loguea. Los tests lo leen del EmailService, la única vía legítima.
      */
     const requestResetToken = async (email: string): Promise<string> => {
-      const sendSpy = jest.spyOn(emailService, 'sendPasswordResetEmail');
+      // mockResolvedValue: sin él, el spy ejecuta el envío REAL (mails a direcciones de test)
+      const sendSpy = jest
+        .spyOn(emailService, 'sendPasswordResetEmail')
+        .mockResolvedValue(undefined);
       sendSpy.mockClear();
 
       await authService.forgotPassword(email);

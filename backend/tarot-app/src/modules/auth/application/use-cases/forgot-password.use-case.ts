@@ -34,19 +34,18 @@ export class ForgotPasswordUseCase {
     const { token } =
       await this.passwordResetRepository.generateResetToken(email);
 
-    try {
-      await this.emailService.sendPasswordResetEmail(
-        user.email,
-        user.name,
-        token,
-      );
-    } catch (error) {
-      // Un fallo de envío no debe cambiar la respuesta: hacerlo revelaría que el email existe.
-      this.logger.error(
-        `Error al enviar el email de recuperación al usuario ${user.id}`,
-        error instanceof Error ? error.stack : String(error),
-      );
-    }
+    // Envío en segundo plano, a propósito: si esperáramos al SMTP, la respuesta tardaría
+    // ~1s para un email registrado y ~0ms para uno que no lo está. Ese delta es un oráculo
+    // de enumeración de usuarios, justo lo que el mensaje genérico intenta evitar.
+    // Un fallo de envío tampoco debe cambiar la respuesta, por la misma razón.
+    void this.emailService
+      .sendPasswordResetEmail(user.email, user.name, token)
+      .catch((error: unknown) => {
+        this.logger.error(
+          `Error al enviar el email de recuperación al usuario ${user.id}`,
+          error instanceof Error ? error.stack : String(error),
+        );
+      });
 
     return { message: GENERIC_MESSAGE };
   }
