@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import {
-  SharedReadingData,
   PlanChangeData,
   QuotaWarningData,
   QuotaLimitReachedData,
@@ -21,44 +20,18 @@ export class EmailService {
   ) {}
 
   /**
-   * Envía un email con la lectura de tarot compartida
-   */
-  async sendSharedReading(
-    to: string,
-    readingData: SharedReadingData,
-  ): Promise<void> {
-    try {
-      await this.mailerService.sendMail({
-        to,
-        subject: 'Tu lectura de Tarot',
-        template: 'shared-reading',
-        context: readingData,
-      });
-
-      this.logger.log(
-        `Email de lectura compartida enviado exitosamente a ${to}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Error al enviar email de lectura compartida a ${to}`,
-        error instanceof Error ? error.stack : String(error),
-      );
-      throw new Error('Error al enviar email de lectura compartida');
-    }
-  }
-
-  /**
    * Envía email de bienvenida a nuevos usuarios
    */
   async sendWelcomeEmail(to: string, userName: string): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to,
-        subject: 'Bienvenido a Tarot App',
+        subject: 'Bienvenida a Auguria',
         template: 'welcome',
         context: {
           userName,
           email: to,
+          frontendUrl: this.configService.getOrThrow<string>('FRONTEND_URL'),
         },
       });
 
@@ -82,7 +55,7 @@ export class EmailService {
   ): Promise<void> {
     try {
       const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
-      const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+      const resetUrl = `${frontendUrl}/restablecer-password?token=${resetToken}`;
 
       await this.mailerService.sendMail({
         to,
@@ -90,7 +63,6 @@ export class EmailService {
         template: 'password-reset',
         context: {
           userName,
-          resetToken,
           resetUrl,
         },
       });

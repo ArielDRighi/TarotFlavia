@@ -5,18 +5,6 @@ export interface EmailOptions {
   context: Record<string, unknown>;
 }
 
-export interface SharedReadingData {
-  userName: string;
-  readingType: string;
-  cards: Array<{
-    name: string;
-    position: string;
-    interpretation?: string;
-  }>;
-  interpretation: string;
-  date: Date;
-}
-
 export interface WelcomeEmailData {
   userName: string;
   email: string;
@@ -24,7 +12,6 @@ export interface WelcomeEmailData {
 
 export interface PasswordResetData {
   userName: string;
-  resetToken: string;
   resetUrl: string;
 }
 

@@ -1007,11 +1007,22 @@ Es decir: **los mensajes de los clientes se pierden en la consola del navegador.
 
 ### T-PROD-015: El Reset de Contraseña No Envía Nada (Usuarios Sin Recuperación de Cuenta)
 
+**Estado:** 🔄 Backend ✅ COMPLETADO (PR) — frontend en curso (página `/restablecer-password`)
 **Prioridad:** 🔴 **Crítica — bloqueante de lanzamiento**
 **Estimación:** 3 puntos
 **Dependencias:** T-PROD-004 (necesita el SMTP real andando)
 **Origen:** hallazgo al ejecutar T-PROD-004
-**Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`)
+**Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`) **+ Frontend** (`docs/WORKFLOW_FRONTEND.md`)
+
+> 🚨 **Hallazgo al iniciar la tarea: el problema era más grande que el diagnóstico original.**
+> El backlog daba por sentado que bastaba con cablear el email, pero **el frontend no tiene
+> ninguna página que consuma el token**. Las rutas son en español y solo existe
+> `/recuperar-password` (el formulario que *pide* el mail); no hay pantalla que llame a
+> `POST /auth/reset-password`, que sí existe y funciona hace tiempo en el backend.
+> Es decir: cableando solo el backend, el mail habría llegado con un link a un **404**, y el
+> criterio de aceptación #1 sería imposible de cumplir. Por eso la tarea pasa a cubrir **los dos
+> stacks** (dos PRs, uno por stack). Ruta elegida por el Delta: **`/restablecer-password?token=`**
+> (en español, separada de `/recuperar-password` para no mezclar dos pantallas distintas).
 
 #### 📋 Problema
 
@@ -1044,22 +1055,34 @@ El problema es más amplio: **4 de los 9 métodos de `EmailService` son código 
 
 Es decir: hoy los únicos emails que la app manda de verdad son los de cuota, la confirmación de compra y las alertas de costo al admin. **Todo el correo de la cuenta del usuario (reset, bienvenida, cambio de plan) no existe.**
 
-#### ✅ Tareas específicas
+#### ✅ Tareas específicas — Backend (✅ COMPLETADO)
 
-- [ ] **`forgot-password.use-case.ts`**: inyectar `EmailService` y llamar a `sendPasswordResetEmail` con el link armado sobre `FRONTEND_URL`. **Eliminar el `console.log` del token** (es una fuga: el token de reset queda escrito en los logs del servidor, y en Railway los logs son consultables).
-- [ ] **Dejar de devolver el `token` en la respuesta HTTP.** Hoy se devuelve fuera de producción "para los tests de integración"; los tests deben leerlo de la DB o de un mock del `EmailService`, no de la respuesta de la API. Devolver un token de reset por la API es un patrón peligroso que no debe quedar ni condicionado a `NODE_ENV`.
-- [ ] El mensaje de respuesta debe ser **el mismo exista o no el usuario** (no filtrar qué emails están registrados) — verificar que ya sea así.
-- [ ] **Bienvenida:** llamar a `sendWelcomeEmail` en el registro. El fallo del email **no debe hacer fallar el alta** (envolver en try/catch y loguear; el usuario ya quedó creado).
-- [ ] **Decidir sobre los otros dos huérfanos:** `sendPlanChangeEmail` (cablear al cambio de plan) y `sendSharedReading` (¿se usa la feature de compartir lectura por email? si no, **borrar método + template**, no dejar código muerto).
-- [ ] Tests: reset envía el mail con el link correcto; el token **no** aparece en la respuesta ni en los logs; el registro sigue funcionando aunque el email falle.
+- [x] **`forgot-password.use-case.ts`**: inyecta `UsersService` + `EmailService` y llama a `sendPasswordResetEmail`; el link se arma sobre `FRONTEND_URL`. **`console.log` del token eliminado** (era una fuga: quedaba escrito en los logs de Railway, que son consultables).
+- [x] **El `token` ya no se devuelve en la respuesta HTTP** en ningún entorno. Los tests que lo leían de la respuesta (o del `console.log`) ahora lo obtienen del `EmailService` mockeado — la misma vía que el usuario real: `password-recovery.e2e-spec.ts`, `auth-users.integration.spec.ts` y `email.integration.spec.ts` (estos dos últimos tenían 2 tests en `it.skip` esperando justamente esta tarea; quedaron **habilitados**).
+- [x] El mensaje de respuesta es **el mismo exista o no el usuario**: *"Si el email está registrado, recibirás un enlace para restablecer tu contraseña."* Además, si el usuario no existe **ni siquiera se genera un token**, y un fallo de SMTP **no cambia la respuesta** (devolver un 500 solo cuando el usuario existe sería un canal de enumeración).
+- [x] **Bienvenida:** `sendWelcomeEmail` cableado en `register.use-case.ts` dentro de try/catch — si el email falla, el alta igual se completa (solo se loguea el error).
+- [x] **Huérfanos resueltos:** `sendPlanChangeEmail` cableado a la **activación Premium** del webhook de MP (no crítico: try/catch, el pago ya está acreditado). `sendSharedReading` + `shared-reading.hbs` + `SharedReadingData` **borrados**: la feature de compartir usa link público (`/compartida/[token]`), no email — era código muerto.
+- [x] **Marca:** las plantillas `welcome` y `password-reset` decían *"Tarot App"* → **Auguria**; el CTA del mail de bienvenida apuntaba a `href='#'` → ahora a `FRONTEND_URL`.
+- [x] Tests: reset envía el mail con el link correcto; el token **no** aparece en la respuesta ni en los logs; el registro sobrevive al fallo del email; la activación Premium notifica y sobrevive al fallo del email.
+
+#### ✅ Tareas específicas — Frontend
+
+- [ ] Página `/restablecer-password` que toma el `token` de la query, pide la nueva contraseña (con confirmación y las reglas de fortaleza del backend) y llama a `POST /auth/reset-password`.
+- [ ] Manejo de token inválido/expirado/ya usado (el backend responde 400) con opción de volver a pedir el mail.
+- [ ] Al éxito: redirigir a `/login` con feedback.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Un usuario que olvida su contraseña recibe el mail, hace clic en el link y **recupera su cuenta**, de punta a punta, en producción.
-- [ ] El token de reset **no** aparece en los logs del servidor ni en ninguna respuesta HTTP.
-- [ ] Un alta de usuario recibe el mail de bienvenida, y si el envío falla el alta igual se completa.
-- [ ] `EmailService` no tiene métodos huérfanos (o se cablean, o se borran con su template).
-- [ ] Ciclo de calidad backend completo pasa.
+- [ ] Un usuario que olvida su contraseña recibe el mail, hace clic en el link y **recupera su cuenta**, de punta a punta, en producción. *(requiere el PR de frontend)*
+- [x] El token de reset **no** aparece en los logs del servidor ni en ninguna respuesta HTTP.
+- [x] Un alta de usuario recibe el mail de bienvenida, y si el envío falla el alta igual se completa.
+- [x] `EmailService` no tiene métodos huérfanos (`sendPlanChangeEmail` cableado; `sendSharedReading` borrado con su template).
+- [x] Ciclo de calidad backend completo pasa (4474 tests, coverage 84.69%, build y arquitectura OK).
+
+> ⚠️ **Pendiente de verificación real:** los tests de integración/e2e tocados **no se corrieron**
+> (no hay Postgres levantado en el entorno de desarrollo). El ciclo obligatorio (unit + coverage +
+> build + arquitectura) sí pasa completo. La prueba de punta a punta contra el SMTP real queda para
+> el cierre de la tarea, con el frontend mergeado.
 
 ---
 

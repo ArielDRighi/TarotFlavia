@@ -100,18 +100,11 @@ describe('Email Integration Tests', () => {
 
   describe('Password Reset Email', () => {
     /**
-     * TODO: Implementar integración completa de email en AuthOrchestratorService.forgotPassword()
-     *
-     * Actualmente AuthOrchestratorService.forgotPassword() solo hace console.log() del token
-     * (ver src/modules/auth/auth.service.ts línea 221)
-     *
-     * Cuando se implemente EmailService.sendPasswordResetEmail() en ese método,
-     * descomentar estos tests para validar el flujo end-to-end:
-     * - Generación de token
-     * - Envío de email con link de reset
-     * - Validación del token para cambiar contraseña
+     * El token de reseteo viaja SOLO por email (T-PROD-015): no se devuelve por la API
+     * ni se loguea. Los tests lo obtienen espiando al EmailService, que es la única vía
+     * legítima — la misma que usa el usuario desde su bandeja de entrada.
      */
-    it.skip('should send password reset email when user requests it', async () => {
+    it('should send password reset email when user requests it', async () => {
       // ARRANGE
       const sendPasswordResetSpy = jest.spyOn(
         emailService,
@@ -125,19 +118,14 @@ describe('Email Integration Tests', () => {
       expect(sendPasswordResetSpy).toHaveBeenCalledTimes(1);
       expect(sendPasswordResetSpy).toHaveBeenCalledWith(
         testUser.email,
-        expect.objectContaining({
-          userName: testUser.name,
-          resetLink: expect.stringContaining('reset-password'),
-        }),
+        testUser.name,
+        expect.any(String),
       );
-
-      // En test mode, el token debe retornarse
-      if (process.env.NODE_ENV !== 'production') {
-        expect(result.token).toBeDefined();
-      }
+      // El token nunca se filtra por la respuesta HTTP
+      expect(result).not.toHaveProperty('token');
     });
 
-    it.skip('should send password reset email with valid token that can be used', async () => {
+    it('should send password reset email with valid token that can be used', async () => {
       // ARRANGE
       const sendPasswordResetSpy = jest.spyOn(
         emailService,
@@ -145,21 +133,21 @@ describe('Email Integration Tests', () => {
       );
 
       // ACT: Request password reset
-      const result = await authService.forgotPassword(testUser.email);
+      await authService.forgotPassword(testUser.email);
 
       // ASSERT: Email sent
       expect(sendPasswordResetSpy).toHaveBeenCalledTimes(1);
 
-      // ACT: Use the token to reset password
-      const newPassword = 'NewTestPass456!';
+      // ACT: Use the token from the email to reset password
+      const resetToken = sendPasswordResetSpy.mock.calls[0][2];
       const resetResult = await authService.resetPassword(
-        result.token!,
-        newPassword,
+        resetToken,
+        'NewTestPass456!',
       );
 
       // ASSERT: Password was reset successfully
       expect(resetResult).toBeDefined();
-      expect(resetResult.message).toContain('actualizada exitosamente');
+      expect(resetResult.message).toBe('Password reset successful');
     });
   });
 

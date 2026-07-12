@@ -3,11 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
 import { Logger } from '@nestjs/common';
-import {
-  SharedReadingData,
-  WelcomeEmailData,
-  PlanChangeData,
-} from './interfaces/email.interface';
+import { WelcomeEmailData, PlanChangeData } from './interfaces/email.interface';
 
 describe('EmailService', () => {
   let service: EmailService;
@@ -59,91 +55,6 @@ describe('EmailService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('sendSharedReading', () => {
-    it('should send shared reading email successfully', async () => {
-      const to = 'user@example.com';
-      const readingData: SharedReadingData = {
-        userName: 'John Doe',
-        readingType: 'Tirada de 3 cartas',
-        cards: [
-          {
-            name: 'El Mago',
-            position: 'Pasado',
-            interpretation: 'Nuevos comienzos',
-          },
-          {
-            name: 'La Emperatriz',
-            position: 'Presente',
-            interpretation: 'Creatividad',
-          },
-          {
-            name: 'El Sol',
-            position: 'Futuro',
-            interpretation: 'Éxito',
-          },
-        ],
-        interpretation: 'Una lectura positiva indicando crecimiento personal',
-        date: new Date('2025-10-31'),
-      };
-
-      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
-
-      await service.sendSharedReading(to, readingData);
-
-      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
-      expect(mailerService.sendMail).toHaveBeenCalledWith({
-        to,
-        subject: 'Tu lectura de Tarot',
-        template: 'shared-reading',
-        context: readingData,
-      });
-    });
-
-    it('should handle errors when sending shared reading email', async () => {
-      const to = 'user@example.com';
-      const readingData: SharedReadingData = {
-        userName: 'John Doe',
-        readingType: 'Tirada de 3 cartas',
-        cards: [],
-        interpretation: 'Test interpretation',
-        date: new Date(),
-      };
-
-      const error = new Error('SMTP Error');
-      mockMailerService.sendMail.mockRejectedValue(error);
-
-      await expect(service.sendSharedReading(to, readingData)).rejects.toThrow(
-        'Error al enviar email de lectura compartida',
-      );
-
-      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
-    });
-
-    it('should log success when email is sent', async () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'log');
-      const to = 'user@example.com';
-      const readingData: SharedReadingData = {
-        userName: 'John Doe',
-        readingType: 'Tirada de 3 cartas',
-        cards: [],
-        interpretation: 'Test interpretation',
-        date: new Date(),
-      };
-
-      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
-
-      await service.sendSharedReading(to, readingData);
-
-      expect(loggerSpy).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Email de lectura compartida enviado exitosamente',
-        ),
-      );
-
-      loggerSpy.mockRestore();
-    });
-  });
-
   describe('sendWelcomeEmail', () => {
     it('should send welcome email successfully', async () => {
       const to = 'newuser@example.com';
@@ -159,11 +70,12 @@ describe('EmailService', () => {
       expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
       expect(mailerService.sendMail).toHaveBeenCalledWith({
         to,
-        subject: 'Bienvenido a Tarot App',
+        subject: 'Bienvenida a Auguria',
         template: 'welcome',
         context: {
           userName: data.userName,
           email: to,
+          frontendUrl: 'http://localhost:3000',
         },
       });
     });
@@ -214,8 +126,7 @@ describe('EmailService', () => {
         template: 'password-reset',
         context: {
           userName,
-          resetToken,
-          resetUrl: expect.stringContaining(resetToken),
+          resetUrl: `http://localhost:3000/restablecer-password?token=${resetToken}`,
         },
       });
     });

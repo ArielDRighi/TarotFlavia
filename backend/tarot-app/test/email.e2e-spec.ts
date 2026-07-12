@@ -4,10 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EmailModule } from '../src/modules/email/email.module';
 import { EmailService } from '../src/modules/email/email.service';
-import {
-  SharedReadingData,
-  PlanChangeData,
-} from '../src/modules/email/interfaces/email.interface';
+import { PlanChangeData } from '../src/modules/email/interfaces/email.interface';
 
 describe('EmailService (e2e)', () => {
   let app: INestApplication;
@@ -40,10 +37,6 @@ describe('EmailService (e2e)', () => {
       expect(emailService).toBeDefined();
     });
 
-    it('should have sendSharedReading method', () => {
-      expect(emailService.sendSharedReading).toBeDefined();
-    });
-
     it('should have sendWelcomeEmail method', () => {
       expect(emailService.sendWelcomeEmail).toBeDefined();
     });
@@ -59,38 +52,6 @@ describe('EmailService (e2e)', () => {
     // NOTE: These tests won't actually send emails in CI/CD
     // They verify the service structure and configuration
     describe('Email sending (mocked for CI/CD)', () => {
-      it('should handle shared reading email structure', async () => {
-        const readingData: SharedReadingData = {
-          userName: 'Test User',
-          readingType: 'Tirada de 3 cartas',
-          cards: [
-            {
-              name: 'El Mago',
-              position: 'Pasado',
-              interpretation: 'Nuevos comienzos',
-            },
-          ],
-          interpretation: 'Test interpretation',
-          date: new Date(),
-        };
-
-        // In a real test environment with Mailtrap or similar,
-        // you would actually send the email and verify it was received
-        // For now, we just verify the method accepts the correct parameters
-        expect(async () => {
-          // This will fail in CI without proper SMTP config, which is expected
-          try {
-            await emailService.sendSharedReading(
-              'test@example.com',
-              readingData,
-            );
-          } catch (error) {
-            // Expected to fail without SMTP config
-            expect(error).toBeDefined();
-          }
-        }).toBeDefined();
-      });
-
       it('should handle welcome email structure', async () => {
         expect(async () => {
           try {

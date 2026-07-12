@@ -7,6 +7,9 @@ import { RefreshTokenDto } from './application/dto/refresh-token.dto';
 import { UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 
+const GENERIC_FORGOT_PASSWORD_MESSAGE =
+  'Si el email está registrado, recibirás un enlace para restablecer tu contraseña.';
+
 describe('AuthController', () => {
   let controller: AuthController;
   let authServiceMock: Partial<AuthOrchestratorService>;
@@ -295,13 +298,13 @@ describe('AuthController', () => {
     it('should call authService.forgotPassword and return success message', async () => {
       const dto = { email: 'test@example.com' };
       authServiceMock.forgotPassword = jest.fn().mockResolvedValue({
-        message: 'Password reset email sent',
+        message: GENERIC_FORGOT_PASSWORD_MESSAGE,
       });
 
       const result = await controller.forgotPassword(dto);
 
       expect(authServiceMock.forgotPassword).toHaveBeenCalledWith(dto.email);
-      expect(result).toEqual({ message: 'Password reset email sent' });
+      expect(result).toEqual({ message: GENERIC_FORGOT_PASSWORD_MESSAGE });
     });
 
     it('should handle errors from authService.forgotPassword', async () => {
