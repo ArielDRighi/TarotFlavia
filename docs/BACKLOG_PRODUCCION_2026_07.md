@@ -323,7 +323,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-001 | Migrar Mercado Pago a producción (credenciales, webhook, env) | Ops/Config | 🔴 Crítica | 1 pt |
 | T-PROD-002 | Fix header móvil: logo en el flujo flex (sin overlap con auth) | Frontend | 🟠 Alta | 1 pt |
 | T-PROD-003 | Sincronizar cartas HQ en el entorno deployado (migración + assets) | Ops | 🟠 Alta | 1 pt |
-| T-PROD-004 | Email del dominio: buzón humano en Porkbun + envío transaccional por Resend (SMTP) | Ops/Infra | 🟠 Alta | 1 pt |
+| T-PROD-004 | ✅ Email del dominio: buzón humano en Porkbun + envío transaccional por Resend (SMTP) | Ops/Infra | 🟠 Alta | 1 pt |
 | T-PROD-005 | Dorso final de las cartas (imagen WebP en lugar del patrón CSS) | Frontend | 🟡 Media | 1.5 pts |
 | T-PROD-006 | Mezcla de cartas server-side (backend: shuffle autoritativo con crypto) | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-007 | Mezcla de cartas: adaptar el frontend al nuevo contrato | Frontend | 🔴 Crítica | 2 pts |
@@ -466,8 +466,9 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 ---
 
-### T-PROD-004: Email Dedicado del Dominio (Porkbun) + SMTP Real
+### T-PROD-004: Email del Dominio — Porkbun (recibe) + Resend (envía) — ✅ COMPLETADA
 
+**Estado:** ✅ **COMPLETADA** (2026-07-12) — infraestructura de email operativa y verificada de punta a punta.
 **Prioridad:** 🟠 Alta
 **Estimación:** 1 punto
 **Dependencias:** acceso a la cuenta de Porkbun donde está `auguriatarot.com`
@@ -525,13 +526,13 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 **Fase 1 — Porkbun: el buzón humano (completarla y verificarla ANTES de tocar Resend)**
 
-1. [ ] Panel → *Domain Management* → `auguriatarot.com` → icono de sobre (columna **EMAIL**).
-2. [ ] Bloque **Porkbun Email Hosting** → *Add Hosted Email Account* → **Add to Cart** → checkout (US$36/año).
-3. [ ] Con la compra hecha, crear la casilla `consultas` con su password. **Anotar ese password aparte**: es el de la *casilla*, no el de la cuenta Porkbun.
-4. [ ] Porkbun agrega sus **MX** en la raíz al activar el servicio. En el panel de email, habilitar **DKIM y DMARC** si no vienen encendidos. Si el DNS quedara inconsistente, el panel tiene un botón **Fix DNS**.
-5. [ ] Verificar que **recibe**: mandar un mail desde Gmail a `consultas@auguriatarot.com` y abrirlo en el **webmail** de Porkbun.
-6. [ ] Verificar que **envía**: responder desde el webmail y confirmar que llega a Gmail (anotar si cae en spam).
-7. [ ] Crear los alias de forwarding gratis: `hola@` y `pagos@` (notificaciones de MercadoPago/Railway) → `consultas@`; `flavia@` → el mail de Flavia. **No** crear un forward para `consultas@` (chocaría con la casilla).
+1. [x] Panel → *Domain Management* → `auguriatarot.com` → icono de sobre (columna **EMAIL**).
+2. [x] Bloque **Porkbun Email Hosting** → *Add Hosted Email Account* → **Add to Cart** → checkout (US$36/año).
+3. [x] Con la compra hecha, crear la casilla `consultas` con su password. **Anotar ese password aparte**: es el de la *casilla*, no el de la cuenta Porkbun.
+4. [x] Porkbun agrega sus **MX** en la raíz al activar el servicio. En el panel de email, habilitar **DKIM y DMARC** si no vienen encendidos. Si el DNS quedara inconsistente, el panel tiene un botón **Fix DNS**.
+5. [x] Verificar que **recibe**: mandar un mail desde Gmail a `consultas@auguriatarot.com` y abrirlo en el **webmail** de Porkbun.
+6. [x] Verificar que **envía**: responder desde el webmail y confirmar que llega a Gmail (anotar si cae en spam).
+7. [x] Crear los alias de forwarding gratis: `hola@` y `pagos@` (notificaciones de MercadoPago/Railway) → `consultas@`; `flavia@` → el mail de Flavia. **No** crear un forward para `consultas@` (chocaría con la casilla).
 
 > **⚠️ Gmail web ya no puede leer la casilla.** Google discontinuó el fetch por POP3 en Gmail.com en
 > **enero de 2026** (aviso en el panel de Porkbun). Para leer `consultas@`: el webmail de Porkbun, un
@@ -544,8 +545,8 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 **Fase 2 — Resend: el remitente transaccional**
 
-8. [ ] Crear cuenta en [resend.com](https://resend.com) → *Domains* → **Add Domain** → `auguriatarot.com` (raíz), eligiendo la región de envío más cercana.
-9. [ ] Resend muestra los registros a cargar. Copiarlos **del panel, en el momento** (varían por región y cuenta — **no** copiarlos de esta doc). La forma que tienen es:
+8. [x] Crear cuenta en [resend.com](https://resend.com) → *Domains* → **Add Domain** → `auguriatarot.com` (raíz), eligiendo la región de envío más cercana.
+9. [x] Resend muestra los registros a cargar. Copiarlos **del panel, en el momento** (varían por región y cuenta — **no** copiarlos de esta doc). La forma que tienen es:
 
    | Tipo | Host | Valor | Nota |
    |------|------|-------|------|
@@ -553,13 +554,13 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
    | `TXT` | `send` | `v=spf1 include:amazonses.com ~all` | SPF del Envelope-From, **separado** del SPF raíz de Porkbun. |
    | `TXT` | `resend._domainkey` | clave pública DKIM | Selector propio → no choca con el DKIM de Porkbun. |
 
-10. [ ] Cargarlos en Porkbun → *DNS Records*. **No tocar los MX ni el TXT de SPF de la raíz.**
-11. [ ] Esperar propagación y darle **Verify** en Resend hasta que el dominio quede `Verified`.
-12. [ ] Crear una **API Key** en Resend (*API Keys*, con permiso de envío). Es el `SMTP_PASS`.
+10. [x] Cargarlos en Porkbun → *DNS Records*. **No tocar los MX ni el TXT de SPF de la raíz.**
+11. [x] Esperar propagación y darle **Verify** en Resend hasta que el dominio quede `Verified`.
+12. [x] Crear una **API Key** en Resend (*API Keys*, con permiso de envío). Es el `SMTP_PASS`.
 
 **Fase 3 — DMARC (uno solo, compartido)**
 
-13. [ ] En Porkbun → *DNS Records*, dejar **un único** TXT en `_dmarc` (si el paso 4 ya creó uno, **editarlo**, no agregar otro):
+13. [x] En Porkbun → *DNS Records*, dejar **un único** TXT en `_dmarc` (si el paso 4 ya creó uno, **editarlo**, no agregar otro):
     ```
     v=DMARC1; p=none; rua=mailto:consultas@auguriatarot.com
     ```
@@ -567,7 +568,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 **Fase 4 — Backend productivo (Railway)**
 
-14. [ ] Cargar las variables (host/puerto/usuario de Resend son **fijos**; ver [docs de SMTP de Resend](https://resend.com/docs/send-with-smtp)):
+14. [x] Cargar las variables (host/puerto/usuario de Resend son **fijos**; ver [docs de SMTP de Resend](https://resend.com/docs/send-with-smtp)):
     ```bash
     SMTP_HOST=smtp.resend.com
     SMTP_PORT=587                          # STARTTLS. El módulo hace secure:true solo si el puerto es 465.
@@ -576,7 +577,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
     EMAIL_FROM=noreply@auguriatarot.com    # el dominio debe estar Verified en Resend
     FRONTEND_URL=https://<frontend-productivo>   # los links de reset salen de acá
     ```
-15. [ ] Redeploy del backend.
+15. [x] Redeploy del backend.
 
 **Fase 5 — Verificación**
 
@@ -586,27 +587,43 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 > arregla eso: son dos problemas distintos. T-PROD-004 valida el **transporte**; T-PROD-015 conecta los
 > **flujos**.
 
-16. [ ] En los logs de arranque, el warning `⚠️ Email configuration is incomplete... TEST MODE with jsonTransport` **ya no aparece**.
-17. [ ] **Test directo del transporte** (script temporal con `nodemailer`, espejando la config de `email.module.ts`: `secure: port === 465`): `transport.verify()` acepta las credenciales y `sendMail()` devuelve `250`.
-18. [ ] El mail de prueba llega a Gmail **a bandeja de entrada** (no spam), y en *Mostrar original* los **tres** dan `PASS`: SPF, **DKIM firmado con `auguriatarot.com`** y DMARC.
-19. [ ] Dashboard de Resend → *Logs*: el envío figura como `Delivered` (esta visibilidad es justamente lo que el SMTP de Porkbun no daba).
-20. [ ] Enviar un mail a [mail-tester.com](https://www.mail-tester.com) por el relay de Resend → score ≥ 9/10, con SPF, DKIM y DMARC en verde.
-21. [ ] Repetir el mail-tester **desde el webmail de Porkbun** (`consultas@`): valida la otra mitad del DNS, que es independiente.
-22. [ ] Una vez todo en verde, **volver el DMARC a `p=quarantine`** (durante la migración quedó en `p=none`).
+16. [x] En los logs de arranque, el warning `⚠️ Email configuration is incomplete... TEST MODE with jsonTransport` **ya no aparece**.
+17. [x] **Test directo del transporte** (script temporal con `nodemailer`, espejando la config de `email.module.ts`: `secure: port === 465`): `transport.verify()` acepta las credenciales y `sendMail()` devuelve `250`.
+18. [x] El mail de prueba llega a Gmail **a bandeja de entrada** (no spam), y en *Mostrar original* los **tres** dan `PASS`: SPF, **DKIM firmado con `auguriatarot.com`** y DMARC.
+19. [x] Dashboard de Resend → *Logs*: el envío figura como `Delivered` (esta visibilidad es justamente lo que el SMTP de Porkbun no daba).
+20. [x] Enviar un mail a [mail-tester.com](https://www.mail-tester.com) por el relay de Resend → score ≥ 9/10, con SPF, DKIM y DMARC en verde.
+21. [ ] *(opcional, diagnóstico)* Repetir el mail-tester **desde el webmail de Porkbun** (`consultas@`): valida la otra mitad del DNS, que es independiente. Se espera un score menor al de Resend por el DKIM que Porkbun no firma.
+22. [x] Una vez todo en verde, **volver el DMARC a `p=quarantine`** (durante la migración estuvo en `p=none`). ✅ verificado con `dig`.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Los emails transaccionales salen de `noreply@auguriatarot.com` vía Resend y llegan a **bandeja de entrada** (no spam) en Gmail/Outlook.
-- [ ] El módulo de email del backend deja de operar en `jsonTransport` en producción.
-- [ ] `consultas@auguriatarot.com` recibe **y responde** correctamente (buzón humano operativo).
-- [ ] SPF, DKIM y DMARC pasan en verde para **ambos** caminos (Resend y Porkbun), con un único registro DMARC.
+- [x] Los emails transaccionales salen de `noreply@auguriatarot.com` vía Resend y llegan a **bandeja de entrada** (no spam) en Gmail/Outlook.
+- [x] El módulo de email del backend deja de operar en `jsonTransport` en producción.
+- [x] `consultas@auguriatarot.com` recibe **y responde** correctamente (buzón humano operativo).
+- [x] SPF, DKIM y DMARC pasan en verde para **ambos** caminos (Resend y Porkbun), con un único registro DMARC.
+
+#### 🔬 Evidencia de la verificación (2026-07-12)
+
+| Check | Resultado |
+|---|---|
+| Transporte SMTP (`verify()` + `sendMail()` con la config de `email.module.ts`) | ✅ credenciales aceptadas, `250 OK` |
+| Mail de prueba en Gmail | ✅ **bandeja de entrada**, entregado en 1 s |
+| SPF / DKIM / DMARC (Gmail → *Mostrar original*) | ✅ los tres `PASS`, **DKIM firmado con `auguriatarot.com`** |
+| Resend → Logs | ✅ `POST /emails` → `200` |
+| **mail-tester (vía Resend)** | ✅ **10/10** |
+| Railway (producción): warning de `jsonTransport` en el boot | ✅ **no aparece** → el módulo tomó las variables |
+| Railway: arranque | ✅ `Modo: Production`, `Nest application successfully started`, 0 warnings, 0 errores |
+| DNS: MX/SPF/DKIM de Porkbun tras cargar Resend | ✅ intactos (verificado con `dig`) |
 
 #### 📝 Hallazgos durante la ejecución (2026-07-12)
 
-- **Porkbun no firma con DKIM el correo saliente**, aunque el registro `default._domainkey` está publicado. El DMARC pasa igual, apoyado solo en SPF — funciona, pero es frágil (un reenvío rompe el SPF y no queda nada que sostenga el DMARC). **No es bloqueante**: el DKIM que le importa a la app es el de Resend (selector `resend`), que es independiente. Pendiente: consultar al soporte de Porkbun. **No usar el botón *Fix DNS*** sin cuidado — regenera los registros de email hosting y puede pisar el `_dmarc` editado a mano.
-- **El `_dmarc` que crea el botón *Configure DMARC* de Porkbun sale con `p=quarantine`** y con los reportes (`rua`/`ruf`) apuntando a una dirección de MXToolbox a la que el Delta **no tiene acceso**. Se bajó a `p=none` durante la migración y se agregó `mailto:consultas@auguriatarot.com` al `rua`.
-- **Hay un `CNAME *.auguriatarot.com`** (parking de Porkbun) que tapaba `send.auguriatarot.com`. Al crear registros explícitos en `send`, el wildcard dejó de aplicar sobre ese nombre (verificado con `dig`). Si Resend alguna vez falla al verificar, **el wildcard es el primer sospechoso**.
-- **Precio real:** US$3/mes/inbox billed yearly = **US$36/año**. El trial de 15 días que menciona la KB de Porkbun **no se ofreció**.
+- 🔴 **El reset de contraseña no manda nada** → **T-PROD-015**. El hallazgo más importante de la tarea: configurar el SMTP no le sirve a ningún usuario final hasta que esto se cablee.
+- ⚠️ **`ADMIN_EMAIL_COST_ALERTS` no estaba seteada** (ni declarada en `env.validation.ts`). Sin ella, `ai-provider-cost.service.ts` loguea un warning y **no manda la alerta**: si el gasto de IA se dispara en producción, nadie se entera. Se cargó en Railway apuntando a `consultas@auguriatarot.com`. **Debería declararse en `env.validation.ts`** (candidata a sumarse a T-PROD-012).
+- ⚠️ **Porkbun no firma con DKIM el correo saliente**, aunque el registro `default._domainkey` está publicado. El DMARC pasa igual, apoyado solo en SPF — funciona, pero es frágil (un reenvío rompe el SPF y no queda nada que sostenga el DMARC). **No es bloqueante**: el DKIM que le importa a la app es el de Resend (selector `resend`), que es independiente. Pendiente: consultar al soporte de Porkbun. **Cuidado con el botón *Fix DNS*** — regenera los registros de email hosting y puede pisar el `_dmarc` editado a mano.
+- ⚠️ **El `_dmarc` que crea el botón *Configure DMARC* de Porkbun sale con `p=quarantine`** y con los reportes (`rua`/`ruf`) apuntando a una dirección de MXToolbox a la que el Delta **no tiene acceso**. Durante la migración se bajó a `p=none`; al terminar se restauró a `p=quarantine` y se agregó `mailto:consultas@auguriatarot.com` al `rua` para tener visibilidad propia.
+- ⚠️ **Hay un `CNAME *.auguriatarot.com`** (parking de Porkbun) que tapaba `send.auguriatarot.com`. Al crear registros explícitos en `send`, el wildcard dejó de aplicar sobre ese nombre (verificado con `dig`). Si Resend alguna vez falla al verificar, **el wildcard es el primer sospechoso**.
+- ⚠️ **Con el SMTP cargado, el entorno local manda mails REALES.** Antes corría en `jsonTransport` (inofensivo). Un seed o un test de integración con datos reales ahora le escribe a personas reales y consume la cuota de Resend. **Las credenciales quedan comentadas en el `.env` local**; descomentar solo para pruebas puntuales.
+- **Precio real:** US$3/mes/inbox billed yearly = **US$36/año**. El trial de 15 días que menciona la KB de Porkbun **no se ofreció**. Resend: US$0 (free tier: 3.000/mes, 100/día).
 
 #### 🔗 Tareas derivadas
 
