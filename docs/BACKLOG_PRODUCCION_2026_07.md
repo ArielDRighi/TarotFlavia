@@ -334,6 +334,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-012 | Fail-fast de SMTP en producción (hoy el fallback a jsonTransport es silencioso) + Reply-To | Backend | 🟠 Alta | 1 pt |
 | T-PROD-013 | Página de contacto: la dirección pública `contacto@auguria.com` no existe (dominio equivocado) | Frontend | 🔴 Crítica | 0.5 pt |
 | T-PROD-014 | Formulario de contacto: enviar de verdad (endpoint + EmailService); hoy los mensajes se pierden | Full-stack | 🟠 Alta | 3 pts |
+| T-PROD-015 | **Reset de contraseña no envía nada**: usuarios sin recuperación de cuenta + métodos huérfanos | Backend | 🔴 Crítica | 3 pts |
 
 ---
 
@@ -579,12 +580,19 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 **Fase 5 — Verificación**
 
+> **⚠️ Ojo: esta tarea NO se puede verificar con "registro" ni "reset de contraseña".** Al ejecutarla se
+> descubrió que **nadie llama** a `sendWelcomeEmail` ni a `sendPasswordResetEmail` — el reset imprime el
+> link en la consola del servidor y le miente al usuario. Ver **T-PROD-015**. Configurar el SMTP no
+> arregla eso: son dos problemas distintos. T-PROD-004 valida el **transporte**; T-PROD-015 conecta los
+> **flujos**.
+
 16. [ ] En los logs de arranque, el warning `⚠️ Email configuration is incomplete... TEST MODE with jsonTransport` **ya no aparece**.
-17. [ ] Registrar un usuario de prueba → llega el email de bienvenida a Gmail, **a bandeja de entrada**.
-18. [ ] Pedir un reset de contraseña → llega el mail y el link apunta al `FRONTEND_URL` productivo.
-19. [ ] Dashboard de Resend → *Emails*: ambos envíos aparecen como `Delivered` (esta visibilidad es justamente lo que el SMTP de Porkbun no daba).
-20. [ ] Enviar un mail a [mail-tester.com](https://www.mail-tester.com) desde la app → score ≥ 9/10, con SPF, DKIM y DMARC en verde.
+17. [ ] **Test directo del transporte** (script temporal con `nodemailer`, espejando la config de `email.module.ts`: `secure: port === 465`): `transport.verify()` acepta las credenciales y `sendMail()` devuelve `250`.
+18. [ ] El mail de prueba llega a Gmail **a bandeja de entrada** (no spam), y en *Mostrar original* los **tres** dan `PASS`: SPF, **DKIM firmado con `auguriatarot.com`** y DMARC.
+19. [ ] Dashboard de Resend → *Logs*: el envío figura como `Delivered` (esta visibilidad es justamente lo que el SMTP de Porkbun no daba).
+20. [ ] Enviar un mail a [mail-tester.com](https://www.mail-tester.com) por el relay de Resend → score ≥ 9/10, con SPF, DKIM y DMARC en verde.
 21. [ ] Repetir el mail-tester **desde el webmail de Porkbun** (`consultas@`): valida la otra mitad del DNS, que es independiente.
+22. [ ] Una vez todo en verde, **volver el DMARC a `p=quarantine`** (durante la migración quedó en `p=none`).
 
 #### 🎯 Criterios de Aceptación
 
@@ -593,10 +601,18 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 - [ ] `consultas@auguriatarot.com` recibe **y responde** correctamente (buzón humano operativo).
 - [ ] SPF, DKIM y DMARC pasan en verde para **ambos** caminos (Resend y Porkbun), con un único registro DMARC.
 
+#### 📝 Hallazgos durante la ejecución (2026-07-12)
+
+- **Porkbun no firma con DKIM el correo saliente**, aunque el registro `default._domainkey` está publicado. El DMARC pasa igual, apoyado solo en SPF — funciona, pero es frágil (un reenvío rompe el SPF y no queda nada que sostenga el DMARC). **No es bloqueante**: el DKIM que le importa a la app es el de Resend (selector `resend`), que es independiente. Pendiente: consultar al soporte de Porkbun. **No usar el botón *Fix DNS*** sin cuidado — regenera los registros de email hosting y puede pisar el `_dmarc` editado a mano.
+- **El `_dmarc` que crea el botón *Configure DMARC* de Porkbun sale con `p=quarantine`** y con los reportes (`rua`/`ruf`) apuntando a una dirección de MXToolbox a la que el Delta **no tiene acceso**. Se bajó a `p=none` durante la migración y se agregó `mailto:consultas@auguriatarot.com` al `rua`.
+- **Hay un `CNAME *.auguriatarot.com`** (parking de Porkbun) que tapaba `send.auguriatarot.com`. Al crear registros explícitos en `send`, el wildcard dejó de aplicar sobre ese nombre (verificado con `dig`). Si Resend alguna vez falla al verificar, **el wildcard es el primer sospechoso**.
+- **Precio real:** US$3/mes/inbox billed yearly = **US$36/año**. El trial de 15 días que menciona la KB de Porkbun **no se ofreció**.
+
 #### 🔗 Tareas derivadas
 
-- **T-PROD-012** (fail-fast de SMTP en producción): el fallback silencioso a `jsonTransport` hace que un typo en una variable de Railway deje a todos los usuarios sin reset de contraseña, con la app aparentemente sana. Conviene mergearla **antes** del cutover de esta tarea.
-- **Reply-To:** hoy `EmailModule` no setea `replyTo`, así que si un cliente le responde a `noreply@` el mail se pierde. Debe apuntar a `consultas@auguriatarot.com` (incluido en T-PROD-012).
+- **T-PROD-015** 🔴 (reset de contraseña que no envía nada): **sin esto, T-PROD-004 no le sirve a ningún usuario final.** El transporte queda perfecto y ningún mail de auth sale igual.
+- **T-PROD-012** (fail-fast de SMTP en producción): el fallback silencioso a `jsonTransport` hace que un typo en una variable de Railway deje a todos los usuarios sin emails, con la app aparentemente sana. Conviene mergearla **antes** del cutover de esta tarea.
+- **T-PROD-014** (formulario de contacto): depende del SMTP que habilita esta tarea.
 
 ---
 
@@ -972,6 +988,64 @@ Es decir: **los mensajes de los clientes se pierden en la consola del navegador.
 
 ---
 
+### T-PROD-015: El Reset de Contraseña No Envía Nada (Usuarios Sin Recuperación de Cuenta)
+
+**Prioridad:** 🔴 **Crítica — bloqueante de lanzamiento**
+**Estimación:** 3 puntos
+**Dependencias:** T-PROD-004 (necesita el SMTP real andando)
+**Origen:** hallazgo al ejecutar T-PROD-004
+**Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`)
+
+#### 📋 Problema
+
+[forgot-password.use-case.ts](../backend/tarot-app/src/modules/auth/application/use-cases/forgot-password.use-case.ts):
+
+```ts
+// TODO: For now, log the link to console (until real email integration is implemented)
+console.log(`/reset-password?token=${token}`);
+return {
+  message: 'Password reset email sent',              // ← mentira
+  token: process.env.NODE_ENV !== 'production' ? token : undefined,
+};
+```
+
+**En producción, "olvidé mi contraseña" está completamente roto.** El backend genera el token, lo imprime en la consola del servidor, le responde al usuario *"Password reset email sent"* y **no manda ningún mail**. Y como en producción el token tampoco se devuelve, **un usuario que pierde su contraseña queda encerrado afuera de su cuenta, sin ninguna vía de recuperación.**
+
+Configurar el SMTP (T-PROD-004) **no arregla esto**: el transporte queda perfecto y el mail no sale igual, porque nadie lo manda.
+
+El problema es más amplio: **4 de los 9 métodos de `EmailService` son código muerto** — nadie los llama.
+
+| Método | ¿Quién lo llama? |
+|---|---|
+| `sendPasswordResetEmail` | ❌ **nadie** ← el crítico |
+| `sendWelcomeEmail` | ❌ nadie |
+| `sendPlanChangeEmail` | ❌ nadie |
+| `sendSharedReading` | ❌ nadie |
+| `sendQuotaWarningEmail` / `sendQuotaLimitReachedEmail` | ✅ `ai-quota.service.ts` |
+| `sendHolisticServiceConfirmation` | ✅ webhook de MP |
+| `sendProviderCostWarning/LimitReached` | ✅ `ai-provider-cost.service.ts` |
+
+Es decir: hoy los únicos emails que la app manda de verdad son los de cuota, la confirmación de compra y las alertas de costo al admin. **Todo el correo de la cuenta del usuario (reset, bienvenida, cambio de plan) no existe.**
+
+#### ✅ Tareas específicas
+
+- [ ] **`forgot-password.use-case.ts`**: inyectar `EmailService` y llamar a `sendPasswordResetEmail` con el link armado sobre `FRONTEND_URL`. **Eliminar el `console.log` del token** (es una fuga: el token de reset queda escrito en los logs del servidor, y en Railway los logs son consultables).
+- [ ] **Dejar de devolver el `token` en la respuesta HTTP.** Hoy se devuelve fuera de producción "para los tests de integración"; los tests deben leerlo de la DB o de un mock del `EmailService`, no de la respuesta de la API. Devolver un token de reset por la API es un patrón peligroso que no debe quedar ni condicionado a `NODE_ENV`.
+- [ ] El mensaje de respuesta debe ser **el mismo exista o no el usuario** (no filtrar qué emails están registrados) — verificar que ya sea así.
+- [ ] **Bienvenida:** llamar a `sendWelcomeEmail` en el registro. El fallo del email **no debe hacer fallar el alta** (envolver en try/catch y loguear; el usuario ya quedó creado).
+- [ ] **Decidir sobre los otros dos huérfanos:** `sendPlanChangeEmail` (cablear al cambio de plan) y `sendSharedReading` (¿se usa la feature de compartir lectura por email? si no, **borrar método + template**, no dejar código muerto).
+- [ ] Tests: reset envía el mail con el link correcto; el token **no** aparece en la respuesta ni en los logs; el registro sigue funcionando aunque el email falle.
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] Un usuario que olvida su contraseña recibe el mail, hace clic en el link y **recupera su cuenta**, de punta a punta, en producción.
+- [ ] El token de reset **no** aparece en los logs del servidor ni en ninguna respuesta HTTP.
+- [ ] Un alta de usuario recibe el mail de bienvenida, y si el envío falla el alta igual se completa.
+- [ ] `EmailService` no tiene métodos huérfanos (o se cablean, o se borran con su template).
+- [ ] Ciclo de calidad backend completo pasa.
+
+---
+
 ## ORDEN DE EJECUCIÓN SUGERIDO
 
 1. **T-PROD-002** (header móvil) — bug visible, fix acotado, sin dependencias.
@@ -983,7 +1057,8 @@ Es decir: **los mensajes de los clientes se pierden en la consola del navegador.
 7. **T-PROD-008 → T-PROD-009** (AdSense) — la fase 1 puede desarrollarse en cualquier momento; la fase 2 requiere el sitio productivo estable (Google revisa el dominio), así que va última.
 8. **T-PROD-010 + T-PROD-011** (segunda ronda: selector móvil + notificaciones) — bugs visibles, fixes acotados, sin dependencias entre sí ni con el resto. Se desarrollan juntos en una sola rama/PR por ser ambos frontend y de la misma ronda de navegación.
 9. **T-PROD-013** (dirección de contacto rota) — independiente de todo y trivial; puede salir **ya**, sin esperar al email. Es una dirección rota de cara al público.
-10. **T-PROD-014** (formulario de contacto que sí envía) — **después** de T-PROD-004, porque necesita el SMTP real andando.
+10. **T-PROD-015** (reset de contraseña) — 🔴 **inmediatamente después de T-PROD-004**. Es el consumidor que justifica todo el trabajo de email: sin esto, el SMTP anda pero ningún usuario puede recuperar su cuenta. **No se lanza sin esta tarea.**
+11. **T-PROD-014** (formulario de contacto que sí envía) — también después de T-PROD-004, pero puede esperar a 015.
 
 ---
 
