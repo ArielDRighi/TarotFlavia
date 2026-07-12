@@ -332,6 +332,8 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-010 | ✅ Selector de horóscopo: carrusel móvil con nombres completos (occidental + chino) | Frontend | 🟠 Alta | 2 pts |
 | T-PROD-011 | ✅ Ocultar y bloquear notificaciones tras feature flag + sincronizar el enum | Frontend | 🟠 Alta | 1.5 pts |
 | T-PROD-012 | Fail-fast de SMTP en producción (hoy el fallback a jsonTransport es silencioso) + Reply-To | Backend | 🟠 Alta | 1 pt |
+| T-PROD-013 | Página de contacto: la dirección pública `contacto@auguria.com` no existe (dominio equivocado) | Frontend | 🔴 Crítica | 0.5 pt |
+| T-PROD-014 | Formulario de contacto: enviar de verdad (endpoint + EmailService); hoy los mensajes se pierden | Full-stack | 🟠 Alta | 3 pts |
 
 ---
 
@@ -903,6 +905,73 @@ Segundo problema, menor: el módulo no setea `replyTo`. Si un cliente le respond
 
 ---
 
+### T-PROD-013: La Dirección Pública de la Página de Contacto No Existe
+
+**Prioridad:** 🔴 Crítica (dirección rota de cara al público; el fix es trivial)
+**Estimación:** 0.5 punto
+**Dependencias:** ninguna — **no** espera a T-PROD-004
+**Origen:** hallazgo al revisar los alias de email de T-PROD-004
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### 📋 Problema
+
+[contacto/page.tsx:55](../frontend/src/app/contacto/page.tsx#L55) publica como dirección de contacto **`contacto@auguria.com`**. Ese dominio **no es el del proyecto** (el dominio real es `auguriatarot.com`) y esa casilla **no existe**. Todo cliente que le escriba recibe un rebote — o, peor, el mail le llega a quien sea que tenga registrado `auguria.com`.
+
+Es un resto del rebrand: el mismo dominio equivocado aparece también en el `README.md` (`soporte@auguria.com`, `seguridad@auguria.com`).
+
+#### ✅ Tareas específicas
+
+- [ ] `contacto/page.tsx:55`: `contacto@auguria.com` → **`consultas@auguriatarot.com`** (la casilla real, creada en T-PROD-004).
+- [ ] Barrer el resto del repo por el dominio equivocado: `grep -rn "auguria\.com" --include="*.tsx" --include="*.ts" --include="*.md" .` y corregir (`README.md` incluido).
+- [ ] Considerar extraer la dirección a una constante única (`CONTACT_EMAIL`) para que no vuelva a divergir.
+- [ ] Test: la página de contacto renderiza la dirección correcta.
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] Ninguna dirección de un dominio que no sea `auguriatarot.com` queda publicada en el frontend.
+- [ ] Ciclo de calidad frontend completo pasa.
+
+---
+
+### T-PROD-014: El Formulario de Contacto No Envía Nada
+
+**Prioridad:** 🟠 Alta
+**Estimación:** 3 puntos
+**Dependencias:** **T-PROD-004** (necesita el SMTP real andando) + T-PROD-012 (deseable)
+**Origen:** hallazgo al revisar los alias de email de T-PROD-004
+**Tipo:** Full-stack (backend + frontend)
+
+#### 📋 Problema
+
+El formulario de contacto **valida** (Zod: `name`, `email`, `subject`, `message` — [contact.schemas.ts](../frontend/src/lib/validations/contact.schemas.ts)) pero **no envía**. El `onSubmit` de [ContactForm.tsx:50-55](../frontend/src/components/features/contact/ContactForm.tsx#L50-L55) es un `TODO` y **no existe endpoint de contacto en el backend**. La propia página lo admite con un `DisclaimerBanner`:
+
+> *"Este formulario es funcional pero el envío de correos aún no está implementado. Los mensajes se muestran en la consola del navegador."*
+
+Es decir: **los mensajes de los clientes se pierden en la consola del navegador.** Un usuario completa el form, ve el mensaje de éxito, y nadie recibe nada.
+
+#### ✅ Tareas específicas
+
+**Backend:**
+- [ ] Endpoint público `POST /contact` (sin `JwtAuthGuard`) con su DTO espejando el schema Zod del frontend.
+- [ ] **Rate limiting obligatorio** (endpoint público sin auth = vector de spam): throttle por IP, del orden de 3/hora.
+- [ ] Nuevo template `contact-message.hbs` + método en `EmailService` que envíe a `consultas@auguriatarot.com` con el `replyTo` seteado **al email del usuario** (así se le responde directo desde el buzón, sin copiar la dirección a mano).
+- [ ] Tests de use-case y controller (incluido el rechazo por rate limit).
+
+**Frontend:**
+- [ ] `API_ENDPOINTS.CONTACT` en `lib/api/endpoints.ts` (nunca hardcodear la ruta).
+- [ ] Hook `useSendContactMessage` (TanStack Query) y cablearlo en el `onSubmit` de `ContactForm`, con estados de carga y error.
+- [ ] **Eliminar el `DisclaimerBanner`** de `contacto/page.tsx` y el `TODO` del docblock.
+- [ ] Tests: envío exitoso, error de red, y que el botón quede deshabilitado mientras envía.
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] Un mensaje enviado desde la página de contacto **llega a `consultas@auguriatarot.com`**, y responderlo contesta directamente al cliente (gracias al `replyTo`).
+- [ ] El endpoint resiste un flood: pasado el límite, responde 429.
+- [ ] La página ya no muestra el disclaimer de "no implementado".
+- [ ] Ciclos de calidad backend y frontend completos pasan.
+
+---
+
 ## ORDEN DE EJECUCIÓN SUGERIDO
 
 1. **T-PROD-002** (header móvil) — bug visible, fix acotado, sin dependencias.
@@ -913,7 +982,9 @@ Segundo problema, menor: el módulo no setea `replyTo`. Si un cliente le respond
 6. **T-PROD-001** (MP producción) — al final de la preparación, cuando dominio + email estén listos; es el gate de cobros reales.
 7. **T-PROD-008 → T-PROD-009** (AdSense) — la fase 1 puede desarrollarse en cualquier momento; la fase 2 requiere el sitio productivo estable (Google revisa el dominio), así que va última.
 8. **T-PROD-010 + T-PROD-011** (segunda ronda: selector móvil + notificaciones) — bugs visibles, fixes acotados, sin dependencias entre sí ni con el resto. Se desarrollan juntos en una sola rama/PR por ser ambos frontend y de la misma ronda de navegación.
+9. **T-PROD-013** (dirección de contacto rota) — independiente de todo y trivial; puede salir **ya**, sin esperar al email. Es una dirección rota de cara al público.
+10. **T-PROD-014** (formulario de contacto que sí envía) — **después** de T-PROD-004, porque necesita el SMTP real andando.
 
 ---
 
-**Nota:** las tareas de código (T-PROD-002/005/006/007/008/010/011 y las partes PR de 003/009) siguen el workflow correspondiente (`WORKFLOW_FRONTEND.md` / `WORKFLOW_BACKEND.md`): TDD, ciclo de calidad completo, PR a `develop`, y actualización de este backlog al completar cada una.
+**Nota:** las tareas de código (T-PROD-002/005/006/007/008/010/011/012/013/014 y las partes PR de 003/009) siguen el workflow correspondiente (`WORKFLOW_FRONTEND.md` / `WORKFLOW_BACKEND.md`): TDD, ciclo de calidad completo, PR a `develop`, y actualización de este backlog al completar cada una.
