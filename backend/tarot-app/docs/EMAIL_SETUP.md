@@ -19,6 +19,9 @@
 | `EMAIL_REPLY_TO` | 🟡 opcional | Buzón que recibe las respuestas a `noreply@`. Sin ella, caen en `EMAIL_FROM`, donde nadie las lee |
 | `ADMIN_EMAIL_COST_ALERTS` | 🟡 opcional | Destinatario de las alertas de costo de IA. Sin ella, las alertas se saltean con un warning |
 
+Las dos opcionales se pueden **dejar vacías** (`EMAIL_REPLY_TO=`) para desactivarlas: el string
+vacío se trata como "sin valor", no como config inválida, y no rompe el arranque.
+
 ---
 
 ## Comportamiento según el entorno
@@ -26,7 +29,7 @@
 ### 🔴 Producción — fail-fast (T-PROD-012)
 
 Si **falta cualquiera** de las 5 variables SMTP, **la app no arranca**: el boot falla con un
-error que nombra las variables faltantes.
+error que nombra **todas** las variables faltantes de una vez.
 
 Es deliberado. Antes, una configuración incompleta caía en silencio a `jsonTransport`: la app
 levantaba **perfecta**, escribía un `logger.warn` que nadie lee, y **ningún email salía** — reset
@@ -34,9 +37,14 @@ de contraseña incluido, que es lo que deja a un usuario encerrado afuera de su 
 una variable de Railway era un incidente invisible hasta que un cliente reclamaba. Ahora falla
 fuerte y temprano.
 
-Lo mismo vale para `FRONTEND_URL`: en producción **debe** estar seteada y **no** puede apuntar a
-localhost. Tiene default (`http://localhost:3001`), así que sin esta validación los links de todos
-los emails salían apuntando a localhost sin un solo error en los logs.
+Lo mismo vale para `FRONTEND_URL`: en producción **debe** ser una URL absoluta (con esquema) y
+**no** puede apuntar a un host local. Tiene default (`http://localhost:3001`), así que sin esta
+validación los links de todos los emails salían apuntando a localhost sin un solo error en los
+logs; y una URL sin esquema (`www.auguriatarot.com`) los dejaría rotos igual de silenciosamente.
+
+La validación vive en `validate()` (`src/config/env-validator.ts`), que corre en
+`ConfigModule.forRoot` — es decir, **antes** de que TypeORM conecte y aplique las migraciones. Un
+deploy con el email mal configurado muere **sin haber tocado la base**.
 
 ### 🟢 Desarrollo y test — jsonTransport
 
@@ -45,8 +53,21 @@ Sin configuración SMTP completa, el módulo cae a **modo de prueba**:
 - La app arranca normalmente y los tests pasan.
 - Los emails se loguean en la consola, **no se envían**.
 - Se emite un warning al arranque nombrando las variables que faltan.
-- El `HandlebarsAdapter` **también** se configura en este modo, así una plantilla `.hbs` rota se
-  detecta corriendo los tests y no en producción.
+- El `HandlebarsAdapter` **también** se configura en este modo, así el dev local renderiza los
+  `.hbs` de verdad en vez de solo serializarlos.
+
+---
+
+## 🧯 El guard de render (`email-templates.spec.ts`)
+
+Los tests de `EmailService` mockean `MailerService`, así que **nadie compilaba un `.hbs`**: un
+template roto, o un `{{placeholder}}` que el servicio dejó de pasar en el contexto, atravesaba todo
+el ciclo de calidad y explotaba recién en producción.
+
+`email-templates.spec.ts` monta el `MailerModule` **real** con `jsonTransport` y **renderiza los 8
+templates** con el mismo contexto que les pasa `EmailService`. Handlebars corre con `strict: true`,
+así que una variable faltante **rompe el test**. Si agregás un template o cambiás el contexto de uno
+existente, sumalo ahí.
 
 ---
 

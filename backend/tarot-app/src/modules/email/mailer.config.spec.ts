@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { createMailerOptions } from './mailer.config';
 
 /**
@@ -69,13 +70,26 @@ describe('createMailerOptions', () => {
       },
     );
 
-    it('configura el HandlebarsAdapter también en modo jsonTransport (un template roto se detecta en los tests, no en producción)', () => {
+    it('configura el HandlebarsAdapter también en modo jsonTransport (el render se ejercita de verdad en email-templates.spec.ts)', () => {
       const options = createMailerOptions(
         mockConfigService({ NODE_ENV: 'development' }),
       );
 
-      expect(options.template).toBeDefined();
-      expect(options.template?.adapter).toBeDefined();
+      expect(options.template?.adapter).toBeInstanceOf(HandlebarsAdapter);
+      expect(options.template?.dir).toMatch(/[\\/]templates$/);
+    });
+
+    it('también setea el replyTo en modo prueba: los dos modos se comportan igual', () => {
+      const options = createMailerOptions(
+        mockConfigService({
+          NODE_ENV: 'development',
+          EMAIL_REPLY_TO: 'consultas@auguriatarot.com',
+        }),
+      );
+
+      expect(options.defaults).toMatchObject({
+        replyTo: 'consultas@auguriatarot.com',
+      });
     });
   });
 
@@ -98,6 +112,16 @@ describe('createMailerOptions', () => {
 
       expect(secure.transport).toMatchObject({ port: 465, secure: true });
       expect(notSecure.transport).toMatchObject({ port: 587, secure: false });
+    });
+
+    it('rechaza un SMTP_PORT que no es un número: sin esto quedaba un NaN silencioso', () => {
+      // El EmailModule se monta standalone en los e2e, sin la validación de entorno
+      // que garantiza que SMTP_PORT sea un puerto.
+      expect(() =>
+        createMailerOptions(
+          mockConfigService({ ...COMPLETE_SMTP, SMTP_PORT: 'quinientos' }),
+        ),
+      ).toThrow(/SMTP_PORT/);
     });
   });
 

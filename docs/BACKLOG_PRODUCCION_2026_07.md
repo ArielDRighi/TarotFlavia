@@ -936,7 +936,7 @@ Segundo problema, menor: el módulo no setea `replyTo`. Si un cliente le respond
 - [x] `defaults: { from, replyTo: EMAIL_REPLY_TO ?? from }` y `EMAIL_REPLY_TO` declarada en `env.validation.ts` con el mismo `@Matches` de email que `EMAIL_FROM`. Valor productivo: `consultas@auguriatarot.com`.
 - [x] Bloque `template` **fuera del `if`**: la rama de `jsonTransport` ahora también configura el `HandlebarsAdapter`, así un `.hbs` roto se detecta corriendo los tests y no en producción.
 - [x] **Bug encontrado al extraer el factory:** `secure: smtpPort === 465` comparaba **string con number** (`ConfigService` devuelve `'465'`, porque `SMTP_PORT` es `@IsPort()` = string). El resultado era **siempre `false`**: en el puerto 465 se habría intentado conectar **sin TLS implícito**. Hoy no explota solo porque Resend usa 587. Corregido con `Number(...)` y cubierto por test.
-- [x] Tests (12 nuevos en `mailer.config.spec.ts`): fail-fast por cada una de las 5 variables, el error nombra todas las faltantes, `jsonTransport` en `development` y `test`, adapter presente en modo prueba, transporte real, `secure` solo en 465, y `replyTo` con y sin `EMAIL_REPLY_TO`.
+- [x] Tests: fail-fast por cada una de las 5 variables, el error nombra todas las faltantes, `jsonTransport` en `development` y `test`, transporte real, `secure` solo en 465, y `replyTo` con y sin `EMAIL_REPLY_TO`. **+27 tests** en total sobre la suite (4511 → 4538).
 - [x] `.env.example` y [EMAIL_SETUP.md](../backend/tarot-app/docs/EMAIL_SETUP.md) reescritos: el doc seguía hablando de Mailtrap, de `tarotflavia.com` y de que las variables eran "opcionales" — contradecía el fail-fast.
 
 **Hallazgos aparcados que esta tarea cierra:**
@@ -951,15 +951,51 @@ Segundo problema, menor: el módulo no setea `replyTo`. Si un cliente le respond
 - [x] Las respuestas a `noreply@` aterrizan en el buzón humano (`replyTo` en los `defaults` del mailer).
 - [x] Ciclo de calidad backend completo pasa: format, lint (0 errores), **4511 tests**, coverage **84.77%**, build y `validate-architecture.js`.
 
+#### 🔍 Ronda de revisión (hallazgos aplicados en un 2º commit)
+
+El revisor encontró **tres cosas importantes** que el primer commit tenía mal. Todas verificadas y
+corregidas con TDD (test primero, en rojo, antes del fix):
+
+- [x] 🟠 **`EMAIL_REPLY_TO=""` tumbaba el boot en TODOS los entornos.** `@IsOptional()` de
+      class-validator saltea `undefined` pero **no** el string vacío, así que dejar la variable
+      vacía —la forma habitual de desactivarla, y la que el propio `.env.example` promueve para
+      otras— hacía fallar el `@Matches`. Era una **regresión** introducida por esta misma tarea.
+      Corregido con el `@Transform` que ya protegía a `SMTP_PORT`. Ídem `ADMIN_EMAIL_COST_ALERTS`.
+- [x] 🟠 **`FRONTEND_URL` sin esquema pasaba el guard.** Se validaba "no vacía" y "no localhost",
+      pero no el formato: con `FRONTEND_URL=www.auguriatarot.com` el boot pasaba y los links de los
+      emails salían **rotos, sin un solo error en los logs** — el mismo modo de falla que la tarea
+      vino a matar, un escalón más abajo. Ahora se **parsea** con `new URL()` y se compara el
+      `hostname` (de paso desaparece el falso positivo de `includes('localhost')`, que habría
+      rechazado un host legítimo como `localhost.auguriatarot.com`).
+- [x] 🟠 **La red de seguridad sobre los `.hbs` no existía.** El código, el doc y este backlog
+      afirmaban que sacar el `template` del `if` hacía que *"un `.hbs` roto se detecte corriendo los
+      tests"*. **Era falso**: ningún test renderizaba una plantilla (el `MailerService` está
+      mockeado en todos). Ahora [email-templates.spec.ts](../backend/tarot-app/src/modules/email/email-templates.spec.ts)
+      monta el `MailerModule` **real** con `jsonTransport` y **renderiza los 8 templates** con el
+      contexto que les pasa `EmailService`; con `strict: true`, una variable faltante rompe el test.
+      **Este test sí habría detectado el `dist/` sin plantillas de T-PROD-015.**
+- [x] 🟡 **El fail-fast corría demasiado tarde.** Vivía en el `useFactory` del `MailerModule`, que se
+      instancia **después** de que `TypeOrmModule` conecta y corre las migraciones
+      (`migrationsRun: true`): un deploy con SMTP incompleto **habría migrado la base y recién
+      después muerto**. Movido a `validate()` ([env-validator.ts](../backend/tarot-app/src/config/env-validator.ts)),
+      que corre en `ConfigModule.forRoot`, **antes de tocar la DB**, y ahora reporta **todas** las
+      variables faltantes en un solo error (Ops ya no descubre una por deploy). El throw del factory
+      se conserva como red de seguridad: el `EmailModule` se monta standalone en los e2e, sin esa
+      validación.
+- [x] 🟡 Aserción tautológica (`expect(adapter).toBeDefined()` sobre una constante de módulo) →
+      `toBeInstanceOf(HandlebarsAdapter)` + chequeo del `dir`.
+- [x] 💡 Guard de `NaN` en `SMTP_PORT` y `replyTo` también en los defaults de `jsonTransport`.
+
 #### 🔬 Verificación contra el build (no solo tests)
 
 Aplicando la lección de T-PROD-015 (*"el ciclo de calidad no cubre el envío real: ts-jest corre desde
-`src/`"*), los tres caminos se ejercitaron **sobre `dist/`**, no solo en Jest:
+`src/`"*), los caminos se ejercitaron **sobre `dist/`**, no solo en Jest:
 
 | Caso | Resultado |
 | --- | --- |
 | `NODE_ENV=production` sin SMTP | ❌ el boot **muere** (exit 1) nombrando las 5 variables faltantes |
-| `NODE_ENV=production` con `FRONTEND_URL` en localhost | ❌ el boot **muere** (exit 1) nombrando `FRONTEND_URL` |
+| `NODE_ENV=production` con `FRONTEND_URL` en localhost o sin esquema | ❌ el boot **muere** (exit 1) nombrando `FRONTEND_URL` |
+| `NODE_ENV=production` con ambos problemas | ❌ **un solo error con todo**, y **sin llegar a conectar la base** |
 | `NODE_ENV=development` sin SMTP | ✅ warning + `jsonTransport`, la app sigue arrancando (sin regresión) |
 
 > ⚠️ **Acción de Ops pendiente al deployar:** setear **`EMAIL_REPLY_TO=consultas@auguriatarot.com`** en
@@ -1290,8 +1326,8 @@ Además el string está **triplicado a mano**: es exactamente la forma en que es
   - [ ] `system-config.entity.ts:54` — el `example:` de Swagger publica `admin@auguria.com` en la
         documentación de la API. Su spec (`system-config.entity.spec.ts:21,30`) usa el mismo fixture →
         `example.com` (dominio reservado por RFC 2606), igual que se hizo con los fixtures del frontend.
-  - [ ] `.env.example` (`EMAIL_FROM=noreply@auguria.com`, `CORS_ORIGIN`, `API_URL`) → alinear con el
-        dominio real.
+  - [ ] `.env.example`: quedan `CORS_ORIGIN` (línea 187) y `API_URL` (línea 258) → alinear con el
+        dominio real. *(El `EMAIL_FROM` ya lo corrigió T-PROD-012 al reescribir el bloque de email.)*
 
 #### 🎯 Criterios de Aceptación
 

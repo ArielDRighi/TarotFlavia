@@ -16,9 +16,9 @@ const REQUIRED_SMTP_KEYS = [
 ] as const;
 
 /**
- * El render de los `.hbs` va fuera del `if`: en modo jsonTransport también se
- * ejercita el HandlebarsAdapter, así una plantilla rota se detecta en los tests
- * y no en producción (T-PROD-012).
+ * El bloque `template` va fuera del `if`: en modo jsonTransport también se configura el
+ * HandlebarsAdapter, así el dev local renderiza los `.hbs` de verdad y no solo los
+ * serializa. El render está cubierto por `email-templates.spec.ts` (T-PROD-012).
  */
 const TEMPLATE_OPTIONS: MailerOptions['template'] = {
   dir: join(__dirname, 'templates'),
@@ -35,10 +35,16 @@ const TEMPLATE_OPTIONS: MailerOptions['template'] = {
  * caía en silencio a `jsonTransport`, con lo cual la app levantaba perfecta, escribía
  * un warning que nadie lee y ningún usuario recibía su email (T-PROD-012).
  *
+ * En el arranque normal de la app este chequeo es redundante: `validate()`
+ * (`env-validator.ts`) ya lo hace antes, en `ConfigModule.forRoot`, para que el boot
+ * muera **antes** de que TypeORM conecte y corra las migraciones. Se conserva igual
+ * porque el `EmailModule` se monta standalone en los e2e, sin esa validación.
+ *
  * Fuera de producción se conserva el fallback a `jsonTransport`, del que dependen el
  * dev local y los tests.
  *
  * @throws {Error} en producción, si falta alguna variable SMTP.
+ * @throws {Error} si `SMTP_PORT` no es un número.
  */
 export function createMailerOptions(
   configService: ConfigService,
@@ -66,12 +72,16 @@ export function createMailerOptions(
         'Running in TEST MODE with jsonTransport: emails are logged to the console, not sent.',
     );
 
+    const fallbackFrom = 'noreply@example.com';
+
     return {
       transport: {
         jsonTransport: true,
       },
       defaults: {
-        from: 'noreply@example.com',
+        from: fallbackFrom,
+        // Paridad con el transporte real: los dos modos se comportan igual.
+        replyTo: configService.get<string>('EMAIL_REPLY_TO') ?? fallbackFrom,
       },
       template: TEMPLATE_OPTIONS,
     };
@@ -79,6 +89,14 @@ export function createMailerOptions(
 
   const smtpPort = Number(configService.get<string>('SMTP_PORT'));
   const emailFrom = configService.get<string>('EMAIL_FROM');
+
+  // `@IsPort()` ya lo garantiza en el arranque de la app, pero el EmailModule se monta
+  // standalone en los e2e: sin este guard, un puerto no numérico quedaba en un NaN mudo.
+  if (!Number.isInteger(smtpPort)) {
+    throw new Error(
+      `❌ SMTP_PORT must be a number (got: ${configService.get<string>('SMTP_PORT')}).`,
+    );
+  }
 
   return {
     transport: {

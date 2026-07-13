@@ -243,9 +243,14 @@ export class EnvironmentVariables {
    * Buzón al que se dirigen las respuestas de los usuarios a `noreply@`.
    * Si no se setea, el `replyTo` cae a `EMAIL_FROM` (ver `mailer.config.ts`).
    * Valor productivo: `consultas@auguriatarot.com` (T-PROD-012).
+   *
+   * El `@Transform` no es decorativo: `@IsOptional()` saltea `undefined`, pero **no** el
+   * string vacío. Sin él, dejar la variable vacía (la forma habitual de desactivarla)
+   * haría fallar el `@Matches` y **tumbaría el boot en cualquier entorno**.
    */
   @IsString()
   @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : undefined))
   @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
     message: 'EMAIL_REPLY_TO must be a valid email address',
   })
@@ -255,9 +260,13 @@ export class EnvironmentVariables {
    * Destinatario de las alertas de costo de los proveedores de IA (80% y 100% del
    * límite mensual). Sin ella, `ai-provider-cost.service.ts` loguea un warning y no
    * manda nada: si el gasto se dispara, nadie se entera (T-PROD-016).
+   *
+   * Mismo `@Transform` que `EMAIL_REPLY_TO`: el string vacío significa "sin destinatario",
+   * no "config inválida".
    */
   @IsString()
   @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : undefined))
   @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
     message: 'ADMIN_EMAIL_COST_ALERTS must be a valid email address',
   })
@@ -275,7 +284,9 @@ export class EnvironmentVariables {
    */
   @IsString()
   @IsOptional()
-  @Transform(({ value }) => (value ? String(value) : 'http://localhost:3001'))
+  @Transform(({ value }) =>
+    value ? String(value).trim() : 'http://localhost:3001',
+  )
   FRONTEND_URL: string = 'http://localhost:3001';
 
   // =============================================================================
