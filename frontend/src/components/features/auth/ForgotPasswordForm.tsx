@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { apiClient } from '@/lib/api/axios-config';
+import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { toast } from '@/hooks/utils/useToast';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validations/auth.schemas';
 
@@ -50,7 +51,7 @@ export function ForgotPasswordForm() {
   const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsSubmitting(true);
     try {
-      await apiClient.post('/auth/forgot-password', { email: data.email });
+      await apiClient.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email: data.email });
     } catch {
       // Silently ignore errors for security - don't reveal if email exists
     } finally {

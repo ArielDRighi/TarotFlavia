@@ -1065,11 +1065,23 @@ Es decir: hoy los únicos emails que la app manda de verdad son los de cuota, la
 - [x] **Marca:** las plantillas `welcome` y `password-reset` decían *"Tarot App"* → **Auguria**; el CTA del mail de bienvenida apuntaba a `href='#'` → ahora a `FRONTEND_URL`.
 - [x] Tests: reset envía el mail con el link correcto; el token **no** aparece en la respuesta ni en los logs; el registro sobrevive al fallo del email; la activación Premium notifica y sobrevive al fallo del email.
 
-#### ✅ Tareas específicas — Frontend
+#### ✅ Tareas específicas — Frontend (✅ COMPLETADO)
 
-- [ ] Página `/restablecer-password` que toma el `token` de la query, pide la nueva contraseña (con confirmación y las reglas de fortaleza del backend) y llama a `POST /auth/reset-password`.
-- [ ] Manejo de token inválido/expirado/ya usado (el backend responde 400) con opción de volver a pedir el mail.
-- [ ] Al éxito: redirigir a `/login` con feedback.
+- [x] Página `/restablecer-password` (client component con `useSearchParams` dentro de `Suspense`, siguiendo el patrón de `ritual/lectura`): toma el `token` de la query y se lo pasa a `ResetPasswordForm`.
+- [x] `ResetPasswordForm`: nueva contraseña + confirmación, con `resetPasswordSchema` que **replica las reglas del backend** (`IsStrongPassword`: mínimo 8 caracteres, una mayúscula y un número; máx. 128).
+- [x] Token inválido/expirado/ya usado (400 del backend) → mensaje claro + enlace a `/recuperar-password` para pedir uno nuevo. Enlace **sin** token (se cortó al copiarlo del mail) → tarjeta "Enlace inválido" con el mismo enlace de rescate.
+- [x] Al éxito: toast + redirección a `/login`.
+- [x] **Bonus (regla de endpoints centralizados):** `ForgotPasswordForm` tenía hardcodeado `'/auth/forgot-password'`. Se agregaron `AUTH.FORGOT_PASSWORD` y `AUTH.RESET_PASSWORD` a `API_ENDPOINTS` y ambos formularios los usan.
+
+##### 🔬 Verificación en navegador real (Chromium, 480 px)
+
+| Escenario | Resultado |
+|---|---|
+| `/restablecer-password?token=…` | ✅ renderiza el formulario |
+| Envío del formulario | ✅ sale `POST /auth/reset-password` con `{"token":"…","newPassword":"…"}` |
+| Respuesta 400 (token vencido/usado) | ✅ *"El enlace expiró o ya fue usado…"* + enlace para pedir uno nuevo |
+| `/restablecer-password` sin token | ✅ tarjeta "Enlace inválido" |
+| Contraseña débil / confirmación distinta | ✅ *"Mínimo 8 caracteres"* / *"Las contraseñas no coinciden"* (no llega al backend) |
 
 #### 🎯 Criterios de Aceptación
 

@@ -71,3 +71,27 @@ export const forgotPasswordSchema = z.object({
 });
 
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
+/**
+ * Reset password form schema
+ *
+ * Las reglas replican las del backend (`IsStrongPassword` + `MaxLength(128)`):
+ * mínimo 8 caracteres, al menos una mayúscula y al menos un número.
+ */
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, 'Mínimo 8 caracteres')
+      .max(128, 'Máximo 128 caracteres')
+      .refine((val) => /[A-Z]/.test(val) && /[0-9]/.test(val), {
+        message: 'Debe incluir al menos una mayúscula y un número',
+      }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  });
+
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
