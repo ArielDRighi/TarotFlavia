@@ -957,7 +957,7 @@ Es un resto del rebrand: el mismo dominio equivocado aparece también en el `REA
 #### ✅ Tareas específicas
 
 - [x] [contacto/page.tsx](../frontend/src/app/contacto/page.tsx): `contacto@auguria.com` → **`consultas@auguriatarot.com`** (la casilla real, creada en T-PROD-004). Además ahora es un `mailto:` clickeable, no texto plano.
-- [x] Barrido del repo por el dominio equivocado. Corregido lo **publicado**: la página de contacto y el `README.md` (`soporte@` y `seguridad@` → `consultas@auguriatarot.com`; ninguno de esos dos alias existe en Porkbun, así que apuntar al buzón real).
+- [x] Barrido del repo por el dominio equivocado. Corregido lo **publicado**: la página de contacto y el `README.md` (`soporte@` y `seguridad@` → `consultas@auguriatarot.com`; ninguno de esos dos alias existe en Porkbun, así que apuntar al buzón real). Tras el review, también los 3 fixtures de test del frontend que mockeaban `test@auguria.com` (`AdSenseScript.test.tsx`, `AdSlot.test.tsx`, `useAdsEnabled.test.ts`) → `test@example.com` (dominio reservado por RFC 2606). El frontend queda con **cero** `auguria.com`.
 - [x] Dirección extraída a una constante única: `CONFIG.CONTACT_EMAIL` en [lib/constants/config.ts](../frontend/src/lib/constants/config.ts), para que no vuelva a divergir.
 - [x] Tests: la página de contacto renderiza la dirección correcta, la expone como `mailto:` y **no** contiene ninguna `@auguria.com`; [config.test.ts](../frontend/src/lib/constants/config.test.ts) fija el buzón y su dominio.
 

@@ -17,7 +17,7 @@ const AD_SLOT_ID = '9876543210';
 function buildUser(plan: UserPlan): AuthUser {
   return {
     id: 1,
-    email: 'test@auguria.com',
+    email: 'test@example.com',
     name: 'Test User',
     roles: ['user'],
     plan,
