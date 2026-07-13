@@ -783,7 +783,7 @@ test(cache): agregar tests de invalidación
 
 ## 🔒 Seguridad
 
-Para reportar vulnerabilidades de seguridad, por favor **NO** crear un issue público. Enviar un email a: [seguridad@auguria.com] (o contactar directamente al mantenedor).
+Para reportar vulnerabilidades de seguridad, por favor **NO** crear un issue público. Enviar un email a: [consultas@auguriatarot.com](mailto:consultas@auguriatarot.com) (o contactar directamente al mantenedor).
 
 Ver [SECURITY.md](backend/tarot-app/docs/SECURITY.md) para más información sobre políticas de seguridad.
 
@@ -802,7 +802,7 @@ Este proyecto es privado y propietario. Todos los derechos reservados.
 Para preguntas o soporte:
 
 - **Issues**: [GitHub Issues](https://github.com/ArielDRighi/Auguria/issues)
-- **Email**: soporte@auguria.com
+- **Email**: consultas@auguriatarot.com
 - **Documentación**: Ver carpeta `docs/`
 
 ## 🗺️ Roadmap

@@ -332,7 +332,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-010 | ✅ Selector de horóscopo: carrusel móvil con nombres completos (occidental + chino) | Frontend | 🟠 Alta | 2 pts |
 | T-PROD-011 | ✅ Ocultar y bloquear notificaciones tras feature flag + sincronizar el enum | Frontend | 🟠 Alta | 1.5 pts |
 | T-PROD-012 | Fail-fast de SMTP en producción (hoy el fallback a jsonTransport es silencioso) + Reply-To | Backend | 🟠 Alta | 1 pt |
-| T-PROD-013 | Página de contacto: la dirección pública `contacto@auguria.com` no existe (dominio equivocado) | Frontend | 🔴 Crítica | 0.5 pt |
+| T-PROD-013 | ✅ Página de contacto: la dirección pública `contacto@auguria.com` no existe (dominio equivocado) | Frontend | 🔴 Crítica | 0.5 pt |
 | T-PROD-014 | Formulario de contacto: enviar de verdad (endpoint + EmailService); hoy los mensajes se pierden | Full-stack | 🟠 Alta | 3 pts |
 | T-PROD-015 | **Reset de contraseña no envía nada**: usuarios sin recuperación de cuenta + métodos huérfanos | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-016 | **Alertas de costo al admin sin plantilla**: si el gasto de los proveedores se dispara, nadie se entera | Backend | 🟠 Alta | 1 pt |
@@ -939,8 +939,9 @@ Segundo problema, menor: el módulo no setea `replyTo`. Si un cliente le respond
 
 ---
 
-### T-PROD-013: La Dirección Pública de la Página de Contacto No Existe
+### T-PROD-013: La Dirección Pública de la Página de Contacto No Existe — ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA (2026-07-12)
 **Prioridad:** 🔴 Crítica (dirección rota de cara al público; el fix es trivial)
 **Estimación:** 0.5 punto
 **Dependencias:** ninguna — **no** espera a T-PROD-004
@@ -955,15 +956,22 @@ Es un resto del rebrand: el mismo dominio equivocado aparece también en el `REA
 
 #### ✅ Tareas específicas
 
-- [ ] `contacto/page.tsx:55`: `contacto@auguria.com` → **`consultas@auguriatarot.com`** (la casilla real, creada en T-PROD-004).
-- [ ] Barrer el resto del repo por el dominio equivocado: `grep -rn "auguria\.com" --include="*.tsx" --include="*.ts" --include="*.md" .` y corregir (`README.md` incluido).
-- [ ] Considerar extraer la dirección a una constante única (`CONTACT_EMAIL`) para que no vuelva a divergir.
-- [ ] Test: la página de contacto renderiza la dirección correcta.
+- [x] [contacto/page.tsx](../frontend/src/app/contacto/page.tsx): `contacto@auguria.com` → **`consultas@auguriatarot.com`** (la casilla real, creada en T-PROD-004). Además ahora es un `mailto:` clickeable, no texto plano.
+- [x] Barrido del repo por el dominio equivocado. Corregido lo **publicado**: la página de contacto y el `README.md` (`soporte@` y `seguridad@` → `consultas@auguriatarot.com`; ninguno de esos dos alias existe en Porkbun, así que apuntar al buzón real).
+- [x] Dirección extraída a una constante única: `CONFIG.CONTACT_EMAIL` en [lib/constants/config.ts](../frontend/src/lib/constants/config.ts), para que no vuelva a divergir.
+- [x] Tests: la página de contacto renderiza la dirección correcta, la expone como `mailto:` y **no** contiene ninguna `@auguria.com`; [config.test.ts](../frontend/src/lib/constants/config.test.ts) fija el buzón y su dominio.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Ninguna dirección de un dominio que no sea `auguriatarot.com` queda publicada en el frontend.
-- [ ] Ciclo de calidad frontend completo pasa.
+- [x] Ninguna dirección de un dominio que no sea `auguriatarot.com` queda publicada en el frontend. Verificado en el HTML prerenderizado de `/contacto` (0 ocurrencias de `auguria.com`); el único email en `src/` fuera de tests es la constante, el resto son placeholders `tu@email.com` de los formularios.
+- [x] Ciclo de calidad frontend completo pasa: format, lint (0 errores), type-check, 5291 tests, build y `validate-architecture.js`.
+
+#### 📌 Fuera de alcance (decisión del Delta — hallazgo abierto)
+
+El barrido encontró más `auguria.com` **no publicados** al usuario, que este PR **no** toca para mantenerlo Frontend puro:
+
+- 🟠 **Backend, funcional:** [geocode.service.ts](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts) manda `User-Agent: Auguria/1.0 (contact@auguria.com)` a **Nominatim**, cuya política de uso exige un email de contacto **válido** para poder avisar antes de bloquear. Hoy es inexistente → merece su propia mini-tarea de backend (3 usos + 2 tests).
+- 🟡 **Placeholders y ejemplos** (sin impacto en runtime): `.env.example`, `system-config.entity.ts` (`example:` de Swagger), `docs/modules/birth-chart/*`, ADRs y `create-mp-preapproval-plan.ts`.
 
 ---
 
