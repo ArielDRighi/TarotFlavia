@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { CONFIG } from '@/lib/constants';
 import ContactoPage from './page';
 
 describe('ContactoPage', () => {
@@ -34,10 +35,26 @@ describe('ContactoPage', () => {
   it('should display alternative contact information', () => {
     render(<ContactoPage />);
     expect(screen.getByText('Otras formas de contacto')).toBeInTheDocument();
-    expect(screen.getByText('contacto@auguria.com')).toBeInTheDocument();
+    expect(screen.getByText(CONFIG.CONTACT_EMAIL)).toBeInTheDocument();
     expect(
       screen.getByText('Respondemos todos los mensajes en un plazo de 24-48 horas.')
     ).toBeInTheDocument();
+  });
+
+  it('should publish the real contact mailbox of the auguriatarot.com domain', () => {
+    render(<ContactoPage />);
+    expect(screen.getByText('consultas@auguriatarot.com')).toBeInTheDocument();
+  });
+
+  it('should NOT publish any address of the wrong auguria.com domain', () => {
+    const { container } = render(<ContactoPage />);
+    expect(container.textContent).not.toMatch(/@auguria\.com/);
+  });
+
+  it('should expose the contact email as a mailto link', () => {
+    render(<ContactoPage />);
+    const link = screen.getByRole('link', { name: CONFIG.CONTACT_EMAIL });
+    expect(link).toHaveAttribute('href', `mailto:${CONFIG.CONTACT_EMAIL}`);
   });
 
   it('should display the disclaimer about form functionality', () => {

@@ -34,7 +34,7 @@ const ADSENSE_CLIENT = 'ca-pub-1234567890123456';
 function buildUser(plan: UserPlan): AuthUser {
   return {
     id: 1,
-    email: 'test@auguria.com',
+    email: 'test@example.com',
     name: 'Test User',
     roles: ['user'],
     plan,

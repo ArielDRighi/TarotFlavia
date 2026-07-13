@@ -9,6 +9,13 @@ export const CONFIG = {
   APP_NAME: 'Auguria',
   APP_DESCRIPTION: 'Marketplace de tarotistas profesionales',
 
+  // Contact
+  /**
+   * Única dirección de contacto pública. Es la casilla real del dominio del
+   * proyecto (`auguriatarot.com`); cualquier otro dominio rebota.
+   */
+  CONTACT_EMAIL: 'consultas@auguriatarot.com',
+
   // API
   API_TIMEOUT: 30000,
   STALE_TIME: 5 * 60 * 1000, // 5 minutes

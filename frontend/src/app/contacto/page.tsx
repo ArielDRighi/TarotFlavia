@@ -3,6 +3,7 @@ import { Mail, Sparkles } from 'lucide-react';
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner';
 import { Reveal } from '@/components/common/Reveal';
 import { ContactForm } from '@/components/features/contact/ContactForm';
+import { CONFIG } from '@/lib/constants';
 
 /**
  * Página de Contacto
@@ -52,7 +53,14 @@ export default function ContactoPage() {
             </h2>
             <div className="text-foreground space-y-2 text-sm">
               <p>
-                <strong>Email:</strong> contacto@auguria.com
+                <strong>Email:</strong>{' '}
+                <a
+                  href={`mailto:${CONFIG.CONTACT_EMAIL}`}
+                  className="text-primary underline-offset-4 hover:underline"
+                  data-testid="contact-email-link"
+                >
+                  {CONFIG.CONTACT_EMAIL}
+                </a>
               </p>
               <p className="text-muted-foreground">
                 Respondemos todos los mensajes en un plazo de 24-48 horas.
