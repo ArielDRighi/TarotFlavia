@@ -12,7 +12,7 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
-enum Environment {
+export enum Environment {
   Development = 'development',
   Production = 'production',
   Test = 'test',
@@ -240,16 +240,53 @@ export class EnvironmentVariables {
   EMAIL_FROM?: string;
 
   /**
+   * Buzón al que se dirigen las respuestas de los usuarios a `noreply@`.
+   * Si no se setea, el `replyTo` cae a `EMAIL_FROM` (ver `mailer.config.ts`).
+   * Valor productivo: `consultas@auguriatarot.com` (T-PROD-012).
+   *
+   * El `@Transform` no es decorativo: `@IsOptional()` saltea `undefined`, pero **no** el
+   * string vacío. Sin él, dejar la variable vacía (la forma habitual de desactivarla)
+   * haría fallar el `@Matches` y **tumbaría el boot en cualquier entorno**.
+   */
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : undefined))
+  @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
+    message: 'EMAIL_REPLY_TO must be a valid email address',
+  })
+  EMAIL_REPLY_TO?: string;
+
+  /**
+   * Destinatario de las alertas de costo de los proveedores de IA (80% y 100% del
+   * límite mensual). Sin ella, `ai-provider-cost.service.ts` loguea un warning y no
+   * manda nada: si el gasto se dispara, nadie se entera (T-PROD-016).
+   *
+   * Mismo `@Transform` que `EMAIL_REPLY_TO`: el string vacío significa "sin destinatario",
+   * no "config inválida".
+   */
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : undefined))
+  @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
+    message: 'ADMIN_EMAIL_COST_ALERTS must be a valid email address',
+  })
+  ADMIN_EMAIL_COST_ALERTS?: string;
+
+  /**
    * URL del frontend. La usan los links de los emails (reset de contraseña, bienvenida)
    * y las back_urls de MercadoPago.
    *
-   * ⚠️ En producción DEBE estar seteada: si falta, cae al default y los links de los
-   * emails salen apuntando a localhost, sin un solo error en los logs.
+   * ⚠️ En producción DEBE estar seteada y no puede apuntar a localhost: el boot falla
+   * si no lo está (ver `validate()` en `env-validator.ts`). Antes caía al default en
+   * silencio y los links de todos los emails salían a localhost, sin un solo error en
+   * los logs (T-PROD-012).
    * El default es el puerto del FRONTEND (3001), no el del backend (3000).
    */
   @IsString()
   @IsOptional()
-  @Transform(({ value }) => (value ? String(value) : 'http://localhost:3001'))
+  @Transform(({ value }) =>
+    value ? String(value).trim() : 'http://localhost:3001',
+  )
   FRONTEND_URL: string = 'http://localhost:3001';
 
   // =============================================================================
