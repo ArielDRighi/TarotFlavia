@@ -1008,7 +1008,7 @@ Es decir: **los mensajes de los clientes se pierden en la consola del navegador.
 
 ### T-PROD-015: El Reset de Contraseña No Envía Nada (Usuarios Sin Recuperación de Cuenta)
 
-**Estado:** 🔄 Backend ✅ COMPLETADO (PR) — frontend en curso (página `/restablecer-password`)
+**Estado:** ✅ COMPLETADA — **verificada de punta a punta en producción (2026-07-12)**
 **Prioridad:** 🔴 **Crítica — bloqueante de lanzamiento**
 **Estimación:** 3 puntos
 **Dependencias:** T-PROD-004 (necesita el SMTP real andando)
@@ -1086,7 +1086,7 @@ Es decir: hoy los únicos emails que la app manda de verdad son los de cuota, la
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Un usuario que olvida su contraseña recibe el mail, hace clic en el link y **recupera su cuenta**, de punta a punta, en producción. *(requiere el PR de frontend)*
+- [x] Un usuario que olvida su contraseña recibe el mail, hace clic en el link y **recupera su cuenta**, de punta a punta, en producción. ✅ **verificado en producción el 2026-07-12** (evidencia abajo)
 - [x] El token de reset **no** aparece en los logs del servidor ni en ninguna respuesta HTTP.
 - [x] Un alta de usuario recibe el mail de bienvenida, y si el envío falla el alta igual se completa.
 - [x] `EmailService` no tiene métodos huérfanos (`sendPlanChangeEmail` cableado; `sendSharedReading` borrado con su template).
@@ -1124,10 +1124,27 @@ Es decir: hoy los únicos emails que la app manda de verdad son los de cuota, la
   error y no relanza. Es el mismo agujero que denunciaba el hallazgo de T-PROD-004 sobre
   `ADMIN_EMAIL_COST_ALERTS`: si el gasto de IA se dispara, nadie se entera.
 
-> ⚠️ **Pendiente de verificación real:** los tests de integración/e2e tocados **no se corrieron localmente**
-> (no hay Postgres en el entorno de desarrollo); los corre el CI. La prueba de punta a punta contra el
-> SMTP real queda para el cierre de la tarea, con el frontend mergeado — y ahora es imprescindible,
-> porque el bug de los templates demuestra que el ciclo de calidad no cubre el envío real.
+#### ✅ Evidencia de la verificación en producción (2026-07-12)
+
+Ejecutada por el Delta sobre el entorno productivo (Railway), con los tres PRs mergeados
+(#591 backend, #592 frontend, #593 alertas de costo):
+
+| Paso | Resultado |
+|---|---|
+| Solicitud de reset desde el sitio productivo | ✅ |
+| Mail *"Recuperación de contraseña"* desde `noreply@auguriatarot.com` | ✅ llega a **bandeja de entrada** (no spam) |
+| Clic en *"Restablecer Contraseña"* → `/restablecer-password?token=…` | ✅ abre la página en el dominio productivo |
+| Cambio de contraseña | ✅ |
+| Login con la contraseña nueva | ✅ |
+
+**El flujo de recuperación de cuenta quedó operativo.** Era el bloqueante de lanzamiento: hasta esta
+tarea, un usuario que perdía su contraseña quedaba encerrado afuera de su cuenta sin ninguna vía de
+recuperación.
+
+> 📌 **Lección para futuras tareas de email:** el ciclo de calidad **no** cubre el envío real. Los tests
+> unitarios pasaban con `dist/` sin una sola plantilla, porque ts-jest corre desde `src/`, donde los
+> `.hbs` siempre existieron. Cualquier tarea que toque emails debe probarse **contra el build**
+> (`npm run build && node dist/src/main`) o directamente en el entorno desplegado.
 
 ---
 
