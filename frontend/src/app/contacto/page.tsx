@@ -1,6 +1,5 @@
 import { Mail, Sparkles } from 'lucide-react';
 
-import { DisclaimerBanner } from '@/components/ui/disclaimer-banner';
 import { Reveal } from '@/components/common/Reveal';
 import { ContactForm } from '@/components/features/contact/ContactForm';
 import { CONFIG } from '@/lib/constants';
@@ -13,7 +12,8 @@ import { CONFIG } from '@/lib/constants';
  * contacto como callout dorado de marca. La lógica del formulario vive en
  * `ContactForm` siguiendo la arquitectura feature-based.
  *
- * TODO: Implementar envío real de correo o integración con backend.
+ * El envío es real desde T-PROD-014 (`POST /contact`): ya no hay disclaimer de
+ * "envío no implementado".
  */
 export default function ContactoPage() {
   return (
@@ -68,9 +68,6 @@ export default function ContactoPage() {
             </div>
           </div>
         </Reveal>
-
-        {/* Disclaimer */}
-        <DisclaimerBanner message="Este formulario es funcional pero el envío de correos aún no está implementado. Los mensajes se muestran en la consola del navegador." />
       </div>
     </div>
   );

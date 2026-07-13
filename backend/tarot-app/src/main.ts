@@ -1,7 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { configureTrustProxy } from './config/trust-proxy.config';
 import { LoggerService } from './common/logger/logger.service';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -31,7 +33,12 @@ async function bootstrap() {
     console.log(`Password exists: ${Boolean(process.env.POSTGRES_PASSWORD)}`);
   }
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Sin esto, `request.ip` es la IP del proxy y el rate limiting leía el primer valor
+  // del `X-Forwarded-For`, que lo escribe el cliente: rotarlo salteaba todos los límites
+  // (T-PROD-014). El número de saltos confiables es configurable: ver trust-proxy.config.
+  configureTrustProxy(app, process.env.TRUST_PROXY_HOPS);
 
   // Set global API prefix for versioning
   app.setGlobalPrefix('api/v1');

@@ -157,14 +157,19 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     });
   }
 
+  /**
+   * IP contra la que se cuentan los límites (y los bloqueos).
+   *
+   * Usa `request.ip`, que **Express** calcula con `trust proxy` (ver `trust-proxy.config`):
+   * descarta los saltos confiables del `X-Forwarded-For` y devuelve la IP real del cliente.
+   *
+   * ⚠️ NO volver a parsear el header a mano. Antes se tomaba su **primer** elemento, que es
+   * justamente el que escribe el cliente: mandando `X-Forwarded-For: 1.2.3.<random>` en cada
+   * request se obtenía un tracker distinto cada vez y **ningún límite se disparaba nunca** —
+   * ni el de login, ni el de registro, ni el del formulario de contacto, que es un endpoint
+   * público que además gasta cuota de SMTP (T-PROD-014).
+   */
   private getIP(request: Request): string {
-    // x-forwarded-for can contain multiple IPs (comma-separated)
-    // Extract and sanitize the first IP (client's real IP)
-    const forwarded = request.headers?.['x-forwarded-for'] as string;
-    if (forwarded) {
-      const ip = forwarded.split(',')[0].trim();
-      return ip || request.ip || 'unknown';
-    }
-    return request.ip || 'unknown';
+    return request.ip || request.socket?.remoteAddress || 'unknown';
   }
 }

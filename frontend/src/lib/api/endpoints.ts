@@ -16,6 +16,11 @@ export const API_ENDPOINTS = {
     RESET_PASSWORD: '/auth/reset-password',
   },
 
+  // Contacto (formulario público)
+  CONTACT: {
+    BASE: '/contact',
+  },
+
   // Categories
   CATEGORIES: {
     BASE: '/categories',

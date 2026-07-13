@@ -14,6 +14,7 @@
   - [Tiradas (Spreads)](#tiradas-spreads)
   - [Categorías](#categorías)
   - [Preguntas Predefinidas](#preguntas-predefinidas)
+  - [Contacto](#contacto)
   - [Lectura Diaria](#lectura-diaria)
   - [Tarotistas Públicos](#tarotistas-públicos)
   - [Scheduling (Programación de Sesiones)](#scheduling-programación-de-sesiones)
@@ -1053,6 +1054,48 @@ GET /api/predefined-questions?categoryId=1&activeOnly=true
   }
 ]
 ```
+
+---
+
+### Contacto
+
+#### ✉️ Enviar Mensaje del Formulario de Contacto
+
+```http
+POST /api/contact
+Content-Type: application/json
+```
+
+Endpoint **público** (no requiere JWT): lo usa el formulario de `/contacto` del frontend. El
+mensaje se envía por email al buzón de `CONTACT_EMAIL_TO` con el **Reply-To apuntando al email
+del remitente**, así responderlo desde el buzón le contesta directamente al cliente.
+
+**Rate limit:** 3 mensajes/hora por IP (endpoint público sin auth). Pasado el límite: `429`.
+
+**Body:**
+
+```json
+{
+  "name": "Ana Pérez",
+  "email": "ana@example.com",
+  "subject": "Consulta por una lectura",
+  "message": "Hola, quería saber cómo reservar una sesión."
+}
+```
+
+**Validaciones:** `name` 2-100 · `email` válido · `subject` 5-200 y **sin saltos de línea**
+(viaja a una cabecera del email) · `message` 10-2000.
+
+**Response: `200 OK`**
+
+```json
+{
+  "message": "Mensaje enviado exitosamente. Te responderemos a la brevedad."
+}
+```
+
+**Errores:** `400` datos inválidos · `429` límite de envíos excedido · `500` el email no pudo
+enviarse. El endpoint **no** simula éxito si el envío falla.
 
 ---
 

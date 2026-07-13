@@ -8,6 +8,7 @@ import {
   PlanChangeData,
   ProviderCostWarningData,
   ProviderCostLimitReachedData,
+  ContactMessageData,
 } from './interfaces/email.interface';
 
 describe('EmailService', () => {
@@ -19,12 +20,16 @@ describe('EmailService', () => {
     sendMail: mockSendMail,
   };
 
+  /** Variables que un test puede pisar (o borrar, con `undefined`) para ese caso. */
+  let configOverrides: Record<string, string | undefined> = {};
+
   const mockConfigGet = jest.fn((key: string) => {
-    const config: Record<string, string | number> = {
+    const config: Record<string, string | number | undefined> = {
       EMAIL_FROM: 'noreply@tarot.com',
       SMTP_HOST: 'smtp.test.com',
       SMTP_PORT: 587,
       FRONTEND_URL: 'http://localhost:3000',
+      ...configOverrides,
     };
     return config[key];
   });
@@ -54,6 +59,7 @@ describe('EmailService', () => {
 
     // Clear all mocks before each test
     jest.clearAllMocks();
+    configOverrides = {};
   });
 
   it('should be defined', () => {
@@ -302,6 +308,125 @@ describe('EmailService', () => {
 
       expect(loggerSpy).toHaveBeenCalledWith(
         expect.stringContaining('Email de cambio de plan enviado exitosamente'),
+      );
+
+      loggerSpy.mockRestore();
+    });
+  });
+
+  describe('sendContactMessageEmail (T-PROD-014)', () => {
+    const contactData: ContactMessageData = {
+      name: 'Ana Pérez',
+      email: 'ana@example.com',
+      subject: 'Consulta por una lectura',
+      message: 'Hola, quería saber cómo reservar una sesión.',
+    };
+
+    it('envía el mensaje al buzón de contacto, con el email del usuario como replyTo', async () => {
+      configOverrides = { CONTACT_EMAIL_TO: 'consultas@auguriatarot.com' };
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendContactMessageEmail(contactData);
+
+      expect(mailerService.sendMail).toHaveBeenCalledTimes(1);
+      expect(mailerService.sendMail).toHaveBeenCalledWith({
+        to: 'consultas@auguriatarot.com',
+        replyTo: contactData.email,
+        subject: `Contacto web: ${contactData.subject}`,
+        template: 'contact-message',
+        context: {
+          name: contactData.name,
+          email: contactData.email,
+          subject: contactData.subject,
+          message: contactData.message,
+        },
+      });
+    });
+
+    it('el replyTo pisa el default global: sin esto, responder el mensaje le contestaría al propio buzón de Auguria y no al cliente', async () => {
+      configOverrides = {
+        CONTACT_EMAIL_TO: 'consultas@auguriatarot.com',
+        EMAIL_REPLY_TO: 'consultas@auguriatarot.com',
+      };
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendContactMessageEmail(contactData);
+
+      expect(mockSendMail.mock.calls[0][0]).toMatchObject({
+        replyTo: 'ana@example.com',
+      });
+    });
+
+    it('sin CONTACT_EMAIL_TO cae a EMAIL_REPLY_TO (dev/staging: el buzón que ya recibe las respuestas)', async () => {
+      configOverrides = {
+        CONTACT_EMAIL_TO: undefined,
+        EMAIL_REPLY_TO: 'consultas@auguriatarot.com',
+      };
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendContactMessageEmail(contactData);
+
+      expect(mockSendMail.mock.calls[0][0]).toMatchObject({
+        to: 'consultas@auguriatarot.com',
+      });
+    });
+
+    it('sin CONTACT_EMAIL_TO ni EMAIL_REPLY_TO cae a EMAIL_FROM', async () => {
+      configOverrides = {
+        CONTACT_EMAIL_TO: undefined,
+        EMAIL_REPLY_TO: undefined,
+      };
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendContactMessageEmail(contactData);
+
+      expect(mockSendMail.mock.calls[0][0]).toMatchObject({
+        to: 'noreply@tarot.com',
+      });
+    });
+
+    it('un CONTACT_EMAIL_TO vacío no es un buzón: cae al siguiente fallback en vez de mandar a `to: ""`', async () => {
+      configOverrides = {
+        CONTACT_EMAIL_TO: '',
+        EMAIL_REPLY_TO: 'consultas@auguriatarot.com',
+      };
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendContactMessageEmail(contactData);
+
+      expect(mockSendMail.mock.calls[0][0]).toMatchObject({
+        to: 'consultas@auguriatarot.com',
+      });
+    });
+
+    it('relanza el error si el envío falla: a diferencia de las alertas de costo, el usuario TIENE que enterarse de que su mensaje no salió', async () => {
+      configOverrides = { CONTACT_EMAIL_TO: 'consultas@auguriatarot.com' };
+      mockMailerService.sendMail.mockRejectedValue(new Error('SMTP Error'));
+
+      await expect(
+        service.sendContactMessageEmail(contactData),
+      ).rejects.toThrow('Error al enviar el mensaje de contacto');
+    });
+
+    it('preserva la causa raíz en el error que relanza: sin el `cause`, el llamador loguea que falló pero no por qué', async () => {
+      configOverrides = { CONTACT_EMAIL_TO: 'consultas@auguriatarot.com' };
+      const smtpFailure = new Error('ECONNREFUSED smtp.resend.com:587');
+      mockMailerService.sendMail.mockRejectedValue(smtpFailure);
+
+      await expect(
+        service.sendContactMessageEmail(contactData),
+      ).rejects.toMatchObject({ cause: smtpFailure });
+    });
+
+    it('loguea el envío exitoso', async () => {
+      const loggerSpy = jest.spyOn(Logger.prototype, 'log');
+      configOverrides = { CONTACT_EMAIL_TO: 'consultas@auguriatarot.com' };
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendContactMessageEmail(contactData);
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Mensaje de contacto enviado exitosamente'),
       );
 
       loggerSpy.mockRestore();

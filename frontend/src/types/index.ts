@@ -326,3 +326,6 @@ export type {
 
 // AdSense Types (T-PROD-008)
 export type { AdsByGoogleConfig, AdsByGoogleQueue } from './adsense.types';
+
+// Contact Types (T-PROD-014)
+export type { ContactMessageResponse } from './contact.types';

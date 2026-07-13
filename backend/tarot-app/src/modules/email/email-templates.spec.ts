@@ -28,6 +28,7 @@ describe('Email templates (build)', () => {
     'holistic-service-confirmation',
     'provider-cost-warning',
     'provider-cost-limit-reached',
+    'contact-message',
   ];
 
   it.each(REQUIRED_TEMPLATES)(
@@ -166,6 +167,12 @@ describe('Email templates (render)', () => {
       whatsappNumber: '+54 9 11 1234-5678',
       whatsappNumberForLink: '5491112345678',
     },
+    'contact-message': {
+      name: 'Ana Pérez',
+      email: 'ana@example.com',
+      subject: 'Consulta por una lectura',
+      message: 'Hola, quería saber cómo reservar una sesión.',
+    },
   };
 
   it.each(Object.keys(TEMPLATE_CONTEXTS))(
@@ -190,5 +197,37 @@ describe('Email templates (render)', () => {
 
     expect(mail.html).toContain(resetUrl);
     expect(mail.html).toContain('Flavia');
+  });
+
+  describe('contact-message (T-PROD-014)', () => {
+    it('incluye los datos del cliente y su mensaje: si falta alguno, el email llega inútil', async () => {
+      const mail = await render(
+        'contact-message',
+        TEMPLATE_CONTEXTS['contact-message'],
+      );
+
+      expect(mail.html).toContain('Ana Pérez');
+      expect(mail.html).toContain('ana@example.com');
+      expect(mail.html).toContain('Consulta por una lectura');
+      expect(mail.html).toContain('Hola, quería saber cómo reservar');
+    });
+
+    // Los tres campos los escribe un desconocido sin autenticar, no solo el cuerpo.
+    it.each([
+      ['message', '<script>alert(1)</script>', '&lt;script&gt;'],
+      ['name', '<img src=x onerror=alert(1)>', '&lt;img'],
+      ['subject', '<b onmouseover=alert(1)>hola</b>', '&lt;b'],
+    ])(
+      'escapa el HTML de %s: lo escribe un desconocido sin autenticar',
+      async (field, payload, escaped) => {
+        const mail = await render('contact-message', {
+          ...TEMPLATE_CONTEXTS['contact-message'],
+          [field]: payload,
+        });
+
+        expect(mail.html).not.toContain(payload);
+        expect(mail.html).toContain(escaped);
+      },
+    );
   });
 });

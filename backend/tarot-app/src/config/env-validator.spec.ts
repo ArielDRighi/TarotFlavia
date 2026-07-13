@@ -104,6 +104,9 @@ describe('env-validator', () => {
       SMTP_USER: 'resend',
       SMTP_PASS: 're_test_key',
       EMAIL_FROM: 'noreply@auguriatarot.com',
+      // Obligatoria en producción desde T-PROD-014: sin ella los mensajes del
+      // formulario de contacto no tendrían buzón al que llegar.
+      CONTACT_EMAIL_TO: 'consultas@auguriatarot.com',
     };
 
     const result = validate(config);
@@ -160,6 +163,7 @@ describe('env-validator', () => {
       SMTP_PASS: 're_test_key',
       EMAIL_FROM: 'noreply@auguriatarot.com',
       FRONTEND_URL: 'https://auguriatarot.com',
+      CONTACT_EMAIL_TO: 'consultas@auguriatarot.com',
     });
 
     it('una config productiva completa arranca sin quejas', () => {
@@ -222,6 +226,42 @@ describe('env-validator', () => {
 
         expect(() => validate(config)).not.toThrow();
         expect(validate(config).ADMIN_EMAIL_COST_ALERTS).toBeUndefined();
+      });
+    });
+
+    describe('CONTACT_EMAIL_TO (T-PROD-014)', () => {
+      it('acepta una dirección válida', () => {
+        const config = {
+          ...baseConfig(),
+          CONTACT_EMAIL_TO: 'consultas@auguriatarot.com',
+        };
+
+        expect(validate(config).CONTACT_EMAIL_TO).toBe(
+          'consultas@auguriatarot.com',
+        );
+      });
+
+      it('rechaza una dirección inválida: un typo mandaría cada mensaje de contacto a la nada', () => {
+        const config = { ...baseConfig(), CONTACT_EMAIL_TO: 'consultas@' };
+
+        expect(() => validate(config)).toThrow('CONTACT_EMAIL_TO');
+      });
+
+      it('falla el boot en producción si falta: los mensajes de los clientes se perderían, que es exactamente el bug que arregla esta tarea', () => {
+        const config = productionConfig();
+        delete config.CONTACT_EMAIL_TO;
+
+        expect(() => validate(config)).toThrow(/CONTACT_EMAIL_TO/);
+      });
+
+      it('falla el boot en producción si está vacía (el string vacío no es un buzón)', () => {
+        const config = { ...productionConfig(), CONTACT_EMAIL_TO: '' };
+
+        expect(() => validate(config)).toThrow(/CONTACT_EMAIL_TO/);
+      });
+
+      it('fuera de producción es opcional: el dev cae a EMAIL_REPLY_TO / EMAIL_FROM y el mailer loguea en consola', () => {
+        expect(() => validate(baseConfig())).not.toThrow();
       });
     });
 

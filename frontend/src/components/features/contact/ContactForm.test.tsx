@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AxiosError, AxiosHeaders } from 'axios';
+import { ReactElement, ReactNode } from 'react';
 import { toast } from 'sonner';
+import * as contactApi from '@/lib/api/contact-api';
 import { ContactForm } from './ContactForm';
 
 // ContactForm muestra el feedback usando `toast` de sonner (ver ContactForm.tsx),
@@ -15,14 +19,45 @@ vi.mock('sonner', () => ({
   },
 }));
 
+vi.mock('@/lib/api/contact-api');
+
+/** El formulario envía por TanStack Query: sin provider no monta. */
+const renderForm = (ui: ReactElement = <ContactForm />) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+
+  return render(ui, { wrapper: Wrapper });
+};
+
+/** Error de axios con un status concreto (el 429 del rate limit del backend). */
+const axiosErrorWithStatus = (status: number) =>
+  new AxiosError('Request failed', 'ERR_BAD_REQUEST', undefined, undefined, {
+    status,
+    statusText: '',
+    data: {},
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+  });
+
 describe('ContactForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(contactApi.sendContactMessage).mockResolvedValue({
+      message: 'Mensaje enviado exitosamente. Te responderemos a la brevedad.',
+    });
   });
 
   describe('Rendering', () => {
     it('should render all form fields', () => {
-      render(<ContactForm />);
+      renderForm();
 
       expect(screen.getByLabelText(/nombre/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/correo electrónico/i)).toBeInTheDocument();
@@ -31,12 +66,12 @@ describe('ContactForm', () => {
     });
 
     it('should render submit button', () => {
-      render(<ContactForm />);
+      renderForm();
       expect(screen.getByRole('button', { name: /enviar mensaje/i })).toBeInTheDocument();
     });
 
     it('should have placeholder texts', () => {
-      render(<ContactForm />);
+      renderForm();
 
       expect(screen.getByPlaceholderText('Tu nombre completo')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('tu@email.com')).toBeInTheDocument();
@@ -45,13 +80,13 @@ describe('ContactForm', () => {
     });
 
     it('should render icons for name, email, and subject fields', () => {
-      const { container } = render(<ContactForm />);
+      const { container } = renderForm();
       const icons = container.querySelectorAll('svg');
       expect(icons.length).toBeGreaterThanOrEqual(3);
     });
 
     it('should have required attributes on inputs', () => {
-      render(<ContactForm />);
+      renderForm();
 
       const nameInput = screen.getByLabelText(/nombre/i);
       const emailInput = screen.getByLabelText(/correo electrónico/i);
@@ -66,7 +101,7 @@ describe('ContactForm', () => {
     });
 
     it('should render form with proper HTML structure', () => {
-      const { container } = render(<ContactForm />);
+      const { container } = renderForm();
       const form = container.querySelector('form');
       expect(form).toBeInTheDocument();
       expect(form).toHaveClass('space-y-6');
@@ -75,7 +110,7 @@ describe('ContactForm', () => {
 
   describe('Canon styling', () => {
     it('should give the submit CTA a visible gold focus ring', () => {
-      render(<ContactForm />);
+      renderForm();
       const submitButton = screen.getByRole('button', { name: /enviar mensaje/i });
       expect(submitButton.className).toContain('focus-visible:ring-secondary');
     });
@@ -83,13 +118,13 @@ describe('ContactForm', () => {
 
   describe('Form Structure', () => {
     it('should use React Hook Form integration', () => {
-      render(<ContactForm />);
+      renderForm();
       const form = screen.getByRole('button', { name: /enviar mensaje/i }).closest('form');
       expect(form).toBeInTheDocument();
     });
 
     it('should have proper label associations', () => {
-      render(<ContactForm />);
+      renderForm();
 
       expect(screen.getByText('Nombre')).toBeInTheDocument();
       expect(screen.getByText(/correo electrónico/i)).toBeInTheDocument();
@@ -111,7 +146,7 @@ describe('ContactForm', () => {
     };
 
     it('should call toast.success after successful submission', async () => {
-      render(<ContactForm />);
+      renderForm();
       await fillAndSubmit();
 
       await waitFor(
@@ -125,7 +160,7 @@ describe('ContactForm', () => {
     });
 
     it('should NOT render inline success banner after submission', async () => {
-      render(<ContactForm />);
+      renderForm();
       await fillAndSubmit();
 
       await waitFor(() => expect(toast.success).toHaveBeenCalled(), { timeout: SUBMIT_TIMEOUT });
@@ -133,7 +168,7 @@ describe('ContactForm', () => {
     });
 
     it('should reset the form after successful submission', async () => {
-      render(<ContactForm />);
+      renderForm();
       const nameInput = screen.getByLabelText(/nombre/i);
       await fillAndSubmit();
 
@@ -141,12 +176,20 @@ describe('ContactForm', () => {
     });
 
     it('should NOT show inline alert initially', () => {
-      render(<ContactForm />);
+      renderForm();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
     it('should show loading state during submission', async () => {
-      render(<ContactForm />);
+      // El envío queda en vuelo para poder observar el estado de carga.
+      let resolveSend: (value: { message: string }) => void = () => {};
+      vi.mocked(contactApi.sendContactMessage).mockReturnValue(
+        new Promise((resolve) => {
+          resolveSend = resolve;
+        })
+      );
+
+      renderForm();
       const user = userEvent.setup();
       await user.type(screen.getByLabelText(/nombre/i), 'Ana García');
       await user.type(screen.getByLabelText(/correo electrónico/i), 'ana@example.com');
@@ -161,7 +204,71 @@ describe('ContactForm', () => {
       });
 
       // Wait for submission to complete to avoid async leaks
+      resolveSend({ message: 'Mensaje enviado' });
       await waitFor(() => expect(toast.success).toHaveBeenCalled(), { timeout: SUBMIT_TIMEOUT });
+    });
+
+    // El bug de T-PROD-014: el formulario simulaba el envío con un setTimeout y el
+    // mensaje del cliente moría en la consola del navegador. Estos tests fijan que
+    // ahora sale de verdad hacia el backend.
+    it('envía el mensaje al backend con los datos del formulario', async () => {
+      renderForm();
+      await fillAndSubmit();
+
+      await waitFor(() => expect(contactApi.sendContactMessage).toHaveBeenCalledTimes(1), {
+        timeout: SUBMIT_TIMEOUT,
+      });
+
+      // Se compara el primer argumento: TanStack Query v5 le pasa además un segundo
+      // parámetro de contexto al mutationFn.
+      expect(vi.mocked(contactApi.sendContactMessage).mock.calls[0][0]).toEqual({
+        name: 'Ana García',
+        email: 'ana@example.com',
+        subject: 'Consulta de prueba',
+        message: 'Este es un mensaje de prueba.',
+      });
+    });
+
+    it('no canta éxito si el envío falla: muestra el alert de error y NO limpia el formulario', async () => {
+      vi.mocked(contactApi.sendContactMessage).mockRejectedValue(new Error('Network Error'));
+
+      renderForm();
+      const nameInput = screen.getByLabelText(/nombre/i);
+      await fillAndSubmit();
+
+      await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument(), {
+        timeout: SUBMIT_TIMEOUT,
+      });
+      expect(screen.getByRole('alert')).toHaveTextContent(/hubo un error al enviar tu mensaje/i);
+      expect(toast.success).not.toHaveBeenCalled();
+      // El texto escrito no se pierde: el usuario puede reintentar sin volver a tipearlo.
+      expect(nameInput).toHaveValue('Ana García');
+    });
+
+    it('ante un 429 avisa del límite de envíos en vez del error genérico', async () => {
+      vi.mocked(contactApi.sendContactMessage).mockRejectedValue(axiosErrorWithStatus(429));
+
+      renderForm();
+      await fillAndSubmit();
+
+      await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument(), {
+        timeout: SUBMIT_TIMEOUT,
+      });
+      expect(screen.getByRole('alert')).toHaveTextContent(/demasiados mensajes/i);
+    });
+
+    it('vuelve a habilitar el botón tras un error, para poder reintentar', async () => {
+      vi.mocked(contactApi.sendContactMessage).mockRejectedValue(new Error('Network Error'));
+
+      renderForm();
+      await fillAndSubmit();
+
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: /enviar mensaje/i })).toBeEnabled();
+        },
+        { timeout: SUBMIT_TIMEOUT }
+      );
     });
   });
 });
