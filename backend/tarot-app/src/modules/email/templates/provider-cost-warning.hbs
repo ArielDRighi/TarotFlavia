@@ -1,0 +1,164 @@
+<html lang='es'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Alerta de costo — 80% del límite</title>
+    <style>
+      body {
+        font-family: 'Georgia', serif;
+        background-color: #f5f3f0;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 40px 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #f0ad4e;
+        padding-bottom: 20px;
+      }
+      .header h1 {
+        color: #8a6d3b;
+        font-size: 24px;
+        margin: 0;
+        font-weight: normal;
+      }
+      .icon {
+        font-size: 50px;
+        margin-bottom: 10px;
+      }
+      .content {
+        color: #5a5a5a;
+        font-size: 16px;
+        line-height: 1.8;
+        margin: 20px 0;
+      }
+      .warning-box {
+        background-color: #fff8dc;
+        border-left: 4px solid #f0ad4e;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        color: #8a6d3b;
+      }
+      .stats {
+        background-color: #f9f7f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 25px 0;
+      }
+      .stats-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e8e2db;
+      }
+      .stats-label {
+        color: #8b7355;
+        font-size: 14px;
+      }
+      .stats-value {
+        color: #333;
+        font-size: 15px;
+        font-weight: bold;
+      }
+      .progress-bar {
+        background-color: #e8e2db;
+        border-radius: 20px;
+        overflow: hidden;
+        margin: 20px 0;
+        height: 26px;
+      }
+      .progress-fill {
+        background-color: #f0ad4e;
+        color: #ffffff;
+        text-align: center;
+        line-height: 26px;
+        font-size: 13px;
+        font-weight: bold;
+      }
+      .cta-button {
+        display: block;
+        text-align: center;
+        background-color: #8b7355;
+        color: #ffffff;
+        padding: 15px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 30px auto;
+        max-width: 260px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+        color: #888;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <div class='icon'>⚠️</div>
+        <h1>El gasto del proveedor llegó al 80% del límite</h1>
+      </div>
+
+      <div class='content'>
+        <div class='warning-box'>
+          <strong>{{provider}}</strong>
+          consumió el
+          <strong>{{percentageUsed}}%</strong>
+          de su límite mensual de costo. Al llegar al 100%, las llamadas a este
+          proveedor se cortan.
+        </div>
+
+        <div class='stats'>
+          <div class='stats-item'>
+            <span class='stats-label'>Proveedor:</span>
+            <span class='stats-value'>{{provider}}</span>
+          </div>
+          <div class='stats-item'>
+            <span class='stats-label'>Gasto del mes:</span>
+            <span class='stats-value'>US$ {{currentCost}}</span>
+          </div>
+          <div class='stats-item'>
+            <span class='stats-label'>Límite mensual:</span>
+            <span class='stats-value'>US$ {{monthlyLimit}}</span>
+          </div>
+        </div>
+
+        <div class='progress-bar'>
+          <div class='progress-fill' style='width: {{percentageUsed}}%;'>
+            {{percentageUsed}}%
+          </div>
+        </div>
+
+        <p><strong>Qué podés hacer:</strong></p>
+        <ul>
+          <li>Revisar el consumo en el panel de administración</li>
+          <li>Subir el límite mensual del proveedor si el gasto es esperado</li>
+          <li>Revisar si hay un pico de uso anómalo (o abuso) detrás del gasto</li>
+        </ul>
+      </div>
+
+      <a href='{{adminUrl}}' class='cta-button'>Ver el consumo</a>
+
+      <div class='footer'>
+        <p>✨ Auguria — alerta automática de costos ✨</p>
+        <p>Este email fue generado automáticamente. Por favor no respondas a
+          este mensaje.</p>
+      </div>
+    </div>
+  </body>
+</html>

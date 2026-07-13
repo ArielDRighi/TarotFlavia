@@ -161,6 +161,14 @@ export class EmailService {
   }
 
   /**
+   * URL del panel de consumo de los proveedores, para los avisos de costo al admin
+   */
+  private buildAiUsageAdminUrl(): string {
+    const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL');
+    return `${frontendUrl}/admin/ai-usage`;
+  }
+
+  /**
    * Envía advertencia de costo de proveedor al 80%
    */
   async sendProviderCostWarningEmail(
@@ -170,9 +178,16 @@ export class EmailService {
     try {
       await this.mailerService.sendMail({
         to,
-        subject: `⚠️ AI Cost Alert: ${costData.provider} at 80% of monthly limit`,
+        subject: `⚠️ Alerta de costo: ${costData.provider} al 80% del límite mensual`,
         template: 'provider-cost-warning',
-        context: costData,
+        context: {
+          provider: costData.provider,
+          // El servicio pasa números crudos (ej. 82.34567): sin formatear quedan ilegibles
+          currentCost: costData.currentCost.toFixed(2),
+          monthlyLimit: costData.monthlyLimit.toFixed(2),
+          percentageUsed: costData.percentageUsed.toFixed(1),
+          adminUrl: this.buildAiUsageAdminUrl(),
+        },
       });
 
       this.logger.log(
@@ -197,9 +212,14 @@ export class EmailService {
     try {
       await this.mailerService.sendMail({
         to,
-        subject: `🚨 AI Cost Alert: ${costData.provider} LIMIT REACHED`,
+        subject: `🚨 Alerta de costo: LÍMITE ALCANZADO en ${costData.provider}`,
         template: 'provider-cost-limit-reached',
-        context: costData,
+        context: {
+          provider: costData.provider,
+          currentCost: costData.currentCost.toFixed(2),
+          monthlyLimit: costData.monthlyLimit.toFixed(2),
+          adminUrl: this.buildAiUsageAdminUrl(),
+        },
       });
 
       this.logger.log(
