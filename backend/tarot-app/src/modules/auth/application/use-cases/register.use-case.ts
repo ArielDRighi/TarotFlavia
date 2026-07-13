@@ -3,10 +3,12 @@ import {
   UnauthorizedException,
   ForbiddenException,
   Inject,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../../users/users.service';
+import { EmailService } from '../../../email/email.service';
 import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
 import { SubscriptionStatusType } from '../../../users/application/dto/user-capabilities.dto';
 import { IRefreshTokenRepository } from '../../domain/interfaces/refresh-token-repository.interface';
@@ -16,10 +18,13 @@ import { mapSubscriptionStatus } from '../../../../common/utils';
 
 @Injectable()
 export class RegisterUseCase {
+  private readonly logger = new Logger(RegisterUseCase.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
   ) {}
@@ -87,6 +92,16 @@ export class RegisterUseCase {
         ipAddress,
         userAgent,
       );
+
+    try {
+      await this.emailService.sendWelcomeEmail(user.email, user.name);
+    } catch (error) {
+      // El usuario ya quedó creado: un fallo del email no debe abortar el alta.
+      this.logger.error(
+        `Error al enviar el email de bienvenida al usuario ${user.id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
 
     return {
       user: {

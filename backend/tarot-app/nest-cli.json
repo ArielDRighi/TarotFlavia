@@ -4,9 +4,14 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true,
+    "watchAssets": true,
     "assets": [
       {
         "include": "modules/birth-chart/assets/fonts/*.ttf",
+        "outDir": "dist/src"
+      },
+      {
+        "include": "modules/email/templates/**/*.hbs",
         "outDir": "dist/src"
       }
     ]

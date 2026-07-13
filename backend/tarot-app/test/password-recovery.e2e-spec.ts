@@ -4,18 +4,45 @@ import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { APP_GUARD, APP_FILTER } from '@nestjs/core';
+import { EmailService } from '../src/modules/email/email.service';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
 
+/**
+ * El token de reseteo NO se devuelve por la API ni se loguea (T-PROD-015).
+ * La única vía legítima para obtenerlo es el email, así que los tests lo leen
+ * del EmailService mockeado — igual que lo haría el usuario desde su bandeja.
+ */
 describe('Password Recovery (e2e)', () => {
   let app: INestApplication<App>;
   const dbHelper = new E2EDatabaseHelper();
   let resetToken: string;
+
+  const GENERIC_MESSAGE =
+    'Si el email está registrado, recibirás un enlace para restablecer tu contraseña.';
+
+  const mockEmailService = {
+    sendPasswordResetEmail: jest
+      .fn()
+      .mockImplementation((_to: string, _userName: string, token: string) => {
+        resetToken = token;
+        return Promise.resolve();
+      }),
+    sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
+  };
 
   const testUser = {
     email: 'password-test@example.com',
     name: 'Password Test User',
     password: 'OldPassword123!',
   };
+
+  const requestPasswordReset = async (
+    email: string = testUser.email,
+  ): Promise<request.Response> =>
+    request(app.getHttpServer())
+      .post('/api/v1/auth/forgot-password')
+      .send({ email })
+      .expect(200);
 
   beforeAll(async () => {
     // Create a mock guard that always allows requests (disables throttling)
@@ -35,6 +62,8 @@ describe('Password Recovery (e2e)', () => {
       .useValue(mockThrottlerGuard)
       .overrideProvider(APP_FILTER)
       .useValue(mockThrottlerFilter)
+      .overrideProvider(EmailService)
+      .useValue(mockEmailService)
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -99,33 +128,19 @@ describe('Password Recovery (e2e)', () => {
       expect(response.body).toHaveProperty('user');
     });
 
-    it('should request password reset', async () => {
-      const consoleLogSpy = jest
-        .spyOn(console, 'log')
-        .mockImplementation((...args: unknown[]) => {
-          // Capture the reset token from console log
-          const message = args.join(' ');
-          if (typeof message === 'string' && message.includes('token=')) {
-            const match = message.match(/token=([a-f0-9]+)/);
-            if (match?.[1]) {
-              resetToken = match[1];
-            }
-          }
-        });
+    it('should request password reset and send the email with the token', async () => {
+      const response = await requestPasswordReset();
 
-      const response = await request(app.getHttpServer())
-        .post('/api/v1/auth/forgot-password')
-        .send({ email: testUser.email })
-        .expect(200);
-
-      expect(response.body).toHaveProperty(
-        'message',
-        'Password reset email sent',
+      expect(response.body).toHaveProperty('message', GENERIC_MESSAGE);
+      // El token viaja SOLO por email: nunca en la respuesta HTTP
+      expect(response.body).not.toHaveProperty('token');
+      expect(mockEmailService.sendPasswordResetEmail).toHaveBeenCalledWith(
+        testUser.email,
+        testUser.name,
+        expect.any(String),
       );
       expect(resetToken).toBeDefined();
       expect(resetToken.length).toBeGreaterThan(0);
-
-      consoleLogSpy.mockRestore();
     });
 
     it('should fail to reset password with invalid token', async () => {
@@ -192,25 +207,8 @@ describe('Password Recovery (e2e)', () => {
     });
 
     it('should invalidate old refresh tokens after password reset', async () => {
-      // Request a new password reset
-      const consoleLogSpy = jest
-        .spyOn(console, 'log')
-        .mockImplementation((...args: unknown[]) => {
-          const message = args.join(' ');
-          if (typeof message === 'string' && message.includes('token=')) {
-            const match = message.match(/token=([a-f0-9]+)/);
-            if (match?.[1]) {
-              resetToken = match[1];
-            }
-          }
-        });
-
-      await request(app.getHttpServer())
-        .post('/api/v1/auth/forgot-password')
-        .send({ email: testUser.email })
-        .expect(200);
-
-      consoleLogSpy.mockRestore();
+      // Request a new password reset (the token arrives through the mocked email)
+      await requestPasswordReset();
 
       // Get a refresh token before password reset
       const loginResponse = await request(app.getHttpServer())
@@ -247,33 +245,17 @@ describe('Password Recovery (e2e)', () => {
     });
 
     it('should handle password reset for non-existent user', async () => {
-      // Security: Returns 200 (not 404) to prevent user enumeration attacks
-      // Attackers shouldn't be able to determine if an email exists in the database
-      await request(app.getHttpServer())
-        .post('/api/v1/auth/forgot-password')
-        .send({ email: 'nonexistent@example.com' })
-        .expect(200);
+      // Security: Returns 200 with the same message (not 404) to prevent user enumeration
+      mockEmailService.sendPasswordResetEmail.mockClear();
+
+      const response = await requestPasswordReset('nonexistent@example.com');
+
+      expect(response.body).toHaveProperty('message', GENERIC_MESSAGE);
+      expect(mockEmailService.sendPasswordResetEmail).not.toHaveBeenCalled();
     });
 
     it('should validate password strength on reset', async () => {
-      const consoleLogSpy = jest
-        .spyOn(console, 'log')
-        .mockImplementation((...args: unknown[]) => {
-          const message = args.join(' ');
-          if (typeof message === 'string' && message.includes('token=')) {
-            const match = message.match(/token=([a-f0-9]+)/);
-            if (match?.[1]) {
-              resetToken = match[1];
-            }
-          }
-        });
-
-      await request(app.getHttpServer())
-        .post('/api/v1/auth/forgot-password')
-        .send({ email: testUser.email })
-        .expect(200);
-
-      consoleLogSpy.mockRestore();
+      await requestPasswordReset();
 
       // Try with weak password (no numbers) - validates IsStrongPassword decorator
       await request(app.getHttpServer())

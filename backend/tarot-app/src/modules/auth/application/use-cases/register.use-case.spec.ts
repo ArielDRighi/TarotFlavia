@@ -1,9 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RegisterUseCase } from './register.use-case';
 import { UsersService } from '../../../users/users.service';
+import { EmailService } from '../../../email/email.service';
 import { REFRESH_TOKEN_REPOSITORY } from '../../domain/interfaces/repository.tokens';
 import { CreateUserDto } from '../../../users/application/dto/create-user.dto';
 import { User } from '../../../users/entities/user.entity';
@@ -14,6 +19,7 @@ describe('RegisterUseCase', () => {
   let jwtService: jest.Mocked<JwtService>;
   let refreshTokenRepository: Record<string, jest.Mock>;
   let configServiceGet: jest.Mock;
+  let emailService: jest.Mocked<Pick<EmailService, 'sendWelcomeEmail'>>;
 
   const mockUser = {
     id: 1,
@@ -33,10 +39,14 @@ describe('RegisterUseCase', () => {
 
   beforeEach(async () => {
     configServiceGet = jest.fn().mockReturnValue(undefined); // no whitelist by default
+    emailService = {
+      sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterUseCase,
+        { provide: EmailService, useValue: emailService },
         {
           provide: UsersService,
           useValue: {
@@ -128,6 +138,39 @@ describe('RegisterUseCase', () => {
         '192.168.1.1',
         'Chrome',
       );
+    });
+
+    it('should send the welcome email to the new user', async () => {
+      usersService.create.mockResolvedValue(mockUser);
+      usersService.findById.mockResolvedValue(mockUser);
+
+      await useCase.execute(createUserDto, '127.0.0.1', 'Mozilla');
+
+      expect(emailService.sendWelcomeEmail).toHaveBeenCalledWith(
+        mockUser.email,
+        mockUser.name,
+      );
+    });
+
+    it('should complete the registration even when the welcome email fails', async () => {
+      const loggerErrorSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
+      usersService.create.mockResolvedValue(mockUser);
+      usersService.findById.mockResolvedValue(mockUser);
+      emailService.sendWelcomeEmail.mockRejectedValue(new Error('SMTP down'));
+
+      const result = await useCase.execute(
+        createUserDto,
+        '127.0.0.1',
+        'Mozilla',
+      );
+
+      expect(result.access_token).toBe('access_token');
+      expect(result.user.id).toBe(1);
+      expect(loggerErrorSpy).toHaveBeenCalled();
+
+      loggerErrorSpy.mockRestore();
     });
 
     it('should return isNewUser: true for new registration', async () => {

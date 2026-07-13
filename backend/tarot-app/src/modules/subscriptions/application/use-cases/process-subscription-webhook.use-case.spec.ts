@@ -6,6 +6,7 @@ import { ProcessSubscriptionWebhookUseCase } from './process-subscription-webhoo
 import { MercadoPagoService } from '../../../payments/infrastructure/services/mercadopago.service';
 import { USER_REPOSITORY } from '../../../users/domain/interfaces/repository.tokens';
 import { IUserRepository } from '../../../users/domain/interfaces/user-repository.interface';
+import { EmailService } from '../../../email/email.service';
 import {
   User,
   UserPlan,
@@ -46,6 +47,12 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
     validateSignature: jest.fn(),
   };
 
+  const mockEmailService: jest.Mocked<
+    Pick<EmailService, 'sendPlanChangeEmail'>
+  > = {
+    sendPlanChangeEmail: jest.fn(),
+  };
+
   const makeUser = (overrides: Partial<User> = {}): User => {
     const user = new User();
     user.id = 42;
@@ -69,6 +76,7 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
         ProcessSubscriptionWebhookUseCase,
         { provide: USER_REPOSITORY, useValue: mockUserRepo },
         { provide: MercadoPagoService, useValue: mockMercadoPagoService },
+        { provide: EmailService, useValue: mockEmailService },
       ],
     }).compile();
 
@@ -84,6 +92,7 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
     jest.clearAllMocks();
     // Default: signature is valid
     mockMercadoPagoService.validateSignature.mockReturnValue(true);
+    mockEmailService.sendPlanChangeEmail.mockResolvedValue(undefined);
   });
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -155,6 +164,91 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
       expect(savedUser.mpPreapprovalId).toBe('preapproval-123');
       expect(savedUser.planStartedAt).toBeInstanceOf(Date);
       expect(savedUser.planExpiresAt).toEqual(new Date(nextPaymentDate));
+    });
+
+    it('debe enviar el email de cambio de plan al activar premium', async () => {
+      const user = makeUser({ id: 42, plan: UserPlan.FREE });
+
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-123',
+          status: 'authorized',
+          external_reference: 'sub_42',
+        }),
+      );
+      mockUserRepo.findById.mockResolvedValue(user);
+      mockUserRepo.save.mockResolvedValue({ ...user } as User);
+
+      await useCase.execute(
+        makePreapprovalPayload('preapproval-123'),
+        xSignature,
+        xRequestId,
+      );
+
+      expect(mockEmailService.sendPlanChangeEmail).toHaveBeenCalledWith(
+        'test@example.com',
+        expect.objectContaining({
+          userName: 'Test User',
+          oldPlan: 'Gratuito',
+          newPlan: 'Premium',
+          changeDate: expect.any(String),
+        }),
+      );
+    });
+
+    it('no debe fallar la activación si el email de cambio de plan falla', async () => {
+      const user = makeUser({ id: 42, plan: UserPlan.FREE });
+
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-123',
+          status: 'authorized',
+          external_reference: 'sub_42',
+        }),
+      );
+      mockUserRepo.findById.mockResolvedValue(user);
+      mockUserRepo.save.mockResolvedValue({ ...user } as User);
+      mockEmailService.sendPlanChangeEmail.mockRejectedValue(
+        new Error('SMTP caído'),
+      );
+
+      const result = await useCase.execute(
+        makePreapprovalPayload('preapproval-123'),
+        xSignature,
+        xRequestId,
+      );
+
+      expect(result.processed).toBe(true);
+      expect(mockUserRepo.save).toHaveBeenCalledTimes(1);
+    });
+
+    it('no debe enviar el email de cambio de plan en una notificación duplicada', async () => {
+      const nextPaymentDate = '2026-04-26T10:00:00.000Z';
+      const user = makeUser({
+        id: 42,
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
+        mpPreapprovalId: 'preapproval-123',
+        planExpiresAt: new Date(nextPaymentDate),
+      });
+
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-123',
+          status: 'authorized',
+          external_reference: 'sub_42',
+          next_payment_date: nextPaymentDate,
+        }),
+      );
+      mockUserRepo.findById.mockResolvedValue(user);
+
+      await useCase.execute(
+        makePreapprovalPayload('preapproval-123'),
+        xSignature,
+        xRequestId,
+      );
+
+      expect(mockEmailService.sendPlanChangeEmail).not.toHaveBeenCalled();
     });
 
     it('debe ser idempotente: no actualizar si ya está authorized+premium con mismo preapprovalId y planExpiresAt', async () => {

@@ -239,10 +239,18 @@ export class EnvironmentVariables {
   })
   EMAIL_FROM?: string;
 
+  /**
+   * URL del frontend. La usan los links de los emails (reset de contraseña, bienvenida)
+   * y las back_urls de MercadoPago.
+   *
+   * ⚠️ En producción DEBE estar seteada: si falta, cae al default y los links de los
+   * emails salen apuntando a localhost, sin un solo error en los logs.
+   * El default es el puerto del FRONTEND (3001), no el del backend (3000).
+   */
   @IsString()
   @IsOptional()
-  @Transform(({ value }) => (value ? String(value) : 'http://localhost:3000'))
-  FRONTEND_URL: string = 'http://localhost:3000';
+  @Transform(({ value }) => (value ? String(value) : 'http://localhost:3001'))
+  FRONTEND_URL: string = 'http://localhost:3001';
 
   // =============================================================================
   // STAGING ACCESS CONTROL (Optional)

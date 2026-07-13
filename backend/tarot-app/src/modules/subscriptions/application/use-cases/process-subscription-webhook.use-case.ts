@@ -12,6 +12,14 @@ import {
   UserPlan,
   SubscriptionStatus,
 } from '../../../users/entities/user.entity';
+import { EmailService } from '../../../email/email.service';
+
+/** Etiquetas de los planes tal como se muestran al usuario en el email */
+const PLAN_LABELS: Record<UserPlan, string> = {
+  [UserPlan.ANONYMOUS]: 'Invitado',
+  [UserPlan.FREE]: 'Gratuito',
+  [UserPlan.PREMIUM]: 'Premium',
+};
 
 @Injectable()
 export class ProcessSubscriptionWebhookUseCase {
@@ -21,6 +29,7 @@ export class ProcessSubscriptionWebhookUseCase {
     @Inject(USER_REPOSITORY)
     private readonly userRepo: IUserRepository,
     private readonly mercadoPagoService: MercadoPagoService,
+    private readonly emailService: EmailService,
   ) {}
 
   async execute(
@@ -139,6 +148,33 @@ export class ProcessSubscriptionWebhookUseCase {
   }
 
   /**
+   * Notifica por email el cambio de plan. No crítico: el pago ya fue acreditado,
+   * un fallo de envío no debe romper el procesamiento del webhook.
+   */
+  private async notifyPlanChange(
+    user: User,
+    previousPlan: UserPlan,
+  ): Promise<void> {
+    try {
+      await this.emailService.sendPlanChangeEmail(user.email, {
+        userName: user.name,
+        oldPlan: PLAN_LABELS[previousPlan],
+        newPlan: PLAN_LABELS[UserPlan.PREMIUM],
+        changeDate: new Date().toLocaleDateString('es-AR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        }),
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error al enviar el email de cambio de plan al usuario ${user.id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  /**
    * Activa el plan premium del usuario.
    * Idempotente: si ya está ACTIVE+PREMIUM con el mismo preapprovalId y planExpiresAt,
    * no hace nada. Si faltan/difieren campos de suscripción, los actualiza sin reiniciar
@@ -191,6 +227,8 @@ export class ProcessSubscriptionWebhookUseCase {
     }
 
     // Activación completa: el usuario aún no era PREMIUM+ACTIVE
+    const previousPlan = user.plan;
+
     user.plan = UserPlan.PREMIUM;
     user.subscriptionStatus = SubscriptionStatus.ACTIVE;
     user.planStartedAt = new Date();
@@ -204,6 +242,8 @@ export class ProcessSubscriptionWebhookUseCase {
     this.logger.log(
       `Usuario ${user.id} activado como PREMIUM (preapproval: ${preapprovalId})`,
     );
+
+    await this.notifyPlanChange(user, previousPlan);
 
     return {
       processed: true,

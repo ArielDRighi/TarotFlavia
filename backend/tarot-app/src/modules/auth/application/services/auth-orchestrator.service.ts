@@ -66,9 +66,7 @@ export class AuthOrchestratorService {
     return this.logoutUseCase.executeAll(userId);
   }
 
-  async forgotPassword(
-    email: string,
-  ): Promise<{ message: string; token?: string }> {
+  async forgotPassword(email: string): Promise<{ message: string }> {
     return this.forgotPasswordUseCase.execute(email);
   }
 

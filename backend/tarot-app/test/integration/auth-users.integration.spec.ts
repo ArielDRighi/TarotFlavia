@@ -4,6 +4,7 @@ import { AppModule } from '../../src/app.module';
 import { DataSource } from 'typeorm';
 import { AuthOrchestratorService } from '../../src/modules/auth/application/services/auth-orchestrator.service';
 import { UsersService } from '../../src/modules/users/users.service';
+import { EmailService } from '../../src/modules/email/email.service';
 import { User as _User } from '../../src/modules/users/entities/user.entity';
 import { RefreshToken } from '../../src/modules/auth/entities/refresh-token.entity';
 import { PasswordResetToken as _PasswordResetToken } from '../../src/modules/auth/entities/password-reset-token.entity';
@@ -45,6 +46,7 @@ describe('Auth + Users Integration Tests', () => {
   let app: INestApplication;
   let dataSource: DataSource;
   let authService: AuthOrchestratorService;
+  let emailService: EmailService;
   let usersService: UsersService;
 
   const testUserData = {
@@ -56,7 +58,15 @@ describe('Auth + Users Integration Tests', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      // El alta de usuario ahora dispara el email de bienvenida: sin este override, cada
+      // registro de este spec intentaría un envío REAL a una dirección de prueba.
+      .overrideProvider(EmailService)
+      .useValue({
+        sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
+        sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
@@ -74,6 +84,7 @@ describe('Auth + Users Integration Tests', () => {
       AuthOrchestratorService,
     );
     usersService = moduleFixture.get<UsersService>(UsersService);
+    emailService = moduleFixture.get<EmailService>(EmailService);
   });
 
   afterAll(async () => {
@@ -380,6 +391,24 @@ describe('Auth + Users Integration Tests', () => {
   });
 
   describe('Password Recovery Flow', () => {
+    /**
+     * El token de reseteo viaja SOLO por email (T-PROD-015): no vuelve en la respuesta
+     * ni se loguea. Los tests lo leen del EmailService, la única vía legítima.
+     */
+    const requestResetToken = async (email: string): Promise<string> => {
+      // mockResolvedValue: sin él, el spy ejecuta el envío REAL (mails a direcciones de test)
+      const sendSpy = jest
+        .spyOn(emailService, 'sendPasswordResetEmail')
+        .mockResolvedValue(undefined);
+      sendSpy.mockClear();
+
+      await authService.forgotPassword(email);
+
+      const token = sendSpy.mock.calls[0]?.[2];
+      expect(token).toBeDefined();
+      return token;
+    };
+
     let user: {
       id: number;
       email: string;
@@ -404,7 +433,7 @@ describe('Auth + Users Integration Tests', () => {
     });
 
     it('should create reset token in database', async () => {
-      const { token } = await authService.forgotPassword(testUserData.email);
+      const token = await requestResetToken(testUserData.email);
 
       // CRÍTICO: Verificar que se creó el token en BD (hasheado)
       const resetTokensInDb = await dataSource.query<PasswordResetTokenRow[]>(
@@ -420,12 +449,12 @@ describe('Auth + Users Integration Tests', () => {
     });
 
     it('should reset password and mark token as used', async () => {
-      const { token } = await authService.forgotPassword(testUserData.email);
+      const token = await requestResetToken(testUserData.email);
 
       const newPassword = 'NewSecurePassword123!';
 
       // Reset password
-      await authService.resetPassword(token!, newPassword);
+      await authService.resetPassword(token, newPassword);
 
       // CRÍTICO: Verificar que la contraseña cambió en la base de datos
       // findByEmail retorna tipo parcial sin password, verificamos desde DB
@@ -482,9 +511,9 @@ describe('Auth + Users Integration Tests', () => {
         );
       }
 
-      const { token } = await authService.forgotPassword(testUserData.email);
+      const token = await requestResetToken(testUserData.email);
 
-      await authService.resetPassword(token!, 'NewPassword123!');
+      await authService.resetPassword(token, 'NewPassword123!');
 
       // CRÍTICO: Verificar que los refresh tokens fueron revocados
       const activeRefreshTokens = await dataSource.query<RefreshToken[]>(
@@ -497,7 +526,7 @@ describe('Auth + Users Integration Tests', () => {
     });
 
     it('should reject expired reset token', async () => {
-      const { token } = await authService.forgotPassword(testUserData.email);
+      const token = await requestResetToken(testUserData.email);
 
       // Expirar el token manualmente con fecha absoluta en el pasado
       const pastDate = new Date(Date.now() - 2 * 60 * 60 * 1000); // 2 horas atrás
@@ -508,19 +537,19 @@ describe('Auth + Users Integration Tests', () => {
 
       // BUSCAR BUG: ¿Se valida correctamente la expiración?
       await expect(
-        authService.resetPassword(token!, 'NewPassword123!'),
+        authService.resetPassword(token, 'NewPassword123!'),
       ).rejects.toThrow();
     });
 
     it('should reject already used reset token', async () => {
-      const { token } = await authService.forgotPassword(testUserData.email);
+      const token = await requestResetToken(testUserData.email);
 
       // Usar el token una vez
-      await authService.resetPassword(token!, 'NewPassword123!');
+      await authService.resetPassword(token, 'NewPassword123!');
 
       // BUSCAR BUG: ¿Permite reutilizar un token?
       await expect(
-        authService.resetPassword(token!, 'AnotherPassword123!'),
+        authService.resetPassword(token, 'AnotherPassword123!'),
       ).rejects.toThrow();
     });
   });

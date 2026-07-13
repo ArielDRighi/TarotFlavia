@@ -209,17 +209,14 @@ describe('AuthOrchestratorService', () => {
 
   describe('forgotPassword', () => {
     it('should delegate to ForgotPasswordUseCase.execute', async () => {
-      forgotPasswordUseCase.execute.mockResolvedValue({
-        message: 'Password reset email sent',
-        token: 'reset_token',
-      });
+      const message =
+        'Si el email está registrado, recibirás un enlace para restablecer tu contraseña.';
+      forgotPasswordUseCase.execute.mockResolvedValue({ message });
 
       const result = await service.forgotPassword('test@example.com');
 
-      expect(result).toEqual({
-        message: 'Password reset email sent',
-        token: 'reset_token',
-      });
+      expect(result).toEqual({ message });
+      expect(result).not.toHaveProperty('token');
       expect(forgotPasswordUseCase.execute).toHaveBeenCalledWith(
         'test@example.com',
       );

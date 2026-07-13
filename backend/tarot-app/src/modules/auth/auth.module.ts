@@ -35,11 +35,13 @@ import { ResetPasswordUseCase } from './application/use-cases/reset-password.use
 // Other modules
 import { UsersModule } from '../users/users.module';
 import { SecurityModule } from '../security/security.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
     forwardRef(() => UsersModule),
     SecurityModule,
+    EmailModule,
     PassportModule,
     ConfigModule,
     TypeOrmModule.forFeature([RefreshToken, PasswordResetToken]),

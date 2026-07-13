@@ -270,6 +270,21 @@ POST /api/auth/forgot-password
 }
 ```
 
+**Response: `200 OK`**
+
+```json
+{
+  "message": "Si el email está registrado, recibirás un enlace para restablecer tu contraseña."
+}
+```
+
+Si el email corresponde a un usuario registrado, se le envía un correo con el enlace
+`{FRONTEND_URL}/restablecer-password?token=<token>` (válido 1 hora, de un solo uso).
+
+> 🔒 **El token de reseteo viaja únicamente por email.** No se devuelve en la respuesta HTTP
+> (en ningún entorno) ni se escribe en los logs. La respuesta es idéntica exista o no el
+> usuario, para no revelar qué emails están registrados.
+
 ---
 
 ### Usuarios

@@ -77,7 +77,8 @@ describe('env-validator', () => {
     expect(result.RATE_LIMIT_TTL).toBe(60);
     expect(result.RATE_LIMIT_MAX).toBe(100);
     expect(result.GROQ_MODEL).toBe('llama-3.3-70b-versatile');
-    expect(result.FRONTEND_URL).toBe('http://localhost:3000');
+    // El frontend corre en 3001; 3000 es el puerto del backend (T-PROD-015)
+    expect(result.FRONTEND_URL).toBe('http://localhost:3001');
   });
 
   it('should preserve custom values for optional variables', () => {
