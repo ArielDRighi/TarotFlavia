@@ -21,6 +21,7 @@ import { PredefinedQuestionsModule } from './modules/predefined-questions/predef
 import { HealthModule } from './modules/health/health.module';
 import { UsageLimitsModule } from './modules/usage-limits/usage-limits.module';
 import { EmailModule } from './modules/email/email.module';
+import { ContactModule } from './modules/contact/contact.module';
 import { TarotistasModule } from './modules/tarotistas/tarotistas.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { CacheModule as InterpretationCacheModule } from './modules/cache/cache.module';
@@ -115,6 +116,7 @@ import { validate } from './config/env-validator';
     HealthModule,
     UsageLimitsModule,
     EmailModule,
+    ContactModule,
     RateLimitingModule,
   ],
   controllers: [AppController],

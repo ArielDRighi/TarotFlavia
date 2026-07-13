@@ -28,6 +28,7 @@ describe('Email templates (build)', () => {
     'holistic-service-confirmation',
     'provider-cost-warning',
     'provider-cost-limit-reached',
+    'contact-message',
   ];
 
   it.each(REQUIRED_TEMPLATES)(
@@ -166,6 +167,12 @@ describe('Email templates (render)', () => {
       whatsappNumber: '+54 9 11 1234-5678',
       whatsappNumberForLink: '5491112345678',
     },
+    'contact-message': {
+      name: 'Ana Pérez',
+      email: 'ana@example.com',
+      subject: 'Consulta por una lectura',
+      message: 'Hola, quería saber cómo reservar una sesión.',
+    },
   };
 
   it.each(Object.keys(TEMPLATE_CONTEXTS))(
@@ -190,5 +197,29 @@ describe('Email templates (render)', () => {
 
     expect(mail.html).toContain(resetUrl);
     expect(mail.html).toContain('Flavia');
+  });
+
+  describe('contact-message (T-PROD-014)', () => {
+    it('incluye los datos del cliente y su mensaje: si falta alguno, el email llega inútil', async () => {
+      const mail = await render(
+        'contact-message',
+        TEMPLATE_CONTEXTS['contact-message'],
+      );
+
+      expect(mail.html).toContain('Ana Pérez');
+      expect(mail.html).toContain('ana@example.com');
+      expect(mail.html).toContain('Consulta por una lectura');
+      expect(mail.html).toContain('Hola, quería saber cómo reservar');
+    });
+
+    it('escapa el HTML del mensaje: el cuerpo lo escribe un desconocido sin autenticar', async () => {
+      const mail = await render('contact-message', {
+        ...TEMPLATE_CONTEXTS['contact-message'],
+        message: '<script>alert(1)</script>',
+      });
+
+      expect(mail.html).not.toContain('<script>alert(1)</script>');
+      expect(mail.html).toContain('&lt;script&gt;');
+    });
   });
 });

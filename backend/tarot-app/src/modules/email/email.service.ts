@@ -8,7 +8,15 @@ import {
   ProviderCostWarningData,
   ProviderCostLimitReachedData,
   HolisticServiceConfirmationData,
+  ContactMessageData,
 } from './interfaces/email.interface';
+
+/**
+ * Último recurso del buzón de contacto, para el dev local sin SMTP: coincide con el
+ * `from` de `mailer.config.ts` en modo jsonTransport, donde el mail se loguea y no sale.
+ * En producción nunca se usa: `CONTACT_EMAIL_TO` es obligatoria y el boot falla sin ella.
+ */
+const CONTACT_RECIPIENT_FALLBACK = 'noreply@example.com';
 
 @Injectable()
 export class EmailService {
@@ -258,6 +266,60 @@ export class EmailService {
         error instanceof Error ? error.stack : String(error),
       );
       // No relanzar — el pago ya fue aprobado, el email es no crítico
+    }
+  }
+
+  /**
+   * Buzón que recibe los mensajes del formulario de contacto.
+   *
+   * En producción es `CONTACT_EMAIL_TO` y punto: el boot falla si no está (T-PROD-014).
+   * Los fallbacks son para dev/staging, donde el mailer corre en jsonTransport.
+   */
+  private resolveContactRecipient(): string {
+    return (
+      this.configService.get<string>('CONTACT_EMAIL_TO') ??
+      this.configService.get<string>('EMAIL_REPLY_TO') ??
+      this.configService.get<string>('EMAIL_FROM') ??
+      CONTACT_RECIPIENT_FALLBACK
+    );
+  }
+
+  /**
+   * Envía al buzón de contacto un mensaje del formulario público.
+   *
+   * El `replyTo` es el email del visitante y **pisa** el default global del mailer
+   * (`EMAIL_REPLY_TO`, que apunta al propio buzón de Auguria): sin él, responder el
+   * mensaje sería responderse a sí misma en vez de contestarle al cliente.
+   *
+   * Relanza si el envío falla — a diferencia de las alertas de costo, acá el usuario
+   * tiene que enterarse: tragarse el error es justamente el bug que arregla T-PROD-014.
+   */
+  async sendContactMessageEmail(data: ContactMessageData): Promise<void> {
+    const to = this.resolveContactRecipient();
+
+    try {
+      await this.mailerService.sendMail({
+        to,
+        replyTo: data.email,
+        subject: `Contacto web: ${data.subject}`,
+        template: 'contact-message',
+        context: {
+          name: data.name,
+          email: data.email,
+          subject: data.subject,
+          message: data.message,
+        },
+      });
+
+      this.logger.log(
+        `Mensaje de contacto enviado exitosamente a ${to} (de ${data.email})`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error al enviar el mensaje de contacto de ${data.email} a ${to}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      throw new Error('Error al enviar el mensaje de contacto');
     }
   }
 }

@@ -333,7 +333,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-011 | ✅ Ocultar y bloquear notificaciones tras feature flag + sincronizar el enum | Frontend | 🟠 Alta | 1.5 pts |
 | T-PROD-012 | ✅ Fail-fast de SMTP en producción (hoy el fallback a jsonTransport es silencioso) + Reply-To | Backend | 🟠 Alta | 1 pt |
 | T-PROD-013 | ✅ Página de contacto: la dirección pública `contacto@auguria.com` no existe (dominio equivocado) | Frontend | 🔴 Crítica | 0.5 pt |
-| T-PROD-014 | Formulario de contacto: enviar de verdad (endpoint + EmailService); hoy los mensajes se pierden | Full-stack | 🟠 Alta | 3 pts |
+| T-PROD-014 | ✅ Formulario de contacto: enviar de verdad (endpoint + EmailService); hoy los mensajes se pierden | Full-stack | 🟠 Alta | 3 pts |
 | T-PROD-015 | **Reset de contraseña no envía nada**: usuarios sin recuperación de cuenta + métodos huérfanos | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-016 | **Alertas de costo al admin sin plantilla**: si el gasto de los proveedores se dispara, nadie se entera | Backend | 🟠 Alta | 1 pt |
 | T-PROD-017 | Geocoding: el `User-Agent` que enviamos a Nominatim declara un email inexistente (riesgo de bloqueo silencioso) | Backend | 🟠 Alta | 0.5 pt |
@@ -1041,8 +1041,9 @@ El barrido encontró más `auguria.com` **no publicados** al usuario, que este P
 
 ---
 
-### T-PROD-014: El Formulario de Contacto No Envía Nada
+### T-PROD-014: El Formulario de Contacto No Envía Nada — ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA (2026-07-12)
 **Prioridad:** 🟠 Alta
 **Estimación:** 3 puntos
 **Dependencias:** **T-PROD-004** (necesita el SMTP real andando) + T-PROD-012 (deseable)
@@ -1060,23 +1061,35 @@ Es decir: **los mensajes de los clientes se pierden en la consola del navegador.
 #### ✅ Tareas específicas
 
 **Backend:**
-- [ ] Endpoint público `POST /contact` (sin `JwtAuthGuard`) con su DTO espejando el schema Zod del frontend.
-- [ ] **Rate limiting obligatorio** (endpoint público sin auth = vector de spam): throttle por IP, del orden de 3/hora.
-- [ ] Nuevo template `contact-message.hbs` + método en `EmailService` que envíe a `consultas@auguriatarot.com` con el `replyTo` seteado **al email del usuario** (así se le responde directo desde el buzón, sin copiar la dirección a mano).
-- [ ] Tests de use-case y controller (incluido el rechazo por rate limit).
+- [x] Endpoint público `POST /contact` (sin `JwtAuthGuard`) en el nuevo módulo `contact` (`contact.controller.ts` → `send-contact-message.use-case.ts`), con `SendContactMessageDto` espejando el schema Zod del frontend (2-100 / email / 5-200 / 10-2000).
+- [x] **Rate limiting**: `@RateLimit({ ttl: 3600, limit: 3, blockDuration: 3600 })` + `@Throttle({ default: { limit: 3, ttl: 3600000 } })` — 3 mensajes/hora por IP, igual que `auth/forgot-password`.
+- [x] Nuevo template `contact-message.hbs` + `EmailService.sendContactMessageEmail()`: envía al buzón de contacto con `replyTo` = **email del visitante**, que **pisa** el default global (`EMAIL_REPLY_TO`) — sin eso, responder el mensaje sería responderse a sí misma.
+- [x] **Nueva variable `CONTACT_EMAIL_TO`**, obligatoria en producción (el boot falla si falta, misma política que las SMTP de T-PROD-012). Fuera de producción cae a `EMAIL_REPLY_TO` / `EMAIL_FROM`.
+- [x] El envío **relanza** si el SMTP falla (a diferencia de las alertas de costo): el use-case devuelve 500 y loguea remitente + asunto, para que el mensaje pueda rescatarse del log.
+- [x] Tests: use-case, controller (delegación, endpoint público, 400 de validación) y el **429 real** montando `ThrottlerGuard` con supertest; `EmailService` (destinatario, replyTo, fallbacks, error); render del template (incluido el escape de HTML del cuerpo, que lo escribe un desconocido sin auth).
+- [x] **Endurecimiento**: el asunto rechaza saltos de línea (`@Matches(/^[^\r\n]+$/)`) — viaja a una cabecera del email y un `\n` permitiría inyectar un `Bcc:` desde un endpoint público.
 
 **Frontend:**
-- [ ] `API_ENDPOINTS.CONTACT` en `lib/api/endpoints.ts` (nunca hardcodear la ruta).
-- [ ] Hook `useSendContactMessage` (TanStack Query) y cablearlo en el `onSubmit` de `ContactForm`, con estados de carga y error.
-- [ ] **Eliminar el `DisclaimerBanner`** de `contacto/page.tsx` y el `TODO` del docblock.
-- [ ] Tests: envío exitoso, error de red, y que el botón quede deshabilitado mientras envía.
+- [x] `API_ENDPOINTS.CONTACT.BASE` en `lib/api/endpoints.ts` + `lib/api/contact-api.ts`.
+- [x] Hook `useSendContactMessage` (TanStack Query, `useMutation`) cableado en el `onSubmit` de `ContactForm`: `isPending` deshabilita el formulario, el error muestra el `Alert` y el 429 avisa del límite en vez del error genérico. Ante un error **no** se limpia el formulario (el usuario reintenta sin volver a escribir).
+- [x] **Eliminado el `DisclaimerBanner`** de `contacto/page.tsx` y los `TODO` de la página y del componente.
+- [x] Tests: envío real al backend, éxito (toast + reset), error de red, 429, botón deshabilitado mientras envía y rehabilitado tras el error. La página fija que el disclaimer **ya no** está.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Un mensaje enviado desde la página de contacto **llega a `consultas@auguriatarot.com`**, y responderlo contesta directamente al cliente (gracias al `replyTo`).
-- [ ] El endpoint resiste un flood: pasado el límite, responde 429.
-- [ ] La página ya no muestra el disclaimer de "no implementado".
-- [ ] Ciclos de calidad backend y frontend completos pasan.
+- [x] Un mensaje enviado desde la página de contacto **llega a `CONTACT_EMAIL_TO`** (`consultas@auguriatarot.com` en producción), y responderlo contesta directamente al cliente (gracias al `replyTo`).
+- [x] El endpoint resiste un flood: pasado el límite, responde 429. Verificado contra la app real: 3×200 y el 4.º con `429 / retryAfter: 3600`.
+- [x] La página ya no muestra el disclaimer de "no implementado".
+- [x] Ciclos de calidad completos: backend (format, lint, 4567 tests, coverage 84.6%, build, validate-architecture) y frontend (format, lint 0 errores, type-check, 5301 tests, build, validate-architecture).
+
+#### 🔍 Verificación manual (backend real, dev)
+
+`POST /api/v1/contact` contra el servidor levantado: 200 con el mensaje de confirmación, `EmailService` loguea el envío (jsonTransport en dev), el 4.º request desde una IP no whitelisteada devuelve **429**, y un asunto con `\n` devuelve **400**. Nota: `127.0.0.1`/`::1` están whitelisteadas por defecto (`ip-whitelist.service.ts`), así que el rate limit no se ve desde localhost sin `X-Forwarded-For` — es el comportamiento de toda la app, no de este endpoint.
+
+> ⚠️ **Acción de Ops al deployar:** setear **`CONTACT_EMAIL_TO=consultas@auguriatarot.com`** en Railway.
+> **Sin ella el arranque en producción falla** (a propósito): un buzón de contacto sin destinatario es
+> exactamente el bug que esta tarea arregla, y preferimos que se note en el deploy y no en los mensajes
+> perdidos de los clientes.
 
 ---
 

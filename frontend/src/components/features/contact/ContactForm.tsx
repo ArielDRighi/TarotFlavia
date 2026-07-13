@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, MessageSquare, User } from 'lucide-react';
+import { isAxiosError } from 'axios';
 import { toast } from 'sonner';
 
+import { useSendContactMessage } from '@/hooks/api/useSendContactMessage';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,25 +14,28 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { contactFormSchema, type ContactFormData } from '@/lib/validations/contact.schemas';
 
+const GENERIC_ERROR = 'Hubo un error al enviar tu mensaje. Por favor, intenta nuevamente.';
+const RATE_LIMIT_ERROR =
+  'Demasiados mensajes enviados. Esperá una hora antes de volver a escribirnos.';
+
+/** El backend limita el endpoint público a 3 mensajes/hora por IP: pasado el límite, 429. */
+function getErrorMessage(error: unknown): string {
+  if (isAxiosError(error) && error.response?.status === 429) {
+    return RATE_LIMIT_ERROR;
+  }
+  return GENERIC_ERROR;
+}
+
 /**
  * ContactForm component
  *
- * A complete contact form with name, email, subject, and message fields.
- * Uses React Hook Form with Zod validation.
+ * Formulario de contacto (nombre, email, asunto y mensaje) con React Hook Form + Zod.
  *
- * Features:
- * - Client-side validation with Zod schema
- * - Inline error messages for each field
- * - Loading state during submission
- * - Success/error feedback after submission
- * - Form reset after successful submission
- *
- * TODO: Implement backend endpoint for email sending
+ * El envío es real (T-PROD-014): `useSendContactMessage` lo manda a `POST /contact`, que
+ * lo hace llegar por email al buzón de Auguria con el remitente como Reply-To. Hasta esa
+ * tarea el `onSubmit` era un `setTimeout` que fingía el envío y perdía el mensaje.
  */
 export function ContactForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasError, setHasError] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -47,24 +51,17 @@ export function ContactForm() {
     },
   });
 
-  const onSubmit = async () => {
-    setIsSubmitting(true);
-    setHasError(false);
+  const { mutate, isPending, error, isError } = useSendContactMessage();
 
-    try {
-      // TODO: Implementar envío real al backend
-      // await sendContactMessage(data);
-
-      // Simulación de envío
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      toast.success('¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.');
-      reset(); // Limpiar formulario
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onSubmit = (data: ContactFormData) => {
+    mutate(data, {
+      onSuccess: () => {
+        toast.success('¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.');
+        reset();
+      },
+      // Sin onError: el mensaje de error sale de `error` y el formulario NO se limpia,
+      // para que el usuario pueda reintentar sin volver a escribir todo.
+    });
   };
 
   return (
@@ -79,7 +76,7 @@ export function ContactForm() {
           id="name"
           type="text"
           placeholder="Tu nombre completo"
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('name')}
         />
         {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
@@ -95,7 +92,7 @@ export function ContactForm() {
           id="email"
           type="email"
           placeholder="tu@email.com"
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('email')}
         />
         {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
@@ -111,7 +108,7 @@ export function ContactForm() {
           id="subject"
           type="text"
           placeholder="¿Sobre qué quieres contactarnos?"
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('subject')}
         />
         {errors.subject && <p className="text-destructive text-sm">{errors.subject.message}</p>}
@@ -124,7 +121,7 @@ export function ContactForm() {
           id="message"
           placeholder="Escribe tu mensaje aquí..."
           rows={6}
-          disabled={isSubmitting}
+          disabled={isPending}
           {...register('message')}
         />
         {errors.message && <p className="text-destructive text-sm">{errors.message.message}</p>}
@@ -134,18 +131,16 @@ export function ContactForm() {
       <Button
         type="submit"
         className="focus-visible:ring-secondary/50 w-full"
-        disabled={isSubmitting}
+        disabled={isPending}
         size="lg"
       >
-        {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
+        {isPending ? 'Enviando...' : 'Enviar Mensaje'}
       </Button>
 
       {/* Error Message */}
-      {hasError && (
-        <Alert variant="destructive" role="alert" aria-live="polite">
-          <AlertDescription>
-            Hubo un error al enviar tu mensaje. Por favor, intenta nuevamente.
-          </AlertDescription>
+      {isError && (
+        <Alert variant="destructive" role="alert" aria-live="polite" data-testid="contact-error">
+          <AlertDescription>{getErrorMessage(error)}</AlertDescription>
         </Alert>
       )}
     </form>

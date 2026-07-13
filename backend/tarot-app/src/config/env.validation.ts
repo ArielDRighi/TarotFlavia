@@ -273,6 +273,24 @@ export class EnvironmentVariables {
   ADMIN_EMAIL_COST_ALERTS?: string;
 
   /**
+   * Buzón que recibe los mensajes del formulario de contacto (T-PROD-014).
+   *
+   * ⚠️ OBLIGATORIA en producción: el boot falla si falta (ver `validate()` en
+   * `env-validator.ts`). Sin destinatario, cada mensaje de un cliente se perdería —
+   * que es exactamente el bug que arregla la tarea.
+   *
+   * Fuera de producción es opcional: `EmailService` cae a `EMAIL_REPLY_TO` /
+   * `EMAIL_FROM` y el mailer loguea el mail en consola (jsonTransport).
+   */
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => (value ? String(value) : undefined))
+  @Matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
+    message: 'CONTACT_EMAIL_TO must be a valid email address',
+  })
+  CONTACT_EMAIL_TO?: string;
+
+  /**
    * URL del frontend. La usan los links de los emails (reset de contraseña, bienvenida)
    * y las back_urls de MercadoPago.
    *

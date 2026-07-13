@@ -87,6 +87,15 @@ function validateProductionOnlyVariables(
     errors.push(frontendUrlError);
   }
 
+  // El string vacío tampoco es un buzón: `@Transform` ya lo convirtió en undefined.
+  if (!validatedConfig.CONTACT_EMAIL_TO) {
+    errors.push(
+      `CONTACT_EMAIL_TO: must be set to the mailbox that receives the contact form messages (not set).\n` +
+        `  Without it, every message a client sends from /contacto would go nowhere (T-PROD-014).\n` +
+        `  Example: consultas@auguriatarot.com`,
+    );
+  }
+
   if (errors.length > 0) {
     throw new Error(
       `❌ Environment variable validation failed (production):\n\n${errors.join('\n\n')}\n\n` +

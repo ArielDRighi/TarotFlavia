@@ -1,0 +1,119 @@
+<html lang='es'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Nuevo mensaje de contacto</title>
+    <style>
+      body {
+        font-family: 'Georgia', serif;
+        background-color: #f5f3f0;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 40px 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #8b7355;
+        padding-bottom: 20px;
+      }
+      .header h1 {
+        color: #8b7355;
+        font-size: 26px;
+        margin: 0;
+        font-weight: normal;
+      }
+      .icon {
+        font-size: 44px;
+        margin-bottom: 10px;
+      }
+      .sender-box {
+        background-color: #f9f7f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .sender-row {
+        color: #5a5a5a;
+        font-size: 15px;
+        margin: 8px 0;
+      }
+      .sender-label {
+        color: #8b7355;
+        font-weight: bold;
+      }
+      .message-box {
+        background-color: #ffffff;
+        border-left: 4px solid #8b7355;
+        padding: 15px 20px;
+        border-radius: 5px;
+        margin: 20px 0;
+        color: #333;
+        font-size: 16px;
+        line-height: 1.8;
+        /* El mensaje llega como texto plano: sin esto, los saltos de línea del
+           formulario se pierden y el mail se lee como un bloque único. */
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .reply-notice {
+        background-color: #f0ebe5;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+        color: #888;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <div class='icon'>✉️</div>
+        <h1>Nuevo mensaje de contacto</h1>
+      </div>
+
+      <div class='sender-box'>
+        <p class='sender-row'>
+          <span class='sender-label'>De:</span>
+          {{name}}
+        </p>
+        <p class='sender-row'>
+          <span class='sender-label'>Email:</span>
+          <a href='mailto:{{email}}'>{{email}}</a>
+        </p>
+        <p class='sender-row'>
+          <span class='sender-label'>Asunto:</span>
+          {{subject}}
+        </p>
+      </div>
+
+      <div class='message-box'>{{message}}</div>
+
+      <div class='reply-notice'>
+        Respondé este email directamente: la respuesta le llega a
+        <strong>{{email}}</strong>.
+      </div>
+
+      <div class='footer'>
+        <p>Mensaje enviado desde el formulario de contacto de Auguria.</p>
+      </div>
+    </div>
+  </body>
+</html>

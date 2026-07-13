@@ -55,6 +55,17 @@ export interface ProviderCostLimitReachedData {
   monthlyLimit: number;
 }
 
+/**
+ * Mensaje del formulario de contacto público (T-PROD-014).
+ * `email` es el del visitante: va como `replyTo`, para poder contestarle directo.
+ */
+export interface ContactMessageData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
 export interface HolisticServiceConfirmationData {
   userName: string;
   serviceName: string;
