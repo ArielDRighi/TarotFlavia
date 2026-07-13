@@ -331,11 +331,12 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-009 | AdSense fase 2: alta de cuenta, ads.txt, consentimiento y colocación en páginas | Full-stack | 🟡 Media | 3 pts |
 | T-PROD-010 | ✅ Selector de horóscopo: carrusel móvil con nombres completos (occidental + chino) | Frontend | 🟠 Alta | 2 pts |
 | T-PROD-011 | ✅ Ocultar y bloquear notificaciones tras feature flag + sincronizar el enum | Frontend | 🟠 Alta | 1.5 pts |
-| T-PROD-012 | Fail-fast de SMTP en producción (hoy el fallback a jsonTransport es silencioso) + Reply-To | Backend | 🟠 Alta | 1 pt |
+| T-PROD-012 | ✅ Fail-fast de SMTP en producción (hoy el fallback a jsonTransport es silencioso) + Reply-To | Backend | 🟠 Alta | 1 pt |
 | T-PROD-013 | ✅ Página de contacto: la dirección pública `contacto@auguria.com` no existe (dominio equivocado) | Frontend | 🔴 Crítica | 0.5 pt |
 | T-PROD-014 | Formulario de contacto: enviar de verdad (endpoint + EmailService); hoy los mensajes se pierden | Full-stack | 🟠 Alta | 3 pts |
 | T-PROD-015 | **Reset de contraseña no envía nada**: usuarios sin recuperación de cuenta + métodos huérfanos | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-016 | **Alertas de costo al admin sin plantilla**: si el gasto de los proveedores se dispara, nadie se entera | Backend | 🟠 Alta | 1 pt |
+| T-PROD-017 | Geocoding: el `User-Agent` que enviamos a Nominatim declara un email inexistente (riesgo de bloqueo silencioso) | Backend | 🟠 Alta | 0.5 pt |
 
 ---
 
@@ -906,13 +907,19 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 ---
 
-### T-PROD-012: Fail-Fast de SMTP en Producción + Reply-To
+### T-PROD-012: Fail-Fast de SMTP en Producción + Reply-To — ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA (2026-07-12)
 **Prioridad:** 🟠 Alta
 **Estimación:** 1 punto
 **Dependencias:** ninguna (pero cobra sentido junto con T-PROD-004)
 **Origen:** hallazgo al revisar la arquitectura de email de T-PROD-004
 **Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`)
+
+> 📌 **Alcance ampliado por decisión del Delta:** la tarea absorbe los **dos hallazgos aparcados**
+> que T-PROD-015 y T-PROD-016 dejaron marcados como *"candidata a sumarse a T-PROD-012"*
+> (`FRONTEND_URL` y `ADMIN_EMAIL_COST_ALERTS`). Los tres agujeros son la misma falla:
+> **una variable mal cargada en Railway no rompe nada, solo apaga los emails en silencio.**
 
 #### 📋 Problema
 
@@ -924,18 +931,41 @@ Segundo problema, menor: el módulo no setea `replyTo`. Si un cliente le respond
 
 #### ✅ Tareas específicas
 
-- [ ] En el `useFactory` de `MailerModule`: si `NODE_ENV === 'production'` y la config SMTP está incompleta → **lanzar** (fail-fast al arranque) en lugar de caer a `jsonTransport`. Fuera de producción, mantener el fallback + warning actual (los tests y el dev local dependen de él).
-- [ ] Agregar `defaults: { from: emailFrom, replyTo: EMAIL_REPLY_TO ?? emailFrom }` y declarar `EMAIL_REPLY_TO` (opcional) en `env.validation.ts` con el mismo `@Matches` de email que `EMAIL_FROM`. Valor productivo: `consultas@auguriatarot.com`.
-- [ ] Mover el bloque `template` fuera del `if`: hoy la rama de `jsonTransport` **no** configura el `HandlebarsAdapter`, así que el modo de prueba no ejercita el render real de los `.hbs` — un template roto no se detecta hasta producción.
-- [ ] Tests: (a) en `production` con SMTP incompleto → el factory lanza; (b) en `development` con SMTP incompleto → devuelve `jsonTransport` sin lanzar; (c) con SMTP completo → transport real y `replyTo` presente en `defaults`.
-- [ ] Actualizar `.env.example` y `backend/tarot-app/docs/EMAIL_SETUP.md` (hoy documenta Mailtrap y dice que las variables de email son opcionales — quedó desactualizado y contradice el fail-fast).
+- [x] El `useFactory` de `MailerModule` se **extrajo** a [mailer.config.ts](../backend/tarot-app/src/modules/email/mailer.config.ts) (`createMailerOptions`): inline dentro del decorador era **imposible de testear**. `email.module.ts` queda en 17 líneas.
+- [x] **Fail-fast:** si `NODE_ENV === 'production'` y la config SMTP está incompleta → **lanza** al arranque, con un error que **nombra las variables que faltan**. Fuera de producción se conserva el fallback a `jsonTransport` + warning (los tests y el dev local dependen de él).
+- [x] `defaults: { from, replyTo: EMAIL_REPLY_TO ?? from }` y `EMAIL_REPLY_TO` declarada en `env.validation.ts` con el mismo `@Matches` de email que `EMAIL_FROM`. Valor productivo: `consultas@auguriatarot.com`.
+- [x] Bloque `template` **fuera del `if`**: la rama de `jsonTransport` ahora también configura el `HandlebarsAdapter`, así un `.hbs` roto se detecta corriendo los tests y no en producción.
+- [x] **Bug encontrado al extraer el factory:** `secure: smtpPort === 465` comparaba **string con number** (`ConfigService` devuelve `'465'`, porque `SMTP_PORT` es `@IsPort()` = string). El resultado era **siempre `false`**: en el puerto 465 se habría intentado conectar **sin TLS implícito**. Hoy no explota solo porque Resend usa 587. Corregido con `Number(...)` y cubierto por test.
+- [x] Tests (12 nuevos en `mailer.config.spec.ts`): fail-fast por cada una de las 5 variables, el error nombra todas las faltantes, `jsonTransport` en `development` y `test`, adapter presente en modo prueba, transporte real, `secure` solo en 465, y `replyTo` con y sin `EMAIL_REPLY_TO`.
+- [x] `.env.example` y [EMAIL_SETUP.md](../backend/tarot-app/docs/EMAIL_SETUP.md) reescritos: el doc seguía hablando de Mailtrap, de `tarotflavia.com` y de que las variables eran "opcionales" — contradecía el fail-fast.
+
+**Hallazgos aparcados que esta tarea cierra:**
+
+- [x] **`FRONTEND_URL` (venía de T-PROD-015):** tiene default, así que class-validator **nunca** la marcaba como faltante. En producción, sin ella los links de **todos** los emails salían apuntando a `localhost` sin un solo error en los logs. Ahora `validate()` ([env-validator.ts](../backend/tarot-app/src/config/env-validator.ts)) **falla el boot** en producción si no está seteada **o si apunta a localhost/127.0.0.1**.
+- [x] **`ADMIN_EMAIL_COST_ALERTS` (venía de T-PROD-016):** no estaba declarada en `env.validation.ts`, así que un typo pasaba sin ruido y las alertas de costo quedaban mudas. Declarada y validada como email.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] En `NODE_ENV=production`, arrancar sin SMTP completo **falla el boot** con un mensaje claro, en vez de simular silenciosamente que los emails se envían.
-- [ ] En dev/test, el comportamiento actual (jsonTransport + warning) se conserva intacto.
-- [ ] Las respuestas a `noreply@` aterrizan en el buzón humano.
-- [ ] Ciclo de calidad backend completo pasa (format, lint, test:cov ≥ 80%, build, validate-architecture).
+- [x] En `NODE_ENV=production`, arrancar sin SMTP completo **falla el boot** con un mensaje claro, en vez de simular silenciosamente que los emails se envían.
+- [x] En dev/test, el comportamiento actual (jsonTransport + warning) se conserva intacto.
+- [x] Las respuestas a `noreply@` aterrizan en el buzón humano (`replyTo` en los `defaults` del mailer).
+- [x] Ciclo de calidad backend completo pasa: format, lint (0 errores), **4511 tests**, coverage **84.77%**, build y `validate-architecture.js`.
+
+#### 🔬 Verificación contra el build (no solo tests)
+
+Aplicando la lección de T-PROD-015 (*"el ciclo de calidad no cubre el envío real: ts-jest corre desde
+`src/`"*), los tres caminos se ejercitaron **sobre `dist/`**, no solo en Jest:
+
+| Caso | Resultado |
+| --- | --- |
+| `NODE_ENV=production` sin SMTP | ❌ el boot **muere** (exit 1) nombrando las 5 variables faltantes |
+| `NODE_ENV=production` con `FRONTEND_URL` en localhost | ❌ el boot **muere** (exit 1) nombrando `FRONTEND_URL` |
+| `NODE_ENV=development` sin SMTP | ✅ warning + `jsonTransport`, la app sigue arrancando (sin regresión) |
+
+> ⚠️ **Acción de Ops pendiente al deployar:** setear **`EMAIL_REPLY_TO=consultas@auguriatarot.com`** en
+> Railway (opcional, pero sin ella las respuestas de los clientes caen en `noreply@`, que nadie lee).
+> Las 5 SMTP, `FRONTEND_URL` y `ADMIN_EMAIL_COST_ALERTS` ya están cargadas desde T-PROD-004 — si
+> alguna se hubiera perdido, **ahora el deploy falla en vez de callarse**, que es exactamente el punto.
 
 ---
 
@@ -966,12 +996,12 @@ Es un resto del rebrand: el mismo dominio equivocado aparece también en el `REA
 - [x] Ninguna dirección de un dominio que no sea `auguriatarot.com` queda publicada en el frontend. Verificado en el HTML prerenderizado de `/contacto` (0 ocurrencias de `auguria.com`); el único email en `src/` fuera de tests es la constante, el resto son placeholders `tu@email.com` de los formularios.
 - [x] Ciclo de calidad frontend completo pasa: format, lint (0 errores), type-check, 5291 tests, build y `validate-architecture.js`.
 
-#### 📌 Fuera de alcance (decisión del Delta — hallazgo abierto)
+#### 📌 Fuera de alcance (decisión del Delta — hallazgo derivado en **T-PROD-017**)
 
 El barrido encontró más `auguria.com` **no publicados** al usuario, que este PR **no** toca para mantenerlo Frontend puro:
 
-- 🟠 **Backend, funcional:** [geocode.service.ts](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts) manda `User-Agent: Auguria/1.0 (contact@auguria.com)` a **Nominatim**, cuya política de uso exige un email de contacto **válido** para poder avisar antes de bloquear. Hoy es inexistente → merece su propia mini-tarea de backend (3 usos + 2 tests).
-- 🟡 **Placeholders y ejemplos** (sin impacto en runtime): `.env.example`, `system-config.entity.ts` (`example:` de Swagger), `docs/modules/birth-chart/*`, ADRs y `create-mp-preapproval-plan.ts`.
+- 🟠 **Backend, funcional:** [geocode.service.ts](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts) manda `User-Agent: Auguria/1.0 (contact@auguria.com)` a **Nominatim**, cuya política de uso exige un email de contacto **válido** para poder avisar antes de bloquear. Hoy es inexistente → **derivado a T-PROD-017** (3 usos + 2 tests).
+- 🟡 **Placeholders y ejemplos** (sin impacto en runtime): `.env.example`, `system-config.entity.ts` (`example:` de Swagger), `docs/modules/birth-chart/*`, ADRs y `create-mp-preapproval-plan.ts`. Los dos primeros entran en **T-PROD-017**; la documentación histórica queda como está.
 
 ---
 
@@ -1121,7 +1151,8 @@ Es decir: hoy los únicos emails que la app manda de verdad son los de cuota, la
   Está declarada con default en `env.validation.ts`, así que `getOrThrow` nunca falla: si Railway no la
   tiene cargada, **los links de todos los emails salen apuntando a localhost y no se registra ningún
   error**. **Corregido** el default a `3001` y descomentada en `.env.example`. **Sigue siendo obligatoria
-  en producción** — candidata a sumarse al fail-fast de **T-PROD-012**.
+  en producción** → ✅ **cerrado en T-PROD-012**: en producción el boot falla si no está seteada o si
+  apunta a localhost.
 - 🟡 Los spies de los tests de integración corrían el envío **real** (`jest.spyOn` sin `mockResolvedValue`):
   con las credenciales de Resend descomentadas en el `.env` local, `npm run test:integration` mandaba
   mails de verdad a direcciones inexistentes (hard bounces + cuota). **Corregido.**
@@ -1201,8 +1232,79 @@ las dos mitades del aviso estaban rotas a la vez.
 
 > ⚠️ **Para que las alertas lleguen de verdad, `ADMIN_EMAIL_COST_ALERTS` debe estar seteada en
 > Railway** (se cargó durante T-PROD-004 apuntando a `consultas@auguriatarot.com`). Sin ella, el
-> servicio loguea un warning y no manda nada. Sigue sin estar declarada en `env.validation.ts`:
-> candidata a sumarse a **T-PROD-012**.
+> servicio loguea un warning y no manda nada. → ✅ **declarada y validada como email en
+> `env.validation.ts` en T-PROD-012**: ahora un typo en la dirección se detecta en el boot.
+
+---
+
+### T-PROD-017: El `User-Agent` del Geocoding Declara un Email Inexistente (Riesgo de Bloqueo Silencioso)
+
+**Prioridad:** 🟠 Alta
+**Estimación:** 0.5 punto
+**Dependencias:** ninguna — el buzón real ya existe (T-PROD-004)
+**Origen:** hallazgo abierto de T-PROD-013 (el barrido del dominio equivocado encontró usos **no publicados** al usuario que aquel PR no tocó por ser Frontend puro)
+**Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`)
+
+#### 📋 Problema
+
+[geocode.service.ts](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts)
+manda en **cada** llamada de geocoding el header:
+
+```
+User-Agent: Auguria/1.0 (contact@auguria.com)
+```
+
+Ese buzón **no existe** — es el mismo resto del rebrand que arregló T-PROD-013 en el frontend (el dominio
+real es `auguriatarot.com`). No es cosmético: la [política de uso de Nominatim](https://operations.osmfoundation.org/policies/nominatim/)
+exige identificar la aplicación con un **medio de contacto válido**, y ese contacto es su vía para
+avisarnos antes de bloquear. Con un email inexistente, el aviso rebota y **el bloqueo nos llega sin
+previo aviso**.
+
+El impacto es sobre la carta natal: el geocoding es lo que convierte el lugar de nacimiento en
+coordenadas + timezone. Si OSM nos corta, **no se puede generar ninguna carta natal nueva**.
+
+**3 usos del header** (2 de ellos contra Nominatim):
+
+| Línea | Destino | Nota |
+|---|---|---|
+| [:164](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts#L164) | Photon (Komoot) — fuente primaria | no exige contacto, pero conviene ser consistente |
+| [:223](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts#L223) | **Nominatim** — fallback de búsqueda | `// Requerido por Nominatim` |
+| [:354](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.ts#L354) | **Nominatim** — reverse geocoding | |
+
+Además el string está **triplicado a mano**: es exactamente la forma en que este bug se volvió a filtrar.
+
+#### ✅ Tareas específicas
+
+- [ ] Extraer el `User-Agent` a una **constante única** (p. ej. `src/common/constants/contact.constants.ts`:
+      `CONTACT_EMAIL = 'consultas@auguriatarot.com'` + `GEOCODING_USER_AGENT`), espejando lo que
+      T-PROD-013 hizo en el frontend con `CONFIG.CONTACT_EMAIL`. Los 3 usos pasan a consumirla — que no
+      vuelva a divergir.
+- [ ] Reemplazar `contact@auguria.com` por **`consultas@auguriatarot.com`** (la casilla real creada en
+      T-PROD-004, que es la que efectivamente leemos).
+- [ ] Actualizar los 2 tests que fijan el string literal:
+      [geocode.service.spec.ts:155 y :616](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.spec.ts#L155)
+      → deben aseverar **contra la constante**, no contra un literal repetido.
+- [ ] Test de regresión: ningún header saliente del geocoding contiene un dominio distinto de
+      `auguriatarot.com`.
+- [ ] **Limpieza del mismo dominio en el backend** (barato, mismo PR):
+  - [ ] `system-config.entity.ts:54` — el `example:` de Swagger publica `admin@auguria.com` en la
+        documentación de la API. Su spec (`system-config.entity.spec.ts:21,30`) usa el mismo fixture →
+        `example.com` (dominio reservado por RFC 2606), igual que se hizo con los fixtures del frontend.
+  - [ ] `.env.example` (`EMAIL_FROM=noreply@auguria.com`, `CORS_ORIGIN`, `API_URL`) → alinear con el
+        dominio real.
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] `grep -r "auguria\.com" backend/tarot-app/src` (excluyendo `auguriatarot.com`) devuelve **0 resultados**.
+- [ ] El `User-Agent` que llega a Nominatim y Photon declara un buzón que **existe y leemos**.
+- [ ] El email del `User-Agent` está definido en **un solo lugar** del backend.
+- [ ] Ciclo de calidad backend completo pasa: format, lint, `test:cov` (≥80%), build y `validate-architecture.js`.
+
+#### 📌 Fuera de alcance
+
+Quedan `auguria.com` en **documentación histórica** (ADRs, `docs/modules/birth-chart/*`,
+`FEEDBACK_CA_001_*`) y en `scripts/create-mp-preapproval-plan.ts` (URL de ejemplo). No afectan runtime ni
+nada publicado al usuario; corregirlos reescribiría documentos que registran decisiones ya tomadas.
 
 ---
 
@@ -1219,7 +1321,8 @@ las dos mitades del aviso estaban rotas a la vez.
 9. **T-PROD-013** (dirección de contacto rota) — independiente de todo y trivial; puede salir **ya**, sin esperar al email. Es una dirección rota de cara al público.
 10. **T-PROD-015** (reset de contraseña) — 🔴 **inmediatamente después de T-PROD-004**. Es el consumidor que justifica todo el trabajo de email: sin esto, el SMTP anda pero ningún usuario puede recuperar su cuenta. **No se lanza sin esta tarea.**
 11. **T-PROD-014** (formulario de contacto que sí envía) — también después de T-PROD-004, pero puede esperar a 015.
+12. **T-PROD-017** (`User-Agent` del geocoding con email inexistente) — independiente de todo y acotado, como lo fue T-PROD-013. Puede salir en cualquier momento; conviene **antes del lanzamiento**, porque el riesgo que cubre (que OSM nos bloquee sin poder avisarnos) se materializa justamente cuando sube el tráfico real.
 
 ---
 
-**Nota:** las tareas de código (T-PROD-002/005/006/007/008/010/011/012/013/014 y las partes PR de 003/009) siguen el workflow correspondiente (`WORKFLOW_FRONTEND.md` / `WORKFLOW_BACKEND.md`): TDD, ciclo de calidad completo, PR a `develop`, y actualización de este backlog al completar cada una.
+**Nota:** las tareas de código (T-PROD-002/005/006/007/008/010/011/012/013/014/017 y las partes PR de 003/009) siguen el workflow correspondiente (`WORKFLOW_FRONTEND.md` / `WORKFLOW_BACKEND.md`): TDD, ciclo de calidad completo, PR a `develop`, y actualización de este backlog al completar cada una.

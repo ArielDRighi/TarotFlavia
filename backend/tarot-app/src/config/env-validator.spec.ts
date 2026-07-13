@@ -127,4 +127,100 @@ describe('env-validator', () => {
       expect(message).toContain('.env.example');
     }
   });
+
+  // ===========================================================================
+  // T-PROD-012: variables de email que fallaban en silencio
+  // ===========================================================================
+
+  describe('email configuration (T-PROD-012)', () => {
+    const baseConfig = (): Record<string, string> => ({
+      POSTGRES_HOST: 'localhost',
+      POSTGRES_PORT: '5432',
+      POSTGRES_USER: 'user',
+      POSTGRES_PASSWORD: 'password',
+      POSTGRES_DB: 'database',
+      JWT_SECRET: 'a'.repeat(32),
+      JWT_EXPIRES_IN: '1h',
+      GROQ_API_KEY: 'gsk_test',
+    });
+
+    describe('EMAIL_REPLY_TO', () => {
+      it('acepta una dirección válida', () => {
+        const config = {
+          ...baseConfig(),
+          EMAIL_REPLY_TO: 'consultas@auguriatarot.com',
+        };
+
+        expect(validate(config).EMAIL_REPLY_TO).toBe(
+          'consultas@auguriatarot.com',
+        );
+      });
+
+      it('rechaza una dirección inválida', () => {
+        const config = { ...baseConfig(), EMAIL_REPLY_TO: 'no-es-un-email' };
+
+        expect(() => validate(config)).toThrow('EMAIL_REPLY_TO');
+      });
+
+      it('es opcional (sin ella, el replyTo cae a EMAIL_FROM)', () => {
+        expect(() => validate(baseConfig())).not.toThrow();
+      });
+    });
+
+    describe('ADMIN_EMAIL_COST_ALERTS', () => {
+      it('acepta una dirección válida', () => {
+        const config = {
+          ...baseConfig(),
+          ADMIN_EMAIL_COST_ALERTS: 'consultas@auguriatarot.com',
+        };
+
+        expect(validate(config).ADMIN_EMAIL_COST_ALERTS).toBe(
+          'consultas@auguriatarot.com',
+        );
+      });
+
+      it('rechaza una dirección inválida: un typo dejaba las alertas de costo mudas', () => {
+        const config = {
+          ...baseConfig(),
+          ADMIN_EMAIL_COST_ALERTS: 'admin@',
+        };
+
+        expect(() => validate(config)).toThrow('ADMIN_EMAIL_COST_ALERTS');
+      });
+    });
+
+    describe('FRONTEND_URL en producción', () => {
+      it('falla el boot si no está seteada: los links de los emails saldrían a localhost sin un solo error', () => {
+        const config = { ...baseConfig(), NODE_ENV: 'production' };
+
+        expect(() => validate(config)).toThrow(/FRONTEND_URL/);
+      });
+
+      it('falla el boot si apunta a localhost', () => {
+        const config = {
+          ...baseConfig(),
+          NODE_ENV: 'production',
+          FRONTEND_URL: 'http://localhost:3001',
+        };
+
+        expect(() => validate(config)).toThrow(/FRONTEND_URL/);
+      });
+
+      it('acepta una URL productiva real', () => {
+        const config = {
+          ...baseConfig(),
+          NODE_ENV: 'production',
+          FRONTEND_URL: 'https://auguriatarot.com',
+        };
+
+        expect(() => validate(config)).not.toThrow();
+      });
+
+      it('fuera de producción sigue cayendo al default de localhost sin quejarse', () => {
+        const config = { ...baseConfig(), NODE_ENV: 'development' };
+
+        expect(validate(config).FRONTEND_URL).toBe('http://localhost:3001');
+      });
+    });
+  });
 });
