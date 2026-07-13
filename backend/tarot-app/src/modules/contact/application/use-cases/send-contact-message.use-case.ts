@@ -11,6 +11,24 @@ export interface SendContactMessageResult {
 }
 
 /**
+ * Stack del error original. `EmailService` relanza con `{ cause }`, y el stack del error
+ * externo solo apunta a ese `throw`: sin desenvolver la causa, el log no dice qué falló
+ * realmente en el SMTP.
+ */
+function rootStack(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+
+  const cause = error.cause;
+  if (cause instanceof Error && cause.stack) {
+    return cause.stack;
+  }
+
+  return error.stack ?? error.message;
+}
+
+/**
  * Envía al buzón de Auguria un mensaje del formulario de contacto (T-PROD-014).
  *
  * Si el email no sale, el caso de uso **falla**: el bug original era mostrarle al
@@ -31,11 +49,12 @@ export class SendContactMessageUseCase {
         message: dto.message,
       });
     } catch (error) {
-      // El log lleva el remitente y el asunto: si el SMTP estaba caído, el mensaje
-      // todavía puede rescatarse del log en vez de perderse del todo.
+      // Único log del fallo, y con la causa raíz: el remitente y el asunto permiten
+      // rescatar el mensaje del log si el SMTP estaba caído, y el stack del `cause`
+      // dice POR QUÉ falló (el `Error` que relanza EmailService no lo diría solo).
       this.logger.error(
         `No se pudo enviar el mensaje de contacto de ${dto.email} ("${dto.subject}")`,
-        error instanceof Error ? error.stack : String(error),
+        rootStack(error),
       );
 
       throw new InternalServerErrorException(

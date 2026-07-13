@@ -1,8 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { ThrottlerModule } from '@nestjs/throttler';
 import * as request from 'supertest';
+import { CustomThrottlerGuard } from '../../../../common/guards/custom-throttler.guard';
+import { configureTrustProxy } from '../../../../config/trust-proxy.config';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { SendContactMessageUseCase } from '../../application/use-cases/send-contact-message.use-case';
 import { ContactController } from './contact.controller';
@@ -44,17 +47,24 @@ describe('ContactController (T-PROD-014)', () => {
     });
 
     it('es un endpoint público: exigir JWT dejaría el formulario inservible para un visitante', () => {
-      const guards = (Reflect.getMetadata(
+      // Se miran los guards del método Y los de la clase: un @UseGuards a nivel de clase
+      // no escribe metadata en el handler, así que mirar solo el método dejaría pasar
+      // justamente la forma más natural de cerrarle el formulario a un visitante.
+      const handlerGuards = (Reflect.getMetadata(
         '__guards__',
         ContactController.prototype.sendMessage,
       ) ?? []) as unknown[];
+      const classGuards = (Reflect.getMetadata(
+        '__guards__',
+        ContactController,
+      ) ?? []) as unknown[];
 
-      expect(guards).not.toContain(JwtAuthGuard);
+      expect([...handlerGuards, ...classGuards]).not.toContain(JwtAuthGuard);
     });
   });
 
   describe('endpoint HTTP', () => {
-    let app: INestApplication;
+    let app: NestExpressApplication;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
@@ -66,11 +76,15 @@ describe('ContactController (T-PROD-014)', () => {
         controllers: [ContactController],
         providers: [
           { provide: SendContactMessageUseCase, useValue: mockUseCase },
-          { provide: APP_GUARD, useClass: ThrottlerGuard },
+          // El guard REAL de la app, no el base: es el que resuelve la IP del tracker,
+          // y ahí vivía el bypass del X-Forwarded-For (T-PROD-014).
+          { provide: APP_GUARD, useClass: CustomThrottlerGuard },
         ],
       }).compile();
 
-      app = module.createNestApplication();
+      app = module.createNestApplication<NestExpressApplication>();
+      // Mismo trust proxy que en producción (Railway = 1 salto), ver main.ts.
+      configureTrustProxy(app, '1');
       app.useGlobalPipes(
         new ValidationPipe({
           whitelist: true,
@@ -134,6 +148,39 @@ describe('ContactController (T-PROD-014)', () => {
       await request(server).post('/contact').send(validBody).expect(200);
 
       await request(server).post('/contact').send(validBody).expect(429);
+
+      expect(mockUseCase.execute).toHaveBeenCalledTimes(3);
+    });
+
+    it('rotar el X-Forwarded-For NO regala cuota nueva: el primer valor del header lo escribe el cliente, y confiar en él hacía decorativo el límite de todos los endpoints públicos', async () => {
+      const server = app.getHttpServer();
+
+      // El proxy confiable (1 salto) agrega la IP real al final; lo de adelante lo inventó
+      // el cliente y va rotando en cada request para simular ser una IP distinta.
+      const spoofed = (i: number) => `10.0.0.${i}, 203.0.113.7`;
+
+      await request(server)
+        .post('/contact')
+        .set('X-Forwarded-For', spoofed(1))
+        .send(validBody)
+        .expect(200);
+      await request(server)
+        .post('/contact')
+        .set('X-Forwarded-For', spoofed(2))
+        .send(validBody)
+        .expect(200);
+      await request(server)
+        .post('/contact')
+        .set('X-Forwarded-For', spoofed(3))
+        .send(validBody)
+        .expect(200);
+
+      // Con el bug, este cuarto request (IP "nueva") pasaba: era un mail-bomb ilimitado.
+      await request(server)
+        .post('/contact')
+        .set('X-Forwarded-For', spoofed(4))
+        .send(validBody)
+        .expect(429);
 
       expect(mockUseCase.execute).toHaveBeenCalledTimes(3);
     });

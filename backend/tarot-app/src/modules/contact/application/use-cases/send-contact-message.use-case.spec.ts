@@ -74,9 +74,31 @@ describe('SendContactMessageUseCase (T-PROD-014)', () => {
       InternalServerErrorException,
     );
 
+    expect(loggerSpy).toHaveBeenCalledTimes(1);
     expect(loggerSpy).toHaveBeenCalledWith(
       expect.stringContaining('ana@example.com'),
       expect.any(String),
+    );
+
+    loggerSpy.mockRestore();
+  });
+
+  it('loguea la causa raíz del SMTP, no el stack del re-throw: sin eso el log dice que falló pero no por qué', async () => {
+    const loggerSpy = jest.spyOn(Logger.prototype, 'error');
+    const smtpFailure = new Error('ECONNREFUSED smtp.resend.com:587');
+    mockEmailService.sendContactMessageEmail.mockRejectedValue(
+      new Error('Error al enviar el mensaje de contacto', {
+        cause: smtpFailure,
+      }),
+    );
+
+    await expect(useCase.execute(dto)).rejects.toThrow(
+      InternalServerErrorException,
+    );
+
+    expect(loggerSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.stringContaining('ECONNREFUSED'),
     );
 
     loggerSpy.mockRestore();

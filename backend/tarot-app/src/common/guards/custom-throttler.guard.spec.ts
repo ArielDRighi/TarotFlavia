@@ -210,16 +210,20 @@ describe('CustomThrottlerGuard', () => {
       });
     });
 
-    describe('x-forwarded-for header handling', () => {
-      it('should extract first IP from x-forwarded-for header', async () => {
+    // T-PROD-014: el guard ya NO parsea el x-forwarded-for a mano. La IP la resuelve
+    // Express con `trust proxy` (ver trust-proxy.config.ts) y llega en `request.ip`.
+    describe('resolución de la IP (x-forwarded-for)', () => {
+      it('ignora el x-forwarded-for crudo y usa la IP que resolvió Express: el primer valor del header lo escribe el cliente, y tomarlo permitía rotarlo y saltarse TODOS los límites', async () => {
         ipWhitelistService.isWhitelisted.mockReturnValue(false);
         ipBlockingService.isBlocked.mockReturnValue(false);
 
         const context = {
           switchToHttp: () => ({
             getRequest: () => ({
-              ip: '127.0.0.1',
+              // Lo que Express calculó descartando los saltos confiables:
+              ip: '198.51.100.1',
               headers: {
+                // Lo que el cliente inventó (va primero en la cadena):
                 'x-forwarded-for': '203.0.113.1, 198.51.100.1',
               },
               user: undefined,
@@ -230,26 +234,28 @@ describe('CustomThrottlerGuard', () => {
           getClass: () => ({}),
         } as unknown as ExecutionContext;
 
-        // The guard should extract 203.0.113.1 from x-forwarded-for
         await guard.canActivate(context).catch(() => {
-          // Ignore rate limit errors, we're testing IP extraction
+          // Los errores de rate limit no importan acá: se testea la resolución de IP.
         });
 
-        // Verify that the guard checked for blocking using the extracted IP
-        expect(ipBlockingService.isBlocked).toHaveBeenCalled();
+        expect(ipBlockingService.isBlocked).toHaveBeenCalledWith(
+          '198.51.100.1',
+        );
+        expect(ipBlockingService.isBlocked).not.toHaveBeenCalledWith(
+          '203.0.113.1',
+        );
       });
 
-      it('should handle x-forwarded-for with spaces', async () => {
+      it('cae al socket si Express no resolvió una IP', async () => {
         ipWhitelistService.isWhitelisted.mockReturnValue(false);
         ipBlockingService.isBlocked.mockReturnValue(false);
 
         const context = {
           switchToHttp: () => ({
             getRequest: () => ({
-              ip: '127.0.0.1',
-              headers: {
-                'x-forwarded-for': '  203.0.113.1  ,  198.51.100.1  ',
-              },
+              ip: undefined,
+              socket: { remoteAddress: '192.168.1.50' },
+              headers: {},
               user: undefined,
             }),
           }),
@@ -262,7 +268,9 @@ describe('CustomThrottlerGuard', () => {
           // Ignore errors
         });
 
-        expect(ipBlockingService.isBlocked).toHaveBeenCalled();
+        expect(ipBlockingService.isBlocked).toHaveBeenCalledWith(
+          '192.168.1.50',
+        );
       });
 
       it('should fallback to request.ip when x-forwarded-for is empty', async () => {

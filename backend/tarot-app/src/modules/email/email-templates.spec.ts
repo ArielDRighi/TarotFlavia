@@ -212,14 +212,22 @@ describe('Email templates (render)', () => {
       expect(mail.html).toContain('Hola, quería saber cómo reservar');
     });
 
-    it('escapa el HTML del mensaje: el cuerpo lo escribe un desconocido sin autenticar', async () => {
-      const mail = await render('contact-message', {
-        ...TEMPLATE_CONTEXTS['contact-message'],
-        message: '<script>alert(1)</script>',
-      });
+    // Los tres campos los escribe un desconocido sin autenticar, no solo el cuerpo.
+    it.each([
+      ['message', '<script>alert(1)</script>', '&lt;script&gt;'],
+      ['name', '<img src=x onerror=alert(1)>', '&lt;img'],
+      ['subject', '<b onmouseover=alert(1)>hola</b>', '&lt;b'],
+    ])(
+      'escapa el HTML de %s: lo escribe un desconocido sin autenticar',
+      async (field, payload, escaped) => {
+        const mail = await render('contact-message', {
+          ...TEMPLATE_CONTEXTS['contact-message'],
+          [field]: payload,
+        });
 
-      expect(mail.html).not.toContain('<script>alert(1)</script>');
-      expect(mail.html).toContain('&lt;script&gt;');
-    });
+        expect(mail.html).not.toContain(payload);
+        expect(mail.html).toContain(escaped);
+      },
+    );
   });
 });

@@ -385,6 +385,20 @@ describe('EmailService', () => {
       });
     });
 
+    it('un CONTACT_EMAIL_TO vacío no es un buzón: cae al siguiente fallback en vez de mandar a `to: ""`', async () => {
+      configOverrides = {
+        CONTACT_EMAIL_TO: '',
+        EMAIL_REPLY_TO: 'consultas@auguriatarot.com',
+      };
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendContactMessageEmail(contactData);
+
+      expect(mockSendMail.mock.calls[0][0]).toMatchObject({
+        to: 'consultas@auguriatarot.com',
+      });
+    });
+
     it('relanza el error si el envío falla: a diferencia de las alertas de costo, el usuario TIENE que enterarse de que su mensaje no salió', async () => {
       configOverrides = { CONTACT_EMAIL_TO: 'consultas@auguriatarot.com' };
       mockMailerService.sendMail.mockRejectedValue(new Error('SMTP Error'));
@@ -392,6 +406,16 @@ describe('EmailService', () => {
       await expect(
         service.sendContactMessageEmail(contactData),
       ).rejects.toThrow('Error al enviar el mensaje de contacto');
+    });
+
+    it('preserva la causa raíz en el error que relanza: sin el `cause`, el llamador loguea que falló pero no por qué', async () => {
+      configOverrides = { CONTACT_EMAIL_TO: 'consultas@auguriatarot.com' };
+      const smtpFailure = new Error('ECONNREFUSED smtp.resend.com:587');
+      mockMailerService.sendMail.mockRejectedValue(smtpFailure);
+
+      await expect(
+        service.sendContactMessageEmail(contactData),
+      ).rejects.toMatchObject({ cause: smtpFailure });
     });
 
     it('loguea el envío exitoso', async () => {

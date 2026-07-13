@@ -274,12 +274,17 @@ export class EmailService {
    *
    * En producción es `CONTACT_EMAIL_TO` y punto: el boot falla si no está (T-PROD-014).
    * Los fallbacks son para dev/staging, donde el mailer corre en jsonTransport.
+   *
+   * Se encadena con `||` y no con `??` a propósito: el string vacío tampoco es un buzón.
+   * El `@Transform` de `env.validation.ts` ya lo convierte en `undefined` en el arranque
+   * de la app, pero el `EmailModule` se monta standalone en los e2e, sin esa validación:
+   * ahí un `CONTACT_EMAIL_TO=''` llegaría como `to: ''` y el envío moriría.
    */
   private resolveContactRecipient(): string {
     return (
-      this.configService.get<string>('CONTACT_EMAIL_TO') ??
-      this.configService.get<string>('EMAIL_REPLY_TO') ??
-      this.configService.get<string>('EMAIL_FROM') ??
+      this.configService.get<string>('CONTACT_EMAIL_TO') ||
+      this.configService.get<string>('EMAIL_REPLY_TO') ||
+      this.configService.get<string>('EMAIL_FROM') ||
       CONTACT_RECIPIENT_FALLBACK
     );
   }
@@ -315,11 +320,11 @@ export class EmailService {
         `Mensaje de contacto enviado exitosamente a ${to} (de ${data.email})`,
       );
     } catch (error) {
-      this.logger.error(
-        `Error al enviar el mensaje de contacto de ${data.email} a ${to}`,
-        error instanceof Error ? error.stack : String(error),
-      );
-      throw new Error('Error al enviar el mensaje de contacto');
+      // El `cause` preserva el fallo real del SMTP: sin él, el llamador que loguea este
+      // error solo ve el stack de este `throw` y la causa raíz se pierde.
+      throw new Error('Error al enviar el mensaje de contacto', {
+        cause: error,
+      });
     }
   }
 }

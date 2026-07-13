@@ -1082,14 +1082,34 @@ Es decir: **los mensajes de los clientes se pierden en la consola del navegador.
 - [x] La página ya no muestra el disclaimer de "no implementado".
 - [x] Ciclos de calidad completos: backend (format, lint, 4567 tests, coverage 84.6%, build, validate-architecture) y frontend (format, lint 0 errores, type-check, 5301 tests, build, validate-architecture).
 
+#### 🔒 Hallazgo del review: el rate limit era esquivable (arreglado en esta misma tarea)
+
+El revisor encontró que **el límite de todos los endpoints públicos era decorativo**, no solo el de contacto: `custom-throttler.guard.ts` armaba el tracker con el **primer** elemento del `X-Forwarded-For`, que es justamente el que escribe el cliente. Mandando `X-Forwarded-For: 1.2.3.<random>` en cada request se obtenía un tracker nuevo cada vez y **el 429 no llegaba a dispararse nunca** — ni en `login`, ni en `register`, ni en `forgot-password`. Con el formulario de contacto el costo sube: un anónimo podía mail-bombear el buzón y quemar la cuota de SMTP (riesgo de suspensión de la cuenta de Resend).
+
+Se arregló acá (y no en una tarea aparte) porque sin esto el criterio de aceptación "el endpoint resiste un flood" era **falso**:
+
+- [x] `main.ts`: la app se crea como `NestExpressApplication` y se configura **`trust proxy`** ([trust-proxy.config.ts](../backend/tarot-app/src/config/trust-proxy.config.ts)). Express descarta los saltos confiables y `request.ip` queda en la IP real del cliente, ignorando lo que este haya inventado.
+- [x] `custom-throttler.guard.ts`: `getIP()` ya **no** parsea el header a mano — usa `request.ip`. Los dos tests que fijaban el comportamiento vulnerable ("should extract first IP from x-forwarded-for") se reemplazaron por los que fijan el correcto.
+- [x] **Nueva variable `TRUST_PROXY_HOPS`** (default 1 = Railway). Es configurable a propósito: el número **tiene que coincidir con la cadena de proxies real**. Demasiado bajo → vuelve el bypass; demasiado alto → `request.ip` pasa a ser la IP del proxy, la misma para todos, y la app **empieza a devolver 429 a usuarios reales**. Si algún día se pone un CDN delante de Railway, es `2`. El valor se loguea en el arranque.
+- [x] Test de regresión que **falla contra el código viejo** (verificado): rotar el `X-Forwarded-For` no regala cuota nueva.
+
 #### 🔍 Verificación manual (backend real, dev)
 
-`POST /api/v1/contact` contra el servidor levantado: 200 con el mensaje de confirmación, `EmailService` loguea el envío (jsonTransport en dev), el 4.º request desde una IP no whitelisteada devuelve **429**, y un asunto con `\n` devuelve **400**. Nota: `127.0.0.1`/`::1` están whitelisteadas por defecto (`ip-whitelist.service.ts`), así que el rate limit no se ve desde localhost sin `X-Forwarded-For` — es el comportamiento de toda la app, no de este endpoint.
+`POST /api/v1/contact` contra el servidor levantado:
 
-> ⚠️ **Acción de Ops al deployar:** setear **`CONTACT_EMAIL_TO=consultas@auguriatarot.com`** en Railway.
-> **Sin ella el arranque en producción falla** (a propósito): un buzón de contacto sin destinatario es
-> exactamente el bug que esta tarea arregla, y preferimos que se note en el deploy y no en los mensajes
-> perdidos de los clientes.
+- 200 con el mensaje de confirmación y `EmailService` logueando el envío (jsonTransport en dev).
+- Asunto con `\n` → **400**.
+- **Flood con el `X-Forwarded-For` rotando** (`10.0.0.1..4, <ip real>`): 3×200 y el 4.º **429**. Antes del fix los cuatro pasaban.
+- Un cliente real distinto **sigue pudiendo escribir** (200): el fix no colapsó a todos en un único bucket, que era el riesgo de calibrar mal `trust proxy`.
+
+Nota: `127.0.0.1`/`::1` están whitelisteadas por defecto (`ip-whitelist.service.ts`), así que desde localhost sin `X-Forwarded-For` no se ve ningún límite — es el comportamiento de toda la app, no de este endpoint.
+
+> ⚠️ **Acciones de Ops al deployar:**
+> 1. Setear **`CONTACT_EMAIL_TO=consultas@auguriatarot.com`** en Railway. **Sin ella el arranque en
+>    producción falla** (a propósito): un buzón de contacto sin destinatario es exactamente el bug que
+>    esta tarea arregla, y preferimos que se note en el deploy y no en los mensajes perdidos.
+> 2. **Confirmar `TRUST_PROXY_HOPS`**: queda en **1** (Railway edge) sin necesidad de setearla. Si hay
+>    un CDN/proxy adicional delante, hay que subirla, o los usuarios podrán volver a falsear su IP.
 
 ---
 

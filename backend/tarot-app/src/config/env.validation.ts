@@ -210,6 +210,24 @@ export class EnvironmentVariables {
   @Transform(({ value }) => (value ? Number(value) : 100))
   RATE_LIMIT_MAX: number = 100;
 
+  /**
+   * Proxies confiables delante de la app (Railway: 1; sin proxy: 0). Define de dónde sale
+   * `request.ip`, o sea la IP contra la que se cuenta **todo** el rate limiting.
+   *
+   * Con el valor equivocado el daño es real en las dos direcciones: demasiado bajo y un
+   * cliente puede falsear su IP y saltarse los límites (era el agujero que arregla
+   * T-PROD-014); demasiado alto y `request.ip` pasa a ser la IP del proxy —la misma para
+   * todos— y la app empieza a devolver 429 a usuarios reales. Ver `trust-proxy.config.ts`.
+   */
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) =>
+    value === undefined || value === '' ? 1 : Number(value),
+  )
+  TRUST_PROXY_HOPS: number = 1;
+
   // =============================================================================
   // EMAIL CONFIGURATION (OPTIONAL)
   // =============================================================================
