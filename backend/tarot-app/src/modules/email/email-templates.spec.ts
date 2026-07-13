@@ -22,6 +22,8 @@ describe('Email templates (build)', () => {
     'quota-warning-80',
     'quota-limit-reached',
     'holistic-service-confirmation',
+    'provider-cost-warning',
+    'provider-cost-limit-reached',
   ];
 
   it.each(REQUIRED_TEMPLATES)(

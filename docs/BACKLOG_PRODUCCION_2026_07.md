@@ -335,6 +335,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-013 | Página de contacto: la dirección pública `contacto@auguria.com` no existe (dominio equivocado) | Frontend | 🔴 Crítica | 0.5 pt |
 | T-PROD-014 | Formulario de contacto: enviar de verdad (endpoint + EmailService); hoy los mensajes se pierden | Full-stack | 🟠 Alta | 3 pts |
 | T-PROD-015 | **Reset de contraseña no envía nada**: usuarios sin recuperación de cuenta + métodos huérfanos | Backend | 🔴 Crítica | 3 pts |
+| T-PROD-016 | **Alertas de costo al admin sin plantilla**: si el gasto de los proveedores se dispara, nadie se entera | Backend | 🟠 Alta | 1 pt |
 
 ---
 
@@ -1127,6 +1128,56 @@ Es decir: hoy los únicos emails que la app manda de verdad son los de cuota, la
 > (no hay Postgres en el entorno de desarrollo); los corre el CI. La prueba de punta a punta contra el
 > SMTP real queda para el cierre de la tarea, con el frontend mergeado — y ahora es imprescindible,
 > porque el bug de los templates demuestra que el ciclo de calidad no cubre el envío real.
+
+---
+
+### T-PROD-016: Las Alertas de Costo al Admin No Tienen Plantilla (Nadie Se Entera Si el Gasto Se Dispara) — ✅ COMPLETADA
+
+**Estado:** ✅ COMPLETADA
+**Prioridad:** 🟠 Alta
+**Estimación:** 1 punto
+**Dependencias:** el fix de assets de T-PROD-015 (sin él, las plantillas no llegan al build igual)
+**Origen:** hallazgo de la revisión de T-PROD-015
+**Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`)
+
+#### 📋 Problema
+
+`ai-provider-cost.service.ts` avisa al admin cuando el gasto mensual de un proveedor llega al 80% y
+al 100% del límite. El código está cableado y `EmailService` tiene los dos métodos… pero
+**las plantillas `provider-cost-warning.hbs` y `provider-cost-limit-reached.hbs` nunca existieron**.
+`sendMail` fallaba con ENOENT, y como los dos métodos atrapan el error y **no relanzan**, el fallo
+quedaba enterrado en un log.
+
+Efecto real: **si el gasto de los proveedores se dispara, nadie se entera** — ni por el aviso
+temprano del 80%, ni cuando el límite se agota y las llamadas al proveedor empiezan a rechazarse.
+Es el mismo agujero que ya había señalado T-PROD-004 con `ADMIN_EMAIL_COST_ALERTS` sin setear:
+las dos mitades del aviso estaban rotas a la vez.
+
+#### ✅ Tareas específicas
+
+- [x] Crear `provider-cost-warning.hbs` (aviso al 80%, con barra de progreso) y
+      `provider-cost-limit-reached.hbs` (límite agotado), en el estilo de las plantillas existentes.
+- [x] **Formatear los números en `EmailService`**: el servicio pasa valores crudos
+      (`percentageUsed` llega como `82.3456`, el costo con 5 decimales). Ahora van con 2 decimales
+      (costo) y 1 (porcentaje). Se agrega `adminUrl` al contexto (link directo al panel de consumo).
+- [x] **Asuntos en español** (estaban en inglés: *"AI Cost Alert…"*), respetando el guardarraíl
+      FBK-003 (`no-ia-user-facing.spec.ts`): el texto de los mails **no** menciona "IA" — el nombre
+      del proveedor ya identifica de qué se habla.
+- [x] Tests: los dos métodos **no tenían ninguno**. Se cubren el contexto formateado, el asunto, y
+      que un fallo de envío **no rompa** el flujo que dispara la alerta.
+- [x] Las dos plantillas se suman a `email-templates.spec.ts` (guarda de regresión del build).
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Las dos plantillas existen y llegan a `dist` en el build.
+- [x] Los mails salen con montos y porcentajes legibles y con link al panel.
+- [x] Un fallo de envío de la alerta no rompe el registro del costo.
+- [x] Ciclo de calidad backend completo pasa (4488 tests, coverage 84.75%).
+
+> ⚠️ **Para que las alertas lleguen de verdad, `ADMIN_EMAIL_COST_ALERTS` debe estar seteada en
+> Railway** (se cargó durante T-PROD-004 apuntando a `consultas@auguriatarot.com`). Sin ella, el
+> servicio loguea un warning y no manda nada. Sigue sin estar declarada en `env.validation.ts`:
+> candidata a sumarse a **T-PROD-012**.
 
 ---
 

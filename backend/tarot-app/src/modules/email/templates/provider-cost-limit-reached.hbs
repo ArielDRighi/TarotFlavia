@@ -1,0 +1,142 @@
+<html lang='es'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Alerta de costo — límite alcanzado</title>
+    <style>
+      body {
+        font-family: 'Georgia', serif;
+        background-color: #f5f3f0;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 40px 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #d9534f;
+        padding-bottom: 20px;
+      }
+      .header h1 {
+        color: #a94442;
+        font-size: 24px;
+        margin: 0;
+        font-weight: normal;
+      }
+      .icon {
+        font-size: 50px;
+        margin-bottom: 10px;
+      }
+      .content {
+        color: #5a5a5a;
+        font-size: 16px;
+        line-height: 1.8;
+        margin: 20px 0;
+      }
+      .alert-box {
+        background-color: #f9e7e6;
+        border-left: 4px solid #d9534f;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        color: #a94442;
+      }
+      .stats {
+        background-color: #f9f7f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 25px 0;
+      }
+      .stats-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e8e2db;
+      }
+      .stats-label {
+        color: #8b7355;
+        font-size: 14px;
+      }
+      .stats-value {
+        color: #333;
+        font-size: 15px;
+        font-weight: bold;
+      }
+      .cta-button {
+        display: block;
+        text-align: center;
+        background-color: #8b7355;
+        color: #ffffff;
+        padding: 15px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 30px auto;
+        max-width: 260px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+        color: #888;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <div class='icon'>🚨</div>
+        <h1>Límite de costo del proveedor alcanzado</h1>
+      </div>
+
+      <div class='content'>
+        <div class='alert-box'>
+          <strong>{{provider}}</strong>
+          agotó su límite mensual de costo. Las llamadas a este proveedor
+          <strong>se están rechazando</strong>: la app pasa al proveedor de
+          respaldo, y si no hay ninguno disponible, las interpretaciones fallan.
+        </div>
+
+        <div class='stats'>
+          <div class='stats-item'>
+            <span class='stats-label'>Proveedor:</span>
+            <span class='stats-value'>{{provider}}</span>
+          </div>
+          <div class='stats-item'>
+            <span class='stats-label'>Gasto del mes:</span>
+            <span class='stats-value'>US$ {{currentCost}}</span>
+          </div>
+          <div class='stats-item'>
+            <span class='stats-label'>Límite mensual:</span>
+            <span class='stats-value'>US$ {{monthlyLimit}}</span>
+          </div>
+        </div>
+
+        <p><strong>Acción requerida:</strong></p>
+        <ul>
+          <li>Subir el límite mensual del proveedor, o</li>
+          <li>Confirmar que el tráfico se está atendiendo con otro proveedor, y</li>
+          <li>Revisar si el gasto responde a un pico anómalo o a abuso</li>
+        </ul>
+      </div>
+
+      <a href='{{adminUrl}}' class='cta-button'>Ver el consumo</a>
+
+      <div class='footer'>
+        <p>✨ Auguria — alerta automática de costos ✨</p>
+        <p>Este email fue generado automáticamente. Por favor no respondas a
+          este mensaje.</p>
+      </div>
+    </div>
+  </body>
+</html>

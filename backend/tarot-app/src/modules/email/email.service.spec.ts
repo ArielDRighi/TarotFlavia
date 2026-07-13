@@ -3,7 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { EmailService } from './email.service';
 import { Logger } from '@nestjs/common';
-import { WelcomeEmailData, PlanChangeData } from './interfaces/email.interface';
+import {
+  WelcomeEmailData,
+  PlanChangeData,
+  ProviderCostWarningData,
+  ProviderCostLimitReachedData,
+} from './interfaces/email.interface';
 
 describe('EmailService', () => {
   let service: EmailService;
@@ -161,6 +166,83 @@ describe('EmailService', () => {
       );
 
       loggerSpy.mockRestore();
+    });
+  });
+
+  describe('sendProviderCostWarningEmail', () => {
+    const costData: ProviderCostWarningData = {
+      provider: 'groq',
+      currentCost: 8.23456,
+      monthlyLimit: 10,
+      percentageUsed: 82.3456,
+    };
+
+    it('should send the 80% cost warning with readable numbers', async () => {
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendProviderCostWarningEmail('admin@example.com', costData);
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith({
+        to: 'admin@example.com',
+        subject: '⚠️ Alerta de costo: groq al 80% del límite mensual',
+        template: 'provider-cost-warning',
+        context: {
+          provider: 'groq',
+          currentCost: '8.23',
+          monthlyLimit: '10.00',
+          percentageUsed: '82.3',
+          adminUrl: 'http://localhost:3000/admin/ai-usage',
+        },
+      });
+    });
+
+    it('should not throw when the alert cannot be sent', async () => {
+      mockMailerService.sendMail.mockRejectedValue(new Error('SMTP Error'));
+
+      // La alerta es informativa: si falla, no debe romper el flujo que la dispara
+      await expect(
+        service.sendProviderCostWarningEmail('admin@example.com', costData),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('sendProviderCostLimitReachedEmail', () => {
+    const costData: ProviderCostLimitReachedData = {
+      provider: 'openai',
+      currentCost: 10.0001,
+      monthlyLimit: 10,
+    };
+
+    it('should send the limit reached alert with readable numbers', async () => {
+      mockMailerService.sendMail.mockResolvedValue({ messageId: 'test-id' });
+
+      await service.sendProviderCostLimitReachedEmail(
+        'admin@example.com',
+        costData,
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith({
+        to: 'admin@example.com',
+        subject: '🚨 Alerta de costo: LÍMITE ALCANZADO en openai',
+        template: 'provider-cost-limit-reached',
+        context: {
+          provider: 'openai',
+          currentCost: '10.00',
+          monthlyLimit: '10.00',
+          adminUrl: 'http://localhost:3000/admin/ai-usage',
+        },
+      });
+    });
+
+    it('should not throw when the alert cannot be sent', async () => {
+      mockMailerService.sendMail.mockRejectedValue(new Error('SMTP Error'));
+
+      await expect(
+        service.sendProviderCostLimitReachedEmail(
+          'admin@example.com',
+          costData,
+        ),
+      ).resolves.toBeUndefined();
     });
   });
 
