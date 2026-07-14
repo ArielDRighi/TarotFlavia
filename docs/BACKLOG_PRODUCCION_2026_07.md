@@ -337,6 +337,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-015 | **Reset de contraseña no envía nada**: usuarios sin recuperación de cuenta + métodos huérfanos | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-016 | **Alertas de costo al admin sin plantilla**: si el gasto de los proveedores se dispara, nadie se entera | Backend | 🟠 Alta | 1 pt |
 | T-PROD-017 | ✅ Geocoding: el `User-Agent` que enviamos a Nominatim declara un email inexistente (riesgo de bloqueo silencioso) | Backend | 🟠 Alta | 0.5 pt |
+| T-PROD-018 | Sin `robots.txt` ni `sitemap.xml`, staging indexable y la imagen social (`og-image.png`) no existe | Frontend | 🔴 Crítica | 2 pts |
 
 ---
 
@@ -1393,6 +1394,63 @@ que registran decisiones ya tomadas.
 
 ---
 
+### T-PROD-018: El Sitio No Es Indexable ni Compartible (Sin `robots.txt`, Sin `sitemap.xml`, con la Imagen Social Rota)
+
+**Prioridad:** 🔴 Crítica (bloquea T-PROD-009: AdSense **no aprueba** un sitio que Google no puede rastrear)
+**Estimación:** 2 puntos
+**Dependencias:** ninguna para el código. El valor real se materializa cuando el dominio productivo esté activo.
+**Origen:** hallazgo al analizar el cutover de staging al dominio final
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### 📋 Problema
+
+El frontend tiene un módulo de SEO decente ([seo.ts](../frontend/src/lib/metadata/seo.ts): metadata por página, Open Graph,
+Twitter cards) pero le faltan las **tres piezas que Google realmente consume**, y una de las que sí existe está rota:
+
+| # | Falta | Consecuencia |
+|---|---|---|
+| 1 | **`robots.txt`** — no existe ni `frontend/public/robots.txt` ni `app/robots.ts` | Nada le dice a Google qué rastrear. Y peor: `defaultMetadata.robots = { index: true, follow: true }` ([seo.ts:70-73](../frontend/src/lib/metadata/seo.ts#L70-L73)) es **fijo**, así que **staging se declara indexable**. Si Google indexa `staging.auguriatarot.com` y después publicamos el dominio final con el mismo contenido → **contenido duplicado compitiendo contra nosotros mismos**, justo en las páginas que son el argumento para que AdSense apruebe. |
+| 2 | **`sitemap.xml`** — no existe `app/sitemap.ts` | Google descubre las páginas a fuerza de crawl. La enciclopedia (78 cartas), los 12 signos y los 12 animales del horóscopo chino son **cientos de URLs generadas** que son precisamente el contenido indexable del sitio: sin sitemap, tardan semanas en aparecer, o no aparecen. |
+| 3 | **`alternates.canonical`** — ningún metadata lo declara | Con dos hosts sirviendo lo mismo (staging + producción), sin canonical Google elige por su cuenta cuál rankea. |
+| 4 | **`og-image.png` NO EXISTE** — `frontend/public/og-image.png` no está en el repo, pero **todos** los metadata lo referencian (`DEFAULT_OG_IMAGE`, [seo.ts:24](../frontend/src/lib/metadata/seo.ts#L24)) | **Cada link compartido en WhatsApp / Instagram / Facebook / Twitter muestra la preview rota (404).** Es el primer contacto de un usuario referido con la marca. |
+
+#### ✅ Tareas específicas
+
+- [ ] **`app/robots.ts`** (Next.js App Router genera `/robots.txt`): `Allow: /` + `Sitemap:` en producción;
+      `Disallow: /` en staging. Debe excluir siempre las rutas privadas (`/admin`, `/perfil`, `/historial`,
+      `/mis-servicios`, `/compartida`).
+- [ ] **Que la indexación dependa del entorno, no de un literal.** Nueva var `NEXT_PUBLIC_ALLOW_INDEXING`
+      (o derivar del host de `NEXT_PUBLIC_APP_URL`): `robots` de `defaultMetadata` pasa a `index: false` en
+      staging. Hoy es `index: true` hardcodeado. **Sin esto, el `robots.txt` de staging es contradicho por
+      el meta tag de cada página.**
+- [ ] **`app/sitemap.ts`** dinámico: estáticas (landing, `/premium`, `/explorar`, `/contacto`, `/privacidad`)
+      + **enciclopedia** (slugs desde la API) + **12 signos** de `/horoscopo/**` + **12 animales** de
+      `/horoscopo-chino/**`. Con `lastModified` y `changeFrequency` razonables. Ojo con el fetch en build:
+      si la API no responde, el sitemap debe degradar a las estáticas, no romper el build.
+- [ ] **`alternates.canonical`** en `defaultMetadata` + por página dinámica (la ficha de enciclopedia y la de
+      cada signo declaran su propia canonical).
+- [ ] **Crear `frontend/public/og-image.png`** (1200×630, como pide el propio comentario de `seo.ts:22`).
+      Alternativa superior: `app/opengraph-image.tsx` con `ImageResponse` de `next/og`, que la genera en build
+      y evita otro asset binario desincronizado.
+- [ ] Tests: `robots.ts` y `sitemap.ts` (staging bloquea / producción permite; el sitemap incluye las
+      dinámicas y degrada sin API), y un test que ate la existencia del OG image al `DEFAULT_OG_IMAGE`
+      referenciado — que no se vuelva a romper en silencio.
+
+#### 🎯 Criterios de Aceptación
+
+- [ ] `https://staging.auguriatarot.com/robots.txt` → `Disallow: /`, y sus páginas emiten `noindex`.
+- [ ] `https://<dominio-final>/robots.txt` → `Allow: /` + línea `Sitemap:`, y `/sitemap.xml` lista las
+      estáticas + la enciclopedia + los 24 horóscopos.
+- [ ] Compartir cualquier URL en WhatsApp muestra imagen, título y descripción (hoy: preview rota).
+- [ ] Ciclo de calidad frontend completo pasa.
+
+#### 📌 Nota de Ops (no es código)
+
+Dar de alta el dominio final en **Google Search Console** y enviar el `sitemap.xml`. Es lo que acelera la
+indexación — y es también la evidencia que mira AdSense en T-PROD-009.
+
+---
+
 ## ORDEN DE EJECUCIÓN SUGERIDO
 
 1. **T-PROD-002** (header móvil) — bug visible, fix acotado, sin dependencias.
@@ -1407,6 +1465,7 @@ que registran decisiones ya tomadas.
 10. **T-PROD-015** (reset de contraseña) — 🔴 **inmediatamente después de T-PROD-004**. Es el consumidor que justifica todo el trabajo de email: sin esto, el SMTP anda pero ningún usuario puede recuperar su cuenta. **No se lanza sin esta tarea.**
 11. **T-PROD-014** (formulario de contacto que sí envía) — también después de T-PROD-004, pero puede esperar a 015.
 12. **T-PROD-017** (`User-Agent` del geocoding con email inexistente) — independiente de todo y acotado, como lo fue T-PROD-013. Puede salir en cualquier momento; conviene **antes del lanzamiento**, porque el riesgo que cubre (que OSM nos bloquee sin poder avisarnos) se materializa justamente cuando sube el tráfico real.
+13. **T-PROD-018** (robots + sitemap + canonical + og-image) — 🔴 **antes de que el dominio final vea la luz.** Dos razones de tiempo: (a) el `noindex` de staging tiene que estar puesto **antes** de que Google lo indexe (después hay que pedir la desindexación y esperar); (b) AdSense (T-PROD-009) revisa un sitio que Google pueda rastrear, así que sin sitemap la fase 2 arranca cojeando. Es, además, **la única tarea de código que queda pendiente**: el resto del camino a producción es Ops (T-PROD-001, T-PROD-003, T-PROD-009).
 
 ---
 
