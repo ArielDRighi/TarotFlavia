@@ -3,9 +3,9 @@ import { getCards } from '@/lib/api/encyclopedia-api';
 import { getArticlesByCategory } from '@/lib/api/encyclopedia-articles-api';
 import { getHolisticServices } from '@/lib/api/holistic-services-api';
 import { getRituals } from '@/lib/api/rituals-api';
+import { ARTICLE_CATEGORIES, getArticlePath } from '@/lib/constants/article-routes';
 import { ROUTES } from '@/lib/constants/routes';
 import { getAllChineseZodiacAnimals } from '@/lib/utils/chinese-zodiac';
-import { ArticleCategory } from '@/types/encyclopedia-article.types';
 import { ZodiacSign } from '@/types/horoscope.types';
 import { getBaseUrl } from './base-url';
 
@@ -42,26 +42,6 @@ const STATIC_ROUTES: ReadonlyArray<{
 ];
 
 /**
- * A qué ruta pertenece cada categoría de artículo de la enciclopedia.
- * Elementos y modalidades comparten `/enciclopedia/elementos`; las 7 guías,
- * `/enciclopedia/guias`.
- */
-const ARTICLE_ROUTE_BY_CATEGORY: Record<ArticleCategory, (slug: string) => string> = {
-  [ArticleCategory.ZODIAC_SIGN]: ROUTES.ENCICLOPEDIA_SIGNO,
-  [ArticleCategory.PLANET]: ROUTES.ENCICLOPEDIA_PLANETA,
-  [ArticleCategory.ASTROLOGICAL_HOUSE]: ROUTES.ENCICLOPEDIA_CASA,
-  [ArticleCategory.ELEMENT]: ROUTES.ENCICLOPEDIA_ELEMENTO,
-  [ArticleCategory.MODALITY]: ROUTES.ENCICLOPEDIA_ELEMENTO,
-  [ArticleCategory.GUIDE_TAROT]: ROUTES.ENCICLOPEDIA_GUIA,
-  [ArticleCategory.GUIDE_NUMEROLOGY]: ROUTES.ENCICLOPEDIA_GUIA,
-  [ArticleCategory.GUIDE_PENDULUM]: ROUTES.ENCICLOPEDIA_GUIA,
-  [ArticleCategory.GUIDE_BIRTH_CHART]: ROUTES.ENCICLOPEDIA_GUIA,
-  [ArticleCategory.GUIDE_RITUAL]: ROUTES.ENCICLOPEDIA_GUIA,
-  [ArticleCategory.GUIDE_HOROSCOPE]: ROUTES.ENCICLOPEDIA_GUIA,
-  [ArticleCategory.GUIDE_CHINESE]: ROUTES.ENCICLOPEDIA_GUIA,
-};
-
-/**
  * El sitemap se genera en el servidor (build o request). Si la API no responde,
  * la sección cae vacía en vez de tirar abajo el build: es preferible un sitemap
  * incompleto a un deploy fallido.
@@ -95,9 +75,9 @@ export async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
   const [cardSlugs, articleEntries, ritualSlugs, serviceSlugs] = await Promise.all([
     safeSlugs(getCards),
     Promise.all(
-      Object.entries(ARTICLE_ROUTE_BY_CATEGORY).map(async ([category, toPath]) => {
-        const slugs = await safeSlugs(() => getArticlesByCategory(category as ArticleCategory));
-        return slugs.map(toPath);
+      ARTICLE_CATEGORIES.map(async (category) => {
+        const slugs = await safeSlugs(() => getArticlesByCategory(category));
+        return slugs.map((slug) => getArticlePath(category, slug));
       })
     ),
     safeSlugs(getRituals),

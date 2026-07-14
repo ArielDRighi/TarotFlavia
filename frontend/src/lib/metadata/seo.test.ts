@@ -35,8 +35,14 @@ describe('SEO Metadata Configuration', () => {
       expect(defaultMetadata.robots).toBeDefined();
     });
 
-    it('should declare a canonical URL', () => {
-      expect(defaultMetadata.alternates?.canonical).toBe('/');
+    it('should declare a SELF-canonical, not a canonical pointing at the home', () => {
+      // ⚠️ El root layout exporta este metadata y Next lo HEREDA en cada página que
+      // no declare `alternates`. Con `canonical: '/'`, las 178 URLs del sitemap le
+      // decían a Google "soy un duplicado de la home, no me indexes" — el modo de
+      // falla exacto que esta tarea viene a evitar.
+      // `./` lo resuelve Next contra el pathname actual → self-canonical por página.
+      expect(defaultMetadata.alternates?.canonical).toBe('./');
+      expect(defaultMetadata.alternates?.canonical).not.toBe('/');
     });
 
     it('should point the social image to a URL that actually exists', () => {
@@ -248,14 +254,17 @@ describe('SEO Metadata Configuration', () => {
       expect(metadata.openGraph).toBeDefined();
     });
 
-    it('should allow indexing for shared readings', () => {
+    it('should NOT be indexed: a shared reading lives behind an unguessable token', () => {
       const metadata = generateSharedReadingMetadata({
         question: 'Test question',
       });
 
+      // Declaraba `index: true` fijo: se salteaba el control por entorno y pedía
+      // indexar una URL con token (que además el robots.txt bloquea). El link se
+      // comparte a mano; no tiene por qué estar en Google.
       expect(metadata.robots).toEqual({
-        index: true,
-        follow: true,
+        index: false,
+        follow: false,
       });
     });
 

@@ -25,8 +25,13 @@ const DISALLOWED_PATHS = [
   '/sesiones$',
   '/rituales/historial',
   '/carta-del-dia/historial',
+  '/carta-astral/historial',
   '/carta-astral/resultado',
   '/servicios/reservar/',
+  // Privadas que viven DENTRO de una sección pública: el detalle del servicio y el
+  // perfil del tarotista se indexan, pero su paso de pago y su reserva exigen sesión.
+  '/servicios/*/pago',
+  '/tarotistas/*/reservar',
   '/premium/activacion',
   '/compartida/',
   '/tarot/',

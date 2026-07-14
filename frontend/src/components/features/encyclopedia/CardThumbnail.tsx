@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/constants/routes';
 import { ArcanaType, SUIT_INFO } from '@/types/encyclopedia.types';
 import type { CardSummary } from '@/types/encyclopedia.types';
 
@@ -45,7 +46,7 @@ export function CardThumbnail({ card, className, href }: CardThumbnailProps) {
 
   return (
     <Link
-      href={href ?? `/enciclopedia/${card.slug}`}
+      href={href ?? ROUTES.ENCICLOPEDIA_TAROT_CARD(card.slug)}
       className="group focus-visible:ring-secondary focus-visible:ring-offset-background block rounded-lg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
     >
       <div

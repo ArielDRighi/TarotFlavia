@@ -8,7 +8,9 @@
 export function getBaseUrl(): string {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
-  if (appUrl) return appUrl;
+  // Sin quitar la barra final, un `https://dominio.com/` pegado en el panel de
+  // Railway produce `https://dominio.com//sitemap.xml` en cada URL emitida.
+  if (appUrl) return appUrl.replace(/\/+$/, '');
 
   if (process.env.NODE_ENV === 'production') {
     throw new Error('NEXT_PUBLIC_APP_URL environment variable must be set in production.');

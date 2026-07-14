@@ -1434,15 +1434,32 @@ Twitter cards) pero le faltan las **tres piezas que Google realmente consume**, 
       ⚠️ **`export const revalidate = 3600`**: el build del frontend (Docker/Railway) **no alcanza a la API**,
       así que un sitemap solo-de-build se publicaría sin la enciclopedia. Con ISR se regenera en el
       contenedor que corre, donde la API sí responde.
-- [x] **`alternates.canonical`**: en `defaultMetadata` (`/`) y en las 5 páginas de artículos
+- [x] **`alternates.canonical`**: `'./'` en `defaultMetadata` + las 5 páginas de artículos
       (`getArticleMetadata(article, canonicalPath)`).
+      🔴 **Hallazgo del revisor local, y era grave:** el primer intento usaba `canonical: '/'`. El root
+      layout exporta ese metadata y **Next lo hereda** en toda página que no declare `alternates`, así que
+      las 178 URLs del sitemap se declaraban *duplicadas de la home* → Google no habría indexado ninguna.
+      Es el modo de falla exacto que la tarea venía a evitar, introducido por la tarea misma. `'./'` lo
+      resuelve contra el pathname actual (self-canonical). Verificado en el HTML del build:
+      `/rituales` → `<link rel="canonical" href="https://auguriatarot.com/rituales">`.
 - [x] **Contenido duplicado eliminado**: `/enciclopedia/[slug]` servía *exactamente* lo mismo que
-      `/enciclopedia/tarot/[slug]` (mismo `useCard`, mismo `CardDetailView`) y **nadie la enlazaba**. Ahora
-      hace `permanentRedirect` (308) a la canónica y se borró `ROUTES.ENCICLOPEDIA_CARD` para que no vuelva
-      a enlazarse.
+      `/enciclopedia/tarot/[slug]` (mismo `useCard`, mismo `CardDetailView`). Ahora hace `permanentRedirect`
+      (308) a la canónica y se borró `ROUTES.ENCICLOPEDIA_CARD`.
+      ⚠️ **El "nadie la enlazaba" era falso** (lo detectó el revisor): el default de `CardThumbnail` apuntaba
+      a la legacy y `CardGrid` lo montaba sin `href` → **las 78 cartas del hub pasaban por el 308**; ídem el
+      prev/next de `CardNavigation`. Corregido: todo el linking interno usa `ROUTES.ENCICLOPEDIA_TAROT_CARD`.
+      `ArticleCard` era peor: enlazaba **artículos** a la ruta de *cartas* → habría caído en "Carta no
+      encontrada". Ahora usa el nuevo `getArticlePath(category, slug)`
+      ([article-routes.ts](../frontend/src/lib/constants/article-routes.ts)), que además reutiliza el sitemap.
 - [x] **Imagen social**: `app/opengraph-image.tsx` con `ImageResponse` de next/og (1200×630, tokens del hero).
       El `og-image.png` que los metadata referenciaban **nunca existió en `public/`**. Un test de `seo.test.ts`
       **fijaba el bug** (aseveraba `stringContaining('/og-image.png')`): ahora asevera contra `OG_IMAGE_PATH`.
+      El revisor encontró una **segunda** preview rota: `carta-astral/layout.tsx` apuntaba a
+      `/og/carta-astral.png` y `public/og/` tampoco existe. Corregida.
+- [x] **Menores del review**: `getBaseUrl` normaliza la barra final (un `https://dominio.com/` pegado en
+      Railway producía `//sitemap.xml` en las 178 URLs), y `generateSharedReadingMetadata` dejó de declarar
+      `index: true` fijo — una lectura vive detrás de un token no adivinable y el robots.txt ya bloquea
+      `/compartida/`.
 - [x] Tests: `indexing` (9), `robots` (6, incluida la trampa del prefijo), `sitemap` (9: mapeo de categorías,
       URL canónica de las cartas, degradación por sección, sin duplicados), redirect de la ruta duplicada (2)
       y los nuevos de `seo`.

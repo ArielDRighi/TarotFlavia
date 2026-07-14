@@ -69,7 +69,11 @@ export const defaultMetadata: Metadata = {
     images: [DEFAULT_OG_IMAGE],
   },
   alternates: {
-    canonical: '/',
+    // ⚠️ `'/'` NO: el root layout exporta este metadata y Next lo hereda en toda
+    // página que no declare `alternates` — cada URL se declararía duplicada de la
+    // home y Google no indexaría ninguna. `'./'` lo resuelve contra el pathname
+    // actual → self-canonical por página (y `/` en la home).
+    canonical: './',
   },
   // Solo el dominio productivo se indexa: staging y los previews quedan fuera
   // sin depender de que alguien se acuerde de apagar un flag (T-PROD-018).
@@ -286,9 +290,11 @@ export function generateSharedReadingMetadata(reading: {
       site: '@auguriatarot',
       creator: '@auguriatarot',
     },
+    // Una lectura compartida vive detrás de un token no adivinable: se comparte a
+    // mano, no tiene por qué estar en Google (y el robots.txt ya bloquea /compartida/).
     robots: {
-      index: true,
-      follow: true,
+      index: false,
+      follow: false,
     },
     alternates: {
       languages: {

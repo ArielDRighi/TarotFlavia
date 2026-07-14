@@ -3,15 +3,22 @@ import { buildRobots } from './robots';
 
 /**
  * Simula el matching de robots.txt como lo hace Google: una regla es un prefijo
- * de path, salvo que termine en `$` (fin de cadena exacto).
+ * de path, con dos comodines — `*` (cualquier secuencia) y `$` (fin exacto).
  *
  * Existe para poder aseverar el COMPORTAMIENTO ("¿queda bloqueada /tarotistas/1?")
  * y no la forma de la lista, que es donde se esconden los errores de prefijo.
  */
 function isBlocked(path: string, disallow: string[]): boolean {
-  return disallow.some((rule) =>
-    rule.endsWith('$') ? path === rule.slice(0, -1) : path.startsWith(rule)
-  );
+  return disallow.some((rule) => {
+    const anchored = rule.endsWith('$');
+    const pattern = anchored ? rule.slice(0, -1) : rule;
+    const source = pattern
+      .split('*')
+      .map((chunk) => chunk.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('.*');
+
+    return new RegExp(`^${source}${anchored ? '$' : ''}`).test(path);
+  });
 }
 
 function getDisallowRules(): string[] {
@@ -70,6 +77,21 @@ describe('buildRobots', () => {
       expect(isBlocked('/premium/activacion', disallow)).toBe(true);
       expect(isBlocked('/compartida/abc123', disallow)).toBe(true);
       expect(isBlocked('/servicios/reservar/7', disallow)).toBe(true);
+    });
+
+    it('bloquea las rutas privadas que viven DENTRO de una sección pública', () => {
+      const disallow = getDisallowRules();
+
+      // El detalle del servicio y el perfil del tarotista son públicos, pero el
+      // paso de pago y la reserva exigen sesión: hay que bloquearlos sin bloquear
+      // a sus padres. Por eso van con comodín.
+      expect(isBlocked('/servicios/registros-akashicos/pago', disallow)).toBe(true);
+      expect(isBlocked('/tarotistas/3/reservar', disallow)).toBe(true);
+      expect(isBlocked('/carta-astral/historial', disallow)).toBe(true);
+
+      expect(isBlocked('/servicios/registros-akashicos', disallow)).toBe(false);
+      expect(isBlocked('/tarotistas/3', disallow)).toBe(false);
+      expect(isBlocked('/carta-astral', disallow)).toBe(false);
     });
 
     it('bloquea el flujo de lectura (/tarot y /ritual) sin arrastrar rutas públicas parecidas', () => {
