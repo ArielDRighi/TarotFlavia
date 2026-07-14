@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { of, throwError } from 'rxjs';
-import { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { GeocodeService } from './geocode.service';
 import { GeocodeCacheService } from './geocode-cache.service';
 import { GeocodedPlaceDto } from '../dto/geocode-response.dto';
@@ -677,13 +677,15 @@ describe('GeocodeService', () => {
     });
   });
 
-  describe('identificación saliente del geocoding', () => {
+  describe('outgoing geocoding identification', () => {
     const EMAIL_REGEX = /[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi;
 
     const sentUserAgents = (): string[] =>
       httpService.get.mock.calls.map(([, config]) => {
-        const headers = config?.headers as Record<string, unknown> | undefined;
-        const userAgent = headers?.['User-Agent'];
+        // El servicio siempre manda headers planos; AxiosHeaders normaliza el nombre,
+        // así que un rename a 'user-agent' no rompe estos tests por el motivo equivocado
+        const headers = config?.headers as Record<string, string> | undefined;
+        const userAgent = AxiosHeaders.from(headers).get('User-Agent');
         return typeof userAgent === 'string' ? userAgent : '';
       });
 
@@ -749,12 +751,24 @@ describe('GeocodeService', () => {
         headers: {},
         config: {} as InternalAxiosRequestConfig,
       };
+      const mockReverseResponse: AxiosResponse = {
+        data: mockNominatimResult,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
 
       httpService.get
         .mockReturnValueOnce(throwError(() => new Error('Photon timeout')))
-        .mockReturnValue(of(mockSearchResponse));
+        .mockReturnValueOnce(of(mockSearchResponse))
+        .mockReturnValue(of(mockReverseResponse));
 
+      // Los 3 destinos salientes: Photon, fallback de Nominatim y reverse de Nominatim
       await service.searchPlaces('Buenos Aires');
+      await service.getPlaceDetails(-34.6037, -58.3816);
+
+      expect(httpService.get).toHaveBeenCalledTimes(3);
 
       const emails = emailsInSentHeaders();
       expect(emails.length).toBeGreaterThan(0);

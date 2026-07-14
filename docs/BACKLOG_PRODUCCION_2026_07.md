@@ -1348,8 +1348,9 @@ Además el string está **triplicado a mano**: es exactamente la forma en que es
 - [x] Extraer el `User-Agent` a una **constante única**
       ([contact.constants.ts](../backend/tarot-app/src/common/constants/contact.constants.ts):
       `CONTACT_EMAIL = 'consultas@auguriatarot.com'` + `GEOCODING_USER_AGENT`), espejando lo que
-      T-PROD-013 hizo en el frontend con `CONFIG.CONTACT_EMAIL`. Los 3 usos la consumen y se exporta
-      desde el barrel `src/common/index.ts` — que no vuelva a divergir.
+      T-PROD-013 hizo en el frontend con `CONFIG.CONTACT_EMAIL`. Los 3 usos la consumen — que no
+      vuelva a divergir. *(También se exporta desde el barrel `src/common/index.ts` por consistencia,
+      pero el guardrail real es el módulo de la constante: el barrel hoy no lo consume nadie.)*
 - [x] Reemplazar `contact@auguria.com` por **`consultas@auguriatarot.com`** (la casilla real creada en
       T-PROD-004, que es la que efectivamente leemos).
 - [x] Actualizar los 2 tests que fijaban el string literal (`geocode.service.spec.ts:155` y `:616`):
@@ -1364,6 +1365,13 @@ Además el string está **triplicado a mano**: es exactamente la forma en que es
         (`system-config.entity.spec.ts:21,30`) usa el mismo fixture.
   - [x] `.env.example`: los ejemplos de `CORS_ORIGINS` y `BACKEND_URL` alineados con el dominio real.
         *(El `EMAIL_FROM` ya lo corrigió T-PROD-012 al reescribir el bloque de email.)*
+  - [x] **`scripts/create-mp-preapproval-plan.ts:170`** (hallazgo del revisor, sumado al PR): el `back_url`
+        del plan de MercadoPago caía a `https://auguria.com.ar/premium` — dominio inexistente, y **no era
+        una URL de ejemplo**: es el retorno post-checkout que MP guarda dentro del plan. Además el guard
+        estaba roto (testeaba `BACKEND_URL` pero interpolaba `FRONTEND_URL ?? BACKEND_URL`, así que con
+        solo `FRONTEND_URL` seteada caía igual al dominio muerto). Ahora:
+        `` `${process.env.FRONTEND_URL ?? DEFAULT_FRONTEND_URL}/premium` ``. Importa porque **T-PROD-001
+        corre este script contra la cuenta real de MP**.
 
 #### 🎯 Criterios de Aceptación
 
@@ -1377,8 +1385,11 @@ Además el string está **triplicado a mano**: es exactamente la forma en que es
 #### 📌 Fuera de alcance
 
 Quedan `auguria.com` en **documentación histórica** (ADRs, `docs/modules/birth-chart/*`,
-`FEEDBACK_CA_001_*`) y en `scripts/create-mp-preapproval-plan.ts` (URL de ejemplo). No afectan runtime ni
-nada publicado al usuario; corregirlos reescribiría documentos que registran decisiones ya tomadas.
+`FEEDBACK_CA_001_*`). No afectan runtime ni nada publicado al usuario; corregirlos reescribiría documentos
+que registran decisiones ya tomadas.
+
+> ⚠️ El `scripts/create-mp-preapproval-plan.ts` **estaba** en esta lista como "URL de ejemplo, no afecta
+> runtime". Era falso: el revisor local lo encontró y **entró al PR** (ver la última tarea de arriba).
 
 ---
 

@@ -43,6 +43,14 @@ interface ScriptOptions {
 
 const KNOWN_KEYS = new Set(['amount', 'reason']);
 
+/**
+ * Dominio productivo del frontend, usado solo si `FRONTEND_URL` no está seteada.
+ *
+ * El `back_url` es el retorno post-checkout que MercadoPago guarda **dentro del plan**:
+ * si apunta a un dominio inexistente, el usuario que se suscribe aterriza en la nada.
+ */
+const DEFAULT_FRONTEND_URL = 'https://auguriatarot.com';
+
 function parseArgs(): ScriptOptions {
   const args = process.argv.slice(2);
   const options: ScriptOptions = {
@@ -165,9 +173,7 @@ async function createPreapprovalPlan(): Promise<void> {
       transaction_amount: options.amount,
       currency_id: 'ARS',
     },
-    back_url: process.env.BACKEND_URL
-      ? `${process.env.FRONTEND_URL ?? process.env.BACKEND_URL}/premium`
-      : 'https://auguria.com.ar/premium',
+    back_url: `${process.env.FRONTEND_URL ?? DEFAULT_FRONTEND_URL}/premium`,
   };
 
   const response = await planClient.create({ body });
