@@ -1,44 +1,23 @@
-'use client';
+import { permanentRedirect } from 'next/navigation';
 
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-
-import { Button } from '@/components/ui/button';
-import { CardDetailView, EncyclopediaSkeleton } from '@/components/features/encyclopedia';
-import { useCard } from '@/hooks/api/useEncyclopedia';
 import { ROUTES } from '@/lib/constants/routes';
 
-// ─── Component ────────────────────────────────────────────────────────────────
+/**
+ * Ruta legacy de la ficha de carta.
+ *
+ * Servía exactamente el mismo contenido que `/enciclopedia/tarot/[slug]` en otra
+ * URL — contenido duplicado ante Google — y ningún enlace del sitio la usa (el hub
+ * y las cartas relacionadas apuntan a la de `tarot/`). Redirige a la canónica en
+ * vez de declararla con un `<link rel="canonical">`: así la URL vieja deja de
+ * servir contenido, y los links externos que ya existan siguen funcionando.
+ */
 
-export default function CardDetailPage() {
-  const params = useParams();
-  const slug = params.slug as string;
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
 
-  const { data: card, isLoading, error } = useCard(slug);
+export default async function CardDetailRedirectPage({ params }: PageProps) {
+  const { slug } = await params;
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <EncyclopediaSkeleton variant="detail" />
-      </div>
-    );
-  }
-
-  if (error || !card) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="mb-4 text-2xl">Carta no encontrada</h1>
-        <p className="text-muted-foreground mb-6">La carta que buscas no existe o fue eliminada.</p>
-        <Button asChild>
-          <Link href={ROUTES.ENCICLOPEDIA}>Ver todas las cartas</Link>
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <CardDetailView card={card} />
-    </div>
-  );
+  permanentRedirect(ROUTES.ENCICLOPEDIA_TAROT_CARD(slug));
 }
