@@ -336,7 +336,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-014 | ✅ Formulario de contacto: enviar de verdad (endpoint + EmailService); hoy los mensajes se pierden | Full-stack | 🟠 Alta | 3 pts |
 | T-PROD-015 | **Reset de contraseña no envía nada**: usuarios sin recuperación de cuenta + métodos huérfanos | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-016 | **Alertas de costo al admin sin plantilla**: si el gasto de los proveedores se dispara, nadie se entera | Backend | 🟠 Alta | 1 pt |
-| T-PROD-017 | Geocoding: el `User-Agent` que enviamos a Nominatim declara un email inexistente (riesgo de bloqueo silencioso) | Backend | 🟠 Alta | 0.5 pt |
+| T-PROD-017 | ✅ Geocoding: el `User-Agent` que enviamos a Nominatim declara un email inexistente (riesgo de bloqueo silencioso) | Backend | 🟠 Alta | 0.5 pt |
 
 ---
 
@@ -1306,8 +1306,9 @@ las dos mitades del aviso estaban rotas a la vez.
 
 ---
 
-### T-PROD-017: El `User-Agent` del Geocoding Declara un Email Inexistente (Riesgo de Bloqueo Silencioso)
+### T-PROD-017: El `User-Agent` del Geocoding Declara un Email Inexistente (Riesgo de Bloqueo Silencioso) — ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA (2026-07-13)
 **Prioridad:** 🟠 Alta
 **Estimación:** 0.5 punto
 **Dependencias:** ninguna — el buzón real ya existe (T-PROD-004)
@@ -1344,30 +1345,34 @@ Además el string está **triplicado a mano**: es exactamente la forma en que es
 
 #### ✅ Tareas específicas
 
-- [ ] Extraer el `User-Agent` a una **constante única** (p. ej. `src/common/constants/contact.constants.ts`:
+- [x] Extraer el `User-Agent` a una **constante única**
+      ([contact.constants.ts](../backend/tarot-app/src/common/constants/contact.constants.ts):
       `CONTACT_EMAIL = 'consultas@auguriatarot.com'` + `GEOCODING_USER_AGENT`), espejando lo que
-      T-PROD-013 hizo en el frontend con `CONFIG.CONTACT_EMAIL`. Los 3 usos pasan a consumirla — que no
-      vuelva a divergir.
-- [ ] Reemplazar `contact@auguria.com` por **`consultas@auguriatarot.com`** (la casilla real creada en
+      T-PROD-013 hizo en el frontend con `CONFIG.CONTACT_EMAIL`. Los 3 usos la consumen y se exporta
+      desde el barrel `src/common/index.ts` — que no vuelva a divergir.
+- [x] Reemplazar `contact@auguria.com` por **`consultas@auguriatarot.com`** (la casilla real creada en
       T-PROD-004, que es la que efectivamente leemos).
-- [ ] Actualizar los 2 tests que fijan el string literal:
-      [geocode.service.spec.ts:155 y :616](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.spec.ts#L155)
-      → deben aseverar **contra la constante**, no contra un literal repetido.
-- [ ] Test de regresión: ningún header saliente del geocoding contiene un dominio distinto de
-      `auguriatarot.com`.
-- [ ] **Limpieza del mismo dominio en el backend** (barato, mismo PR):
-  - [ ] `system-config.entity.ts:54` — el `example:` de Swagger publica `admin@auguria.com` en la
-        documentación de la API. Su spec (`system-config.entity.spec.ts:21,30`) usa el mismo fixture →
-        `example.com` (dominio reservado por RFC 2606), igual que se hizo con los fixtures del frontend.
-  - [ ] `.env.example`: quedan `CORS_ORIGIN` (línea 187) y `API_URL` (línea 258) → alinear con el
-        dominio real. *(El `EMAIL_FROM` ya lo corrigió T-PROD-012 al reescribir el bloque de email.)*
+- [x] Actualizar los 2 tests que fijaban el string literal (`geocode.service.spec.ts:155` y `:616`):
+      ahora aseveran **contra la constante**.
+- [x] Test de regresión: nuevo bloque `identificación saliente del geocoding` en
+      [geocode.service.spec.ts](../backend/tarot-app/src/modules/birth-chart/application/services/geocode.service.spec.ts)
+      — las 3 llamadas salientes (Photon, fallback Nominatim, reverse Nominatim) mandan exactamente
+      `GEOCODING_USER_AGENT`, y ningún header saliente declara un buzón fuera de `auguriatarot.com`.
+- [x] **Limpieza del mismo dominio en el backend** (mismo PR):
+  - [x] `system-config.entity.ts:54` — el `example:` de Swagger publicaba `admin@auguria.com` en la
+        documentación de la API → `admin@example.com` (dominio reservado por RFC 2606), y su spec
+        (`system-config.entity.spec.ts:21,30`) usa el mismo fixture.
+  - [x] `.env.example`: los ejemplos de `CORS_ORIGINS` y `BACKEND_URL` alineados con el dominio real.
+        *(El `EMAIL_FROM` ya lo corrigió T-PROD-012 al reescribir el bloque de email.)*
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] `grep -r "auguria\.com" backend/tarot-app/src` (excluyendo `auguriatarot.com`) devuelve **0 resultados**.
-- [ ] El `User-Agent` que llega a Nominatim y Photon declara un buzón que **existe y leemos**.
-- [ ] El email del `User-Agent` está definido en **un solo lugar** del backend.
-- [ ] Ciclo de calidad backend completo pasa: format, lint, `test:cov` (≥80%), build y `validate-architecture.js`.
+- [x] `grep -r "auguria\.com" backend/tarot-app/src` (excluyendo `auguriatarot.com`) devuelve **0 resultados**
+      (también en `.env.example`).
+- [x] El `User-Agent` que llega a Nominatim y Photon declara un buzón que **existe y leemos**.
+- [x] El email del `User-Agent` está definido en **un solo lugar** del backend.
+- [x] Ciclo de calidad backend completo pasa: format, lint, `test:cov` (4593 tests, coverage 84.87%), build
+      y `validate-architecture.js`.
 
 #### 📌 Fuera de alcance
 
