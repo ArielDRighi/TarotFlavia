@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { ROUTES } from '@/lib/constants/routes';
 import { ArcanaType, SUIT_INFO } from '@/types/encyclopedia.types';
 import type { CardSummary } from '@/types/encyclopedia.types';
 
@@ -24,7 +25,7 @@ export interface CardListItemProps {
  * Displays a tarot card as a horizontal list item with thumbnail, name, and type info.
  *
  * Features:
- * - Links to card detail page at /enciclopedia/{slug}
+ * - Links to card detail page at /enciclopedia/tarot/{slug}
  * - Thumbnail image on the left
  * - Card name and type badge on the right
  * - Hover effect
@@ -39,7 +40,7 @@ export function CardListItem({ card, className }: CardListItemProps) {
   const typeLabel = isMajor ? 'Arcanos Mayores' : card.suit ? SUIT_INFO[card.suit].nameEs : null;
 
   return (
-    <Link href={`/enciclopedia/${card.slug}`} className="group block">
+    <Link href={ROUTES.ENCICLOPEDIA_TAROT_CARD(card.slug)} className="group block">
       <div
         data-testid={`card-list-item-${card.slug}`}
         className={cn(

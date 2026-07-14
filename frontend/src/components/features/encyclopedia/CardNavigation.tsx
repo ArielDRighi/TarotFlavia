@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { useCardNavigation } from '@/hooks/api/useEncyclopedia';
+import { ROUTES } from '@/lib/constants/routes';
 
 export interface CardNavigationProps {
   slug: string;
@@ -23,7 +24,7 @@ export function CardNavigation({ slug }: CardNavigationProps) {
         <Button variant="ghost" asChild>
           <Link
             data-testid="card-navigation-prev"
-            href={`/enciclopedia/${navigation.previous.slug}`}
+            href={ROUTES.ENCICLOPEDIA_TAROT_CARD(navigation.previous.slug)}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
             {navigation.previous.nameEs}
@@ -35,7 +36,10 @@ export function CardNavigation({ slug }: CardNavigationProps) {
 
       {navigation.next ? (
         <Button variant="ghost" asChild>
-          <Link data-testid="card-navigation-next" href={`/enciclopedia/${navigation.next.slug}`}>
+          <Link
+            data-testid="card-navigation-next"
+            href={ROUTES.ENCICLOPEDIA_TAROT_CARD(navigation.next.slug)}
+          >
             {navigation.next.nameEs}
             <ChevronRight className="ml-2 h-4 w-4" />
           </Link>

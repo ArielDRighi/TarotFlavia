@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { getArticle, getArticlesByCategory } from '@/lib/api/encyclopedia-articles-api';
 import { getArticleMetadata } from '@/lib/metadata/seo';
+import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 import { ArticleDetailPageContent } from '@/components/features/encyclopedia/ArticleDetailPageContent';
 
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   try {
     const article = await getArticle(slug);
-    return getArticleMetadata(article);
+    return getArticleMetadata(article, ROUTES.ENCICLOPEDIA_GUIA(slug));
   } catch {
     return {};
   }

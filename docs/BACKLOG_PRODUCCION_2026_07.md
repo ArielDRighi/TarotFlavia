@@ -337,7 +337,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-015 | **Reset de contraseña no envía nada**: usuarios sin recuperación de cuenta + métodos huérfanos | Backend | 🔴 Crítica | 3 pts |
 | T-PROD-016 | **Alertas de costo al admin sin plantilla**: si el gasto de los proveedores se dispara, nadie se entera | Backend | 🟠 Alta | 1 pt |
 | T-PROD-017 | ✅ Geocoding: el `User-Agent` que enviamos a Nominatim declara un email inexistente (riesgo de bloqueo silencioso) | Backend | 🟠 Alta | 0.5 pt |
-| T-PROD-018 | Sin `robots.txt` ni `sitemap.xml`, staging indexable y la imagen social (`og-image.png`) no existe | Frontend | 🔴 Crítica | 2 pts |
+| T-PROD-018 | ✅ Sin `robots.txt` ni `sitemap.xml`, staging indexable y la imagen social (`og-image.png`) no existe | Frontend | 🔴 Crítica | 2 pts |
 
 ---
 
@@ -1394,8 +1394,9 @@ que registran decisiones ya tomadas.
 
 ---
 
-### T-PROD-018: El Sitio No Es Indexable ni Compartible (Sin `robots.txt`, Sin `sitemap.xml`, con la Imagen Social Rota)
+### T-PROD-018: El Sitio No Es Indexable ni Compartible (Sin `robots.txt`, Sin `sitemap.xml`, con la Imagen Social Rota) — ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA (2026-07-14)
 **Prioridad:** 🔴 Crítica (bloquea T-PROD-009: AdSense **no aprueba** un sitio que Google no puede rastrear)
 **Estimación:** 2 puntos
 **Dependencias:** ninguna para el código. El valor real se materializa cuando el dominio productivo esté activo.
@@ -1416,33 +1417,75 @@ Twitter cards) pero le faltan las **tres piezas que Google realmente consume**, 
 
 #### ✅ Tareas específicas
 
-- [ ] **`app/robots.ts`** (Next.js App Router genera `/robots.txt`): `Allow: /` + `Sitemap:` en producción;
-      `Disallow: /` en staging. Debe excluir siempre las rutas privadas (`/admin`, `/perfil`, `/historial`,
-      `/mis-servicios`, `/compartida`).
-- [ ] **Que la indexación dependa del entorno, no de un literal.** Nueva var `NEXT_PUBLIC_ALLOW_INDEXING`
-      (o derivar del host de `NEXT_PUBLIC_APP_URL`): `robots` de `defaultMetadata` pasa a `index: false` en
-      staging. Hoy es `index: true` hardcodeado. **Sin esto, el `robots.txt` de staging es contradicho por
-      el meta tag de cada página.**
-- [ ] **`app/sitemap.ts`** dinámico: estáticas (landing, `/premium`, `/explorar`, `/contacto`, `/privacidad`)
-      + **enciclopedia** (slugs desde la API) + **12 signos** de `/horoscopo/**` + **12 animales** de
-      `/horoscopo-chino/**`. Con `lastModified` y `changeFrequency` razonables. Ojo con el fetch en build:
-      si la API no responde, el sitemap debe degradar a las estáticas, no romper el build.
-- [ ] **`alternates.canonical`** en `defaultMetadata` + por página dinámica (la ficha de enciclopedia y la de
-      cada signo declaran su propia canonical).
-- [ ] **Crear `frontend/public/og-image.png`** (1200×630, como pide el propio comentario de `seo.ts:22`).
-      Alternativa superior: `app/opengraph-image.tsx` con `ImageResponse` de `next/og`, que la genera en build
-      y evita otro asset binario desincronizado.
-- [ ] Tests: `robots.ts` y `sitemap.ts` (staging bloquea / producción permite; el sitemap incluye las
-      dinámicas y degrada sin API), y un test que ate la existencia del OG image al `DEFAULT_OG_IMAGE`
-      referenciado — que no se vuelva a romper en silencio.
+- [x] **`app/robots.ts`** (Next genera `/robots.txt`): `Allow: /` + `Sitemap:` + `Host:` en producción;
+      `Disallow: /` fuera de ella. Excluye las rutas privadas.
+      ⚠️ **Trampa del prefijo:** en robots.txt una regla matchea por *prefijo de path*, así que `/tarot`
+      también bloquearía `/tarotistas/1` y `/ritual` bloquearía `/rituales` — ambas **públicas**. Van como
+      `/x/` + `/x$`. Hay un test que asevera el comportamiento (`/tarotistas/1` NO bloqueada), no la forma
+      de la lista.
+- [x] **La indexación se deriva del host de `NEXT_PUBLIC_APP_URL`**
+      ([indexing.ts](../frontend/src/lib/metadata/indexing.ts)), no de un flag nuevo: es **fail-closed**.
+      Solo `auguriatarot.com` / `www.auguriatarot.com` se indexan; staging, los previews de Railway y local
+      quedan fuera **sin que nadie tenga que acordarse de apagar nada** — que es exactamente cómo staging
+      quedó indexable. `defaultMetadata.robots` pasó de `index: true` fijo a depender del entorno.
+- [x] **`app/sitemap.ts`**: estáticas + enciclopedia (cartas + las 12 categorías de artículos, mapeadas a su
+      ruta real) + 12 signos + 12 animales + rituales + servicios. Cada sección degrada a vacío si su fetch
+      falla: **un sitemap incompleto es mejor que un build caído**.
+      ⚠️ **`export const revalidate = 3600`**: el build del frontend (Docker/Railway) **no alcanza a la API**,
+      así que un sitemap solo-de-build se publicaría sin la enciclopedia. Con ISR se regenera en el
+      contenedor que corre, donde la API sí responde.
+- [x] **`alternates.canonical`**: `'./'` en `defaultMetadata` + las 5 páginas de artículos
+      (`getArticleMetadata(article, canonicalPath)`).
+      🔴 **Hallazgo del revisor local, y era grave:** el primer intento usaba `canonical: '/'`. El root
+      layout exporta ese metadata y **Next lo hereda** en toda página que no declare `alternates`, así que
+      las 178 URLs del sitemap se declaraban *duplicadas de la home* → Google no habría indexado ninguna.
+      Es el modo de falla exacto que la tarea venía a evitar, introducido por la tarea misma. `'./'` lo
+      resuelve contra el pathname actual (self-canonical). Verificado en el HTML del build:
+      `/rituales` → `<link rel="canonical" href="https://auguriatarot.com/rituales">`.
+- [x] **Contenido duplicado eliminado**: `/enciclopedia/[slug]` servía *exactamente* lo mismo que
+      `/enciclopedia/tarot/[slug]` (mismo `useCard`, mismo `CardDetailView`). Ahora hace `permanentRedirect`
+      (308) a la canónica y se borró `ROUTES.ENCICLOPEDIA_CARD`.
+      ⚠️ **El "nadie la enlazaba" era falso** (lo detectó el revisor): el default de `CardThumbnail` apuntaba
+      a la legacy y `CardGrid` lo montaba sin `href` → **las 78 cartas del hub pasaban por el 308**; ídem el
+      prev/next de `CardNavigation`. Corregido: todo el linking interno usa `ROUTES.ENCICLOPEDIA_TAROT_CARD`.
+      `ArticleCard` era peor: enlazaba **artículos** a la ruta de *cartas* → habría caído en "Carta no
+      encontrada". Ahora usa el nuevo `getArticlePath(category, slug)`
+      ([article-routes.ts](../frontend/src/lib/constants/article-routes.ts)), que además reutiliza el sitemap.
+- [x] **Imagen social**: `app/opengraph-image.tsx` con `ImageResponse` de next/og (1200×630, tokens del hero).
+      El `og-image.png` que los metadata referenciaban **nunca existió en `public/`**. Un test de `seo.test.ts`
+      **fijaba el bug** (aseveraba `stringContaining('/og-image.png')`): ahora asevera contra `OG_IMAGE_PATH`.
+      El revisor encontró una **segunda** preview rota: `carta-astral/layout.tsx` apuntaba a
+      `/og/carta-astral.png` y `public/og/` tampoco existe. Corregida.
+- [x] **Menores del review**: `getBaseUrl` normaliza la barra final (un `https://dominio.com/` pegado en
+      Railway producía `//sitemap.xml` en las 178 URLs), y `generateSharedReadingMetadata` dejó de declarar
+      `index: true` fijo — una lectura vive detrás de un token no adivinable y el robots.txt ya bloquea
+      `/compartida/`.
+- [x] Tests: `indexing` (9), `robots` (6, incluida la trampa del prefijo), `sitemap` (9: mapeo de categorías,
+      URL canónica de las cartas, degradación por sección, sin duplicados), redirect de la ruta duplicada (2)
+      y los nuevos de `seo`.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] `https://staging.auguriatarot.com/robots.txt` → `Disallow: /`, y sus páginas emiten `noindex`.
-- [ ] `https://<dominio-final>/robots.txt` → `Allow: /` + línea `Sitemap:`, y `/sitemap.xml` lista las
-      estáticas + la enciclopedia + los 24 horóscopos.
-- [ ] Compartir cualquier URL en WhatsApp muestra imagen, título y descripción (hoy: preview rota).
-- [ ] Ciclo de calidad frontend completo pasa.
+- [x] Staging → `robots.txt` con `Disallow: /` **y** `<meta name="robots" content="noindex, nofollow">` en el
+      HTML. *(Verificado contra un build real con `NEXT_PUBLIC_APP_URL=https://staging.auguriatarot.com`.)*
+- [x] Dominio final → `robots.txt` con `Allow: /` + `Sitemap:`, y `/sitemap.xml` con **178 URLs**: 133 de
+      enciclopedia, 24 horóscopos, 5 rituales, 4 servicios y 12 estáticas. *(Verificado levantando el build
+      productivo contra la API real.)*
+- [x] `GET /opengraph-image` → **200 `image/png`** (111 KB), y el HTML emite
+      `<meta property="og:image">` apuntando a esa URL. *(Antes: 404.)*
+- [x] `GET /enciclopedia/the-fool` → **308** a `/enciclopedia/tarot/the-fool`.
+- [x] Ciclo de calidad frontend completo pasa: format, lint:fix, type-check, `test:run`
+      (**5325 tests**, 424 suites), build y `validate-architecture.js`.
+
+#### 📌 Fuera de alcance (deliberado, no olvido)
+
+- **Los perfiles de tarotistas (`/tarotistas/[id]`) no entran al sitemap**: el listado del backend es
+  paginado y las constantes de ruta del marketplace están desactualizadas (`ROUTES.TAROTISTA_PROFILE` apunta
+  a `/marketplace/...`, que no existe). Merece su propia tarea.
+- **Varias páginas públicas son client components** (`/horoscopo/[sign]`, la ficha de carta, `/rituales/[slug]`,
+  `/servicios/[slug]`): Googlebot recibe un 200 con el esqueleto y el contenido se pinta por JS. Google hoy
+  ejecuta JS, pero indexa más lento y peor. Además esas rutas **no tienen `title`/`description` propios**:
+  comparten el default "Auguria". Es el próximo cuello de botella de SEO y **necesita una tarea aparte**.
 
 #### 📌 Nota de Ops (no es código)
 

@@ -37,7 +37,7 @@ describe('CardThumbnail', () => {
       render(<CardThumbnail card={createTestCard({ slug: 'the-fool' })} />);
 
       const link = screen.getByRole('link');
-      expect(link).toHaveAttribute('href', '/enciclopedia/the-fool');
+      expect(link).toHaveAttribute('href', '/enciclopedia/tarot/the-fool');
     });
 
     it('should have data-testid attribute', () => {

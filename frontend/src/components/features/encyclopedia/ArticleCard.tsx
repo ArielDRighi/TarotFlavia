@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
+import { getArticlePath } from '@/lib/constants/article-routes';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -51,7 +52,7 @@ export function ArticleCard({ article, className }: ArticleCardProps) {
 
   return (
     <Link
-      href={`/enciclopedia/${article.slug}`}
+      href={getArticlePath(article.category, article.slug)}
       data-testid="article-card"
       className={cn(
         'bg-card hover:bg-accent group flex flex-col gap-2 rounded-lg border p-4 transition-colors',

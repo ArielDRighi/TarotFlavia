@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { OG_IMAGE_PATH } from '@/lib/metadata/og-image';
+
 export const metadata: Metadata = {
   title: 'Carta Astral | Auguria',
   description:
@@ -8,7 +10,7 @@ export const metadata: Metadata = {
     title: 'Carta Astral | Auguria',
     description:
       'Descubre tu carta astral natal. Conoce la posición de los planetas en el momento de tu nacimiento.',
-    images: ['/og/carta-astral.png'],
+    images: [OG_IMAGE_PATH],
   },
 };
 

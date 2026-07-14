@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { getBaseUrl } from './base-url';
+import { isIndexingAllowed } from './indexing';
+import { OG_IMAGE_PATH } from './og-image';
 
 /**
  * SEO Configuration for Auguria
@@ -6,23 +9,21 @@ import type { Metadata } from 'next';
  * Centralized metadata configuration for consistent SEO across all pages.
  */
 
+export { OG_IMAGE_PATH };
+
 /**
  * Base URL for the application
  * Used for canonical URLs and Open Graph images
  */
-const BASE_URL =
-  process.env.NEXT_PUBLIC_APP_URL ||
-  (process.env.NODE_ENV === 'production'
-    ? (() => {
-        throw new Error('NEXT_PUBLIC_APP_URL environment variable must be set in production.');
-      })()
-    : 'http://localhost:3001');
+const BASE_URL = getBaseUrl();
 
 /**
- * Default Open Graph image
- * Should be 1200x630px for optimal social media sharing
+ * Imagen de preview social: la genera `app/opengraph-image.tsx` (next/og).
+ *
+ * Antes apuntaba a `/og-image.png`, un archivo que **no existe** en `public/`:
+ * cada link compartido mostraba la preview rota (T-PROD-018).
  */
-const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
+const DEFAULT_OG_IMAGE = `${BASE_URL}${OG_IMAGE_PATH}`;
 
 /**
  * Site name used across all metadata
@@ -67,9 +68,18 @@ export const defaultMetadata: Metadata = {
     card: 'summary_large_image',
     images: [DEFAULT_OG_IMAGE],
   },
+  alternates: {
+    // ⚠️ `'/'` NO: el root layout exporta este metadata y Next lo hereda en toda
+    // página que no declare `alternates` — cada URL se declararía duplicada de la
+    // home y Google no indexaría ninguna. `'./'` lo resuelve contra el pathname
+    // actual → self-canonical por página (y `/` en la home).
+    canonical: './',
+  },
+  // Solo el dominio productivo se indexa: staging y los previews quedan fuera
+  // sin depender de que alguien se acuerde de apagar un flag (T-PROD-018).
   robots: {
-    index: true,
-    follow: true,
+    index: isIndexingAllowed(),
+    follow: isIndexingAllowed(),
   },
 };
 
@@ -214,7 +224,10 @@ export function generateTarotistaMetadata(
 /**
  * Generate metadata for encyclopedia article detail pages
  */
-export function getArticleMetadata(article: { nameEs: string; snippet: string }): Metadata {
+export function getArticleMetadata(
+  article: { nameEs: string; snippet: string },
+  canonicalPath?: string
+): Metadata {
   const title = `${article.nameEs} | Enciclopedia Mística`;
 
   return {
@@ -225,6 +238,7 @@ export function getArticleMetadata(article: { nameEs: string; snippet: string })
       description: article.snippet,
       type: 'article',
     },
+    ...(canonicalPath ? { alternates: { canonical: canonicalPath } } : {}),
   };
 }
 
@@ -276,9 +290,11 @@ export function generateSharedReadingMetadata(reading: {
       site: '@auguriatarot',
       creator: '@auguriatarot',
     },
+    // Una lectura compartida vive detrás de un token no adivinable: se comparte a
+    // mano, no tiene por qué estar en Google (y el robots.txt ya bloquea /compartida/).
     robots: {
-      index: true,
-      follow: true,
+      index: false,
+      follow: false,
     },
     alternates: {
       languages: {

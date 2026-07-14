@@ -83,7 +83,7 @@ describe('CardNavigation', () => {
 
       const prevLink = screen.getByTestId('card-navigation-prev');
       expect(prevLink).toBeInTheDocument();
-      expect(prevLink).toHaveAttribute('href', '/enciclopedia/the-fool');
+      expect(prevLink).toHaveAttribute('href', '/enciclopedia/tarot/the-fool');
     });
 
     it('should render next card link', () => {
@@ -99,7 +99,7 @@ describe('CardNavigation', () => {
 
       const nextLink = screen.getByTestId('card-navigation-next');
       expect(nextLink).toBeInTheDocument();
-      expect(nextLink).toHaveAttribute('href', '/enciclopedia/the-high-priestess');
+      expect(nextLink).toHaveAttribute('href', '/enciclopedia/tarot/the-high-priestess');
     });
 
     it('should display previous card name', () => {

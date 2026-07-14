@@ -17,6 +17,10 @@ export const ROUTES = {
   NUMEROLOGIA: '/numerologia',
   PENDULO: '/pendulo',
   CARTA_ASTRAL: '/carta-astral',
+  EXPLORAR: '/explorar',
+  CONTACTO: '/contacto',
+  PRIVACIDAD: '/privacidad',
+  TERMINOS: '/terminos',
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',
@@ -68,7 +72,8 @@ export const ROUTES = {
 
   // Encyclopedia
   ENCICLOPEDIA: '/enciclopedia',
-  ENCICLOPEDIA_CARD: (slug: string) => `/enciclopedia/${slug}`,
+  // (ENCICLOPEDIA_CARD, `/enciclopedia/[slug]`, se eliminó en T-PROD-018: duplicaba
+  //  el contenido de la ficha de tarot. Esa ruta hoy redirige a la canónica.)
 
   // Encyclopedia — Tarot
   ENCICLOPEDIA_TAROT: '/enciclopedia/tarot',
