@@ -7,6 +7,7 @@ import {
   GeocodeSearchResponseDto,
   GeocodedPlaceDto,
 } from '../dto/geocode-response.dto';
+import { GEOCODING_USER_AGENT } from '../../../../common/constants/contact.constants';
 
 interface NominatimResult {
   place_id: number;
@@ -161,7 +162,7 @@ export class GeocodeService {
           limit: 5,
         },
         headers: {
-          'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
+          'User-Agent': GEOCODING_USER_AGENT,
         },
       }),
     );
@@ -220,7 +221,7 @@ export class GeocodeService {
             'accept-language': 'es',
           },
           headers: {
-            'User-Agent': 'Auguria/1.0 (contact@auguria.com)', // Requerido por Nominatim
+            'User-Agent': GEOCODING_USER_AGENT, // Requerido por Nominatim
           },
         }),
       );
@@ -351,7 +352,7 @@ export class GeocodeService {
               'accept-language': 'es',
             },
             headers: {
-              'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
+              'User-Agent': GEOCODING_USER_AGENT,
             },
           },
         ),

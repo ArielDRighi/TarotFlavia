@@ -2,10 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { of, throwError } from 'rxjs';
-import { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { AxiosHeaders, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { GeocodeService } from './geocode.service';
 import { GeocodeCacheService } from './geocode-cache.service';
 import { GeocodedPlaceDto } from '../dto/geocode-response.dto';
+import { GEOCODING_USER_AGENT } from '../../../../common/constants/contact.constants';
 
 describe('GeocodeService', () => {
   let service: GeocodeService;
@@ -152,7 +153,7 @@ describe('GeocodeService', () => {
             limit: 5,
           }),
           headers: expect.objectContaining({
-            'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
+            'User-Agent': GEOCODING_USER_AGENT,
           }),
         }),
       );
@@ -613,7 +614,7 @@ describe('GeocodeService', () => {
             'accept-language': 'es',
           }),
           headers: {
-            'User-Agent': 'Auguria/1.0 (contact@auguria.com)',
+            'User-Agent': GEOCODING_USER_AGENT,
           },
         }),
       );
@@ -672,6 +673,108 @@ describe('GeocodeService', () => {
       // Should call with 4 decimal places
       expect(cacheService.getPlaceDetails).toHaveBeenCalledWith(
         '-34.6037,-58.3817',
+      );
+    });
+  });
+
+  describe('outgoing geocoding identification', () => {
+    const EMAIL_REGEX = /[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi;
+
+    const sentUserAgents = (): string[] =>
+      httpService.get.mock.calls.map(([, config]) => {
+        // El servicio siempre manda headers planos; AxiosHeaders normaliza el nombre,
+        // así que un rename a 'user-agent' no rompe estos tests por el motivo equivocado
+        const headers = config?.headers as Record<string, string> | undefined;
+        const userAgent = AxiosHeaders.from(headers).get('User-Agent');
+        return typeof userAgent === 'string' ? userAgent : '';
+      });
+
+    const emailsInSentHeaders = (): string[] =>
+      httpService.get.mock.calls.flatMap(
+        ([, config]) =>
+          JSON.stringify(config?.headers ?? {}).match(EMAIL_REGEX) ?? [],
+      );
+
+    it('should send the User-Agent contact mailbox on Photon and on the Nominatim fallback', async () => {
+      cacheService.getSearchResults.mockResolvedValue(null);
+      cacheService.getTimezone.mockResolvedValue('UTC');
+
+      const mockNominatimResponse: AxiosResponse = {
+        data: [mockNominatimResult],
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+
+      httpService.get
+        .mockReturnValueOnce(throwError(() => new Error('Photon timeout')))
+        .mockReturnValue(of(mockNominatimResponse));
+
+      await service.searchPlaces('Buenos Aires');
+
+      const userAgents = sentUserAgents();
+      expect(userAgents).toHaveLength(2); // Photon + fallback a Nominatim
+      userAgents.forEach((userAgent) =>
+        expect(userAgent).toBe(GEOCODING_USER_AGENT),
+      );
+    });
+
+    it('should send the User-Agent contact mailbox on Nominatim reverse geocoding', async () => {
+      cacheService.getPlaceDetails.mockResolvedValue(null);
+      cacheService.getTimezone.mockResolvedValue('UTC');
+
+      const mockResponse: AxiosResponse = {
+        data: mockNominatimResult,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+
+      httpService.get.mockReturnValue(of(mockResponse));
+
+      await service.getPlaceDetails(-34.6037, -58.3816);
+
+      expect(sentUserAgents()).toEqual([GEOCODING_USER_AGENT]);
+    });
+
+    it('should not leak any mailbox outside auguriatarot.com in outgoing headers', async () => {
+      cacheService.getSearchResults.mockResolvedValue(null);
+      cacheService.getPlaceDetails.mockResolvedValue(null);
+      cacheService.getTimezone.mockResolvedValue('UTC');
+
+      const mockSearchResponse: AxiosResponse = {
+        data: [mockNominatimResult],
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+      const mockReverseResponse: AxiosResponse = {
+        data: mockNominatimResult,
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {} as InternalAxiosRequestConfig,
+      };
+
+      httpService.get
+        .mockReturnValueOnce(throwError(() => new Error('Photon timeout')))
+        .mockReturnValueOnce(of(mockSearchResponse))
+        .mockReturnValue(of(mockReverseResponse));
+
+      // Los 3 destinos salientes: Photon, fallback de Nominatim y reverse de Nominatim
+      await service.searchPlaces('Buenos Aires');
+      await service.getPlaceDetails(-34.6037, -58.3816);
+
+      expect(httpService.get).toHaveBeenCalledTimes(3);
+
+      const emails = emailsInSentHeaders();
+      expect(emails.length).toBeGreaterThan(0);
+      emails.forEach((email) =>
+        // Nominatim avisa a este buzón antes de bloquear: si el dominio no existe, el aviso rebota
+        expect(email.endsWith('@auguriatarot.com')).toBe(true),
       );
     });
   });

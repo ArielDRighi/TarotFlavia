@@ -51,7 +51,7 @@ export class SystemConfig {
   description: string | null;
 
   @ApiProperty({
-    example: 'admin@auguria.com',
+    example: 'admin@example.com',
     description: 'Email del administrador que realizó el último cambio',
     required: false,
   })

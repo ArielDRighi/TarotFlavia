@@ -1,3 +1,6 @@
+// Constants
+export * from './constants/contact.constants';
+
 // Enums
 export * from './enums/user-role.enum';
 

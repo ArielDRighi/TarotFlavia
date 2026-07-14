@@ -18,7 +18,7 @@ describe('SystemConfig Entity', () => {
       config.key = 'birth_chart';
       config.value = '{"anonymous":0,"free":3,"premium":5}';
       config.description = 'Límites de carta astral';
-      config.updatedBy = 'admin@auguria.com';
+      config.updatedBy = 'admin@example.com';
       config.createdAt = new Date('2026-02-06T12:00:00Z');
       config.updatedAt = new Date('2026-02-06T12:00:00Z');
 
@@ -27,7 +27,7 @@ describe('SystemConfig Entity', () => {
       expect(config.key).toBe('birth_chart');
       expect(config.value).toBe('{"anonymous":0,"free":3,"premium":5}');
       expect(config.description).toBe('Límites de carta astral');
-      expect(config.updatedBy).toBe('admin@auguria.com');
+      expect(config.updatedBy).toBe('admin@example.com');
       expect(config.createdAt).toEqual(new Date('2026-02-06T12:00:00Z'));
       expect(config.updatedAt).toEqual(new Date('2026-02-06T12:00:00Z'));
     });
