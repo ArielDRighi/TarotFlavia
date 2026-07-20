@@ -322,7 +322,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | ---------- | ------------------------------------------------------------------------------ | ----------- | ---------- | ---------- |
 | T-PROD-001 | Migrar Mercado Pago a producción (credenciales, webhook, env) | Ops/Config | 🔴 Crítica | 1 pt |
 | T-PROD-002 | Fix header móvil: logo en el flujo flex (sin overlap con auth) | Frontend | 🟠 Alta | 1 pt |
-| T-PROD-003 | Sincronizar cartas HQ en el entorno deployado (migración + assets) | Ops | 🟠 Alta | 1 pt |
+| T-PROD-003 | ✅ Sincronizar cartas HQ en el entorno deployado (migración + assets) | Ops | 🟠 Alta | 1 pt |
 | T-PROD-004 | ✅ Email del dominio: buzón humano en Porkbun + envío transaccional por Resend (SMTP) | Ops/Infra | 🟠 Alta | 1 pt |
 | T-PROD-005 | Dorso final de las cartas (imagen WebP en lugar del patrón CSS) | Frontend | 🟡 Media | 1.5 pts |
 | T-PROD-006 | Mezcla de cartas server-side (backend: shuffle autoritativo con crypto) | Backend | 🔴 Crítica | 3 pts |
@@ -419,9 +419,9 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 
 ---
 
-### T-PROD-003: Sincronizar Cartas HQ en el Entorno Deployado
+### T-PROD-003: Sincronizar Cartas HQ en el Entorno Deployado — ✅ COMPLETADA
 
-**Estado:** 🔄 Parte de código ✅ COMPLETADA (PR) — pasos de Ops pendientes de ejecución en Railway
+**Estado:** ✅ COMPLETADA (2026-07-14) — código y pasos de Ops ejecutados en Railway
 **Prioridad:** 🟠 Alta
 **Estimación:** 1 punto
 **Dependencias:** acceso a la DB y al pipeline de deploy del entorno
