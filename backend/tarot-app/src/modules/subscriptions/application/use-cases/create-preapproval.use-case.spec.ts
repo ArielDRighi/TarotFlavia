@@ -14,6 +14,7 @@ import {
   SubscriptionStatus,
 } from '../../../users/entities/user.entity';
 import { USER_REPOSITORY } from '../../../users/domain/interfaces/repository.tokens';
+import { PREAPPROVAL_PLAN } from '../constants/preapproval-plan.constants';
 
 describe('CreatePreapprovalUseCase', () => {
   let useCase: CreatePreapprovalUseCase;
@@ -133,7 +134,7 @@ describe('CreatePreapprovalUseCase', () => {
         autoRecurring: {
           frequency: 1,
           frequencyType: 'months',
-          transactionAmount: 2999,
+          transactionAmount: PREAPPROVAL_PLAN.TRANSACTION_AMOUNT,
           currencyId: 'ARS',
         },
         payerEmail: 'user99@example.com',
@@ -309,7 +310,7 @@ describe('CreatePreapprovalUseCase', () => {
           autoRecurring: expect.objectContaining({
             frequency: 1,
             frequencyType: 'months',
-            transactionAmount: 2999,
+            transactionAmount: PREAPPROVAL_PLAN.TRANSACTION_AMOUNT,
             currencyId: 'ARS',
           }),
         }),
