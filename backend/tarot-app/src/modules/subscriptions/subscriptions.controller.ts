@@ -20,6 +20,7 @@ import {
 } from './subscriptions.service';
 import { SetFavoriteTarotistaDto } from './dto/set-favorite-tarotista.dto';
 import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
+import { PurchaseWhitelistGuard } from '../../common/guards/purchase-whitelist.guard';
 import { UserTarotistaSubscription } from '../tarotistas/entities/user-tarotista-subscription.entity';
 import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
 import { CancelSubscriptionUseCase } from './application/use-cases/cancel-subscription.use-case';
@@ -117,6 +118,7 @@ export class SubscriptionsController {
   }
 
   @Post('create-preapproval')
+  @UseGuards(PurchaseWhitelistGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Crear suscripción premium en Mercado Pago',

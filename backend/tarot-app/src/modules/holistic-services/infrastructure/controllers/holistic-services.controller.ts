@@ -19,6 +19,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { PurchaseWhitelistGuard } from '../../../../common/guards/purchase-whitelist.guard';
 import { HolisticServicesOrchestratorService } from '../../application/orchestrators/holistic-services-orchestrator.service';
 import { PurchaseResponseDto } from '../../application/dto/purchase-response.dto';
 import { CreatePurchaseDto } from '../../application/dto/purchase.dto';
@@ -33,6 +34,7 @@ export class HolisticServicesController {
   ) {}
 
   @Post('purchases')
+  @UseGuards(PurchaseWhitelistGuard)
   @ApiOperation({ summary: 'Crear una nueva compra de servicio holístico' })
   @ApiResponse({
     status: 201,
