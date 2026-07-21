@@ -125,14 +125,14 @@ describe('DailyCardLimitReached', () => {
       expect(mockPush).toHaveBeenCalledWith('/tarot');
     });
 
-    test('should navigate to /planes when "Mejorar a Premium" button is clicked', async () => {
+    test('should navigate to /premium when "Mejorar a Premium" button is clicked', async () => {
       const user = userEvent.setup();
       render(<DailyCardLimitReached />);
 
       const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
       await user.click(upgradeButton);
 
-      expect(mockPush).toHaveBeenCalledWith('/planes');
+      expect(mockPush).toHaveBeenCalledWith('/premium');
     });
   });
 });

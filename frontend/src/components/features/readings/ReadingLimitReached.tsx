@@ -6,6 +6,7 @@ import { Calendar, History, Crown, Sparkles } from 'lucide-react';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { ROUTES } from '@/lib/constants/routes';
 import {
   Card,
   CardContent,
@@ -45,7 +46,7 @@ export function ReadingLimitReached() {
   };
 
   const handleUpgradePremium = () => {
-    router.push('/planes');
+    router.push(ROUTES.PREMIUM);
   };
 
   return (

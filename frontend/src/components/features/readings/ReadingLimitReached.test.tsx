@@ -86,14 +86,14 @@ describe('ReadingLimitReached', () => {
     expect(dailyCardButton).toBeInTheDocument();
   });
 
-  it('should navigate to /planes when upgrade button is clicked', async () => {
+  it('should navigate to /premium when upgrade button is clicked', async () => {
     const user = userEvent.setup();
     render(<ReadingLimitReached />);
 
     const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
     await user.click(upgradeButton);
 
-    expect(mockPush).toHaveBeenCalledWith('/planes');
+    expect(mockPush).toHaveBeenCalledWith('/premium');
   });
 
   it('should navigate to /historial when history button is clicked', async () => {
