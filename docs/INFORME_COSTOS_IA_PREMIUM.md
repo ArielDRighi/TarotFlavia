@@ -4,6 +4,8 @@
 > 🎯 **Objetivo:** Cuantificar el costo real en tokens de IA que genera un usuario Premium, para dimensionar el precio de la suscripción ($7.000 ARS/mes).
 > 🔎 **Metodología:** todo lo marcado **[código]** está verificado en el repo (`path:línea`). Los tamaños de tokens son **estimaciones [est.]** derivadas de los `max_tokens` configurados y la longitud de los prompts (español ≈ 3,5–4 caracteres/token). Precios: búsqueda web, julio 2026.
 
+> ✏️ **Corrección (2026-07-20, aclarado por el Delta):** las features que **realmente** consumen IA por-usuario son solo **tarot (tirada) + carta del día + carta astral**. La **numerología** tiene interpretación IA en el código pero **está bloqueada en el producto** → no genera costo. **"Regeneración de interpretaciones"** y **"Oráculo"** **NO existen como features**: son constantes muertas en el enum `UsageFeature` (`usage-limits.constants.ts`) que ensucian cualquier análisis del código. Este informe ya refleja la corrección.
+
 ---
 
 ## 1. Resumen ejecutivo
@@ -36,7 +38,7 @@
 | Tarot (interpretación) | DeepSeek | `interpretations.service.ts:223` |
 | Tarot (carta del día) | DeepSeek | `interpretations.service.ts:451` |
 | Carta astral / natal | DeepSeek | `chart-ai-synthesis.service.ts:87` |
-| Numerología | DeepSeek | `numerology.service.ts:153` |
+| Numerología | ~~DeepSeek~~ **bloqueada (sin IA)** | código presente pero deshabilitado en el producto |
 | Horóscopo occidental | Groq | `horoscope-generation.service.ts:103` |
 | Horóscopo chino | Groq | `chinese-horoscope.service.ts:161` |
 | Péndulo | **Ninguno (sin IA)** | `pendulum-interpretation.service.ts:30-39` |
@@ -57,10 +59,13 @@
 | Tirada de tarot (3 cartas) | deepseek-v4-flash | 3000 | ~1.500 | ~900 |
 | Carta del día (1 carta) | deepseek-v4-flash | ~700 | ~550 | ~450 |
 | Carta astral | deepseek-v4-flash | 1500 | ~1.300 | ~1.000 |
-| Numerología | deepseek-v4-flash | 1500 | ~800 | ~1.000 |
-| Regeneración de interpretación | deepseek-v4-flash | 3000 | ~1.500 | ~900 |
 | Horóscopo occidental (x signo) | llama-3.3-70b | 1000 | ~600 | ~700 |
 | Horóscopo chino (x animal) | llama-3.3-70b | 1500 | ~700 | ~1.200 |
+
+**NO consumen IA (o no existen):**
+- **Numerología:** interpretación IA bloqueada en el producto → $0. *(El código de IA sigue presente en `src/modules/numerology/` — conviene limpiarlo o confirmar el bloqueo.)*
+- **Péndulo:** usa textos pre-cargados → $0.
+- **Regeneración de interpretaciones / Oráculo:** **no son features reales**; solo existen como constantes muertas en `usage-limits.constants.ts`.
 
 ---
 
@@ -68,15 +73,14 @@
 
 | Feature | Límite Premium | ¿IA? | Fuente |
 |---|---|---|---|
-| Carta del día | 1/día (+1 regeneración) | Sí | `usage-limits.constants.ts:33` |
+| Carta del día | 1/día | Sí | `usage-limits.constants.ts:33` |
 | Tirada de tarot | 3/día | Sí | `usage-limits.constants.ts:34` |
-| Regeneración | **Ilimitada** | Sí | `usage-limits.constants.ts:35` |
-| Péndulo | 3/día | No | `usage-limits.constants.ts:37` |
 | Carta astral | **Ilimitada** | Sí | `usage-limits.constants.ts:38` |
-| Numerología | 1 vez / de por vida (cacheada) | Sí | `numerology.service.ts:117-119` |
+| Péndulo | 3/día | No | `usage-limits.constants.ts:37` |
+| Numerología | — | **No (bloqueada)** | interpretación IA deshabilitada en producto |
 | Cuota mensual IA global | Ilimitada (-1) | — | `plans.seeder.ts:78` |
 
-> ⚠️ `ORACLE_QUERY` tiene límite definido pero **no está cableado a ningún endpoint** → hoy no genera costo [assumption].
+> ⚠️ `INTERPRETATION_REGENERATION` y `ORACLE_QUERY` figuran en el enum `UsageFeature` con límites, pero **no corresponden a features reales** (no hay endpoint que los use). Son código muerto → **recomendación: eliminarlos** para que dejen de aparecer en los análisis.
 
 ---
 
@@ -112,35 +116,36 @@ Si migraran a DeepSeek v4: occidental ≈ **$0,05–0,10/mes**, chino ≈ despre
 | Tirada de tarot (3 cartas) | ~$0,00046 |
 | Carta del día | ~$0,00020 |
 | Carta astral | ~$0,00046 |
-| Numerología (1 vez de por vida) | ~$0,00039 |
-| Horóscopos / Péndulo | $0 |
+| Horóscopos / Péndulo / Numerología | $0 |
 
 **Cada llamada a DeepSeek ≈ $0,0005 (medio milésimo de dólar).**
 
 ### Costo diario de un usuario Premium
 
+Solo 3 features consumen IA: **carta del día (1/día), tirada de tarot (3/día) y carta astral (ilimitada).**
+
 | Escenario | Actividad | Costo/día |
 |---|---|---|
-| Típico | 1 carta día + 1 tirada + 0-1 regen | ~$0,0010 |
-| Máximo de límites diarios | 1 carta día + 1 regen + 3 tiradas | ~$0,0020 |
-| Heavy (abusa de ilimitados) | + 10 cartas astrales + 20 regeneraciones | ~$0,017 |
+| Típico | 1 carta día + 1 tirada | ~$0,0007 |
+| Máximo de límites diarios | 1 carta día + 3 tiradas | ~$0,0016 |
+| Heavy (abusa de carta astral ilimitada) | + 10 cartas astrales | ~$0,006 |
 
 ### Costo mensual de un usuario Premium
 
 | Escenario | Costo/mes USD | % de $7.000 ARS (~$4,74) |
 |---|---|---|
-| Típico | ~$0,03 | ~0,6% |
-| Uso alto | ~$0,06 | ~1,3% |
-| Heavy / abuso | ~$0,50 | ~11% |
+| Típico | ~$0,02 | ~0,4% |
+| Uso alto | ~$0,05 | ~1,0% |
+| Heavy / abuso (carta astral) | ~$0,18 | ~3,8% |
 
 ---
 
 ## 8. Conclusiones para el pricing
 
-1. **El costo de IA es despreciable frente al precio.** Un Premium típico cuesta ~$0,03–0,06 USD/mes; incluso un abusador queda en ~$0,50/mes.
-2. **Por qué es tan barato:** DeepSeek v4 es muy económico, los horóscopos (lo más voluminoso) corren gratis en Groq, el péndulo y todo el plan Free no tocan IA, y numerología se cachea 1 vez de por vida.
+1. **El costo de IA es despreciable frente al precio.** Un Premium típico cuesta ~$0,02–0,05 USD/mes; incluso un abusador de la carta astral queda en ~$0,18/mes (~3,8% del ingreso).
+2. **Por qué es tan barato:** DeepSeek v4 es muy económico, los horóscopos (lo más voluminoso) corren gratis en Groq, y el péndulo, la numerología y todo el plan Free no tocan IA. Solo 3 features generan costo.
 3. **Salvaguarda ya implementada:** tope global de DeepSeek de **$20 USD/mes** [código] `ai-provider-cost.service.ts:185` (`DEEPSEEK_MAX_MONTHLY_COST_USD`), con aviso por email al 80%/100%. A $0,0005/llamada, cubre **~40.000 interpretaciones/mes** en toda la plataforma.
-4. **Único riesgo teórico:** las features **ilimitadas** (carta astral, regeneración). Por el precio unitario ínfimo + el cap de $20, el riesgo es bajo. Si escala la base, conviene ponerles un límite diario suave y monitorear el cap.
+4. **Único punto a vigilar:** la **carta astral es ilimitada**. Por el precio unitario ínfimo + el cap de $20 el riesgo es bajo, pero si escala la base conviene ponerle un límite diario suave y monitorear el cap.
 
 ---
 
