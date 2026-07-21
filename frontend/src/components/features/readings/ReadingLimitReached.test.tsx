@@ -143,4 +143,37 @@ describe('ReadingLimitReached', () => {
     expect(historyButton).toBeInTheDocument();
     expect(dailyCardButton).toBeInTheDocument();
   });
+
+  describe('usuario premium (agotó sus tiradas del día)', () => {
+    beforeEach(() => {
+      mockUseUserCapabilities.mockReturnValue({
+        data: {
+          plan: 'premium',
+          tarotReadings: { used: 3, limit: 3 },
+        },
+        isLoading: false,
+      });
+    });
+
+    it('NO ofrece "Hazte Premium" a quien ya es premium', () => {
+      render(<ReadingLimitReached />);
+
+      expect(screen.queryByRole('button', { name: /Mejorar a Premium/i })).not.toBeInTheDocument();
+      expect(screen.queryByText('Actualiza a Premium')).not.toBeInTheDocument();
+      expect(screen.queryByText(/actualiza a PREMIUM para/i)).not.toBeInTheDocument();
+    });
+
+    it('muestra que el límite se reinicia mañana', () => {
+      render(<ReadingLimitReached />);
+
+      expect(screen.getByText(/se reinician mañana/i)).toBeInTheDocument();
+    });
+
+    it('mantiene las acciones de historial y carta del día', () => {
+      render(<ReadingLimitReached />);
+
+      expect(screen.getByRole('button', { name: /Ver historial/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Carta del día/i })).toBeInTheDocument();
+    });
+  });
 });
