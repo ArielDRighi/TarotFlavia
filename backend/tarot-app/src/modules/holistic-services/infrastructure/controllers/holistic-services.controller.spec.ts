@@ -5,6 +5,7 @@ import { HolisticServicesOrchestratorService } from '../../application/orchestra
 import { PurchaseResponseDto } from '../../application/dto/purchase-response.dto';
 import { CreatePurchaseDto } from '../../application/dto/purchase.dto';
 import { PurchaseStatus } from '../../domain/enums/purchase-status.enum';
+import { PurchaseWhitelistGuard } from '../../../../common/guards/purchase-whitelist.guard';
 
 describe('HolisticServicesController', () => {
   let controller: HolisticServicesController;
@@ -53,7 +54,12 @@ describe('HolisticServicesController', () => {
           useValue: mockOrchestrator,
         },
       ],
-    }).compile();
+    })
+      // El PurchaseWhitelistGuard necesita ConfigService (no está en este módulo de test);
+      // su comportamiento se cubre en purchase-whitelist.guard.spec.ts. Acá se anula.
+      .overrideGuard(PurchaseWhitelistGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<HolisticServicesController>(
       HolisticServicesController,

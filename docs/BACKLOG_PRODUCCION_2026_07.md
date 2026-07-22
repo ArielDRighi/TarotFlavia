@@ -1495,8 +1495,9 @@ indexación — y es también la evidencia que mira AdSense en T-PROD-009.
 
 ---
 
-### T-PROD-019: El CTA de "Límite Alcanzado" Manda a un 404 y Ofrece Premium a Usuarios Premium
+### T-PROD-019: El CTA de "Límite Alcanzado" Manda a un 404 y Ofrece Premium a Usuarios Premium — ✅ COMPLETADA
 
+**Estado:** ✅ COMPLETADA (2026-07-21)
 **Prioridad:** 🟠 Alta
 **Estimación:** 0.5 punto
 **Dependencias:** ninguna
@@ -1524,20 +1525,20 @@ Dos bugs en los componentes de "límite alcanzado" del flujo de tarot/carta del 
 #### ✅ Tareas específicas
 
 - [x] `/planes` → `ROUTES.PREMIUM` en ambos componentes (hecho en `develop`).
-- [ ] En `ReadingLimitReached`, agregar `const isPremium = capabilities?.plan === 'premium'` y ramificar
+- [x] En `ReadingLimitReached`, agregado `const isPremium = capabilities?.plan === 'premium'` y ramificado
       (espejando `DailyCardLimitReached`):
-  - **Premium:** título/descripción tipo *"Alcanzaste tus N tiradas de hoy — se reinician mañana"*, **sin** el
-    bloque "Actualiza a Premium" ni el botón de upgrade. Mantener las acciones de historial/carta del día.
+  - **Premium:** descripción *"Se reinician mañana"* + recordatorio *"Tu límite se reinicia mañana"*, **sin** el
+    bloque "Actualiza a Premium" ni el botón de upgrade. Se mantienen las acciones de historial/carta del día.
   - **Free:** el comportamiento actual (con el CTA a `/premium`).
-- [ ] Actualizar/añadir tests: caso premium (no aparece el botón de upgrade ni el bloque de beneficios) y caso
-      free (sí aparece y navega a `/premium`).
+- [x] Tests: bloque `usuario premium` (no aparece el botón de upgrade ni el bloque de beneficios; sí el mensaje
+      de reinicio) + los free existentes (navegan a `/premium`). 15/15 pasan.
 
 #### 🎯 Criterios de Aceptación
 
-- [ ] Un usuario **free** que agota su tirada ve el CTA y "Hazte Premium" lo lleva a `/premium` (no 404).
-- [ ] Un usuario **premium** que agota sus 3 tiradas ve un mensaje de "se reinicia mañana" **sin** ofertas de
+- [x] Un usuario **free** que agota su tirada ve el CTA y "Hazte Premium" lo lleva a `/premium` (no 404).
+- [x] Un usuario **premium** que agota sus 3 tiradas ve un mensaje de "se reinicia mañana" **sin** ofertas de
       upgrade.
-- [ ] Ciclo de calidad frontend completo pasa.
+- [x] Ciclo de calidad frontend completo pasa (15 tests, lint, type-check, build, validate-architecture).
 
 #### 📌 Fuera de alcance
 
