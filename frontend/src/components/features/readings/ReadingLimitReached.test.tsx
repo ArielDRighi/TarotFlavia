@@ -176,4 +176,16 @@ describe('ReadingLimitReached', () => {
       expect(screen.getByRole('button', { name: /Carta del día/i })).toBeInTheDocument();
     });
   });
+
+  describe('estado de carga (capabilities aún no resueltas)', () => {
+    it('renderiza sin romper y cae al comportamiento free por defecto', () => {
+      mockUseUserCapabilities.mockReturnValue({ data: undefined, isLoading: true });
+
+      render(<ReadingLimitReached />);
+
+      // No crashea y muestra el título; sin plan definido se trata como free (fail-safe)
+      expect(screen.getByText('Límite de tiradas alcanzado')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Mejorar a Premium/i })).toBeInTheDocument();
+    });
+  });
 });

@@ -84,12 +84,12 @@ export function ReadingLimitReached() {
           /* PREMIUM: recordatorio de reinicio, sin oferta de upgrade */
           <div className="bg-primary/5 rounded-lg p-4 text-center">
             <div className="mb-2 flex items-center justify-center gap-2">
-              <Sparkles className="text-primary h-5 w-5" />
+              <Calendar className="text-primary h-5 w-5" />
               <p className="font-semibold">Tu límite se reinicia mañana</p>
             </div>
             <p className="text-text-muted text-sm">
-              Ya usaste tus {tarotLimit} tiradas de hoy. Mientras tanto, podés revisar tu historial
-              o consultar tu carta del día.
+              Ya usaste tus {tarotLimit} {tarotLimit === 1 ? 'tirada' : 'tiradas'} de hoy. Mientras
+              tanto, podés revisar tu historial o consultar tu carta del día.
             </p>
           </div>
         ) : (
