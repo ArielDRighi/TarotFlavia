@@ -338,6 +338,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-016 | **Alertas de costo al admin sin plantilla**: si el gasto de los proveedores se dispara, nadie se entera | Backend | 🟠 Alta | 1 pt |
 | T-PROD-017 | ✅ Geocoding: el `User-Agent` que enviamos a Nominatim declara un email inexistente (riesgo de bloqueo silencioso) | Backend | 🟠 Alta | 0.5 pt |
 | T-PROD-018 | ✅ Sin `robots.txt` ni `sitemap.xml`, staging indexable y la imagen social (`og-image.png`) no existe | Frontend | 🔴 Crítica | 2 pts |
+| T-PROD-019 | El límite alcanzado manda a `/planes` (404) y el de tiradas ofrece "Hazte Premium" a usuarios que ya son premium | Frontend | 🟠 Alta | 0.5 pt |
 
 ---
 
@@ -1491,6 +1492,58 @@ Twitter cards) pero le faltan las **tres piezas que Google realmente consume**, 
 
 Dar de alta el dominio final en **Google Search Console** y enviar el `sitemap.xml`. Es lo que acelera la
 indexación — y es también la evidencia que mira AdSense en T-PROD-009.
+
+---
+
+### T-PROD-019: El CTA de "Límite Alcanzado" Manda a un 404 y Ofrece Premium a Usuarios Premium — ✅ COMPLETADA
+
+**Estado:** ✅ COMPLETADA (2026-07-21)
+**Prioridad:** 🟠 Alta
+**Estimación:** 0.5 punto
+**Dependencias:** ninguna
+**Origen:** hallazgo del Delta probando el flujo con cuenta free y premium
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### 📋 Problema
+
+Dos bugs en los componentes de "límite alcanzado" del flujo de tarot/carta del día:
+
+1. **404 al querer hacerse Premium.** El CTA "Hazte Premium" de
+   [DailyCardLimitReached.tsx](../frontend/src/components/features/daily-reading/DailyCardLimitReached.tsx) y
+   [ReadingLimitReached.tsx](../frontend/src/components/features/readings/ReadingLimitReached.tsx) hacía
+   `router.push('/planes')` — una ruta que **no existe** → 404 "Camino no encontrado". El destino correcto es
+   `/premium` (`ROUTES.PREMIUM`).
+   > ⚠️ **Ya corregido en `develop`** (commit `d1cf6ffa`), pero fue commiteado **directo a develop por error**
+   > (los fixes de código van por rama + PR). Queda registrado acá para trazabilidad.
+
+2. **`ReadingLimitReached` no diferencia premium.** A diferencia de `DailyCardLimitReached` (que sí detecta
+   `capabilities.plan === 'premium'` y muestra *"tu límite se reinicia mañana"* sin CTA de upgrade),
+   `ReadingLimitReached` siempre muestra el bloque "Actualiza a Premium" y el botón "Hazte Premium". Un usuario
+   **premium** que agota sus **3 tiradas/día** ve el mensaje *"actualiza a PREMIUM para 3 tiradas diarias"* —
+   siendo que ya las tiene. Confuso e incorrecto.
+
+#### ✅ Tareas específicas
+
+- [x] `/planes` → `ROUTES.PREMIUM` en ambos componentes (hecho en `develop`).
+- [x] En `ReadingLimitReached`, agregado `const isPremium = capabilities?.plan === 'premium'` y ramificado
+      (espejando `DailyCardLimitReached`):
+  - **Premium:** descripción *"Se reinician mañana"* + recordatorio *"Tu límite se reinicia mañana"*, **sin** el
+    bloque "Actualiza a Premium" ni el botón de upgrade. Se mantienen las acciones de historial/carta del día.
+  - **Free:** el comportamiento actual (con el CTA a `/premium`).
+- [x] Tests: bloque `usuario premium` (no aparece el botón de upgrade ni el bloque de beneficios; sí el mensaje
+      de reinicio) + los free existentes (navegan a `/premium`). 15/15 pasan.
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Un usuario **free** que agota su tirada ve el CTA y "Hazte Premium" lo lleva a `/premium` (no 404).
+- [x] Un usuario **premium** que agota sus 3 tiradas ve un mensaje de "se reinicia mañana" **sin** ofertas de
+      upgrade.
+- [x] Ciclo de calidad frontend completo pasa (15 tests, lint, type-check, build, validate-architecture).
+
+#### 📌 Fuera de alcance
+
+La colocación de contenido/CTAs en premium más allá del mensaje de reinicio (p. ej. sugerir otras features) —
+si se quiere, va en una tarea de producto aparte.
 
 ---
 

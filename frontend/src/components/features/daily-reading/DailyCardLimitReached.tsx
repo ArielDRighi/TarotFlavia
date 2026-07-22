@@ -55,7 +55,7 @@ export function DailyCardLimitReached() {
   };
 
   const handleUpgradePremium = () => {
-    router.push('/planes');
+    router.push(ROUTES.PREMIUM);
   };
 
   return (

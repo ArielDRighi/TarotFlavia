@@ -6,6 +6,7 @@ import { Calendar, History, Crown, Sparkles } from 'lucide-react';
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
+import { ROUTES } from '@/lib/constants/routes';
 import {
   Card,
   CardContent,
@@ -36,6 +37,9 @@ export function ReadingLimitReached() {
   const tarotCount = capabilities?.tarotReadings.used ?? 0;
   const tarotLimit = capabilities?.tarotReadings.limit ?? 1;
 
+  // PREMIUM: no upgrade CTA — el usuario ya tiene el plan, solo espera el reinicio diario.
+  const isPremium = capabilities?.plan === 'premium';
+
   const handleViewHistory = () => {
     router.push('/historial');
   };
@@ -45,7 +49,7 @@ export function ReadingLimitReached() {
   };
 
   const handleUpgradePremium = () => {
-    router.push('/planes');
+    router.push(ROUTES.PREMIUM);
   };
 
   return (
@@ -60,82 +64,110 @@ export function ReadingLimitReached() {
           <span className="font-semibold">
             {tarotCount} de {tarotLimit} {tarotLimit === 1 ? 'tirada' : 'tiradas'}
           </span>{' '}
-          de tarot hoy. Puedes crear una nueva tirada mañana, o{' '}
-          <span className="text-primary font-semibold">
-            actualiza a PREMIUM para 3 tiradas diarias
-          </span>
-          .
+          de tarot hoy.{' '}
+          {isPremium ? (
+            'Se reinician mañana.'
+          ) : (
+            <>
+              Puedes crear una nueva tirada mañana, o{' '}
+              <span className="text-primary font-semibold">
+                actualiza a PREMIUM para 3 tiradas diarias
+              </span>
+              .
+            </>
+          )}
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Premium Benefits CTA */}
-        <div className="border-secondary/40 bg-secondary/10 rounded-lg border p-4">
-          <div className="mb-3 flex items-center gap-2">
-            <Crown className="text-secondary h-5 w-5" />
-            <p className="text-lg font-semibold">Actualiza a Premium</p>
+        {isPremium ? (
+          /* PREMIUM: recordatorio de reinicio, sin oferta de upgrade */
+          <div className="bg-primary/5 rounded-lg p-4 text-center">
+            <div className="mb-2 flex items-center justify-center gap-2">
+              <Calendar className="text-primary h-5 w-5" />
+              <p className="font-semibold">Tu límite se reinicia mañana</p>
+            </div>
+            <p className="text-text-muted text-sm">
+              Ya usaste tus {tarotLimit} {tarotLimit === 1 ? 'tirada' : 'tiradas'} de hoy. Mientras
+              tanto, podés revisar tu historial o consultar tu carta del día.
+            </p>
           </div>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-start gap-2">
-              <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <strong>3 tiradas completas por día</strong> (vs 1 tirada gratis)
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <strong>Todas las tiradas disponibles</strong> (1, 3, 5 cartas y Cruz Céltica)
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <strong>Interpretaciones personalizadas y profundas</strong> en todas tus lecturas
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <strong>Preguntas personalizadas</strong> para lecturas más precisas
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <strong>Carta del día con interpretación completa todos los días</strong>
-              </span>
-            </li>
-          </ul>
-        </div>
+        ) : (
+          <>
+            {/* Premium Benefits CTA */}
+            <div className="border-secondary/40 bg-secondary/10 rounded-lg border p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <Crown className="text-secondary h-5 w-5" />
+                <p className="text-lg font-semibold">Actualiza a Premium</p>
+              </div>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    <strong>3 tiradas completas por día</strong> (vs 1 tirada gratis)
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    <strong>Todas las tiradas disponibles</strong> (1, 3, 5 cartas y Cruz Céltica)
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    <strong>Interpretaciones personalizadas y profundas</strong> en todas tus
+                    lecturas
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    <strong>Preguntas personalizadas</strong> para lecturas más precisas
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Sparkles className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    <strong>Carta del día con interpretación completa todos los días</strong>
+                  </span>
+                </li>
+              </ul>
+            </div>
 
-        {/* Quick Actions */}
-        <div className="bg-primary/5 rounded-lg p-4 text-center text-sm">
-          <p className="mb-2 font-medium">Mientras tanto, puedes:</p>
-          <ul className="space-y-1 text-left">
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span> Ver todas tus lecturas pasadas en el historial
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span> Obtener tu carta del día (si aún no la
-              recibiste)
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span> Volver mañana para una nueva lectura gratuita
-            </li>
-          </ul>
-        </div>
+            {/* Quick Actions */}
+            <div className="bg-primary/5 rounded-lg p-4 text-center text-sm">
+              <p className="mb-2 font-medium">Mientras tanto, puedes:</p>
+              <ul className="space-y-1 text-left">
+                <li className="flex items-center gap-2">
+                  <span className="text-primary">✓</span> Ver todas tus lecturas pasadas en el
+                  historial
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-primary">✓</span> Obtener tu carta del día (si aún no la
+                  recibiste)
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-primary">✓</span> Volver mañana para una nueva lectura
+                  gratuita
+                </li>
+              </ul>
+            </div>
+          </>
+        )}
       </CardContent>
 
       <CardFooter className="flex flex-col gap-3">
-        <Button
-          onClick={handleUpgradePremium}
-          className="focus-visible:ring-secondary/50 w-full"
-          size="lg"
-        >
-          <Crown className="h-4 w-4" />
-          {CTA_PREMIUM.LIMIT_REACHED}
-        </Button>
+        {!isPremium && (
+          <Button
+            onClick={handleUpgradePremium}
+            className="focus-visible:ring-secondary/50 w-full"
+            size="lg"
+          >
+            <Crown className="h-4 w-4" />
+            {CTA_PREMIUM.LIMIT_REACHED}
+          </Button>
+        )}
         <div className="flex w-full flex-col gap-2 sm:flex-row">
           <Button
             onClick={handleViewHistory}

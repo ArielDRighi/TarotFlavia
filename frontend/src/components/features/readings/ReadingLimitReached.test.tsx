@@ -86,14 +86,14 @@ describe('ReadingLimitReached', () => {
     expect(dailyCardButton).toBeInTheDocument();
   });
 
-  it('should navigate to /planes when upgrade button is clicked', async () => {
+  it('should navigate to /premium when upgrade button is clicked', async () => {
     const user = userEvent.setup();
     render(<ReadingLimitReached />);
 
     const upgradeButton = screen.getByRole('button', { name: /Mejorar a Premium/i });
     await user.click(upgradeButton);
 
-    expect(mockPush).toHaveBeenCalledWith('/planes');
+    expect(mockPush).toHaveBeenCalledWith('/premium');
   });
 
   it('should navigate to /historial when history button is clicked', async () => {
@@ -142,5 +142,50 @@ describe('ReadingLimitReached', () => {
     // Vitest + jsdom don't process Tailwind classes, but we can check component props
     expect(historyButton).toBeInTheDocument();
     expect(dailyCardButton).toBeInTheDocument();
+  });
+
+  describe('usuario premium (agotó sus tiradas del día)', () => {
+    beforeEach(() => {
+      mockUseUserCapabilities.mockReturnValue({
+        data: {
+          plan: 'premium',
+          tarotReadings: { used: 3, limit: 3 },
+        },
+        isLoading: false,
+      });
+    });
+
+    it('NO ofrece "Hazte Premium" a quien ya es premium', () => {
+      render(<ReadingLimitReached />);
+
+      expect(screen.queryByRole('button', { name: /Mejorar a Premium/i })).not.toBeInTheDocument();
+      expect(screen.queryByText('Actualiza a Premium')).not.toBeInTheDocument();
+      expect(screen.queryByText(/actualiza a PREMIUM para/i)).not.toBeInTheDocument();
+    });
+
+    it('muestra que el límite se reinicia mañana', () => {
+      render(<ReadingLimitReached />);
+
+      expect(screen.getByText(/se reinician mañana/i)).toBeInTheDocument();
+    });
+
+    it('mantiene las acciones de historial y carta del día', () => {
+      render(<ReadingLimitReached />);
+
+      expect(screen.getByRole('button', { name: /Ver historial/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Carta del día/i })).toBeInTheDocument();
+    });
+  });
+
+  describe('estado de carga (capabilities aún no resueltas)', () => {
+    it('renderiza sin romper y cae al comportamiento free por defecto', () => {
+      mockUseUserCapabilities.mockReturnValue({ data: undefined, isLoading: true });
+
+      render(<ReadingLimitReached />);
+
+      // No crashea y muestra el título; sin plan definido se trata como free (fail-safe)
+      expect(screen.getByText('Límite de tiradas alcanzado')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Mejorar a Premium/i })).toBeInTheDocument();
+    });
   });
 });
