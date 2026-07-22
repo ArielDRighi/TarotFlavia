@@ -13,6 +13,7 @@ import {
   UserTarotistaSubscription,
 } from '../tarotistas/entities/user-tarotista-subscription.entity';
 import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
+import { PurchaseWhitelistGuard } from '../../common/guards/purchase-whitelist.guard';
 import { CancelSubscriptionUseCase } from './application/use-cases/cancel-subscription.use-case';
 import { CheckSubscriptionStatusUseCase } from './application/use-cases/check-subscription-status.use-case';
 import {
@@ -58,7 +59,12 @@ describe('SubscriptionsController', () => {
           },
         },
       ],
-    }).compile();
+    })
+      // El PurchaseWhitelistGuard necesita ConfigService (no está en este módulo de test);
+      // su comportamiento se cubre en purchase-whitelist.guard.spec.ts. Acá se anula.
+      .overrideGuard(PurchaseWhitelistGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<SubscriptionsController>(SubscriptionsController);
     service = module.get<SubscriptionsService>(SubscriptionsService);
