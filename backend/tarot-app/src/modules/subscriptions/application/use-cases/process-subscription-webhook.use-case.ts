@@ -161,6 +161,7 @@ export class ProcessSubscriptionWebhookUseCase {
         oldPlan: PLAN_LABELS[previousPlan],
         newPlan: PLAN_LABELS[UserPlan.PREMIUM],
         changeDate: new Date().toLocaleDateString('es-AR', {
+          timeZone: 'America/Argentina/Buenos_Aires',
           day: '2-digit',
           month: 'long',
           year: 'numeric',

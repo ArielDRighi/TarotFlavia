@@ -230,4 +230,47 @@ describe('Email templates (render)', () => {
       },
     );
   });
+
+  describe('plan-change: contenido veraz del email de cambio de plan', () => {
+    it('usa la marca "Auguria", nunca "Tarot App"', async () => {
+      const mail = await render('plan-change', {
+        userName: 'Flavia',
+        oldPlan: 'Gratuito',
+        newPlan: 'Premium',
+        changeDate: '22 de julio de 2026',
+      });
+
+      expect(mail.html).toContain('Auguria');
+      expect(mail.html).not.toContain('Tarot App');
+    });
+
+    it('no promete beneficios que el plan Premium no ofrece', async () => {
+      const mail = await render('plan-change', {
+        userName: 'Flavia',
+        oldPlan: 'Gratuito',
+        newPlan: 'Premium',
+        changeDate: '22 de julio de 2026',
+      });
+
+      // Premium NO es ilimitado (1 carta/día + 3 tiradas/día) ni ofrece estas
+      // features inexistentes: eran texto genérico erróneo.
+      expect(mail.html).not.toContain('Lecturas ilimitadas');
+      expect(mail.html).not.toContain('Soporte prioritario');
+      expect(mail.html).not.toContain('Sin publicidad');
+      expect(mail.html).not.toContain('Historial completo');
+    });
+
+    it('lista los beneficios reales del plan Premium', async () => {
+      const mail = await render('plan-change', {
+        userName: 'Flavia',
+        oldPlan: 'Gratuito',
+        newPlan: 'Premium',
+        changeDate: '22 de julio de 2026',
+      });
+
+      expect(mail.html).toContain('3 tiradas de tarot diarias');
+      expect(mail.html).toContain('Preguntas personalizadas');
+      expect(mail.html).toContain('Tiradas avanzadas');
+    });
+  });
 });
