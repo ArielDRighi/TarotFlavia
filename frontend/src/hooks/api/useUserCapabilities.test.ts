@@ -4,8 +4,8 @@
  * Test suite for the user capabilities hook that fetches and manages
  * user capabilities from the backend capabilities endpoint.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useUserCapabilities, useInvalidateCapabilities } from './useUserCapabilities';
 import { apiClient } from '@/lib/api/axios-config';
@@ -272,6 +272,103 @@ describe('useUserCapabilities', () => {
 
       // Data should be immediately stale (staleTime: 0)
       expect(result.current.isStale).toBe(true);
+    });
+  });
+
+  // ==========================================================================
+  // Auto-refresh on daily reset (fixes stale "límite alcanzado" on a new day)
+  // ==========================================================================
+  describe('daily reset auto-refresh', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const limitReachedWithResetAt = (resetAt: string): UserCapabilities => ({
+      dailyCard: { used: 1, limit: 1, canUse: false, resetAt },
+      tarotReadings: { used: 1, limit: 1, canUse: false, resetAt },
+      pendulum: {
+        used: 0,
+        limit: 3,
+        canUse: true,
+        resetAt: null,
+        period: 'monthly',
+      },
+      canCreateDailyReading: false,
+      canCreateTarotReading: false,
+      canUseAI: false,
+      canUseCustomQuestions: false,
+      canUseAdvancedSpreads: false,
+      canUseFullDeck: false,
+      plan: 'free',
+      isAuthenticated: true,
+    });
+
+    it('should not schedule an extra refetch when resetAt is already in the past', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+
+      const pastReset = new Date(Date.now() - 60_000).toISOString();
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: limitReachedWithResetAt(pastReset),
+      });
+
+      const { result } = renderHook(() => useUserCapabilities(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      // A past resetAt must not trigger an immediate/looping invalidation:
+      // refetchOnMount/refetchOnWindowFocus already handle stale-on-mount.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5_000);
+      });
+
+      expect(apiClient.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should refetch when the scheduled reset time is reached', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+
+      const futureReset = new Date(Date.now() + 60_000).toISOString();
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: limitReachedWithResetAt(futureReset),
+      });
+
+      const { result } = renderHook(() => useUserCapabilities(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(apiClient.get).toHaveBeenCalledTimes(1);
+
+      // Cross the reset boundary → the scheduled timer invalidates and refetches.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(61_000);
+      });
+
+      await waitFor(() => expect(apiClient.get).toHaveBeenCalledTimes(2));
+    });
+
+    it('should NOT refetch before the reset time is reached', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+
+      const futureReset = new Date(Date.now() + 60 * 60_000).toISOString();
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: limitReachedWithResetAt(futureReset),
+      });
+
+      const { result } = renderHook(() => useUserCapabilities(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      // Advance only 5 minutes: still well before the 1-hour reset.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5 * 60_000);
+      });
+
+      expect(apiClient.get).toHaveBeenCalledTimes(1);
     });
   });
 
