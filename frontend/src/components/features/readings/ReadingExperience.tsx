@@ -28,6 +28,7 @@ import { Spinner } from '@/components/ui/spinner';
 import FreeReadingUpgradeBanner from './FreeReadingUpgradeBanner';
 import UpgradeModal from './UpgradeModal';
 import DailyLimitReachedModal from './DailyLimitReachedModal';
+import { ReadingLimitReached } from './ReadingLimitReached';
 import { cn } from '@/lib/utils';
 import type {
   ReadingDetail,
@@ -522,6 +523,19 @@ export function ReadingExperience({
             onRetry={() => router.push(ROUTES.TAROT)}
           />
         </div>
+      </div>
+    );
+  }
+
+  // Gate: si el límite diario está alcanzado, no permitir (re)elegir cartas.
+  // Cubre la navegación "atrás/adelante" del navegador y el ingreso por URL directa
+  // a la pantalla de lectura con el límite agotado (el backend también rechaza al
+  // crear, pero el wizard no debe siquiera mostrar la grilla de cartas). Solo aplica
+  // al estado 'selecting': la vista del informe ('result') nunca se bloquea.
+  if (state === 'selecting' && capabilities && !capabilities.canCreateTarotReading) {
+    return (
+      <div className="bg-bg-main flex min-h-screen items-center justify-center p-4 md:p-8">
+        <ReadingLimitReached />
       </div>
     );
   }

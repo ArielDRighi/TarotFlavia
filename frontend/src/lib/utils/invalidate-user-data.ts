@@ -30,7 +30,14 @@ import { userQueryKeys } from '@/hooks/api/useUser';
  */
 export async function invalidateUserData(queryClient: QueryClient): Promise<void> {
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: capabilitiesQueryKeys.capabilities }),
-    queryClient.invalidateQueries({ queryKey: userQueryKeys.profile }),
+    // refetchType: 'all' also refetches INACTIVE queries. After creating a reading,
+    // the SpreadSelector that owns the capabilities query is unmounted, so a plain
+    // invalidate marks it stale but never refetches it — leaving stale data that let
+    // the user re-select cards after navigating back. 'all' forces the refresh.
+    queryClient.invalidateQueries({
+      queryKey: capabilitiesQueryKeys.capabilities,
+      refetchType: 'all',
+    }),
+    queryClient.invalidateQueries({ queryKey: userQueryKeys.profile, refetchType: 'all' }),
   ]);
 }
