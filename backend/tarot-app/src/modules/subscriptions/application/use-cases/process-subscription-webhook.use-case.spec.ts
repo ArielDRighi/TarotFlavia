@@ -7,6 +7,7 @@ import { MercadoPagoService } from '../../../payments/infrastructure/services/me
 import { USER_REPOSITORY } from '../../../users/domain/interfaces/repository.tokens';
 import { IUserRepository } from '../../../users/domain/interfaces/user-repository.interface';
 import { EmailService } from '../../../email/email.service';
+import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 import {
   User,
   UserPlan,
@@ -53,6 +54,12 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
     sendPlanChangeEmail: jest.fn(),
   };
 
+  const mockUsageLimitsService: jest.Mocked<
+    Pick<UsageLimitsService, 'resetTodayUsage'>
+  > = {
+    resetTodayUsage: jest.fn(),
+  };
+
   const makeUser = (overrides: Partial<User> = {}): User => {
     const user = new User();
     user.id = 42;
@@ -77,6 +84,7 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
         { provide: USER_REPOSITORY, useValue: mockUserRepo },
         { provide: MercadoPagoService, useValue: mockMercadoPagoService },
         { provide: EmailService, useValue: mockEmailService },
+        { provide: UsageLimitsService, useValue: mockUsageLimitsService },
       ],
     }).compile();
 
@@ -93,6 +101,7 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
     // Default: signature is valid
     mockMercadoPagoService.validateSignature.mockReturnValue(true);
     mockEmailService.sendPlanChangeEmail.mockResolvedValue(undefined);
+    mockUsageLimitsService.resetTodayUsage.mockResolvedValue(0);
   });
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -220,6 +229,81 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
 
       expect(result.processed).toBe(true);
       expect(mockUserRepo.save).toHaveBeenCalledTimes(1);
+    });
+
+    it('debe resetear el consumo del día al activar premium (evita que las tiradas free descuenten de la cuota premium)', async () => {
+      const user = makeUser({ id: 42, plan: UserPlan.FREE });
+
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-123',
+          status: 'authorized',
+          external_reference: 'sub_42',
+        }),
+      );
+      mockUserRepo.findById.mockResolvedValue(user);
+      mockUserRepo.save.mockResolvedValue({ ...user } as User);
+      mockUsageLimitsService.resetTodayUsage.mockResolvedValue(1);
+
+      await useCase.execute(
+        makePreapprovalPayload('preapproval-123'),
+        xSignature,
+        xRequestId,
+      );
+
+      expect(mockUsageLimitsService.resetTodayUsage).toHaveBeenCalledWith(42);
+    });
+
+    it('no debe fallar la activación si el reseteo del consumo del día falla', async () => {
+      const user = makeUser({ id: 42, plan: UserPlan.FREE });
+
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-123',
+          status: 'authorized',
+          external_reference: 'sub_42',
+        }),
+      );
+      mockUserRepo.findById.mockResolvedValue(user);
+      mockUserRepo.save.mockResolvedValue({ ...user } as User);
+      mockUsageLimitsService.resetTodayUsage.mockRejectedValue(
+        new Error('DB caída'),
+      );
+
+      const result = await useCase.execute(
+        makePreapprovalPayload('preapproval-123'),
+        xSignature,
+        xRequestId,
+      );
+
+      expect(result.processed).toBe(true);
+      expect(mockUserRepo.save).toHaveBeenCalledTimes(1);
+    });
+
+    it('no debe resetear el consumo del día en una notificación duplicada', async () => {
+      const user = makeUser({
+        id: 42,
+        plan: UserPlan.PREMIUM,
+        subscriptionStatus: SubscriptionStatus.ACTIVE,
+        mpPreapprovalId: 'preapproval-123',
+      });
+
+      mockMercadoPagoService.getPreapproval.mockResolvedValue(
+        buildPreapprovalResponse({
+          id: 'preapproval-123',
+          status: 'authorized',
+          external_reference: 'sub_42',
+        }),
+      );
+      mockUserRepo.findById.mockResolvedValue(user);
+
+      await useCase.execute(
+        makePreapprovalPayload('preapproval-123'),
+        xSignature,
+        xRequestId,
+      );
+
+      expect(mockUsageLimitsService.resetTodayUsage).not.toHaveBeenCalled();
     });
 
     it('no debe enviar el email de cambio de plan en una notificación duplicada', async () => {
