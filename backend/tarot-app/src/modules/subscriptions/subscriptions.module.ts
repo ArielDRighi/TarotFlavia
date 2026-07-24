@@ -8,6 +8,7 @@ import { Tarotista } from '../tarotistas/entities/tarotista.entity';
 import { UsersModule } from '../users/users.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { EmailModule } from '../email/email.module';
+import { UsageLimitsModule } from '../usage-limits/usage-limits.module';
 import { CreatePreapprovalUseCase } from './application/use-cases/create-preapproval.use-case';
 import { CancelSubscriptionUseCase } from './application/use-cases/cancel-subscription.use-case';
 import { CheckSubscriptionStatusUseCase } from './application/use-cases/check-subscription-status.use-case';
@@ -21,6 +22,7 @@ import { SUBSCRIPTION_WEBHOOK_USE_CASE } from '../payments/tokens/payment.tokens
     TypeOrmModule.forFeature([UserTarotistaSubscription, User, Tarotista]),
     UsersModule,
     EmailModule,
+    UsageLimitsModule,
     forwardRef(() => PaymentsModule),
   ],
   controllers: [SubscriptionsController],
