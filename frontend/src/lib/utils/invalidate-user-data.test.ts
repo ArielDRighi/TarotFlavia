@@ -18,19 +18,24 @@ describe('invalidateUserData', () => {
     } as unknown as QueryClient;
   });
 
-  it('should invalidate user capabilities query', async () => {
+  it('should invalidate user capabilities query and refetch inactive queries', async () => {
     await invalidateUserData(queryClient);
 
+    // refetchType: 'all' ensures the capabilities query refetches even when its
+    // owner component (e.g. SpreadSelector) is unmounted, so navigating back does
+    // not show stale "can create reading" data.
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: capabilitiesQueryKeys.capabilities,
+      refetchType: 'all',
     });
   });
 
-  it('should invalidate user profile query', async () => {
+  it('should invalidate user profile query and refetch inactive queries', async () => {
     await invalidateUserData(queryClient);
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: userQueryKeys.profile,
+      refetchType: 'all',
     });
   });
 
