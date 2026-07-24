@@ -34,19 +34,17 @@ interface ReadingResponse {
     position: string;
     isReversed: boolean;
   }>;
-  regenerationCount?: number;
 }
 
 /**
  * Premium User Edge Cases E2E Tests
  *
  * Tests edge cases específicos del journey de usuarios PREMIUM que no están
- * cubiertos por mvp-complete.e2e-spec.ts ni reading-regeneration.e2e-spec.ts
+ * cubiertos por mvp-complete.e2e-spec.ts
  *
  * Coverage:
  * - Premium readings limit verification (4 lecturas/día: 1 carta + 3 tiradas)
  * - Custom question edge cases (empty, very long, special chars)
- * - Regeneration workflow edge cases
  * - Premium downgrade scenarios
  * - Concurrent premium operations
  */
@@ -287,7 +285,7 @@ describe('Premium User Edge Cases E2E', () => {
     });
   });
 
-  describe('4. Premium Downgrade Scenarios', () => {
+  describe('3. Premium Downgrade Scenarios', () => {
     it('should preserve existing readings after downgrade to FREE', async () => {
       // Create 2 readings as premium
       const reading1 = await request(app.getHttpServer())
@@ -382,7 +380,7 @@ describe('Premium User Edge Cases E2E', () => {
   /**
    * 5. Multi-Tarotista Support (TASK-074)
    */
-  describe('5. Multi-Tarotista Support (TASK-074)', () => {
+  describe('4. Multi-Tarotista Support (TASK-074)', () => {
     it('should include tarotistaId in PREMIUM user readings', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/readings')
