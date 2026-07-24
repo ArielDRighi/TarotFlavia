@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Reveal } from '@/components/common/Reveal';
 import { PremiumHero } from './PremiumHero';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSubscriptionStatus } from '@/hooks/api/useSubscription';
-import { useInvalidateCapabilities } from '@/hooks/api/useUserCapabilities';
 import { useAuthStore } from '@/stores/authStore';
+import { invalidateUserData } from '@/lib/utils/invalidate-user-data';
 import { ROUTES } from '@/lib/constants/routes';
 import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
 
@@ -20,7 +21,9 @@ import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
 // ============================================================================
 
 const POLLING_INTERVAL_MS = 2000;
-const POLLING_TIMEOUT_MS = 30000;
+// MercadoPago webhooks routinely take more than 30s in production. Give the
+// happy path a wider window before falling back to the "en procesamiento" UI.
+const POLLING_TIMEOUT_MS = 90000;
 
 /**
  * Themed image for the success band (T-PREM-004). `PremiumHero` degrades to its
@@ -197,7 +200,7 @@ type ActivationState = 'loading' | 'success' | 'timeout' | 'pending' | 'failure'
 export function ActivationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const invalidateCapabilities = useInvalidateCapabilities();
+  const queryClient = useQueryClient();
   const { user, setUser } = useAuthStore();
 
   const status = parseCheckoutStatus(searchParams.get('status'));
@@ -214,8 +217,12 @@ export function ActivationPage() {
   // Track if we already handled the success (to avoid double-fire)
   const successHandled = useRef(false);
 
-  // Polling is active only while in 'loading' state for an 'authorized' checkout
-  const pollingActive = status === 'authorized' && activationState === 'loading';
+  // Keep polling in both 'loading' and 'timeout' states: if the MercadoPago
+  // webhook lands after the timeout fell back to the "en procesamiento" UI, the
+  // polling still detects it and recovers to the success state (invalidating the
+  // caches) instead of leaving the user with stale free capabilities.
+  const pollingActive =
+    status === 'authorized' && (activationState === 'loading' || activationState === 'timeout');
 
   // Subscription status polling — only enabled for authorized + loading flow
   const { data: subscriptionStatus } = useSubscriptionStatus({
@@ -236,6 +243,10 @@ export function ActivationPage() {
 
     const timer = setTimeout(() => {
       if (!successHandled.current) {
+        // Invalidate user data on the way into the timeout state so that, if the
+        // webhook landed between the last poll and now, any later navigation
+        // (or window focus) already reflects premium instead of stale free.
+        void invalidateUserData(queryClient);
         startTransition(() => {
           setActivationState('timeout');
         });
@@ -243,7 +254,7 @@ export function ActivationPage() {
     }, POLLING_TIMEOUT_MS);
 
     return () => clearTimeout(timer);
-  }, [status]);
+  }, [status, queryClient]);
 
   // Detect premium activation via polling
   useEffect(() => {
@@ -266,14 +277,16 @@ export function ActivationPage() {
       });
     }
 
-    // Invalidate capabilities to reflect new plan
-    invalidateCapabilities();
+    // Invalidate BOTH capabilities and profile (refetchType:'all' refetches even
+    // inactive queries) so every plan-gated surface reflects premium immediately,
+    // not just capabilities.
+    void invalidateUserData(queryClient);
 
     // Show success state immediately
     startTransition(() => {
       setActivationState('success');
     });
-  }, [subscriptionStatus?.plan, status, user, setUser, invalidateCapabilities]);
+  }, [subscriptionStatus?.plan, status, user, setUser, queryClient]);
 
   // Redirect after 3 seconds once success state is reached
   useEffect(() => {
