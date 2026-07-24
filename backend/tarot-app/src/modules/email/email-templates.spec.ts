@@ -254,7 +254,9 @@ describe('Email templates (render)', () => {
 
       // Premium NO es ilimitado (1 carta/día + 3 tiradas/día) ni ofrece estas
       // features inexistentes: eran texto genérico erróneo.
-      expect(mail.html).not.toContain('Lecturas ilimitadas');
+      // El núcleo del bug era prometer algo "ilimitado": lo bloqueamos por raíz
+      // para atajar futuras reintroducciones ("tiradas ilimitadas", etc.).
+      expect(mail.html).not.toMatch(/ilimitad/i);
       expect(mail.html).not.toContain('Soporte prioritario');
       expect(mail.html).not.toContain('Sin publicidad');
       expect(mail.html).not.toContain('Historial completo');
@@ -268,9 +270,11 @@ describe('Email templates (render)', () => {
         changeDate: '22 de julio de 2026',
       });
 
+      expect(mail.html).toContain('1 carta del día');
       expect(mail.html).toContain('3 tiradas de tarot diarias');
       expect(mail.html).toContain('Preguntas personalizadas');
       expect(mail.html).toContain('Tiradas avanzadas');
+      expect(mail.html).toContain('Comparte tus lecturas');
     });
   });
 });
