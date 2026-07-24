@@ -281,11 +281,16 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
     });
 
     it('no debe resetear el consumo del día en una notificación duplicada', async () => {
+      // Idempotencia estricta: mismo preapprovalId Y misma fecha de expiración,
+      // para garantizar que se ejercita el path de "notificación duplicada real"
+      // (no el de "actualizar campos de suscripción").
+      const nextPaymentDate = '2026-04-26T10:00:00.000Z';
       const user = makeUser({
         id: 42,
         plan: UserPlan.PREMIUM,
         subscriptionStatus: SubscriptionStatus.ACTIVE,
         mpPreapprovalId: 'preapproval-123',
+        planExpiresAt: new Date(nextPaymentDate),
       });
 
       mockMercadoPagoService.getPreapproval.mockResolvedValue(
@@ -293,6 +298,7 @@ describe('ProcessSubscriptionWebhookUseCase', () => {
           id: 'preapproval-123',
           status: 'authorized',
           external_reference: 'sub_42',
+          next_payment_date: nextPaymentDate,
         }),
       );
       mockUserRepo.findById.mockResolvedValue(user);

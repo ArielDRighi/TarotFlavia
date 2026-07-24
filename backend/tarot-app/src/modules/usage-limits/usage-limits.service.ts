@@ -196,6 +196,10 @@ export class UsageLimitsService {
    * para que el consumo acumulado bajo el plan anterior no se descuente de la
    * cuota del nuevo plan dentro de la misma ventana diaria.
    *
+   * NOTA: borra el consumo de TODAS las features del día (tarot, carta del día,
+   * péndulo, etc.), no solo tarot. Es intencional: al cambiar de plan el usuario
+   * "empieza limpio" el día con la cuota completa del plan nuevo en cada feature.
+   *
    * @returns Cantidad de registros eliminados.
    */
   async resetTodayUsage(userId: number): Promise<number> {
