@@ -22,9 +22,12 @@ vi.mock('@/hooks/utils/useToast', () => ({
 
 // Mock auth store
 const mockLogout = vi.fn();
+const mockCheckAuth = vi.fn().mockResolvedValue(undefined);
 vi.mock('@/stores/authStore', () => ({
-  useAuthStore: () => ({
-    logout: mockLogout,
+  // useUpdateProfile calls useAuthStore.getState().checkAuth() to refresh the
+  // store after a profile edit, so the mock exposes getState too.
+  useAuthStore: Object.assign(() => ({ logout: mockLogout }), {
+    getState: () => ({ checkAuth: mockCheckAuth }),
   }),
 }));
 
@@ -162,6 +165,19 @@ describe('useUser hooks', () => {
 
       expect(userApi.updateProfile).toHaveBeenCalledWith(updateData);
       expect(result.current.data).toEqual(mockUpdatedProfile);
+    });
+
+    it('should refresh the auth store (checkAuth) on success so authStore name/plan stay fresh', async () => {
+      vi.mocked(userApi.updateProfile).mockResolvedValue(mockUpdatedProfile);
+
+      const wrapper = createWrapper();
+      const { result } = renderHook(() => useUpdateProfile(), { wrapper });
+
+      result.current.mutate({ name: 'Updated User' });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(mockCheckAuth).toHaveBeenCalled();
     });
 
     it('should invalidate profile query on success', async () => {
