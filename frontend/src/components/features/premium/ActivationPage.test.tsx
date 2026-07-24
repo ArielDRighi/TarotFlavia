@@ -53,10 +53,10 @@ vi.mock('@/hooks/api/useSubscription', () => ({
     mockUseSubscriptionStatus(options),
 }));
 
-// Mock capabilities invalidation
-const mockInvalidateCapabilities = vi.fn();
-vi.mock('@/hooks/api/useUserCapabilities', () => ({
-  useInvalidateCapabilities: () => mockInvalidateCapabilities,
+// Mock user-data invalidation (capabilities + profile, refetchType:'all')
+const mockInvalidateUserData = vi.fn().mockResolvedValue(undefined);
+vi.mock('@/lib/utils/invalidate-user-data', () => ({
+  invalidateUserData: (...args: unknown[]) => mockInvalidateUserData(...args),
 }));
 
 // Mock auth store
@@ -301,7 +301,7 @@ describe('ActivationPage', () => {
       renderWithProviders(<ActivationPage />);
 
       await waitFor(() => {
-        expect(mockInvalidateCapabilities).toHaveBeenCalled();
+        expect(mockInvalidateUserData).toHaveBeenCalled();
       });
     });
 
@@ -363,7 +363,7 @@ describe('ActivationPage', () => {
       });
     });
 
-    it('should show timeout message after 30 seconds without premium activation', async () => {
+    it('should show timeout message after the polling window without premium activation', async () => {
       // Plan never becomes premium
       mockUseSubscriptionStatus.mockReturnValue({
         data: {
@@ -380,7 +380,7 @@ describe('ActivationPage', () => {
       expect(screen.getByTestId('activation-loading')).toBeInTheDocument();
 
       act(() => {
-        vi.advanceTimersByTime(30000);
+        vi.advanceTimersByTime(90000);
       });
 
       await waitFor(() => {
@@ -388,6 +388,32 @@ describe('ActivationPage', () => {
       });
 
       expect(screen.getByText(/estamos procesando tu pago/i)).toBeInTheDocument();
+    });
+
+    it('should invalidate user data when falling back to the timeout state', async () => {
+      mockUseSubscriptionStatus.mockReturnValue({
+        data: {
+          plan: 'free',
+          subscriptionStatus: null,
+          planExpiresAt: null,
+          mpPreapprovalId: null,
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<ActivationPage />);
+
+      act(() => {
+        vi.advanceTimersByTime(90000);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('activation-timeout')).toBeInTheDocument();
+      });
+
+      // If the webhook landed just after the last poll, the timeout invalidation
+      // ensures a later navigation/focus already reflects premium.
+      expect(mockInvalidateUserData).toHaveBeenCalled();
     });
 
     it('should show "Ir al inicio" button on timeout', async () => {
@@ -404,7 +430,7 @@ describe('ActivationPage', () => {
       renderWithProviders(<ActivationPage />);
 
       act(() => {
-        vi.advanceTimersByTime(30000);
+        vi.advanceTimersByTime(90000);
       });
 
       await waitFor(() => {

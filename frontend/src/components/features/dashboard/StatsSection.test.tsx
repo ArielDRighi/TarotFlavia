@@ -112,6 +112,33 @@ describe('StatsSection', () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it('should return null (not render 0/0) when capabilities are an anonymous payload', () => {
+    // Stale pre-auth response leaking into a premium session: plan 'anonymous'
+    // with used:0/limit:0 would render a bogus "0 / 0 - límite alcanzado".
+    mockUseUserCapabilities.mockReturnValue({
+      data: {
+        tarotReadings: { used: 0, limit: 0, canUse: false, resetAt: '2026-01-09T00:00:00Z' },
+        dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-01-09T00:00:00Z' },
+        canCreateDailyReading: true,
+        canCreateTarotReading: false,
+        canUseAI: false,
+        canUseCustomQuestions: false,
+        canUseAdvancedSpreads: false,
+        plan: 'anonymous',
+        isAuthenticated: false,
+      },
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    const { container } = render(<StatsSection />);
+
+    expect(container.firstChild).toBeNull();
+    expect(screen.queryByText('0 / 0')).not.toBeInTheDocument();
+    expect(screen.queryByText('Has alcanzado tu límite diario')).not.toBeInTheDocument();
+  });
+
   it('should display remaining readings', () => {
     mockUseUserCapabilities.mockReturnValue({
       data: {
