@@ -170,6 +170,20 @@ describe('useUserCapabilities', () => {
       expect(apiClient.get).toHaveBeenCalledTimes(1);
     });
 
+    it('forwards the AbortSignal to axios so an in-flight request can be cancelled', async () => {
+      vi.mocked(apiClient.get).mockResolvedValue({ data: mockAnonymousCapabilities });
+
+      const { result } = renderHook(() => useUserCapabilities(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      const config = vi.mocked(apiClient.get).mock.calls[0][1];
+      expect(config).toHaveProperty('signal');
+      expect(config?.signal).toBeInstanceOf(AbortSignal);
+    });
+
     it('should fetch free user capabilities', async () => {
       vi.mocked(apiClient.get).mockResolvedValue({ data: mockFreeCapabilities });
 
