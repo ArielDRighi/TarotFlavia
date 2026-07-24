@@ -106,8 +106,11 @@ export function useDailyReadingPublic() {
 
   return useMutation({
     mutationFn: createDailyReadingPublic,
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: dailyReadingQueryKeys.all });
+      // Refresh capabilities so the anonymous daily-card usage/limit updates in any
+      // widget without a manual refresh (previously relied on the component doing it).
+      await invalidateUserData(queryClient);
       // No toast for anonymous users - component handles UI feedback
     },
     onError: () => {
