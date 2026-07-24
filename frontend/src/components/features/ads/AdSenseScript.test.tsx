@@ -10,6 +10,13 @@ vi.mock('next/navigation', () => ({
   usePathname: () => mockUsePathname(),
 }));
 
+// useAdsEnabled → useUserPlanFeatures now reads capabilities as the primary plan
+// source. Mock it "not loaded" so the hook falls back to the authStore plan these
+// tests set (and no QueryClient wrapper is needed).
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => ({ data: undefined }),
+}));
+
 interface MockScriptProps {
   id?: string;
   src?: string;

@@ -109,21 +109,21 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
             <div>
               <p className="text-lg font-semibold">
                 Plan{' '}
-                {profile.plan === 'anonymous'
+                {effectivePlan === 'anonymous'
                   ? 'ANÓNIMO'
-                  : profile.plan === 'free'
+                  : effectivePlan === 'free'
                     ? 'GRATUITO'
                     : 'PREMIUM'}
               </p>
               <p className="text-muted-foreground text-sm">
-                {profile.plan === 'free'
+                {effectivePlan === 'free'
                   ? 'Plan gratuito con funcionalidades básicas'
-                  : profile.plan === 'premium'
+                  : effectivePlan === 'premium'
                     ? 'Plan premium con funcionalidades avanzadas'
                     : 'Plan anónimo con funcionalidades limitadas'}
               </p>
             </div>
-            <PlanBadge plan={profile.plan} />
+            <PlanBadge plan={effectivePlan} />
           </div>
         </CardContent>
       </Card>

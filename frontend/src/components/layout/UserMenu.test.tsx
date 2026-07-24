@@ -19,6 +19,16 @@ vi.mock('@/stores/authStore', () => ({
   useAuthStore: () => mockUseAuthStore(),
 }));
 
+// UserMenu now derives premium from useUserPlanFeatures (capabilities-backed).
+// Keep the existing tests driving premium via the mocked authStore user.plan by
+// having the mocked hook read the same source.
+vi.mock('@/hooks/utils/useUserPlanFeatures', () => ({
+  useUserPlanFeatures: () => {
+    const state = mockUseAuthStore() as { user?: { plan?: string } | null };
+    return { isPremium: state?.user?.plan === 'premium' };
+  },
+}));
+
 describe('UserMenu', () => {
   beforeEach(() => {
     vi.clearAllMocks();
