@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReadingExperience } from './ReadingExperience';
@@ -89,32 +89,30 @@ vi.mock('@/hooks/utils/useToast', () => ({
   toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
 
-// The key mock: the daily tarot reading limit is REACHED.
+// Mutable capabilities mock so each test can set limit-reached / loading state.
+const limitReachedCapabilities = {
+  dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-07-24T00:00:00Z' },
+  tarotReadings: { used: 1, limit: 1, canUse: false, resetAt: '2026-07-24T00:00:00Z' },
+  pendulum: {
+    used: 0,
+    limit: 3,
+    canUse: true,
+    resetAt: null,
+    period: 'monthly' as const,
+  },
+  canCreateDailyReading: false,
+  canCreateTarotReading: false,
+  canUseAI: false,
+  canUseCustomQuestions: false,
+  canUseAdvancedSpreads: false,
+  canUseFullDeck: false,
+  plan: 'free' as const,
+  isAuthenticated: true,
+};
+
+const mockUseUserCapabilities = vi.fn();
 vi.mock('@/hooks/api/useUserCapabilities', () => ({
-  useUserCapabilities: () => ({
-    data: {
-      dailyCard: { used: 1, limit: 1, canUse: false, resetAt: '2026-07-24T00:00:00Z' },
-      tarotReadings: { used: 1, limit: 1, canUse: false, resetAt: '2026-07-24T00:00:00Z' },
-      pendulum: {
-        used: 0,
-        limit: 3,
-        canUse: true,
-        resetAt: null,
-        period: 'monthly',
-      },
-      canCreateDailyReading: false,
-      canCreateTarotReading: false,
-      canUseAI: false,
-      canUseCustomQuestions: false,
-      canUseAdvancedSpreads: false,
-      canUseFullDeck: false,
-      plan: 'free',
-      isAuthenticated: true,
-    },
-    isLoading: false,
-    isError: false,
-    error: null,
-  }),
+  useUserCapabilities: () => mockUseUserCapabilities(),
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -144,6 +142,16 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('ReadingExperience - gate de límite en la selección de cartas', () => {
+  beforeEach(() => {
+    // Default: limit reached, capabilities already loaded.
+    mockUseUserCapabilities.mockReturnValue({
+      data: limitReachedCapabilities,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+  });
+
   it('NO muestra la grilla de cartas cuando el límite diario está alcanzado', () => {
     renderWithProviders(<ReadingExperience spreadId={2} questionId={33} customQuestion={null} />);
 
@@ -157,5 +165,23 @@ describe('ReadingExperience - gate de límite en la selección de cartas', () =>
 
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.getByText('Límite de tiradas alcanzado')).toBeInTheDocument();
+  });
+
+  it('muestra spinner (no la grilla) mientras capabilities está cargando, para evitar el flash', () => {
+    // Ingreso por URL directa: hasta que capabilities resuelve, no se debe
+    // mostrar la grilla (que se vería y desaparecería al aplicar el gate).
+    mockUseUserCapabilities.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+    });
+
+    renderWithProviders(<ReadingExperience spreadId={2} questionId={33} customQuestion={null} />);
+
+    expect(screen.getByText('Cargando...')).toBeInTheDocument();
+    expect(screen.queryByTestId('card-selection-grid')).not.toBeInTheDocument();
+    // Tampoco el gate todavía: aún no sabemos si el límite está alcanzado.
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });

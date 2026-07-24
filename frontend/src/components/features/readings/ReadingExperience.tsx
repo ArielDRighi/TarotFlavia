@@ -295,7 +295,7 @@ export function ReadingExperience({
   const { data: spreads, isLoading: isSpreadsLoading } = useMyAvailableSpreads();
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
   const { data: categories } = useCategories();
-  const { data: capabilities } = useUserCapabilities();
+  const { data: capabilities, isLoading: isCapabilitiesLoading } = useUserCapabilities();
   const { cardIndices } = useTarotDeck();
   const { mutateAsync: createReading } = useCreateReading();
   const { mutate: regenerateInterpretation, isPending: isRegenerating } =
@@ -505,8 +505,11 @@ export function ReadingExperience({
     return capabilities?.canCreateTarotReading ?? false;
   }, [user, capabilities]);
 
-  // Render loading/missing spread state
-  if (isSpreadsLoading || isQuestionsLoading) {
+  // Render loading/missing spread state.
+  // Wait for capabilities too: without it, a direct-URL entry with the limit
+  // exhausted would briefly flash the card grid (capabilities undefined → gate
+  // skipped) before ReadingLimitReached takes over once capabilities resolve.
+  if (isSpreadsLoading || isQuestionsLoading || isCapabilitiesLoading) {
     return (
       <div className="bg-bg-main flex min-h-screen items-center justify-center p-8">
         <Spinner size="lg" text="Cargando..." />
