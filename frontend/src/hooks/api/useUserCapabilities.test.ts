@@ -341,12 +341,38 @@ describe('useUserCapabilities', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(apiClient.get).toHaveBeenCalledTimes(1);
 
-      // Cross the reset boundary → the scheduled timer invalidates and refetches.
+      // Cross the reset boundary (+5s safety margin) → timer invalidates and refetches.
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(61_000);
+        await vi.advanceTimersByTimeAsync(66_000);
       });
 
       await waitFor(() => expect(apiClient.get).toHaveBeenCalledTimes(2));
+    });
+
+    it('should clear the scheduled timer on unmount (no refetch after unmount)', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+
+      const futureReset = new Date(Date.now() + 60_000).toISOString();
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: limitReachedWithResetAt(futureReset),
+      });
+
+      const { result, unmount } = renderHook(() => useUserCapabilities(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(apiClient.get).toHaveBeenCalledTimes(1);
+
+      // Unmount before the reset fires: the cleanup must clearTimeout so no
+      // refetch happens once the boundary passes.
+      unmount();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(66_000);
+      });
+
+      expect(apiClient.get).toHaveBeenCalledTimes(1);
     });
 
     it('should NOT refetch before the reset time is reached', async () => {

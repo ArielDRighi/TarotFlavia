@@ -89,6 +89,12 @@ export function useUserCapabilities(options?: { enabled?: boolean }) {
   // event (mount/focus/reconnect). If the tab stays open across midnight on the
   // "límite alcanzado" screen, the query never revalidates and shows yesterday's
   // stale state until a manual refresh. This timer closes that gap.
+  //
+  // We key off tarotReadings.resetAt as the daily clock: dailyCard shares the same
+  // midnight-UTC boundary, and invalidating refetches the whole response, so a
+  // single timer refreshes every daily feature. Using the daily reset (max ~24h)
+  // also stays well under the setTimeout overflow limit (~24.8 days), unlike the
+  // pendulum reset which can be monthly/lifetime.
   const resetAt = query.data?.tarotReadings?.resetAt;
   useEffect(() => {
     if (!resetAt) return;
@@ -100,11 +106,14 @@ export function useUserCapabilities(options?: { enabled?: boolean }) {
     // returns the next midnight UTC), so no immediate invalidation is needed.
     if (msUntilReset <= 0) return;
 
+    // +5s margin so the backend has safely crossed midnight UTC before we refetch,
+    // tolerating small client/server clock skew (firing early would refetch the
+    // same resetAt and, since the dependency wouldn't change, skip rescheduling).
     const timer = setTimeout(() => {
       void queryClient.invalidateQueries({
         queryKey: capabilitiesQueryKeys.capabilities,
       });
-    }, msUntilReset + 1000); // +1s margin so the backend has crossed midnight UTC
+    }, msUntilReset + 5000);
 
     return () => clearTimeout(timer);
   }, [resetAt, queryClient]);
