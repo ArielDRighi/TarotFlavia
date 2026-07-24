@@ -19,6 +19,7 @@ import { useCallback, useEffect } from 'react';
 import { apiClient } from '@/lib/api/axios-config';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { getSessionFingerprint } from '@/lib/utils/fingerprint';
+import { useAuthStore } from '@/stores/authStore';
 import type { UserCapabilities } from '@/types';
 
 // ============================================================================
@@ -26,7 +27,20 @@ import type { UserCapabilities } from '@/types';
 // ============================================================================
 
 export const capabilitiesQueryKeys = {
+  /**
+   * Invalidation prefix — matches every per-identity capabilities cache entry.
+   * Use this for `invalidateQueries` so both the anonymous and authenticated
+   * caches are refreshed regardless of who is logged in.
+   */
   capabilities: ['user', 'capabilities'] as const,
+  /**
+   * Actual query key, scoped by identity. The capabilities endpoint returns a
+   * DIFFERENT payload for an anonymous request (no token → `plan:'anonymous'`,
+   * `0/0`) vs an authenticated one. Sharing a single key let a stale anonymous
+   * response leak into a logged-in premium session (the "0/0" dashboard widget).
+   * Scoping by identity keeps those responses in separate cache entries.
+   */
+  byIdentity: (identity: string | number) => ['user', 'capabilities', identity] as const,
 } as const;
 
 // ============================================================================
@@ -67,13 +81,21 @@ export const capabilitiesQueryKeys = {
 export function useUserCapabilities(options?: { enabled?: boolean }) {
   const queryClient = useQueryClient();
 
+  // Scope the cache by identity so an anonymous response never leaks into an
+  // authenticated session (and vice versa). Falls back to 'anon' pre-login.
+  const userId = useAuthStore((state) => state.user?.id);
+  const identity = userId ?? 'anon';
+
   const query = useQuery<UserCapabilities>({
-    queryKey: capabilitiesQueryKeys.capabilities,
-    queryFn: async () => {
+    queryKey: capabilitiesQueryKeys.byIdentity(identity),
+    queryFn: async ({ signal }) => {
       // Get fingerprint for anonymous users to track usage
       const fingerprint = await getSessionFingerprint();
 
       const response = await apiClient.get<UserCapabilities>(API_ENDPOINTS.USERS.CAPABILITIES, {
+        // Forward React Query's AbortSignal so a logout/login `queryClient.clear()`
+        // cancels an in-flight request instead of letting it repopulate the cache.
+        signal,
         params: { fingerprint },
       });
       return response.data;

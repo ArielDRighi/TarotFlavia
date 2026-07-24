@@ -146,6 +146,18 @@ export const useAuthStore = create<AuthStore>()(
 
           const response = await apiClient.get<AuthUser>('/users/profile');
           get().setUser(response.data);
+
+          // Force a fresh, identity-scoped capabilities fetch on session restore.
+          // The capabilities cache is keyed by identity (see useUserCapabilities),
+          // so an anonymous `0/0` response persisted before auth must not gate the
+          // authenticated session. Literal key avoids an import cycle with the hook.
+          if (typeof window !== 'undefined') {
+            const queryClient = getGlobalQueryClient();
+            void queryClient.invalidateQueries({
+              queryKey: ['user', 'capabilities'],
+              refetchType: 'all',
+            });
+          }
         } catch {
           // Clear invalid tokens (SSR safety check)
           if (typeof window !== 'undefined') {
