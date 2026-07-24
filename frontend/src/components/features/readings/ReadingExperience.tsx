@@ -288,7 +288,7 @@ export function ReadingExperience({
 }: ReadingExperienceProps) {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { canUseAI } = useUserPlanFeatures();
+  const { canUseAI, isPremium } = useUserPlanFeatures();
 
   // API Hooks
   const { data: spreads, isLoading: isSpreadsLoading } = useMyAvailableSpreads();
@@ -322,8 +322,9 @@ export function ReadingExperience({
   }, [questionId, predefinedQuestions]);
 
   const cardsCount = spread?.cardCount ?? 0;
-  // More robust isPremium check - ensure user and plan exist
-  const isPremium = Boolean(user?.plan) && user?.plan?.toUpperCase() === 'PREMIUM';
+  // isPremium comes from useUserPlanFeatures, which derives the plan from
+  // capabilities (fresh) with an authStore fallback — so it reflects a webhook
+  // upgrade/expiry without a re-login instead of the stale persisted JWT plan.
 
   // Derive category name client-side (backend does not serialize categoryName in the response)
   const resolvedCategoryName =

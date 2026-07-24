@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/stores/authStore';
+import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
 /**
@@ -22,6 +23,10 @@ import { CTA_AUTH } from '@/lib/constants/cta-copy';
 export function UserMenu() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  // Derive premium from capabilities (fresh) via useUserPlanFeatures, not the
+  // persisted authStore plan, so the premium-only links appear right after an
+  // upgrade without a re-login.
+  const { isPremium } = useUserPlanFeatures();
 
   // Show login and register buttons when not authenticated
   if (!user) {
@@ -73,7 +78,7 @@ export function UserMenu() {
             Mis Lecturas
           </Link>
         </DropdownMenuItem>
-        {user.plan === 'premium' && (
+        {isPremium && (
           <DropdownMenuItem asChild>
             <Link href="/carta-astral/historial" className="flex items-center">
               <Star className="mr-2 size-4" />
