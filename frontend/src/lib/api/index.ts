@@ -12,7 +12,6 @@ export {
   getMyReadings,
   getReadingById,
   deleteReading,
-  regenerateInterpretation,
   shareReading,
   unshareReading,
   getTrashedReadings,
