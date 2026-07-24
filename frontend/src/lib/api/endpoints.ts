@@ -50,7 +50,6 @@ export const API_ENDPOINTS = {
     BY_ID: (id: number) => `/readings/${id}`,
     TRASH: '/readings/trash',
     RESTORE: (id: number) => `/readings/${id}/restore`,
-    REGENERATE: (id: number) => `/readings/${id}/regenerate`,
     SHARE: (id: number) => `/readings/${id}/share`,
     SHARE_TEXT: (id: number) => `/readings/${id}/share-text`,
   },

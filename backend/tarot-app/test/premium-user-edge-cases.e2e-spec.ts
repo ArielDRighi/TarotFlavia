@@ -34,19 +34,17 @@ interface ReadingResponse {
     position: string;
     isReversed: boolean;
   }>;
-  regenerationCount?: number;
 }
 
 /**
  * Premium User Edge Cases E2E Tests
  *
  * Tests edge cases específicos del journey de usuarios PREMIUM que no están
- * cubiertos por mvp-complete.e2e-spec.ts ni reading-regeneration.e2e-spec.ts
+ * cubiertos por mvp-complete.e2e-spec.ts
  *
  * Coverage:
  * - Premium readings limit verification (4 lecturas/día: 1 carta + 3 tiradas)
  * - Custom question edge cases (empty, very long, special chars)
- * - Regeneration workflow edge cases
  * - Premium downgrade scenarios
  * - Concurrent premium operations
  */
@@ -287,138 +285,7 @@ describe('Premium User Edge Cases E2E', () => {
     });
   });
 
-  describe('3. Regeneration Workflow Edge Cases', () => {
-    it('should track regeneration count correctly after multiple regenerations', async () => {
-      // Create reading WITHOUT interpretation to avoid AI provider rate limits
-      const createResponse = await request(app.getHttpServer())
-        .post('/api/v1/readings')
-        .set('Authorization', `Bearer ${premiumUserToken}`)
-        .send({
-          customQuestion: 'Test regeneration count',
-          deckId: deckId,
-          spreadId: spreadId,
-          useAI: false,
-        })
-        .expect(201);
-
-      const readingId = (createResponse.body as ReadingResponse).id;
-
-      // Regenerate 3 times (limit is 3 regenerations per reading)
-      // Note: Regeneration ALWAYS generates interpretation (business rule)
-      // Accept that AI may fail (fallback will be used), focus on testing regeneration count
-      for (let i = 1; i <= 3; i++) {
-        const regenResponse = await request(app.getHttpServer())
-          .post(`/api/v1/readings/${readingId}/regenerate`)
-          .set('Authorization', `Bearer ${premiumUserToken}`)
-          .send({
-            customQuestion: `Regenerated question ${i}`,
-          });
-
-        // Accept both success (201) and potential AI failures (still creates reading with fallback)
-        expect([200, 201]).toContain(regenResponse.status);
-
-        const body = regenResponse.body as ReadingResponse;
-        expect(body.regenerationCount).toBe(i);
-
-        // Minimal delay to avoid database/concurrency issues
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
-      // 4th regeneration should fail (limit exceeded OR rate limited)
-      const fourthRegen = await request(app.getHttpServer())
-        .post(`/api/v1/readings/${readingId}/regenerate`)
-        .set('Authorization', `Bearer ${premiumUserToken}`)
-        .send({
-          customQuestion: 'Fourth regeneration (should fail)',
-        });
-
-      // Should fail with either:
-      // - 403 (regeneration limit exceeded - business rule)
-      // - 429 (rate limit from AI provider - infrastructure limitation)
-      expect([403, 429]).toContain(fourthRegen.status);
-
-      // Verify appropriate error message based on status
-      if (fourthRegen.status === 403) {
-        expect(fourthRegen.body.message).toContain('regeneration limit');
-      } else if (fourthRegen.status === 429) {
-        // Rate limit from AI provider or circuit breaker
-        expect(fourthRegen.body.message).toBeDefined();
-      }
-    }, 30000); // Reasonable timeout: 3 regenerations + delays + buffer for AI calls/fallbacks
-
-    it('should preserve original reading data after failed regeneration', async () => {
-      // Create reading WITHOUT interpretation to avoid AI provider rate limits
-      const createResponse = await request(app.getHttpServer())
-        .post('/api/v1/readings')
-        .set('Authorization', `Bearer ${premiumUserToken}`)
-        .send({
-          customQuestion: 'Original question',
-          deckId: deckId,
-          spreadId: spreadId,
-          useAI: false,
-        })
-        .expect(201);
-
-      const readingId = (createResponse.body as ReadingResponse).id;
-
-      // Exhaust regeneration limit (3 regenerations allowed)
-      // Note: Regeneration ALWAYS generates interpretation (business rule)
-      for (let i = 0; i < 3; i++) {
-        const regenResponse = await request(app.getHttpServer())
-          .post(`/api/v1/readings/${readingId}/regenerate`)
-          .set('Authorization', `Bearer ${premiumUserToken}`)
-          .send({
-            customQuestion: `Regen ${i + 1}`,
-          });
-
-        // Accept both success and potential AI failures (fallback used)
-        expect([200, 201]).toContain(regenResponse.status);
-
-        // Delay to avoid database/concurrency issues and allow AI processing
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
-      // Attempt 4th regeneration - should fail due to limit exceeded OR rate limiting
-      const fourthRegen = await request(app.getHttpServer())
-        .post(`/api/v1/readings/${readingId}/regenerate`)
-        .set('Authorization', `Bearer ${premiumUserToken}`)
-        .send({
-          customQuestion: 'Fourth regeneration attempt',
-        });
-
-      // Should fail with either:
-      // - 403 (regeneration limit exceeded - business rule)
-      // - 429 (rate limit from AI provider - infrastructure limitation)
-      expect([403, 429]).toContain(fourthRegen.status);
-
-      // Verify appropriate error message
-      if (fourthRegen.status === 403) {
-        expect(fourthRegen.body.message).toContain('regeneration limit');
-      }
-
-      // Verify reading data is intact regardless of failure reason
-      const getResponse = await request(app.getHttpServer())
-        .get(`/api/v1/readings/${readingId}`)
-        .set('Authorization', `Bearer ${premiumUserToken}`)
-        .expect(200);
-
-      const body = getResponse.body as ReadingResponse;
-      expect(body.regenerationCount).toBe(3); // Still at 3, not 4
-      expect(body.id).toBe(readingId);
-      // Note: customQuestion will be from last successful regen, not necessarily "Original question"
-      expect(body.customQuestion).toBeTruthy();
-    }, 30000); // Reasonable timeout: 3 regenerations + delays + buffer for AI calls/fallbacks
-
-    // Reset usage limits after this test group
-    afterAll(async () => {
-      const ds = dbHelper.getDataSource();
-      await ds.query('DELETE FROM usage_limit WHERE user_id = $1', [
-        premiumUserId,
-      ]);
-    });
-  });
-
-  describe('4. Premium Downgrade Scenarios', () => {
+  describe('3. Premium Downgrade Scenarios', () => {
     it('should preserve existing readings after downgrade to FREE', async () => {
       // Create 2 readings as premium
       const reading1 = await request(app.getHttpServer())
@@ -513,7 +380,7 @@ describe('Premium User Edge Cases E2E', () => {
   /**
    * 5. Multi-Tarotista Support (TASK-074)
    */
-  describe('5. Multi-Tarotista Support (TASK-074)', () => {
+  describe('4. Multi-Tarotista Support (TASK-074)', () => {
     it('should include tarotistaId in PREMIUM user readings', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/readings')

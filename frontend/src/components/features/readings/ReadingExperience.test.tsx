@@ -242,7 +242,6 @@ const mockReadingDetail: ReadingDetail = {
 
 // Mocks for hooks
 const mockCreateReadingMutateAsync = vi.fn();
-const mockRegenerateInterpretation = vi.fn();
 const mockShareReading = vi.fn();
 
 vi.mock('@/hooks/api/useReadings', () => ({
@@ -261,10 +260,6 @@ vi.mock('@/hooks/api/useReadings', () => ({
   useCreateReading: () => ({
     mutate: vi.fn(),
     mutateAsync: mockCreateReadingMutateAsync,
-    isPending: false,
-  }),
-  useRegenerateInterpretation: () => ({
-    mutate: mockRegenerateInterpretation,
     isPending: false,
   }),
   useShareReading: () => ({
@@ -603,52 +598,11 @@ describe('ReadingExperience', () => {
         expect(screen.getByRole('button', { name: /Nueva Lectura/i })).toBeInTheDocument();
       });
     });
-
-    it('should show regenerate button for premium users', async () => {
-      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
-
-      const cards = screen.getAllByTestId('selectable-card');
-      fireEvent.click(cards[0]);
-      fireEvent.click(cards[1]);
-      fireEvent.click(cards[2]);
-
-      const revealButton = screen.getByRole('button', { name: /Revelar mi destino/i });
-      fireEvent.click(revealButton);
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Regenerar Interpretación/i })
-        ).toBeInTheDocument();
-      });
-    });
   });
 
   describe('Actions', () => {
     beforeEach(() => {
       mockCreateReadingMutateAsync.mockResolvedValue(mockReadingDetail);
-    });
-
-    it('should call regenerate mutation when regenerate button is clicked', async () => {
-      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
-
-      const cards = screen.getAllByTestId('selectable-card');
-      fireEvent.click(cards[0]);
-      fireEvent.click(cards[1]);
-      fireEvent.click(cards[2]);
-
-      const revealButton = screen.getByRole('button', { name: /Revelar mi destino/i });
-      fireEvent.click(revealButton);
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: /Regenerar Interpretación/i })
-        ).toBeInTheDocument();
-      });
-
-      const regenerateButton = screen.getByRole('button', { name: /Regenerar Interpretación/i });
-      fireEvent.click(regenerateButton);
-
-      expect(mockRegenerateInterpretation).toHaveBeenCalledWith(123);
     });
 
     it('should show share button and handle clipboard copy', async () => {

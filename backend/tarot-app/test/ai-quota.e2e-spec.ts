@@ -108,45 +108,9 @@ describe('AI Quota (E2E)', () => {
   });
 
   describe('AIQuotaGuard Integration', () => {
-    it('should block POST /readings/:id/regenerate for FREE user (sin IA: cuota 0)', async () => {
-      // T-FBK-006: Free NO consume IA. El guard bloquea la regeneración con IA
-      // (cuota 0) independientemente del uso previo.
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.update(testUserId, {
-        aiRequestsUsedMonth: 50,
-      });
-
-      return request(getServer())
-        .post('/api/v1/readings/999/regenerate')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(403)
-        .expect((res) => {
-          const body = res.body as { message: string };
-          expect(body.message).toContain('exclusivas de Premium');
-        });
-    });
-
     it('should block POST /daily-reading/regenerate for FREE user (sin IA)', async () => {
       return request(getServer())
         .post('/api/v1/daily-reading/regenerate')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(403)
-        .expect((res) => {
-          const body = res.body as { message: string };
-          expect(body.message).toContain('exclusivas de Premium');
-        });
-    });
-
-    it('should block FREE user even with zero AI usage (sin IA, no "cuota agotada")', async () => {
-      // T-FBK-006: a diferencia del modelo anterior (cuota 100), Free se bloquea
-      // aunque no haya usado IA: su cuota es 0 por diseño (IA exclusiva de Premium).
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.update(testUserId, {
-        aiRequestsUsedMonth: 0,
-      });
-
-      return request(getServer())
-        .post('/api/v1/readings/999/regenerate')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(403)
         .expect((res) => {

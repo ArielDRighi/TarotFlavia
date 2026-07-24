@@ -2,14 +2,13 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { RefreshCw, Share2, Plus, Sparkles } from 'lucide-react';
+import { Share2, Plus, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import {
   useMyAvailableSpreads,
   usePredefinedQuestions,
   useCreateReading,
-  useRegenerateInterpretation,
   useCategories,
 } from '@/hooks/api/useReadings';
 import { getShareText } from '@/lib/api/readings-api';
@@ -298,8 +297,6 @@ export function ReadingExperience({
   const { data: capabilities, isLoading: isCapabilitiesLoading } = useUserCapabilities();
   const { cardIndices } = useTarotDeck();
   const { mutateAsync: createReading } = useCreateReading();
-  const { mutate: regenerateInterpretation, isPending: isRegenerating } =
-    useRegenerateInterpretation();
   const [isSharing, setIsSharing] = useState(false);
 
   // State
@@ -455,11 +452,6 @@ export function ReadingExperience({
   ]);
 
   // Action handlers
-  const handleRegenerate = useCallback(() => {
-    if (!readingResult) return;
-    regenerateInterpretation(readingResult.id);
-  }, [readingResult, regenerateInterpretation]);
-
   const handleShare = useCallback(async () => {
     if (!readingResult) return;
 
@@ -678,13 +670,6 @@ export function ReadingExperience({
 
           {/* Action Buttons */}
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            {isPremium && (
-              <Button variant="outline" onClick={handleRegenerate} disabled={isRegenerating}>
-                <RefreshCw className={cn('mr-2 h-4 w-4', isRegenerating && 'animate-spin')} />
-                Regenerar Interpretación
-              </Button>
-            )}
-
             <Button variant="outline" onClick={handleShare} disabled={isSharing}>
               <Share2 className="mr-2 h-4 w-4" />
               Compartir

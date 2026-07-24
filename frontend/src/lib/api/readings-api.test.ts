@@ -15,7 +15,6 @@ import {
   getMyReadings,
   getReadingById,
   deleteReading,
-  regenerateInterpretation,
   shareReading,
   unshareReading,
   getTrashedReadings,
@@ -477,55 +476,6 @@ describe('readings-api', () => {
       vi.mocked(apiClient.delete).mockRejectedValueOnce(new Error('Network error'));
 
       await expect(deleteReading(123)).rejects.toThrow('Error al eliminar lectura');
-    });
-  });
-
-  // ==========================================================================
-  // regenerateInterpretation
-  // ==========================================================================
-  describe('regenerateInterpretation', () => {
-    // Mock API response (raw backend format)
-    const mockApiResponse = {
-      id: 123,
-      userId: 1,
-      spreadId: 1,
-      customQuestion: '¿Qué me depara el futuro?',
-      cards: [],
-      cardPositions: [],
-      interpretation: 'Nueva interpretación regenerada...',
-      createdAt: '2025-11-20T10:30:00.000Z',
-    };
-
-    // Expected transformed result
-    const expectedReading: ReadingDetail = {
-      id: 123,
-      userId: 1,
-      spreadId: 1,
-      tarotistaId: undefined,
-      question: '¿Qué me depara el futuro?',
-      cards: [],
-      interpretation: 'Nueva interpretación regenerada...',
-      freeInterpretations: null,
-      createdAt: '2025-11-20T10:30:00.000Z',
-      deletedAt: undefined,
-      shareToken: undefined,
-    };
-
-    it('should regenerate reading interpretation', async () => {
-      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockApiResponse });
-
-      const result = await regenerateInterpretation(123);
-
-      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.READINGS.REGENERATE(123));
-      expect(result).toEqual(expectedReading);
-    });
-
-    it('should throw error with clear message on failure', async () => {
-      vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Network error'));
-
-      await expect(regenerateInterpretation(123)).rejects.toThrow(
-        'Error al regenerar interpretación'
-      );
     });
   });
 

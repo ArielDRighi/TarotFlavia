@@ -262,23 +262,6 @@ export async function deleteReading(id: number): Promise<void> {
 // Interpretation Regeneration
 // ============================================================================
 
-/**
- * Regenerate the AI interpretation for a reading
- * @param readingId - Reading ID to regenerate
- * @returns Promise<ReadingDetail> Updated reading with new interpretation
- * @throws Error with clear message on failure
- */
-export async function regenerateInterpretation(readingId: number): Promise<ReadingDetail> {
-  try {
-    const response = await apiClient.post<ApiReadingResponse>(
-      API_ENDPOINTS.READINGS.REGENERATE(readingId)
-    );
-    return transformReadingResponse(response.data);
-  } catch {
-    throw new Error('Error al regenerar interpretación');
-  }
-}
-
 // ============================================================================
 // Sharing
 // ============================================================================
