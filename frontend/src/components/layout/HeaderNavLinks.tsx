@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { ROUTES } from '@/lib/constants/routes';
 import type { AuthUser } from '@/types';
 
@@ -51,6 +52,9 @@ const AUTH_NAV_LINKS: NavLink[] = [
 
 export function HeaderNavLinks({ variant, user, onNavigate }: HeaderNavLinksProps) {
   const pathname = usePathname();
+  // Premium gating from capabilities (fresh), not the persisted authStore plan,
+  // so premium/non-premium nav links update right after an upgrade/expiry.
+  const { isPremium } = useUserPlanFeatures();
 
   const isMobile = variant === 'mobile';
 
@@ -64,7 +68,7 @@ export function HeaderNavLinks({ variant, user, onNavigate }: HeaderNavLinksProp
     ...PUBLIC_NAV_LINKS,
     ...AUTH_NAV_LINKS.filter((link) => {
       if (link.requiresAuth && !user) return false;
-      if (link.requiresNonPremium && user?.plan === 'premium') return false;
+      if (link.requiresNonPremium && isPremium) return false;
       return true;
     }),
   ];
