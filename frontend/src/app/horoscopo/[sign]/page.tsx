@@ -8,7 +8,7 @@ import {
   HoroscopeSkeleton,
   ZodiacSignSelector,
 } from '@/components/features/horoscope';
-import { useTodayHoroscope } from '@/hooks/api/useHoroscope';
+import { useLocalHoroscope } from '@/hooks/api/useHoroscope';
 import { useAuthStore } from '@/stores/authStore';
 import { getZodiacSignFromDate, ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
 import { ROUTES } from '@/lib/constants/routes';
@@ -20,7 +20,7 @@ export default function HoroscopeSignPage() {
   const { user } = useAuthStore();
 
   const sign = params.sign as ZodiacSign;
-  const { data, isLoading, error } = useTodayHoroscope(sign);
+  const { data, isLoading, error } = useLocalHoroscope(sign);
 
   if (!ZODIAC_SIGNS_INFO[sign]) {
     return (

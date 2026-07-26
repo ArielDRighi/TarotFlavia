@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WidgetEmptyState } from '@/components/features/dashboard';
-import { useMySignHoroscope } from '@/hooks/api/useHoroscope';
+import { useMyLocalSignHoroscope } from '@/hooks/api/useHoroscope';
 import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
 import { ROUTES } from '@/lib/constants/routes';
 
@@ -33,7 +33,13 @@ import { ZodiacSymbol } from './ZodiacSymbol';
  * ```
  */
 export function HoroscopeWidget() {
-  const { data: horoscope, isLoading, errorState, refetch, isRefetching } = useMySignHoroscope();
+  const {
+    data: horoscope,
+    isLoading,
+    errorState,
+    refetch,
+    isRefetching,
+  } = useMyLocalSignHoroscope();
 
   // Loading state
   if (isLoading) {

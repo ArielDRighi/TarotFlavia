@@ -25,7 +25,7 @@ const mockUseTodayHoroscope = vi.fn();
 const mockUseAuthStore = vi.fn();
 
 vi.mock('@/hooks/api/useHoroscope', () => ({
-  useTodayHoroscope: (sign: ZodiacSign | null) => mockUseTodayHoroscope(sign),
+  useLocalHoroscope: (sign: ZodiacSign | null) => mockUseTodayHoroscope(sign),
 }));
 
 vi.mock('@/stores/authStore', () => ({

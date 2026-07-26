@@ -265,3 +265,34 @@ export function formatDateLocalized(
     ...options,
   });
 }
+
+/**
+ * Returns a calendar date as 'YYYY-MM-DD' in the VISITOR'S LOCAL timezone.
+ *
+ * Uses local getters (getFullYear/getMonth/getDate) on purpose: the daily
+ * horoscope should roll over at the visitor's local midnight, so "today" must be
+ * their local calendar day — NOT the UTC day (which flips at 21:00 in UTC-3).
+ *
+ * @param base - Date to read (defaults to now)
+ * @returns Local calendar date, e.g. '2026-07-25'
+ */
+export function getLocalDateString(base: Date = new Date()): string {
+  const year = base.getFullYear();
+  const month = String(base.getMonth() + 1).padStart(2, '0');
+  const day = String(base.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Shifts a 'YYYY-MM-DD' calendar date by `days` (can be negative), staying in
+ * the local calendar. Handles month/year rollovers via the Date arithmetic.
+ *
+ * @example
+ * shiftDateString('2026-03-01', -1) // → '2026-02-28'
+ */
+export function shiftDateString(dateString: string, days: number): string {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day); // local midnight
+  date.setDate(date.getDate() + days);
+  return getLocalDateString(date);
+}

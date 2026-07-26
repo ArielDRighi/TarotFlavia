@@ -60,14 +60,14 @@ describe('UserDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Default mock for useMySignHoroscope (can be overridden per test)
-    vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+    // Default mock for useMyLocalSignHoroscope (can be overridden per test)
+    vi.spyOn(useHoroscopeModule, 'useMyLocalSignHoroscope').mockReturnValue({
       data: undefined,
       isLoading: false,
       error: null,
       errorState: null,
       refetch: vi.fn(),
-    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMyLocalSignHoroscope>);
 
     // Default mock for useMyAnimalHoroscope (Chinese horoscope widget)
     vi.spyOn(useChineseHoroscopeModule, 'useMyAnimalHoroscope').mockReturnValue({
@@ -528,8 +528,8 @@ describe('UserDashboard', () => {
       isAnonymous: false,
     });
 
-    // Mock useMySignHoroscope
-    vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+    // Mock useMyLocalSignHoroscope
+    vi.spyOn(useHoroscopeModule, 'useMyLocalSignHoroscope').mockReturnValue({
       data: {
         id: 1,
         zodiacSign: ZodiacSign.TAURUS,
@@ -548,7 +548,7 @@ describe('UserDashboard', () => {
       error: null,
       errorState: null,
       refetch: vi.fn(),
-    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMyLocalSignHoroscope>);
 
     render(<UserDashboard />);
 
@@ -616,8 +616,8 @@ describe('UserDashboard', () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<UserCapabilities>);
 
-    // Mock useMySignHoroscope
-    vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+    // Mock useMyLocalSignHoroscope
+    vi.spyOn(useHoroscopeModule, 'useMyLocalSignHoroscope').mockReturnValue({
       data: {
         id: 2,
         zodiacSign: ZodiacSign.CAPRICORN,
@@ -636,7 +636,7 @@ describe('UserDashboard', () => {
       error: null,
       errorState: null,
       refetch: vi.fn(),
-    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMyLocalSignHoroscope>);
 
     render(<UserDashboard />);
 
@@ -875,7 +875,7 @@ describe('UserDashboard', () => {
     });
 
     // Provide data so the widgets render their full (testid-bearing) state
-    vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+    vi.spyOn(useHoroscopeModule, 'useMyLocalSignHoroscope').mockReturnValue({
       data: {
         id: 1,
         zodiacSign: ZodiacSign.TAURUS,
@@ -894,7 +894,7 @@ describe('UserDashboard', () => {
       error: null,
       errorState: null,
       refetch: vi.fn(),
-    } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
+    } as unknown as ReturnType<typeof useHoroscopeModule.useMyLocalSignHoroscope>);
 
     vi.spyOn(useNumerologyModule, 'useMyNumerologyProfile').mockReturnValue({
       data: {
@@ -992,7 +992,7 @@ describe('UserDashboard', () => {
         isAnonymous: false,
       });
 
-      vi.spyOn(useHoroscopeModule, 'useMySignHoroscope').mockReturnValue({
+      vi.spyOn(useHoroscopeModule, 'useMyLocalSignHoroscope').mockReturnValue({
         data: {
           id: 1,
           zodiacSign: ZodiacSign.TAURUS,
@@ -1011,7 +1011,7 @@ describe('UserDashboard', () => {
         error: null,
         errorState: null,
         refetch: vi.fn(),
-      } as unknown as ReturnType<typeof useHoroscopeModule.useMySignHoroscope>);
+      } as unknown as ReturnType<typeof useHoroscopeModule.useMyLocalSignHoroscope>);
 
       vi.spyOn(useNumerologyModule, 'useMyNumerologyProfile').mockReturnValue({
         data: {
