@@ -53,11 +53,13 @@ export const CLEANUP_SCHEDULE = '0 0 0 * * 0';
  * T-BUG-016-B: Expresión cron para verificar la completitud de la generación diaria
  *
  * Formato: "segundo minuto hora díaMes mes díaSemana"
- * Valor: "0 0 9 * * *"
- * Significado: Todos los días a las 09:00 UTC (3 horas después de la generación)
- * Razón: Detectar y regenerar signos faltantes si la generación de las 06:00 quedó incompleta
+ * Valor: "0 0 2 * * *"
+ * Significado: Todos los días a las 02:00 UTC (1 hora después de la generación)
+ * Razón: Detectar y regenerar signos faltantes si la generación de las 01:00 quedó
+ *   incompleta. Se corre a las 02:00 UTC (23:00 hora Argentina) para rellenar los
+ *   huecos ANTES de la medianoche argentina, cuando el front cambia al día nuevo.
  */
-export const VERIFICATION_SCHEDULE = '0 0 9 * * *';
+export const VERIFICATION_SCHEDULE = '0 0 2 * * *';
 
 /**
  * T-BUG-016-B: Cantidad máxima de reintentos por signo ante fallo transitorio

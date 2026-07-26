@@ -247,13 +247,14 @@ export class HoroscopeCronService {
   }
 
   /**
-   * T-BUG-016-B: Verifica la completitud de la generación diaria - 09:00 UTC
+   * T-BUG-016-B: Verifica la completitud de la generación diaria - 02:00 UTC
    *
-   * Se ejecuta unas horas después de la generación de las 06:00 para detectar
-   * signos que hayan quedado sin horóscopo (por fallos transitorios persistentes)
-   * y regenerar únicamente los faltantes, sin tocar los ya generados.
+   * Se ejecuta 1 hora después de la generación de las 01:00 para detectar signos
+   * que hayan quedado sin horóscopo (por fallos transitorios persistentes) y
+   * regenerar únicamente los faltantes, sin tocar los ya generados. Corre a las
+   * 02:00 UTC (23:00 ART) para rellenar los huecos antes de la medianoche argentina.
    *
-   * Cron expression: "0 0 9 * * *" (todos los días a las 09:00 UTC)
+   * Cron expression: "0 0 2 * * *" (todos los días a las 02:00 UTC)
    */
   @Cron(VERIFICATION_SCHEDULE, {
     name: 'verify-daily-horoscope-completeness',
