@@ -110,3 +110,73 @@ export function getStartOfMonthUTC(): Date {
   now.setUTCHours(0, 0, 0, 0);
   return now;
 }
+
+// ============================================================================
+// App business day (Argentina) — daily usage/limit boundary
+// ============================================================================
+
+/**
+ * App business timezone. The DAILY usage/limit "day" resets at local midnight
+ * in this timezone, NOT at UTC midnight, because the audience is in Argentina
+ * and a UTC boundary meant limits reset at 21:00 local.
+ *
+ * Argentina currently has NO DST (fixed UTC-3). If that ever changes, replace
+ * APP_UTC_OFFSET with an Intl-based offset computed per instant.
+ */
+export const APP_TIMEZONE = 'America/Argentina/Buenos_Aires';
+const APP_UTC_OFFSET = '-03:00';
+
+/**
+ * Returns the current calendar day in the app timezone as 'YYYY-MM-DD'.
+ * This is the key used for daily usage records and daily limit comparisons.
+ *
+ * @param now - Instant to evaluate (defaults to now)
+ * @example
+ * // At 2026-07-25T01:00:00Z (2026-07-24 22:00 in Argentina) → '2026-07-24'
+ */
+export function getTodayAppDateString(now: Date = new Date()): string {
+  // 'en-CA' formats dates as 'YYYY-MM-DD'.
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: APP_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+}
+
+/**
+ * Returns the UTC instant of the most recent app-timezone midnight (start of the
+ * current app day). Use for TIMESTAMP comparisons like `createdAt >= start`.
+ *
+ * @param now - Instant to evaluate (defaults to now)
+ */
+export function getStartOfTodayApp(now: Date = new Date()): Date {
+  return new Date(`${getTodayAppDateString(now)}T00:00:00${APP_UTC_OFFSET}`);
+}
+
+/**
+ * Returns the UTC instant of the next app-timezone midnight (when the daily
+ * limits reset). Used for `resetAt` in capabilities.
+ *
+ * @param now - Instant to evaluate (defaults to now)
+ */
+export function getNextAppMidnight(now: Date = new Date()): Date {
+  // Fixed -3 offset ⇒ start-of-app-day + 24h is the next app midnight.
+  return new Date(getStartOfTodayApp(now).getTime() + 24 * 60 * 60 * 1000);
+}
+
+/**
+ * Returns the app-timezone date N days ago as 'YYYY-MM-DD'. Used for retention
+ * cleanup so the cutoff matches the app-day keys stored on usage records.
+ *
+ * @param days - Number of days to subtract
+ * @param now - Instant to evaluate (defaults to now)
+ */
+export function getDateDaysAgoAppString(
+  days: number,
+  now: Date = new Date(),
+): string {
+  return getTodayAppDateString(
+    new Date(now.getTime() - days * 24 * 60 * 60 * 1000),
+  );
+}

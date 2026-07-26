@@ -21,8 +21,8 @@ import { UserPlan } from '../../users/entities/user.entity';
 import { USAGE_LIMIT_FEATURE_KEY } from '../decorators/check-usage-limit.decorator';
 import { ALLOW_ANONYMOUS_KEY } from '../decorators/allow-anonymous.decorator';
 import {
-  getTodayUTCDateString,
-  getStartOfTodayUTC,
+  getTodayAppDateString,
+  getStartOfTodayApp,
 } from '../../../common/utils/date.utils';
 
 /** Standard error message for daily limit reached */
@@ -127,7 +127,7 @@ export class CheckUsageLimitGuard implements CanActivate {
    * to ensure consistent behavior across timezones.
    */
   private async checkDailyCardLimit(userId: number): Promise<boolean> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
     this.logger.debug(
       `Checking DAILY_CARD for userId=${userId}, date=${todayStr}`,
     );
@@ -180,8 +180,8 @@ export class CheckUsageLimitGuard implements CanActivate {
     }
 
     // Count today's readings using start of day UTC
-    const startOfToday = getStartOfTodayUTC();
-    const todayStr = getTodayUTCDateString();
+    const startOfToday = getStartOfTodayApp();
+    const todayStr = getTodayAppDateString();
 
     const readingsCount = await this.tarotReadingRepository
       .createQueryBuilder('tarot_reading')

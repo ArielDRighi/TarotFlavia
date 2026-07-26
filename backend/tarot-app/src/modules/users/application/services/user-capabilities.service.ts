@@ -13,8 +13,9 @@ import {
 } from '../dto/user-capabilities.dto';
 import { UserPlan } from '../../entities/user.entity';
 import {
-  getTodayUTCDateString,
-  getStartOfTodayUTC,
+  getTodayAppDateString,
+  getStartOfTodayApp,
+  getNextAppMidnight,
   mapSubscriptionStatus,
 } from '../../../../common/utils';
 import { UsageFeature } from '../../../usage-limits/entities/usage-limit.entity';
@@ -60,7 +61,7 @@ export class UserCapabilitiesService {
     // Esto garantiza consistencia con la tabla real de lecturas
     // BUG-CAP-001 FIX: Use string comparison for DATE column (not MoreThanOrEqual with Date object)
     // The readingDate column is type DATE (YYYY-MM-DD), so we must use string equality
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     const existingDailyReading = await this.dailyReadingRepository
       .createQueryBuilder('daily_reading')
@@ -73,7 +74,7 @@ export class UserCapabilitiesService {
     // Obtener uso de tiradas de tarot consultando directamente la tabla tarot_reading
     // Esto garantiza consistencia con la tabla real de lecturas
     // For TIMESTAMP columns, MoreThanOrEqual with Date object works correctly
-    const startOfToday = getStartOfTodayUTC();
+    const startOfToday = getStartOfTodayApp();
     const tarotReadingsCount = await this.tarotReadingRepository.count({
       where: {
         user: { id: userId },
@@ -92,7 +93,7 @@ export class UserCapabilitiesService {
         ? 999999
         : planConfig.tarotReadingsLimit;
 
-    const resetAt = this.getNextMidnightUTC();
+    const resetAt = this.getNextResetAt();
 
     // Obtener límites del péndulo según el plan del usuario
     const pendulumConfig = await this.planConfigService.getPendulumLimit(
@@ -108,7 +109,7 @@ export class UserCapabilitiesService {
     // Calcular resetAt del péndulo según el período
     let pendulumResetAt: string | null = null;
     if (pendulumConfig.period === 'daily') {
-      pendulumResetAt = resetAt; // Usa el mismo resetAt (próxima medianoche UTC)
+      pendulumResetAt = resetAt; // Usa el mismo resetAt (próxima medianoche AR)
     } else if (pendulumConfig.period === 'monthly') {
       // Calcular primer día del próximo mes (00:00:00.000 UTC) de forma segura
       // Usar Date.UTC() evita bugs de normalización en fechas de fin de mes
@@ -170,7 +171,7 @@ export class UserCapabilitiesService {
   private async getAnonymousCapabilities(
     fingerprint: string | null,
   ): Promise<UserCapabilitiesDto> {
-    const resetAt = this.getNextMidnightUTC();
+    const resetAt = this.getNextResetAt();
 
     // Check actual usage for anonymous user via fingerprint
     let dailyCardUsed = 0;
@@ -182,7 +183,7 @@ export class UserCapabilitiesService {
     if (fingerprint && fingerprint.length > 0) {
       // Query the daily_reading table directly for today's reading
       // BUG-CAP-001 FIX: Use string comparison for DATE column
-      const todayStr = getTodayUTCDateString();
+      const todayStr = getTodayAppDateString();
 
       const existingReading = await this.dailyReadingRepository
         .createQueryBuilder('daily_reading')
@@ -243,14 +244,12 @@ export class UserCapabilitiesService {
   }
 
   /**
-   * Calcula la próxima medianoche UTC
-   * @returns Fecha ISO 8601 de la próxima medianoche UTC
+   * Calcula la próxima medianoche en la zona horaria de la app (Argentina),
+   * que es cuando resetean los límites diarios.
+   * @returns Fecha ISO 8601 (instante UTC) de la próxima medianoche local AR
    */
-  private getNextMidnightUTC(): string {
-    const tomorrow = new Date();
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    tomorrow.setUTCHours(0, 0, 0, 0);
-    return tomorrow.toISOString();
+  private getNextResetAt(): string {
+    return getNextAppMidnight().toISOString();
   }
 
   /**

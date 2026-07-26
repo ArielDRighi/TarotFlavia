@@ -12,6 +12,7 @@ import { UserPlanType } from '../dto/user-capabilities.dto';
 import { User, UserPlan, SubscriptionStatus } from '../../entities/user.entity';
 import { Plan } from '../../../plan-config/entities/plan.entity';
 import { UserRole } from '../../../../common/enums/user-role.enum';
+import { getNextAppMidnight } from '../../../../common/utils';
 
 describe('UserCapabilitiesService', () => {
   let service: UserCapabilitiesService;
@@ -696,7 +697,7 @@ describe('UserCapabilitiesService', () => {
     });
 
     describe('resetAt calculation', () => {
-      it('should return next midnight UTC', async () => {
+      it('should return the next Argentina (app timezone) midnight', async () => {
         // No fingerprint provided, so no query is made
         const result = await service.getCapabilities(null, null);
         const resetDate = new Date(result.dailyCard.resetAt);
@@ -704,13 +705,17 @@ describe('UserCapabilitiesService', () => {
         // Should be a valid date
         expect(resetDate.toString()).not.toBe('Invalid Date');
 
-        // Should be midnight UTC
-        expect(resetDate.getUTCHours()).toBe(0);
+        // Should be the next app (Argentina) midnight. Argentina is UTC-3, so
+        // local midnight lands at 03:00 UTC.
+        expect(result.dailyCard.resetAt).toBe(
+          getNextAppMidnight().toISOString(),
+        );
+        expect(resetDate.getUTCHours()).toBe(3);
         expect(resetDate.getUTCMinutes()).toBe(0);
         expect(resetDate.getUTCSeconds()).toBe(0);
         expect(resetDate.getUTCMilliseconds()).toBe(0);
 
-        // Should be in the future (tomorrow)
+        // Should be in the future (next local midnight)
         const now = new Date();
         expect(resetDate.getTime()).toBeGreaterThan(now.getTime());
       });

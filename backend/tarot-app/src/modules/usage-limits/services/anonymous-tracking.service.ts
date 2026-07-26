@@ -5,7 +5,7 @@ import { createHash } from 'crypto';
 import { AnonymousUsage } from '../entities/anonymous-usage.entity';
 import { UsageFeature } from '../entities/usage-limit.entity';
 import { Request } from 'express';
-import { getTodayUTCDateString } from '../../../common/utils/date.utils';
+import { getTodayAppDateString } from '../../../common/utils/date.utils';
 
 @Injectable()
 export class AnonymousTrackingService {
@@ -53,7 +53,7 @@ export class AnonymousTrackingService {
     feature: UsageFeature,
   ): Promise<boolean> {
     const fingerprint = this.generateFingerprint(ip, userAgent);
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     // Check if fingerprint already accessed today for this feature
     const existingUsage = await this.anonymousUsageRepository.findOne({
@@ -80,7 +80,7 @@ export class AnonymousTrackingService {
     feature: UsageFeature,
   ): Promise<number> {
     const fingerprint = this.generateFingerprint(ip, userAgent);
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     // Count usage for this fingerprint today
     const count = await this.anonymousUsageRepository.count({
@@ -103,7 +103,7 @@ export class AnonymousTrackingService {
     const ip = req.ip || '';
     const userAgent = req.headers['user-agent'] || '';
     const fingerprint = this.generateFingerprint(ip, userAgent);
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     const anonymousUsage = this.anonymousUsageRepository.create({
       fingerprint,
