@@ -6,25 +6,70 @@
  * toma las credenciales desde variables de entorno, para poder crear el primer
  * admin en producción sin exponer secretos en el repo.
  *
- * Conecta a la base definida por las variables POSTGRES_* del entorno actual, así
- * que para apuntar a producción hay que exportar las env de la DB de producción.
+ * IMPORTANTE: usa un DataSource AISLADO (NO bootea el AppModule), con
+ * `migrationsRun: false` y `synchronize: false`. Así, correrlo contra producción
+ * solo inserta/actualiza el usuario admin y NUNCA dispara migraciones ni DDL.
  *
- * Uso:
- *   ADMIN_EMAIL=florzenavilla@gmail.com \
- *   ADMIN_PASSWORD='TuPasswordTemporal' \
- *   ADMIN_NAME='Flor' \
+ * Conexión (en este orden de prioridad):
+ *   1. DATABASE_URL (o DB_URL): string de conexión completo. Útil para apuntar a
+ *      producción vía el proxy público de Railway (DATABASE_PUBLIC_URL).
+ *   2. Variables POSTGRES_* individuales (host/port/user/password/db).
+ * Opcional: DB_SSL=true para habilitar SSL (rejectUnauthorized: false).
+ *
+ * Uso (local, con POSTGRES_* del .env):
+ *   ADMIN_EMAIL=admin@dominio.com ADMIN_PASSWORD='...' npm run db:seed:admin
+ *
+ * Uso (producción, vía proxy público de Railway):
+ *   DATABASE_URL='postgresql://user:pass@junction.proxy.rlwy.net:PORT/railway' \
+ *   ADMIN_EMAIL=admin@dominio.com ADMIN_PASSWORD='...' ADMIN_NAME='...' \
  *   npm run db:seed:admin
  *
  * ADMIN_NAME es opcional (default: 'Admin'). ADMIN_EMAIL y ADMIN_PASSWORD son
  * obligatorios. Es idempotente: si el email ya existe, lo promueve a admin.
  */
 
-import { NestFactory } from '@nestjs/core';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AppModule } from '../src/app.module';
+import 'reflect-metadata';
+import * as path from 'path';
+import { DataSource } from 'typeorm';
 import { User } from '../src/modules/users/entities/user.entity';
 import { seedAdminUser } from '../src/database/seeds/admin-user.seeder';
+
+/**
+ * Construye un DataSource aislado (sin migraciones ni synchronize) para operar
+ * solo sobre las entidades, sin arrastrar el arranque completo del AppModule.
+ */
+function buildDataSource(): DataSource {
+  const url = process.env.DATABASE_URL ?? process.env.DB_URL;
+  const ssl =
+    process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
+  const entities = [path.join(__dirname, '..', 'src', '**', '*.entity{.ts,.js}')];
+
+  if (url) {
+    return new DataSource({
+      type: 'postgres',
+      url,
+      entities,
+      synchronize: false,
+      migrationsRun: false,
+      ssl,
+      logging: ['error'],
+    });
+  }
+
+  return new DataSource({
+    type: 'postgres',
+    host: process.env.POSTGRES_HOST ?? 'localhost',
+    port: parseInt(process.env.POSTGRES_PORT ?? '5432', 10),
+    username: process.env.POSTGRES_USER ?? 'postgres',
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
+    entities,
+    synchronize: false,
+    migrationsRun: false,
+    ssl,
+    logging: ['error'],
+  });
+}
 
 async function bootstrap(): Promise<void> {
   const email = process.env.ADMIN_EMAIL;
@@ -41,12 +86,13 @@ async function bootstrap(): Promise<void> {
     process.exit(1);
   }
 
-  const app = await NestFactory.createApplicationContext(AppModule);
-  const userRepository = app.get<Repository<User>>(getRepositoryToken(User));
+  const dataSource = buildDataSource();
+  await dataSource.initialize();
+  console.log('✅ Conectado a la base de datos.');
 
   try {
     console.log(`👤 Seeding admin (${email})...`);
-    const result = await seedAdminUser(userRepository, {
+    const result = await seedAdminUser(dataSource.getRepository(User), {
       email,
       password,
       name,
@@ -57,9 +103,9 @@ async function bootstrap(): Promise<void> {
     );
   } catch (error) {
     console.error('❌ Error creando el admin:', error);
-    process.exit(1);
+    process.exitCode = 1;
   } finally {
-    await app.close();
+    await dataSource.destroy();
   }
 }
 
