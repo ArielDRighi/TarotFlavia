@@ -37,6 +37,7 @@ export function HoroscopeWidget() {
     data: horoscope,
     isLoading,
     errorState,
+    isShowingPreviousDay,
     refetch,
     isRefetching,
   } = useMyLocalSignHoroscope();
@@ -117,6 +118,12 @@ export function HoroscopeWidget() {
           </Link>
         </Button>
       </div>
+
+      {isShowingPreviousDay && (
+        <p className="text-muted-foreground mb-2 text-xs italic">
+          El de hoy se está preparando; mostramos el de ayer.
+        </p>
+      )}
 
       <p className="text-muted-foreground line-clamp-3 text-sm">{horoscope.generalContent}</p>
 

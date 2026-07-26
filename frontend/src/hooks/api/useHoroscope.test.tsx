@@ -59,7 +59,9 @@ describe('horoscope hooks (local day)', () => {
 
   beforeEach(() => {
     queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
+      // retryDelay:0 keeps the hooks' own retryNon4xx (which retries 5xx twice)
+      // instant, so error-surfacing tests don't exceed waitFor's timeout.
+      defaultOptions: { queries: { retry: false, retryDelay: 0 } },
     });
     vi.clearAllMocks();
     mockUser.mockReturnValue(null);
@@ -120,6 +122,22 @@ describe('horoscope hooks (local day)', () => {
       expect(result.current.data).toBeUndefined();
     });
 
+    it('surfaces a non-404 error WITHOUT falling back to yesterday', async () => {
+      // A hard error (5xx) on "today" is a real failure, not "not generated yet",
+      // so we must not silently show yesterday's horoscope.
+      vi.mocked(horoscopeApi.getHoroscopeByDateAndSign).mockRejectedValue(httpError(500));
+
+      const { result } = renderHook(() => useLocalHoroscope(ZodiacSign.ARIES), { wrapper });
+
+      await waitFor(() => expect(result.current.error).not.toBeNull());
+      expect(result.current.isShowingPreviousDay).toBe(false);
+      // Only "today" was requested — no fallback attempt to yesterday.
+      expect(horoscopeApi.getHoroscopeByDateAndSign).not.toHaveBeenCalledWith(
+        YESTERDAY,
+        ZodiacSign.ARIES
+      );
+    });
+
     it('is disabled when sign is null', () => {
       const { result } = renderHook(() => useLocalHoroscope(null), { wrapper });
 
@@ -172,6 +190,15 @@ describe('horoscope hooks (local day)', () => {
       await waitFor(() => expect(result.current.data).toEqual(mockHoroscope));
       expect(result.current.errorState).toBeNull();
       expect(horoscopeApi.getHoroscopeByDateAndSign).toHaveBeenCalledWith(TODAY, ZodiacSign.ARIES);
+    });
+
+    it('returns errorState not-generated when both today and yesterday are 404', async () => {
+      mockUser.mockReturnValue({ birthDate: '1990-03-25' }); // Aries
+      vi.mocked(horoscopeApi.getHoroscopeByDateAndSign).mockRejectedValue(httpError(404));
+
+      const { result } = renderHook(() => useMyLocalSignHoroscope(), { wrapper });
+
+      await waitFor(() => expect(result.current.errorState).toBe('not-generated'));
     });
   });
 });
