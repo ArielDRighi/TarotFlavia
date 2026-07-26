@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { HoroscopeCronService } from './horoscope-cron.service';
 import { HoroscopeGenerationService } from './horoscope-generation.service';
 import { ZodiacSign } from '../../../../common/utils/zodiac.utils';
@@ -7,6 +8,7 @@ import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
 
 describe('HoroscopeCronService', () => {
   let service: HoroscopeCronService;
+  let mockConfigGet: jest.Mock;
 
   // Mock completo de DailyHoroscope
   const createMockHoroscope = (sign: ZodiacSign): DailyHoroscope => ({
@@ -38,12 +40,20 @@ describe('HoroscopeCronService', () => {
   };
 
   beforeEach(async () => {
+    // Por defecto los tests corren fuera de producción, así el hook de bootstrap
+    // no dispara generación salvo en los tests que lo fuerzan explícitamente.
+    mockConfigGet = jest.fn().mockReturnValue('test');
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HoroscopeCronService,
         {
           provide: HoroscopeGenerationService,
           useValue: mockHoroscopeGenerationService,
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: mockConfigGet },
         },
       ],
     }).compile();
@@ -68,6 +78,60 @@ describe('HoroscopeCronService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('onApplicationBootstrap', () => {
+    // Deja correr la tarea fire-and-forget disparada por el hook.
+    const flushMicrotasks = () =>
+      new Promise((resolve) => setImmediate(resolve));
+
+    it('rellena los horóscopos faltantes de hoy al arrancar en producción', async () => {
+      mockConfigGet.mockReturnValue('production');
+      mockHoroscopeGenerationService.findMissingSignsForDate.mockResolvedValue(
+        [],
+      );
+
+      service.onApplicationBootstrap();
+      await flushMicrotasks();
+
+      expect(mockConfigGet).toHaveBeenCalledWith('NODE_ENV');
+      expect(
+        mockHoroscopeGenerationService.findMissingSignsForDate,
+      ).toHaveBeenCalledTimes(1);
+
+      // Se rellena la fecha de HOY (blinda contra regresiones en el argumento).
+      const dateArg =
+        mockHoroscopeGenerationService.findMissingSignsForDate.mock.calls[0][0];
+      expect(dateArg).toBeInstanceOf(Date);
+      expect((dateArg as Date).toISOString().split('T')[0]).toBe(
+        new Date().toISOString().split('T')[0],
+      );
+    });
+
+    it('NO dispara generación fuera de producción (dev/test)', async () => {
+      mockConfigGet.mockReturnValue('development');
+
+      service.onApplicationBootstrap();
+      await flushMicrotasks();
+
+      expect(
+        mockHoroscopeGenerationService.findMissingSignsForDate,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('no propaga errores del backfill (no tumba el arranque)', async () => {
+      mockConfigGet.mockReturnValue('production');
+      mockHoroscopeGenerationService.findMissingSignsForDate.mockRejectedValue(
+        new Error('DB caída'),
+      );
+
+      expect(() => service.onApplicationBootstrap()).not.toThrow();
+      await flushMicrotasks();
+
+      expect(
+        mockHoroscopeGenerationService.findMissingSignsForDate,
+      ).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('generateDailyHoroscopes', () => {
