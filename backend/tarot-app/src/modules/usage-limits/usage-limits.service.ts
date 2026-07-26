@@ -10,8 +10,8 @@ import { UsersService } from '../users/users.service';
 import { PlanConfigService } from '../plan-config/plan-config.service';
 import { USAGE_RETENTION_DAYS, USAGE_LIMITS } from './usage-limits.constants';
 import {
-  getTodayUTCDateString,
-  getDateDaysAgoUTCString,
+  getTodayAppDateString,
+  getDateDaysAgoAppString,
 } from '../../common/utils/date.utils';
 
 @Injectable()
@@ -64,7 +64,7 @@ export class UsageLimitsService {
     userId: number,
     feature: UsageFeature,
   ): Promise<UsageLimit | null> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
     return this.usageLimitRepository.findOne({
       where: {
         userId,
@@ -134,7 +134,7 @@ export class UsageLimitsService {
     userId: number,
     feature: UsageFeature,
   ): Promise<UsageLimit> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     // First, try to create a new record (if it doesn't exist)
     // This leverages the unique constraint on (userId, feature, date)
@@ -203,7 +203,7 @@ export class UsageLimitsService {
    * @returns Cantidad de registros eliminados.
    */
   async resetTodayUsage(userId: number): Promise<number> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     const result = await this.usageLimitRepository
       .createQueryBuilder()
@@ -216,7 +216,7 @@ export class UsageLimitsService {
   }
 
   async cleanOldRecords(): Promise<number> {
-    const cutoffDateStr = getDateDaysAgoUTCString(USAGE_RETENTION_DAYS);
+    const cutoffDateStr = getDateDaysAgoAppString(USAGE_RETENTION_DAYS);
 
     const result = await this.usageLimitRepository
       .createQueryBuilder()

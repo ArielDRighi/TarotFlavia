@@ -10,6 +10,7 @@ import {
   UserPlan,
   SubscriptionStatus,
 } from '../users/entities/user.entity';
+import { getTodayAppDateString } from '../../common/utils/date.utils';
 
 describe('UsageLimitsService', () => {
   let service: UsageLimitsService;
@@ -349,14 +350,12 @@ describe('UsageLimitsService', () => {
       expect(result).toBe(3);
     });
 
-    it('should query for today UTC date', async () => {
+    it('should query for today (app timezone / Argentina) date', async () => {
       mockUsageLimitRepository.findOne.mockResolvedValue(null);
 
       await service.getUsage(1, UsageFeature.DAILY_CARD);
 
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
-      const expectedDate = today.toISOString().split('T')[0];
+      const expectedDate = getTodayAppDateString();
 
       expect(mockUsageLimitRepository.findOne).toHaveBeenCalledWith({
         where: {
@@ -520,10 +519,8 @@ describe('UsageLimitsService', () => {
         const dateArg = callArgs.where.date;
         expect(dateArg).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
-        // Verify it's today's date
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
-        const expectedDateString = today.toISOString().split('T')[0];
+        // Verify it's today's date (app timezone / Argentina)
+        const expectedDateString = getTodayAppDateString();
         expect(dateArg).toBe(expectedDateString);
       });
 
@@ -654,8 +651,8 @@ describe('UsageLimitsService', () => {
       });
     });
 
-    describe('UTC date handling', () => {
-      it('should use UTC timezone for date calculations', async () => {
+    describe('app-timezone date handling', () => {
+      it('should use the app timezone (Argentina) for date calculations', async () => {
         const freeUser: Partial<User> = {
           id: 1,
           plan: UserPlan.FREE,
@@ -675,14 +672,12 @@ describe('UsageLimitsService', () => {
         expect(typeof dateArg).toBe('string');
         expect(dateArg).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
-        // Should match today's date in UTC
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
-        const expectedDateString = today.toISOString().split('T')[0];
+        // Should match today's date in the app timezone (Argentina)
+        const expectedDateString = getTodayAppDateString();
         expect(dateArg).toBe(expectedDateString);
       });
 
-      it("should increment usage for today's date in UTC", async () => {
+      it("should increment usage for today's date (app timezone)", async () => {
         const mockInsertQueryBuilder = {
           insert: jest.fn().mockReturnThis(),
           into: jest.fn().mockReturnThis(),
@@ -703,9 +698,7 @@ describe('UsageLimitsService', () => {
           .mockReturnValueOnce(mockInsertQueryBuilder)
           .mockReturnValueOnce(mockUpdateQueryBuilder);
 
-        const todayMock = new Date();
-        todayMock.setUTCHours(0, 0, 0, 0);
-        const todayDateString = todayMock.toISOString().split('T')[0];
+        const todayDateString = getTodayAppDateString();
 
         mockUsageLimitRepository.findOne.mockResolvedValue({
           id: 1,
@@ -723,10 +716,8 @@ describe('UsageLimitsService', () => {
         expect(typeof insertValues.date).toBe('string');
         expect(insertValues.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
-        // Verify it's today's date in UTC
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
-        const expectedDateString = today.toISOString().split('T')[0];
+        // Verify it's today's date in the app timezone (Argentina)
+        const expectedDateString = getTodayAppDateString();
         expect(insertValues.date).toBe(expectedDateString);
       });
     });

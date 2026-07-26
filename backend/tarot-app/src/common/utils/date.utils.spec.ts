@@ -4,6 +4,10 @@ import {
   getStartOfTodayUTC,
   getStartOfTomorrowUTC,
   getDateDaysAgoUTCString,
+  getTodayAppDateString,
+  getStartOfTodayApp,
+  getNextAppMidnight,
+  getDateDaysAgoAppString,
 } from './date.utils';
 
 describe('Date Utils', () => {
@@ -120,6 +124,60 @@ describe('Date Utils', () => {
       // This test verifies the function works across year boundaries
       const result = getDateDaysAgoUTCString(400);
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+  });
+
+  // ==========================================================================
+  // App business day (Argentina, UTC-3) — daily limit boundary
+  // ==========================================================================
+  describe('getTodayAppDateString', () => {
+    it('returns the Argentina calendar day, which differs from UTC late at night', () => {
+      // 2026-07-25 01:00 UTC = 2026-07-24 22:00 in Argentina (UTC-3)
+      expect(getTodayAppDateString(new Date('2026-07-25T01:00:00Z'))).toBe(
+        '2026-07-24',
+      );
+      // 2026-07-25 05:00 UTC = 2026-07-25 02:00 in Argentina
+      expect(getTodayAppDateString(new Date('2026-07-25T05:00:00Z'))).toBe(
+        '2026-07-25',
+      );
+    });
+
+    it('crosses the app day exactly at 03:00 UTC (00:00 Argentina)', () => {
+      expect(getTodayAppDateString(new Date('2026-07-25T02:59:59Z'))).toBe(
+        '2026-07-24',
+      );
+      expect(getTodayAppDateString(new Date('2026-07-25T03:00:00Z'))).toBe(
+        '2026-07-25',
+      );
+    });
+  });
+
+  describe('getStartOfTodayApp', () => {
+    it('returns the UTC instant of the current Argentina midnight (03:00 UTC)', () => {
+      // AR 02:00 on the 25th → start of AR day 25 = 2026-07-25T03:00:00Z
+      expect(
+        getStartOfTodayApp(new Date('2026-07-25T05:00:00Z')).toISOString(),
+      ).toBe('2026-07-25T03:00:00.000Z');
+      // AR 23:00 on the 24th → start of AR day 24 = 2026-07-24T03:00:00Z
+      expect(
+        getStartOfTodayApp(new Date('2026-07-25T02:00:00Z')).toISOString(),
+      ).toBe('2026-07-24T03:00:00.000Z');
+    });
+  });
+
+  describe('getNextAppMidnight', () => {
+    it('returns the next Argentina midnight as a UTC instant', () => {
+      expect(
+        getNextAppMidnight(new Date('2026-07-25T05:00:00Z')).toISOString(),
+      ).toBe('2026-07-26T03:00:00.000Z');
+    });
+  });
+
+  describe('getDateDaysAgoAppString', () => {
+    it('returns the Argentina date N days ago', () => {
+      expect(getDateDaysAgoAppString(7, new Date('2026-07-25T05:00:00Z'))).toBe(
+        '2026-07-18',
+      );
     });
   });
 });

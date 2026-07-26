@@ -20,7 +20,7 @@ import {
   DailyReadingHistoryDto,
   DailyReadingHistoryItemDto,
 } from './dto/daily-reading-history.dto';
-import { getTodayUTCDateString } from '../../../common/utils/date.utils';
+import { getTodayAppDateString } from '../../../common/utils/date.utils';
 
 @Injectable()
 export class DailyReadingService {
@@ -53,7 +53,7 @@ export class DailyReadingService {
     tarotistaId: number,
     user?: Partial<User>,
   ): Promise<DailyReading> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     // NUEVO: Verificar límite de carta del día ANTES de verificar existencia
     // Si el usuario alcanzó su límite diario de cartas, lanzar error 403
@@ -167,7 +167,7 @@ export class DailyReadingService {
    * Obtiene la carta del día de hoy si existe
    */
   async getTodayCard(userId: number): Promise<DailyReading | null> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     return this.dailyReadingRepository
       .createQueryBuilder('daily_reading')
@@ -202,7 +202,7 @@ export class DailyReadingService {
    * No incluye interpretación IA (solo info de DB)
    */
   async getTodayCardPublic(): Promise<DailyReading | null> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     return this.dailyReadingRepository
       .createQueryBuilder('daily_reading')
@@ -222,7 +222,7 @@ export class DailyReadingService {
     fingerprint: string,
     tarotistaId: number,
   ): Promise<DailyReading> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     // Verificar que NO existe carta del día para este fingerprint hoy
     const existingReading = await this.dailyReadingRepository
@@ -293,7 +293,7 @@ export class DailyReadingService {
     userId: number,
     tarotistaId: number,
   ): Promise<DailyReading> {
-    const todayStr = getTodayUTCDateString();
+    const todayStr = getTodayAppDateString();
 
     // Buscar carta del día existente
     const existingReading = await this.dailyReadingRepository

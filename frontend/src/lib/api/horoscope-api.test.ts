@@ -4,13 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiClient } from './axios-config';
-import {
-  getTodayAllHoroscopes,
-  getTodayHoroscope,
-  getMySignHoroscope,
-  getHoroscopeByDate,
-  getHoroscopeByDateAndSign,
-} from './horoscope-api';
+import { getHoroscopeByDate, getHoroscopeByDateAndSign } from './horoscope-api';
 import { ZodiacSign } from '@/types/horoscope.types';
 import { API_ENDPOINTS } from './endpoints';
 
@@ -40,56 +34,6 @@ describe('horoscope API functions', () => {
     luckyColor: 'Verde',
     luckyTime: 'Media mañana',
   };
-
-  describe('getTodayAllHoroscopes', () => {
-    it('should call correct endpoint and return horoscopes array', async () => {
-      const mockData = [mockHoroscope, { ...mockHoroscope, id: 2, zodiacSign: ZodiacSign.TAURUS }];
-      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockData });
-
-      const result = await getTodayAllHoroscopes();
-
-      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.HOROSCOPE.TODAY_ALL);
-      expect(result).toEqual(mockData);
-      expect(result).toHaveLength(2);
-    });
-  });
-
-  describe('getTodayHoroscope', () => {
-    it('should call correct endpoint with sign and return horoscope', async () => {
-      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockHoroscope });
-
-      const result = await getTodayHoroscope(ZodiacSign.ARIES);
-
-      expect(apiClient.get).toHaveBeenCalledWith(
-        API_ENDPOINTS.HOROSCOPE.TODAY_SIGN(ZodiacSign.ARIES)
-      );
-      expect(result).toEqual(mockHoroscope);
-      expect(result.zodiacSign).toBe(ZodiacSign.ARIES);
-    });
-
-    it('should work with different zodiac signs', async () => {
-      const leoHoroscope = { ...mockHoroscope, zodiacSign: ZodiacSign.LEO };
-      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: leoHoroscope });
-
-      const result = await getTodayHoroscope(ZodiacSign.LEO);
-
-      expect(apiClient.get).toHaveBeenCalledWith(
-        API_ENDPOINTS.HOROSCOPE.TODAY_SIGN(ZodiacSign.LEO)
-      );
-      expect(result.zodiacSign).toBe(ZodiacSign.LEO);
-    });
-  });
-
-  describe('getMySignHoroscope', () => {
-    it('should call correct endpoint and return horoscope', async () => {
-      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockHoroscope });
-
-      const result = await getMySignHoroscope();
-
-      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.HOROSCOPE.MY_SIGN);
-      expect(result).toEqual(mockHoroscope);
-    });
-  });
 
   describe('getHoroscopeByDate', () => {
     it('should call correct endpoint with date and return horoscopes array', async () => {

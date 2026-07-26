@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WidgetEmptyState } from '@/components/features/dashboard';
-import { useMySignHoroscope } from '@/hooks/api/useHoroscope';
+import { useMyLocalSignHoroscope } from '@/hooks/api/useHoroscope';
 import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
 import { ROUTES } from '@/lib/constants/routes';
 
@@ -33,7 +33,14 @@ import { ZodiacSymbol } from './ZodiacSymbol';
  * ```
  */
 export function HoroscopeWidget() {
-  const { data: horoscope, isLoading, errorState, refetch, isRefetching } = useMySignHoroscope();
+  const {
+    data: horoscope,
+    isLoading,
+    errorState,
+    isShowingPreviousDay,
+    refetch,
+    isRefetching,
+  } = useMyLocalSignHoroscope();
 
   // Loading state
   if (isLoading) {
@@ -111,6 +118,12 @@ export function HoroscopeWidget() {
           </Link>
         </Button>
       </div>
+
+      {isShowingPreviousDay && (
+        <p className="text-muted-foreground mb-2 text-xs italic">
+          El de hoy se está preparando; mostramos el de ayer.
+        </p>
+      )}
 
       <p className="text-muted-foreground line-clamp-3 text-sm">{horoscope.generalContent}</p>
 
