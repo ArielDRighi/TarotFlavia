@@ -110,9 +110,6 @@ export const API_ENDPOINTS = {
 
   // Horoscope (Horóscopo Diario)
   HOROSCOPE: {
-    TODAY_ALL: '/horoscope/today',
-    TODAY_SIGN: (sign: string) => `/horoscope/today/${sign}`,
-    MY_SIGN: '/horoscope/my-sign',
     BY_DATE: (date: string) => `/horoscope/${date}`,
     BY_DATE_SIGN: (date: string, sign: string) => `/horoscope/${date}/${sign}`,
   },

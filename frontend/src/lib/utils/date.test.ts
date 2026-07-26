@@ -10,6 +10,8 @@ import {
   formatDateShort,
   formatDateCompact,
   formatDateLocalized,
+  getLocalDateString,
+  shiftDateString,
 } from './date';
 
 describe('date utilities', () => {
@@ -305,6 +307,39 @@ describe('date utilities', () => {
       expect(resultA).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
       // resultB is 6 hours later, so its numeric time should be greater
       expect(resultB > resultA).toBe(true);
+    });
+  });
+
+  describe('getLocalDateString', () => {
+    it('formats a given Date as YYYY-MM-DD using LOCAL getters', () => {
+      // Local date (constructed with local getters) → same local calendar day.
+      expect(getLocalDateString(new Date(2026, 6, 25, 10, 30))).toBe('2026-07-25');
+    });
+
+    it('zero-pads month and day', () => {
+      expect(getLocalDateString(new Date(2026, 0, 5))).toBe('2026-01-05');
+    });
+  });
+
+  describe('shiftDateString', () => {
+    it('shifts within the same month', () => {
+      expect(shiftDateString('2026-07-25', 1)).toBe('2026-07-26');
+      expect(shiftDateString('2026-07-25', -1)).toBe('2026-07-24');
+    });
+
+    it('handles month boundaries', () => {
+      expect(shiftDateString('2026-03-01', -1)).toBe('2026-02-28');
+      expect(shiftDateString('2026-01-31', 1)).toBe('2026-02-01');
+    });
+
+    it('handles year boundaries', () => {
+      expect(shiftDateString('2026-01-01', -1)).toBe('2025-12-31');
+      expect(shiftDateString('2025-12-31', 1)).toBe('2026-01-01');
+    });
+
+    it('handles leap years (2028 is a leap year)', () => {
+      expect(shiftDateString('2028-02-28', 1)).toBe('2028-02-29');
+      expect(shiftDateString('2028-03-01', -1)).toBe('2028-02-29');
     });
   });
 });

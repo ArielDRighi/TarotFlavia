@@ -21,7 +21,7 @@ vi.mock('@/hooks/api/useHoroscope', async () => {
   const actual = await vi.importActual<typeof useHoroscopeModule>('@/hooks/api/useHoroscope');
   return {
     ...actual,
-    useMySignHoroscope: vi.fn(),
+    useMyLocalSignHoroscope: vi.fn(),
   };
 });
 
@@ -40,14 +40,12 @@ const mockHoroscope: DailyHoroscope = {
   luckyTime: 'Mañana',
 };
 
-type HookReturn = ReturnType<typeof useHoroscopeModule.useMySignHoroscope>;
+type HookReturn = ReturnType<typeof useHoroscopeModule.useMyLocalSignHoroscope>;
 
 function mockHook(overrides: Partial<HookReturn>): void {
-  vi.mocked(useHoroscopeModule.useMySignHoroscope).mockReturnValue({
+  vi.mocked(useHoroscopeModule.useMyLocalSignHoroscope).mockReturnValue({
     data: undefined,
     isLoading: false,
-    isError: false,
-    isSuccess: false,
     error: null,
     errorState: null,
     isRefetching: false,
@@ -73,7 +71,7 @@ describe('HoroscopeWidget', () => {
 
   describe('Success state', () => {
     it('should render horoscope content when data is available', () => {
-      mockHook({ data: mockHoroscope, isSuccess: true });
+      mockHook({ data: mockHoroscope });
 
       render(<HoroscopeWidget />);
 
@@ -90,7 +88,6 @@ describe('HoroscopeWidget', () => {
   describe('Error state: no-birthdate (400)', () => {
     it('should show CTA to configure birth date', () => {
       mockHook({
-        isError: true,
         errorState: 'no-birthdate',
         error: new Error('birthDate required'),
       });
@@ -104,7 +101,6 @@ describe('HoroscopeWidget', () => {
 
     it('should render the illustrated empty state title (T-DASH-005)', () => {
       mockHook({
-        isError: true,
         errorState: 'no-birthdate',
         error: new Error('birthDate required'),
       });
@@ -116,7 +112,6 @@ describe('HoroscopeWidget', () => {
 
     it('should NOT show the "not-generated" message', () => {
       mockHook({
-        isError: true,
         errorState: 'no-birthdate',
         error: new Error('birthDate required'),
       });
@@ -130,7 +125,6 @@ describe('HoroscopeWidget', () => {
   describe('Error state: not-generated (404)', () => {
     it('should show "preparing" message, NOT the birth date CTA', () => {
       mockHook({
-        isError: true,
         errorState: 'not-generated',
         error: new Error('Horoscope not found'),
       });
@@ -148,7 +142,6 @@ describe('HoroscopeWidget', () => {
   describe('Error state: generic error (5xx / network)', () => {
     it('should show generic error message with retry button', () => {
       mockHook({
-        isError: true,
         errorState: 'error',
         error: new Error('Internal Server Error'),
       });
@@ -164,7 +157,6 @@ describe('HoroscopeWidget', () => {
     it('should call refetch when retry button is clicked', async () => {
       const refetch = vi.fn();
       mockHook({
-        isError: true,
         errorState: 'error',
         error: new Error('Internal Server Error'),
         refetch,

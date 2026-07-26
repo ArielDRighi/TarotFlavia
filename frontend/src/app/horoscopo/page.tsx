@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ZodiacSignSelector, HoroscopeSkeleton } from '@/components/features/horoscope';
 import { ServiceIntro } from '@/components/features/encyclopedia';
 import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
-import { useTodayAllHoroscopes } from '@/hooks/api/useHoroscope';
+import { useLocalDailyHoroscopes } from '@/hooks/api/useHoroscope';
 import { useAuthStore } from '@/stores/authStore';
 import { getZodiacSignFromDate } from '@/lib/utils/zodiac';
 import { ROUTES } from '@/lib/constants/routes';
@@ -14,7 +14,7 @@ import type { ZodiacSign } from '@/types/horoscope.types';
 export default function HoroscopoPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
-  const { isLoading } = useTodayAllHoroscopes();
+  const { isLoading } = useLocalDailyHoroscopes();
 
   const userSign = user?.birthDate ? getZodiacSignFromDate(new Date(user.birthDate)) : null;
 

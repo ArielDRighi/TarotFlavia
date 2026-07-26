@@ -9,32 +9,6 @@ import { API_ENDPOINTS } from './endpoints';
 import type { DailyHoroscope, ZodiacSign } from '@/types/horoscope.types';
 
 /**
- * Obtener todos los horóscopos del día de hoy
- */
-export async function getTodayAllHoroscopes(): Promise<DailyHoroscope[]> {
-  const response = await apiClient.get<DailyHoroscope[]>(API_ENDPOINTS.HOROSCOPE.TODAY_ALL);
-  return response.data;
-}
-
-/**
- * Obtener el horóscopo de un signo específico para hoy
- * @param sign - Signo zodiacal
- */
-export async function getTodayHoroscope(sign: ZodiacSign): Promise<DailyHoroscope> {
-  const response = await apiClient.get<DailyHoroscope>(API_ENDPOINTS.HOROSCOPE.TODAY_SIGN(sign));
-  return response.data;
-}
-
-/**
- * Obtener el horóscopo del signo del usuario autenticado
- * Requiere que el usuario tenga configurada su fecha de nacimiento
- */
-export async function getMySignHoroscope(): Promise<DailyHoroscope> {
-  const response = await apiClient.get<DailyHoroscope>(API_ENDPOINTS.HOROSCOPE.MY_SIGN);
-  return response.data;
-}
-
-/**
  * Obtener todos los horóscopos de una fecha específica
  * @param date - Fecha en formato YYYY-MM-DD
  */
