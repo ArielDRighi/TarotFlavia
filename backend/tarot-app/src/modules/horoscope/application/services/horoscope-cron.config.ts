@@ -27,11 +27,17 @@ export const RETENTION_DAYS = 30;
  * Expresión cron para generación diaria de horóscopos
  *
  * Formato: "segundo minuto hora díaMes mes díaSemana"
- * Valor: "0 0 6 * * *"
- * Significado: Todos los días a las 06:00 UTC
- * Razón: Horario temprano UTC para que esté listo en todas las zonas horarias
+ * Valor: "0 0 1 * * *"
+ * Significado: Todos los días a las 01:00 UTC (= 22:00 hora Argentina del día anterior)
+ * Razón: El horóscopo se muestra por día calendario LOCAL del visitante y cambia
+ *   en pantalla a las 00:00 hora local. Para que a esa medianoche el día ya exista
+ *   (y NO se muestre el de ayer como fallback), la generación debe terminar ANTES
+ *   de la medianoche argentina (00:00 ART = 03:00 UTC). A las 01:00 UTC, en UTC ya
+ *   es el día objetivo, así que el registro queda etiquetado con la fecha correcta.
+ *   ⚠️ No adelantar a antes de las 00:00 UTC (ej. 21:00 UTC): la fecha del horóscopo
+ *   se toma de `new Date()` (UTC), por lo que generaría el día anterior.
  */
-export const GENERATION_SCHEDULE = '0 0 6 * * *';
+export const GENERATION_SCHEDULE = '0 0 1 * * *';
 
 /**
  * Expresión cron para limpieza semanal de horóscopos antiguos
@@ -47,11 +53,13 @@ export const CLEANUP_SCHEDULE = '0 0 0 * * 0';
  * T-BUG-016-B: Expresión cron para verificar la completitud de la generación diaria
  *
  * Formato: "segundo minuto hora díaMes mes díaSemana"
- * Valor: "0 0 9 * * *"
- * Significado: Todos los días a las 09:00 UTC (3 horas después de la generación)
- * Razón: Detectar y regenerar signos faltantes si la generación de las 06:00 quedó incompleta
+ * Valor: "0 0 2 * * *"
+ * Significado: Todos los días a las 02:00 UTC (1 hora después de la generación)
+ * Razón: Detectar y regenerar signos faltantes si la generación de las 01:00 quedó
+ *   incompleta. Se corre a las 02:00 UTC (23:00 hora Argentina) para rellenar los
+ *   huecos ANTES de la medianoche argentina, cuando el front cambia al día nuevo.
  */
-export const VERIFICATION_SCHEDULE = '0 0 9 * * *';
+export const VERIFICATION_SCHEDULE = '0 0 2 * * *';
 
 /**
  * T-BUG-016-B: Cantidad máxima de reintentos por signo ante fallo transitorio

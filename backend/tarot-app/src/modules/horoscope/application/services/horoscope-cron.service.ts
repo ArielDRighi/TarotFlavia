@@ -31,7 +31,7 @@ interface GenerationResult {
  * Servicio de cron jobs para generación automática de horóscopos
  *
  * Responsabilidades:
- * - Generar horóscopos diarios a las 06:00 UTC de forma SECUENCIAL
+ * - Generar horóscopos diarios a las 01:00 UTC de forma SECUENCIAL
  * - Respetar límites de rate de la API de IA (15 RPM para Gemini)
  * - Limpiar horóscopos antiguos semanalmente
  * - Proveer método manual para testing
@@ -74,7 +74,11 @@ export class HoroscopeCronService {
   constructor(private readonly horoscopeService: HoroscopeGenerationService) {}
 
   /**
-   * Genera horóscopos diarios para todos los signos - 06:00 UTC
+   * Genera horóscopos diarios para todos los signos - 01:00 UTC (22:00 ART)
+   *
+   * Se corre antes de la medianoche argentina para que el día ya esté generado
+   * cuando el front cambia al nuevo día local (00:00 hora local). Ver la razón
+   * completa en GENERATION_SCHEDULE (horoscope-cron.config.ts).
    *
    * LÓGICA SECUENCIAL:
    * - Un signo a la vez
@@ -82,10 +86,10 @@ export class HoroscopeCronService {
    * - Total: ~72 segundos para 12 signos
    * - Si falla uno, continúa con el siguiente
    *
-   * Cron expression: "0 0 6 * * *"
+   * Cron expression: "0 0 1 * * *"
    * - 0 segundos
    * - 0 minutos
-   * - 6 hora (06:00)
+   * - 1 hora (01:00 UTC)
    * - * cualquier día del mes
    * - * cualquier mes
    * - * cualquier día de la semana
@@ -243,13 +247,14 @@ export class HoroscopeCronService {
   }
 
   /**
-   * T-BUG-016-B: Verifica la completitud de la generación diaria - 09:00 UTC
+   * T-BUG-016-B: Verifica la completitud de la generación diaria - 02:00 UTC
    *
-   * Se ejecuta unas horas después de la generación de las 06:00 para detectar
-   * signos que hayan quedado sin horóscopo (por fallos transitorios persistentes)
-   * y regenerar únicamente los faltantes, sin tocar los ya generados.
+   * Se ejecuta 1 hora después de la generación de las 01:00 para detectar signos
+   * que hayan quedado sin horóscopo (por fallos transitorios persistentes) y
+   * regenerar únicamente los faltantes, sin tocar los ya generados. Corre a las
+   * 02:00 UTC (23:00 ART) para rellenar los huecos antes de la medianoche argentina.
    *
-   * Cron expression: "0 0 9 * * *" (todos los días a las 09:00 UTC)
+   * Cron expression: "0 0 2 * * *" (todos los días a las 02:00 UTC)
    */
   @Cron(VERIFICATION_SCHEDULE, {
     name: 'verify-daily-horoscope-completeness',
