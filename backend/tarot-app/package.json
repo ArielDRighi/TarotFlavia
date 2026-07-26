@@ -38,6 +38,7 @@
     "db:seed:all": "ts-node -r tsconfig-paths/register scripts/db-seed-all.ts",
     "db:seed:cards": "ts-node -r tsconfig-paths/register scripts/db-seed-cards.ts",
     "db:seed:users": "ts-node -r tsconfig-paths/register scripts/db-seed-users.ts",
+    "db:seed:admin": "ts-node -r tsconfig-paths/register scripts/db-seed-admin.ts",
     "generate:reading": "ts-node -r tsconfig-paths/register scripts/generate-reading.ts",
     "test:e2e:local": "npm run db:e2e:reset && npm run test:e2e && npm run db:e2e:clean",
     "logs:openai": "ts-node -r tsconfig-paths/register scripts/logs-openai.ts",
