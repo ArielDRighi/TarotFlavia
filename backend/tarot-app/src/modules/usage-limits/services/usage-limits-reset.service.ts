@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { UsageLimit } from '../entities/usage-limit.entity';
 import { USAGE_RETENTION_DAYS } from '../usage-limits.constants';
-import { getDateDaysAgoUTCString } from '../../../common/utils/date.utils';
+import { getDateDaysAgoAppString } from '../../../common/utils/date.utils';
 
 /**
  * Service responsible for daily reset of usage limits.
@@ -37,7 +37,7 @@ export class UsageLimitsResetService {
     this.logger.log('Daily usage limits reset job started');
 
     try {
-      const cutoffDateStr = getDateDaysAgoUTCString(USAGE_RETENTION_DAYS);
+      const cutoffDateStr = getDateDaysAgoAppString(USAGE_RETENTION_DAYS);
 
       const deleteResult = await this.usageLimitRepository.delete({
         date: LessThan(cutoffDateStr),
@@ -66,7 +66,7 @@ export class UsageLimitsResetService {
     recordsToDelete: number;
     retentionDays: number;
   }> {
-    const cutoffDateStr = getDateDaysAgoUTCString(USAGE_RETENTION_DAYS);
+    const cutoffDateStr = getDateDaysAgoAppString(USAGE_RETENTION_DAYS);
 
     const count = await this.usageLimitRepository.count({
       where: {

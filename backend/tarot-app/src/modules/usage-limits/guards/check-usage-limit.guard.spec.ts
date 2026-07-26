@@ -549,8 +549,8 @@ describe('CheckUsageLimitGuard', () => {
         const userId = 1;
         const today = '2025-01-15';
 
-        // Mock getTodayUTCDateString to return "today"
-        jest.spyOn(dateUtils, 'getTodayUTCDateString').mockReturnValue(today);
+        // Mock getTodayAppDateString to return "today"
+        jest.spyOn(dateUtils, 'getTodayAppDateString').mockReturnValue(today);
 
         // Recreate module with dailyReadingRepository mock
         const mockDailyQueryBuilder = {
@@ -634,7 +634,7 @@ describe('CheckUsageLimitGuard', () => {
         const userId = 1;
         const today = '2025-01-15';
 
-        jest.spyOn(dateUtils, 'getTodayUTCDateString').mockReturnValue(today);
+        jest.spyOn(dateUtils, 'getTodayAppDateString').mockReturnValue(today);
 
         const mockDailyQueryBuilder = {
           where: jest.fn().mockReturnThis(),
@@ -713,9 +713,9 @@ describe('CheckUsageLimitGuard', () => {
         const userId = 1;
         const today = '2025-01-15';
 
-        jest.spyOn(dateUtils, 'getTodayUTCDateString').mockReturnValue(today);
+        jest.spyOn(dateUtils, 'getTodayAppDateString').mockReturnValue(today);
         jest
-          .spyOn(dateUtils, 'getStartOfTodayUTC')
+          .spyOn(dateUtils, 'getStartOfTodayApp')
           .mockReturnValue(new Date('2025-01-15T00:00:00.000Z'));
 
         const mockTarotQueryBuilder = {
@@ -795,9 +795,9 @@ describe('CheckUsageLimitGuard', () => {
         const userId = 1;
         const today = '2025-01-15';
 
-        jest.spyOn(dateUtils, 'getTodayUTCDateString').mockReturnValue(today);
+        jest.spyOn(dateUtils, 'getTodayAppDateString').mockReturnValue(today);
         jest
-          .spyOn(dateUtils, 'getStartOfTodayUTC')
+          .spyOn(dateUtils, 'getStartOfTodayApp')
           .mockReturnValue(new Date('2025-01-15T00:00:00.000Z'));
 
         const mockTarotQueryBuilder = {
@@ -869,16 +869,16 @@ describe('CheckUsageLimitGuard', () => {
         jest.restoreAllMocks();
       });
 
-      it('should use consistent UTC date for both DAILY_CARD and TAROT_READING', async () => {
+      it('should use a consistent app-timezone date for both DAILY_CARD and TAROT_READING', async () => {
         // Verify both features use the same date utility functions
         const today = '2025-01-15';
         const startOfToday = new Date('2025-01-15T00:00:00.000Z');
 
         const getTodaySpy = jest
-          .spyOn(dateUtils, 'getTodayUTCDateString')
+          .spyOn(dateUtils, 'getTodayAppDateString')
           .mockReturnValue(today);
         const getStartSpy = jest
-          .spyOn(dateUtils, 'getStartOfTodayUTC')
+          .spyOn(dateUtils, 'getStartOfTodayApp')
           .mockReturnValue(startOfToday);
 
         // Test DAILY_CARD
