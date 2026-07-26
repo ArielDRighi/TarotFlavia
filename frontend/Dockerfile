@@ -4,8 +4,9 @@ FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
+# Copy package files (.npmrc sets legacy-peer-deps so npm install resolves the
+# @hookform/resolvers v5 optional-peer conflict on valibot — see frontend/.npmrc)
+COPY package.json .npmrc ./
 RUN npm install
 
 # ── Stage 2: Build ──────────────────────────────────────────────
