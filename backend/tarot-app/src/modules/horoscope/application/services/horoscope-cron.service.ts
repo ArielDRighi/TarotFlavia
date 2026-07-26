@@ -33,6 +33,7 @@ interface GenerationResult {
  *
  * Responsabilidades:
  * - Generar horóscopos diarios a las 01:00 UTC de forma SECUENCIAL
+ * - Rellenar los faltantes de hoy al arrancar la app (backfill de bootstrap)
  * - Respetar límites de rate de la API de IA (15 RPM para Gemini)
  * - Limpiar horóscopos antiguos semanalmente
  * - Proveer método manual para testing

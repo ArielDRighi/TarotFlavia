@@ -98,6 +98,14 @@ describe('HoroscopeCronService', () => {
       expect(
         mockHoroscopeGenerationService.findMissingSignsForDate,
       ).toHaveBeenCalledTimes(1);
+
+      // Se rellena la fecha de HOY (blinda contra regresiones en el argumento).
+      const dateArg =
+        mockHoroscopeGenerationService.findMissingSignsForDate.mock.calls[0][0];
+      expect(dateArg).toBeInstanceOf(Date);
+      expect((dateArg as Date).toISOString().split('T')[0]).toBe(
+        new Date().toISOString().split('T')[0],
+      );
     });
 
     it('NO dispara generación fuera de producción (dev/test)', async () => {
