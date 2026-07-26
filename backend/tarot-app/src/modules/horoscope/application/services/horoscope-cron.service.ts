@@ -74,7 +74,11 @@ export class HoroscopeCronService {
   constructor(private readonly horoscopeService: HoroscopeGenerationService) {}
 
   /**
-   * Genera horóscopos diarios para todos los signos - 06:00 UTC
+   * Genera horóscopos diarios para todos los signos - 01:00 UTC (22:00 ART)
+   *
+   * Se corre antes de la medianoche argentina para que el día ya esté generado
+   * cuando el front cambia al nuevo día local (00:00 hora local). Ver la razón
+   * completa en GENERATION_SCHEDULE (horoscope-cron.config.ts).
    *
    * LÓGICA SECUENCIAL:
    * - Un signo a la vez
@@ -82,10 +86,10 @@ export class HoroscopeCronService {
    * - Total: ~72 segundos para 12 signos
    * - Si falla uno, continúa con el siguiente
    *
-   * Cron expression: "0 0 6 * * *"
+   * Cron expression: "0 0 1 * * *"
    * - 0 segundos
    * - 0 minutos
-   * - 6 hora (06:00)
+   * - 1 hora (01:00 UTC)
    * - * cualquier día del mes
    * - * cualquier mes
    * - * cualquier día de la semana
