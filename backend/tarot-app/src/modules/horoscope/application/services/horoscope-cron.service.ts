@@ -31,7 +31,7 @@ interface GenerationResult {
  * Servicio de cron jobs para generación automática de horóscopos
  *
  * Responsabilidades:
- * - Generar horóscopos diarios a las 06:00 UTC de forma SECUENCIAL
+ * - Generar horóscopos diarios a las 01:00 UTC de forma SECUENCIAL
  * - Respetar límites de rate de la API de IA (15 RPM para Gemini)
  * - Limpiar horóscopos antiguos semanalmente
  * - Proveer método manual para testing
