@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useAuth } from '../useAuth';
+import { useUserCapabilities } from '../api/useUserCapabilities';
 import type { UserPlan } from '@/types';
 
 /**
@@ -70,9 +71,18 @@ export interface UseUserPlanFeaturesReturn {
  */
 export function useUserPlanFeatures(): UseUserPlanFeaturesReturn {
   const { user } = useAuth();
+  const { data: capabilities } = useUserCapabilities();
+
+  // Source of truth for the plan is `capabilities.plan` (React Query, staleTime:0,
+  // recomputed from the DB on every fetch). The persisted `authStore.user.plan` is
+  // only a fallback for first paint while capabilities loads — it goes stale when
+  // the plan changes without a re-login (webhook upgrade, subscription expiry), so
+  // deriving gating from it caused "still free after paying" bugs.
+  const capabilitiesPlan = capabilities?.plan as UserPlan | undefined;
+  const authPlan = user?.plan as UserPlan | undefined;
 
   return useMemo(() => {
-    const plan: UserPlan = (user?.plan as UserPlan) || 'anonymous';
+    const plan: UserPlan = capabilitiesPlan ?? authPlan ?? 'anonymous';
     const isPremium = plan === 'premium';
     const isFree = plan === 'free';
     const isAnonymous = plan === 'anonymous';
@@ -88,5 +98,5 @@ export function useUserPlanFeatures(): UseUserPlanFeaturesReturn {
       isFree,
       isAnonymous,
     };
-  }, [user?.plan]);
+  }, [capabilitiesPlan, authPlan]);
 }

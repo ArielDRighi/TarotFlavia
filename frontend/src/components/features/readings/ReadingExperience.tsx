@@ -2,14 +2,13 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { RefreshCw, Share2, Plus, Sparkles } from 'lucide-react';
+import { Share2, Plus, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import {
   useMyAvailableSpreads,
   usePredefinedQuestions,
   useCreateReading,
-  useRegenerateInterpretation,
   useCategories,
 } from '@/hooks/api/useReadings';
 import { getShareText } from '@/lib/api/readings-api';
@@ -28,6 +27,7 @@ import { Spinner } from '@/components/ui/spinner';
 import FreeReadingUpgradeBanner from './FreeReadingUpgradeBanner';
 import UpgradeModal from './UpgradeModal';
 import DailyLimitReachedModal from './DailyLimitReachedModal';
+import { ReadingLimitReached } from './ReadingLimitReached';
 import { cn } from '@/lib/utils';
 import type {
   ReadingDetail,
@@ -288,17 +288,15 @@ export function ReadingExperience({
 }: ReadingExperienceProps) {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { canUseAI } = useUserPlanFeatures();
+  const { canUseAI, isPremium } = useUserPlanFeatures();
 
   // API Hooks
   const { data: spreads, isLoading: isSpreadsLoading } = useMyAvailableSpreads();
   const { data: predefinedQuestions, isLoading: isQuestionsLoading } = usePredefinedQuestions();
   const { data: categories } = useCategories();
-  const { data: capabilities } = useUserCapabilities();
+  const { data: capabilities, isLoading: isCapabilitiesLoading } = useUserCapabilities();
   const { cardIndices } = useTarotDeck();
   const { mutateAsync: createReading } = useCreateReading();
-  const { mutate: regenerateInterpretation, isPending: isRegenerating } =
-    useRegenerateInterpretation();
   const [isSharing, setIsSharing] = useState(false);
 
   // State
@@ -324,8 +322,9 @@ export function ReadingExperience({
   }, [questionId, predefinedQuestions]);
 
   const cardsCount = spread?.cardCount ?? 0;
-  // More robust isPremium check - ensure user and plan exist
-  const isPremium = Boolean(user?.plan) && user?.plan?.toUpperCase() === 'PREMIUM';
+  // isPremium comes from useUserPlanFeatures, which derives the plan from
+  // capabilities (fresh) with an authStore fallback — so it reflects a webhook
+  // upgrade/expiry without a re-login instead of the stale persisted JWT plan.
 
   // Derive category name client-side (backend does not serialize categoryName in the response)
   const resolvedCategoryName =
@@ -454,11 +453,6 @@ export function ReadingExperience({
   ]);
 
   // Action handlers
-  const handleRegenerate = useCallback(() => {
-    if (!readingResult) return;
-    regenerateInterpretation(readingResult.id);
-  }, [readingResult, regenerateInterpretation]);
-
   const handleShare = useCallback(async () => {
     if (!readingResult) return;
 
@@ -504,8 +498,11 @@ export function ReadingExperience({
     return capabilities?.canCreateTarotReading ?? false;
   }, [user, capabilities]);
 
-  // Render loading/missing spread state
-  if (isSpreadsLoading || isQuestionsLoading) {
+  // Render loading/missing spread state.
+  // Wait for capabilities too: without it, a direct-URL entry with the limit
+  // exhausted would briefly flash the card grid (capabilities undefined → gate
+  // skipped) before ReadingLimitReached takes over once capabilities resolve.
+  if (isSpreadsLoading || isQuestionsLoading || isCapabilitiesLoading) {
     return (
       <div className="bg-bg-main flex min-h-screen items-center justify-center p-8">
         <Spinner size="lg" text="Cargando..." />
@@ -522,6 +519,19 @@ export function ReadingExperience({
             onRetry={() => router.push(ROUTES.TAROT)}
           />
         </div>
+      </div>
+    );
+  }
+
+  // Gate: si el límite diario está alcanzado, no permitir (re)elegir cartas.
+  // Cubre la navegación "atrás/adelante" del navegador y el ingreso por URL directa
+  // a la pantalla de lectura con el límite agotado (el backend también rechaza al
+  // crear, pero el wizard no debe siquiera mostrar la grilla de cartas). Solo aplica
+  // al estado 'selecting': la vista del informe ('result') nunca se bloquea.
+  if (state === 'selecting' && capabilities && !capabilities.canCreateTarotReading) {
+    return (
+      <div className="bg-bg-main flex min-h-screen items-center justify-center p-4 md:p-8">
+        <ReadingLimitReached />
       </div>
     );
   }
@@ -661,13 +671,6 @@ export function ReadingExperience({
 
           {/* Action Buttons */}
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            {isPremium && (
-              <Button variant="outline" onClick={handleRegenerate} disabled={isRegenerating}>
-                <RefreshCw className={cn('mr-2 h-4 w-4', isRegenerating && 'animate-spin')} />
-                Regenerar Interpretación
-              </Button>
-            )}
-
             <Button variant="outline" onClick={handleShare} disabled={isSharing}>
               <Share2 className="mr-2 h-4 w-4" />
               Compartir

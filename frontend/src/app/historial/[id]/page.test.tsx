@@ -33,7 +33,6 @@ vi.mock('@/hooks/useRequireAuth', () => ({
 vi.mock('@/hooks/api/useReadings', () => ({
   useReadingDetail: vi.fn(),
   useSpreads: vi.fn(),
-  useRegenerateInterpretation: vi.fn(),
   useShareReading: vi.fn(),
 }));
 
@@ -172,11 +171,6 @@ describe('ReadingDetailPage', () => {
       isError: false,
       error: null,
     } as ReturnType<typeof useReadingsModule.useSpreads>);
-
-    vi.mocked(useReadingsModule.useRegenerateInterpretation).mockReturnValue({
-      mutate: vi.fn(),
-      isPending: false,
-    } as unknown as ReturnType<typeof useReadingsModule.useRegenerateInterpretation>);
 
     vi.mocked(useReadingsModule.useShareReading).mockReturnValue({
       mutate: vi.fn(),

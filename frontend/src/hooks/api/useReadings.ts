@@ -19,7 +19,6 @@ import {
   getReadingById,
   createReading,
   deleteReading,
-  regenerateInterpretation,
   shareReading,
   unshareReading,
   getTrashedReadings,
@@ -175,25 +174,6 @@ export function useDeleteReading() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Error al eliminar lectura');
-    },
-  });
-}
-
-/**
- * Hook to regenerate AI interpretation for a reading
- * On success: invalidates the specific reading and shows toast
- */
-export function useRegenerateInterpretation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (readingId: number) => regenerateInterpretation(readingId),
-    onSuccess: (_, readingId) => {
-      queryClient.invalidateQueries({ queryKey: readingQueryKeys.detail(readingId) });
-      toast.success('Interpretación regenerada');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Error al regenerar interpretación');
     },
   });
 }

@@ -5,7 +5,6 @@ import { CreateReadingUseCase } from '../use-cases/create-reading.use-case';
 import { ListReadingsUseCase } from '../use-cases/list-readings.use-case';
 import { GetReadingUseCase } from '../use-cases/get-reading.use-case';
 import { ShareReadingUseCase } from '../use-cases/share-reading.use-case';
-import { RegenerateReadingUseCase } from '../use-cases/regenerate-reading.use-case';
 import { DeleteReadingUseCase } from '../use-cases/delete-reading.use-case';
 import { RestoreReadingUseCase } from '../use-cases/restore-reading.use-case';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
@@ -24,7 +23,6 @@ describe('ReadingsOrchestratorService', () => {
   let listReadingsUC: jest.Mocked<ListReadingsUseCase>;
   let getReadingUC: jest.Mocked<GetReadingUseCase>;
   let shareReadingUC: jest.Mocked<ShareReadingUseCase>;
-  let regenerateReadingUC: jest.Mocked<RegenerateReadingUseCase>;
   let deleteReadingUC: jest.Mocked<DeleteReadingUseCase>;
   let restoreReadingUC: jest.Mocked<RestoreReadingUseCase>;
   let mockReadingMapper: jest.Mocked<ReadingMapperService>;
@@ -109,10 +107,6 @@ describe('ReadingsOrchestratorService', () => {
       execute: jest.fn(),
     };
 
-    const mockRegenerateReadingUC = {
-      execute: jest.fn(),
-    };
-
     const mockDeleteReadingUC = {
       execute: jest.fn(),
     };
@@ -145,10 +139,6 @@ describe('ReadingsOrchestratorService', () => {
           useValue: mockShareReadingUC,
         },
         {
-          provide: RegenerateReadingUseCase,
-          useValue: mockRegenerateReadingUC,
-        },
-        {
           provide: DeleteReadingUseCase,
           useValue: mockDeleteReadingUC,
         },
@@ -175,7 +165,6 @@ describe('ReadingsOrchestratorService', () => {
     listReadingsUC = module.get(ListReadingsUseCase);
     getReadingUC = module.get(GetReadingUseCase);
     shareReadingUC = module.get(ShareReadingUseCase);
-    regenerateReadingUC = module.get(RegenerateReadingUseCase);
     deleteReadingUC = module.get(DeleteReadingUseCase);
     restoreReadingUC = module.get(RestoreReadingUseCase);
     mockReadingMapper = module.get(ReadingMapperService);
@@ -362,20 +351,6 @@ describe('ReadingsOrchestratorService', () => {
 
         expect(shareReadingUC.execute).toHaveBeenCalledWith(1, mockUser.id);
         expect(result).toEqual(shareResult);
-      });
-    });
-
-    describe('regenerateInterpretation', () => {
-      it('should delegate to RegenerateReadingUseCase', async () => {
-        regenerateReadingUC.execute.mockResolvedValue(mockReading);
-
-        const result = await service.regenerateInterpretation(1, mockUser.id);
-
-        expect(regenerateReadingUC.execute).toHaveBeenCalledWith(
-          1,
-          mockUser.id,
-        );
-        expect(result).toEqual(mockReading);
       });
     });
 

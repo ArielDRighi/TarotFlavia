@@ -190,6 +190,31 @@ export class UsageLimitsService {
     return Math.max(0, limit - currentCount);
   }
 
+  /**
+   * Resetea el consumo de HOY de un usuario borrando todos sus registros de uso
+   * del día en curso. Se usa al activar/cambiar el plan (p.ej. upgrade a Premium)
+   * para que el consumo acumulado bajo el plan anterior no se descuente de la
+   * cuota del nuevo plan dentro de la misma ventana diaria.
+   *
+   * NOTA: borra el consumo de TODAS las features del día (tarot, carta del día,
+   * péndulo, etc.), no solo tarot. Es intencional: al cambiar de plan el usuario
+   * "empieza limpio" el día con la cuota completa del plan nuevo en cada feature.
+   *
+   * @returns Cantidad de registros eliminados.
+   */
+  async resetTodayUsage(userId: number): Promise<number> {
+    const todayStr = getTodayUTCDateString();
+
+    const result = await this.usageLimitRepository
+      .createQueryBuilder()
+      .delete()
+      .where('userId = :userId', { userId })
+      .andWhere('date = :date', { date: todayStr })
+      .execute();
+
+    return result.affected || 0;
+  }
+
   async cleanOldRecords(): Promise<number> {
     const cutoffDateStr = getDateDaysAgoUTCString(USAGE_RETENTION_DAYS);
 

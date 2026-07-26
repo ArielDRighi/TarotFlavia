@@ -875,4 +875,47 @@ describe('UsageLimitsService', () => {
       });
     });
   });
+
+  describe('resetTodayUsage', () => {
+    it("should delete today's usage records for the user and return affected count", async () => {
+      const mockQueryBuilder = {
+        delete: jest.fn().mockReturnThis(),
+        from: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({ affected: 2 }),
+      };
+
+      mockUsageLimitRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder,
+      );
+
+      const result = await service.resetTodayUsage(1);
+
+      expect(result).toBe(2);
+      expect(mockQueryBuilder.delete).toHaveBeenCalled();
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('userId = :userId', {
+        userId: 1,
+      });
+      expect(mockQueryBuilder.execute).toHaveBeenCalled();
+    });
+
+    it('should return 0 when there are no records for today', async () => {
+      const mockQueryBuilder = {
+        delete: jest.fn().mockReturnThis(),
+        from: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue({ affected: 0 }),
+      };
+
+      mockUsageLimitRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder,
+      );
+
+      const result = await service.resetTodayUsage(999);
+
+      expect(result).toBe(0);
+    });
+  });
 });

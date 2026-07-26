@@ -30,7 +30,6 @@ describe('ReadingsController', () => {
     findAll: jest.fn(),
     findOne: jest.fn(),
     findTrashedReadings: jest.fn(),
-    regenerateInterpretation: jest.fn(),
     remove: jest.fn(),
     restore: jest.fn(),
     shareReading: jest.fn(),
@@ -148,15 +147,6 @@ describe('ReadingsController', () => {
       // Pero el gate real de IA (RequiresPremiumForAIGuard) debe seguir presente:
       // su remoción accidental abriría IA a Free sin que ningún test falle.
       expect(guards).toContain(RequiresPremiumForAIGuard);
-    });
-
-    it('mantiene AIQuotaGuard en la regeneración de interpretación (flujo exclusivo de IA)', () => {
-      const guards = (Reflect.getMetadata(
-        '__guards__',
-        ReadingsController.prototype.regenerateInterpretation,
-      ) ?? []) as unknown[];
-
-      expect(guards).toContain(AIQuotaGuard);
     });
   });
 
@@ -337,27 +327,6 @@ describe('ReadingsController', () => {
 
       expect(orchestrator.findOne).toHaveBeenCalledWith(1, 1, false);
       expect(result).toEqual(mockReading);
-    });
-  });
-
-  describe('regenerateInterpretation', () => {
-    it('should regenerate interpretation for a reading', async () => {
-      const regeneratedReading = {
-        ...mockReading,
-        interpretation: 'New interpretation',
-        regenerationCount: 1,
-      };
-
-      mockOrchestrator.regenerateInterpretation.mockResolvedValue(
-        regeneratedReading,
-      );
-
-      const req = { user: { userId: 1 } };
-      const result = await controller.regenerateInterpretation(req, 1);
-
-      expect(orchestrator.regenerateInterpretation).toHaveBeenCalledWith(1, 1);
-      expect(result).toEqual(regeneratedReading);
-      expect(result.regenerationCount).toBe(1);
     });
   });
 

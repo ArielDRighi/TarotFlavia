@@ -10,6 +10,13 @@ vi.mock('next/navigation', () => ({
   usePathname: () => mockUsePathname(),
 }));
 
+// useUserPlanFeatures now reads capabilities as the primary plan source. Mock it
+// as "not loaded" so the hook falls back to the authStore plan that these tests
+// drive via setAuthState (and no QueryClient wrapper is needed).
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => ({ data: undefined }),
+}));
+
 const ADSENSE_CLIENT = 'ca-pub-1234567890123456';
 
 function buildUser(plan: UserPlan): AuthUser {

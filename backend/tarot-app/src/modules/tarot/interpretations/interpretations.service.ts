@@ -384,25 +384,6 @@ export class InterpretationsService {
     }
   }
 
-  // Método para regenerar la interpretación de una lectura existente
-  private async regenerateInterpretation(
-    reading: TarotReading,
-  ): Promise<InterpretationResult> {
-    const cards = reading.cards;
-    const positions = reading.cardPositions;
-
-    const result = await this.generateInterpretation(
-      cards as TarotCard[], // TypeORM loads full entities at runtime despite interface type
-      positions,
-      reading.question,
-    );
-
-    // Actualizar la interpretación en la lectura
-    reading.interpretation = result.interpretation;
-
-    return result;
-  }
-
   getCacheHitRate(): number {
     return this.totalRequests === 0
       ? 0

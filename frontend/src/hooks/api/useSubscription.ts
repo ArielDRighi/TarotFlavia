@@ -14,7 +14,7 @@ import {
   getSubscriptionStatus,
   cancelSubscription,
 } from '@/lib/api/subscription-mp-api';
-import { capabilitiesQueryKeys } from './useUserCapabilities';
+import { invalidateUserData } from '@/lib/utils/invalidate-user-data';
 import type { MpSubscriptionStatus } from '@/types';
 
 // ============================================================================
@@ -87,8 +87,9 @@ export function useCancelSubscription() {
   return useMutation({
     mutationFn: cancelSubscription,
     onSuccess: () => {
-      // Invalidate capabilities to reflect updated plan state
-      queryClient.invalidateQueries({ queryKey: capabilitiesQueryKeys.capabilities });
+      // Refresh capabilities + profile (refetchType:'all' covers inactive queries)
+      // so every plan-gated surface reflects the cancelled state.
+      void invalidateUserData(queryClient);
       // Invalidate subscription status to reflect cancelled state
       queryClient.invalidateQueries({ queryKey: subscriptionMpQueryKeys.status });
     },

@@ -55,6 +55,9 @@ export function useUpdateProfile() {
       // Invalidar numerología ya que depende de birthDate y name del usuario
       queryClient.invalidateQueries({ queryKey: numerologyQueryKeys.myProfile() });
       queryClient.invalidateQueries({ queryKey: numerologyQueryKeys.myInterpretation() });
+      // Refrescar el authStore (nombre/fecha de nacimiento) para que superficies que
+      // leen del store (p.ej. la inicial del avatar en UserMenu) no queden stale.
+      void useAuthStore.getState().checkAuth();
       toast.success('Perfil actualizado exitosamente');
     },
     onError: (error: Error) => {

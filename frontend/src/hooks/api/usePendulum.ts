@@ -15,7 +15,8 @@ import {
 } from '@/lib/api/pendulum-api';
 import type { PendulumQueryRequest, PendulumResponse } from '@/types/pendulum.types';
 import type { PendulumFeatureLimit } from '@/types/capabilities.types';
-import { useUserCapabilities, capabilitiesQueryKeys } from './useUserCapabilities';
+import { useUserCapabilities } from './useUserCapabilities';
+import { invalidateUserData } from '@/lib/utils/invalidate-user-data';
 
 // ============================================================================
 // Query Keys (for consistency and type safety)
@@ -47,7 +48,9 @@ export function usePendulumQuery() {
     mutationFn: (request: PendulumQueryRequest) => queryPendulum(request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pendulumKeys.all });
-      queryClient.invalidateQueries({ queryKey: capabilitiesQueryKeys.capabilities });
+      // invalidateUserData refetches capabilities + profile even when inactive
+      // (refetchType:'all'), so a pendulum-limit widget mounted elsewhere refreshes.
+      void invalidateUserData(queryClient);
     },
   });
 }

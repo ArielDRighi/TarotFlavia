@@ -187,10 +187,6 @@ vi.mock('@/hooks/api/useReadings', () => ({
     mutateAsync: mockCreateReadingMutateAsync,
     isPending: false,
   }),
-  useRegenerateInterpretation: () => ({
-    mutate: vi.fn(),
-    isPending: false,
-  }),
   useShareReading: () => ({
     mutate: vi.fn(),
     isPending: false,
@@ -198,6 +194,28 @@ vi.mock('@/hooks/api/useReadings', () => ({
   useCategories: () => ({
     data: [{ id: 1, name: 'Amor', slug: 'amor' }],
     isLoading: false,
+  }),
+}));
+
+// Capabilities: allow creating a reading (gate must not block) and be loaded.
+vi.mock('@/hooks/api/useUserCapabilities', () => ({
+  useUserCapabilities: () => ({
+    data: {
+      dailyCard: { used: 0, limit: 1, canUse: true, resetAt: '2026-07-24T00:00:00Z' },
+      tarotReadings: { used: 0, limit: 3, canUse: true, resetAt: '2026-07-24T00:00:00Z' },
+      pendulum: { used: 0, limit: 3, canUse: true, resetAt: null, period: 'monthly' },
+      canCreateDailyReading: true,
+      canCreateTarotReading: true,
+      canUseAI: false,
+      canUseCustomQuestions: false,
+      canUseAdvancedSpreads: false,
+      canUseFullDeck: false,
+      plan: 'free',
+      isAuthenticated: true,
+    },
+    isLoading: false,
+    isError: false,
+    error: null,
   }),
 }));
 

@@ -8,7 +8,6 @@ import { CreateReadingUseCase } from '../use-cases/create-reading.use-case';
 import { ListReadingsUseCase } from '../use-cases/list-readings.use-case';
 import { GetReadingUseCase } from '../use-cases/get-reading.use-case';
 import { ShareReadingUseCase } from '../use-cases/share-reading.use-case';
-import { RegenerateReadingUseCase } from '../use-cases/regenerate-reading.use-case';
 import { DeleteReadingUseCase } from '../use-cases/delete-reading.use-case';
 import { RestoreReadingUseCase } from '../use-cases/restore-reading.use-case';
 import { IReadingRepository } from '../../domain/interfaces/reading-repository.interface';
@@ -33,7 +32,6 @@ export class ReadingsOrchestratorService {
     private readonly listReadingsUC: ListReadingsUseCase,
     private readonly getReadingUC: GetReadingUseCase,
     private readonly shareReadingUC: ShareReadingUseCase,
-    private readonly regenerateReadingUC: RegenerateReadingUseCase,
     private readonly deleteReadingUC: DeleteReadingUseCase,
     private readonly restoreReadingUC: RestoreReadingUseCase,
     private readonly mapper: ReadingMapperService,
@@ -65,13 +63,6 @@ export class ReadingsOrchestratorService {
     userId: number,
   ): Promise<{ sharedToken: string; shareUrl: string; isPublic: boolean }> {
     return this.shareReadingUC.execute(id, userId);
-  }
-
-  async regenerateInterpretation(
-    id: number,
-    userId: number,
-  ): Promise<TarotReading> {
-    return this.regenerateReadingUC.execute(id, userId);
   }
 
   async remove(id: number, userId: number): Promise<void> {

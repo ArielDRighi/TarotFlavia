@@ -74,7 +74,6 @@ describe('ReadingsController', () => {
     restore: jest.fn(),
     shareReading: jest.fn(),
     unshareReading: jest.fn(),
-    regenerateInterpretation: jest.fn(),
     findAllForAdmin: jest.fn(),
     cleanupOldDeletedReadings: jest.fn(),
     getSharedReading: jest.fn(),

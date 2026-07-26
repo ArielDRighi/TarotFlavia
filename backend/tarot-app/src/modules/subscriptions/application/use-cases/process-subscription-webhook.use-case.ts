@@ -13,6 +13,7 @@ import {
   SubscriptionStatus,
 } from '../../../users/entities/user.entity';
 import { EmailService } from '../../../email/email.service';
+import { UsageLimitsService } from '../../../usage-limits/usage-limits.service';
 
 /** Etiquetas de los planes tal como se muestran al usuario en el email */
 const PLAN_LABELS: Record<UserPlan, string> = {
@@ -30,6 +31,7 @@ export class ProcessSubscriptionWebhookUseCase {
     private readonly userRepo: IUserRepository,
     private readonly mercadoPagoService: MercadoPagoService,
     private readonly emailService: EmailService,
+    private readonly usageLimitsService: UsageLimitsService,
   ) {}
 
   async execute(
@@ -161,6 +163,7 @@ export class ProcessSubscriptionWebhookUseCase {
         oldPlan: PLAN_LABELS[previousPlan],
         newPlan: PLAN_LABELS[UserPlan.PREMIUM],
         changeDate: new Date().toLocaleDateString('es-AR', {
+          timeZone: 'America/Argentina/Buenos_Aires',
           day: '2-digit',
           month: 'long',
           year: 'numeric',
@@ -242,6 +245,23 @@ export class ProcessSubscriptionWebhookUseCase {
     this.logger.log(
       `Usuario ${user.id} activado como PREMIUM (preapproval: ${preapprovalId})`,
     );
+
+    // Resetear el consumo de hoy para que las lecturas hechas bajo el plan
+    // anterior no descuenten de la cuota del plan Premium en la misma ventana
+    // diaria. No crítico: un fallo aquí no debe romper la activación del pago.
+    try {
+      const deleted = await this.usageLimitsService.resetTodayUsage(user.id);
+      if (deleted > 0) {
+        this.logger.log(
+          `Consumo del día reseteado para usuario ${user.id} tras upgrade a Premium (${deleted} registros)`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error al resetear el consumo del día del usuario ${user.id} tras upgrade a Premium`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
 
     await this.notifyPlanChange(user, previousPlan);
 

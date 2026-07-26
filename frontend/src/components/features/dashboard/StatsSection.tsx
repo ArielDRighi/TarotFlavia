@@ -83,7 +83,11 @@ export function StatsSection({ index = 0 }: StatsSectionProps) {
         />
       </WidgetCard>
     );
-  } else if (!capabilities) {
+  } else if (!capabilities || capabilities.plan === 'anonymous') {
+    // Defensive: never render an anonymous capabilities payload here. This widget
+    // is only shown to authenticated (premium) users; an 'anonymous' plan means a
+    // stale pre-auth response (used:0/limit:0) — treat it as "still loading" so we
+    // don't flash a bogus "0/0 - límite alcanzado" until the authenticated fetch lands.
     return null;
   } else {
     const dailyReadingsCount = capabilities.tarotReadings.used;

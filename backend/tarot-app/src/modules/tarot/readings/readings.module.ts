@@ -43,7 +43,6 @@ import { CreateReadingUseCase } from './application/use-cases/create-reading.use
 import { ListReadingsUseCase } from './application/use-cases/list-readings.use-case';
 import { GetReadingUseCase } from './application/use-cases/get-reading.use-case';
 import { ShareReadingUseCase } from './application/use-cases/share-reading.use-case';
-import { RegenerateReadingUseCase } from './application/use-cases/regenerate-reading.use-case';
 import { DeleteReadingUseCase } from './application/use-cases/delete-reading.use-case';
 import { RestoreReadingUseCase } from './application/use-cases/restore-reading.use-case';
 
@@ -101,7 +100,6 @@ import { RestoreReadingUseCase } from './application/use-cases/restore-reading.u
     ListReadingsUseCase,
     GetReadingUseCase,
     ShareReadingUseCase,
-    RegenerateReadingUseCase,
     DeleteReadingUseCase,
     RestoreReadingUseCase,
   ],

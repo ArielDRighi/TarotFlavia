@@ -201,10 +201,6 @@ vi.mock('@/hooks/api/useReadings', () => ({
     mutateAsync: mockCreateReadingMutateAsync,
     isPending: false,
   }),
-  useRegenerateInterpretation: () => ({
-    mutate: vi.fn(),
-    isPending: false,
-  }),
   useShareReading: () => ({
     mutate: vi.fn(),
     isPending: false,

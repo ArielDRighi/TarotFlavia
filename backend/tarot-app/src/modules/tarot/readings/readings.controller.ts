@@ -33,7 +33,6 @@ import {
   CheckUsageLimit,
   UsageFeature,
 } from '../../usage-limits';
-import { AIQuotaGuard } from '../../ai-usage/infrastructure/guards/ai-quota.guard';
 import { ReadingsOrchestratorService } from './application/services/readings-orchestrator.service';
 import { ShareTextGeneratorService } from './application/services/share-text-generator.service';
 import { CreateReadingDto } from './dto/create-reading.dto';
@@ -196,42 +195,6 @@ export class ReadingsController {
     const isAdmin = req.user.isAdmin || false;
 
     return this.orchestrator.findOne(id, userId, isAdmin);
-  }
-
-  @UseGuards(JwtAuthGuard, AIQuotaGuard, CheckUsageLimitGuard)
-  @UseInterceptors(IncrementUsageInterceptor)
-  @CheckUsageLimit(UsageFeature.INTERPRETATION_REGENERATION)
-  @Post(':id/regenerate')
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Regenerar interpretación de una lectura existente',
-    description:
-      'Genera una nueva interpretación para una lectura existente manteniendo las mismas cartas. Solo disponible para usuarios premium. Límite: 3 regeneraciones por lectura. Consume de la cuota mensual de IA.',
-  })
-  @ApiParam({ name: 'id', description: 'ID de la lectura a regenerar' })
-  @ApiResponse({
-    status: 201,
-    description: 'Interpretación regenerada con éxito',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Usuario no es premium o no es el dueño de la lectura',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Lectura no encontrada',
-  })
-  @ApiResponse({
-    status: 429,
-    description:
-      'Límite de regeneraciones alcanzado (máximo 3 por lectura) o límite diario alcanzado',
-  })
-  async regenerateInterpretation(
-    @Request() req: { user: { userId: number } },
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    const userId = req.user.userId;
-    return this.orchestrator.regenerateInterpretation(id, userId);
   }
 
   @UseGuards(JwtAuthGuard)
