@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { HoroscopeGenerationService } from './horoscope-generation.service';
 import {
@@ -32,6 +33,7 @@ interface GenerationResult {
  *
  * Responsabilidades:
  * - Generar horóscopos diarios a las 01:00 UTC de forma SECUENCIAL
+ * - Rellenar los faltantes de hoy al arrancar la app (backfill de bootstrap)
  * - Respetar límites de rate de la API de IA (15 RPM para Gemini)
  * - Limpiar horóscopos antiguos semanalmente
  * - Proveer método manual para testing
@@ -41,9 +43,12 @@ interface GenerationResult {
  * - Delay de 6 segundos entre signos para no superar 15 RPM
  * - Total: ~72 segundos para 12 signos
  * - Si un signo falla, continúa con el siguiente
+ * - Al arrancar la app (OnApplicationBootstrap) rellena los horóscopos faltantes
+ *   de hoy, para recuperarse de corridas de cron perdidas por deploys/reinicios
+ *   (los @Cron de NestJS no ejecutan tareas perdidas).
  */
 @Injectable()
-export class HoroscopeCronService {
+export class HoroscopeCronService implements OnApplicationBootstrap {
   private readonly logger = new Logger(HoroscopeCronService.name);
 
   /**
@@ -71,7 +76,63 @@ export class HoroscopeCronService {
     ZodiacSign.PISCES,
   ];
 
-  constructor(private readonly horoscopeService: HoroscopeGenerationService) {}
+  constructor(
+    private readonly horoscopeService: HoroscopeGenerationService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  /**
+   * Hook de arranque: al levantar la app, rellena los horóscopos faltantes de hoy.
+   *
+   * Motivo: los @Cron de NestJS NO ejecutan tareas perdidas. Si el proceso estaba
+   * caído o redesplegando durante la ventana de generación (01:00 UTC) y de
+   * verificación (02:00 UTC), el día quedaría sin generar hasta el día siguiente.
+   * Este hook hace que cada deploy/reinicio se auto-cure el día en curso.
+   *
+   * - Solo corre en producción: en dev (watch mode) y test evita disparar la IA
+   *   en cada reinicio.
+   * - Fire-and-forget: no bloquea el arranque de la app (la generación puede
+   *   tardar ~72s). Los errores se loguean, no se propagan.
+   * - Idempotente: `generateMissingHoroscopes` solo genera los signos que faltan.
+   */
+  onApplicationBootstrap(): void {
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+
+    if (nodeEnv !== 'production') {
+      this.logger.log(
+        `Bootstrap backfill de horóscopos omitido (NODE_ENV=${nodeEnv ?? 'undefined'})`,
+      );
+      return;
+    }
+
+    // Fire-and-forget: no await para no bloquear el arranque.
+    void this.runBootstrapBackfill();
+  }
+
+  /**
+   * Ejecuta el relleno de faltantes del día en curso, capturando cualquier error
+   * para que un fallo del backfill nunca tumbe el arranque de la app.
+   */
+  private async runBootstrapBackfill(): Promise<void> {
+    try {
+      this.logger.log(
+        '=== BOOTSTRAP: verificando completitud de horóscopos de hoy ===',
+      );
+      const result = await this.generateMissingHoroscopes(new Date());
+      this.logger.log(
+        `Bootstrap backfill: ${result.missing} faltantes, ` +
+          `${result.successful} generados, ${result.failed} fallidos`,
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? (error.stack ?? '') : '';
+      this.logger.error(
+        `Error en bootstrap backfill de horóscopos: ${errorMessage}`,
+        errorStack,
+      );
+    }
+  }
 
   /**
    * Genera horóscopos diarios para todos los signos - 01:00 UTC (22:00 ART)
