@@ -1,3 +1,4 @@
+export { HomePageContent } from './HomePageContent';
 export { LandingPage } from './LandingPage';
 export { HeroSection } from './HeroSection';
 export { TryWithoutRegisterSection } from './TryWithoutRegisterSection';

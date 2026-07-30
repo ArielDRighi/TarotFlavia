@@ -1,44 +1,60 @@
-'use client';
+import type { Metadata } from 'next';
 
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
+import { CardDetailPageContent } from '@/components/features/encyclopedia/CardDetailPageContent';
+import { getCardBySlug, getCards } from '@/lib/api/encyclopedia-api';
+import { getCardDetailMetadata } from '@/lib/metadata/page-metadata';
+import type { CardDetail } from '@/types/encyclopedia.types';
 
-import { Button } from '@/components/ui/button';
-import { CardDetailView, EncyclopediaSkeleton } from '@/components/features/encyclopedia';
-import { useCard } from '@/hooks/api/useEncyclopedia';
-import { ROUTES } from '@/lib/constants/routes';
+/**
+ * Ficha de una carta del tarot.
+ *
+ * Route: /enciclopedia/tarot/[slug]
+ *
+ * Era un client component: las 78 fichas servían el MISMO HTML (el skeleton) y
+ * el MISMO `<title>` heredado del root layout, así que Google las agrupaba como
+ * duplicadas y elegía una sola canónica (T-PROD-020). Ahora la ruta resuelve la
+ * carta en el servidor: `title`/`description` propios y contenido real en el HTML.
+ */
 
-// ─── Component ────────────────────────────────────────────────────────────────
+/** La enciclopedia es contenido estático; un día de ISR alcanza y sobra. */
+export const revalidate = 86400;
 
-export default function CardDetailPage() {
-  const params = useParams();
-  const slug = params.slug as string;
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
 
-  const { data: card, isLoading, error } = useCard(slug);
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <EncyclopediaSkeleton variant="detail" />
-      </div>
-    );
+/**
+ * La API puede no responder durante el build. Preferimos degradar (metadata
+ * heredada + fetch desde el cliente) antes que romper el render de la ruta,
+ * mismo criterio que `sitemap.ts`.
+ */
+async function safeGetCard(slug: string): Promise<CardDetail | null> {
+  try {
+    return await getCardBySlug(slug);
+  } catch {
+    return null;
   }
+}
 
-  if (error || !card) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="mb-4 text-2xl">Carta no encontrada</h1>
-        <p className="text-muted-foreground mb-6">La carta que buscas no existe o fue eliminada.</p>
-        <Button asChild>
-          <Link href={ROUTES.ENCICLOPEDIA_TAROT}>Ver todas las cartas</Link>
-        </Button>
-      </div>
-    );
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const card = await safeGetCard(slug);
+
+  return card ? getCardDetailMetadata(card) : {};
+}
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  try {
+    const cards = await getCards();
+    return cards.map((card) => ({ slug: card.slug }));
+  } catch {
+    return [];
   }
+}
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <CardDetailView card={card} />
-    </div>
-  );
+export default async function CardDetailRoute({ params }: PageProps) {
+  const { slug } = await params;
+  const card = await safeGetCard(slug);
+
+  return <CardDetailPageContent slug={slug} initialCard={card} />;
 }

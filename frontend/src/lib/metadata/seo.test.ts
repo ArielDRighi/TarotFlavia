@@ -85,8 +85,14 @@ describe('SEO Metadata Configuration', () => {
 
   describe('homeMetadata', () => {
     it('should have specific title and description', () => {
-      expect(homeMetadata.title).toBe('Tu guía espiritual');
+      // La marca va en el título de la home porque el `title.template` del root
+      // layout no aplica al segmento que lo define (T-PROD-020).
+      expect(homeMetadata.title).toBe('Auguria — Tu guía espiritual');
       expect(homeMetadata.description).toContain('Lecturas de tarot');
+    });
+
+    it('⚠️ T-PROD-020: la home declara su canonical', () => {
+      expect(homeMetadata.alternates?.canonical).toBe('/');
     });
 
     it('should have OpenGraph metadata', () => {

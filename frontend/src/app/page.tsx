@@ -1,55 +1,20 @@
-'use client';
+import type { Metadata } from 'next';
 
-import { LandingPage } from '@/components/features/home';
-import { UserDashboard } from '@/components/features/dashboard';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useAuthStore } from '@/stores/authStore';
+import { HomePageContent } from '@/components/features/home/HomePageContent';
+import { homeMetadata } from '@/lib/metadata/seo';
 
 /**
- * Loading Skeleton for auth validation
- * Prevents FOUC (Flash Of Unauthed Content)
+ * Home Page
+ *
+ * Route: /
+ *
+ * `homeMetadata` existía en `seo.ts` desde siempre pero **nadie la importaba**:
+ * la home era un client component y Next no admite `export const metadata` en
+ * uno, así que servía el título genérico "Auguria" igual que el resto del sitio
+ * (T-PROD-020). La lógica dual landing/dashboard vive en `HomePageContent`.
  */
-function LoadingSkeleton() {
-  return (
-    <div className="bg-bg-main flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-4xl space-y-8 px-4">
-        <Skeleton className="mx-auto h-24 w-3/4" />
-        <Skeleton className="mx-auto h-16 w-full" />
-        <Skeleton className="mx-auto h-64 w-full" />
-      </div>
-    </div>
-  );
-}
+export const metadata: Metadata = homeMetadata;
 
-/**
- * Home Page with Dual Logic
- * TASK-017: Implement dual HomePage (LandingPage + UserDashboard)
- *
- * Behavior:
- * - Shows loading skeleton while checking auth (prevents FOUC)
- * - Shows LandingPage for unauthenticated users
- * - Shows UserDashboard for authenticated users (all plans)
- *
- * @example
- * // Unauthenticated
- * → LandingPage with hero, benefits, try without register
- *
- * // Authenticated (FREE/PREMIUM/ANONYMOUS)
- * → UserDashboard with welcome, quick actions, stats
- */
 export default function Home() {
-  const { user, isAuthenticated, isLoading } = useAuthStore();
-
-  // Show loading skeleton while validating auth (prevent FOUC)
-  if (isLoading) {
-    return <LoadingSkeleton />;
-  }
-
-  // Show LandingPage for unauthenticated users
-  if (!isAuthenticated || !user) {
-    return <LandingPage />;
-  }
-
-  // Show UserDashboard for authenticated users (all plans)
-  return <UserDashboard />;
+  return <HomePageContent />;
 }

@@ -50,6 +50,7 @@ export { EncyclopediaSearchBar } from './EncyclopediaSearchBar';
 export { EncyclopediaSkeleton } from './EncyclopediaSkeleton';
 
 // Detail components
+export { CardDetailPageContent } from './CardDetailPageContent';
 export { CardDetailView } from './CardDetailView';
 export { CardDetailHero } from './CardDetailHero';
 export { CardImage } from './CardImage';
