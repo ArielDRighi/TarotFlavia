@@ -32,13 +32,34 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  *
  * ## Alcance
  *
- * Se convierten TODAS las columnas `timestamp` de las tres tablas, no solo
- * `expires_at`: dejar una tabla con dos semánticas distintas de tiempo es la
- * trampa que hace que el próximo que la toque se equivoque.
+ * La regla es: se convierte **toda columna cuyo valor se compara contra
+ * `new Date()` en JS**, porque ésas son las que se rompen. Entran las cuatro
+ * expiraciones (`password_reset_tokens`, `refresh_tokens`,
+ * `cached_interpretations`, `user_tarotista_subscriptions`) más
+ * `"user"."planExpiresAt"`, que alimenta el cron que degrada premium → free.
+ *
+ * En las tres tablas chicas de auth/caché se convierten además las columnas
+ * hermanas (`created_at`, `used_at`, `revoked_at`, `last_used_at`): son todas
+ * instantes del mismo ciclo de vida y dejar una tabla con dos semánticas de
+ * tiempo distintas es la trampa que hace que el próximo que la toque se equivoque.
+ *
+ * NO entran las columnas de auditoría del resto del sistema (`createdAt` /
+ * `updatedAt` de `"user"`, `service_purchase`, `session`…). No se comparan nunca
+ * contra `new Date()`, y convertir la tabla más grande del sistema entera merece
+ * su propia ventana de deploy (ver nota de rewrite abajo).
  *
  * NO se tocan las columnas `date` (fecha sin hora). Ésas están deliberadamente
  * en hora local y su manejo está documentado en `CLAUDE.md` (`parseBirthDate`,
  * `getTodayAppDateString`).
+ *
+ * ## Nota de deploy
+ *
+ * El `USING` explícito anula el fast-path de PG12+, así que cada `ALTER` reescribe
+ * la tabla bajo `ACCESS EXCLUSIVE`. Con `migrationsRun: true` eso ocurre durante el
+ * arranque del contenedor, que tiene `--start-period=40s` en el HEALTHCHECK. Las
+ * tablas de tokens son chicas; la única que puede haber crecido es
+ * `cached_interpretations` — si en producción pesa mucho, conviene correr antes el
+ * `deleteExpired` que ya existe en `typeorm-cache.repository.ts`.
  */
 export class AuthTimestampsToTimestamptz1776900000000 implements MigrationInterface {
   name = 'AuthTimestampsToTimestamptz1776900000000';
@@ -53,6 +74,12 @@ export class AuthTimestampsToTimestamptz1776900000000 implements MigrationInterf
     ['cached_interpretations', 'expires_at'],
     ['cached_interpretations', 'created_at'],
     ['cached_interpretations', 'last_used_at'],
+    // Comparadas en JS igual que las de arriba, y con más impacto de negocio:
+    // `planExpiresAt` alimenta `hasPlanExpired()` y el cron que degrada premium.
+    ['user', 'planExpiresAt'],
+    ['user', 'planStartedAt'],
+    ['user_tarotista_subscriptions', 'expires_at'],
+    ['user_tarotista_subscriptions', 'can_change_at'],
   ];
 
   public async up(queryRunner: QueryRunner): Promise<void> {

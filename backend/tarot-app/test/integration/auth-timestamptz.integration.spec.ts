@@ -59,6 +59,16 @@ const INSTANT_COLUMNS: ReadonlyArray<{
     column: 'expires_at',
     rompe: 'caché de IA siempre vencida: se vuelve a pagar cada interpretación',
   },
+  {
+    table: 'user',
+    column: 'planExpiresAt',
+    rompe: 'el cron degrada premium a free con el offset de diferencia',
+  },
+  {
+    table: 'user_tarotista_subscriptions',
+    column: 'can_change_at',
+    rompe: 'el bloqueo de cambio de tarotista favorito se corre el offset',
+  },
 ];
 
 /** TTL real de un token de reset (`typeorm-password-reset.repository.ts`). */
@@ -104,7 +114,9 @@ describe('T-PROD-021 — expiraciones independientes del timezone', () => {
 
   describe('tipo de columna en la base', () => {
     it.each(INSTANT_COLUMNS)(
-      '$table.$column es timestamptz (si no: $rompe)',
+      // Sin el separador, Jest interpreta `$table.` como un path y se come el
+      // punto: el título salía "password_reset_tokensexpires_at".
+      '$table / $column es timestamptz (si no: $rompe)',
       async ({ table, column }) => {
         const rows = await dataSource.query<ColumnTypeRow[]>(
           `SELECT data_type FROM information_schema.columns

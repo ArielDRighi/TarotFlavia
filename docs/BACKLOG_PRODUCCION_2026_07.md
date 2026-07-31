@@ -1741,8 +1741,12 @@ la recuperación de cuenta. Y borraría el trabajo de **T-PROD-015** sin que nad
 - [x] Nuevo [auth-timestamptz.integration.spec.ts](../backend/tarot-app/test/integration/auth-timestamptz.integration.spec.ts)
       (8 tests): tipo de columna en `information_schema`, metadata de las entidades y round-trip que asevera
       que el instante se preserva y que un TTL de 1 h no nace vencido.
-- [x] Revisadas las demás columnas `timestamp`: `paid_at`, `cancelled_at` y las de `cache_metrics` no se
-      comparan contra `new Date()` en ningún lado, así que quedan fuera (ver *Fuera de alcance*).
+- [x] Barrido de las demás columnas `timestamp` comparadas en JS. **La primera pasada se quedó corta y lo
+      encontró el revisor local**: faltaban `"user"."planExpiresAt"` / `"planStartedAt"` (alimentan
+      `hasPlanExpired()` y el cron que **degrada premium → free**, o sea el mayor impacto de negocio de
+      todos) y `user_tarotista_subscriptions.expires_at` / `can_change_at`. Se sumaron a la migración:
+      **13 columnas** en total. `paid_at`, `cancelled_at`, `cache_metrics` y los `createdAt`/`updatedAt`
+      de auditoría sí quedan fuera: no se comparan contra `new Date()` en ningún lado.
 
 #### 🎯 Criterios de Aceptación
 
@@ -1753,6 +1757,35 @@ la recuperación de cuenta. Y borraría el trabajo de **T-PROD-015** sin que nad
 - [x] La migración corre y commitea sobre una base con datos reales (verificado contra la BD de integración).
 - [x] Ciclo de calidad backend completo: format, lint, `npm run test` (**4603 tests**, 317 suites), build y
       `validate-architecture.js`.
+
+#### 🔍 Hallazgos del revisor local
+
+- 🟠 **El barrido de columnas estaba incompleto** (ver arriba): faltaban las 4 de `"user"` y suscripciones.
+      Aplicado.
+- 🟡 **El comentario del `Dockerfile` prometía lo que no hace**: decía que `ENV TZ=UTC` protege contra una
+      variable cargada en el panel de Railway, y es al revés — una variable de servicio se inyecta en runtime
+      y **pisa** el `ENV`. Lo que sí vuelve inocuo ese escenario es el `timestamptz`. Comentario corregido.
+- 🟡 **`it.each` se comía el punto del título**: Jest interpreta `$table.` como un path y renderizaba
+      `password_reset_tokensexpires_at`. Cambiado a `$table / $column`.
+- 💡 **Nota de deploy**: el `USING` explícito anula el fast-path de PG12+, así que cada `ALTER` reescribe la
+      tabla bajo `ACCESS EXCLUSIVE` durante el arranque (`migrationsRun: true`, HEALTHCHECK con
+      `--start-period=40s`). Documentado en la migración; si `cached_interpretations` pesa mucho en
+      producción, correr antes el `deleteExpired` que ya existe.
+
+**Rechazados con evidencia (2 marcados como bloqueantes):** el revisor sostuvo que el round-trip nunca
+dependió del TZ —porque `postgres-date` parsea los `timestamp` naive con el constructor local— y que por lo
+tanto los 2 tests de round-trip eran tautológicos. Su sonda usaba `dataSource.query` cruda, donde el driver
+**sí** es simétrico; el camino real pasa por la hidratación de la entidad, que no lo es. Medido dentro de
+`validateToken` con `TZ=America/Argentina/Buenos_Aires`:
+
+```
+literal en la BD  = 2026-07-31 01:36:44     (hora de pared ART)  | pg TimeZone = UTC
+hidratado por ORM = 2026-07-31T01:36:44Z    (releído como UTC)   | now = 03:36:44Z
+```
+
+Escribe local, lee UTC. Y sobre `develop`, con la columna vieja y ese TZ, los 3 tests de `Password Recovery
+Flow` fallan con `Token has expired`, y los 2 de round-trip fallan con un drift de **10.800.000 ms = 3 h
+exactas**. Ambos hallazgos quedan descartados; el resto del informe se aplicó.
 
 #### 📌 Fuera de alcance (deliberado, no olvido)
 

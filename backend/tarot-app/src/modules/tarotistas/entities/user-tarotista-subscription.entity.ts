@@ -94,7 +94,7 @@ export class UserTarotistaSubscription {
     example: '2023-12-31T23:59:59Z',
     description: 'Fecha de expiración',
   })
-  @Column({ name: 'expires_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'expires_at', type: 'timestamptz', nullable: true })
   expiresAt: Date | null;
 
   @ApiProperty({
@@ -109,7 +109,7 @@ export class UserTarotistaSubscription {
     description:
       'Fecha en que el usuario FREE puede cambiar de tarotista favorito',
   })
-  @Column({ name: 'can_change_at', type: 'timestamp', nullable: true })
+  @Column({ name: 'can_change_at', type: 'timestamptz', nullable: true })
   canChangeAt: Date | null;
 
   @ApiProperty({
