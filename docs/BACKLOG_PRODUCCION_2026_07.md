@@ -340,6 +340,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-018 | ✅ Sin `robots.txt` ni `sitemap.xml`, staging indexable y la imagen social (`og-image.png`) no existe | Frontend | 🔴 Crítica | 2 pts |
 | T-PROD-019 | El límite alcanzado manda a `/planes` (404) y el de tiradas ofrece "Hazte Premium" a usuarios que ya son premium | Frontend | 🟠 Alta | 0.5 pt |
 | T-PROD-020 | ✅ Search Console: "Duplicada, Google eligió otra canónica" — casi todo el sitemap comparte el `<title>` "Auguria" | Frontend | 🔴 Crítica | 3 pts |
+| T-PROD-021 | **Bomba de timezone en auth**: las columnas `timestamp` de expiración se leen desfasadas si el server no corre en UTC (rompe login y reset de contraseña) | Backend | 🟠 Alta | 2 pts |
 
 ---
 
@@ -1671,6 +1672,78 @@ que su metadata también queda congelada al build. Mismo hallazgo 🟠, pero no 
   única y prerender, pero su HTML inicial no trae el detalle. Sus componentes dependen de sesión/interacción;
   hacerles SSR es una tarea aparte y de bastante menos impacto que la ficha de carta (5 y 4 URLs contra 78).
 - **`/tarotistas/[id]` sigue fuera del sitemap** (heredado de T-PROD-018).
+
+---
+
+### T-PROD-021: Bomba de Timezone en Auth — las Expiraciones se Leen Desfasadas si el Server no Corre en UTC
+
+**Estado:** ⏳ PENDIENTE
+**Prioridad:** 🟠 Alta
+**Estimación:** 2 puntos
+**Dependencias:** ninguna
+**Origen:** hallazgo al diagnosticar un fallo de CI durante T-PROD-020
+**Tipo:** Backend (`docs/WORKFLOW_BACKEND.md`)
+
+#### 📋 Problema
+
+Las columnas de expiración de auth son `timestamp` **sin zona horaria**. TypeORM las escribe con la
+hora de pared **local** del proceso y, al hidratar la entidad, las relee como si fueran **UTC**. Si el
+proceso Node corre en un timezone distinto de UTC, el `Date` que vuelve está desfasado exactamente el
+offset del timezone.
+
+**Hoy no se manifiesta** porque nadie setea `TZ`: ni el `Dockerfile`, ni los workflows de CI, ni las
+variables de Railway. Node cae a UTC, hora local == UTC, no hay desfase. **El día que alguien ponga
+`TZ=America/Argentina/Buenos_Aires` en Railway** —tentador en un proyecto que ya razona todo en hora
+argentina— el login y el reset de contraseña se rompen para todos los usuarios.
+
+#### 🔬 Evidencia
+
+Medido con un log temporal dentro de `validateToken`, con el proceso en `TZ=America/Argentina/Buenos_Aires`:
+
+```
+now       = 2026-07-31T01:49:50Z
+expiresAt = 2026-07-30T23:49:50Z   ← debería ser 02:49:50Z (now + 1 h)
+tokensFound = 1
+```
+
+El token nace **2 horas vencido** (desfase de 3 h sobre un TTL de 1 h). El dato clave es
+`tokensFound = 1`: el `WHERE expiresAt > now` de SQL **sí lo encuentra**, o sea que la fila en la base
+está bien y la comparación del driver también. Lo que está mal es el `Date` hidratado por TypeORM —
+y por eso revienta el doble chequeo en memoria de
+[typeorm-password-reset.repository.ts:71](../backend/tarot-app/src/modules/auth/infrastructure/repositories/typeorm-password-reset.repository.ts#L71),
+el que un comentario del propio código llama *"CRITICAL BUG FIX"*.
+
+Verificación cruzada: `TZ=UTC npx jest test/integration/auth-users.integration.spec.ts` → 17/17 pasan.
+Con el TZ por defecto de una máquina argentina → 4 fallan con `BadRequestException: Token has expired`.
+
+#### 🎯 Alcance (3 columnas afectadas, no solo el reset)
+
+| Entidad | Columna | Comparación en JS | Qué rompe con TZ ≠ UTC |
+| --- | --- | --- | --- |
+| `PasswordResetToken` | `expires_at` | [repository:71](../backend/tarot-app/src/modules/auth/infrastructure/repositories/typeorm-password-reset.repository.ts#L71) | **Reset de contraseña**: todo token nace vencido → nadie recupera su cuenta |
+| `RefreshToken` | `expires_at` | [entity:52](../backend/tarot-app/src/modules/auth/entities/refresh-token.entity.ts#L52) (`isExpired()`) | **Sesiones**: refresh siempre vencido → deslogueo permanente |
+| `CachedInterpretation` | `expires_at` | [service:101](../backend/tarot-app/src/modules/cache/application/services/interpretation-cache.service.ts#L101) | Caché de IA siempre "vencida" → se paga cada interpretación de nuevo |
+
+⚠️ **`RefreshToken` es el más grave y es el que no vi al principio**: rompe el login de todos, no solo
+la recuperación de cuenta. Y borraría el trabajo de **T-PROD-015** sin que nadie toque ese código.
+
+#### ✅ Tareas propuestas
+
+- [ ] Migración que pase las 3 columnas de `timestamp` a `timestamptz`. Postgres guarda un instante
+      absoluto y el round-trip deja de depender del TZ del proceso. Es el arreglo de fondo.
+- [ ] Actualizar los `@Column({ type: 'timestamp' })` correspondientes en las entidades.
+- [ ] **Además** (cinturón y tiradores): fijar `TZ=UTC` explícito en el `Dockerfile` del backend, para que
+      el comportamiento no dependa de una variable que alguien puede cambiar desde el panel de Railway.
+- [ ] Test de regresión que corra el flujo de reset **con `TZ` no-UTC** y verifique que el token sigue
+      siendo válido. Sin esto el bug vuelve: hoy CI corre en UTC y no lo vería nunca.
+- [ ] Revisar si hay otras columnas `timestamp` comparadas en JS que merezcan el mismo tratamiento
+      (`used_at`, `revoked_at`, `paid_at`, `cancelled_at` no se comparan hoy, pero conviene dejarlo anotado).
+
+#### 📌 Fuera de alcance
+
+Las columnas `date` (fecha sin hora) **no se tocan**: su manejo está deliberadamente en hora local y
+documentado en `CLAUDE.md` (`parseBirthDate`/`formatBirthDate`, y `getTodayAppDateString()` para los
+límites diarios). Esta tarea es solo sobre columnas `timestamp` que representan un **instante**.
 
 ---
 
