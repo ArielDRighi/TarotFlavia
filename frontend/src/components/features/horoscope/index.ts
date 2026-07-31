@@ -4,6 +4,7 @@ export { ZodiacSignSelector } from './ZodiacSignSelector';
 export { ZodiacSignCard } from './ZodiacSignCard';
 export { ZodiacSymbol } from './ZodiacSymbol';
 export { HoroscopeDetail } from './HoroscopeDetail';
+export { HoroscopeSignPageContent } from './HoroscopeSignPageContent';
 export { HoroscopeAreaCard } from './HoroscopeAreaCard';
 export { HoroscopeSkeleton } from './HoroscopeSkeleton';
 export { HoroscopeWidget } from './HoroscopeWidget';

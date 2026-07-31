@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 import {
   getChineseZodiacInfo,
   getCurrentYear,
+  isChineseZodiacAnimal,
   getAllChineseZodiacAnimals,
   getAllChineseZodiacInfo,
   getElementIcon,
@@ -303,4 +304,19 @@ describe('chinese zodiac utilities', () => {
       }
     });
   });
+});
+
+describe('isChineseZodiacAnimal', () => {
+  it('acepta los 12 animales válidos', () => {
+    Object.values(ChineseZodiacAnimal).forEach((animal) => {
+      expect(isChineseZodiacAnimal(animal)).toBe(true);
+    });
+  });
+
+  it.each(['unicornio', 'Rat', '', 'toString', 'constructor'])(
+    'rechaza %o como animal',
+    (value) => {
+      expect(isChineseZodiacAnimal(value)).toBe(false);
+    }
+  );
 });

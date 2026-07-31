@@ -114,6 +114,14 @@ export function getChineseZodiacInfo(animal: ChineseZodiacAnimal): ChineseZodiac
 }
 
 /**
+ * Valida el segmento de una URL (`/horoscopo-chino/rat`) antes de tratarlo como
+ * animal. Type guard, para no castear el `string` que llega de `params`.
+ */
+export function isChineseZodiacAnimal(value: string): value is ChineseZodiacAnimal {
+  return Object.hasOwn(CHINESE_ZODIAC_INFO, value);
+}
+
+/**
  * Obtiene el año actual (gregoriano)
  * Útil para consultar horóscopos chinos que usan años gregorianos en el backend
  */

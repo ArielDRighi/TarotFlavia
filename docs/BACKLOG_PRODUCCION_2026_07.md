@@ -339,6 +339,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-017 | ✅ Geocoding: el `User-Agent` que enviamos a Nominatim declara un email inexistente (riesgo de bloqueo silencioso) | Backend | 🟠 Alta | 0.5 pt |
 | T-PROD-018 | ✅ Sin `robots.txt` ni `sitemap.xml`, staging indexable y la imagen social (`og-image.png`) no existe | Frontend | 🔴 Crítica | 2 pts |
 | T-PROD-019 | El límite alcanzado manda a `/planes` (404) y el de tiradas ofrece "Hazte Premium" a usuarios que ya son premium | Frontend | 🟠 Alta | 0.5 pt |
+| T-PROD-020 | ✅ Search Console: "Duplicada, Google eligió otra canónica" — casi todo el sitemap comparte el `<title>` "Auguria" | Frontend | 🔴 Crítica | 3 pts |
 
 ---
 
@@ -1544,6 +1545,132 @@ Dos bugs en los componentes de "límite alcanzado" del flujo de tarot/carta del 
 
 La colocación de contenido/CTAs en premium más allá del mensaje de reinicio (p. ej. sugerir otras features) —
 si se quiere, va en una tarea de producto aparte.
+
+---
+
+### T-PROD-020: Search Console — "Duplicada: Google Eligió una Canónica Distinta" — ✅ COMPLETADA
+
+**Estado:** ✅ COMPLETADA (2026-07-30)
+**Prioridad:** 🔴 Crítica
+**Estimación:** 3 puntos
+**Dependencias:** T-PROD-018 (robots + sitemap + canonical)
+**Origen:** aviso de Google Search Console al Delta, con dos motivos de no-indexación
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### 📋 Problema
+
+Search Console reportó dos motivos que impiden indexar páginas:
+
+1. 🔴 **"Duplicada: Google ha elegido una versión canónica diferente a la del usuario"** — el motivo real.
+2. 🟢 **"Página con redirección"** — esperado y benigno (ver *Fuera de alcance*).
+
+**La causa NO era el canonical.** `defaultMetadata` ya declaraba un self-canonical correcto (`'./'`,
+arreglado en T-PROD-018). El problema es que **casi todas las URLs del sitemap servían el mismo
+`<title>` ("Auguria") y la misma description**, heredados del root layout: solo 6 rutas públicas
+(los 5 tipos de artículo de enciclopedia + `/tarotistas/[id]`) declaraban metadata propia.
+
+Con título, description y —en las fichas client-side— HTML inicial idénticos, Google agrupa las URLs
+como duplicadas y elige **una sola** canónica por su cuenta, ignorando la declarada.
+
+Estaba anotado como pendiente explícito en el *Fuera de alcance* de T-PROD-018: *"esas rutas no tienen
+`title`/`description` propios: comparten el default Auguria. Es el próximo cuello de botella de SEO y
+necesita una tarea aparte."*
+
+**Agravante en las fichas de detalle:** `/enciclopedia/tarot/[slug]` (78 URLs) y `/horoscopo/[sign]`
+(12 URLs) eran client components que traían los datos por TanStack Query → el HTML que recibía
+Googlebot era el **skeleton, idéntico byte a byte** entre todas ellas.
+
+#### ✅ Tareas específicas
+
+- [x] Nuevo módulo [page-metadata.ts](../frontend/src/lib/metadata/page-metadata.ts): `buildPageMetadata()`
+      + `STATIC_PAGE_METADATA` (17 rutas) + 5 generadores dinámicos (signo, animal chino, carta, ritual,
+      servicio). Repite `openGraph` completo a propósito: **Next no hace merge profundo** de metadata, así
+      que declarar `openGraph` en una página pisa el del padre entero y se perdería la preview social.
+- [x] **13 rutas server** pasan a `export const metadata` (hubs de enciclopedia, numerología, péndulo,
+      rituales, servicios, premium, contacto).
+- [x] **4 layouts nuevos** para rutas que son client components y no admiten `export const metadata`
+      (`/horoscopo`, `/horoscopo-chino`, `/privacidad`, `/terminos`).
+- [x] **`generateMetadata` + `generateStaticParams`** en las 5 rutas dinámicas públicas:
+      `/horoscopo/[sign]`, `/horoscopo-chino/[animal]`, `/enciclopedia/tarot/[slug]`, `/rituales/[slug]`,
+      `/servicios/[slug]`. Todas degradan a `{}` si la API no responde, en vez de romper el build.
+- [x] **`/enciclopedia/tarot/[slug]` pasa a server component con SSR real del contenido**: la ruta resuelve
+      la carta y la pasa por `initialCard` a `CardDetailPageContent`, que siembra la query (`useCard(slug,
+      initialData)`). El HTML deja de ser el skeleton. ISR de 24 h.
+- [x] **`/horoscopo/[sign]` pasa a server wrapper** (`HoroscopeSignPageContent`). El contenido sigue siendo
+      client **a propósito**: el horóscopo se resuelve contra el día calendario LOCAL del visitante.
+- [x] **`homeMetadata` estaba sin usar desde siempre** — código muerto en `seo.ts`, porque `app/page.tsx`
+      era client. La lógica dual landing/dashboard se movió a `HomePageContent` y la home ya declara su
+      metadata. Además el título ahora incluye la marca: el `title.template` del root layout **no aplica al
+      segmento que lo define**, así que la home renderizaba `<title>Tu guía espiritual</title>`, sin "Auguria".
+- [x] Tests: 73 de `page-metadata` (incluidos los de regresión "ningún título/description/canonical se
+      repite"), 5 + 5 de las rutas dinámicas convertidas, 5 de `CardDetailPageContent` (uno verifica que la
+      carta del servidor siembra la query) y los movidos de las páginas extraídas.
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Cada ruta pública del sitemap sirve un `<title>` y una `<meta description>` **únicos**. *(Verificado
+      en el HTML del build: `/enciclopedia` → "Enciclopedia Mística | Auguria", `/horoscopo/aries` →
+      "Horóscopo de Aries Hoy", `/premium` → "Plan Premium | Auguria", `/` → "Auguria — Tu guía espiritual".)*
+- [x] Cada una declara su propio `<link rel="canonical">` apuntando a sí misma.
+- [x] `/enciclopedia/tarot/[slug]` y `/horoscopo/[sign]` figuran como **SSG** en el reporte del build
+      (antes eran estáticas con contenido client-only).
+- [x] Un test falla si dos rutas vuelven a compartir título, description o canonical.
+- [x] Ciclo de calidad frontend completo pasa: format, lint:fix, type-check, `test:run` (**5505 tests**,
+      434 suites), build y `validate-architecture.js`.
+
+#### 🔍 Hallazgos del revisor local (aplicados en un segundo commit)
+
+Dos de ellos **recreaban el bug que la tarea arregla**, en caminos que el primer commit no cubría:
+
+- 🟠 **El `catch → return {}` cacheaba el bug 24 h y servía soft-404 indexables.** Con la API caída
+      durante el build, `generateMetadata` devolvía `{}` y la página renderizaba el skeleton: título
+      heredado + HTML indistinguible, exactamente el estado que Google marcó como duplicado, prerenderizado
+      y cacheado. Y un slug inventado (`/enciclopedia/tarot/inventado`) respondía **200** en vez de 404,
+      sumando otra URL al grupo de duplicadas. Nuevo [route-data.ts](../frontend/src/lib/metadata/route-data.ts)
+      distingue los dos casos: 404 de la API → `notFound()`; error transitorio → **se propaga**, para que
+      Next no cachee un render degradado.
+- 🟡 **`/horoscopo/unicornio` heredaba el canonical del hub.** Devolver `{}` para un param inválido hacía
+      que la URL basura tomara `canonical: '/horoscopo'` del layout: una página declarándose duplicada de
+      otra, en 200 — el patrón exacto de la tarea, fabricado a propósito. Nueva
+      `INVALID_ROUTE_PARAM_METADATA` (self-canonical + `noindex`) en las dos rutas de horóscopo.
+- 🟠 **Faltaba `revalidate` en `/rituales/[slug]` y `/servicios/[slug]`**: su metadata habría quedado
+      congelada al build (Flavia edita un ritual → el `<title>` sigue viejo hasta el próximo deploy).
+- 🟡 **Doble fetch por render**: `generateMetadata` y la página pedían la misma carta y Next solo dedupea
+      `fetch()` (acá hay axios) → 156 requests por build en vez de 78. Resuelto con `cache()` de React.
+- 🟡 **`error || !card` tiraba abajo una ficha ya cargada**: en React Query v5 un refetch fallido puebla
+      `error` conservando el `data` bueno. Pasa a `!card`.
+- 🟡 **Título dinámico sin tope**: los nombres los pone la API. `buildPageMetadata` ahora clampea el título
+      además de la description, y el patrón de la carta se acortó (`— Significado`) porque
+      "Caballero de Pentáculos" dejaba el `<title>` al filo de los 60 caracteres del SERP.
+- 🟡 **Tests faltantes** en `/rituales/[slug]`, `/servicios/[slug]` y `/horoscopo-chino/[animal]`.
+- 💡 **Triplicación de `safeSlugs`** (ya existía en `sitemap.ts`) → `safeStaticParams` compartido; y type
+      guards `isZodiacSign` / `isChineseZodiacAnimal` que eliminan los casts en ruta y componente.
+- 💡 **Bug preexistente, fuera del diff pero en el sitemap:** `carta-astral/layout.tsx` declaraba
+      `title: 'Carta Astral | Auguria'` y, como el `title.template` del root layout **sí** aplica a los
+      segmentos hijos, la ruta renderizaba `<title>Carta Astral | Auguria | Auguria</title>`. Pasa por el
+      builder compartido. *(Verificado en el build: ahora `Carta Astral | Auguria`.)*
+
+**No aplicado:** los exports de los tres componentes extraídos en sus `index.ts` quedan aunque las rutas
+importen por ruta directa — es la convención de esos barrels, quitarlos los volvería la excepción.
+
+**Anotado, no aplicado (preexistente de T-PROD-018):** las 5 rutas de artículo de enciclopedia
+(`guias`, `signos`, `planetas`, `casas`, `elementos`) tienen `generateStaticParams` sin `revalidate`, así
+que su metadata también queda congelada al build. Mismo hallazgo 🟠, pero no lo introdujo esta tarea.
+
+#### 📌 Fuera de alcance (deliberado, no olvido)
+
+- **"Página con redirección" no se toca**: son las redirecciones 301 intencionales de T-PROD-018
+  (`/enciclopedia/:slug` → `/enciclopedia/tarot/:slug`) y las de `/ritual/*` → `/tarot/*`. El sitemap **no
+  emite ninguna URL que redirija** (verificado), así que se trata de URLs viejas que Google ya tenía
+  indexadas; se decantan solas. Las de `/ritual/*` quedarán reportadas de forma permanente porque el destino
+  (`/tarot/`) está `disallow` en robots.txt — es correcto, son rutas de sesión.
+- **Verificación de Ops (no es código):** confirmar que el dominio no sirva www y no-www (o http) a la vez
+  con ambas propiedades dadas de alta en Search Console. Eso sí generaría redirecciones masivas y es lo único
+  que podría explicar el motivo 2 más allá de las 301 conocidas.
+- **El contenido de `/rituales/[slug]` y `/servicios/[slug]` sigue siendo client-side**: ahora tienen metadata
+  única y prerender, pero su HTML inicial no trae el detalle. Sus componentes dependen de sesión/interacción;
+  hacerles SSR es una tarea aparte y de bastante menos impacto que la ficha de carta (5 y 4 URLs contra 78).
+- **`/tarotistas/[id]` sigue fuera del sitemap** (heredado de T-PROD-018).
 
 ---
 

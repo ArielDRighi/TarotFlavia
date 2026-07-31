@@ -87,14 +87,26 @@ export const defaultMetadata: Metadata = {
  * Home Page Metadata
  */
 export const homeMetadata: Metadata = {
-  title: 'Tu guía espiritual',
+  // Con la marca adentro a propósito: el `title.template` del root layout NO se
+  // aplica al segmento que lo define, y `/` es ese segmento. Sin esto la home
+  // renderizaba `<title>Tu guía espiritual</title>`, sin "Auguria" por ningún lado.
+  title: `${SITE_NAME} — Tu guía espiritual`,
   description:
     'Lecturas de tarot personalizadas y sesiones con tarotistas profesionales. Descubre tu destino y conecta con guías espirituales.',
   openGraph: {
-    title: `${SITE_NAME} - Tu guía espiritual`,
+    // Next NO hace merge profundo: declarar `openGraph` acá pisa el del root
+    // layout entero, así que hay que repetir type/locale/siteName o la home
+    // perdería la preview social que `defaultMetadata` configura.
+    type: 'website',
+    locale: 'es_ES',
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — Tu guía espiritual`,
     description:
       'Descubre tu destino con lecturas de tarot y sesiones con tarotistas profesionales',
     images: [DEFAULT_OG_IMAGE],
+  },
+  alternates: {
+    canonical: '/',
   },
 };
 

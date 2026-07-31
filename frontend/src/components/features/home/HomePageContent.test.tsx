@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import Home from './page';
+import { HomePageContent } from './HomePageContent';
 
 // Mock child components
-vi.mock('@/components/features/home', () => ({
+vi.mock('./LandingPage', () => ({
   LandingPage: () => <div data-testid="landing-page">LandingPage Component</div>,
 }));
 
@@ -36,7 +36,7 @@ vi.mock('@/stores/authStore', () => ({
  * - Authenticated users → UserDashboard (all plans)
  * - Auth state transitions
  */
-describe('Home (Root Page)', () => {
+describe('HomePageContent (Root Page)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -49,7 +49,7 @@ describe('Home (Root Page)', () => {
         isLoading: true,
       });
 
-      render(<Home />);
+      render(<HomePageContent />);
 
       const skeletons = screen.getAllByTestId('skeleton-loader');
       expect(skeletons.length).toBeGreaterThan(0);
@@ -66,7 +66,7 @@ describe('Home (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<Home />);
+      render(<HomePageContent />);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
       expect(screen.queryByTestId('user-dashboard')).not.toBeInTheDocument();
@@ -81,7 +81,7 @@ describe('Home (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<Home />);
+      render(<HomePageContent />);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -94,7 +94,7 @@ describe('Home (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<Home />);
+      render(<HomePageContent />);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -107,7 +107,7 @@ describe('Home (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<Home />);
+      render(<HomePageContent />);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -122,7 +122,7 @@ describe('Home (Root Page)', () => {
         isLoading: true,
       });
 
-      const { rerender } = render(<Home />);
+      const { rerender } = render(<HomePageContent />);
       const skeletons = screen.getAllByTestId('skeleton-loader');
       expect(skeletons.length).toBeGreaterThan(0);
 
@@ -133,7 +133,7 @@ describe('Home (Root Page)', () => {
         isLoading: false,
       });
 
-      rerender(<Home />);
+      rerender(<HomePageContent />);
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
       expect(screen.queryAllByTestId('skeleton-loader').length).toBe(0);
     });
@@ -145,7 +145,7 @@ describe('Home (Root Page)', () => {
         isLoading: true,
       });
 
-      const { rerender } = render(<Home />);
+      const { rerender } = render(<HomePageContent />);
       const skeletons = screen.getAllByTestId('skeleton-loader');
       expect(skeletons.length).toBeGreaterThan(0);
 
@@ -156,7 +156,7 @@ describe('Home (Root Page)', () => {
         isLoading: false,
       });
 
-      rerender(<Home />);
+      rerender(<HomePageContent />);
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryAllByTestId('skeleton-loader').length).toBe(0);
     });
@@ -170,7 +170,7 @@ describe('Home (Root Page)', () => {
         isLoading: true,
       });
 
-      render(<Home />);
+      render(<HomePageContent />);
 
       // Should only show loading, no actual content
       const skeletons = screen.getAllByTestId('skeleton-loader');
