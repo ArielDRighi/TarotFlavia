@@ -53,7 +53,7 @@ describe('CardDetailPageContent', () => {
   it('debe renderizar CardDetailView cuando la carta existe', () => {
     mockUseCard.mockReturnValue({ data: card, isLoading: false, error: null });
 
-    render(<CardDetailPageContent slug="el-loco" initialCard={null} />);
+    render(<CardDetailPageContent slug="el-loco" initialCard={card} />);
 
     expect(screen.getByTestId('card-detail-view')).toBeInTheDocument();
     expect(screen.getByText('El Loco')).toBeInTheDocument();
@@ -62,19 +62,19 @@ describe('CardDetailPageContent', () => {
   it('debe mostrar skeleton mientras carga', () => {
     mockUseCard.mockReturnValue({ data: undefined, isLoading: true, error: null });
 
-    render(<CardDetailPageContent slug="el-loco" initialCard={null} />);
+    render(<CardDetailPageContent slug="el-loco" initialCard={card} />);
 
     expect(screen.getByTestId('encyclopedia-skeleton')).toBeInTheDocument();
   });
 
-  it('debe mostrar mensaje de error cuando la carta no existe (404)', () => {
+  it('debe mostrar mensaje de error cuando no hay carta', () => {
     mockUseCard.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('Not found'),
     });
 
-    render(<CardDetailPageContent slug="el-loco" initialCard={null} />);
+    render(<CardDetailPageContent slug="el-loco" initialCard={card} />);
 
     expect(screen.getByText('Carta no encontrada')).toBeInTheDocument();
   });
@@ -90,12 +90,14 @@ describe('CardDetailPageContent', () => {
     expect(screen.getByTestId('card-detail-view')).toBeInTheDocument();
   });
 
-  it('cae al fetch del cliente si el servidor no pudo resolver la carta', () => {
-    mockUseCard.mockReturnValue({ data: undefined, isLoading: true, error: null });
+  it('mantiene la ficha visible si falla un refetch en background', () => {
+    // React Query v5 puebla `error` conservando el `data` bueno: mirar `error`
+    // tiraría abajo una carta ya cargada por un fallo transitorio de la API.
+    mockUseCard.mockReturnValue({ data: card, isLoading: false, error: new Error('Network') });
 
-    render(<CardDetailPageContent slug="el-loco" initialCard={null} />);
+    render(<CardDetailPageContent slug="el-loco" initialCard={card} />);
 
-    expect(mockUseCard).toHaveBeenCalledWith('el-loco', undefined);
-    expect(screen.getByTestId('encyclopedia-skeleton')).toBeInTheDocument();
+    expect(screen.getByTestId('card-detail-view')).toBeInTheDocument();
+    expect(screen.queryByText('Carta no encontrada')).not.toBeInTheDocument();
   });
 });

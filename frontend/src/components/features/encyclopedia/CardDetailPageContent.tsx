@@ -20,18 +20,17 @@ import type { CardDetail } from '@/types/encyclopedia.types';
  * era client-only y Googlebot recibía el mismo skeleton en las 78 fichas —
  * contenido indistinguible que Google agrupaba como duplicado (T-PROD-020).
  *
- * Sigue usando React Query igual: `initialCard` solo siembra la caché, y si el
- * servidor no pudo resolver la carta (API caída en build) el cliente la busca.
+ * Sigue usando React Query igual: `initialCard` solo siembra la caché.
  */
 
 interface CardDetailPageContentProps {
   slug: string;
-  /** Carta resuelta en el servidor, o `null` si el fetch falló. */
-  initialCard: CardDetail | null;
+  /** Carta resuelta en el servidor. La ruta 404ea si el slug no existe. */
+  initialCard: CardDetail;
 }
 
 export function CardDetailPageContent({ slug, initialCard }: CardDetailPageContentProps) {
-  const { data: card, isLoading, error } = useCard(slug, initialCard ?? undefined);
+  const { data: card, isLoading } = useCard(slug, initialCard);
 
   if (isLoading) {
     return (
@@ -41,7 +40,10 @@ export function CardDetailPageContent({ slug, initialCard }: CardDetailPageConte
     );
   }
 
-  if (error || !card) {
+  // Sin `error` a propósito: en React Query v5 un refetch fallido puebla `error`
+  // conservando el `data` bueno. Mirar `error` tiraba abajo una ficha ya cargada
+  // (pestaña abierta > 1 h, vuelve al foco, la API no responde).
+  if (!card) {
     return (
       <div className="container mx-auto px-4 py-8 text-center" data-testid="card-detail-not-found">
         <h1 className="mb-4 text-2xl">Carta no encontrada</h1>

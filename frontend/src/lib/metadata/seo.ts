@@ -100,7 +100,7 @@ export const homeMetadata: Metadata = {
     type: 'website',
     locale: 'es_ES',
     siteName: SITE_NAME,
-    title: `${SITE_NAME} - Tu guía espiritual`,
+    title: `${SITE_NAME} — Tu guía espiritual`,
     description:
       'Descubre tu destino con lecturas de tarot y sesiones con tarotistas profesionales',
     images: [DEFAULT_OG_IMAGE],

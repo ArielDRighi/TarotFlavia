@@ -3,7 +3,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getZodiacSignFromDate, getZodiacSignInfo, ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
+import {
+  getZodiacSignFromDate,
+  getZodiacSignInfo,
+  isZodiacSign,
+  ZODIAC_SIGNS_INFO,
+} from '@/lib/utils/zodiac';
 import { ZodiacSign } from '@/types/horoscope.types';
 
 describe('zodiac utilities', () => {
@@ -169,4 +174,21 @@ describe('zodiac utilities', () => {
       expect(waterCount).toBe(3); // Cáncer, Escorpio, Piscis
     });
   });
+});
+
+describe('isZodiacSign', () => {
+  it('acepta los 12 signos válidos', () => {
+    Object.values(ZodiacSign).forEach((sign) => {
+      expect(isZodiacSign(sign)).toBe(true);
+    });
+  });
+
+  it.each(['unicornio', 'Aries', '', 'toString', 'constructor'])(
+    'rechaza %o como signo',
+    (value) => {
+      // `toString`/`constructor` verifican que no se consulte el prototipo:
+      // un `in` ingenuo los daría por válidos y `/horoscopo/toString` pasaría.
+      expect(isZodiacSign(value)).toBe(false);
+    }
+  );
 });

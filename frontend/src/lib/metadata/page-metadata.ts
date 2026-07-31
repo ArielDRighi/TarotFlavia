@@ -34,7 +34,12 @@ import { OG_IMAGE_ALT, OG_IMAGE_PATH, OG_IMAGE_SIZE } from './og-image';
 /** Longitud a partir de la cual Google trunca la description en el SERP. */
 const MAX_DESCRIPTION_LENGTH = 160;
 
+/** Ídem para el título, contando el " | Auguria" que agrega el root layout. */
+const MAX_TITLE_LENGTH = 60;
+
 const SITE_NAME = 'Auguria';
+
+const TITLE_SUFFIX = ` | ${SITE_NAME}`;
 
 interface PageMetadataInput {
   /** Sin el sufijo del sitio: el template del root layout agrega " | Auguria". */
@@ -50,28 +55,56 @@ interface PageMetadataInput {
  * Las descripciones dinámicas vienen de la API (descripción de una carta, de un
  * ritual, de un servicio) y pueden ser párrafos enteros.
  */
-function clampDescription(text: string): string {
+function clampText(text: string, maxLength: number): string {
   const normalized = text.replace(/\s+/g, ' ').trim();
 
-  if (normalized.length <= MAX_DESCRIPTION_LENGTH) {
+  if (normalized.length <= maxLength) {
     return normalized;
   }
 
-  const cut = normalized.slice(0, MAX_DESCRIPTION_LENGTH - 1);
+  const cut = normalized.slice(0, maxLength - 1);
   const lastSpace = cut.lastIndexOf(' ');
 
   return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
 }
 
+function clampDescription(text: string): string {
+  return clampText(text, MAX_DESCRIPTION_LENGTH);
+}
+
+/**
+ * Los títulos dinámicos interpolan datos de la API (nombre de un ritual, de un
+ * servicio) cuya longitud no controlamos: sin tope, Google los corta donde le
+ * conviene y el `<title>` deja de leerse.
+ */
+function clampTitle(text: string): string {
+  return clampText(text, MAX_TITLE_LENGTH - TITLE_SUFFIX.length);
+}
+
+/**
+ * Metadata para un valor de ruta que no existe (`/horoscopo/unicornio`).
+ *
+ * Devolver `{}` no alcanzaba: la página heredaba el `alternates.canonical` del
+ * layout del hub, así que una URL basura respondía 200 declarándose duplicada de
+ * `/horoscopo` — el patrón exacto que originó T-PROD-020, fabricado a propósito.
+ * `'./'` la hace self-canonical y el `noindex` la deja fuera del índice.
+ */
+export const INVALID_ROUTE_PARAM_METADATA: Metadata = {
+  alternates: { canonical: './' },
+  robots: { index: false, follow: true },
+};
+
 export function buildPageMetadata({ title, description, canonical }: PageMetadataInput): Metadata {
+  const clampedTitle = clampTitle(title);
+
   return {
-    title,
+    title: clampedTitle,
     description,
     openGraph: {
       type: 'website',
       locale: 'es_ES',
       siteName: SITE_NAME,
-      title,
+      title: clampedTitle,
       description,
       url: canonical,
       images: [{ url: OG_IMAGE_PATH, ...OG_IMAGE_SIZE, alt: OG_IMAGE_ALT }],
@@ -146,6 +179,13 @@ export const STATIC_PAGE_METADATA = {
     description:
       'Los 12 animales del zodíaco chino y su predicción: encontrá tu animal según tu año de nacimiento y su elemento.',
     canonical: ROUTES.HOROSCOPO_CHINO,
+  }),
+
+  cartaAstral: buildPageMetadata({
+    title: 'Carta Astral',
+    description:
+      'Descubre tu carta astral natal: la posición de los planetas en el momento de tu nacimiento y su interpretación personalizada.',
+    canonical: ROUTES.CARTA_ASTRAL,
   }),
 
   numerologia: buildPageMetadata({
@@ -243,7 +283,9 @@ export function getCardDetailMetadata(card: {
   meaningUpright: string;
 }): Metadata {
   return buildPageMetadata({
-    title: `${card.nameEs} — Significado en el Tarot`,
+    // Corto a propósito: los nombres largos ("Caballero de Pentáculos") dejaban
+    // el título al filo de los 60 caracteres del SERP con el sufijo del layout.
+    title: `${card.nameEs} — Significado`,
     // `description` es opcional en el modelo de carta; el significado al derecho
     // no lo es, y describe la carta igual de bien para el SERP.
     description: clampDescription(card.description ?? card.meaningUpright),

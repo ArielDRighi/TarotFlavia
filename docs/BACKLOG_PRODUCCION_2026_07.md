@@ -1615,8 +1615,47 @@ Googlebot era el **skeleton, idéntico byte a byte** entre todas ellas.
 - [x] `/enciclopedia/tarot/[slug]` y `/horoscopo/[sign]` figuran como **SSG** en el reporte del build
       (antes eran estáticas con contenido client-only).
 - [x] Un test falla si dos rutas vuelven a compartir título, description o canonical.
-- [x] Ciclo de calidad frontend completo pasa: format, lint:fix, type-check, `test:run` (**5434 tests**,
-      430 suites), build y `validate-architecture.js`.
+- [x] Ciclo de calidad frontend completo pasa: format, lint:fix, type-check, `test:run` (**5505 tests**,
+      434 suites), build y `validate-architecture.js`.
+
+#### 🔍 Hallazgos del revisor local (aplicados en un segundo commit)
+
+Dos de ellos **recreaban el bug que la tarea arregla**, en caminos que el primer commit no cubría:
+
+- 🟠 **El `catch → return {}` cacheaba el bug 24 h y servía soft-404 indexables.** Con la API caída
+      durante el build, `generateMetadata` devolvía `{}` y la página renderizaba el skeleton: título
+      heredado + HTML indistinguible, exactamente el estado que Google marcó como duplicado, prerenderizado
+      y cacheado. Y un slug inventado (`/enciclopedia/tarot/inventado`) respondía **200** en vez de 404,
+      sumando otra URL al grupo de duplicadas. Nuevo [route-data.ts](../frontend/src/lib/metadata/route-data.ts)
+      distingue los dos casos: 404 de la API → `notFound()`; error transitorio → **se propaga**, para que
+      Next no cachee un render degradado.
+- 🟡 **`/horoscopo/unicornio` heredaba el canonical del hub.** Devolver `{}` para un param inválido hacía
+      que la URL basura tomara `canonical: '/horoscopo'` del layout: una página declarándose duplicada de
+      otra, en 200 — el patrón exacto de la tarea, fabricado a propósito. Nueva
+      `INVALID_ROUTE_PARAM_METADATA` (self-canonical + `noindex`) en las dos rutas de horóscopo.
+- 🟠 **Faltaba `revalidate` en `/rituales/[slug]` y `/servicios/[slug]`**: su metadata habría quedado
+      congelada al build (Flavia edita un ritual → el `<title>` sigue viejo hasta el próximo deploy).
+- 🟡 **Doble fetch por render**: `generateMetadata` y la página pedían la misma carta y Next solo dedupea
+      `fetch()` (acá hay axios) → 156 requests por build en vez de 78. Resuelto con `cache()` de React.
+- 🟡 **`error || !card` tiraba abajo una ficha ya cargada**: en React Query v5 un refetch fallido puebla
+      `error` conservando el `data` bueno. Pasa a `!card`.
+- 🟡 **Título dinámico sin tope**: los nombres los pone la API. `buildPageMetadata` ahora clampea el título
+      además de la description, y el patrón de la carta se acortó (`— Significado`) porque
+      "Caballero de Pentáculos" dejaba el `<title>` al filo de los 60 caracteres del SERP.
+- 🟡 **Tests faltantes** en `/rituales/[slug]`, `/servicios/[slug]` y `/horoscopo-chino/[animal]`.
+- 💡 **Triplicación de `safeSlugs`** (ya existía en `sitemap.ts`) → `safeStaticParams` compartido; y type
+      guards `isZodiacSign` / `isChineseZodiacAnimal` que eliminan los casts en ruta y componente.
+- 💡 **Bug preexistente, fuera del diff pero en el sitemap:** `carta-astral/layout.tsx` declaraba
+      `title: 'Carta Astral | Auguria'` y, como el `title.template` del root layout **sí** aplica a los
+      segmentos hijos, la ruta renderizaba `<title>Carta Astral | Auguria | Auguria</title>`. Pasa por el
+      builder compartido. *(Verificado en el build: ahora `Carta Astral | Auguria`.)*
+
+**No aplicado:** los exports de los tres componentes extraídos en sus `index.ts` quedan aunque las rutas
+importen por ruta directa — es la convención de esos barrels, quitarlos los volvería la excepción.
+
+**Anotado, no aplicado (preexistente de T-PROD-018):** las 5 rutas de artículo de enciclopedia
+(`guias`, `signos`, `planetas`, `casas`, `elementos`) tienen `generateStaticParams` sin `revalidate`, así
+que su metadata también queda congelada al build. Mismo hallazgo 🟠, pero no lo introdujo esta tarea.
 
 #### 📌 Fuera de alcance (deliberado, no olvido)
 

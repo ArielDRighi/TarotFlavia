@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 
 import { HoroscopeSignPageContent } from '@/components/features/horoscope/HoroscopeSignPageContent';
-import { getHoroscopeSignMetadata } from '@/lib/metadata/page-metadata';
-import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
+import {
+  INVALID_ROUTE_PARAM_METADATA,
+  getHoroscopeSignMetadata,
+} from '@/lib/metadata/page-metadata';
+import { isZodiacSign } from '@/lib/utils/zodiac';
 import { ZodiacSign } from '@/types/horoscope.types';
 
 /**
@@ -20,16 +23,12 @@ interface PageProps {
   params: Promise<{ sign: string }>;
 }
 
-function parseSign(value: string): ZodiacSign | null {
-  return ZODIAC_SIGNS_INFO[value as ZodiacSign] ? (value as ZodiacSign) : null;
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { sign } = await params;
-  const parsed = parseSign(sign);
 
-  // `/horoscopo/foobar` no debe inventar un título: cae a la del layout padre.
-  return parsed ? getHoroscopeSignMetadata(parsed) : {};
+  // `/horoscopo/unicornio` no debe heredar el canonical del hub: quedaría
+  // declarada duplicada de `/horoscopo` en un 200.
+  return isZodiacSign(sign) ? getHoroscopeSignMetadata(sign) : INVALID_ROUTE_PARAM_METADATA;
 }
 
 export function generateStaticParams(): { sign: string }[] {

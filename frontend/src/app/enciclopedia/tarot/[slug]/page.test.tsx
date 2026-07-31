@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { AxiosError, AxiosHeaders } from 'axios';
 
 import { generateMetadata, generateStaticParams } from './page';
 import type { CardDetail, CardSummary } from '@/types/encyclopedia.types';
@@ -12,6 +13,32 @@ vi.mock('@/lib/api/encyclopedia-api', () => ({
   getCardBySlug: (slug: string) => mockGetCardBySlug(slug),
   getCards: () => mockGetCards(),
 }));
+
+const mockNotFound = vi.fn(() => {
+  throw new Error('NEXT_NOT_FOUND');
+});
+
+vi.mock('next/navigation', () => ({
+  notFound: () => mockNotFound(),
+}));
+
+// `cache()` de React memoiza por render; en tests cada llamada debe ir al mock.
+vi.mock('react', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('react')>()),
+  cache: <T extends (...args: never[]) => unknown>(fn: T) => fn,
+}));
+
+function apiError(status: number): AxiosError {
+  const error = new AxiosError('boom');
+  error.response = {
+    status,
+    statusText: '',
+    data: null,
+    headers: new AxiosHeaders(),
+    config: { headers: new AxiosHeaders() },
+  };
+  return error;
+}
 
 const card = {
   id: 1,
@@ -47,12 +74,24 @@ describe('/enciclopedia/tarot/[slug] — metadata', () => {
     expect(metadata.alternates?.canonical).toBe('/enciclopedia/tarot/el-loco');
   });
 
-  it('degrada a la metadata heredada si la API no responde', async () => {
-    mockGetCardBySlug.mockRejectedValue(new Error('API caída'));
+  it('⚠️ T-PROD-020: un slug inexistente 404ea en vez de servir un 200 genérico', async () => {
+    mockGetCardBySlug.mockRejectedValue(apiError(404));
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'el-loco' }) });
+    await expect(
+      generateMetadata({ params: Promise.resolve({ slug: 'inventado' }) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
+    expect(mockNotFound).toHaveBeenCalledOnce();
+  });
 
-    expect(metadata).toEqual({});
+  it('⚠️ T-PROD-020: propaga un fallo transitorio en vez de cachear metadata degradada', async () => {
+    // Tragarlo dejaría la ficha prerenderizada 24 h con el título heredado y el
+    // esqueleto vacío: el estado exacto que Google marcó como duplicado.
+    mockGetCardBySlug.mockRejectedValue(apiError(503));
+
+    await expect(
+      generateMetadata({ params: Promise.resolve({ slug: 'el-loco' }) })
+    ).rejects.toThrow('boom');
+    expect(mockNotFound).not.toHaveBeenCalled();
   });
 });
 

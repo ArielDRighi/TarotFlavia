@@ -5,6 +5,7 @@ import { ROUTES } from '@/lib/constants/routes';
 import { ZodiacSign } from '@/types/horoscope.types';
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 import {
+  INVALID_ROUTE_PARAM_METADATA,
   STATIC_PAGE_METADATA,
   buildPageMetadata,
   getCardDetailMetadata,
@@ -54,6 +55,19 @@ describe('buildPageMetadata', () => {
   it('replica title y description en Open Graph (preview social por página)', () => {
     expect(metadata.openGraph?.title).toBe('Título de prueba');
     expect(metadata.openGraph?.description).toBe('Descripción de prueba.');
+  });
+
+  it('recorta un título que se truncaría en el SERP', () => {
+    const clamped = buildPageMetadata({
+      title: 'Un título larguísimo que Google jamás mostraría entero en su resultado',
+      description: 'Descripción.',
+      canonical: '/ruta',
+    });
+
+    // El template del root layout suma " | Auguria" (10 caracteres).
+    expect(titleOf(clamped).length).toBeLessThanOrEqual(MAX_TITLE_LENGTH - ' | Auguria'.length);
+    expect(titleOf(clamped).endsWith('…')).toBe(true);
+    expect(clamped.openGraph?.title).toBe(titleOf(clamped));
   });
 
   it('declara un canonical absoluto de path, nunca relativo', () => {
@@ -134,6 +148,18 @@ describe('STATIC_PAGE_METADATA', () => {
     const text = `${titleOf(metadata)} ${metadata.description}`;
 
     expect(text).not.toMatch(/\b(the|your|discover|free|read)\b/i);
+  });
+});
+
+describe('INVALID_ROUTE_PARAM_METADATA', () => {
+  it('⚠️ T-PROD-020: es self-canonical, no hereda el canonical del hub', () => {
+    // Con `{}`, `/horoscopo/unicornio` heredaba `canonical: '/horoscopo'` del
+    // layout: una URL basura declarándose duplicada de otra, en 200.
+    expect(INVALID_ROUTE_PARAM_METADATA.alternates?.canonical).toBe('./');
+  });
+
+  it('deja la URL inválida fuera del índice', () => {
+    expect(INVALID_ROUTE_PARAM_METADATA.robots).toEqual({ index: false, follow: true });
   });
 });
 
@@ -234,6 +260,15 @@ describe('getRitualDetailMetadata', () => {
 
     expect(metadata.description?.length ?? 0).toBeLessThanOrEqual(MAX_DESCRIPTION_LENGTH);
   });
+
+  it('recorta un título largo: el nombre lo pone la API, no nosotros', () => {
+    const metadata = getRitualDetailMetadata({
+      ...ritual,
+      title: 'Ritual de Luna Llena para la Abundancia, la Prosperidad y la Protección del Hogar',
+    });
+
+    expect(titleOf(metadata).length).toBeLessThanOrEqual(MAX_TITLE_LENGTH - ' | Auguria'.length);
+  });
 });
 
 describe('getServiceDetailMetadata', () => {
@@ -251,5 +286,38 @@ describe('getServiceDetailMetadata', () => {
     expect(getServiceDetailMetadata(service).alternates?.canonical).toBe(
       ROUTES.SERVICIO_DETAIL('registros-akashicos')
     );
+  });
+
+  it('recorta un título largo: el nombre lo pone la API, no nosotros', () => {
+    const metadata = getServiceDetailMetadata({
+      ...service,
+      name: 'Sesión de Registros Akáshicos y Acompañamiento Espiritual Personalizado',
+    });
+
+    expect(titleOf(metadata).length).toBeLessThanOrEqual(MAX_TITLE_LENGTH - ' | Auguria'.length);
+  });
+});
+
+describe('títulos dinámicos dentro del límite del SERP', () => {
+  const budget = MAX_TITLE_LENGTH - ' | Auguria'.length;
+
+  it.each(Object.values(ZodiacSign))('el horóscopo de %s no se trunca', (sign) => {
+    expect(titleOf(getHoroscopeSignMetadata(sign)).length).toBeLessThanOrEqual(budget);
+  });
+
+  it.each(Object.values(ChineseZodiacAnimal))('el horóscopo chino de %s no se trunca', (animal) => {
+    expect(titleOf(getChineseZodiacMetadata(animal)).length).toBeLessThanOrEqual(budget);
+  });
+
+  it('la carta con el nombre más largo del mazo no se trunca', () => {
+    const metadata = getCardDetailMetadata({
+      slug: 'el-papa',
+      nameEs: 'El Papa (El Hierofante)',
+      description: 'Tradición y guía espiritual.',
+      meaningUpright: 'Tradición.',
+    });
+
+    expect(titleOf(metadata).length).toBeLessThanOrEqual(budget);
+    expect(titleOf(metadata).endsWith('…')).toBe(false);
   });
 });

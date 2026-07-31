@@ -1,9 +1,10 @@
+import { cache } from 'react';
 import type { Metadata } from 'next';
 
 import { CardDetailPageContent } from '@/components/features/encyclopedia/CardDetailPageContent';
 import { getCardBySlug, getCards } from '@/lib/api/encyclopedia-api';
 import { getCardDetailMetadata } from '@/lib/metadata/page-metadata';
-import type { CardDetail } from '@/types/encyclopedia.types';
+import { resolveRouteResource, safeStaticParams } from '@/lib/metadata/route-data';
 
 /**
  * Ficha de una carta del tarot.
@@ -24,37 +25,24 @@ interface PageProps {
 }
 
 /**
- * La API puede no responder durante el build. Preferimos degradar (metadata
- * heredada + fetch desde el cliente) antes que romper el render de la ruta,
- * mismo criterio que `sitemap.ts`.
+ * `generateMetadata` y la página piden la misma carta. Next solo dedupea
+ * `fetch()`, y acá abajo hay axios — sin `cache()` serían 156 requests por
+ * build en vez de 78.
  */
-async function safeGetCard(slug: string): Promise<CardDetail | null> {
-  try {
-    return await getCardBySlug(slug);
-  } catch {
-    return null;
-  }
-}
+const getCard = cache((slug: string) => resolveRouteResource(() => getCardBySlug(slug)));
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const card = await safeGetCard(slug);
 
-  return card ? getCardDetailMetadata(card) : {};
+  return getCardDetailMetadata(await getCard(slug));
 }
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
-  try {
-    const cards = await getCards();
-    return cards.map((card) => ({ slug: card.slug }));
-  } catch {
-    return [];
-  }
+  return safeStaticParams(getCards, (card) => ({ slug: card.slug }));
 }
 
 export default async function CardDetailRoute({ params }: PageProps) {
   const { slug } = await params;
-  const card = await safeGetCard(slug);
 
-  return <CardDetailPageContent slug={slug} initialCard={card} />;
+  return <CardDetailPageContent slug={slug} initialCard={await getCard(slug)} />;
 }

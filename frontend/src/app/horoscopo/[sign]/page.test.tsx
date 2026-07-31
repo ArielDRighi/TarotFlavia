@@ -32,10 +32,14 @@ describe('/horoscopo/[sign] — metadata', () => {
     expect(metadata.alternates?.canonical).toBe('/horoscopo/aries');
   });
 
-  it('cae a la metadata heredada si el signo no existe', async () => {
+  it('⚠️ T-PROD-020: un signo inválido no hereda el canonical del hub', async () => {
+    // Con `{}` heredaba `canonical: '/horoscopo'` del layout: `/horoscopo/unicornio`
+    // respondía 200 declarándose duplicada de otra URL — el patrón que originó
+    // la tarea, fabricado a propósito para URLs basura.
     const metadata = await generateMetadata({ params: Promise.resolve({ sign: 'unicornio' }) });
 
-    expect(metadata).toEqual({});
+    expect(metadata.alternates?.canonical).toBe('./');
+    expect(metadata.robots).toEqual({ index: false, follow: true });
   });
 });
 

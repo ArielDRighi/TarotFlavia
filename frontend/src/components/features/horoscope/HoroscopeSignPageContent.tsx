@@ -13,9 +13,8 @@ import { HoroscopeSkeleton } from './HoroscopeSkeleton';
 import { ZodiacSignSelector } from './ZodiacSignSelector';
 // 5. Stores, utils & types
 import { useAuthStore } from '@/stores/authStore';
-import { getZodiacSignFromDate, ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
+import { getZodiacSignFromDate, isZodiacSign } from '@/lib/utils/zodiac';
 import { ROUTES } from '@/lib/constants/routes';
-import { ZodiacSign } from '@/types/horoscope.types';
 
 /**
  * Contenido de `/horoscopo/[sign]`.
@@ -36,8 +35,7 @@ export function HoroscopeSignPageContent() {
   // Validate the sign BEFORE querying: pass null to the hook for an invalid
   // route (e.g. /horoscopo/foobar) so it stays disabled instead of firing 404s.
   const rawSign = params.sign as string;
-  const isValidSign = Boolean(ZODIAC_SIGNS_INFO[rawSign as ZodiacSign]);
-  const sign = isValidSign ? (rawSign as ZodiacSign) : null;
+  const sign = isZodiacSign(rawSign) ? rawSign : null;
   const { data, isLoading, error, isShowingPreviousDay } = useLocalHoroscope(sign);
 
   if (!sign) {
