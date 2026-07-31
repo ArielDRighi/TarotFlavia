@@ -48,6 +48,14 @@ WORKDIR /app/backend/tarot-app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+# T-PROD-021: cinturón y tiradores. Las columnas de expiración ya son `timestamptz`
+# (instante absoluto, independiente del TZ del proceso), pero el resto del código
+# sigue razonando con `new Date()` en varios lugares. Fijarlo acá evita que un
+# `TZ=America/Argentina/Buenos_Aires` cargado desde el panel de Railway cambie el
+# comportamiento del server sin que nadie toque una línea de código.
+# Ojo: NO es la zona del negocio — los días calendario argentinos se resuelven con
+# `getTodayAppDateString()`, que lleva su timezone explícito.
+ENV TZ=UTC
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \

@@ -340,7 +340,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-018 | ✅ Sin `robots.txt` ni `sitemap.xml`, staging indexable y la imagen social (`og-image.png`) no existe | Frontend | 🔴 Crítica | 2 pts |
 | T-PROD-019 | El límite alcanzado manda a `/planes` (404) y el de tiradas ofrece "Hazte Premium" a usuarios que ya son premium | Frontend | 🟠 Alta | 0.5 pt |
 | T-PROD-020 | ✅ Search Console: "Duplicada, Google eligió otra canónica" — casi todo el sitemap comparte el `<title>` "Auguria" | Frontend | 🔴 Crítica | 3 pts |
-| T-PROD-021 | **Bomba de timezone en auth**: las columnas `timestamp` de expiración se leen desfasadas si el server no corre en UTC (rompe login y reset de contraseña) | Backend | 🟠 Alta | 2 pts |
+| T-PROD-021 | ✅ **Bomba de timezone en auth**: las columnas `timestamp` de expiración se leen desfasadas si el server no corre en UTC (rompe login y reset de contraseña) | Backend | 🟠 Alta | 2 pts |
 
 ---
 
@@ -1675,9 +1675,9 @@ que su metadata también queda congelada al build. Mismo hallazgo 🟠, pero no 
 
 ---
 
-### T-PROD-021: Bomba de Timezone en Auth — las Expiraciones se Leen Desfasadas si el Server no Corre en UTC
+### T-PROD-021: Bomba de Timezone en Auth — las Expiraciones se Leen Desfasadas si el Server no Corre en UTC — ✅ COMPLETADA
 
-**Estado:** ⏳ PENDIENTE
+**Estado:** ✅ COMPLETADA (2026-07-31)
 **Prioridad:** 🟠 Alta
 **Estimación:** 2 puntos
 **Dependencias:** ninguna
@@ -1729,21 +1729,48 @@ la recuperación de cuenta. Y borraría el trabajo de **T-PROD-015** sin que nad
 
 #### ✅ Tareas propuestas
 
-- [ ] Migración que pase las 3 columnas de `timestamp` a `timestamptz`. Postgres guarda un instante
-      absoluto y el round-trip deja de depender del TZ del proceso. Es el arreglo de fondo.
-- [ ] Actualizar los `@Column({ type: 'timestamp' })` correspondientes en las entidades.
-- [ ] **Además** (cinturón y tiradores): fijar `TZ=UTC` explícito en el `Dockerfile` del backend, para que
-      el comportamiento no dependa de una variable que alguien puede cambiar desde el panel de Railway.
-- [ ] Test de regresión que corra el flujo de reset **con `TZ` no-UTC** y verifique que el token sigue
-      siendo válido. Sin esto el bug vuelve: hoy CI corre en UTC y no lo vería nunca.
-- [ ] Revisar si hay otras columnas `timestamp` comparadas en JS que merezcan el mismo tratamiento
-      (`used_at`, `revoked_at`, `paid_at`, `cancelled_at` no se comparan hoy, pero conviene dejarlo anotado).
+- [x] Migración [1776900000000-AuthTimestampsToTimestamptz.ts](../backend/tarot-app/src/database/migrations/1776900000000-AuthTimestampsToTimestamptz.ts):
+      **9 columnas** pasan a `timestamptz` con `USING "col" AT TIME ZONE 'UTC'`. Se convierten *todas* las
+      columnas `timestamp` de las tres tablas, no solo `expires_at`: dejar una tabla con dos semánticas de
+      tiempo distintas es la trampa que hace que el próximo que la toque se equivoque.
+- [x] `@Column({ type: 'timestamptz' })` en `PasswordResetToken`, `RefreshToken` y `CachedInterpretation`
+      (incluidos los `@CreateDateColumn`, que sin `type` explícito caían en `timestamp`).
+- [x] `ENV TZ=UTC` en el [Dockerfile](../backend/tarot-app/Dockerfile) del backend. No es la zona del
+      negocio —los días calendario argentinos los resuelve `getTodayAppDateString()` con su timezone
+      explícito— sino un cinturón para que nadie cambie el comportamiento del server desde el panel de Railway.
+- [x] Nuevo [auth-timestamptz.integration.spec.ts](../backend/tarot-app/test/integration/auth-timestamptz.integration.spec.ts)
+      (8 tests): tipo de columna en `information_schema`, metadata de las entidades y round-trip que asevera
+      que el instante se preserva y que un TTL de 1 h no nace vencido.
+- [x] Revisadas las demás columnas `timestamp`: `paid_at`, `cancelled_at` y las de `cache_metrics` no se
+      comparan contra `new Date()` en ningún lado, así que quedan fuera (ver *Fuera de alcance*).
 
-#### 📌 Fuera de alcance
+#### 🎯 Criterios de Aceptación
 
-Las columnas `date` (fecha sin hora) **no se tocan**: su manejo está deliberadamente en hora local y
-documentado en `CLAUDE.md` (`parseBirthDate`/`formatBirthDate`, y `getTodayAppDateString()` para los
-límites diarios). Esta tarea es solo sobre columnas `timestamp` que representan un **instante**.
+- [x] **El bug se reprodujo y se cerró en la misma máquina.** Antes: `TZ=America/Argentina/Buenos_Aires
+      npm run test:integration` → 4 fallos (`Token has expired`) en `auth-users` y `email`. Después: esas
+      dos suites pasan 31/31 con el mismo TZ.
+- [x] Los 8 tests nuevos pasan **con `TZ=UTC` y con `TZ=America/Argentina/Buenos_Aires`**.
+- [x] La migración corre y commitea sobre una base con datos reales (verificado contra la BD de integración).
+- [x] Ciclo de calidad backend completo: format, lint, `npm run test` (**4603 tests**, 317 suites), build y
+      `validate-architecture.js`.
+
+#### 📌 Fuera de alcance (deliberado, no olvido)
+
+- Las columnas `date` (fecha sin hora) **no se tocan**: su manejo está deliberadamente en hora local y
+  documentado en `CLAUDE.md` (`parseBirthDate`/`formatBirthDate`, y `getTodayAppDateString()` para los
+  límites diarios). Esta tarea es solo sobre columnas `timestamp` que representan un **instante**.
+- **No se agregó un job de CI con `TZ` no-UTC.** Sería el guardarraíl ideal, pero flipear el TZ de la suite
+  entera puede destapar otros tests que asumen UTC sin que eso sea parte de esta tarea. El test de tipo de
+  columna sí corre en CI y ataja la regresión más probable (una migración futura que vuelva a `timestamp`).
+
+#### 🐛 Hallazgo lateral (no arreglado acá)
+
+`npm run test:integration:fresh` está **roto** y no es por esta tarea: `scripts/db-integration-reset.sh`
+invoca `npm run migration:run -- -d src/config/integration-data-source.ts`, y como el script de
+`package.json` ya trae su propio `-d`, el CLI de TypeORM recibe el flag duplicado y yargs muere con
+`ERR_INVALID_ARG_TYPE`. Para reconstruir la BD de integración a mano hay que replicar lo que hace CI
+(`migration:run` + `seed` con `INTEGRATION_TESTING=true` y `POSTGRES_*` apuntando al puerto 5439).
+Merece su propia tarea de DX.
 
 ---
 
