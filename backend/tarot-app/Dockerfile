@@ -48,6 +48,15 @@ WORKDIR /app/backend/tarot-app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+# T-PROD-021: deja el timezone explícito en la imagen en vez de depender del
+# default de la base (`node:20-alpine` sin tzdata ya cae en UTC, así que hoy es un
+# no-op — el valor está en que no cambie solo si mañana cambia la imagen base).
+# ⚠️ NO protege contra el panel de Railway: una variable de servicio se inyecta en
+# runtime y pisa este `ENV`. Lo que sí vuelve inocuo ese escenario es que las
+# columnas de expiración ahora son `timestamptz` (instante absoluto).
+# Ojo: NO es la zona del negocio — los días calendario argentinos se resuelven con
+# `getTodayAppDateString()`, que lleva su timezone explícito.
+ENV TZ=UTC
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \

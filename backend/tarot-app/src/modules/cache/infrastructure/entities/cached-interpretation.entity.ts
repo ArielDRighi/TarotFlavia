@@ -40,12 +40,12 @@ export class CachedInterpretation {
   @Column({ type: 'int', default: 0 })
   hit_count: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   last_used_at: Date;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamptz' })
   expires_at: Date;
 }

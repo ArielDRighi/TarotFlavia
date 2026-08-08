@@ -124,7 +124,7 @@ export class User {
     description: 'Fecha de inicio del plan actual',
     nullable: true,
   })
-  @Column({ nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   planStartedAt: Date;
 
   @ApiProperty({
@@ -132,7 +132,7 @@ export class User {
     description: 'Fecha de expiración del plan',
     nullable: true,
   })
-  @Column({ nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   planExpiresAt: Date;
 
   @ApiProperty({
