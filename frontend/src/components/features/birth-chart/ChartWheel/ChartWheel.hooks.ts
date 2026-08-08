@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Chart } from '@astrodraw/astrochart';
 import type {
   PlanetPosition,
   HouseCusp,
@@ -81,8 +80,16 @@ export function useChartWheel({
       }
 
       // Esperar siguiente frame para asegurar que el DOM esté listo
-      requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
         try {
+          // `@astrodraw/astrochart` toca `self` al evaluarse, así que importarla
+          // arriba del módulo rompía el prerender de `/carta-astral/resultado`
+          // ("ReferenceError: self is not defined"). El `AuthProvider` lo tapaba
+          // porque nunca llegaba a renderizar la página en el servidor; al quitar
+          // ese bloqueo (T-PROD-022) el error salió a la luz. Acá ya estamos en el
+          // browser, dentro de un `requestAnimationFrame`.
+          const { Chart } = await import('@astrodraw/astrochart');
+
           // Convertir datos
           const planets = convertPlanetsToAstroChart(data.planets as PlanetPosition[]);
           const cusps = convertHousesToAstroChart(data.houses as HouseCusp[]);

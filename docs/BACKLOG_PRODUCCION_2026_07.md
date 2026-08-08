@@ -341,6 +341,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-019 | El límite alcanzado manda a `/planes` (404) y el de tiradas ofrece "Hazte Premium" a usuarios que ya son premium | Frontend | 🟠 Alta | 0.5 pt |
 | T-PROD-020 | ✅ Search Console: "Duplicada, Google eligió otra canónica" — casi todo el sitemap comparte el `<title>` "Auguria" | Frontend | 🔴 Crítica | 3 pts |
 | T-PROD-021 | ✅ **Bomba de timezone en auth**: las columnas `timestamp` de expiración se leen desfasadas si el server no corre en UTC (rompe login y reset de contraseña) | Backend | 🟠 Alta | 2 pts |
+| T-PROD-022 | ✅ **El sitio entero servía 3 palabras a Googlebot**: el `AuthProvider` devolvía "Verificando sesión..." en lugar del contenido en todo render SSR (rechazo de AdSense) | Frontend | 🔴 Crítica | 2 pts |
 
 ---
 
@@ -1804,6 +1805,93 @@ invoca `npm run migration:run -- -d src/config/integration-data-source.ts`, y co
 `ERR_INVALID_ARG_TYPE`. Para reconstruir la BD de integración a mano hay que replicar lo que hace CI
 (`migration:run` + `seed` con `INTEGRATION_TESTING=true` y `POSTGRES_*` apuntando al puerto 5439).
 Merece su propia tarea de DX.
+
+---
+
+### T-PROD-022: El Sitio Entero le Servía 3 Palabras a Googlebot — ✅ COMPLETADA
+
+**Estado:** ✅ COMPLETADA (2026-08-08)
+**Prioridad:** 🔴 Crítica
+**Estimación:** 2 puntos
+**Dependencias:** ninguna (pero deja sin efecto parte del beneficio de T-PROD-020 hasta que se deploye)
+**Origen:** AdSense rechazó `auguriatarot.com` por *"Contenido de poco valor"*
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### 📋 Problema
+
+AdSense rechazó el sitio por contenido de poco valor. Al medir producción con el user-agent de
+Googlebot, el motivo resultó literal: **todas las páginas devolvían 3 palabras**.
+
+| URL | `<title>` | Palabras visibles |
+| --- | --- | --- |
+| `/` | Auguria | 3 |
+| `/enciclopedia/tarot/the-fool` | Auguria | 3 |
+| `/horoscopo/aries` | Auguria | 3 |
+| `/numerologia` | Auguria | 3 |
+
+Las tres palabras eran siempre `Auguria Verificando sesión...`.
+
+**Causa:** `auth-provider.tsx` devolvía la pantalla de carga **en lugar de** `children` mientras
+`!hasHydrated || isLoading`. Como vive en el layout raíz y en el servidor `_hasHydrated` es **siempre
+`false`** (no existe `localStorage`), **todo render SSR del sitio entero era ese splash**.
+
+⚠️ **Esto era también la mitad que faltaba de T-PROD-020.** Aquella tarea dejó los `<title>` únicos, pero
+los cuerpos seguían siendo todos idénticos, así que Google habría seguido agrupando las URLs como
+duplicadas. Verificado sobre el build con T-PROD-020 aplicado: `"Enciclopedia Mística | Auguria
+Verificando sesión..."` = 6 palabras.
+
+**Segundo foco, misma clase:** `HomePageContent` devolvía un skeleton mientras `isLoading` — y `isLoading`
+arranca en `true` en el store, así que ese skeleton **era** el render del servidor de `/`. La home, la URL
+más importante del sitio, servía 4 palabras propias.
+
+#### ✅ Tareas específicas
+
+- [x] `AuthProvider` renderiza `children` **siempre**; mantiene el `checkAuth` tras la hidratación.
+      La protección contra FOUC baja a quien la necesita: `useRequireAuth` en rutas privadas y
+      `useAdsEnabled`, que **ya** exigía `_hasHydrated` por su cuenta — o sea que el gate nunca fue lo que
+      protegía a los Premium de ver un anuncio (T-PROD-008 sigue intacto).
+- [x] `HomePageContent`: la landing es el render por defecto; el dashboard aparece en cuanto hay sesión.
+- [x] **Bug destapado por el arreglo:** `/carta-astral/resultado` rompía el build con
+      `ReferenceError: self is not defined`. `@astrodraw/astrochart` toca `self` al evaluarse y se
+      importaba en el tope de `ChartWheel.hooks.ts`; el gate lo tapaba porque la página nunca llegaba a
+      renderizarse en el servidor. Pasa a `await import()` dentro del `requestAnimationFrame`, que ya
+      corre en el browser.
+- [x] Tests de regresión en `auth-provider.test.tsx` (6) y `HomePageContent.test.tsx`. Los de TASK-017 que
+      aseveraban *"no renderizar contenido mientras carga"* se invirtieron a propósito, con el porqué escrito.
+
+#### 🎯 Criterios de Aceptación
+
+- [x] Ninguna página emite la pantalla de "Verificando sesión" en el HTML del servidor.
+- [x] La home pasa de **4 a 611 palabras propias** en el build.
+- [x] El build prerenderiza las 85 páginas sin errores.
+- [x] Ciclo de calidad frontend completo: format, lint:fix, type-check, `test:run` (**5512 tests**,
+      435 suites), build y `validate-architecture.js`.
+
+#### 📊 Estado del contenido después del arreglo (build local, sin API)
+
+Medido descontando las 39 palabras de header + footer:
+
+| Con contenido propio | Todavía casi vacías |
+| --- | --- |
+| `/` 611 · `/carta-astral` 376 · `/numerologia` 305 · `/horoscopo-chino` 258 · `/rituales` 223 · `/horoscopo` 217 · `/pendulo` 215 | `/premium` 3 · `/servicios` 5 · `/enciclopedia/guias` 13 · `/explorar` 20 · `/enciclopedia/tarot` 24 · `/horoscopo/aries` 31 |
+
+Las de la derecha son listados y fichas que traen sus datos **por el cliente** con React Query: el crawler
+sigue recibiendo el cascarón. No es el mismo bug (ya no hay un gate global), pero sí el mismo síntoma.
+
+#### 📌 Fuera de alcance → **candidata a T-PROD-023**
+
+Hacer SSR del contenido de esos listados/fichas, como ya se hizo con `/enciclopedia/tarot/[slug]` en
+T-PROD-020 (resolver en el server y pasar por `initialData` a React Query). Es lo que falta para que
+AdSense evalúe un sitio con contenido real en todas sus URLs, y conviene medirlo contra producción con la
+API arriba antes de decidir el alcance — varias de esas páginas se llenan en producción y el build local
+las subestima.
+
+#### 📌 Nota de deploy
+
+Producción corre `main`. Nada de esto —ni T-PROD-020, ni T-PROD-021, ni esto— llega al sitio hasta
+promover `develop` → `main`. Después del deploy hay que **re-verificar con el mismo `curl` como Googlebot**
+antes de apretar "Solicitar revisión" en AdSense. Pendiente aparte: `ads.txt` figura como *No se encuentra*
+en el panel (contemplado en T-PROD-009).
 
 ---
 
