@@ -11,15 +11,6 @@ vi.mock('@/components/features/dashboard', () => ({
   UserDashboard: () => <div data-testid="user-dashboard">UserDashboard Component</div>,
 }));
 
-// Mock Skeleton component
-vi.mock('@/components/ui/skeleton', () => ({
-  Skeleton: ({ className }: { className?: string }) => (
-    <div data-testid="skeleton-loader" className={className}>
-      Loading...
-    </div>
-  ),
-}));
-
 // Mock authStore
 const mockUseAuthStore = vi.fn();
 vi.mock('@/stores/authStore', () => ({
@@ -55,7 +46,6 @@ describe('HomePageContent (Root Page)', () => {
       render(<HomePageContent />);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
-      expect(screen.queryAllByTestId('skeleton-loader')).toHaveLength(0);
       expect(screen.queryByTestId('user-dashboard')).not.toBeInTheDocument();
     });
 
@@ -149,7 +139,6 @@ describe('HomePageContent (Root Page)', () => {
 
       rerender(<HomePageContent />);
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
-      expect(screen.queryAllByTestId('skeleton-loader').length).toBe(0);
     });
 
     it('should handle transition from loading to authenticated', () => {
@@ -172,7 +161,6 @@ describe('HomePageContent (Root Page)', () => {
 
       rerender(<HomePageContent />);
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
-      expect(screen.queryAllByTestId('skeleton-loader').length).toBe(0);
     });
   });
 
@@ -193,7 +181,6 @@ describe('HomePageContent (Root Page)', () => {
       render(<HomePageContent />);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
-      expect(screen.queryAllByTestId('skeleton-loader')).toHaveLength(0);
     });
   });
 });

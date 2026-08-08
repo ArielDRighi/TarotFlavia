@@ -29,20 +29,27 @@ interface AuthProviderProps {
  * "Duplicada: Google eligió otra canónica" de T-PROD-020: los `<title>` quedaron
  * únicos, pero los cuerpos seguían siendo todos idénticos.
  *
- * ## Dónde vive ahora la protección contra el FOUC
+ * ## Qué protege qué ahora
  *
- * En cada componente que la necesita, que es donde corresponde:
- * - `HomePageContent` muestra su propio skeleton mientras `isLoading`, para no
- *   parpadear la landing antes del dashboard.
- * - Las rutas privadas usan `useRequireAuth`, que redirige por su cuenta.
+ * - Las rutas privadas usan `useRequireAuth`, que espera a que `isLoading` sea
+ *   `false` antes de redirigir y muestra su propio spinner mientras tanto.
  * - `useAdsEnabled` exige `_hasHydrated` antes de habilitar anuncios, así que un
  *   Premium sigue sin ver ni un flash de publicidad (T-PROD-008).
+ * - `HomePageContent` renderiza la landing por defecto y cambia al dashboard en
+ *   cuanto hay sesión. El parpadeo para un usuario logueado es un costo asumido.
  *
  * ⚠️ NO volver a devolver un splash desde acá: apaga el sitio para los buscadores.
  */
 export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
+
+  // El store usa `skipHydration` para que el primer render del cliente coincida
+  // con el del servidor (ver `authStore.ts`). La rehidratación se dispara acá,
+  // ya montados, y al terminar pone `_hasHydrated` en `true`.
+  useEffect(() => {
+    void useAuthStore.persist.rehydrate();
+  }, []);
 
   useEffect(() => {
     // Only check auth after Zustand has hydrated from localStorage

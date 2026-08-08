@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { renderToString } from 'react-dom/server';
 
 import { AuthProvider } from './auth-provider';
 
@@ -29,6 +30,7 @@ import { AuthProvider } from './auth-provider';
  */
 
 const mockCheckAuth = vi.fn();
+const mockRehydrate = vi.fn();
 
 interface MockAuthState {
   checkAuth: () => void;
@@ -38,9 +40,13 @@ interface MockAuthState {
 
 let mockState: MockAuthState;
 
-vi.mock('@/stores/authStore', () => ({
-  useAuthStore: (selector: (state: MockAuthState) => unknown) => selector(mockState),
-}));
+vi.mock('@/stores/authStore', () => {
+  const useAuthStore = (selector: (state: MockAuthState) => unknown) => selector(mockState);
+  // El store real usa `skipHydration`, así que el provider dispara la
+  // rehidratación a mano desde un efecto.
+  useAuthStore.persist = { rehydrate: () => mockRehydrate() };
+  return { useAuthStore };
+});
 
 function renderWithState(state: Partial<MockAuthState>) {
   mockState = {
@@ -99,5 +105,36 @@ describe('AuthProvider', () => {
     renderWithState({ _hasHydrated: false, isLoading: true });
 
     expect(mockCheckAuth).not.toHaveBeenCalled();
+  });
+
+  it('dispara la rehidratación del store, que ahora usa skipHydration', () => {
+    // Sin esto la sesión no se recupera nunca: `skipHydration` desactiva la
+    // rehidratación automática para que el primer render del cliente coincida
+    // con el del servidor.
+    renderWithState({ _hasHydrated: false, isLoading: true });
+
+    expect(mockRehydrate).toHaveBeenCalledOnce();
+  });
+
+  describe('render del servidor', () => {
+    it('⚠️ T-PROD-022: el HTML del servidor trae el contenido, no el splash', () => {
+      // Éste es el nivel donde ocurrió el bug: en jsdom se simula con un mock,
+      // pero lo que rompió el sitio fue el string que emite el servidor.
+      mockState = {
+        checkAuth: mockCheckAuth,
+        // En el servidor no existe `localStorage`: este es el estado real.
+        isLoading: true,
+        _hasHydrated: false,
+      };
+
+      const html = renderToString(
+        <AuthProvider>
+          <main>Significado de El Loco en el tarot</main>
+        </AuthProvider>
+      );
+
+      expect(html).toContain('Significado de El Loco en el tarot');
+      expect(html).not.toContain('Verificando sesión');
+    });
   });
 });

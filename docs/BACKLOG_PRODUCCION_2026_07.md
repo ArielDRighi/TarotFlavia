@@ -1878,6 +1878,32 @@ Medido descontando las 39 palabras de header + footer:
 Las de la derecha son listados y fichas que traen sus datos **por el cliente** con React Query: el crawler
 sigue recibiendo el cascarón. No es el mismo bug (ya no hay un gate global), pero sí el mismo síntoma.
 
+#### 🔍 Hallazgos del revisor local (aplicados en un segundo commit)
+
+- 🟠 **Regresión que introdujo el primer commit: mismatch de hidratación en todo el sitio.** El revisor
+      lo midió: zustand `persist` rehidrata de forma **síncrona** con `localStorage`, así que el primer
+      render del cliente ya tenía `user`, mientras que el del servidor no lo tiene nunca. React 19 lo
+      reporta como *"Hydration failed… this tree will be regenerated on the client"* y **descarta el HTML
+      del servidor en cada página** (el `Header` vive en el layout raíz). No afectaba a Googlebot ni a
+      anónimos, pero tiraba a la basura el beneficio del SSR justamente para los usuarios logueados.
+      Arreglado con `skipHydration: true` en el store + `persist.rehydrate()` desde un efecto del
+      `AuthProvider`: el primer render del cliente coincide con el del servidor y la sesión entra después.
+      Verificado que no rompe `useRequireAuth`: solo redirige con `!isAuthenticated && !isLoading`, y
+      `isLoading` arranca en `true`, así que ningún usuario logueado se va a `/login` durante la ventana.
+- 🟡 **Comentario que describía un skeleton borrado en ese mismo commit.** La sección "dónde vive ahora la
+      protección contra el FOUC" del `AuthProvider` afirmaba que `HomePageContent` mostraba un skeleton.
+      Reescrita.
+- 🟡 **Mock muerto y aserciones tautológicas** en `HomePageContent.test.tsx`: el `vi.mock` de
+      `@/components/ui/skeleton` quedó inerte y `expect(queryAllByTestId('skeleton-loader')).toHaveLength(0)`
+      no podía fallar nunca. Eliminados.
+- 🟡 **Carrera al desmontar con el import dinámico.** Si el componente se desmonta mientras viaja el chunk
+      de astrochart, el cleanup ya corrió y después se construía un `Chart` contra un contenedor
+      inexistente que nadie limpiaba. Agregado un contador de generación que se incrementa en el cleanup y
+      se verifica al volver del `await`.
+- 💡 **El guardarraíl no cubría el nivel del bug.** Los tests corrían en jsdom con un mock, pero lo que
+      rompió el sitio fue el **string del servidor**. Sumado un test con `renderToString` que asevera que el
+      HTML contiene el contenido y no contiene "Verificando sesión".
+
 #### 📌 Fuera de alcance → **candidata a T-PROD-023**
 
 Hacer SSR del contenido de esos listados/fichas, como ya se hizo con `/enciclopedia/tarot/[slug]` en
