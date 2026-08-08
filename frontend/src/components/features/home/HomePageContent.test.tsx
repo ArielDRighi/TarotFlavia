@@ -11,15 +11,6 @@ vi.mock('@/components/features/dashboard', () => ({
   UserDashboard: () => <div data-testid="user-dashboard">UserDashboard Component</div>,
 }));
 
-// Mock Skeleton component
-vi.mock('@/components/ui/skeleton', () => ({
-  Skeleton: ({ className }: { className?: string }) => (
-    <div data-testid="skeleton-loader" className={className}>
-      Loading...
-    </div>
-  ),
-}));
-
 // Mock authStore
 const mockUseAuthStore = vi.fn();
 vi.mock('@/stores/authStore', () => ({
@@ -42,7 +33,10 @@ describe('HomePageContent (Root Page)', () => {
   });
 
   describe('Loading State', () => {
-    it('should show loading skeleton while validating auth', () => {
+    it('⚠️ T-PROD-022: muestra la landing mientras se valida la sesión, no un skeleton', () => {
+      // `isLoading` arranca en `true` en el store, así que el skeleton que había
+      // acá ERA el render del servidor: la home le servía a Googlebot una pantalla
+      // de carga. La landing es el default, también en SSR.
       mockUseAuthStore.mockReturnValue({
         user: null,
         isAuthenticated: false,
@@ -51,10 +45,20 @@ describe('HomePageContent (Root Page)', () => {
 
       render(<HomePageContent />);
 
-      const skeletons = screen.getAllByTestId('skeleton-loader');
-      expect(skeletons.length).toBeGreaterThan(0);
-      expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
+      expect(screen.getByTestId('landing-page')).toBeInTheDocument();
       expect(screen.queryByTestId('user-dashboard')).not.toBeInTheDocument();
+    });
+
+    it('⚠️ T-PROD-022: muestra el dashboard en cuanto hay sesión, aunque siga cargando', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: { id: 1, name: 'Test User', plan: 'free' },
+        isAuthenticated: true,
+        isLoading: true,
+      });
+
+      render(<HomePageContent />);
+
+      expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
     });
   });
 
@@ -123,8 +127,8 @@ describe('HomePageContent (Root Page)', () => {
       });
 
       const { rerender } = render(<HomePageContent />);
-      const skeletons = screen.getAllByTestId('skeleton-loader');
-      expect(skeletons.length).toBeGreaterThan(0);
+      // Antes de resolver la sesión ya se ve la landing (T-PROD-022).
+      expect(screen.getByTestId('landing-page')).toBeInTheDocument();
 
       // Simulate auth check complete - no user
       mockUseAuthStore.mockReturnValue({
@@ -135,7 +139,6 @@ describe('HomePageContent (Root Page)', () => {
 
       rerender(<HomePageContent />);
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
-      expect(screen.queryAllByTestId('skeleton-loader').length).toBe(0);
     });
 
     it('should handle transition from loading to authenticated', () => {
@@ -146,8 +149,8 @@ describe('HomePageContent (Root Page)', () => {
       });
 
       const { rerender } = render(<HomePageContent />);
-      const skeletons = screen.getAllByTestId('skeleton-loader');
-      expect(skeletons.length).toBeGreaterThan(0);
+      // Antes de resolver la sesión ya se ve la landing (T-PROD-022).
+      expect(screen.getByTestId('landing-page')).toBeInTheDocument();
 
       // Simulate auth check complete - user logged in
       mockUseAuthStore.mockReturnValue({
@@ -158,12 +161,17 @@ describe('HomePageContent (Root Page)', () => {
 
       rerender(<HomePageContent />);
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
-      expect(screen.queryAllByTestId('skeleton-loader').length).toBe(0);
     });
   });
 
-  describe('FOUC Prevention', () => {
-    it('should not render content while loading to prevent FOUC', () => {
+  describe('Contenido indexable (T-PROD-022)', () => {
+    it('⚠️ nunca deja la home sin contenido: el render por defecto es la landing', () => {
+      // TASK-017 aseveraba lo contrario ("no renderizar contenido mientras carga,
+      // para evitar el FOUC"). Se invirtió a propósito: como `isLoading` arranca en
+      // `true`, ese comportamiento hacía que el HTML servido por el servidor —lo
+      // que ve Googlebot y lo que evaluó AdSense— fuera una pantalla de carga.
+      // El precio es un parpadeo de la landing antes del dashboard para un usuario
+      // logueado; el beneficio es tener una home indexable.
       mockUseAuthStore.mockReturnValue({
         user: null,
         isAuthenticated: false,
@@ -172,11 +180,7 @@ describe('HomePageContent (Root Page)', () => {
 
       render(<HomePageContent />);
 
-      // Should only show loading, no actual content
-      const skeletons = screen.getAllByTestId('skeleton-loader');
-      expect(skeletons.length).toBeGreaterThan(0);
-      expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('user-dashboard')).not.toBeInTheDocument();
+      expect(screen.getByTestId('landing-page')).toBeInTheDocument();
     });
   });
 });

@@ -172,6 +172,15 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
+      // ⚠️ T-PROD-022: la rehidratación NO puede ocurrir durante la creación del
+      // store. `localStorage` es síncrono, así que sin esto zustand rehidrata en
+      // el mismo tick y el PRIMER render del cliente ya tiene `user`, mientras que
+      // el del servidor no lo tiene nunca → React detecta un mismatch y descarta
+      // el HTML del servidor, regenerando el árbol entero en el cliente (el
+      // `Header` está en el layout raíz, así que pasaba en todas las páginas).
+      // Con `skipHydration`, `AuthProvider` la dispara en un efecto: el primer
+      // render del cliente coincide con el del servidor y la sesión entra después.
+      skipHydration: true,
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,

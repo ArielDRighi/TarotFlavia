@@ -44,8 +44,11 @@ export default function RootLayout({
       >
         <ReactQueryProvider>
           <AuthProvider>
-            {/* Dentro del AuthProvider: necesita el plan hidratado para no cargarle
-                el loader de AdSense a un usuario Premium (T-PROD-008) */}
+            {/* El gating de AdSense NO depende de este árbol: `useAdsEnabled` exige
+                `_hasHydrated` por su cuenta, así que un Premium no ve ni un flash de
+                anuncio (T-PROD-008). El `AuthProvider` ya no bloquea el render —
+                bloquearlo dejaba el sitio entero en blanco para los buscadores
+                (T-PROD-022). */}
             <AdSenseScript />
             <div className="flex min-h-screen flex-col">
               <Header />
