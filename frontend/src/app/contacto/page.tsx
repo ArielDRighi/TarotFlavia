@@ -1,8 +1,12 @@
+import type { Metadata } from 'next';
 import { Mail, Sparkles } from 'lucide-react';
 
 import { Reveal } from '@/components/common/Reveal';
 import { ContactForm } from '@/components/features/contact/ContactForm';
 import { CONFIG } from '@/lib/constants';
+import { STATIC_PAGE_METADATA } from '@/lib/metadata/page-metadata';
+
+export const metadata: Metadata = STATIC_PAGE_METADATA.contacto;
 
 /**
  * Página de Contacto

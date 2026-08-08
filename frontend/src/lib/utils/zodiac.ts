@@ -172,3 +172,13 @@ export function getZodiacSignFromDate(birthDate: Date): ZodiacSign {
 export function getZodiacSignInfo(sign: ZodiacSign): ZodiacSignInfo {
   return ZODIAC_SIGNS_INFO[sign];
 }
+
+/**
+ * Valida el segmento de una URL (`/horoscopo/aries`) antes de tratarlo como signo.
+ *
+ * Es un type guard para que ni la ruta ni el componente tengan que castear el
+ * `string` que llega de `params`.
+ */
+export function isZodiacSign(value: string): value is ZodiacSign {
+  return Object.hasOwn(ZODIAC_SIGNS_INFO, value);
+}

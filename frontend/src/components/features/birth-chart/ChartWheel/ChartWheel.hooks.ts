@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Chart } from '@astrodraw/astrochart';
 import type {
   PlanetPosition,
   HouseCusp,
@@ -59,6 +58,14 @@ export function useChartWheel({
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const chartRef = useRef<AstroChart | null>(null);
   const containerIdRef = useRef<string>(generateChartContainerId());
+  /**
+   * Se incrementa en cada cleanup. Como el `import()` dinámico de astrochart
+   * puede tardar lo que tarde la descarga del chunk, al volver del `await` hay
+   * que confirmar que este render sigue vigente: sin esto, desmontar el
+   * componente mientras el chunk viaja dejaba un `Chart` construido contra un
+   * contenedor que ya no existe, y nadie lo limpiaba nunca.
+   */
+  const renderGenerationRef = useRef(0);
 
   // Renderizar gráfico
   const renderChart = useCallback(() => {
@@ -81,8 +88,22 @@ export function useChartWheel({
       }
 
       // Esperar siguiente frame para asegurar que el DOM esté listo
-      requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
         try {
+          // `@astrodraw/astrochart` toca `self` al evaluarse, así que importarla
+          // arriba del módulo rompía el prerender de `/carta-astral/resultado`
+          // ("ReferenceError: self is not defined"). El `AuthProvider` lo tapaba
+          // porque nunca llegaba a renderizar la página en el servidor; al quitar
+          // ese bloqueo (T-PROD-022) el error salió a la luz. Acá ya estamos en el
+          // browser, dentro de un `requestAnimationFrame`.
+          const generation = renderGenerationRef.current;
+          const { Chart } = await import('@astrodraw/astrochart');
+
+          // El componente se desmontó (o se relanzó el render) mientras cargaba.
+          if (generation !== renderGenerationRef.current) {
+            return;
+          }
+
           // Convertir datos
           const planets = convertPlanetsToAstroChart(data.planets as PlanetPosition[]);
           const cusps = convertHousesToAstroChart(data.houses as HouseCusp[]);
@@ -140,6 +161,9 @@ export function useChartWheel({
 
     // Cleanup al desmontar
     return () => {
+      // Invalida cualquier `import()` en vuelo (ver `renderGenerationRef`).
+      renderGenerationRef.current += 1;
+
       if (chartRef.current) {
         const container = document.getElementById(currentContainerId);
         if (container) {

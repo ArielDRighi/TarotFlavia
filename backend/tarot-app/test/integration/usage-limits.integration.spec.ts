@@ -27,6 +27,19 @@ import {
   AIResponse,
 } from '../../src/modules/ai/domain/interfaces/ai-provider.interface';
 import { GroqProvider } from '../../src/modules/ai/infrastructure/providers/groq.provider';
+import { getTodayAppDateString } from '../../src/common/utils/date.utils';
+
+/**
+ * ⚠️ La fecha de un registro de uso se consulta SIEMPRE con `getTodayAppDateString()`,
+ * el mismo helper que usa `UsageLimitsService` para escribirla.
+ *
+ * Estos tests calculaban el día con `setUTCHours(0,0,0,0)` + `toISOString()`, es decir
+ * el día **UTC**. Pero los límites diarios se llevan por el día calendario de
+ * **Argentina** (UTC-3), porque un corte en medianoche UTC reseteaba los límites a las
+ * 21:00 hora local. Entre las 00:00 y las 03:00 UTC los dos valores difieren, el
+ * `findOne` devolvía `null` y la suite fallaba en CI todas las noches — sin que nada
+ * hubiera cambiado en el código.
+ */
 
 // No need to increase timeout with mocked AI
 jest.setTimeout(10000);
@@ -375,19 +388,15 @@ describe('UsageLimits + Readings Integration Tests', () => {
         .expect(201);
 
       // ASSERT
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
-      const dateString = today.toISOString().split('T')[0];
-
       const usageRecord = await usageLimitRepository.findOne({
         where: {
           userId: testUser.id,
           feature: UsageFeature.TAROT_READING,
-          date: dateString,
+          date: getTodayAppDateString(),
         },
       });
 
-      expect(usageRecord).toBeDefined();
+      expect(usageRecord).not.toBeNull();
       expect(usageRecord!.count).toBe(1);
     });
 
@@ -410,19 +419,15 @@ describe('UsageLimits + Readings Integration Tests', () => {
       }
 
       // ASSERT
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
-      const dateString = today.toISOString().split('T')[0];
-
       const usageRecord = await usageLimitRepository.findOne({
         where: {
           userId: testUser.id,
           feature: UsageFeature.TAROT_READING,
-          date: dateString,
+          date: getTodayAppDateString(),
         },
       });
 
-      expect(usageRecord).toBeDefined();
+      expect(usageRecord).not.toBeNull();
       expect(usageRecord!.count).toBe(3);
     }, 30000); // 30s timeout
   });
@@ -464,17 +469,14 @@ describe('UsageLimits + Readings Integration Tests', () => {
       expect(userAfter!.aiRequestsUsedMonth).toBe(3);
 
       // Verify usage counter is at 3
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
-      const dateString = today.toISOString().split('T')[0];
       const usageRecord = await usageLimitRepository.findOne({
         where: {
           userId: testUser.id,
           feature: UsageFeature.TAROT_READING,
-          date: dateString,
+          date: getTodayAppDateString(),
         },
       });
-      expect(usageRecord).toBeDefined();
+      expect(usageRecord).not.toBeNull();
       expect(usageRecord!.count).toBe(3);
 
       // TASK-003: Verify that 4th reading is blocked
