@@ -1,5 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Los mocks devuelven solo lo que el componente consume. Se tipan contra el
+// retorno real del hook (sin `any`, prohibido por CLAUDE.md Rule 0).
+type RitualQuery = ReturnType<typeof useRitual>;
+type CompleteRitualMutation = ReturnType<typeof useCompleteRitual>;
 import userEvent from '@testing-library/user-event';
 import { RitualDetailPage } from './RitualDetailPage';
 import { RitualCategory, RitualDifficulty, MaterialType } from '@/types/ritual.types';
@@ -75,23 +80,20 @@ describe('RitualDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useAuthStore as any).mockReturnValue({
+    vi.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: false,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useRitual as any).mockReturnValue({
+    vi.mocked(useRitual).mockReturnValue({
       data: mockRitual,
       isLoading: false,
       error: null,
-    });
+    } as unknown as RitualQuery);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useCompleteRitual as any).mockReturnValue({
+    vi.mocked(useCompleteRitual).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    });
+    } as unknown as CompleteRitualMutation);
   });
 
   it('renders ritual title', () => {
@@ -101,12 +103,11 @@ describe('RitualDetailPage', () => {
   });
 
   it('shows loading skeleton when loading', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useRitual as any).mockReturnValue({
+    vi.mocked(useRitual).mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
-    });
+    } as unknown as RitualQuery);
 
     render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
@@ -115,12 +116,11 @@ describe('RitualDetailPage', () => {
   });
 
   it('shows error message when ritual not found', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useRitual as any).mockReturnValue({
+    vi.mocked(useRitual).mockReturnValue({
       data: null,
       isLoading: false,
       error: new Error('Not found'),
-    });
+    } as unknown as RitualQuery);
 
     render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
@@ -146,8 +146,7 @@ describe('RitualDetailPage', () => {
   });
 
   it('does not show login message when authenticated', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useAuthStore as any).mockReturnValue({
+    vi.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: true,
     });
 

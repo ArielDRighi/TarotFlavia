@@ -25,7 +25,7 @@ import type { CardDetail } from '@/types/encyclopedia.types';
 
 interface CardDetailPageContentProps {
   slug: string;
-  /** Carta resuelta en el servidor. La ruta 404ea si el slug no existe. */
+  /** Carta resuelta en el servidor. La ruta corta con notFound() si el slug no existe. */
   initialCard: CardDetail;
 }
 

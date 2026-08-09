@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
 import { getArticle, getArticlesByCategory } from '@/lib/api/encyclopedia-articles-api';
@@ -26,7 +27,23 @@ interface PageProps {
  * `fetch()` y acá abajo hay axios, así que sin `cache()` serían dos requests por
  * página renderizada.
  */
-const getArticleCached = cache((slug: string) => resolveRouteResource(() => getArticle(slug)));
+const ROUTE_CATEGORIES: readonly ArticleCategory[] = [ArticleCategory.ZODIAC_SIGN];
+
+/**
+ * Las 5 rutas de artículo consultan el MISMO `getArticle(slug)`, sin filtrar por
+ * categoría. Sin este chequeo, `/enciclopedia/elementos/aries` devolvía 200 con el
+ * signo Aries: cada artículo quedaba alcanzable como 5 URLs distintas con el mismo
+ * contenido — justo el agrupamiento por duplicado que T-PROD-020 vino a deshacer.
+ */
+const getArticleCached = cache(async (slug: string) => {
+  const article = await resolveRouteResource(() => getArticle(slug));
+
+  if (!ROUTE_CATEGORIES.includes(article.category)) {
+    notFound();
+  }
+
+  return article;
+});
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;

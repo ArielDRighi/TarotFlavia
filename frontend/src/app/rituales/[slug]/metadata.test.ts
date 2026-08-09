@@ -58,7 +58,7 @@ describe('/rituales/[slug] — metadata', () => {
     expect(metadata.alternates?.canonical).toBe('/rituales/bano-de-luna');
   });
 
-  it('un slug inexistente 404ea en vez de servir un 200 con metadata genérica', async () => {
+  it('un slug inexistente corta con notFound() en vez de servir metadata genérica', async () => {
     mockGetRitualBySlug.mockRejectedValue(apiError(404));
 
     await expect(

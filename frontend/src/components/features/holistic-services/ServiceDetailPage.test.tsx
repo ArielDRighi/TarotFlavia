@@ -5,6 +5,7 @@
  * User must select a date + time slot before the CTA is enabled.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { AxiosError, AxiosHeaders } from 'axios';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -65,6 +66,18 @@ const mockServiceDetail: HolisticServiceDetail = {
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedAt: '2025-01-01T00:00:00.000Z',
 };
+
+function notFoundAxiosError(): AxiosError {
+  const error = new AxiosError('Not found');
+  error.response = {
+    status: 404,
+    statusText: '',
+    data: null,
+    headers: new AxiosHeaders(),
+    config: { headers: new AxiosHeaders() },
+  };
+  return error;
+}
 
 describe('ServiceDetailPage', () => {
   let queryClient: QueryClient;
@@ -320,7 +333,9 @@ describe('ServiceDetailPage', () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      error: new Error('Servicio no encontrado'),
+      // `getHolisticServiceDetail` preserva el AxiosError original en el 404 para
+      // que la ruta pueda cortar con notFound(); envolverlo daba 500 (T-PROD-024).
+      error: notFoundAxiosError(),
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
     render(<ServiceDetailPage slug="slug-inexistente" initialService={mockServiceDetail} />, {

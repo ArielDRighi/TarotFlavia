@@ -75,6 +75,7 @@ describe('generateMetadata (casas)', () => {
       slug: 'primera-casa',
       nameEs: 'Primera Casa',
       snippet: 'La casa del yo.',
+      category: 'astro_house',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'primera-casa' }) });
@@ -90,6 +91,7 @@ describe('generateMetadata (casas)', () => {
       slug: 'primera-casa',
       nameEs: 'Primera Casa',
       snippet,
+      category: 'astro_house',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'primera-casa' }) });
@@ -103,6 +105,7 @@ describe('generateMetadata (casas)', () => {
       slug: 'primera-casa',
       nameEs: 'Primera Casa',
       snippet: 'La casa del yo.',
+      category: 'astro_house',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'primera-casa' }) });
@@ -114,7 +117,7 @@ describe('generateMetadata (casas)', () => {
     });
   });
 
-  it('⚠️ T-PROD-024: un slug inexistente 404ea en vez de servir un 200 genérico', async () => {
+  it('⚠️ T-PROD-024: un slug inexistente corta con notFound() en vez de servir el recurso', async () => {
     mockGetArticle.mockRejectedValue(apiError(404));
 
     await expect(
@@ -128,6 +131,23 @@ describe('generateMetadata (casas)', () => {
     await expect(generateMetadata({ params: Promise.resolve({ slug: 'aries' }) })).rejects.toThrow(
       'boom'
     );
+  });
+
+  it('⚠️ T-PROD-024: un artículo de otra categoría corta con notFound() en esta ruta', async () => {
+    // Todas las rutas de artículo consultan el mismo `getArticle(slug)`. Sin el
+    // chequeo de categoría, el mismo contenido quedaba alcanzable como 5 URLs
+    // distintas: contenido duplicado ante Google.
+    mockGetArticle.mockResolvedValue({
+      id: 99,
+      slug: 'intruso',
+      nameEs: 'Intruso',
+      snippet: 'De otra sección.',
+      category: 'zodiac_sign',
+    });
+
+    await expect(
+      generateMetadata({ params: Promise.resolve({ slug: 'intruso' }) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 });
 

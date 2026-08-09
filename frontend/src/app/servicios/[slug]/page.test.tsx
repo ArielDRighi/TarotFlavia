@@ -59,7 +59,7 @@ describe('/servicios/[slug] — metadata', () => {
     expect(metadata.alternates?.canonical).toBe('/servicios/registros-akashicos');
   });
 
-  it('un slug inexistente 404ea en vez de servir un 200 genérico', async () => {
+  it('un slug inexistente corta con notFound() en vez de servir el recurso', async () => {
     mockGetDetail.mockRejectedValue(apiError(404));
 
     await expect(

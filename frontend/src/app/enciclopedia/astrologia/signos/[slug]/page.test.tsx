@@ -75,6 +75,7 @@ describe('generateMetadata (signos)', () => {
       slug: 'aries',
       nameEs: 'Aries',
       snippet: 'El primer signo del zodíaco.',
+      category: 'zodiac_sign',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'aries' }) });
@@ -90,6 +91,7 @@ describe('generateMetadata (signos)', () => {
       slug: 'aries',
       nameEs: 'Aries',
       snippet,
+      category: 'zodiac_sign',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'aries' }) });
@@ -103,6 +105,7 @@ describe('generateMetadata (signos)', () => {
       slug: 'aries',
       nameEs: 'Aries',
       snippet: 'El primer signo del zodíaco.',
+      category: 'zodiac_sign',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'aries' }) });
@@ -114,7 +117,7 @@ describe('generateMetadata (signos)', () => {
     });
   });
 
-  it('⚠️ T-PROD-024: un slug inexistente 404ea en vez de servir un 200 genérico', async () => {
+  it('⚠️ T-PROD-024: un slug inexistente corta con notFound() en vez de servir el recurso', async () => {
     mockGetArticle.mockRejectedValue(apiError(404));
 
     await expect(
@@ -128,6 +131,23 @@ describe('generateMetadata (signos)', () => {
     await expect(generateMetadata({ params: Promise.resolve({ slug: 'aries' }) })).rejects.toThrow(
       'boom'
     );
+  });
+
+  it('⚠️ T-PROD-024: un artículo de otra categoría corta con notFound() en esta ruta', async () => {
+    // Todas las rutas de artículo consultan el mismo `getArticle(slug)`. Sin el
+    // chequeo de categoría, el mismo contenido quedaba alcanzable como 5 URLs
+    // distintas: contenido duplicado ante Google.
+    mockGetArticle.mockResolvedValue({
+      id: 99,
+      slug: 'intruso',
+      nameEs: 'Intruso',
+      snippet: 'De otra sección.',
+      category: 'planet',
+    });
+
+    await expect(
+      generateMetadata({ params: Promise.resolve({ slug: 'intruso' }) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 });
 

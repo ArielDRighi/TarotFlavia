@@ -2046,6 +2046,46 @@ AdSense— y Google los veía vacíos: el `<title>` estaba bien desde T-PROD-020
 - [x] Ciclo de calidad frontend: format, lint (0 errores, los 7 warnings preexistentes), type-check
       (ambos tsconfig), `test:run` (**5514 tests**) y `validate-architecture.js`.
 
+#### 🔍 Hallazgos del revisor local (aplicados en un segundo commit)
+
+- 🟠 **`/servicios/[slug]` nunca 404eaba: daba 500.** `getHolisticServiceDetail` envolvía el `AxiosError`
+      del 404 en un `Error` plano, así que `isNotFoundError` no lo reconocía y `resolveRouteResource` lo
+      re-lanzaba. Y el test lo tapaba: mockeaba un `AxiosError` crudo que la función real **nunca emite**.
+      Ahora la API re-lanza el error original y el test pasa por el comportamiento real.
+- 🟠 **`ServiceDetailPage` seguía vaciando la página ante `error`**, al revés que artículo, ritual y carta.
+      Con `initialService` sembrado, la única forma de que `isError` sea true es un refetch en background
+      fallido — y ahí el usuario perdía el precio, el calendario y **el turno que ya había elegido**.
+      Pasa a guardar por `!service`.
+- 🟡 **`initialData` congelaba el precio hasta 24 h.** Sin `initialDataUpdatedAt`, React Query estampa el
+      dato como recién traído y con el `staleTime` no refetchea al montar: la copia horneada en el HTML
+      quedaba fija. Se agrega `initialDataUpdatedAt: 0` en servicios y rituales (en enciclopedia no hace
+      falta: el contenido es realmente estático).
+- 🟡 **6 `eslint-disable @typescript-eslint/no-explicit-any`** en el test relocalizado de ritual.
+      Reemplazados por `vi.mocked()` con los tipos reales del hook — Rule 0 es tolerancia cero.
+- 💡 **Fuga de slugs entre categorías.** Las 5 rutas de artículo consultan el mismo `getArticle(slug)` sin
+      filtrar, así que `/enciclopedia/elementos/aries` servía el signo Aries: el mismo contenido alcanzable
+      como 5 URLs, justo el duplicado que T-PROD-020 vino a deshacer. Se agrega un chequeo de categoría
+      post-fetch, con test en las 5 rutas.
+
+#### ⚠️ Hallazgo propio al verificar: los `notFound()` son soft-404
+
+Al comprobar los arreglos contra la imagen real medí los códigos HTTP y **no son 404**:
+
+```
+/enciclopedia/elementos/aries    → 200 (página de no-encontrado)
+/servicios/inventado             → 200 (página de no-encontrado)
+/enciclopedia/tarot/inventado-xyz → 200 (página de no-encontrado)
+```
+
+La tercera usa el código de **T-PROD-020, ya en producción**, así que es **preexistente y ajeno a este
+PR** — pero invalida la afirmación de "404 real" que quedó escrita en T-PROD-020 y T-PROD-021. Los
+comentarios se corrigieron para decir lo que realmente hace (`notFound()` corta el render y sirve la
+página de no-encontrado). Un soft-404 es justamente lo que Google penaliza, así que **merece tarea
+propia**: hay que entender por qué Next no está emitiendo el status 404 en estas rutas ISR.
+
+Lo que sí mejora este PR: `/servicios/inventado` pasó de **500** a página de no-encontrado, y
+`/enciclopedia/elementos/aries` dejó de servir contenido duplicado.
+
 #### 📌 Fuera de alcance → **quedan 27 URLs delgadas**
 
 Se atacaron 62 de las ~86. Lo que falta **no es el mismo patrón** y por eso no entró:

@@ -23,7 +23,7 @@ import type { ArticleDetail } from '@/types/encyclopedia-article.types';
  */
 interface ArticleDetailPageContentProps {
   slug: string;
-  /** Artículo resuelto en el servidor. La ruta 404ea si el slug no existe. */
+  /** Artículo resuelto en el servidor. La ruta corta con notFound() si el slug no existe. */
   initialArticle: ArticleDetail;
 }
 

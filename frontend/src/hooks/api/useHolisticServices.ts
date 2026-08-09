@@ -64,6 +64,10 @@ export function useHolisticServiceDetail(slug: string, initialData?: HolisticSer
     enabled: slug.length > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
     initialData,
+    // El precio y la duración cambian desde el admin: sin esto, `initialData` se estampa como recién
+    // traído y con el `staleTime` el cliente NO refetchea al montar, así que la
+    // copia horneada en el HTML (hasta 24 h por el ISR) quedaría fija (T-PROD-024).
+    initialDataUpdatedAt: 0,
   });
 }
 

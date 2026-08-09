@@ -20,7 +20,7 @@ import { ROUTES } from '@/lib/constants/routes';
 
 interface RitualDetailPageProps {
   slug: string;
-  /** Ritual resuelto en el servidor; la ruta 404ea si el slug no existe (T-PROD-024). */
+  /** Ritual resuelto en el servidor; la ruta corta con notFound() si el slug no existe (T-PROD-024). */
   initialRitual: RitualDetail;
 }
 

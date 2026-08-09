@@ -127,6 +127,10 @@ export function useRitual(slug: string, initialData?: RitualDetail) {
     enabled: !!slug,
     staleTime: 1000 * 60 * 30,
     initialData,
+    // El `completionCount` cambia con cada usuario: sin esto, `initialData` se estampa como recién
+    // traído y con el `staleTime` el cliente NO refetchea al montar, así que la
+    // copia horneada en el HTML (hasta 24 h por el ISR) quedaría fija (T-PROD-024).
+    initialDataUpdatedAt: 0,
   });
 }
 

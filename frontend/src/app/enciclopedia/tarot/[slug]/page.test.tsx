@@ -74,7 +74,7 @@ describe('/enciclopedia/tarot/[slug] — metadata', () => {
     expect(metadata.alternates?.canonical).toBe('/enciclopedia/tarot/el-loco');
   });
 
-  it('⚠️ T-PROD-020: un slug inexistente 404ea en vez de servir un 200 genérico', async () => {
+  it('⚠️ T-PROD-020: un slug inexistente corta con notFound() en vez de servir el recurso', async () => {
     mockGetCardBySlug.mockRejectedValue(apiError(404));
 
     await expect(
