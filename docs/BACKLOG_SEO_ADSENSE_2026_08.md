@@ -1,0 +1,385 @@
+# Backlog SEO / AdSense — Agosto 2026
+
+> **Propósito:** cerrar lo que falta para que AdSense apruebe `auguriatarot.com` y para que el problema
+> no se repita en silencio.
+> **Origen:** rechazo de AdSense por *"Contenido de poco valor"* (31-jul-2026) y el trabajo de
+> T-PROD-020 → T-PROD-024, documentado en [BACKLOG_PRODUCCION_2026_07.md](./BACKLOG_PRODUCCION_2026_07.md).
+> **Última medición:** 9-ago-2026, contra producción.
+
+---
+
+## 📍 Punto de partida (leé esto antes de tomar cualquier tarea)
+
+### Qué pasó
+
+Google Search Console avisó *"Duplicada: Google ha elegido una versión canónica diferente"* y AdSense
+rechazó el sitio por contenido de poco valor. La causa resultó ser una cadena de tres problemas, todos ya
+resueltos y deployados:
+
+1. **T-PROD-020** — casi todas las URLs del sitemap compartían el `<title>` "Auguria". Se agregó metadata
+   propia por ruta y SSR de la ficha de tarot.
+2. **T-PROD-022** — `AuthProvider` devolvía una pantalla "Verificando sesión..." **en lugar de** `children`
+   en todo render del servidor, así que **el sitio entero servía 3 palabras** a Googlebot.
+3. **T-PROD-023** — el build de Railway venía fallando desde el 26-jul, así que nada de lo anterior había
+   llegado a producción. Se destrabó.
+4. **T-PROD-024** — los 53 artículos de enciclopedia + rituales + servicios traían su contenido por el
+   cliente: 5–11 palabras para el crawler. Ahora resuelven en el servidor.
+
+### Dónde está el sitio hoy
+
+Muestra estratificada de 62 de las 178 URLs del sitemap, midiendo **palabras propias** (total menos las
+39 de header + footer):
+
+| Grupo | URLs | Palabras propias | Estado |
+| --- | --- | --- | --- |
+| Home | 1 | 611 | ✅ |
+| Fichas de tarot | 79 | 126–233 | ✅ |
+| Artículos de enciclopedia (signos, planetas, casas, guías, elementos) | 53 | 400–645 | ✅ |
+| Hubs con texto estático (numerología, carta astral, péndulo, horóscopo, rituales, chino) | ~8 | 215–415 | ✅ |
+| Fichas de ritual y servicio | 9 | 243–422 | ✅ |
+| **Horóscopo chino por animal** | **12** | **3** | ❌ T-SEO-002 |
+| **Signos del horóscopo** | **12** | **31** | ❌ T-SEO-004 |
+| **Listados y hubs** (`/premium` 3, `/servicios` 5, `/explorar` 20, `/enciclopedia/tarot` 24, `/enciclopedia/guias` 13) | **5** | 3–24 | ❌ T-SEO-003 |
+
+**29 de 62 URLs muestreadas superan las 150 palabras propias** (antes de este trabajo: 13).
+
+### El patrón que ya funciona (replicalo, no inventes otro)
+
+Probado cuatro veces en producción. La ruta resuelve el recurso en el servidor y lo entrega al componente
+cliente, que siembra React Query con él:
+
+```tsx
+// app/<ruta>/[slug]/page.tsx  (server component)
+import { cache } from 'react';
+import { resolveRouteResource, safeStaticParams } from '@/lib/metadata/route-data';
+
+export const revalidate = 86400; // si el contenido es estático
+
+// `generateMetadata` y la página piden lo mismo. Next solo dedupea `fetch()` y acá
+// hay axios, así que sin `cache()` son dos requests por render.
+const getResourceCached = cache((slug: string) => resolveRouteResource(() => getResource(slug)));
+
+export async function generateMetadata({ params }) { /* usa getResourceCached */ }
+export async function generateStaticParams() { return safeStaticParams(getAll, r => ({ slug: r.slug })); }
+
+export default async function Page({ params }) {
+  const { slug } = await params;
+  return <Content slug={slug} initialResource={await getResourceCached(slug)} />;
+}
+```
+
+```tsx
+// components/features/.../Content.tsx  ('use client')
+const { data, isLoading } = useResource(slug, initialResource);
+
+// ⚠️ Guardar por `!data`, NUNCA por `error`: en React Query v5 un refetch fallido en
+// background puebla `error` conservando el `data` bueno, y mirar `error` tira abajo
+// contenido ya cargado.
+if (isLoading) return <Skeleton />;
+if (!data) return <NoEncontrado />;
+```
+
+```ts
+// hooks/api/useX.ts
+export function useResource(slug: string, initialData?: Resource) {
+  return useQuery({
+    queryKey: keys.detail(slug),
+    queryFn: () => getResource(slug),
+    staleTime: STALE_TIME,
+    initialData,
+    // ⚠️ Solo si el dato CAMBIA (precio, contadores): sin esto React Query estampa
+    // `initialData` como recién traído y con el `staleTime` no refetchea al montar,
+    // así que la copia horneada en el HTML queda fija hasta que expire el ISR.
+    initialDataUpdatedAt: 0,
+  });
+}
+```
+
+Referencias vivas: [enciclopedia/tarot/[slug]/page.tsx](../frontend/src/app/enciclopedia/tarot/%5Bslug%5D/page.tsx),
+[ArticleDetailPageContent.tsx](../frontend/src/components/features/encyclopedia/ArticleDetailPageContent.tsx),
+[route-data.ts](../frontend/src/lib/metadata/route-data.ts).
+
+### Cómo verificar (no alcanza con `npm run build`)
+
+Lecciones que costaron caro en la sesión del 8-ago:
+
+1. **CI en verde NO significa que el deploy funcione.** CI usa `npm ci` contra el lockfile de la raíz;
+   el Dockerfile de Railway corre `npm install` sin lockfile y resuelve versiones distintas. El deploy
+   estuvo roto dos semanas con CI verde. Ver T-SEO-005.
+2. **El build local no prerenderiza lo que depende de la API** (no está levantada). Para ver el HTML real:
+
+```bash
+cd frontend
+docker build --no-cache \
+  --build-arg NEXT_PUBLIC_APP_URL=https://auguriatarot.com \
+  --build-arg NEXT_PUBLIC_API_URL=https://api.auguriatarot.com/api/v1 \
+  --build-arg NEXT_PUBLIC_APP_ENV=production -t auguria-check .
+
+docker run -d --name chk -p 3099:3001 \
+  -e NEXT_PUBLIC_API_URL=https://api.auguriatarot.com/api/v1 \
+  -e NEXT_PUBLIC_APP_URL=https://auguriatarot.com auguria-check
+sleep 12
+curl -sS -A "Mozilla/5.0 (compatible; Googlebot/2.1)" http://localhost:3099/<ruta> | \
+  python3 -c "import sys,re;h=sys.stdin.read();b=re.sub(r'(?is)<(script|style|noscript)[^>]*>.*?</\1>',' ',h);print(len(re.sub(r'\s+',' ',re.sub(r'(?s)<[^>]+>',' ',b)).strip().split()))"
+docker rm -f chk
+```
+
+3. **El edge de Railway cachea el HTML** (`cache-control: s-maxage=31536000`). Después de un deploy,
+   verificá con un cache-buster (`?cb=123`) o vas a medir la versión vieja.
+4. **El chrome (header + footer) son 39 palabras.** Restalas siempre.
+
+### Reglas del proyecto que aplican
+
+Seguí `docs/WORKFLOW_FRONTEND.md` (TDD, ciclo de calidad, PR a `develop`). Y del `CLAUDE.md` raíz:
+sin `any` / `eslint-disable` / `@ts-ignore` **ni en tests**, texto user-facing en español, nada de
+lógica en `app/`.
+
+---
+
+## Índice de tareas
+
+| ID | Tarea | Tipo | Prioridad | Estimación |
+| --- | --- | --- | --- | --- |
+| T-SEO-001 | Guardarraíl automático de contenido indexable | Frontend/CI | 🔴 Crítica | 2 pts |
+| T-SEO-002 | Horóscopo chino por animal: 12 URLs sirven 3 palabras | Frontend | 🔴 Crítica | 3 pts |
+| T-SEO-003 | Listados y hubs sin contenido para el crawler | Frontend | 🟠 Alta | 2 pts |
+| T-SEO-004 | Signos del horóscopo: ficha estática del signo | Frontend | 🟠 Alta | 2 pts |
+| T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) | Infra | 🟠 Alta | 2 pts |
+| T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) | Frontend | 🟡 Media | 1.5 pts |
+
+**Orden recomendado:** 001 → 002 → 003 → 004 → 005 → 006.
+El 001 primero porque convierte el resto en verificable; el 005 en un momento sin urgencia porque
+necesita coordinación con el panel de Railway.
+
+---
+
+## T-SEO-001: Guardarraíl Automático de Contenido Indexable
+
+**Prioridad:** 🔴 Crítica · **Estimación:** 2 pts · **Dependencias:** ninguna
+
+### Problema
+
+La misma clase de bug —una página que trae su contenido por el cliente y por lo tanto sirve un cascarón
+al crawler— se arregló **cuatro veces** (tarot, artículos, rituales, servicios), y las cuatro se
+descubrieron **midiendo a mano con `curl`**. Eso no escala: la próxima página que alguien agregue con
+datos del cliente nace invisible y nos enteramos por otro rechazo de AdSense.
+
+### Alcance
+
+Un script que recorra `sitemap.xml`, mida las palabras propias de cada URL y falle si alguna baja del
+umbral. Debe poder correr contra un host arbitrario (build local, contenedor, producción).
+
+- [ ] `frontend/scripts/check-indexable-content.mjs` (o `.ts`) con:
+  - `--base-url` (default: `NEXT_PUBLIC_APP_URL`)
+  - `--min-words` (sugerido: 120 palabras propias)
+  - `--sample N` para muestreo estratificado por sección, y modo completo
+  - descuento automático del chrome: medirlo contra una ruta vacía conocida (`/admin`) en vez de
+    hardcodear 39
+  - salida en tabla ordenada por palabras ascendente + exit code ≠ 0 si hay incumplimientos
+  - cache-buster en las requests (ver *Cómo verificar*)
+- [ ] **Detección de soft-404**: pedir un slug inventado por cada patrón de ruta dinámica y reportar si
+      responde 200 en vez de 404. Alimenta T-SEO-006.
+- [ ] Lista de excepciones justificadas en el propio script (rutas que legítimamente son delgadas, si las hay).
+- [ ] Tests del script (parseo del sitemap, conteo de palabras, umbral, exit code).
+- [ ] Documentar el uso en `frontend/README.md` o en `docs/WORKFLOW_FRONTEND.md`.
+
+### Criterios de aceptación
+
+- [ ] Corriendo contra producción hoy, reporta exactamente las 27 URLs delgadas conocidas (chino, signos,
+      listados) y ninguna más.
+- [ ] Exit code ≠ 0 con esas URLs presentes; exit 0 si se le sube el umbral por debajo de ellas.
+- [ ] Detecta el soft-404 de `/enciclopedia/tarot/inventado-xyz`.
+
+### Fuera de alcance
+
+Enchufarlo como *gate* bloqueante de CI. Primero que exista y se use a mano; convertirlo en gate implica
+decidir qué hacer cuando la API está caída durante el build, y eso merece su propia discusión.
+
+---
+
+## T-SEO-002: Horóscopo Chino — 12 URLs Sirven 3 Palabras
+
+**Prioridad:** 🔴 Crítica · **Estimación:** 3 pts · **Dependencias:** conviene tener T-SEO-001
+
+### Problema
+
+`/horoscopo-chino/[animal]` sirve **3 palabras propias** — el peor caso del sitio, peor incluso que antes
+de arreglar el gate global. Son 12 URLs en el sitemap.
+
+**La causa NO es la misma que en artículos/rituales.**
+[AnimalHoroscopePage.tsx](../frontend/src/components/features/chinese-horoscope/AnimalHoroscopePage.tsx)
+usa `useSearchParams()` en un client component, lo que **deopta la ruta entera** del prerender estático:
+Next no puede generar HTML porque el árbol depende de la query string. Por eso emite menos que el resto.
+
+### Alcance sugerido
+
+Separar lo estático de lo interactivo:
+
+- [ ] La ficha del animal (nombre, emoji, elemento, características, años de nacimiento) sale de
+      constantes locales — `CHINESE_ZODIAC_INFO` en
+      [chinese-zodiac.ts](../frontend/src/lib/utils/chinese-zodiac.ts) — así que **puede renderizarse en el
+      servidor sin tocar la API**. Ése es el contenido indexable.
+- [ ] La predicción del año (que depende del elemento elegido y de la sesión) queda client-side, envuelta
+      en `<Suspense>` para que el `useSearchParams` no arrastre a toda la ruta.
+- [ ] Revisar si el modal de selección de elemento puede aparecer *después* del contenido en lugar de
+      bloquearlo.
+- [ ] `generateStaticParams` ya existe y devuelve los 12 animales; verificar que el prerender los emita.
+
+### Criterios de aceptación
+
+- [ ] Las 12 URLs superan las 150 palabras propias, medido con el método de *Cómo verificar*.
+- [ ] El selector de elemento y la predicción siguen funcionando igual para el usuario.
+- [ ] `getChineseZodiacMetadata` sigue dando títulos únicos por animal (T-PROD-020, no romperlo).
+
+---
+
+## T-SEO-003: Listados y Hubs sin Contenido para el Crawler
+
+**Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** ninguna
+
+### Problema
+
+| Ruta | Palabras propias |
+| --- | --- |
+| `/premium` | 3 |
+| `/servicios` | 5 |
+| `/enciclopedia/guias` | 13 |
+| `/explorar` | 20 |
+| `/enciclopedia/tarot` | 24 |
+
+`/premium` es especialmente sensible: es a donde va un revisor de AdSense a mirar el modelo de negocio, y
+sirve 3 palabras.
+
+### Alcance
+
+Mismo patrón del punto *El patrón que ya funciona*, aplicado a listados en vez de fichas:
+
+- [ ] `/enciclopedia/tarot` — la ruta ya es server; resolver `getCards()` y pasar por `initialData` a
+      `EnciclopediaContent`.
+- [ ] `/enciclopedia/guias` — ídem con `GuiasContent`.
+- [ ] `/servicios` — ídem con `ServiciosPage`.
+- [ ] `/explorar` — listado de tarotistas; ojo que el endpoint es **paginado** (ver contrato en
+      `.github/copilot-instructions.md`): sembrar solo la primera página.
+- [ ] `/premium` — revisar por qué sirve 3 palabras: si el contenido de planes viene de la API, sembrarlo;
+      si es estático, entender qué lo está bloqueando.
+
+### Criterios de aceptación
+
+- [ ] Las 5 rutas superan las 120 palabras propias.
+- [ ] Sin regresión en la interactividad (filtros, búsqueda, tabs).
+
+---
+
+## T-SEO-004: Signos del Horóscopo — Ficha Estática del Signo
+
+**Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** ninguna
+
+### Problema
+
+`/horoscopo/[sign]` sirve **31 palabras propias** × 12 URLs.
+
+⚠️ **No se puede hacer SSR del horóscopo del día**, y es deliberado: se resuelve contra el **día calendario
+local del visitante** (`useLocalHoroscope` → `useLocalToday`). Renderizarlo en el servidor mostraría el día
+del servidor. Está documentado en T-PROD-020 y en `CLAUDE.md`.
+
+### Alcance
+
+- [ ] Renderizar en el servidor la **ficha estática del signo**: nombre, símbolo, fechas, elemento,
+      modalidad, rasgos, compatibilidades. Sale de `ZODIAC_SIGNS_INFO`
+      ([zodiac.ts](../frontend/src/lib/utils/zodiac.ts)) o de la enciclopedia, sin depender del día.
+- [ ] El horóscopo del día sigue client-side, debajo o al costado.
+- [ ] Ojo con no duplicar el artículo de `/enciclopedia/astrologia/signos/[slug]`: si el texto es el
+      mismo, Google los agrupa. Usar contenido distinto o canonicalizar a uno de los dos.
+
+### Criterios de aceptación
+
+- [ ] Las 12 URLs superan las 150 palabras propias.
+- [ ] El horóscopo sigue cambiando a la medianoche local del visitante (no romper T-PROD-020).
+- [ ] `/horoscopo/aries` y `/enciclopedia/astrologia/signos/aries` no sirven el mismo texto.
+
+---
+
+## T-SEO-005: El Build de Docker no Usa Lockfile
+
+**Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** coordinación con el panel de Railway
+
+### Problema
+
+El [Dockerfile del frontend](../frontend/Dockerfile) copia solo `package.json` y corre `npm install`, sin
+lockfile. Resuelve versiones **más nuevas** que local y que CI: en el incidente del 8-ago el builder trajo
+**Next 16.3.0** contra **16.0.6** local, y esa deriva rompió el deploy **durante dos semanas con CI en
+verde**. T-PROD-023 eliminó la clase de fallo concreta (tipos de tests), pero la causa de fondo sigue viva:
+cualquier deriva en dependencias de *aplicación* puede volver a romper un deploy sin aviso.
+
+### Opciones
+
+1. **Recomendada:** mover el *Root Directory* de Railway a la raíz del monorepo y usar `npm ci` contra el
+   lockfile raíz — idéntico a CI. Hay precedente: el Dockerfile del backend ya se construye desde la raíz.
+2. Commitear un `frontend/package-lock.json` propio. No requiere tocar Railway, pero deja dos lockfiles en
+   un repo con workspaces, que npm no maneja bien y que se desincronizan.
+
+### Alcance (opción 1)
+
+- [ ] Adaptar `frontend/Dockerfile` a contexto de raíz (`COPY package.json package-lock.json ./`,
+      `npm ci`, rutas del monorepo).
+- [ ] **Coordinar con el Delta**: en el panel de Railway hay que cambiar *Root Directory* a `/` y
+      *Dockerfile Path* a `frontend/Dockerfile`. **Si sale solo una de las dos mitades, el deploy se rompe.**
+- [ ] Verificar con `docker build` real desde la raíz **antes** de tocar el panel.
+
+### Criterios de aceptación
+
+- [ ] `docker build` desde la raíz completa y resuelve **las mismas versiones que local/CI** (comparar
+      `next --version` dentro de la imagen contra el lockfile).
+- [ ] Deploy exitoso en Railway.
+
+---
+
+## T-SEO-006: Los `notFound()` Devuelven 200 (Soft-404)
+
+**Prioridad:** 🟡 Media · **Estimación:** 1.5 pts · **Dependencias:** T-SEO-001 ayuda a detectarlo
+
+### Problema
+
+Medido contra la imagen de producción el 9-ago:
+
+```
+/enciclopedia/elementos/aries      → 200 (página de no-encontrado)
+/servicios/inventado               → 200 (página de no-encontrado)
+/enciclopedia/tarot/inventado-xyz  → 200 (página de no-encontrado)
+```
+
+`notFound()` corta el render y sirve la página correcta, pero **no emite el status 404**. Un soft-404 es
+justamente lo que Google penaliza: la URL entra al índice como página válida y vacía.
+
+⚠️ Es **preexistente** — la tercera URL usa código de T-PROD-020 que ya estaba en producción — pero
+invalida la afirmación de "404 real" que quedó escrita en T-PROD-020, T-PROD-021 y T-PROD-024 (los
+comentarios del código ya se corrigieron; el backlog viejo conserva la afirmación).
+
+### Alcance
+
+- [ ] Entender por qué Next no emite 404 en estas rutas. Hipótesis a descartar: streaming (headers ya
+      enviados cuando se llama `notFound()`), interacción con ISR/`revalidate`, ausencia de un
+      `not-found.tsx` por segmento.
+- [ ] Arreglarlo o, si es una limitación real de esta configuración, documentar la alternativa
+      (p. ej. validar el slug **antes** de empezar a renderizar).
+- [ ] Test de regresión que asevere el **status HTTP**, no solo el contenido.
+
+### Criterios de aceptación
+
+- [ ] Un slug inexistente en cualquier ruta dinámica pública devuelve **404**.
+- [ ] Las URLs válidas siguen devolviendo 200 con su contenido.
+
+---
+
+## 📌 Pendientes de Ops (no son código)
+
+- [ ] **Solicitar la revisión de AdSense** — recomendado **después** de T-SEO-002 y T-SEO-003. Con
+      `/premium` sirviendo 3 palabras, un revisor ve lo mismo que motivó el primer rechazo, y un segundo
+      rechazo cuesta más que unos días de espera.
+- [ ] **Search Console**: reenviar el sitemap y pedir re-indexación. Google todavía tiene en el índice la
+      versión de 3 palabras por página.
+- [ ] **`ads.txt`**: verificado el 9-ago, correcto en producción
+      (`google.com, pub-3738638099455331, DIRECT, f08c47fec0942fa0`). El "No se encuentra" del panel es
+      previo al deploy; Google lo re-rastrea solo.
+- [ ] **Verificar que no haya www y no-www dados de alta a la vez** en Search Console sirviendo lo mismo
+      (pendiente desde T-PROD-020).
