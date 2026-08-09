@@ -5,6 +5,7 @@
  */
 'use client';
 
+import type { HolisticServiceDetail } from '@/types/holistic-service.types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getHolisticServices,
@@ -53,12 +54,16 @@ export function useHolisticServices() {
  * @param slug - Service slug
  * @returns TanStack Query result with service detail (includes longDescription)
  */
-export function useHolisticServiceDetail(slug: string) {
+/**
+ * @param initialData servicio resuelto por la ruta en el servidor (T-PROD-024).
+ */
+export function useHolisticServiceDetail(slug: string, initialData?: HolisticServiceDetail) {
   return useQuery({
     queryKey: holisticServiceQueryKeys.detail(slug),
     queryFn: () => getHolisticServiceDetail(slug),
     enabled: slug.length > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    initialData,
   });
 }
 

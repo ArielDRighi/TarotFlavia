@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { AxiosError, AxiosHeaders } from 'axios';
 
-import GuiaDetailPage, { generateMetadata, generateStaticParams } from './page';
+import { generateMetadata, generateStaticParams } from './page';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 vi.mock('next/navigation', () => ({
-  useParams: () => ({ slug: 'guia-numerologia' }),
+  notFound: () => {
+    throw new Error('NEXT_NOT_FOUND');
+  },
 }));
 
 vi.mock('next/link', () => ({
@@ -50,48 +52,17 @@ vi.mock('@/lib/api/encyclopedia-articles-api', () => ({
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('GuiaDetailPage (/enciclopedia/guias/[slug])', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('debe renderizar ArticleDetailView cuando el artículo existe', () => {
-    mockUseArticle.mockReturnValue({
-      data: {
-        id: 4,
-        slug: 'guia-numerologia',
-        nameEs: 'Guía de Numerología',
-        nameEn: null,
-        category: 'guide_numerology',
-        snippet: 'Aprende sobre numerología.',
-        imageUrl: null,
-        sortOrder: 1,
-        content: '## Guía de Numerología',
-        metadata: null,
-        relatedArticles: [],
-        relatedTarotCards: null,
-      },
-      isLoading: false,
-      error: null,
-    });
-
-    render(<GuiaDetailPage />);
-
-    expect(screen.getByTestId('article-detail-view')).toBeInTheDocument();
-  });
-
-  it('debe retornar 404 para slug inexistente', () => {
-    mockUseArticle.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error('Not found'),
-    });
-
-    render(<GuiaDetailPage />);
-
-    expect(screen.getByText('Artículo no encontrado')).toBeInTheDocument();
-  });
-});
+function apiError(status: number): AxiosError {
+  const error = new AxiosError('boom');
+  error.response = {
+    status,
+    statusText: '',
+    data: null,
+    headers: new AxiosHeaders(),
+    config: { headers: new AxiosHeaders() },
+  };
+  return error;
+}
 
 describe('generateMetadata (guias)', () => {
   beforeEach(() => {
@@ -149,12 +120,20 @@ describe('generateMetadata (guias)', () => {
     });
   });
 
-  it('debe retornar objeto vacío si el artículo no existe', async () => {
-    mockGetArticle.mockRejectedValue(new Error('Not found'));
+  it('⚠️ T-PROD-024: un slug inexistente 404ea en vez de servir un 200 genérico', async () => {
+    mockGetArticle.mockRejectedValue(apiError(404));
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'inexistente' }) });
+    await expect(
+      generateMetadata({ params: Promise.resolve({ slug: 'inexistente' }) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
+  });
 
-    expect(metadata).toEqual({});
+  it('⚠️ T-PROD-024: propaga un fallo transitorio en vez de cachear metadata degradada', async () => {
+    mockGetArticle.mockRejectedValue(apiError(503));
+
+    await expect(generateMetadata({ params: Promise.resolve({ slug: 'aries' }) })).rejects.toThrow(
+      'boom'
+    );
   });
 });
 

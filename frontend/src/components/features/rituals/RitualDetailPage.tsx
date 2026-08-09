@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -14,17 +13,22 @@ import {
   RitualsSkeleton,
 } from '@/components/features/rituals';
 import { useRitual, useCompleteRitual } from '@/hooks/api/useRituals';
+import type { RitualDetail } from '@/types/ritual.types';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/hooks/utils/useToast';
 import { ROUTES } from '@/lib/constants/routes';
 
-export function RitualDetailPage() {
-  const params = useParams();
-  const slug = params.slug as string;
+interface RitualDetailPageProps {
+  slug: string;
+  /** Ritual resuelto en el servidor; la ruta 404ea si el slug no existe (T-PROD-024). */
+  initialRitual: RitualDetail;
+}
+
+export function RitualDetailPage({ slug, initialRitual }: RitualDetailPageProps) {
   const { toast } = useToast();
 
   const { isAuthenticated } = useAuthStore();
-  const { data: ritual, isLoading, error } = useRitual(slug);
+  const { data: ritual, isLoading } = useRitual(slug, initialRitual);
   const { mutate: completeRitual, isPending } = useCompleteRitual();
 
   const [showCompletedModal, setShowCompletedModal] = useState(false);
@@ -69,7 +73,8 @@ export function RitualDetailPage() {
     );
   }
 
-  if (error || !ritual) {
+  // Sin `error`: un refetch fallido en background conserva el `data` bueno.
+  if (!ritual) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="mb-4 text-2xl">Ritual no encontrado</h1>

@@ -11,6 +11,8 @@
  */
 'use client';
 
+import type { HolisticServiceDetail } from '@/types/holistic-service.types';
+
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { BookingCalendar } from '@/components/features/marketplace/BookingCalendar';
@@ -21,6 +23,8 @@ import { ROUTES } from '@/lib/constants/routes';
 
 interface ServiceDetailPageProps {
   slug: string;
+  /** Servicio resuelto en el servidor; la ruta 404ea si no existe (T-PROD-024). */
+  initialService: HolisticServiceDetail;
 }
 
 // Flavia's tarotistaId — single tarotista MVP
@@ -30,8 +34,13 @@ function formatArs(amount: number): string {
   return amount.toLocaleString('es-AR');
 }
 
-export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
-  const { data: service, isLoading, isError, error } = useHolisticServiceDetail(slug);
+export function ServiceDetailPage({ slug, initialService }: ServiceDetailPageProps) {
+  const {
+    data: service,
+    isLoading,
+    isError,
+    error,
+  } = useHolisticServiceDetail(slug, initialService);
 
   // Selected slot state — user must pick date + time before paying
   const [selectedDate, setSelectedDate] = useState<string>('');

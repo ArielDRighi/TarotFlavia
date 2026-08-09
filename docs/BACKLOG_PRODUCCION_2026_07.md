@@ -343,6 +343,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-021 | ✅ **Bomba de timezone en auth**: las columnas `timestamp` de expiración se leen desfasadas si el server no corre en UTC (rompe login y reset de contraseña) | Backend | 🟠 Alta | 2 pts |
 | T-PROD-022 | ✅ **El sitio entero servía 3 palabras a Googlebot**: el `AuthProvider` devolvía "Verificando sesión..." en lugar del contenido en todo render SSR (rechazo de AdSense) | Frontend | 🔴 Crítica | 2 pts |
 | T-PROD-023 | ✅ **El build de Railway venía fallando hace 2 semanas**: sin lockfile resuelve versiones más nuevas que local/CI y `next build` type-checkea los tests | Frontend/Infra | 🔴 Crítica | 1 pt |
+| T-PROD-024 | ✅ **62 URLs servían ~5 palabras al crawler**: artículos, rituales y servicios traían su contenido por el cliente | Frontend | 🔴 Crítica | 3 pts |
 
 ---
 
@@ -1987,6 +1988,77 @@ lockfile propio del frontend. Es una decisión de infra que merece su propia tar
 
 Que CI esté verde no garantiza que el deploy funcione: **CI y Railway instalan dependencias de forma
 distinta**. Vale la pena correr el `docker build` real antes de dar por deployado un cambio.
+
+---
+
+### T-PROD-024: 62 URLs de Contenido Servían ~5 Palabras al Crawler — ✅ COMPLETADA
+
+**Estado:** ✅ COMPLETADA (2026-08-09)
+**Prioridad:** 🔴 Crítica
+**Estimación:** 3 puntos
+**Dependencias:** T-PROD-022 (el gate global) y T-PROD-023 (el deploy)
+**Origen:** medición sobre producción tras el primer deploy exitoso
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### 📋 Problema
+
+Con el sitio ya deployado, medí las 178 URLs del sitemap como Googlebot (muestra estratificada de 62,
+descontando las 39 palabras de header+footer). **Solo 13 superaban las 150 palabras propias.**
+
+Las 79 fichas de tarot estaban bien (126–233 palabras: el SSR de T-PROD-020 funcionó). El resto no:
+
+| Grupo | URLs | Palabras propias |
+| --- | --- | --- |
+| Artículos de enciclopedia (signos, planetas, casas, guías, elementos) | **53** | 5–11 |
+| Fichas de ritual y de servicio | 9 | 7–9 |
+| Horóscopo chino por animal | 12 | 3 |
+| Signos del horóscopo | 12 | 31 |
+
+Los 53 artículos son **el contenido editorial del sitio** —lo más valioso que hay para mostrarle a
+AdSense— y Google los veía vacíos: el `<title>` estaba bien desde T-PROD-020, pero el cuerpo lo traía
+`ArticleDetailPageContent` por el cliente.
+
+#### ✅ Tareas específicas
+
+- [x] `useArticle`, `useRitual` y `useHolisticServiceDetail` aceptan `initialData`.
+- [x] `ArticleDetailPageContent` (el componente que sirve **las 53 fichas**), `RitualDetailPage` y
+      `ServiceDetailPage` reciben el recurso ya resuelto y siembran la query con él.
+- [x] Las 5 rutas de artículo + ritual + servicio resuelven en el servidor con `cache()` de React (para
+      no duplicar el fetch entre `generateMetadata` y la página) y los helpers de `route-data.ts`:
+      404 → `notFound()`, error transitorio → se propaga. `revalidate` de 24 h en las de enciclopedia.
+- [x] Tests: nuevo `ArticleDetailPageContent.test.tsx` (5) y actualizados los de las 5 rutas, que
+      aseveraban el comportamiento viejo (`{}` ante cualquier error).
+
+#### 🎯 Criterios de Aceptación
+
+- [x] **Verificado corriendo la imagen de producción contra la API real** (no solo con el build):
+
+  | URL | Antes | Después |
+  | --- | --- | --- |
+  | `/enciclopedia/astrologia/signos/aries` | 5 | **451** |
+  | `/enciclopedia/guias/guia-pendulo` | 7 | **684** |
+  | `/enciclopedia/elementos/elemento-agua` | 6 | **464** |
+  | `/rituales/ritual-luna-nueva` | 7 | **461** |
+  | `/servicios/arbol-genealogico` | 9 | **282** |
+  | `/enciclopedia/tarot/the-fool` | 260 | 260 (sin regresión) |
+
+- [x] `docker build` reproduciendo Railway: exit 0.
+- [x] Ciclo de calidad frontend: format, lint (0 errores, los 7 warnings preexistentes), type-check
+      (ambos tsconfig), `test:run` (**5514 tests**) y `validate-architecture.js`.
+
+#### 📌 Fuera de alcance → **quedan 27 URLs delgadas**
+
+Se atacaron 62 de las ~86. Lo que falta **no es el mismo patrón** y por eso no entró:
+
+- **Horóscopo chino por animal (12 URLs, 3 palabras).** Es el peor caso y tiene otra causa:
+  `AnimalHoroscopePage` usa `useSearchParams()` en un client component, lo que **deopta la ruta entera**
+  del prerender estático — por eso sirve menos que el resto. Arreglarlo implica separar la parte estática
+  del animal (nombre, elemento, características, años) de la interactiva. Merece su propia tarea.
+- **Signos del horóscopo (12 URLs, 31 palabras).** El horóscopo del día depende del **día calendario local
+  del visitante** (decisión deliberada de T-PROD-020), así que no se puede resolver en el servidor. Lo que
+  sí se puede es renderizar la ficha estática del signo (fechas, elemento, rasgos) alrededor.
+- **Listados/hubs**: `/enciclopedia/tarot` (24), `/explorar` (20), `/enciclopedia/guias` (13),
+  `/servicios` (5), `/premium` (3). Mismo patrón que este PR, pero sobre listados.
 
 ---
 

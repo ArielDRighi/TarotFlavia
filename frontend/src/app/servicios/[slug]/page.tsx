@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import type { Metadata } from 'next';
 
 import { ServiceDetailPage } from '@/components/features/holistic-services';
@@ -18,10 +19,15 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+/** `generateMetadata` y la página piden el mismo servicio; `cache()` evita el doble fetch. */
+const getServiceCached = cache((slug: string) =>
+  resolveRouteResource(() => getHolisticServiceDetail(slug))
+);
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
-  return getServiceDetailMetadata(await resolveRouteResource(() => getHolisticServiceDetail(slug)));
+  return getServiceDetailMetadata(await getServiceCached(slug));
 }
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
@@ -30,5 +36,6 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 
 export default async function ServicioDetailRoute({ params }: Props) {
   const { slug } = await params;
-  return <ServiceDetailPage slug={slug} />;
+
+  return <ServiceDetailPage slug={slug} initialService={await getServiceCached(slug)} />;
 }

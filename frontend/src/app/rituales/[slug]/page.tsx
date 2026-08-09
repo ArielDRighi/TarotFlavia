@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import type { Metadata } from 'next';
 
 import { RitualDetailPage } from '@/components/features/rituals';
@@ -18,16 +19,21 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+/** `generateMetadata` y la página piden el mismo ritual; `cache()` evita el doble fetch. */
+const getRitualCached = cache((slug: string) => resolveRouteResource(() => getRitualBySlug(slug)));
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  return getRitualDetailMetadata(await resolveRouteResource(() => getRitualBySlug(slug)));
+  return getRitualDetailMetadata(await getRitualCached(slug));
 }
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   return safeStaticParams(getRituals, (ritual) => ({ slug: ritual.slug }));
 }
 
-export default function Page() {
-  return <RitualDetailPage />;
+export default async function Page({ params }: PageProps) {
+  const { slug } = await params;
+
+  return <RitualDetailPage slug={slug} initialRitual={await getRitualCached(slug)} />;
 }

@@ -11,7 +11,7 @@ import {
   getRitualHistory,
   getRitualStats,
 } from '@/lib/api/rituals-api';
-import type { RitualFilters, CompleteRitualRequest } from '@/types/ritual.types';
+import type { RitualFilters, CompleteRitualRequest, RitualDetail } from '@/types/ritual.types';
 
 /**
  * Query keys for ritual-related queries
@@ -116,12 +116,17 @@ export function useLunarInfo() {
  * const { data: ritual } = useRitual('ritual-luna-nueva');
  * ```
  */
-export function useRitual(slug: string) {
+/**
+ * @param initialData ritual resuelto por la ruta en el servidor, para que el HTML
+ *   inicial traiga el contenido en vez del skeleton (T-PROD-024).
+ */
+export function useRitual(slug: string, initialData?: RitualDetail) {
   return useQuery({
     queryKey: ritualKeys.detail(slug),
     queryFn: () => getRitualBySlug(slug),
     enabled: !!slug,
     staleTime: 1000 * 60 * 30,
+    initialData,
   });
 }
 

@@ -11,7 +11,7 @@ import {
   getArticlesByCategory,
   globalSearch,
 } from '@/lib/api/encyclopedia-articles-api';
-import type { ArticleCategory } from '@/types/encyclopedia-article.types';
+import type { ArticleCategory, ArticleDetail } from '@/types/encyclopedia-article.types';
 
 const STALE_TIME_STATIC = 1000 * 60 * 60; // 1 hour — static encyclopedia content
 
@@ -36,12 +36,19 @@ export function useArticleSnippet(slug: string) {
   });
 }
 
-export function useArticle(slug: string) {
+/**
+ * @param initialData artículo ya resuelto por la ruta en el servidor. Siembra la
+ *   caché para que el primer render —el HTML que ve Googlebot— traiga el artículo
+ *   en vez del skeleton (T-PROD-024). Con `STALE_TIME_STATIC` no dispara refetch
+ *   inmediato: la enciclopedia es contenido estático.
+ */
+export function useArticle(slug: string, initialData?: ArticleDetail) {
   return useQuery({
     queryKey: articleKeys.detail(slug),
     queryFn: () => getArticle(slug),
     staleTime: STALE_TIME_STATIC,
     enabled: !!slug,
+    initialData,
   });
 }
 
