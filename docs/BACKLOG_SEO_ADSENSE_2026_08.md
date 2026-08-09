@@ -140,7 +140,7 @@ lógica en `app/`.
 
 | ID | Tarea | Tipo | Prioridad | Estimación |
 | --- | --- | --- | --- | --- |
-| T-SEO-001 | Guardarraíl automático de contenido indexable | Frontend/CI | 🔴 Crítica | 2 pts |
+| T-SEO-001 | Guardarraíl automático de contenido indexable ✅ | Frontend/CI | 🔴 Crítica | 2 pts |
 | T-SEO-002 | Horóscopo chino por animal: 12 URLs sirven 3 palabras | Frontend | 🔴 Crítica | 3 pts |
 | T-SEO-003 | Listados y hubs sin contenido para el crawler | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-004 | Signos del horóscopo: ficha estática del signo | Frontend | 🟠 Alta | 2 pts |
@@ -156,6 +156,7 @@ necesita coordinación con el panel de Railway.
 ## T-SEO-001: Guardarraíl Automático de Contenido Indexable
 
 **Prioridad:** 🔴 Crítica · **Estimación:** 2 pts · **Dependencias:** ninguna
+**Estado:** ✅ COMPLETADA (9-ago-2026)
 
 ### Problema
 
@@ -169,31 +170,64 @@ datos del cliente nace invisible y nos enteramos por otro rechazo de AdSense.
 Un script que recorra `sitemap.xml`, mida las palabras propias de cada URL y falle si alguna baja del
 umbral. Debe poder correr contra un host arbitrario (build local, contenedor, producción).
 
-- [ ] `frontend/scripts/check-indexable-content.mjs` (o `.ts`) con:
-  - `--base-url` (default: `NEXT_PUBLIC_APP_URL`)
-  - `--min-words` (sugerido: 120 palabras propias)
-  - `--sample N` para muestreo estratificado por sección, y modo completo
-  - descuento automático del chrome: medirlo contra una ruta vacía conocida (`/admin`) en vez de
-    hardcodear 39
-  - salida en tabla ordenada por palabras ascendente + exit code ≠ 0 si hay incumplimientos
-  - cache-buster en las requests (ver *Cómo verificar*)
-- [ ] **Detección de soft-404**: pedir un slug inventado por cada patrón de ruta dinámica y reportar si
+- [x] `frontend/scripts/check-indexable-content.mjs` (o `.ts`) con:
+  - [x] `--base-url` (default: `NEXT_PUBLIC_APP_URL`)
+  - [x] `--min-words` (sugerido: 120 palabras propias)
+  - [x] `--sample N` para muestreo estratificado por sección, y modo completo
+  - [x] descuento automático del chrome: medirlo contra una ruta vacía conocida (`/admin`) en vez de
+        hardcodear 39
+  - [x] salida en tabla ordenada por palabras ascendente + exit code ≠ 0 si hay incumplimientos
+  - [x] cache-buster en las requests (ver *Cómo verificar*)
+- [x] **Detección de soft-404**: pedir un slug inventado por cada patrón de ruta dinámica y reportar si
       responde 200 en vez de 404. Alimenta T-SEO-006.
-- [ ] Lista de excepciones justificadas en el propio script (rutas que legítimamente son delgadas, si las hay).
-- [ ] Tests del script (parseo del sitemap, conteo de palabras, umbral, exit code).
-- [ ] Documentar el uso en `frontend/README.md` o en `docs/WORKFLOW_FRONTEND.md`.
+- [x] Lista de excepciones justificadas en el propio script (`RUTAS_EXENTAS`, hoy vacía a propósito).
+- [x] Tests del script (59 tests: parseo del sitemap, conteo de palabras, secciones, muestreo, umbral,
+      soft-404, exit code, orquestación con `fetch` inyectado).
+- [x] Documentar el uso en `frontend/README.md` (+ paso 11 bis no bloqueante en `docs/WORKFLOW_FRONTEND.md`).
 
 ### Criterios de aceptación
 
-- [ ] Corriendo contra producción hoy, reporta exactamente las 27 URLs delgadas conocidas (chino, signos,
-      listados) y ninguna más.
-- [ ] Exit code ≠ 0 con esas URLs presentes; exit 0 si se le sube el umbral por debajo de ellas.
-- [ ] Detecta el soft-404 de `/enciclopedia/tarot/inventado-xyz`.
+- [x] Corriendo contra producción hoy, reporta las URLs delgadas conocidas (chino, signos, listados).
+      ⚠️ **No son 27 sino 48** — ver *Qué encontró al correrlo* abajo: la muestra de 62 URLs se había
+      salteado 6 hubs, y 13 fichas quedan entre 109 y 119 palabras.
+- [x] Exit code ≠ 0 con esas URLs presentes; exit 0 si se le baja el umbral por debajo de ellas
+      (`--min-words 3` → 178/178 cumplen, exit 0).
+- [x] Detecta el soft-404 de `/enciclopedia/tarot/inventado-xyz` (y 10 más).
 
 ### Fuera de alcance
 
 Enchufarlo como *gate* bloqueante de CI. Primero que exista y se use a mano; convertirlo en gate implica
 decidir qué hacer cuando la API está caída durante el build, y eso merece su propia discusión.
+
+### Qué encontró al correrlo (producción, 9-ago-2026, umbral 120)
+
+`npm run check:indexable -- --base-url https://auguriatarot.com` → **48 de 178 URLs** por debajo del
+umbral, no 27. El chrome medido dio **39 palabras exactas**, así que la referencia manual era correcta;
+lo que estaba incompleto era la muestra.
+
+| Grupo | URLs | Palabras propias | Tarea |
+| --- | --- | --- | --- |
+| Horóscopo chino por animal | 12 | 3 | T-SEO-002 |
+| Signos del horóscopo | 12 | 31 | T-SEO-004 |
+| Listados ya conocidos (`/premium`, `/servicios`, `/enciclopedia/guias`, `/explorar`, `/enciclopedia/tarot`) | 5 | 3–24 | T-SEO-003 |
+| **Hubs que la muestra no había medido** (`/enciclopedia/astrologia/planetas` 18, `/enciclopedia/astrologia/signos` 23, `/enciclopedia/astrologia/casas` 26, `/contacto` 34, `/enciclopedia` 70, `/enciclopedia/astrologia` 70) | **6** | 18–70 | **sumar a T-SEO-003** |
+| **Fichas al borde del umbral** (12 arcanos menores 110–119 + `/servicios/limpiezas-energeticas` 109) | **13** | 109–119 | contenido real, apenas corto |
+
+Se escaparon porque el muestreo manual metía todos los hubs de primer nivel en una bolsa y medía unos
+pocos. Por eso `sectionOf()` trata cada ruta de primer nivel como su propia sección: con `--sample 2` se
+miden 34 URLs y **aparecen las 10 clases de problema**, no un subconjunto.
+
+**11 soft-404** (responden 200 con la página de no-encontrado) — insumo directo para T-SEO-006:
+`/enciclopedia`, `/enciclopedia/astrologia/{casas,planetas,signos}`, `/enciclopedia/{elementos,guias,tarot}`,
+`/horoscopo`, `/horoscopo-chino`, `/rituales`, `/servicios`.
+
+### Notas técnicas
+
+- **Las rutas dinámicas se infieren del sitemap** (un padre con ≥3 hijos es un `[slug]`) en vez de
+  hardcodearse: una sección nueva queda cubierta sin tocar el script.
+- **El chrome se mide, no se asume.** Si alguien agrega un link al header, el umbral no se corre solo.
+- Los tests del script viven en `frontend/scripts/*.test.mjs`; se agregó ese patrón al `include` de
+  `vitest.config.ts` (antes solo miraba `src/`).
 
 ---
 
@@ -262,10 +296,15 @@ Mismo patrón del punto *El patrón que ya funciona*, aplicado a listados en vez
       `.github/copilot-instructions.md`): sembrar solo la primera página.
 - [ ] `/premium` — revisar por qué sirve 3 palabras: si el contenido de planes viene de la API, sembrarlo;
       si es estático, entender qué lo está bloqueando.
+- [ ] **Sumados por T-SEO-001** (la muestra manual no los había medido): `/enciclopedia` 70,
+      `/enciclopedia/astrologia` 70, `/enciclopedia/astrologia/casas` 26, `/enciclopedia/astrologia/planetas` 18,
+      `/enciclopedia/astrologia/signos` 23 y `/contacto` 34. Los cinco primeros son hubs de listado, mismo
+      patrón; `/contacto` es un formulario y quizá amerite texto propio en vez de sembrado.
 
 ### Criterios de aceptación
 
-- [ ] Las 5 rutas superan las 120 palabras propias.
+- [ ] Las 11 rutas superan las 120 palabras propias, verificado con
+      `npm run check:indexable -- --base-url https://auguriatarot.com`.
 - [ ] Sin regresión en la interactividad (filtros, búsqueda, tabs).
 
 ---

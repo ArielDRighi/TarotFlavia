@@ -14,7 +14,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "check:indexable": "node scripts/check-indexable-content.mjs"
   },
   "dependencies": {
     "@astrodraw/astrochart": "^3.0.2",
