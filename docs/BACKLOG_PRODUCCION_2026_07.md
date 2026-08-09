@@ -342,6 +342,7 @@ Además el frontend define tres tipos que el backend **nunca emite** (`reading_s
 | T-PROD-020 | ✅ Search Console: "Duplicada, Google eligió otra canónica" — casi todo el sitemap comparte el `<title>` "Auguria" | Frontend | 🔴 Crítica | 3 pts |
 | T-PROD-021 | ✅ **Bomba de timezone en auth**: las columnas `timestamp` de expiración se leen desfasadas si el server no corre en UTC (rompe login y reset de contraseña) | Backend | 🟠 Alta | 2 pts |
 | T-PROD-022 | ✅ **El sitio entero servía 3 palabras a Googlebot**: el `AuthProvider` devolvía "Verificando sesión..." en lugar del contenido en todo render SSR (rechazo de AdSense) | Frontend | 🔴 Crítica | 2 pts |
+| T-PROD-023 | ✅ **El build de Railway venía fallando hace 2 semanas**: sin lockfile resuelve versiones más nuevas que local/CI y `next build` type-checkea los tests | Frontend/Infra | 🔴 Crítica | 1 pt |
 
 ---
 
@@ -1904,7 +1905,7 @@ sigue recibiendo el cascarón. No es el mismo bug (ya no hay un gate global), pe
       rompió el sitio fue el **string del servidor**. Sumado un test con `renderToString` que asevera que el
       HTML contiene el contenido y no contiene "Verificando sesión".
 
-#### 📌 Fuera de alcance → **candidata a T-PROD-023**
+#### 📌 Fuera de alcance → **candidata a T-PROD-024**
 
 Hacer SSR del contenido de esos listados/fichas, como ya se hizo con `/enciclopedia/tarot/[slug]` en
 T-PROD-020 (resolver en el server y pasar por `initialData` a React Query). Es lo que falta para que
@@ -1918,6 +1919,74 @@ Producción corre `main`. Nada de esto —ni T-PROD-020, ni T-PROD-021, ni esto�
 promover `develop` → `main`. Después del deploy hay que **re-verificar con el mismo `curl` como Googlebot**
 antes de apretar "Solicitar revisión" en AdSense. Pendiente aparte: `ads.txt` figura como *No se encuentra*
 en el panel (contemplado en T-PROD-009).
+
+---
+
+### T-PROD-023: El Build de Railway Fallaba Hace Dos Semanas — ✅ COMPLETADA
+
+**Estado:** ✅ COMPLETADA (2026-08-08)
+**Prioridad:** 🔴 Crítica
+**Estimación:** 1 punto
+**Dependencias:** ninguna — **bloqueaba el deploy de T-PROD-020, 021 y 022**
+**Origen:** el deploy activo del frontend en Railway era del **26-jul**; los tres arreglos de SEO estaban mergeados en `main` pero nunca llegaron al sitio
+**Tipo:** Frontend (`docs/WORKFLOW_FRONTEND.md`)
+
+#### 📋 Problema
+
+Producción seguía sirviendo el splash aun con T-PROD-020/021/022 en `main`. El deploy activo era
+`a6093f24`, del 26 de julio: **todos los builds posteriores fallaron**, y el síntoma era el mismo que
+verificamos con `curl` (3 palabras por página, y `Carta Astral | Auguria | Auguria`, la huella del build
+anterior a T-PROD-020).
+
+El log de Railway mostró cientos de errores como:
+
+```
+src/lib/providers/react-query-provider.test.tsx(2,18):
+  error TS2305: Module '"@testing-library/react"' has no exported member 'screen'.
+Failed to type check.
+```
+
+**Tres factores que se suman:**
+
+1. **El Dockerfile instala sin lockfile.** Copia solo `package.json` y corre `npm install` (el `.npmrc` ya
+   lo documentaba). Resolución fresca ⇒ versiones más nuevas que local y CI: el builder trajo
+   **Next 16.3.0** contra **16.0.6** local. Errores de tipos que nadie ve en CI (que usa `npm ci` contra
+   el lockfile raíz).
+2. **`@testing-library/dom` no estaba declarada.** Es **peer** de `@testing-library/react` v16
+   (`^10.0.0`), y `.npmrc` tiene `legacy-peer-deps=true`, así que npm no la instala. En local funciona
+   porque está *hoisted* en el `node_modules` de la raíz del monorepo; en Docker el contexto es solo
+   `frontend/`, no hay hoisting ⇒ `screen`/`waitFor`/`fireEvent`/`within` no existen en los tipos ⇒
+   TS2305 en **todos** los archivos de test.
+3. **`next build` type-checkea los archivos de test**, que no forman parte del bundle. La app compilaba
+   perfecto (`✓ Compiled successfully`) y el deploy moría igual en el paso de tipos.
+
+#### ✅ Tareas específicas
+
+- [x] `@testing-library/dom@^10.4.1` declarada en `devDependencies` — el peer que faltaba.
+- [x] `tsconfig.json` excluye `*.test.*` / `*.spec.*`: un build de producción no se rompe por el tipado de
+      los tests. Nuevo `tsconfig.test.json` que sí los incluye, y `type-check` corre **los dos**, así que
+      no se pierde cobertura de tipos en CI.
+
+#### 🎯 Criterios de Aceptación
+
+- [x] **Experimento controlado con Docker, reproduciendo el build de Railway:**
+      · sin el arreglo → `Failed to type check` con los mismos TS2305 y los mismos archivos del log de Railway
+      · con el arreglo (`--no-cache`, resolviendo **Next 16.3.0**, la misma versión que Railway) →
+      **exit 0, 0 errores, 218 páginas prerenderizadas**, imagen construida.
+- [x] `npm run type-check` (ambos tsconfig) y `test:run` (**5514 tests**) en verde.
+
+#### 📌 Fuera de alcance → **candidata a tarea propia**
+
+**La causa de fondo sigue viva: el build de Docker no usa lockfile.** Este arreglo elimina la clase de
+fallo que nos golpeó (tipos de tests), pero cualquier deriva en dependencias de *aplicación* puede volver
+a romper un deploy sin aviso, porque Railway resuelve distinto que CI. Las salidas posibles son mover el
+Root Directory de Railway a la raíz del monorepo y usar `npm ci` contra el lockfile raíz, o commitear un
+lockfile propio del frontend. Es una decisión de infra que merece su propia tarea.
+
+#### 🔑 Lección
+
+Que CI esté verde no garantiza que el deploy funcione: **CI y Railway instalan dependencias de forma
+distinta**. Vale la pena correr el `docker build` real antes de dar por deployado un cambio.
 
 ---
 
