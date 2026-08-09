@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { AxiosError, AxiosHeaders } from 'axios';
 
-import CasaDetailPage, { generateMetadata, generateStaticParams } from './page';
+import { generateMetadata, generateStaticParams } from './page';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 vi.mock('next/navigation', () => ({
-  useParams: () => ({ slug: 'primera-casa' }),
+  notFound: () => {
+    throw new Error('NEXT_NOT_FOUND');
+  },
 }));
 
 vi.mock('next/link', () => ({
@@ -50,48 +52,17 @@ vi.mock('@/lib/api/encyclopedia-articles-api', () => ({
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('CasaDetailPage (/enciclopedia/astrologia/casas/[slug])', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('debe renderizar ArticleDetailView cuando el artículo existe', () => {
-    mockUseArticle.mockReturnValue({
-      data: {
-        id: 3,
-        slug: 'primera-casa',
-        nameEs: 'Primera Casa',
-        nameEn: 'First House',
-        category: 'astro_house',
-        snippet: 'La casa del yo.',
-        imageUrl: null,
-        sortOrder: 1,
-        content: '## Primera Casa',
-        metadata: null,
-        relatedArticles: [],
-        relatedTarotCards: null,
-      },
-      isLoading: false,
-      error: null,
-    });
-
-    render(<CasaDetailPage />);
-
-    expect(screen.getByTestId('article-detail-view')).toBeInTheDocument();
-  });
-
-  it('debe retornar 404 para slug inexistente', () => {
-    mockUseArticle.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error('Not found'),
-    });
-
-    render(<CasaDetailPage />);
-
-    expect(screen.getByText('Artículo no encontrado')).toBeInTheDocument();
-  });
-});
+function apiError(status: number): AxiosError {
+  const error = new AxiosError('boom');
+  error.response = {
+    status,
+    statusText: '',
+    data: null,
+    headers: new AxiosHeaders(),
+    config: { headers: new AxiosHeaders() },
+  };
+  return error;
+}
 
 describe('generateMetadata (casas)', () => {
   beforeEach(() => {
@@ -104,6 +75,7 @@ describe('generateMetadata (casas)', () => {
       slug: 'primera-casa',
       nameEs: 'Primera Casa',
       snippet: 'La casa del yo.',
+      category: 'astro_house',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'primera-casa' }) });
@@ -119,6 +91,7 @@ describe('generateMetadata (casas)', () => {
       slug: 'primera-casa',
       nameEs: 'Primera Casa',
       snippet,
+      category: 'astro_house',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'primera-casa' }) });
@@ -132,6 +105,7 @@ describe('generateMetadata (casas)', () => {
       slug: 'primera-casa',
       nameEs: 'Primera Casa',
       snippet: 'La casa del yo.',
+      category: 'astro_house',
     });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'primera-casa' }) });
@@ -143,12 +117,37 @@ describe('generateMetadata (casas)', () => {
     });
   });
 
-  it('debe retornar objeto vacío si el artículo no existe', async () => {
-    mockGetArticle.mockRejectedValue(new Error('Not found'));
+  it('⚠️ T-PROD-024: un slug inexistente corta con notFound() en vez de servir el recurso', async () => {
+    mockGetArticle.mockRejectedValue(apiError(404));
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: 'inexistente' }) });
+    await expect(
+      generateMetadata({ params: Promise.resolve({ slug: 'inexistente' }) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
+  });
 
-    expect(metadata).toEqual({});
+  it('⚠️ T-PROD-024: propaga un fallo transitorio en vez de cachear metadata degradada', async () => {
+    mockGetArticle.mockRejectedValue(apiError(503));
+
+    await expect(generateMetadata({ params: Promise.resolve({ slug: 'aries' }) })).rejects.toThrow(
+      'boom'
+    );
+  });
+
+  it('⚠️ T-PROD-024: un artículo de otra categoría corta con notFound() en esta ruta', async () => {
+    // Todas las rutas de artículo consultan el mismo `getArticle(slug)`. Sin el
+    // chequeo de categoría, el mismo contenido quedaba alcanzable como 5 URLs
+    // distintas: contenido duplicado ante Google.
+    mockGetArticle.mockResolvedValue({
+      id: 99,
+      slug: 'intruso',
+      nameEs: 'Intruso',
+      snippet: 'De otra sección.',
+      category: 'zodiac_sign',
+    });
+
+    await expect(
+      generateMetadata({ params: Promise.resolve({ slug: 'intruso' }) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 });
 

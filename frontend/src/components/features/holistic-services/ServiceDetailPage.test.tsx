@@ -5,6 +5,7 @@
  * User must select a date + time slot before the CTA is enabled.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { AxiosError, AxiosHeaders } from 'axios';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -66,6 +67,18 @@ const mockServiceDetail: HolisticServiceDetail = {
   updatedAt: '2025-01-01T00:00:00.000Z',
 };
 
+function notFoundAxiosError(): AxiosError {
+  const error = new AxiosError('Not found');
+  error.response = {
+    status: 404,
+    statusText: '',
+    data: null,
+    headers: new AxiosHeaders(),
+    config: { headers: new AxiosHeaders() },
+  };
+  return error;
+}
+
 describe('ServiceDetailPage', () => {
   let queryClient: QueryClient;
 
@@ -86,7 +99,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(screen.getByTestId('service-detail-page')).toBeInTheDocument();
   });
@@ -99,7 +114,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'Árbol Genealógico' })
@@ -114,7 +131,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(screen.getByText(/El trabajo con el árbol genealógico/)).toBeInTheDocument();
   });
@@ -127,7 +146,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(screen.getByText(/15\.000/)).toBeInTheDocument();
     expect(screen.getByText(/ARS/i)).toBeInTheDocument();
@@ -141,7 +162,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(screen.getByText(/90/)).toBeInTheDocument();
     expect(screen.getByText(/min/i)).toBeInTheDocument();
@@ -155,7 +178,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     // Should not show any phone number (e.g. +54...) or text like "número de whatsapp"
     expect(screen.queryByText(/\+54/)).not.toBeInTheDocument();
@@ -170,7 +195,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     const calendar = screen.getByTestId('booking-calendar');
     expect(calendar).toBeInTheDocument();
@@ -185,7 +212,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     const calendar = screen.getByTestId('booking-calendar');
     expect(calendar).toHaveAttribute('data-service-slug', 'arbol-genealogico');
@@ -199,7 +228,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     const calendar = screen.getByTestId('booking-calendar');
     expect(calendar).toHaveAttribute(
@@ -216,7 +247,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     const button = screen.getByTestId('contratar-button');
     expect(button).toBeInTheDocument();
@@ -231,7 +264,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(screen.getByTestId('slot-required-hint')).toBeInTheDocument();
   });
@@ -244,7 +279,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     // Simulate slot selection via BookingCalendar mock
     await userEvent.click(screen.getByTestId('mock-select-slot'));
@@ -265,7 +302,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     await userEvent.click(screen.getByTestId('mock-select-slot'));
 
@@ -282,7 +321,9 @@ describe('ServiceDetailPage', () => {
       error: null,
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(screen.getByTestId('service-detail-skeleton')).toBeInTheDocument();
   });
@@ -292,10 +333,14 @@ describe('ServiceDetailPage', () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      error: new Error('Servicio no encontrado'),
+      // `getHolisticServiceDetail` preserva el AxiosError original en el 404 para
+      // que la ruta pueda cortar con notFound(); envolverlo daba 500 (T-PROD-024).
+      error: notFoundAxiosError(),
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="slug-inexistente" />, { wrapper });
+    render(<ServiceDetailPage slug="slug-inexistente" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(screen.getByTestId('service-detail-not-found')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /volver al catálogo/i })).toBeInTheDocument();
@@ -309,7 +354,9 @@ describe('ServiceDetailPage', () => {
       error: new Error('Network Error'),
     } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServiceDetail>);
 
-    render(<ServiceDetailPage slug="arbol-genealogico" />, { wrapper });
+    render(<ServiceDetailPage slug="arbol-genealogico" initialService={mockServiceDetail} />, {
+      wrapper,
+    });
 
     expect(screen.getByTestId('service-detail-error')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /volver al catálogo/i })).toBeInTheDocument();

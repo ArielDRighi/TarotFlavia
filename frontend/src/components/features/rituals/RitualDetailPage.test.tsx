@@ -1,15 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import userEvent from '@testing-library/user-event';
-import RitualDetailPage from './page';
-import { RitualCategory, RitualDifficulty, MaterialType } from '@/types/ritual.types';
 
-// Mock Next.js router
-vi.mock('next/navigation', () => ({
-  useParams: () => ({
-    slug: 'ritual-luna-nueva',
-  }),
-}));
+// Los mocks devuelven solo lo que el componente consume. Se tipan contra el
+// retorno real del hook (sin `any`, prohibido por CLAUDE.md Rule 0).
+type RitualQuery = ReturnType<typeof useRitual>;
+type CompleteRitualMutation = ReturnType<typeof useCompleteRitual>;
+import userEvent from '@testing-library/user-event';
+import { RitualDetailPage } from './RitualDetailPage';
+import { RitualCategory, RitualDifficulty, MaterialType } from '@/types/ritual.types';
 
 // Mock hooks
 vi.mock('@/hooks/api/useRituals', () => ({
@@ -82,124 +80,118 @@ describe('RitualDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useAuthStore as any).mockReturnValue({
+    vi.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: false,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useRitual as any).mockReturnValue({
+    vi.mocked(useRitual).mockReturnValue({
       data: mockRitual,
       isLoading: false,
       error: null,
-    });
+    } as unknown as RitualQuery);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useCompleteRitual as any).mockReturnValue({
+    vi.mocked(useCompleteRitual).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    });
+    } as unknown as CompleteRitualMutation);
   });
 
   it('renders ritual title', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Ritual de Luna Nueva')).toBeInTheDocument();
   });
 
   it('shows loading skeleton when loading', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useRitual as any).mockReturnValue({
+    vi.mocked(useRitual).mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
-    });
+    } as unknown as RitualQuery);
 
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     // Skeleton should be rendered
     expect(screen.queryByText('Ritual de Luna Nueva')).not.toBeInTheDocument();
   });
 
   it('shows error message when ritual not found', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useRitual as any).mockReturnValue({
+    vi.mocked(useRitual).mockReturnValue({
       data: null,
       isLoading: false,
       error: new Error('Not found'),
-    });
+    } as unknown as RitualQuery);
 
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Ritual no encontrado')).toBeInTheDocument();
   });
 
   it('renders back button', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Rituales')).toBeInTheDocument();
   });
 
   it('renders complete button', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Marcar como Completado')).toBeInTheDocument();
   });
 
   it('shows login message when not authenticated', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Inicia sesión para guardar tu progreso')).toBeInTheDocument();
   });
 
   it('does not show login message when authenticated', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (useAuthStore as any).mockReturnValue({
+    vi.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: true,
     });
 
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.queryByText('Inicia sesión para guardar tu progreso')).not.toBeInTheDocument();
   });
 
   it('renders purpose section', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Propósito')).toBeInTheDocument();
     expect(screen.getByText('Establecer intenciones para el nuevo ciclo')).toBeInTheDocument();
   });
 
   it('renders preparation section', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Preparación')).toBeInTheDocument();
     expect(screen.getByText('Preparar espacio tranquilo')).toBeInTheDocument();
   });
 
   it('renders materials section', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Materiales Necesarios')).toBeInTheDocument();
     expect(screen.getByText('Vela blanca')).toBeInTheDocument();
   });
 
   it('renders steps section', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Pasos del Ritual')).toBeInTheDocument();
     expect(screen.getByText('Preparar espacio')).toBeInTheDocument();
   });
 
   it('renders closing section', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Cierre del Ritual')).toBeInTheDocument();
     expect(screen.getByText('Agradecer y cerrar')).toBeInTheDocument();
   });
 
   it('renders tips section', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Consejos')).toBeInTheDocument();
     expect(screen.getByText('• Tip 1')).toBeInTheDocument();
@@ -209,7 +201,7 @@ describe('RitualDetailPage', () => {
   it('opens completion modal when button clicked', async () => {
     const user = userEvent.setup();
 
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     const completeButton = screen.getByText('Marcar como Completado');
     await user.click(completeButton);
@@ -219,7 +211,7 @@ describe('RitualDetailPage', () => {
   });
 
   it('renders best time of day', () => {
-    render(<RitualDetailPage />);
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 
     expect(screen.getByText('Mejor momento para realizar')).toBeInTheDocument();
     expect(screen.getByText('Noche')).toBeInTheDocument();

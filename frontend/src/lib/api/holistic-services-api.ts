@@ -48,7 +48,11 @@ export async function getHolisticServiceDetail(slug: string): Promise<HolisticSe
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as { response?: { status?: number } };
       if (axiosError.response?.status === 404) {
-        throw new Error('Servicio no encontrado');
+        // Se re-lanza el error ORIGINAL, no uno plano: `isNotFoundError` de
+        // `route-data.ts` necesita el `AxiosError` para distinguir "no existe"
+        // (→ notFound) de un fallo transitorio (→ se propaga). Envolverlo hacía
+        // que `/servicios/inventado` respondiera 500 en vez de 404 (T-PROD-024).
+        throw error;
       }
     }
     throw new Error('Error al obtener detalle del servicio');

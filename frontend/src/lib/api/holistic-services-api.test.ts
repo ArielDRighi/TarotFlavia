@@ -116,10 +116,14 @@ describe('Holistic Services API', () => {
       expect(apiClient.get).toHaveBeenCalledWith('/holistic-services/arbol-genealogico');
     });
 
-    it('should throw "Servicio no encontrado" on 404', async () => {
-      vi.mocked(apiClient.get).mockRejectedValue({ response: { status: 404 } });
+    it('⚠️ T-PROD-024: en 404 re-lanza el error ORIGINAL, no uno plano', async () => {
+      // `isNotFoundError` de `route-data.ts` necesita el AxiosError para distinguir
+      // "no existe" (→ notFound) de un fallo transitorio (→ se propaga). Envolverlo
+      // en un `Error` plano hacía que `/servicios/inventado` devolviera 500.
+      const original = { response: { status: 404 } };
+      vi.mocked(apiClient.get).mockRejectedValue(original);
 
-      await expect(getHolisticServiceDetail('no-existe')).rejects.toThrow('Servicio no encontrado');
+      await expect(getHolisticServiceDetail('no-existe')).rejects.toBe(original);
     });
 
     it('should throw generic error on non-404 failures', async () => {

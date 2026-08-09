@@ -11,6 +11,8 @@
  */
 'use client';
 
+import type { HolisticServiceDetail } from '@/types/holistic-service.types';
+
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { BookingCalendar } from '@/components/features/marketplace/BookingCalendar';
@@ -18,9 +20,12 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHolisticServiceDetail } from '@/hooks/api/useHolisticServices';
 import { ROUTES } from '@/lib/constants/routes';
+import { isNotFoundError } from '@/lib/metadata/route-data';
 
 interface ServiceDetailPageProps {
   slug: string;
+  /** Servicio resuelto en el servidor; la ruta corta con notFound() si no existe (T-PROD-024). */
+  initialService: HolisticServiceDetail;
 }
 
 // Flavia's tarotistaId — single tarotista MVP
@@ -30,8 +35,8 @@ function formatArs(amount: number): string {
   return amount.toLocaleString('es-AR');
 }
 
-export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
-  const { data: service, isLoading, isError, error } = useHolisticServiceDetail(slug);
+export function ServiceDetailPage({ slug, initialService }: ServiceDetailPageProps) {
+  const { data: service, isLoading, error } = useHolisticServiceDetail(slug, initialService);
 
   // Selected slot state — user must pick date + time before paying
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -49,10 +54,28 @@ export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
     ? `${ROUTES.SERVICIO_PAGO(slug)}?date=${encodeURIComponent(selectedDate)}&time=${encodeURIComponent(selectedTime)}`
     : ROUTES.SERVICIO_PAGO(slug);
 
-  // Handle 404 — render client-side not-found state
-  if (isError) {
-    const isNotFound = error instanceof Error && error.message === 'Servicio no encontrado';
-    if (isNotFound) {
+  if (isLoading) {
+    return (
+      <div
+        data-testid="service-detail-skeleton"
+        className="bg-bg-main min-h-screen px-4 py-8 md:px-8"
+      >
+        <Skeleton className="mb-4 h-10 w-3/4" />
+        <Skeleton className="mb-2 h-4 w-full" />
+        <Skeleton className="mb-2 h-4 w-full" />
+        <Skeleton className="mb-2 h-4 w-2/3" />
+        <Skeleton className="mb-8 h-4 w-1/2" />
+        <Skeleton className="h-10 w-40" />
+      </div>
+    );
+  }
+
+  // Sin `isError` como primer guard: con `initialService` sembrado, la única
+  // forma de que `isError` sea true es un refetch en background fallido, y ahí
+  // hay que conservar el servicio bueno en vez de vaciar la página (y perder el
+  // turno que el usuario ya eligió). Mismo criterio que artículo, ritual y carta.
+  if (!service) {
+    if (isNotFoundError(error)) {
       return (
         <div
           data-testid="service-detail-not-found"
@@ -83,26 +106,6 @@ export function ServiceDetailPage({ slug }: ServiceDetailPageProps) {
         </Button>
       </div>
     );
-  }
-
-  if (isLoading) {
-    return (
-      <div
-        data-testid="service-detail-skeleton"
-        className="bg-bg-main min-h-screen px-4 py-8 md:px-8"
-      >
-        <Skeleton className="mb-4 h-10 w-3/4" />
-        <Skeleton className="mb-2 h-4 w-full" />
-        <Skeleton className="mb-2 h-4 w-full" />
-        <Skeleton className="mb-2 h-4 w-2/3" />
-        <Skeleton className="mb-8 h-4 w-1/2" />
-        <Skeleton className="h-10 w-40" />
-      </div>
-    );
-  }
-
-  if (!service) {
-    return null;
   }
 
   return (
