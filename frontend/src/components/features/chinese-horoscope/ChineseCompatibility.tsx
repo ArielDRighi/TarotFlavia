@@ -17,6 +17,14 @@ export interface ChineseCompatibilityProps {
     good: ChineseZodiacAnimal[];
     challenging: ChineseZodiacAnimal[];
   };
+  /**
+   * Encabezado de la tarjeta. Por defecto "Compatibilidad".
+   *
+   * En `/horoscopo-chino/[animal]` conviven dos bloques de compatibilidad —el
+   * tradicional del signo, en `AnimalProfile`, y el del año que trae la API— y
+   * sin títulos distintos el usuario ve datos contradictorios sin explicación.
+   */
+  title?: string;
 }
 
 /**
@@ -36,7 +44,10 @@ export interface ChineseCompatibilityProps {
  * />
  * ```
  */
-export function ChineseCompatibility({ compatibility }: ChineseCompatibilityProps) {
+export function ChineseCompatibility({
+  compatibility,
+  title = 'Compatibilidad',
+}: ChineseCompatibilityProps) {
   const renderAnimals = (animals: ChineseZodiacAnimal[], variantClass: string) => (
     <div className="flex flex-wrap gap-2" data-testid="compatibility-group">
       {animals.map((animal) => {
@@ -61,7 +72,7 @@ export function ChineseCompatibility({ compatibility }: ChineseCompatibilityProp
 
   return (
     <Card className="p-4" data-testid="chinese-compatibility">
-      <h3 className="mb-4 font-serif text-lg">Compatibilidad</h3>
+      <h3 className="mb-4 font-serif text-lg">{title}</h3>
 
       <div className="space-y-4">
         <div>

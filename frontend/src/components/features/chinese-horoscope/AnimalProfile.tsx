@@ -93,8 +93,8 @@ export function AnimalProfile({ animal }: AnimalProfileProps) {
       </header>
 
       <Card className="space-y-4 p-6">
-        {profile.intro.map((paragraph) => (
-          <p key={paragraph.slice(0, 24)} className="leading-relaxed">
+        {profile.intro.map((paragraph, index) => (
+          <p key={index} className="leading-relaxed">
             {paragraph}
           </p>
         ))}
@@ -137,7 +137,9 @@ export function AnimalProfile({ animal }: AnimalProfileProps) {
       </div>
 
       <section>
-        <h2 className="mb-3 font-serif text-2xl">Compatibilidad de {info.nameEs}</h2>
+        {/* "tradicional" en el título: más abajo, la predicción del año trae su
+            propio bloque de afinidades con datos distintos. */}
+        <h2 className="mb-3 font-serif text-2xl">Compatibilidad tradicional de {info.nameEs}</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="space-y-3 p-4">
             <h3 className="font-serif text-lg">Mejores afinidades</h3>
@@ -169,7 +171,7 @@ export function AnimalProfile({ animal }: AnimalProfileProps) {
       </section>
 
       <section>
-        <h2 className="mb-3 font-serif text-2xl">Suerte tradicional</h2>
+        <h2 className="mb-3 font-serif text-2xl">Suerte tradicional del signo {info.nameEs}</h2>
         <Card className="p-4">
           <dl className="grid gap-4 sm:grid-cols-3">
             <div>

@@ -175,7 +175,7 @@ describe('ChineseHoroscopeDetail', () => {
       const horoscope = createMockHoroscope();
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('Elementos de Suerte')).toBeInTheDocument();
+      expect(screen.getByText(/Elementos de Suerte de 2026/)).toBeInTheDocument();
     });
 
     it('should display lucky numbers', () => {
@@ -358,7 +358,7 @@ describe('ChineseHoroscopeDetail', () => {
       });
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('Elementos de Suerte')).toBeInTheDocument();
+      expect(screen.getByText(/Elementos de Suerte de 2026/)).toBeInTheDocument();
       // Should render empty strings without errors
       expect(screen.getByText('Números')).toBeInTheDocument();
     });

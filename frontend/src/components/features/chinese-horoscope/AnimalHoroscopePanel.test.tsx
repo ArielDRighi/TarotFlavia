@@ -23,10 +23,15 @@ vi.mock('@/hooks/utils/useAnimalHoroscopePage', () => ({
   useAnimalHoroscopePage: () => mockUseAnimalHoroscopePage(),
 }));
 
-// Mock child components to simplify tests
-vi.mock('@/components/features/chinese-horoscope', () => ({
+// Mock child components to simplify tests (por ruta directa: el panel ya no
+// importa del barrel, para no crear un ciclo con el componente de ruta)
+vi.mock('./ChineseHoroscopeDetail', () => ({
   ChineseHoroscopeDetail: () => <div data-testid="horoscope-detail">Detalle horóscopo</div>,
+}));
+vi.mock('./ChineseAnimalSelector', () => ({
   ChineseAnimalSelector: () => <div data-testid="animal-selector">Selector</div>,
+}));
+vi.mock('./ElementSelectorModal', () => ({
   ElementSelectorModal: () => null,
 }));
 
@@ -40,7 +45,6 @@ vi.mock('@/lib/constants/routes', () => ({
 function createBaseHookResult() {
   return {
     animal: 'rata' as const,
-    isValidAnimal: true,
     animalInfo: { nameEs: 'Rata', emoji: '🐭' },
     userAnimal: undefined,
     isMyAnimal: false,
@@ -49,7 +53,8 @@ function createBaseHookResult() {
     isLoading: false,
     error: null,
     currentYear: 2025,
-    showElementModal: false,
+    needsElementSelection: false,
+    isResolvingUserAnimal: false,
     handleElementSelect: vi.fn(),
   };
 }
@@ -182,7 +187,6 @@ describe('AnimalHoroscopePanel', () => {
     it('no renderiza nada: el mensaje lo sirve AnimalHoroscopeRoute en el servidor', () => {
       mockUseAnimalHoroscopePage.mockReturnValue({
         ...createBaseHookResult(),
-        isValidAnimal: false,
         animalInfo: null,
       });
 
@@ -192,16 +196,31 @@ describe('AnimalHoroscopePanel', () => {
     });
   });
 
-  describe('Contenido indexable (T-SEO-002)', () => {
-    it('no duplica el h1 de la ficha estática', () => {
+  describe('Selección de elemento (T-SEO-002)', () => {
+    it('ofrece elegir el elemento sin abrir el modal solo', () => {
       mockUseAnimalHoroscopePage.mockReturnValue({
         ...createBaseHookResult(),
-        horoscopeData: { id: 1, year: 2025 },
+        element: null,
+        needsElementSelection: true,
       });
 
       render(<AnimalHoroscopePanel />);
 
-      expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
+      expect(screen.getByTestId('element-selection-prompt')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Elegir mi elemento/i })).toBeInTheDocument();
+    });
+
+    it('no parpadea el aviso mientras se resuelve el animal del usuario', () => {
+      mockUseAnimalHoroscopePage.mockReturnValue({
+        ...createBaseHookResult(),
+        element: null,
+        needsElementSelection: true,
+        isResolvingUserAnimal: true,
+      });
+
+      render(<AnimalHoroscopePanel />);
+
+      expect(screen.queryByTestId('element-selection-prompt')).not.toBeInTheDocument();
     });
   });
 });

@@ -313,6 +313,23 @@ existía solo para no reabrir el modal descartado.
 - **El soft-404 sigue vivo** (`/horoscopo-chino/inventado-xyz` responde 200): es T-SEO-006, fuera de
   alcance acá.
 
+### Ajustes tras la revisión
+
+- **Dos bloques de compatibilidad y dos de suerte convivían sin distinguirse.** La ficha trae los datos
+  tradicionales del signo y la predicción trae los del año, y no coinciden (la API guarda dos animales en
+  choque, la tradición uno). Ahora los títulos lo dicen: "Compatibilidad tradicional de X" / "Suerte
+  tradicional del signo X" contra "Afinidades de {año}" / "Elementos de Suerte de {año}".
+  `ChineseCompatibility` acepta un `title` opcional para eso.
+- **El barrel dejó de exportar los componentes de ruta.** `index → AnimalHoroscopeRoute → AnimalHoroscopePanel
+  → index` era un ciclo, y el barrel es lo que un client component importa: un import con side-effect y las
+  536 líneas de perfiles terminan en el bundle del navegador. El panel importa a sus hijos por ruta directa.
+- **`showElementModal` pasó a `needsElementSelection`** en el hook: ya no controla ningún modal.
+  Se eliminó también `isValidAnimal`, que quedó sin consumidores cuando la validación se fue al servidor.
+- **Se sacó el `revalidate = 86400`**: el HTML sale entero de constantes del repo, así que un ISR diario
+  regeneraba 12 URLs por día para producir el mismo byte.
+- **El aviso de "elegí tu elemento" ya no parpadea** para el usuario autenticado en su propio animal: el
+  hook expone `isResolvingUserAnimal` y el panel espera esa resolución.
+
 ---
 
 ## T-SEO-003: Listados y Hubs sin Contenido para el Crawler

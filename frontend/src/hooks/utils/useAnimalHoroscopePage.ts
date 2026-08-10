@@ -28,9 +28,11 @@ import type {
 interface UseAnimalHoroscopePageResult {
   /** The current animal from URL params */
   animal: ChineseZodiacAnimal;
-  /** Whether the current animal is valid */
-  isValidAnimal: boolean;
-  /** Animal info from the zodiac constant */
+  /**
+   * Animal info from the zodiac constant, o `null` si el segmento de la URL no
+   * es uno de los 12 animales. Única señal de validez que necesita el panel: el
+   * mensaje de "animal no válido" lo sirve `AnimalHoroscopeRoute` en el servidor.
+   */
   animalInfo: ChineseZodiacInfo | null;
   /** User's own animal (if authenticated) */
   userAnimal: ChineseZodiacAnimal | undefined;
@@ -46,8 +48,10 @@ interface UseAnimalHoroscopePageResult {
   error: Error | null;
   /** Current year for horoscope */
   currentYear: number;
-  /** Whether to show the element selector modal */
-  showElementModal: boolean;
+  /** Whether the user still has to pick a Wu Xing element to see the prediction */
+  needsElementSelection: boolean;
+  /** Whether the user's own animal is still being resolved (auth + API) */
+  isResolvingUserAnimal: boolean;
   /** Handler when user selects an element from modal */
   handleElementSelect: (element: ChineseElementCode) => void;
 }
@@ -78,7 +82,8 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
   const userBirthDate = user?.birthDate
     ? new Date(user.birthDate).toISOString().split('T')[0]
     : null;
-  const { data: userAnimalData } = useCalculateAnimal(userBirthDate);
+  const { data: userAnimalData, isLoading: isResolvingUserAnimal } =
+    useCalculateAnimal(userBirthDate);
 
   // Determine if user is viewing their own animal
   const isMyAnimal = useMemo(() => {
@@ -96,10 +101,10 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
     return null;
   }, [elementFromQuery, isMyAnimal, userAnimalData]);
 
-  // Show element selector modal when:
-  // - Not viewing own animal AND
-  // - No element in query params
-  const showElementModal = !isMyAnimal && !element;
+  // Falta elegir elemento cuando no es el animal del usuario y no vino ninguno
+  // en la query string. El panel lo usa para ofrecer el selector, que ya no se
+  // abre solo (T-SEO-002).
+  const needsElementSelection = !isMyAnimal && !element;
 
   // Queries for horoscope data
   // Only fetch my horoscope when viewing own animal (optimization)
@@ -129,12 +134,10 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
   };
 
   // Validate animal
-  const isValidAnimal = !!CHINESE_ZODIAC_INFO[animal];
-  const animalInfo = isValidAnimal ? CHINESE_ZODIAC_INFO[animal] : null;
+  const animalInfo = CHINESE_ZODIAC_INFO[animal] ?? null;
 
   return {
     animal,
-    isValidAnimal,
     animalInfo,
     userAnimal: userAnimalData?.animal,
     isMyAnimal,
@@ -143,7 +146,8 @@ export function useAnimalHoroscopePage(): UseAnimalHoroscopePageResult {
     isLoading,
     error,
     currentYear,
-    showElementModal,
+    needsElementSelection,
+    isResolvingUserAnimal,
     handleElementSelect,
   };
 }

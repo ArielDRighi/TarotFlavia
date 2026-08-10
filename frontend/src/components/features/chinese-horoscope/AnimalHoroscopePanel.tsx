@@ -20,13 +20,15 @@ import { ArrowLeft, Calculator, Clock, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
-import {
-  ChineseHoroscopeDetail,
-  ChineseAnimalSelector,
-  ElementSelectorModal,
-} from '@/components/features/chinese-horoscope';
 import { useAnimalHoroscopePage } from '@/hooks/utils/useAnimalHoroscopePage';
 import { ROUTES } from '@/lib/constants/routes';
+
+// Imports directos, no por el barrel: el barrel también exporta el componente de
+// ruta, que importa este panel, y el ciclo hace fácil arrastrar al bundle de
+// cliente el contenido estático de las 12 fichas.
+import { ChineseAnimalSelector } from './ChineseAnimalSelector';
+import { ChineseHoroscopeDetail } from './ChineseHoroscopeDetail';
+import { ElementSelectorModal } from './ElementSelectorModal';
 
 interface ErrorWithResponse {
   response?: { status: number };
@@ -48,7 +50,8 @@ export function AnimalHoroscopePanel() {
     isLoading,
     error,
     currentYear,
-    showElementModal,
+    needsElementSelection,
+    isResolvingUserAnimal,
     handleElementSelect,
   } = useAnimalHoroscopePage();
 
@@ -61,9 +64,9 @@ export function AnimalHoroscopePanel() {
   // primero y el selector es un paso explícito.
   const [isElementModalOpen, setIsElementModalOpen] = useState(false);
 
-  // `showElementModal` del hook significa "falta elegir elemento": no es el
-  // animal del usuario y no vino ninguno en la query string.
-  const needsElementSelection = showElementModal;
+  // Mientras se resuelve el animal del usuario no sabemos si va a hacer falta
+  // elegir elemento; sin esperar, el aviso aparece y desaparece solo.
+  const showElementPrompt = needsElementSelection && !isResolvingUserAnimal;
 
   // La validez del segmento la resuelve `AnimalHoroscopeRoute` en el servidor
   // (una sola fuente de verdad, y así el mensaje de error también es indexable).
@@ -91,7 +94,7 @@ export function AnimalHoroscopePanel() {
         onOpenChange={setIsElementModalOpen}
       />
 
-      {needsElementSelection && (
+      {showElementPrompt && (
         <Alert data-testid="element-selection-prompt">
           <Calculator className="h-4 w-4" />
           <AlertDescription className="flex flex-wrap items-center justify-between gap-2">

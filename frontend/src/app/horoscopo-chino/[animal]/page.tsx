@@ -21,11 +21,9 @@ interface PageProps {
   params: Promise<{ animal: string }>;
 }
 
-/**
- * Contenido estático: se revalida a diario para que el ISR no quede congelado
- * cuando cambie el texto de un perfil.
- */
-export const revalidate = 86400;
+// Sin `revalidate`: el HTML sale entero de constantes del repo, así que solo
+// cambia con un deploy —que ya regenera las páginas—. Un ISR diario regeneraría
+// 12 URLs por día para producir el mismo byte.
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { animal } = await params;

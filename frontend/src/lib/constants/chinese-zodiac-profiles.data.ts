@@ -12,6 +12,17 @@
  * ⚠️ El texto de cada animal debe ser **único**: doce URLs con el mismo párrafo
  * son contenido duplicado para Google, que fue el problema original.
  * `chinese-zodiac-profiles.data.test.ts` lo verifica.
+ *
+ * **Fuente de los datos tradicionales** (no inventar al editarlos):
+ * - `compatibility`: los cuatro triángulos de afinidad del zodiaco chino más el
+ *   par de "amigos secretos", y como choque el opuesto de la rueda (6 posiciones).
+ *   Coinciden con `compatibleWith` / `incompatibleWith` del backend en
+ *   `backend/tarot-app/src/common/utils/chinese-zodiac.utils.ts`. Si cambian allá,
+ *   cambian acá: los tests verifican la coherencia interna, no la del backend.
+ * - `luck.numbers` / `luck.colors` / `luck.direction`: tablas tradicionales de
+ *   números, colores y direcciones favorables por animal. La fuente no es única y
+ *   varía entre escuelas; la ficha los presenta como tradición, no como certeza.
+ * - `element`: el elemento fijo sale de `CHINESE_ZODIAC_INFO`, no se repite acá.
  */
 
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
@@ -319,7 +330,7 @@ export const CHINESE_ZODIAC_PROFILES: Record<ChineseZodiacAnimal, ChineseZodiacP
     challenges: ['Dispersión', 'Impaciencia', 'Habla de más', 'Se aburre pronto'],
     love: 'Se enamora rápido y con ganas, y sostiene el vínculo mientras haya aire y proyectos por delante. El control lo espanta; la complicidad y las aventuras compartidas lo fijan mucho más que las exigencias.',
     career:
-      'Rinde en ventas, turismo, deporte, transporte, comunicación, capacitación y cualquier trabajo con movimiento y contacto humano. La oficina sin ventanas y la tarea repetitiva le rinden mal, aun cuando pague bien.',
+      'Rinde en ventas, turismo, deporte, transporte, comunicación, capacitación y cualquier trabajo con movimiento y contacto humano. La oficina sin ventanas y la tarea repetitiva lo desgastan, aun cuando paguen bien.',
     compatibility: {
       best: [ChineseZodiacAnimal.TIGER, ChineseZodiacAnimal.DOG, ChineseZodiacAnimal.GOAT],
       challenging: [ChineseZodiacAnimal.RAT],
