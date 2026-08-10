@@ -1,11 +1,13 @@
 {
   "//": "Type-check de los archivos de test. Existe porque `next build` usa tsconfig.json, y un build de producción NO debe romperse por el tipado de los tests: no forman parte del bundle. El Dockerfile de Railway instala sin lockfile (ver .npmrc), así que resuelve versiones más nuevas que local y CI —Next 16.3 contra 16.0— y esa deriva aparecía como cientos de errores de tipos en los tests, tumbando el deploy con la app compilando perfecto. `npm run type-check` corre ambos, así que la cobertura de tipos sobre los tests no se pierde.",
+  "//mjs": "Los .mjs entran acá y NO en tsconfig.json por la misma razón: los scripts de scripts/ no forman parte del bundle y no deben poder tumbar un deploy. Solo se chequean los que declaran `// @ts-check` (no hay `checkJs` global).",
   "extends": "./tsconfig.json",
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "**/*.mts",
+    "**/*.mjs",
     ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules", "tests/e2e"]

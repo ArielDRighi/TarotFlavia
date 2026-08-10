@@ -228,6 +228,15 @@ miden 34 URLs y **aparecen las 10 clases de problema**, no un subconjunto.
 - **El chrome se mide, no se asume.** Si alguien agrega un link al header, el umbral no se corre solo.
 - Los tests del script viven en `frontend/scripts/*.test.mjs`; se agregó ese patrón al `include` de
   `vitest.config.ts` (antes solo miraba `src/`).
+- **`scripts/` entró a los quality gates**: `lint`/`lint:fix` cubren `scripts/**/*.mjs`, `format`
+  cubre `{src,scripts}`, y `tsconfig.test.json` incluye `**/*.mjs` para que el `// @ts-check` del
+  script se valide en `npm run type-check`. Va en el tsconfig de tests y **no** en el de la app por
+  la misma razón que los tests: un script de desarrollo no debe poder tumbar un deploy (T-SEO-005).
+- **Modos de falla silenciosa cerrados tras la revisión**: si `/admin` no responde 200 la corrida
+  aborta (con la línea base en 0 el umbral se ablandaba solo); una request caída se reporta como
+  fila fallida en vez de tumbar las otras 177; y los soft-404 no cuentan para el exit code salvo
+  `--fail-on-soft-404`, porque los 11 actuales harían fallar toda corrida hasta que se arregle
+  T-SEO-006.
 
 ---
 

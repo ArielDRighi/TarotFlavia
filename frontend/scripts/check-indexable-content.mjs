@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 
 /**
  * Guardarraíl de Contenido Indexable - Auguria (T-SEO-001)
@@ -62,6 +63,7 @@ export const RUTAS_EXENTAS = new Map();
 
 const USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
 
+/** @type {Record<string, string>} */
 const NAMED_ENTITIES = {
   nbsp: ' ',
   amp: '&',
@@ -101,7 +103,19 @@ const NAMED_ENTITIES = {
  * @returns {string[]}
  */
 export function parseSitemap(xml) {
-  const locs = [...String(xml ?? '').matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) =>
+  const texto = String(xml ?? '');
+
+  // Un sitemap index apunta a otros sitemaps, no a páginas: medirlo daría
+  // "palabras" de XML. Hoy `src/app/sitemap.ts` devuelve una lista plana, pero
+  // si alguien agrega `generateSitemaps()` conviene un error legible.
+  if (/<sitemapindex[\s>]/i.test(texto)) {
+    throw new Error(
+      'El sitemap es un índice (<sitemapindex>): apunta a otros sitemaps, no a páginas. ' +
+        'Pasá cada sub-sitemap por separado o extendé el script para recorrerlos.'
+    );
+  }
+
+  const locs = [...texto.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)].map((match) =>
     match[1]
       .replace(/^\s*<!\[CDATA\[/, '')
       .replace(/\]\]>\s*$/, '')
@@ -115,11 +129,16 @@ export function parseSitemap(xml) {
  * Devuelve el pathname normalizado de una URL (sin query, sin hash, sin barra final).
  *
  * @param {string} url
+ * @param {string} [base] Base para resolver `<loc>` relativos.
  * @returns {string}
  */
-export function toPathname(url) {
-  const { pathname } = new URL(url);
-  return pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
+export function toPathname(url, base) {
+  try {
+    const { pathname } = new URL(url, base);
+    return pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
+  } catch {
+    throw new Error(`URL inválida en el sitemap: "${url}"`);
+  }
 }
 
 /**
@@ -145,10 +164,17 @@ export function withCacheBuster(url, token) {
  * @returns {string}
  */
 function decodeEntities(texto) {
-  return texto
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
-    .replace(/&([a-z]+);/gi, (_, name) => NAMED_ENTITIES[name] ?? '');
+  return (
+    texto
+      .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
+      .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
+      // `Object.hasOwn` y no `NAMED_ENTITIES[name]`: sin eso, `&constructor;`
+      // inyecta el prototipo de Object como texto. La desconocida se reemplaza
+      // por un espacio, no por nada, para no pegar las palabras vecinas.
+      .replace(/&([a-z]+);/gi, (_, name) =>
+        Object.hasOwn(NAMED_ENTITIES, name) ? NAMED_ENTITIES[name] : ' '
+      )
+  );
 }
 
 /**
@@ -165,7 +191,12 @@ export function countWords(html) {
     String(html)
       .replace(/<(script|style|noscript|template)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
       .replace(/<!--[\s\S]*?-->/g, ' ')
-      .replace(/<[^>]+>/g, ' ')
+      .replace(/<![^>]*>/g, ' ') // doctype
+      // Solo lo que empieza con letra es etiqueta, y los atributos entre
+      // comillas pueden contener '>'. Un `<[^>]+>` a secas se comía "5 < 7 y
+      // 8 > 2" como si fuera un tag y contaba de menos en el HTML que viene de
+      // la API (artículos y rituales entran por `dangerouslySetInnerHTML`).
+      .replace(/<\/?[a-zA-Z][^\s>/]*(?:"[^"]*"|'[^']*'|[^'">])*>/g, ' ')
   )
     .replace(/\s+/g, ' ')
     .trim();
@@ -202,8 +233,7 @@ export function parentOf(pathname) {
  */
 export function sectionOf(pathname) {
   const segmentos = pathname.split('/').filter(Boolean);
-  if (segmentos.length === 0) return '/';
-  return segmentos.length === 1 ? `/${segmentos[0]}` : `/${segmentos.slice(0, -1).join('/')}`;
+  return segmentos.length === 1 ? `/${segmentos[0]}` : parentOf(pathname);
 }
 
 /**
@@ -224,8 +254,11 @@ export function groupBySection(pathnames) {
 }
 
 /**
- * Muestreo estratificado: hasta `perSection` rutas por sección, determinístico
- * (siempre las primeras, para que dos corridas sean comparables).
+ * Muestreo estratificado: hasta `perSection` rutas por sección.
+ *
+ * Dentro de cada sección se ordena alfabéticamente antes de recortar: el orden
+ * del sitemap lo arma `buildSitemap()` con datos de la API, así que sin ordenar
+ * dos corridas podrían medir URLs distintas y no serían comparables.
  *
  * @param {string[]} pathnames
  * @param {number | undefined} perSection
@@ -236,7 +269,7 @@ export function stratifiedSample(pathnames, perSection) {
 
   const muestra = [];
   for (const rutas of groupBySection(pathnames).values()) {
-    muestra.push(...rutas.slice(0, perSection));
+    muestra.push(...[...rutas].sort((a, b) => a.localeCompare(b)).slice(0, perSection));
   }
 
   return muestra;
@@ -274,34 +307,47 @@ export function deriveDynamicPrefixes(pathnames, { minChildren = MIN_CHILDREN_DE
 // =============================================================================
 
 /**
+ * Entero no negativo. `Number.isFinite` a secas dejaba pasar `--min-words=`
+ * (`Number('')` es 0) y `--min-words=-5`, que apagan el guardarraíl en silencio.
+ *
  * @param {string} valor
  * @param {string} flag
+ * @param {number} [minimo]
  * @returns {number}
  */
-function toNumber(valor, flag) {
+function toNumber(valor, flag, minimo = 0) {
   const numero = Number(valor);
-  if (!Number.isFinite(numero)) {
-    throw new Error(`El valor de ${flag} debe ser un número (recibido: "${valor}")`);
+  if (valor.trim() === '' || !Number.isInteger(numero) || numero < minimo) {
+    throw new Error(
+      `El valor de ${flag} debe ser un número entero >= ${minimo} (recibido: "${valor}")`
+    );
   }
   return numero;
 }
 
 /**
+ * @typedef {object} Opciones
+ * @property {string} baseUrl
+ * @property {number} minWords
+ * @property {number | undefined} sample
+ * @property {string} chromeRoute
+ * @property {number} concurrency
+ * @property {number} timeout
+ * @property {boolean} checkSoft404
+ * @property {boolean} failOnSoft404
+ * @property {string} userAgent
+ * @property {boolean} json
+ * @property {boolean} help
+ * @property {Map<string, string>} [exceptions] Solo se pasa desde los tests.
+ */
+
+/**
  * @param {string[]} argv
  * @param {Record<string, string | undefined>} [env]
- * @returns {{
- *   baseUrl: string,
- *   minWords: number,
- *   sample: number | undefined,
- *   chromeRoute: string,
- *   concurrency: number,
- *   timeout: number,
- *   checkSoft404: boolean,
- *   json: boolean,
- *   help: boolean,
- * }}
+ * @returns {Opciones}
  */
 export function parseArgs(argv = [], env = process.env) {
+  /** @type {Opciones} */
   const opciones = {
     baseUrl: env.NEXT_PUBLIC_APP_URL ?? '',
     minWords: MIN_WORDS_DEFAULT,
@@ -310,12 +356,16 @@ export function parseArgs(argv = [], env = process.env) {
     concurrency: 6,
     timeout: 20000,
     checkSoft404: true,
+    failOnSoft404: false,
+    userAgent: USER_AGENT,
     json: false,
     help: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
-    const [flag, valorInline] = argv[i].split(/=(.*)/s);
+    const igual = argv[i].indexOf('=');
+    const flag = igual === -1 ? argv[i] : argv[i].slice(0, igual);
+    const valorInline = igual === -1 ? undefined : argv[i].slice(igual + 1);
     const siguiente = () => {
       if (valorInline !== undefined) return valorInline;
       i += 1;
@@ -340,13 +390,19 @@ export function parseArgs(argv = [], env = process.env) {
         opciones.chromeRoute = siguiente();
         break;
       case '--concurrency':
-        opciones.concurrency = toNumber(siguiente(), flag);
+        opciones.concurrency = toNumber(siguiente(), flag, 1);
         break;
       case '--timeout':
-        opciones.timeout = toNumber(siguiente(), flag);
+        opciones.timeout = toNumber(siguiente(), flag, 1);
+        break;
+      case '--user-agent':
+        opciones.userAgent = siguiente();
         break;
       case '--no-soft-404':
         opciones.checkSoft404 = false;
+        break;
+      case '--fail-on-soft-404':
+        opciones.failOnSoft404 = true;
         break;
       case '--json':
         opciones.json = true;
@@ -364,6 +420,24 @@ export function parseArgs(argv = [], env = process.env) {
     throw new Error('Falta la URL base: pasá --base-url o definí NEXT_PUBLIC_APP_URL');
   }
 
+  // `new URL('localhost:3099')` no tira: lo lee como protocolo "localhost:".
+  // Por eso se exige http/https explícito y no solo que parsee.
+  if (opciones.baseUrl) {
+    let protocolo = '';
+    try {
+      protocolo = new URL(opciones.baseUrl).protocol;
+    } catch {
+      protocolo = '';
+    }
+
+    if (protocolo !== 'http:' && protocolo !== 'https:') {
+      throw new Error(
+        `La URL base debe incluir el esquema http:// o https:// (recibido: "${opciones.baseUrl}"). ` +
+          'Ejemplo: http://localhost:3099'
+      );
+    }
+  }
+
   return opciones;
 }
 
@@ -372,7 +446,13 @@ export function parseArgs(argv = [], env = process.env) {
 // =============================================================================
 
 /**
- * @typedef {{ pathname: string, status: number, ownWords: number, totalWords?: number }} Medicion
+ * @typedef {object} Medicion
+ * @property {string} pathname
+ * @property {number} status 0 cuando la request ni siquiera llegó.
+ * @property {number} ownWords
+ * @property {number} [totalWords]
+ * @property {string} [error] Motivo cuando la request falló.
+ * @property {string} [redirectedTo] Pathname final si hubo redirect.
  */
 
 /**
@@ -424,6 +504,8 @@ function padRight(texto, ancho) {
  *   chromeWords: number,
  *   softNotFound: Array<{ pathname: string, status: number }>,
  *   exceptions?: Map<string, string>,
+ *   checkSoft404?: boolean,
+ *   failOnSoft404?: boolean,
  * }} resultado
  * @returns {string}
  */
@@ -436,6 +518,7 @@ export function formatReport({
   softNotFound,
   exceptions = RUTAS_EXENTAS,
   checkSoft404 = true,
+  failOnSoft404 = false,
 }) {
   const lineas = [];
   const anchoRuta = Math.max(20, ...rows.map((row) => row.pathname.length));
@@ -450,9 +533,14 @@ export function formatReport({
   for (const row of rows) {
     const cumple = row.status === 200 && row.ownWords >= minWords;
     const icono = cumple ? '✅' : exceptions.has(row.pathname) ? '⚠️ ' : '❌';
+    const nota = row.error
+      ? `  ⚠️ ${row.error}`
+      : row.redirectedTo
+        ? `  ↪ ${row.redirectedTo}`
+        : '';
     lineas.push(
       `${padRight(row.pathname, anchoRuta)}  ${String(row.status).padStart(4)}  ` +
-        `${String(row.ownWords).padStart(7)}  ${String(row.totalWords ?? row.ownWords).padStart(5)}  ${icono}`
+        `${String(row.ownWords).padStart(7)}  ${String(row.totalWords ?? row.ownWords).padStart(5)}  ${icono}${nota}`
     );
   }
 
@@ -478,7 +566,11 @@ export function formatReport({
     for (const probe of softNotFound) {
       lineas.push(`   ${probe.pathname} → ${probe.status}`);
     }
-    lineas.push('   Ver T-SEO-006.');
+    lineas.push(
+      failOnSoft404
+        ? '   Ver T-SEO-006. Cuentan para el exit code (--fail-on-soft-404).'
+        : '   Ver T-SEO-006. NO cuentan para el exit code: usá --fail-on-soft-404 si querés que fallen.'
+    );
   } else {
     lineas.push('✅ Sin soft-404: las rutas dinámicas responden 404 ante un slug inventado.');
   }
@@ -523,7 +615,7 @@ async function mapWithConcurrency(items, concurrency, tarea) {
 /**
  * Ejecuta la verificación completa contra un host.
  *
- * @param {ReturnType<typeof parseArgs>} opciones
+ * @param {Opciones} opciones
  * @param {{ fetchImpl?: typeof fetch, log?: (mensaje: string) => void }} [deps]
  * @returns {Promise<{
  *   rows: Medicion[],
@@ -543,6 +635,8 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
     concurrency = 6,
     timeout,
     checkSoft404 = true,
+    failOnSoft404 = false,
+    userAgent = USER_AGENT,
     exceptions = RUTAS_EXENTAS,
     json = false,
   } = opciones;
@@ -551,17 +645,21 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
 
   /**
    * @param {string} pathname
-   * @returns {Promise<{ status: number, html: string }>}
+   * @returns {Promise<{ status: number, html: string, finalPathname?: string }>}
    */
   const pedir = async (pathname) => {
     const url = withCacheBuster(new URL(pathname, baseUrl).toString(), token);
     const respuesta = await fetchImpl(url, {
-      headers: { 'User-Agent': USER_AGENT, 'Cache-Control': 'no-cache' },
+      headers: { 'User-Agent': userAgent, 'Cache-Control': 'no-cache' },
       redirect: 'follow',
       ...(timeout ? { signal: AbortSignal.timeout(timeout) } : {}),
     });
 
-    return { status: respuesta.status, html: await respuesta.text() };
+    return {
+      status: respuesta.status,
+      html: await respuesta.text(),
+      finalPathname: respuesta.url ? toPathname(respuesta.url, baseUrl) : undefined,
+    };
   };
 
   const sitemap = await pedir('/sitemap.xml');
@@ -569,20 +667,47 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
     throw new Error(`No se pudo leer el sitemap de ${baseUrl} (HTTP ${sitemap.status})`);
   }
 
-  const pathnames = [...new Set(parseSitemap(sitemap.html).map(toPathname))];
+  const pathnames = [...new Set(parseSitemap(sitemap.html).map((url) => toPathname(url, baseUrl)))];
   if (pathnames.length === 0) {
     throw new Error(`El sitemap de ${baseUrl} no declara ninguna URL`);
   }
 
+  // Sin línea base no hay medición: si `chromeWords` cayera a 0 por un 302,
+  // cada página ganaría ~39 palabras fantasma y el umbral se ablandaría solo.
   const chrome = await pedir(chromeRoute);
-  const chromeWords = chrome.status === 200 ? countWords(chrome.html) : 0;
+  if (chrome.status !== 200) {
+    throw new Error(
+      `No se pudo medir el chrome contra ${chromeRoute} (HTTP ${chrome.status}). ` +
+        'Pasá otra ruta vacía con --chrome-route: sin línea base, el umbral mentiría.'
+    );
+  }
+  const chromeWords = countWords(chrome.html);
 
   const objetivo = stratifiedSample(pathnames, sample);
-  const mediciones = await mapWithConcurrency(objetivo, concurrency, async (pathname) => {
-    const { status, html } = await pedir(pathname);
-    const totalWords = countWords(html);
 
-    return { pathname, status, totalWords, ownWords: Math.max(0, totalWords - chromeWords) };
+  // Una request que rechaza (timeout, DNS, socket) NO debe tumbar la corrida:
+  // se reporta como fila fallida y las otras 177 URLs siguen midiéndose.
+  const mediciones = await mapWithConcurrency(objetivo, concurrency, async (pathname) => {
+    try {
+      const { status, html, finalPathname } = await pedir(pathname);
+      const totalWords = countWords(html);
+
+      return {
+        pathname,
+        status,
+        totalWords,
+        ownWords: Math.max(0, totalWords - chromeWords),
+        ...(finalPathname && finalPathname !== pathname ? { redirectedTo: finalPathname } : {}),
+      };
+    } catch (error) {
+      return {
+        pathname,
+        status: 0,
+        totalWords: 0,
+        ownWords: 0,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
   });
 
   const softNotFound = [];
@@ -590,29 +715,34 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
     const sondas = deriveDynamicPrefixes(pathnames).map(
       (prefijo) => `${prefijo}/${SLUG_INVENTADO}`
     );
-    const respuestas = await mapWithConcurrency(sondas, concurrency, async (pathname) => ({
-      pathname,
-      status: (await pedir(pathname)).status,
-    }));
+    const respuestas = await mapWithConcurrency(sondas, concurrency, async (pathname) => {
+      try {
+        return { pathname, status: (await pedir(pathname)).status };
+      } catch {
+        return { pathname, status: 404 }; // sin respuesta no hay soft-404 que reportar
+      }
+    });
 
     softNotFound.push(...respuestas.filter((probe) => probe.status !== 404));
   }
 
-  const { rows, failures, exempt, exitCode } = evaluate(mediciones, { minWords, exceptions });
-  const resultado = { rows, failures, exempt, softNotFound, chromeWords, exitCode };
+  const evaluacion = evaluate(mediciones, { minWords, exceptions });
+  const exitCode = /** @type {0 | 1} */ (
+    evaluacion.exitCode === 1 || (failOnSoft404 && softNotFound.length > 0) ? 1 : 0
+  );
+  const resultado = { ...evaluacion, softNotFound, chromeWords, exitCode };
 
   log(
     json
       ? JSON.stringify(resultado, null, 2)
       : formatReport({
-          rows,
-          failures,
-          exempt,
+          ...evaluacion,
           minWords,
           chromeWords,
           softNotFound,
           exceptions,
           checkSoft404,
+          failOnSoft404,
         })
   );
 
@@ -635,11 +765,14 @@ Uso: node scripts/check-indexable-content.mjs [opciones]
   --chrome-route <ruta> Ruta vacía para medir el chrome (default: ${CHROME_ROUTE_DEFAULT})
   --concurrency <n>     Requests en paralelo (default: 6)
   --timeout <ms>        Timeout por request (default: 20000)
+  --user-agent <ua>     User-Agent de las requests (default: Googlebot)
   --no-soft-404         No sondear slugs inventados en rutas dinámicas
+  --fail-on-soft-404    Que los soft-404 también cuenten para el exit code
   --json                Salida en JSON en vez de tabla
   -h, --help            Esta ayuda
 
-Exit code 1 si alguna URL queda por debajo del umbral.
+Exit code 1 si alguna URL queda por debajo del umbral. Los soft-404 se reportan
+pero NO afectan el exit code salvo que se pase --fail-on-soft-404.
 `;
 
 async function main() {

@@ -248,8 +248,8 @@
     npm run build               # Build production
     ```
 
-11 bis. **Si la tarea toca páginas públicas (SEO):** verificar que sirvan contenido al crawler.
-    No es un gate bloqueante — se corre a mano, contra un host levantado:
+    **Si la tarea toca páginas públicas (SEO):** verificar además que sirvan contenido al
+    crawler. No es un gate bloqueante — se corre a mano, contra un host levantado:
 
     ```bash
     npm run check:indexable -- --base-url https://auguriatarot.com --sample 2

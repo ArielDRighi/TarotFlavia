@@ -51,16 +51,24 @@ npm run check:indexable -- --base-url http://localhost:3099 --min-words 150
 | `--chrome-route <ruta>` | `/admin`              | Ruta vacía contra la que se mide el chrome          |
 | `--concurrency <n>`     | `6`                   | Requests en paralelo                                |
 | `--timeout <ms>`        | `20000`               | Timeout por request                                 |
+| `--user-agent <ua>`     | Googlebot             | User-Agent de las requests                          |
 | `--no-soft-404`         | —                     | No sondear slugs inventados                         |
+| `--fail-on-soft-404`    | —                     | Que los soft-404 también cuenten para el exit code  |
 | `--json`                | —                     | Salida en JSON en vez de tabla                      |
 
-**Exit code 1** si alguna URL queda por debajo del umbral, así que sirve tal cual en un script.
+**Exit code 1** si alguna URL queda por debajo del umbral, así que sirve tal cual en un script. Los
+**soft-404 se reportan pero no afectan el exit code** salvo que se pase `--fail-on-soft-404`: hoy hay
+11 conocidos (T-SEO-006) y harían fallar toda corrida hasta que se arreglen.
 
 Detalles que importan:
 
 - **El chrome se mide, no se hardcodea.** Se pide `/admin` (que para un visitante sin sesión
   renderiza solo header + footer) y ese conteo se resta de cada página. Al 9-ago-2026 daba 39
-  palabras; si alguien agrega un link al menú, el guardarraíl no miente.
+  palabras; si alguien agrega un link al menú, el guardarraíl no miente. Si esa ruta **no responde
+  200 la corrida aborta**: con la línea base en 0, cada página ganaría 39 palabras fantasma y el
+  umbral se ablandaría solo.
+- **Una request caída no tumba la corrida.** Un timeout o un DNS que falla se reporta como fila
+  fallida (`estado 0` + motivo) y las demás URLs se siguen midiendo.
 - **Todas las requests llevan cache-buster.** El edge de Railway cachea el HTML con
   `s-maxage=31536000`: sin `?cb=…` se mide la versión previa al deploy.
 - **Las rutas dinámicas se infieren del sitemap** (un padre con ≥3 hijos es un `[slug]`), así que

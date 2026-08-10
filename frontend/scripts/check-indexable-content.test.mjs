@@ -109,6 +109,13 @@ describe('parseSitemap', () => {
   it('devuelve un array vacío si no hay <loc>', () => {
     expect(parseSitemap('<urlset></urlset>')).toEqual([]);
   });
+
+  it('aborta con un mensaje claro ante un sitemap index', () => {
+    const xml =
+      '<sitemapindex><sitemap><loc>https://auguriatarot.com/sitemap/0.xml</loc></sitemap></sitemapindex>';
+
+    expect(() => parseSitemap(xml)).toThrow(/índice/i);
+  });
 });
 
 // =============================================================================
@@ -133,6 +140,16 @@ describe('toPathname', () => {
 
   it('quita la barra final de rutas internas', () => {
     expect(toPathname('https://auguriatarot.com/premium/')).toBe('/premium');
+  });
+
+  it('resuelve un <loc> relativo contra la base', () => {
+    expect(toPathname('/enciclopedia/tarot', 'https://auguriatarot.com')).toBe(
+      '/enciclopedia/tarot'
+    );
+  });
+
+  it('dice qué URL era cuando no puede parsearla', () => {
+    expect(() => toPathname('no-es-una-url')).toThrow(/no-es-una-url/);
   });
 });
 
@@ -166,6 +183,27 @@ describe('countWords', () => {
   it('devuelve 0 para HTML sin texto', () => {
     expect(countWords('<html><body><div></div></body></html>')).toBe(0);
     expect(countWords('')).toBe(0);
+  });
+
+  it('no confunde un < o > sueltos del texto con etiquetas', () => {
+    // Entra por el HTML que viene de la API (artículos y rituales).
+    expect(countWords('<p>5 < 7 y 8 > 2 fin</p>')).toBe(8);
+  });
+
+  it('tolera un > dentro de un atributo entrecomillado', () => {
+    expect(countWords('<div title="x > y z">uno dos</div>')).toBe(2);
+  });
+
+  it('ignora el doctype', () => {
+    expect(countWords('<!doctype html><p>uno dos</p>')).toBe(2);
+  });
+
+  it('no inyecta el prototipo de Object ante una entidad inventada', () => {
+    expect(countWords('<p>a&constructor;b</p>')).toBe(2);
+  });
+
+  it('una entidad desconocida separa, no pega, las palabras vecinas', () => {
+    expect(countWords('<p>hola&iexcl;mundo chau</p>')).toBe(3);
   });
 });
 
@@ -227,7 +265,9 @@ describe('stratifiedSample', () => {
   });
 
   it('devuelve todas las rutas si N supera el tamaño de cada sección', () => {
-    expect(stratifiedSample(rutas, 10)).toEqual(rutas);
+    // Mismo conjunto; dentro de cada sección quedan ordenadas alfabéticamente
+    // para que dos corridas midan lo mismo aunque la API devuelva otro orden.
+    expect(stratifiedSample(rutas, 10).sort()).toEqual([...rutas].sort());
   });
 
   it('es determinístico: dos corridas dan el mismo resultado', () => {
@@ -355,6 +395,27 @@ describe('parseArgs', () => {
 
   it('falla si una opción se queda sin valor', () => {
     expect(() => parseArgs(['--base-url'])).toThrow(/falta el valor/i);
+  });
+
+  it('rechaza umbrales que apagarían el guardarraíl en silencio', () => {
+    expect(() => parseArgs(['--base-url=http://x', '--min-words='])).toThrow(/entero/i);
+    expect(() => parseArgs(['--base-url=http://x', '--min-words=-5'])).toThrow(/entero/i);
+    expect(() => parseArgs(['--base-url=http://x', '--concurrency=0'])).toThrow(/entero/i);
+  });
+
+  it('exige que la base URL traiga esquema', () => {
+    expect(() => parseArgs(['--base-url=localhost:3099'])).toThrow(/esquema/i);
+  });
+
+  it('acepta --fail-on-soft-404 y --user-agent', () => {
+    const opciones = parseArgs([
+      '--base-url=http://x',
+      '--fail-on-soft-404',
+      '--user-agent=Auguria/1.0',
+    ]);
+
+    expect(opciones.failOnSoft404).toBe(true);
+    expect(opciones.userAgent).toBe('Auguria/1.0');
   });
 });
 
@@ -568,12 +629,83 @@ describe('run', () => {
     await expect(run(opcionesBase, { fetchImpl, log: vi.fn() })).rejects.toThrow(/sitemap/i);
   });
 
-  it('no descuenta chrome si la ruta de referencia no responde 200', async () => {
-    const rutas = { ...rutasBase, '/admin': { status: 500, html: pageHtml(0) } };
-    const resultado = await run(opcionesBase, { fetchImpl: fakeFetch(rutas), log: vi.fn() });
+  it('aborta si no puede medir el chrome, en vez de ablandar el umbral', async () => {
+    // Con chromeWords = 0 cada página ganaría ~39 palabras fantasma y el
+    // guardarraíl dejaría pasar páginas delgadas sin decir nada.
+    const rutas = { ...rutasBase, '/admin': { status: 302, html: '' } };
 
-    expect(resultado.chromeWords).toBe(0);
-    expect(resultado.rows.find((r) => r.pathname === '/premium').ownWords).toBe(3 + CHROME_WORDS);
+    await expect(run(opcionesBase, { fetchImpl: fakeFetch(rutas), log: vi.fn() })).rejects.toThrow(
+      /chrome/i
+    );
+  });
+
+  it('una request que rechaza no tumba la corrida: se reporta como fila fallida', async () => {
+    const fetchImpl = vi.fn(async (url) => {
+      const { pathname } = new URL(url);
+      if (pathname === '/horoscopo/tauro') throw new TypeError('fetch failed');
+      return fakeFetch(rutasBase)(url);
+    });
+
+    const resultado = await run(opcionesBase, { fetchImpl, log: vi.fn() });
+
+    expect(resultado.rows).toHaveLength(4);
+    const caida = resultado.rows.find((r) => r.pathname === '/horoscopo/tauro');
+    expect(caida).toMatchObject({ status: 0, ownWords: 0, error: 'fetch failed' });
+    expect(resultado.failures.map((f) => f.pathname)).toContain('/horoscopo/tauro');
+    expect(resultado.rows.find((r) => r.pathname === '/horoscopo/aries').ownWords).toBe(300);
+  });
+
+  it('respeta el tope de concurrencia', async () => {
+    let enVuelo = 0;
+    let pico = 0;
+    const base = fakeFetch(rutasBase);
+    const fetchImpl = vi.fn(async (url) => {
+      enVuelo += 1;
+      pico = Math.max(pico, enVuelo);
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      enVuelo -= 1;
+      return base(url);
+    });
+
+    await run({ ...opcionesBase, concurrency: 2 }, { fetchImpl, log: vi.fn() });
+
+    expect(pico).toBeLessThanOrEqual(2);
+  });
+
+  it('los soft-404 no cuentan para el exit code salvo --fail-on-soft-404', async () => {
+    const rutas = {
+      ...rutasBase,
+      '/premium': { html: pageHtml(300) },
+      [`/horoscopo/${SLUG_INVENTADO}`]: { status: 200, html: pageHtml(2) },
+    };
+
+    const sinFlag = await run(
+      { ...opcionesBase, checkSoft404: true },
+      { fetchImpl: fakeFetch(rutas), log: vi.fn() }
+    );
+    expect(sinFlag.softNotFound).toHaveLength(1);
+    expect(sinFlag.exitCode).toBe(0);
+
+    const conFlag = await run(
+      { ...opcionesBase, checkSoft404: true, failOnSoft404: true },
+      { fetchImpl: fakeFetch(rutas), log: vi.fn() }
+    );
+    expect(conFlag.exitCode).toBe(1);
+  });
+
+  it('reporta la ruta final cuando hubo redirect', async () => {
+    const fetchImpl = vi.fn(async (url) => {
+      const respuesta = await fakeFetch(rutasBase)(url);
+      const { pathname } = new URL(url);
+      return {
+        ...respuesta,
+        url: pathname === '/premium' ? 'https://auguriatarot.com/login' : url,
+      };
+    });
+
+    const resultado = await run(opcionesBase, { fetchImpl, log: vi.fn() });
+
+    expect(resultado.rows.find((r) => r.pathname === '/premium').redirectedTo).toBe('/login');
   });
 
   it('aborta si el sitemap no declara ninguna URL', async () => {
