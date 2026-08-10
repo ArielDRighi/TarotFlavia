@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import GuiasPage from './page';
-import { ArticleCategory } from '@/types/encyclopedia-article.types';
+import { ArticleCategory, GUIDE_CATEGORIES } from '@/types/encyclopedia-article.types';
 import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -32,10 +32,18 @@ vi.mock('next/image', () => ({
   ),
 }));
 
+const mockGetArticlesByCategories = vi.fn();
+
+vi.mock('@/lib/api/encyclopedia-articles-api', () => ({
+  getArticlesByCategories: (categories: ArticleCategory[]) =>
+    mockGetArticlesByCategories(categories),
+}));
+
 const mockUseArticlesByCategory = vi.fn();
 
 vi.mock('@/hooks/api/useEncyclopediaArticles', () => ({
-  useArticlesByCategory: (category: ArticleCategory) => mockUseArticlesByCategory(category),
+  useArticlesByCategory: (category: ArticleCategory, initialData?: ArticleSummary[]) =>
+    mockUseArticlesByCategory(category, initialData),
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -73,9 +81,10 @@ function buildGuideArticle(
 describe('GuiasPage (/enciclopedia/guias)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetArticlesByCategories.mockResolvedValue({});
   });
 
-  it('debe mostrar el listado de guías cuando hay datos', () => {
+  it('debe mostrar el listado de guías cuando hay datos', async () => {
     const guias = [
       buildGuideArticle(
         1,
@@ -92,13 +101,13 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
       return { data: [], isLoading: false };
     });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     expect(screen.getByText('Guía de Numerología')).toBeInTheDocument();
     expect(screen.getByText('Guía del Péndulo')).toBeInTheDocument();
   });
 
-  it('links de guías deben apuntar a la ruta /enciclopedia/guias/[slug]', () => {
+  it('links de guías deben apuntar a la ruta /enciclopedia/guias/[slug]', async () => {
     const guias = [
       buildGuideArticle(
         1,
@@ -112,13 +121,13 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
       return { data: [], isLoading: false };
     });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     const link = screen.getByRole('link', { name: /guía de numerología/i });
     expect(link).toHaveAttribute('href', '/enciclopedia/guias/guia-numerologia');
   });
 
-  it('debe incluir la Guía del Tarot en el listado', () => {
+  it('debe incluir la Guía del Tarot en el listado', async () => {
     const tarotGuide = buildGuideArticle(
       10,
       'guia-tarot',
@@ -130,23 +139,23 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
       return { data: [], isLoading: false };
     });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     const link = screen.getByRole('link', { name: /guía del tarot/i });
     expect(link).toHaveAttribute('href', '/enciclopedia/guias/guia-tarot');
   });
 
-  it('debe consultar la categoría GUIDE_TAROT y ubicarla primera', () => {
+  it('debe consultar la categoría GUIDE_TAROT y ubicarla primera', async () => {
     mockUseArticlesByCategory.mockReturnValue({ data: [], isLoading: false });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     const requestedCategories = mockUseArticlesByCategory.mock.calls.map((call) => call[0]);
     expect(requestedCategories).toContain(ArticleCategory.GUIDE_TAROT);
     expect(requestedCategories[0]).toBe(ArticleCategory.GUIDE_TAROT);
   });
 
-  it('debe renderizar la tarjeta de la Guía del Tarot con thumbnail temático e imagen con alt', () => {
+  it('debe renderizar la tarjeta de la Guía del Tarot con thumbnail temático e imagen con alt', async () => {
     const tarotGuide = buildGuideArticle(
       10,
       'guia-tarot',
@@ -158,14 +167,14 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
       return { data: [], isLoading: false };
     });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     const image = screen.getByTestId('next-image');
     expect(image).toHaveAttribute('src', expect.stringContaining('guia-tarot-hero.webp'));
     expect(image).toHaveAccessibleName(expect.stringMatching(/tarot/i));
   });
 
-  it('debe mostrar un chip de categoría dorado y el CTA "Leer guía"', () => {
+  it('debe mostrar un chip de categoría dorado y el CTA "Leer guía"', async () => {
     const tarotGuide = buildGuideArticle(
       10,
       'guia-tarot',
@@ -177,13 +186,13 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
       return { data: [], isLoading: false };
     });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     expect(screen.getByText('Tarot')).toBeInTheDocument();
     expect(screen.getByText(/leer guía/i)).toBeInTheDocument();
   });
 
-  it('debe usar texto oscuro sobre el chip dorado para contraste AA (T-ENC-009)', () => {
+  it('debe usar texto oscuro sobre el chip dorado para contraste AA (T-ENC-009)', async () => {
     const tarotGuide = buildGuideArticle(
       10,
       'guia-tarot',
@@ -195,7 +204,7 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
       return { data: [], isLoading: false };
     });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     // Cada guía renderiza su propio chip; el test fija un único guía mockeado,
     // pero usamos getAllByTestId para no romper si se añaden más guías.
@@ -204,7 +213,7 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
     expect(chip).not.toHaveClass('text-secondary-foreground');
   });
 
-  it('debe preferir el imageUrl del backend cuando está disponible', () => {
+  it('debe preferir el imageUrl del backend cuando está disponible', async () => {
     const numerologyGuide: ArticleSummary = {
       ...buildGuideArticle(
         1,
@@ -220,14 +229,14 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
       return { data: [], isLoading: false };
     });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     const image = screen.getByTestId('next-image');
     expect(image).toHaveAttribute('src', '/images/enciclopedia/guia-numerologia.webp');
     expect(image).toHaveAccessibleName(expect.stringMatching(/guía de numerología/i));
   });
 
-  it('debe renderizar el hero temático de la Guía de Numerología (T-ENC-011)', () => {
+  it('debe renderizar el hero temático de la Guía de Numerología (T-ENC-011)', async () => {
     const numerologyGuide = buildGuideArticle(
       1,
       'guia-numerologia',
@@ -240,10 +249,42 @@ describe('GuiasPage (/enciclopedia/guias)', () => {
       return { data: [], isLoading: false };
     });
 
-    renderWithProviders(<GuiasPage />);
+    renderWithProviders(await GuiasPage());
 
     const image = screen.getByTestId('next-image');
     expect(image).toHaveAttribute('src', expect.stringContaining('guia-numerologia-hero.webp'));
     expect(screen.queryByTestId('guia-thumb-fallback')).not.toBeInTheDocument();
+  });
+
+  it('⚠️ T-SEO-003: resuelve las siete categorías en el servidor y las siembra', async () => {
+    const tarotGuide = buildGuideArticle(
+      1,
+      'guia-tarot',
+      'Guía del Tarot',
+      ArticleCategory.GUIDE_TAROT
+    );
+    mockGetArticlesByCategories.mockResolvedValue({
+      [ArticleCategory.GUIDE_TAROT]: [tarotGuide],
+    });
+    mockUseArticlesByCategory.mockReturnValue({ data: [], isLoading: false });
+
+    renderWithProviders(await GuiasPage());
+
+    expect(mockGetArticlesByCategories).toHaveBeenCalledWith(GUIDE_CATEGORIES);
+    expect(mockUseArticlesByCategory).toHaveBeenCalledWith(ArticleCategory.GUIDE_TAROT, [
+      tarotGuide,
+    ]);
+    expect(mockUseArticlesByCategory).toHaveBeenCalledWith(
+      ArticleCategory.GUIDE_PENDULUM,
+      undefined
+    );
+  });
+
+  it('⚠️ T-SEO-003: renderiza la introducción editorial indexable', async () => {
+    mockUseArticlesByCategory.mockReturnValue({ data: [], isLoading: false });
+
+    renderWithProviders(await GuiasPage());
+
+    expect(screen.getByTestId('listing-intro')).toBeInTheDocument();
   });
 });

@@ -9,7 +9,7 @@ import { Reveal } from '@/components/common';
 // 6. Utils & types
 import { useArticlesByCategory } from '@/hooks/api/useEncyclopediaArticles';
 import { ROUTES } from '@/lib/constants/routes';
-import { ArticleCategory } from '@/types/encyclopedia-article.types';
+import { ArticleCategory, GUIDE_CATEGORIES } from '@/types/encyclopedia-article.types';
 import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -36,19 +36,6 @@ const THUMB_OVERLAY =
 const GOLD_FILLET = 'linear-gradient(90deg, transparent, #d69e2e, transparent)';
 const CREAM = '#f9f7f2';
 const CREAM_MUTED = 'rgba(249, 247, 242, 0.72)';
-
-/**
- * Guide categories, in display order. The Tarot guide stays first (BUG-017 fix).
- */
-const GUIDE_CATEGORIES: ArticleCategory[] = [
-  ArticleCategory.GUIDE_TAROT,
-  ArticleCategory.GUIDE_NUMEROLOGY,
-  ArticleCategory.GUIDE_PENDULUM,
-  ArticleCategory.GUIDE_BIRTH_CHART,
-  ArticleCategory.GUIDE_RITUAL,
-  ArticleCategory.GUIDE_HOROSCOPE,
-  ArticleCategory.GUIDE_CHINESE,
-];
 
 /**
  * Per-category editorial theme: short gold chip label and a themed thumbnail.
@@ -216,11 +203,13 @@ export function GuiaCard({ article }: GuiaCardProps) {
 function CategorySection({
   category,
   categoryIndex,
+  initialArticles,
 }: {
   category: ArticleCategory;
   categoryIndex: number;
+  initialArticles?: ArticleSummary[];
 }) {
-  const { data: articles } = useArticlesByCategory(category);
+  const { data: articles } = useArticlesByCategory(category, initialArticles);
   return (
     <>
       {(articles ?? []).map((article, articleIndex) => (
@@ -243,7 +232,16 @@ function CategorySection({
  * título Cormorant, snippet y CTA), reemplazando las filas planas previas
  * (T-ENC-006 / hallazgo ENC-005). Usa una llamada al hook por categoría.
  */
-export function GuiasContent() {
+export interface GuiasContentProps {
+  /**
+   * Guías resueltas por la ruta en el servidor, indexadas por categoría
+   * (T-SEO-003). Siembran cada `CategorySection` para que el HTML que ve
+   * Googlebot traiga las siete tarjetas en vez de una grilla vacía.
+   */
+  initialArticlesByCategory?: Partial<Record<ArticleCategory, ArticleSummary[]>>;
+}
+
+export function GuiasContent({ initialArticlesByCategory }: GuiasContentProps = {}) {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Banda de cabecera con identidad de marca */}
@@ -278,7 +276,12 @@ export function GuiasContent() {
       {/* Grid de tarjetas — reveal fade-up escalonado al entrar en viewport */}
       <div className="grid gap-6 md:grid-cols-2">
         {GUIDE_CATEGORIES.map((category, categoryIndex) => (
-          <CategorySection key={category} category={category} categoryIndex={categoryIndex} />
+          <CategorySection
+            key={category}
+            category={category}
+            categoryIndex={categoryIndex}
+            initialArticles={initialArticlesByCategory?.[category]}
+          />
         ))}
       </div>
     </div>

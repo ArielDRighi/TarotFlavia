@@ -33,10 +33,15 @@ export const publicPlansQueryKeys = {
  * const premiumPlan = plans?.find(p => p.planType === 'premium');
  * ```
  */
-export function usePublicPlans() {
+export function usePublicPlans(initialData?: PlanConfig[]) {
   return useQuery<PlanConfig[]>({
     queryKey: publicPlansQueryKeys.all,
     queryFn: fetchPublicPlans,
     staleTime: 5 * 60 * 1000, // 5 minutes — plan config changes rarely
+    initialData,
+    // El precio del plan cambia desde el admin: sin esto, `initialData` se estampa
+    // como recién traído y con el `staleTime` el cliente NO refetchea al montar,
+    // así que el precio horneado en el HTML quedaría fijo hasta que expire el ISR.
+    initialDataUpdatedAt: 0,
   });
 }

@@ -15,12 +15,22 @@ import { ErrorDisplay } from '@/components/ui/error-display';
 import { useHolisticServices } from '@/hooks/api/useHolisticServices';
 import { useAuthStore } from '@/stores/authStore';
 import { ROUTES } from '@/lib/constants/routes';
+import type { HolisticService } from '@/types/holistic-service.types';
 import { ServiceCard } from './ServiceCard';
 
 const SKELETON_COUNT = 6;
 
-export function ServiciosPage() {
-  const { data: services, isLoading, isError, refetch } = useHolisticServices();
+export interface ServiciosPageProps {
+  /**
+   * Catálogo resuelto por la ruta en el servidor (T-SEO-003). Sin esto la
+   * página servía 5 palabras propias: el crawler veía el título y seis
+   * esqueletos.
+   */
+  initialServices?: HolisticService[];
+}
+
+export function ServiciosPage({ initialServices }: ServiciosPageProps = {}) {
+  const { data: services, isLoading, isError, refetch } = useHolisticServices(initialServices);
   const { isAuthenticated } = useAuthStore();
 
   return (

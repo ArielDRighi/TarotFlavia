@@ -239,4 +239,22 @@ describe('ServiciosPage', () => {
 
     expect(screen.queryByTestId('mis-servicios-link')).not.toBeInTheDocument();
   });
+
+  describe('Sembrado desde el servidor (T-SEO-003)', () => {
+    it('⚠️ pasa el catálogo sembrado al hook para que el HTML no salga vacío', () => {
+      vi.mocked(useHolisticServicesHook.useHolisticServices).mockReturnValue({
+        data: mockServices,
+        isLoading: false,
+        isError: false,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServices>);
+
+      render(<ServiciosPage initialServices={mockServices} />, { wrapper });
+
+      expect(vi.mocked(useHolisticServicesHook.useHolisticServices)).toHaveBeenCalledWith(
+        mockServices
+      );
+      expect(screen.getByTestId('servicios-grid')).toBeInTheDocument();
+    });
+  });
 });

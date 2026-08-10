@@ -256,3 +256,52 @@ describe('useTarotistaDetail', () => {
     expect(result.current.data?.añosExperiencia).toBeNull();
   });
 });
+
+// ============================================================================
+// Sembrado desde el servidor (T-SEO-003)
+// ============================================================================
+
+describe('useTarotistas — sembrado desde el servidor', () => {
+  const seeded: PaginatedTarotistas = {
+    data: [
+      {
+        id: 7,
+        nombrePublico: 'Estrella Guía',
+        bio: 'Guía espiritual con quince años de experiencia',
+        especialidades: ['Espiritual'],
+        fotoPerfil: 'https://example.com/estrella.jpg',
+        ratingPromedio: 4.9,
+        totalLecturas: 200,
+        totalReviews: 100,
+        añosExperiencia: 15,
+        idiomas: ['Español'],
+        createdAt: '2024-01-01T00:00:00Z',
+      },
+    ],
+    total: 1,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('⚠️ T-SEO-003: sirve la primera página sembrada en el primer render, sin esqueleto', () => {
+    const { result } = renderHook(() => useTarotistas(undefined, seeded), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.data).toEqual(seeded);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('⚠️ refetchea igual al montar: el rating y el listado cambian', async () => {
+    vi.mocked(tarotistasApi.getTarotistas).mockResolvedValue(seeded);
+
+    renderHook(() => useTarotistas(undefined, seeded), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(vi.mocked(tarotistasApi.getTarotistas)).toHaveBeenCalledTimes(1));
+  });
+});

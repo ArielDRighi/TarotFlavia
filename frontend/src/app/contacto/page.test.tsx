@@ -118,5 +118,14 @@ describe('ContactoPage', () => {
       renderPage();
       expect(screen.getByTestId('contact-accent')).toBeInTheDocument();
     });
+
+    it('⚠️ T-SEO-003: renderiza contenido propio sobre qué se responde por acá', () => {
+      renderPage();
+
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Antes de escribirnos' })
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('listing-intro')).toBeInTheDocument();
+    });
   });
 });

@@ -13,6 +13,9 @@ export type { SessionCardProps } from './SessionCard';
 export { TarotistaCard } from './TarotistaCard';
 export type { TarotistaCardProps } from './TarotistaCard';
 
+export { ExplorarContent } from './ExplorarContent';
+export type { ExplorarContentProps } from './ExplorarContent';
+
 export { TarotistasExplorer } from './TarotistasExplorer';
 export type { TarotistasExplorerProps } from './TarotistasExplorer';
 

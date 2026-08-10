@@ -5,7 +5,7 @@
  */
 'use client';
 
-import type { HolisticServiceDetail } from '@/types/holistic-service.types';
+import type { HolisticService, HolisticServiceDetail } from '@/types/holistic-service.types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getHolisticServices,
@@ -39,13 +39,20 @@ export const holisticServiceQueryKeys = {
 
 /**
  * Hook to fetch the full holistic services catalog
+ * @param initialData catálogo resuelto por la ruta `/servicios` en el servidor
+ *   (T-SEO-003): el primer render trae los servicios en vez del esqueleto.
  * @returns TanStack Query result with array of active services
  */
-export function useHolisticServices() {
+export function useHolisticServices(initialData?: HolisticService[]) {
   return useQuery({
     queryKey: holisticServiceQueryKeys.lists(),
     queryFn: getHolisticServices,
     staleTime: 5 * 60 * 1000, // 5 minutes - catalog changes infrequently
+    initialData,
+    // El catálogo y los precios cambian desde el admin: sin esto, `initialData` se
+    // estampa como recién traído y con el `staleTime` el cliente NO refetchea al
+    // montar, así que la copia horneada en el HTML quedaría fija hasta el ISR.
+    initialDataUpdatedAt: 0,
   });
 }
 

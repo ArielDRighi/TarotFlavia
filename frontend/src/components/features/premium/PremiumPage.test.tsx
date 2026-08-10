@@ -104,7 +104,7 @@ vi.mock('@/stores/authStore', () => ({
 // Mock public plans hook
 const mockUsePlans = vi.fn();
 vi.mock('@/hooks/api/usePublicPlans', () => ({
-  usePublicPlans: () => mockUsePlans(),
+  usePublicPlans: (initialData?: PlanConfig[]) => mockUsePlans(initialData),
 }));
 
 // Query client factory
@@ -127,13 +127,40 @@ describe('PremiumPage', () => {
   });
 
   describe('Loading state', () => {
-    it('should render loading skeleton when plans are loading', () => {
+    it('should render loading skeleton for the price when plans are loading', () => {
       mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
       mockUsePlans.mockReturnValue({ data: undefined, isLoading: true, isError: false });
 
       renderWithProviders(<PremiumPage />);
 
       expect(screen.getByTestId('premium-page-loading')).toBeInTheDocument();
+    });
+
+    it('⚠️ T-SEO-003: el contenido estático se renderiza aunque los planes no hayan cargado', () => {
+      // La página servía 3 palabras propias: un esqueleto de pantalla completa
+      // tapaba la comparativa y las FAQ hasta que respondiera la API.
+      mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+      mockUsePlans.mockReturnValue({ data: undefined, isLoading: true, isError: false });
+
+      renderWithProviders(<PremiumPage />);
+
+      expect(screen.getByTestId('plan-comparison')).toBeInTheDocument();
+      expect(screen.getByTestId('faq-section')).toBeInTheDocument();
+      expect(screen.getByText('¿Puedo cancelar en cualquier momento?')).toBeInTheDocument();
+      expect(screen.getByText('Sin compromiso')).toBeInTheDocument();
+    });
+
+    it('⚠️ T-SEO-003: pasa los planes sembrados por la ruta al hook', () => {
+      mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
+      mockUsePlans.mockReturnValue({
+        data: [mockFreePlan, mockPremiumPlan],
+        isLoading: false,
+        isError: false,
+      });
+
+      renderWithProviders(<PremiumPage initialPlans={[mockFreePlan, mockPremiumPlan]} />);
+
+      expect(mockUsePlans).toHaveBeenCalledWith([mockFreePlan, mockPremiumPlan]);
     });
   });
 

@@ -101,18 +101,16 @@ function ComparisonCell({ value }: { value: PlanCell }) {
   );
 }
 
-function PremiumPageSkeleton() {
-  return (
-    <div data-testid="premium-page-loading" className="container mx-auto max-w-5xl px-4 py-10">
-      <Skeleton className="mb-8 h-64 w-full rounded-2xl" />
-      <Skeleton className="mx-auto mb-10 h-8 w-2/3" />
-      <div className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
-        {[1, 2].map((i) => (
-          <Skeleton key={i} className="h-80 rounded-xl" />
-        ))}
-      </div>
-    </div>
-  );
+/**
+ * Marcador del precio mientras se resuelven los planes.
+ *
+ * Antes toda la página esperaba a la API detrás de un esqueleto de pantalla
+ * completa, así que `/premium` servía 3 palabras propias: justo la URL que mira
+ * un revisor de AdSense para entender el modelo de negocio (T-SEO-003). Ahora lo
+ * único que espera es el número.
+ */
+function PriceSkeleton() {
+  return <Skeleton data-testid="premium-page-loading" className="mx-auto h-10 w-32" />;
 }
 
 interface PremiumCtaButtonProps {
@@ -188,12 +186,16 @@ function PremiumCtaButton({ premiumPlan, testId, onDark = false }: PremiumCtaBut
 // Main Component
 // ============================================================================
 
-export function PremiumPage() {
-  const { data: plans, isLoading } = usePublicPlans();
+export interface PremiumPageProps {
+  /**
+   * Planes resueltos por la ruta en el servidor (T-SEO-003): el HTML sale con el
+   * precio real en vez de esperar a la API en el cliente.
+   */
+  initialPlans?: PlanConfig[];
+}
 
-  if (isLoading) {
-    return <PremiumPageSkeleton />;
-  }
+export function PremiumPage({ initialPlans }: PremiumPageProps = {}) {
+  const { data: plans, isLoading } = usePublicPlans(initialPlans);
 
   const freePlan = plans?.find((p) => p.planType === 'free');
   const premiumPlan = plans?.find((p) => p.planType === 'premium');
@@ -263,10 +265,16 @@ export function PremiumPage() {
                 <h3 className="text-card-foreground mb-2 font-serif text-2xl font-bold">
                   {premiumPlan?.name ?? 'Premium'}
                 </h3>
-                <p className="text-foreground mb-4 text-4xl font-bold">
-                  {premiumPlan ? formatPriceArs(premiumPlan.price) : '---'}
-                  <span className="text-muted-foreground text-lg font-normal">/mes</span>
-                </p>
+                {isLoading ? (
+                  <div className="mb-4">
+                    <PriceSkeleton />
+                  </div>
+                ) : (
+                  <p className="text-foreground mb-4 text-4xl font-bold">
+                    {premiumPlan ? formatPriceArs(premiumPlan.price) : '---'}
+                    <span className="text-muted-foreground text-lg font-normal">/mes</span>
+                  </p>
+                )}
                 <p className="text-muted-foreground text-sm">
                   {premiumPlan?.description ?? 'Desbloquea todo el potencial'}
                 </p>

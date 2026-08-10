@@ -11,7 +11,11 @@ import {
   getArticlesByCategory,
   globalSearch,
 } from '@/lib/api/encyclopedia-articles-api';
-import type { ArticleCategory, ArticleDetail } from '@/types/encyclopedia-article.types';
+import type {
+  ArticleCategory,
+  ArticleDetail,
+  ArticleSummary,
+} from '@/types/encyclopedia-article.types';
 
 const STALE_TIME_STATIC = 1000 * 60 * 60; // 1 hour — static encyclopedia content
 
@@ -52,12 +56,19 @@ export function useArticle(slug: string, initialData?: ArticleDetail) {
   });
 }
 
-export function useArticlesByCategory(category: ArticleCategory) {
+/**
+ * @param initialData artículos ya resueltos por la ruta de listado en el
+ *   servidor. Siembra la caché para que el primer render —el HTML que ve
+ *   Googlebot— traiga la lista en vez del esqueleto (T-SEO-003). Con
+ *   `STALE_TIME_STATIC` no dispara refetch inmediato: son artículos estáticos.
+ */
+export function useArticlesByCategory(category: ArticleCategory, initialData?: ArticleSummary[]) {
   return useQuery({
     queryKey: articleKeys.byCategory(category),
     queryFn: () => getArticlesByCategory(category),
     staleTime: STALE_TIME_STATIC,
     enabled: !!category,
+    initialData,
   });
 }
 

@@ -43,6 +43,26 @@ export async function resolveRouteResource<T>(fetcher: () => Promise<T>): Promis
 }
 
 /**
+ * Resuelve los datos de una ruta de **listado**, degradando a `undefined` si la
+ * API falla (T-SEO-003).
+ *
+ * El criterio es el opuesto al de `resolveRouteResource`, y la diferencia es
+ * deliberada: una ficha sin su recurso no tiene nada que mostrar, así que
+ * conviene fallar fuerte antes que cachear un esqueleto. Un listado, en cambio,
+ * tiene contenido propio —su introducción editorial— que sirve igual, y el
+ * cliente reintenta el fetch al montar. Tirar abajo el render (y con él el
+ * prerender de la ruta) por un blip de la API sería peor que servir el listado
+ * vacío con su texto.
+ */
+export async function resolveListingData<T>(fetcher: () => Promise<T>): Promise<T | undefined> {
+  try {
+    return await fetcher();
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Params de prerender que degradan a `[]` si la API no responde.
  *
  * Acá sí se traga el error: sin params la ruta pasa a renderizarse on-demand,

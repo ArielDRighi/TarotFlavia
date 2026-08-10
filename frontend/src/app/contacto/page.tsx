@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { Mail, Sparkles } from 'lucide-react';
 
+import { ListingIntro } from '@/components/common/ListingIntro';
 import { Reveal } from '@/components/common/Reveal';
 import { ContactForm } from '@/components/features/contact/ContactForm';
 import { CONFIG } from '@/lib/constants';
+import { LISTING_INTROS } from '@/lib/constants/listing-intros.data';
 import { STATIC_PAGE_METADATA } from '@/lib/metadata/page-metadata';
 
 export const metadata: Metadata = STATIC_PAGE_METADATA.contacto;
@@ -18,6 +20,10 @@ export const metadata: Metadata = STATIC_PAGE_METADATA.contacto;
  *
  * El envío es real desde T-PROD-014 (`POST /contact`): ya no hay disclaimer de
  * "envío no implementado".
+ *
+ * Servía 34 palabras propias —el formulario es todo `input`, y un `input` no es
+ * texto para el crawler—, así que abajo va contenido propio sobre qué se
+ * responde por acá y qué no (T-SEO-003).
  */
 export default function ContactoPage() {
   return (
@@ -71,6 +77,10 @@ export default function ContactoPage() {
               </p>
             </div>
           </div>
+        </Reveal>
+
+        <Reveal index={3}>
+          <ListingIntro intro={LISTING_INTROS.contacto} className="p-0" />
         </Reveal>
       </div>
     </div>
