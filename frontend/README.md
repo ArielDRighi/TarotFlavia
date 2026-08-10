@@ -20,6 +20,64 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Guardarraíl de contenido indexable
+
+`scripts/check-indexable-content.mjs` recorre el `sitemap.xml` de un host, mide las **palabras
+propias** de cada URL (el texto que ve un crawler, menos el chrome de header + footer) y falla si
+alguna baja del umbral. También sondea un slug inventado por cada ruta dinámica para detectar
+**soft-404** (páginas de "no encontrado" que responden 200).
+
+Existe porque la misma clase de bug —una página que trae su contenido por el cliente y sirve un
+cascarón al crawler— se arregló cuatro veces y las cuatro se descubrieron midiendo a mano con
+`curl`. Contexto completo en [docs/BACKLOG_SEO_ADSENSE_2026_08.md](../docs/BACKLOG_SEO_ADSENSE_2026_08.md).
+
+```bash
+# Producción, sitemap completo (178 URLs, ~1 min)
+npm run check:indexable -- --base-url https://auguriatarot.com
+
+# Muestreo estratificado: hasta 2 URLs por sección (cubre todas las secciones, ~30 URLs)
+npm run check:indexable -- --base-url https://auguriatarot.com --sample 2
+
+# Contra la imagen de Docker corriendo local
+npm run check:indexable -- --base-url http://localhost:3099 --min-words 150
+```
+
+| Opción                  | Default               | Para qué                                            |
+| ----------------------- | --------------------- | --------------------------------------------------- |
+| `--base-url <url>`      | `NEXT_PUBLIC_APP_URL` | Host a medir                                        |
+| `--min-words <n>`       | `120`                 | Umbral de palabras propias                          |
+| `--sample <n>`          | —                     | Hasta n URLs por sección (sin él, sitemap completo) |
+| `--full`                | ✔️                    | Modo completo explícito                             |
+| `--chrome-route <ruta>` | `/admin`              | Ruta vacía contra la que se mide el chrome          |
+| `--concurrency <n>`     | `6`                   | Requests en paralelo                                |
+| `--timeout <ms>`        | `20000`               | Timeout por request                                 |
+| `--user-agent <ua>`     | Googlebot             | User-Agent de las requests                          |
+| `--no-soft-404`         | —                     | No sondear slugs inventados                         |
+| `--fail-on-soft-404`    | —                     | Que los soft-404 también cuenten para el exit code  |
+| `--json`                | —                     | Salida en JSON en vez de tabla                      |
+
+**Exit code 1** si alguna URL queda por debajo del umbral, así que sirve tal cual en un script. Los
+**soft-404 se reportan pero no afectan el exit code** salvo que se pase `--fail-on-soft-404`: hoy hay
+11 conocidos (T-SEO-006) y harían fallar toda corrida hasta que se arreglen.
+
+Detalles que importan:
+
+- **El chrome se mide, no se hardcodea.** Se pide `/admin` (que para un visitante sin sesión
+  renderiza solo header + footer) y ese conteo se resta de cada página. Al 9-ago-2026 daba 39
+  palabras; si alguien agrega un link al menú, el guardarraíl no miente. Si esa ruta **no responde
+  200 la corrida aborta**: con la línea base en 0, cada página ganaría 39 palabras fantasma y el
+  umbral se ablandaría solo.
+- **Una request caída no tumba la corrida.** Un timeout o un DNS que falla se reporta como fila
+  fallida (`estado 0` + motivo) y las demás URLs se siguen midiendo.
+- **Todas las requests llevan cache-buster.** El edge de Railway cachea el HTML con
+  `s-maxage=31536000`: sin `?cb=…` se mide la versión previa al deploy.
+- **Las rutas dinámicas se infieren del sitemap** (un padre con ≥3 hijos es un `[slug]`), así que
+  una sección nueva queda cubierta sin tocar el script.
+- **Excepciones:** `RUTAS_EXENTAS` dentro del script, con el motivo escrito al lado. Hoy está
+  vacía a propósito.
+- **No es un gate de CI** (decisión de T-SEO-001): correrlo a mano después de un deploy o antes de
+  pedirle a Google que reindexe.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
