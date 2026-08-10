@@ -1,9 +1,17 @@
+/**
+ * `/horoscopo-chino/[animal]` - Tests de la ruta.
+ *
+ * Desde T-SEO-002 la ruta es un server component: resuelve el segmento y delega
+ * en `AnimalHoroscopeRoute`, que sirve la ficha estática y monta la parte
+ * interactiva dentro de un `<Suspense>`.
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import ChineseHoroscopeAnimalPage from './page';
+import Page, { generateStaticParams } from './page';
 import { ChineseZodiacAnimal, ChineseElementCode } from '@/types/chinese-horoscope.types';
 
 // Mock next/navigation
@@ -43,7 +51,6 @@ vi.mock('@/hooks/api/useChineseHoroscope', () => ({
   useCalculateAnimal: (birthDate: string | null) => mockUseCalculateAnimal(birthDate),
 }));
 
-// Test wrapper
 function createTestQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -55,10 +62,39 @@ function createTestQueryClient() {
   });
 }
 
-function renderWithProviders(ui: React.ReactElement) {
-  const queryClient = createTestQueryClient();
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+/** Renderiza el server component ya resuelto, con los providers de cliente. */
+async function renderPage(animal: string) {
+  mockParams.animal = animal;
+  const ui = await Page({ params: Promise.resolve({ animal }) });
+
+  return render(<QueryClientProvider client={createTestQueryClient()}>{ui}</QueryClientProvider>);
 }
+
+const mockHoroscope = {
+  id: 1,
+  animal: ChineseZodiacAnimal.DRAGON,
+  birthElement: 'wood' as ChineseElementCode,
+  year: 2026,
+  generalOverview: 'Test overview for dragon',
+  areas: {
+    love: { content: 'Love content', score: 8 },
+    career: { content: 'Career content', score: 7 },
+    wellness: { content: 'Wellness content', score: 9 },
+    finance: { content: 'Finance content', score: 6 },
+  },
+  luckyElements: {
+    numbers: [3, 7, 9],
+    colors: ['Rojo', 'Dorado'],
+    directions: ['Sur', 'Este'],
+    months: [3, 6, 9],
+  },
+  compatibility: {
+    best: [ChineseZodiacAnimal.RAT],
+    good: [ChineseZodiacAnimal.MONKEY],
+    challenging: [ChineseZodiacAnimal.DOG],
+  },
+  monthlyHighlights: 'Test highlights',
+};
 
 describe('ChineseHoroscopeAnimalPage', () => {
   beforeEach(() => {
@@ -68,253 +104,156 @@ describe('ChineseHoroscopeAnimalPage', () => {
     mockParams.animal = 'dragon';
     mockAuthStore.user = null;
     mockAuthStore.isAuthenticated = false;
-    mockUseCalculateAnimal.mockReturnValue({
-      data: null,
-      isLoading: false,
-    });
-  });
-
-  it('should render animal selector', () => {
-    mockUseMyAnimalHoroscope.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
-    });
+    mockUseCalculateAnimal.mockReturnValue({ data: null, isLoading: false });
+    mockUseMyAnimalHoroscope.mockReturnValue({ isLoading: false, data: null, error: null });
     mockUseChineseHoroscopeByElement.mockReturnValue({
       isLoading: false,
       data: null,
       error: null,
     });
-
-    renderWithProviders(<ChineseHoroscopeAnimalPage />);
-
-    expect(screen.getByTestId('chinese-animal-selector')).toBeInTheDocument();
   });
 
-  it('should show ElementSelectorModal when not user animal and no element', () => {
-    mockUseMyAnimalHoroscope.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
-    });
-    mockUseChineseHoroscopeByElement.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
+  describe('contenido indexable (T-SEO-002)', () => {
+    it('sirve la ficha estática del animal sin depender de la API', async () => {
+      const { container } = await renderPage('dragon');
+
+      expect(screen.getByTestId('animal-profile')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: /Dragón/ })).toBeInTheDocument();
+
+      const words = (container.textContent ?? '').replace(/\s+/g, ' ').trim().split(' ');
+      expect(words.length).toBeGreaterThan(150);
     });
 
-    renderWithProviders(<ChineseHoroscopeAnimalPage />);
+    it('mantiene un solo h1 en la página', async () => {
+      mockSearchParams.get.mockReturnValue('wood');
+      mockUseChineseHoroscopeByElement.mockReturnValue({
+        isLoading: false,
+        data: mockHoroscope,
+        error: null,
+      });
 
-    // Should show the element selector modal
-    expect(screen.getByTestId('element-selector-modal')).toBeInTheDocument();
-    expect(screen.getByText(/Selecciona tu elemento/i)).toBeInTheDocument();
+      await renderPage('dragon');
+
+      expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    });
+
+    it('prerenderiza los 12 animales', () => {
+      expect(generateStaticParams()).toHaveLength(12);
+    });
   });
 
-  it('should render loading state when fetching horoscope', () => {
-    mockSearchParams.get.mockReturnValue('wood');
-    mockUseMyAnimalHoroscope.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
-    });
-    mockUseChineseHoroscopeByElement.mockReturnValue({
-      isLoading: true,
-      data: null,
-      error: null,
+  describe('parte interactiva', () => {
+    it('should render animal selector', async () => {
+      await renderPage('dragon');
+
+      expect(screen.getByTestId('chinese-animal-selector')).toBeInTheDocument();
     });
 
-    renderWithProviders(<ChineseHoroscopeAnimalPage />);
+    it('invita a elegir el elemento sin tapar la ficha con un modal', async () => {
+      await renderPage('dragon');
 
-    expect(screen.getByText('Cargando horóscopo...')).toBeInTheDocument();
+      expect(screen.getByTestId('element-selection-prompt')).toBeInTheDocument();
+      expect(screen.getByText(/Selecciona tu elemento/i)).toBeInTheDocument();
+      expect(screen.queryByTestId('element-selector-modal')).not.toBeInTheDocument();
+    });
+
+    it('abre el selector de elemento al pedirlo', async () => {
+      const user = userEvent.setup();
+      await renderPage('dragon');
+
+      await user.click(screen.getByRole('button', { name: /Elegir mi elemento/i }));
+
+      expect(screen.getByTestId('element-selector-modal')).toBeInTheDocument();
+    });
+
+    it('should render loading state when fetching horoscope', async () => {
+      mockSearchParams.get.mockReturnValue('wood');
+      mockUseChineseHoroscopeByElement.mockReturnValue({
+        isLoading: true,
+        data: null,
+        error: null,
+      });
+
+      await renderPage('dragon');
+
+      expect(screen.getByText('Cargando horóscopo...')).toBeInTheDocument();
+    });
+
+    it('should render error state when horoscope not found', async () => {
+      mockSearchParams.get.mockReturnValue('wood');
+      mockUseChineseHoroscopeByElement.mockReturnValue({
+        isLoading: false,
+        data: null,
+        error: Object.assign(new Error('Not found'), { response: { status: 404 } }),
+      });
+
+      await renderPage('dragon');
+
+      expect(screen.getByText(/horóscopo en preparación/i)).toBeInTheDocument();
+    });
+
+    it('should render horoscope detail when data is loaded', async () => {
+      mockSearchParams.get.mockReturnValue('wood');
+      mockUseChineseHoroscopeByElement.mockReturnValue({
+        isLoading: false,
+        data: mockHoroscope,
+        error: null,
+      });
+
+      await renderPage('dragon');
+
+      expect(screen.getByText('Test overview for dragon')).toBeInTheDocument();
+    });
+
+    it('should show horoscope directly when viewing own animal (isMyAnimal === true)', async () => {
+      mockAuthStore.user = { birthDate: '1988-03-15' };
+      mockAuthStore.isAuthenticated = true;
+      mockUseCalculateAnimal.mockReturnValue({
+        data: {
+          animal: ChineseZodiacAnimal.DRAGON,
+          birthElement: 'earth' as ChineseElementCode,
+        },
+        isLoading: false,
+      });
+      mockUseMyAnimalHoroscope.mockReturnValue({
+        isLoading: false,
+        data: { ...mockHoroscope, generalOverview: 'Tu año como Dragón de Tierra' },
+        error: null,
+      });
+
+      await renderPage('dragon');
+
+      expect(screen.getByText('Tu año como Dragón de Tierra')).toBeInTheDocument();
+    });
   });
 
-  it('should render error state when horoscope not found', () => {
-    mockSearchParams.get.mockReturnValue('wood');
-    mockUseMyAnimalHoroscope.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
-    });
-    mockUseChineseHoroscopeByElement.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: Object.assign(new Error('Not found'), { response: { status: 404 } }),
+  describe('animal inválido', () => {
+    it('muestra el mensaje de animal no válido y un enlace al listado', async () => {
+      await renderPage('invalid-animal');
+
+      expect(screen.getByText('Animal no válido')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Ver todos los animales/i })).toHaveAttribute(
+        'href',
+        '/horoscopo-chino'
+      );
     });
 
-    renderWithProviders(<ChineseHoroscopeAnimalPage />);
+    it('no renderiza la ficha ni el panel para un animal inválido', async () => {
+      await renderPage('invalid-animal');
 
-    expect(screen.getByText(/horóscopo en preparación/i)).toBeInTheDocument();
+      expect(screen.queryByTestId('animal-profile')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('chinese-animal-selector')).not.toBeInTheDocument();
+    });
   });
 
-  it('should render horoscope detail when data is loaded', () => {
-    mockSearchParams.get.mockReturnValue('wood');
-    mockUseMyAnimalHoroscope.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
+  describe('navegación', () => {
+    it('vuelve al listado con un enlace rastreable', async () => {
+      await renderPage('dragon');
+
+      expect(screen.getByRole('link', { name: /Todos los animales/i })).toHaveAttribute(
+        'href',
+        '/horoscopo-chino'
+      );
     });
-    mockUseChineseHoroscopeByElement.mockReturnValue({
-      isLoading: false,
-      data: {
-        id: 1,
-        animal: ChineseZodiacAnimal.DRAGON,
-        birthElement: 'wood' as ChineseElementCode,
-        year: 2026,
-        generalOverview: 'Test overview for dragon',
-        areas: {
-          love: { content: 'Love content', rating: 8 },
-          career: { content: 'Career content', rating: 7 },
-          wellness: { content: 'Wellness content', rating: 9 },
-          finance: { content: 'Finance content', rating: 6 },
-        },
-        luckyElements: {
-          numbers: [3, 7, 9],
-          colors: ['Rojo', 'Dorado'],
-          directions: ['Sur', 'Este'],
-          months: [3, 6, 9],
-        },
-        compatibility: {
-          best: [ChineseZodiacAnimal.RAT],
-          good: [ChineseZodiacAnimal.MONKEY],
-          challenging: [ChineseZodiacAnimal.DOG],
-        },
-        monthlyHighlights: 'Test highlights',
-      },
-      error: null,
-    });
-
-    renderWithProviders(<ChineseHoroscopeAnimalPage />);
-
-    expect(screen.getByText('Test overview for dragon')).toBeInTheDocument();
-  });
-
-  it('should show invalid animal message for invalid animal', () => {
-    mockParams.animal = 'invalid-animal';
-
-    mockUseMyAnimalHoroscope.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
-    });
-    mockUseChineseHoroscopeByElement.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
-    });
-
-    renderWithProviders(<ChineseHoroscopeAnimalPage />);
-
-    expect(screen.getByText('Animal no válido')).toBeInTheDocument();
-    expect(screen.getByText('Ver todos los animales')).toBeInTheDocument();
-  });
-
-  it('should navigate back when clicking back button', async () => {
-    const user = userEvent.setup();
-    mockParams.animal = 'dragon';
-    mockSearchParams.get.mockReturnValue('wood'); // Add element so modal doesn't show
-
-    mockUseMyAnimalHoroscope.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
-    });
-    mockUseChineseHoroscopeByElement.mockReturnValue({
-      isLoading: false,
-      data: {
-        id: 1,
-        animal: ChineseZodiacAnimal.DRAGON,
-        birthElement: 'wood' as ChineseElementCode,
-        year: 2026,
-        generalOverview: 'Test overview',
-        areas: {
-          love: { content: 'Love content', rating: 8 },
-          career: { content: 'Career content', rating: 7 },
-          wellness: { content: 'Wellness content', rating: 9 },
-          finance: { content: 'Finance content', rating: 6 },
-        },
-        luckyElements: {
-          numbers: [3, 7, 9],
-          colors: ['Rojo', 'Dorado'],
-          directions: ['Sur', 'Este'],
-          months: [3, 6, 9],
-        },
-        compatibility: {
-          best: [ChineseZodiacAnimal.RAT],
-          good: [ChineseZodiacAnimal.MONKEY],
-          challenging: [ChineseZodiacAnimal.DOG],
-        },
-        monthlyHighlights: 'Test highlights',
-      },
-      error: null,
-    });
-
-    renderWithProviders(<ChineseHoroscopeAnimalPage />);
-
-    // Look for "Todos los animales" button
-    const backButton = screen.getByRole('button', { name: /Todos los animales/i });
-    await user.click(backButton);
-
-    expect(mockPush).toHaveBeenCalledWith('/horoscopo-chino');
-  });
-
-  it('should show horoscope directly when viewing own animal (isMyAnimal === true)', () => {
-    mockParams.animal = 'dragon';
-    mockAuthStore.user = { birthDate: '1988-03-15' };
-    mockAuthStore.isAuthenticated = true;
-
-    // User's calculated animal matches the current animal
-    mockUseCalculateAnimal.mockReturnValue({
-      data: {
-        animal: ChineseZodiacAnimal.DRAGON,
-        birthElement: 'earth' as ChineseElementCode,
-      },
-      isLoading: false,
-    });
-
-    mockUseMyAnimalHoroscope.mockReturnValue({
-      isLoading: false,
-      data: {
-        id: 1,
-        animal: ChineseZodiacAnimal.DRAGON,
-        birthElement: 'earth' as ChineseElementCode,
-        year: 2026,
-        generalOverview: 'Tu año como Dragón de Tierra',
-        areas: {
-          love: { content: 'Love content', rating: 8 },
-          career: { content: 'Career content', rating: 7 },
-          wellness: { content: 'Wellness content', rating: 9 },
-          finance: { content: 'Finance content', rating: 6 },
-        },
-        luckyElements: {
-          numbers: [3, 7, 9],
-          colors: ['Rojo', 'Dorado'],
-          directions: ['Sur', 'Este'],
-          months: [3, 6, 9],
-        },
-        compatibility: {
-          best: [ChineseZodiacAnimal.RAT],
-          good: [ChineseZodiacAnimal.MONKEY],
-          challenging: [ChineseZodiacAnimal.DOG],
-        },
-        monthlyHighlights: 'Test highlights',
-      },
-      error: null,
-    });
-
-    mockUseChineseHoroscopeByElement.mockReturnValue({
-      isLoading: false,
-      data: null,
-      error: null,
-    });
-
-    renderWithProviders(<ChineseHoroscopeAnimalPage />);
-
-    // Should NOT show YearInputBanner
-    expect(
-      screen.queryByText(/Ingresa el año de nacimiento para ver el horóscopo personalizado/i)
-    ).not.toBeInTheDocument();
-
-    // Should show the horoscope directly
-    expect(screen.getByText('Tu año como Dragón de Tierra')).toBeInTheDocument();
   });
 });

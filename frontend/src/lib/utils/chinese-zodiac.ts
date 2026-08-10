@@ -144,6 +144,50 @@ export function getAllChineseZodiacInfo(): ChineseZodiacInfo[] {
 }
 
 /**
+ * Rango de años que se listan como "años de nacimiento" de cada animal.
+ *
+ * Fijo a propósito: la ficha de `/horoscopo-chino/[animal]` se prerenderiza, así
+ * que la lista no puede depender de `new Date()` — el HTML horneado quedaría
+ * congelado en el año del build y mentiría al visitante.
+ */
+export const CHINESE_BIRTH_YEARS_RANGE = { from: 1936, to: 2043 } as const;
+
+/** Largo del ciclo del zodiaco chino. */
+const CHINESE_ZODIAC_CYCLE = 12;
+
+/**
+ * Años del calendario chino que corresponden a un animal, dentro de
+ * `CHINESE_BIRTH_YEARS_RANGE` y en orden ascendente.
+ *
+ * ⚠️ El año chino **no** arranca el 1 de enero sino con el Año Nuevo Chino
+ * (entre el 21 de enero y el 20 de febrero), así que quien nació en esa franja
+ * pertenece al animal del año anterior. La ficha lo aclara y deriva al
+ * calculador, que resuelve la fecha exacta contra la API.
+ *
+ * @example
+ * ```typescript
+ * getAnimalBirthYears(ChineseZodiacAnimal.DRAGON);
+ * // [1940, 1952, 1964, 1976, 1988, 2000, 2012, 2024, 2036]
+ * ```
+ */
+export function getAnimalBirthYears(animal: ChineseZodiacAnimal): number[] {
+  // La rueda arranca en la Rata: 1936 fue año de la Rata, así que el índice del
+  // animal en el enum es directamente su desplazamiento sobre el inicio del rango.
+  const offset = getAllChineseZodiacAnimals().indexOf(animal);
+  const years: number[] = [];
+
+  for (
+    let year = CHINESE_BIRTH_YEARS_RANGE.from + offset;
+    year <= CHINESE_BIRTH_YEARS_RANGE.to;
+    year += CHINESE_ZODIAC_CYCLE
+  ) {
+    years.push(year);
+  }
+
+  return years;
+}
+
+/**
  * Elemento icons para Wu Xing (5 elementos chinos)
  */
 const ELEMENT_ICONS: Record<string, string> = {

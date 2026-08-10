@@ -1,7 +1,15 @@
 /**
- * Chinese Horoscope Animal Detail Page Component
+ * AnimalHoroscopePanel Component
  *
- * Handles the business logic for displaying a specific animal's horoscope
+ * Parte **interactiva** de `/horoscopo-chino/[animal]`: selector de animal,
+ * selector de elemento Wu Xing y predicción del año.
+ *
+ * Depende de `useSearchParams` (el elemento viaja en la query string), así que
+ * `AnimalHoroscopeRoute` lo monta dentro de un `<Suspense>`: sin ese límite, Next
+ * deopta el prerender de **toda** la ruta y las 12 URLs sirven un cascarón vacío
+ * al crawler (T-SEO-002).
+ *
+ * La ficha estática del animal —el contenido indexable— vive en `AnimalProfile`.
  */
 
 'use client';
@@ -29,11 +37,10 @@ function getErrorStatus(error: Error): number | null {
   return err.response?.status ?? null;
 }
 
-export function AnimalHoroscopePage() {
+export function AnimalHoroscopePanel() {
   const router = useRouter();
   const {
     animal,
-    isValidAnimal,
     animalInfo,
     userAnimal,
     element,
@@ -45,77 +52,61 @@ export function AnimalHoroscopePage() {
     handleElementSelect,
   } = useAnimalHoroscopePage();
 
-  // Track if user manually dismissed the modal
-  // Use animal as key to reset state when animal changes
-  const [userDismissedModal, setUserDismissedModal] = useState<Record<string, boolean>>({});
+  // El modal arranca cerrado y se abre a pedido (T-SEO-002).
+  //
+  // Antes se auto-abría cuando faltaba el elemento, y eso tapaba la ficha del
+  // animal: además del overlay visual, Radix marca `aria-hidden` en el resto del
+  // documento mientras el diálogo está abierto, así que el contenido recién
+  // agregado quedaba invisible para lectores de pantalla. Ahora la ficha se lee
+  // primero y el selector es un paso explícito.
+  const [isElementModalOpen, setIsElementModalOpen] = useState(false);
 
-  // Show modal only if:
-  // 1. showElementModal is true (no element and not user's animal)
-  // 2. User hasn't dismissed it yet for this animal
-  const shouldShowModal = showElementModal && !userDismissedModal[animal];
+  // `showElementModal` del hook significa "falta elegir elemento": no es el
+  // animal del usuario y no vino ninguno en la query string.
+  const needsElementSelection = showElementModal;
 
-  const handleModalClose = (open: boolean) => {
-    if (!open) {
-      setUserDismissedModal((prev) => ({ ...prev, [animal]: true }));
-    }
-  };
-
-  // Invalid animal - show error
-  if (!isValidAnimal || !animalInfo) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="mb-4 text-2xl">Animal no válido</h1>
-        <Button onClick={() => router.push(ROUTES.HOROSCOPO_CHINO)}>Ver todos los animales</Button>
-      </div>
-    );
+  // La validez del segmento la resuelve `AnimalHoroscopeRoute` en el servidor
+  // (una sola fuente de verdad, y así el mensaje de error también es indexable).
+  if (!animalInfo) {
+    return null;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => router.push(ROUTES.HOROSCOPO_CHINO)}
-        className="mb-4"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Todos los animales
-      </Button>
+    <div className="space-y-6" data-testid="animal-horoscope-panel">
+      <ChineseAnimalSelector
+        selectedAnimal={animal}
+        userAnimal={userAnimal}
+        variant="carousel"
+        onSelect={(a) => {
+          router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL(a));
+        }}
+      />
 
-      <div className="mb-8">
-        <ChineseAnimalSelector
-          selectedAnimal={animal}
-          userAnimal={userAnimal}
-          variant="carousel"
-          onSelect={(a) => {
-            router.push(ROUTES.HOROSCOPO_CHINO_ANIMAL(a));
-          }}
-        />
-      </div>
-
-      {/* Show element selector modal when element is missing */}
+      {/* El selector se abre a pedido, sin tapar la ficha */}
       <ElementSelectorModal
-        open={shouldShowModal}
+        open={isElementModalOpen}
         animal={animal}
         animalNameEs={animalInfo.nameEs}
         onSelectElement={handleElementSelect}
-        onOpenChange={handleModalClose}
+        onOpenChange={setIsElementModalOpen}
       />
 
-      {/* Show info message with calculator link when user dismissed modal */}
-      {!element && userDismissedModal[animal] && (
-        <Alert className="mb-6">
+      {needsElementSelection && (
+        <Alert data-testid="element-selection-prompt">
           <Calculator className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
-            <span>Selecciona tu elemento para ver el horóscopo completo</span>
-            <Button
-              variant="link"
-              size="sm"
-              onClick={() => router.push(ROUTES.HOROSCOPO_CHINO)}
-              className="ml-2"
-            >
-              ¿No sabes tu elemento? Usa el calculador
-            </Button>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>
+              Selecciona tu elemento Wu Xing para ver la predicción de {animalInfo.nameEs} para{' '}
+              {currentYear}
+            </span>
+            <span className="flex flex-wrap items-center gap-2">
+              <Button size="sm" onClick={() => setIsElementModalOpen(true)}>
+                Elegir mi elemento
+              </Button>
+              <Button variant="link" size="sm" onClick={() => router.push(ROUTES.HOROSCOPO_CHINO)}>
+                ¿No sabes tu elemento? Usa el calculador
+              </Button>
+            </span>
           </AlertDescription>
         </Alert>
       )}

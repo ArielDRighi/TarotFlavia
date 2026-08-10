@@ -52,7 +52,8 @@ export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeD
           label={animalInfo.nameEs}
           className="text-6xl"
         />
-        <h1 className="mt-2 font-serif text-3xl">{displayName}</h1>
+        {/* h2, no h1: el h1 de `/horoscopo-chino/[animal]` es el de `AnimalProfile`. */}
+        <h2 className="mt-2 font-serif text-3xl">{displayName}</h2>
         <Badge variant="secondary" className="mt-2">
           Horóscopo {horoscope.year}
         </Badge>

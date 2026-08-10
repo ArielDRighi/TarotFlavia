@@ -1,5 +1,5 @@
 /**
- * AnimalHoroscopePage - Tests
+ * AnimalHoroscopePanel - Tests
  *
  * Cubre estados: loading, error 404, error 5xx, éxito
  */
@@ -7,7 +7,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { AnimalHoroscopePage } from './AnimalHoroscopePage';
+import { AnimalHoroscopePanel } from './AnimalHoroscopePanel';
 
 // Mock next/navigation
 const mockPush = vi.fn();
@@ -37,7 +37,7 @@ vi.mock('@/lib/constants/routes', () => ({
   },
 }));
 
-function createBaseHookResult(overrides = {}) {
+function createBaseHookResult() {
   return {
     animal: 'rata' as const,
     isValidAnimal: true,
@@ -54,7 +54,7 @@ function createBaseHookResult(overrides = {}) {
   };
 }
 
-describe('AnimalHoroscopePage', () => {
+describe('AnimalHoroscopePanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -66,7 +66,7 @@ describe('AnimalHoroscopePage', () => {
         isLoading: true,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByText(/cargando horóscopo/i)).toBeInTheDocument();
     });
@@ -83,7 +83,7 @@ describe('AnimalHoroscopePage', () => {
         error: error404,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByText(/en preparación/i)).toBeInTheDocument();
     });
@@ -98,7 +98,7 @@ describe('AnimalHoroscopePage', () => {
         error: error404,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByRole('button', { name: /volver al listado/i })).toBeInTheDocument();
     });
@@ -113,7 +113,7 @@ describe('AnimalHoroscopePage', () => {
         error: error404,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       await userEvent.click(screen.getByRole('button', { name: /volver al listado/i }));
 
@@ -132,7 +132,7 @@ describe('AnimalHoroscopePage', () => {
         error: error500,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument();
     });
@@ -147,7 +147,7 @@ describe('AnimalHoroscopePage', () => {
         error: error503,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByTestId('error-server')).toBeInTheDocument();
     });
@@ -160,7 +160,7 @@ describe('AnimalHoroscopePage', () => {
         horoscopeData: { id: 1, year: 2025 },
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByTestId('horoscope-detail')).toBeInTheDocument();
     });
@@ -171,7 +171,7 @@ describe('AnimalHoroscopePage', () => {
         horoscopeData: { id: 1, year: 2025 },
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.queryByText(/en preparación/i)).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /reintentar/i })).not.toBeInTheDocument();
@@ -179,16 +179,29 @@ describe('AnimalHoroscopePage', () => {
   });
 
   describe('Estado: animal inválido', () => {
-    it('muestra mensaje de animal no válido', () => {
+    it('no renderiza nada: el mensaje lo sirve AnimalHoroscopeRoute en el servidor', () => {
       mockUseAnimalHoroscopePage.mockReturnValue({
         ...createBaseHookResult(),
         isValidAnimal: false,
         animalInfo: null,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
-      expect(screen.getByText(/animal no válido/i)).toBeInTheDocument();
+      expect(screen.queryByTestId('animal-horoscope-panel')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Contenido indexable (T-SEO-002)', () => {
+    it('no duplica el h1 de la ficha estática', () => {
+      mockUseAnimalHoroscopePage.mockReturnValue({
+        ...createBaseHookResult(),
+        horoscopeData: { id: 1, year: 2025 },
+      });
+
+      render(<AnimalHoroscopePanel />);
+
+      expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
     });
   });
 });

@@ -35,4 +35,10 @@ export type { YearSelectorModalProps } from './YearSelectorModal';
 export { YearInputBanner } from './YearInputBanner';
 export type { YearInputBannerProps } from './YearInputBanner';
 
-export { AnimalHoroscopePage } from './AnimalHoroscopePage';
+export { AnimalHoroscopePanel } from './AnimalHoroscopePanel';
+
+export { AnimalHoroscopeRoute } from './AnimalHoroscopeRoute';
+export type { AnimalHoroscopeRouteProps } from './AnimalHoroscopeRoute';
+
+export { AnimalProfile } from './AnimalProfile';
+export type { AnimalProfileProps } from './AnimalProfile';

@@ -37,11 +37,12 @@ Muestra estratificada de 62 de las 178 URLs del sitemap, midiendo **palabras pro
 | Artículos de enciclopedia (signos, planetas, casas, guías, elementos) | 53 | 400–645 | ✅ |
 | Hubs con texto estático (numerología, carta astral, péndulo, horóscopo, rituales, chino) | ~8 | 215–415 | ✅ |
 | Fichas de ritual y servicio | 9 | 243–422 | ✅ |
-| **Horóscopo chino por animal** | **12** | **3** | ❌ T-SEO-002 |
+| Horóscopo chino por animal | 12 | 3 → **355–401** | ✅ T-SEO-002 (10-ago) |
 | **Signos del horóscopo** | **12** | **31** | ❌ T-SEO-004 |
 | **Listados y hubs** (`/premium` 3, `/servicios` 5, `/explorar` 20, `/enciclopedia/tarot` 24, `/enciclopedia/guias` 13) | **5** | 3–24 | ❌ T-SEO-003 |
 
 **29 de 62 URLs muestreadas superan las 150 palabras propias** (antes de este trabajo: 13).
+Con T-SEO-002 cerrada, **41 de 62**: los 12 animales del horóscopo chino pasaron de 3 a 355–401.
 
 ### El patrón que ya funciona (replicalo, no inventes otro)
 
@@ -141,7 +142,7 @@ lógica en `app/`.
 | ID | Tarea | Tipo | Prioridad | Estimación |
 | --- | --- | --- | --- | --- |
 | T-SEO-001 | Guardarraíl automático de contenido indexable ✅ | Frontend/CI | 🔴 Crítica | 2 pts |
-| T-SEO-002 | Horóscopo chino por animal: 12 URLs sirven 3 palabras | Frontend | 🔴 Crítica | 3 pts |
+| T-SEO-002 | Horóscopo chino por animal: 12 URLs sirven 3 palabras ✅ | Frontend | 🔴 Crítica | 3 pts |
 | T-SEO-003 | Listados y hubs sin contenido para el crawler | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-004 | Signos del horóscopo: ficha estática del signo | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) | Infra | 🟠 Alta | 2 pts |
@@ -243,6 +244,7 @@ miden 34 URLs y **aparecen las 10 clases de problema**, no un subconjunto.
 ## T-SEO-002: Horóscopo Chino — 12 URLs Sirven 3 Palabras
 
 **Prioridad:** 🔴 Crítica · **Estimación:** 3 pts · **Dependencias:** conviene tener T-SEO-001
+**Estado:** ✅ COMPLETADA (10-ago-2026)
 
 ### Problema
 
@@ -258,21 +260,58 @@ Next no puede generar HTML porque el árbol depende de la query string. Por eso 
 
 Separar lo estático de lo interactivo:
 
-- [ ] La ficha del animal (nombre, emoji, elemento, características, años de nacimiento) sale de
-      constantes locales — `CHINESE_ZODIAC_INFO` en
-      [chinese-zodiac.ts](../frontend/src/lib/utils/chinese-zodiac.ts) — así que **puede renderizarse en el
-      servidor sin tocar la API**. Ése es el contenido indexable.
-- [ ] La predicción del año (que depende del elemento elegido y de la sesión) queda client-side, envuelta
-      en `<Suspense>` para que el `useSearchParams` no arrastre a toda la ruta.
-- [ ] Revisar si el modal de selección de elemento puede aparecer *después* del contenido en lugar de
-      bloquearlo.
-- [ ] `generateStaticParams` ya existe y devuelve los 12 animales; verificar que el prerender los emita.
+- [x] La ficha del animal se renderiza en el servidor sin tocar la API. `CHINESE_ZODIAC_INFO` alcanzaba
+      para el encabezado pero no para 150 palabras (son ~10), así que el contenido propio se escribió en
+      [chinese-zodiac-profiles.data.ts](../frontend/src/lib/constants/chinese-zodiac-profiles.data.ts):
+      titular, dos párrafos de introducción, tres rasgos explicados, fortalezas, desafíos, amor, trabajo,
+      compatibilidades y datos de suerte, **únicos por animal**.
+- [x] La predicción del año queda client-side (`AnimalHoroscopePanel`), dentro de un `<Suspense>` en
+      `AnimalHoroscopeRoute`. Ése es el corte que permite prerenderizar el resto.
+- [x] El modal ya no bloquea: arranca cerrado y se abre con un botón (*Elegir mi elemento*) desde un
+      aviso inline. Ver *Decisión de UX* abajo.
+- [x] `generateStaticParams` emite los 12 animales: el build los lista como `●` (SSG) con `revalidate` de
+      1 día.
 
 ### Criterios de aceptación
 
-- [ ] Las 12 URLs superan las 150 palabras propias, medido con el método de *Cómo verificar*.
-- [ ] El selector de elemento y la predicción siguen funcionando igual para el usuario.
-- [ ] `getChineseZodiacMetadata` sigue dando títulos únicos por animal (T-PROD-020, no romperlo).
+- [x] Las 12 URLs superan las 150 palabras propias: **355–401** (antes 3), medido contra el build de
+      producción con el chrome en 39 palabras. Verificado también con
+      `npm run check:indexable --base-url http://localhost:3099`: las 12 en ✅.
+- [x] El selector de elemento y la predicción siguen funcionando: mismo `ElementSelectorModal`, mismo
+      `handleElementSelect`, misma navegación con `?element=`. Cambia **cuándo** se abre el modal.
+- [x] `getChineseZodiacMetadata` intacto: títulos únicos verificados en el HTML servido
+      (`Horóscopo Chino: Rata` / `: Dragón` / `: Cerdo`) y canonical propio por URL.
+
+### Decisión de UX: el modal ya no se auto-abre
+
+Antes, al entrar a la ficha sin `?element=`, el modal se abría solo. Con la ficha nueva eso es un
+problema doble: tapa el contenido con el overlay y, además, Radix marca `aria-hidden` en el resto del
+documento mientras el diálogo está abierto, así que las 380 palabras recién agregadas quedaban fuera del
+árbol de accesibilidad. Ahora la ficha se lee primero y aparece un aviso con dos salidas: *Elegir mi
+elemento* (abre el mismo modal) y el enlace al calculador. Se eliminó el estado `userDismissedModal`, que
+existía solo para no reabrir el modal descartado.
+
+### Notas técnicas
+
+- **La causa era el `useSearchParams` sin límite de Suspense**, como decía el diagnóstico. El árbol quedó
+  así: `page.tsx` (server, `revalidate = 86400`) → `AnimalHoroscopeRoute` (server: valida el segmento,
+  ficha, `<Suspense>`) → `AnimalHoroscopePanel` (`'use client'`, selector + predicción).
+- **`AnimalHoroscopePage` pasó a llamarse `AnimalHoroscopePanel`** (ya no es la página) y perdió el
+  branch de "Animal no válido": esa validación vive ahora en el componente de ruta, en el servidor, con
+  una sola fuente de verdad. El "volver al listado" del encabezado es un `<Link>` real en lugar de un
+  `router.push`, así que el crawler lo recorre.
+- **`ChineseHoroscopeDetail` bajó su `<h1>` a `<h2>`**: el `<h1>` de la página es el de la ficha.
+- **Los años de nacimiento se calculan**, no se hardcodean: `getAnimalBirthYears` en
+  [chinese-zodiac.ts](../frontend/src/lib/utils/chinese-zodiac.ts) los deriva del ciclo de 12 sobre un
+  rango fijo (1936–2043). El rango es fijo a propósito: con `new Date()` el HTML prerenderizado quedaría
+  congelado en el año del build. La ficha aclara que el año chino empieza con el Año Nuevo Chino y deriva
+  al calculador para las fechas de enero/febrero.
+- **Guardarraíl de contenido en los tests**: `getProfileWordCount` + `MIN_PROFILE_WORDS` fallan si un
+  perfil baja de 200 palabras, y hay tests de unicidad de párrafos, de reciprocidad de las afinidades y
+  de que el choque sea el opuesto de la rueda. Si alguien recorta el contenido, se entera en CI y no en
+  el próximo rechazo de AdSense.
+- **El soft-404 sigue vivo** (`/horoscopo-chino/inventado-xyz` responde 200): es T-SEO-006, fuera de
+  alcance acá.
 
 ---
 
