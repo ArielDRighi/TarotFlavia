@@ -75,7 +75,6 @@ describe('useAnimalHoroscopePage', () => {
   it('should mark dragon as valid animal', () => {
     const { result } = renderHook(() => useAnimalHoroscopePage(), { wrapper });
 
-    expect(result.current.isValidAnimal).toBe(true);
     expect(result.current.animalInfo).not.toBeNull();
     expect(result.current.animalInfo?.nameEs).toBe('Dragón');
   });
@@ -85,7 +84,6 @@ describe('useAnimalHoroscopePage', () => {
 
     const { result } = renderHook(() => useAnimalHoroscopePage(), { wrapper });
 
-    expect(result.current.isValidAnimal).toBe(false);
     expect(result.current.animalInfo).toBeNull();
   });
 
@@ -119,14 +117,14 @@ describe('useAnimalHoroscopePage', () => {
     });
   });
 
-  it('should provide showElementModal flag when element is missing', () => {
+  it('should flag needsElementSelection when element is missing', () => {
     const { result } = renderHook(() => useAnimalHoroscopePage(), { wrapper });
 
-    // No element in query and not my animal -> should show modal
-    expect(result.current.showElementModal).toBe(true);
+    // No element in query and not my animal -> hay que elegir elemento
+    expect(result.current.needsElementSelection).toBe(true);
   });
 
-  it('should not show element modal when element is provided in query', async () => {
+  it('should not need element selection when element is provided in query', async () => {
     vi.mocked(useSearchParams).mockReturnValue({
       get: vi.fn((key: string) => (key === 'element' ? 'fire' : null)),
     } as unknown as ReturnType<typeof useSearchParams>);
@@ -134,7 +132,7 @@ describe('useAnimalHoroscopePage', () => {
     const { result } = renderHook(() => useAnimalHoroscopePage(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.showElementModal).toBe(false);
+      expect(result.current.needsElementSelection).toBe(false);
     });
   });
 

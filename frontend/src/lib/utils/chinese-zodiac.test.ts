@@ -2,16 +2,18 @@
  * Tests for Chinese Zodiac Utilities
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   getChineseZodiacInfo,
   getCurrentYear,
   isChineseZodiacAnimal,
   getAllChineseZodiacAnimals,
   getAllChineseZodiacInfo,
+  getAnimalBirthYears,
   getElementIcon,
   getElementForYear,
   CHINESE_ZODIAC_INFO,
+  CHINESE_BIRTH_YEARS_RANGE,
 } from '@/lib/utils/chinese-zodiac';
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
@@ -303,6 +305,66 @@ describe('chinese zodiac utilities', () => {
         expect(getElementForYear(baseYear + 8)).toBe(getElementForYear(baseYear + 9)); // earth/earth
       }
     });
+  });
+});
+
+describe('getAnimalBirthYears', () => {
+  it('devuelve años conocidos de cada animal', () => {
+    // Referencia: años del calendario chino ampliamente publicados.
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.RAT)).toContain(2020);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.OX)).toContain(2021);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.TIGER)).toContain(2022);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.RABBIT)).toContain(2023);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.DRAGON)).toContain(2024);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.SNAKE)).toContain(2025);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.HORSE)).toContain(2026);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.GOAT)).toContain(2027);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.MONKEY)).toContain(2028);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.ROOSTER)).toContain(2029);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.DOG)).toContain(2030);
+    expect(getAnimalBirthYears(ChineseZodiacAnimal.PIG)).toContain(2031);
+  });
+
+  it('devuelve los años en orden ascendente y separados por el ciclo de 12', () => {
+    Object.values(ChineseZodiacAnimal).forEach((animal) => {
+      const years = getAnimalBirthYears(animal);
+
+      expect(years.length).toBeGreaterThanOrEqual(7);
+      years.forEach((year, index) => {
+        if (index > 0) {
+          expect(year - years[index - 1]).toBe(12);
+        }
+      });
+    });
+  });
+
+  it('mantiene todos los años dentro del rango declarado', () => {
+    Object.values(ChineseZodiacAnimal).forEach((animal) => {
+      getAnimalBirthYears(animal).forEach((year) => {
+        expect(year).toBeGreaterThanOrEqual(CHINESE_BIRTH_YEARS_RANGE.from);
+        expect(year).toBeLessThanOrEqual(CHINESE_BIRTH_YEARS_RANGE.to);
+      });
+    });
+  });
+
+  it('no repite un año entre dos animales distintos', () => {
+    const seen = new Map<number, ChineseZodiacAnimal>();
+
+    Object.values(ChineseZodiacAnimal).forEach((animal) => {
+      getAnimalBirthYears(animal).forEach((year) => {
+        expect(seen.get(year)).toBeUndefined();
+        seen.set(year, animal);
+      });
+    });
+  });
+
+  it('es determinista: no depende de la fecha actual', () => {
+    const before = getAnimalBirthYears(ChineseZodiacAnimal.DRAGON);
+    vi.setSystemTime(new Date('2099-06-15T00:00:00Z'));
+    const after = getAnimalBirthYears(ChineseZodiacAnimal.DRAGON);
+    vi.useRealTimers();
+
+    expect(after).toEqual(before);
   });
 });
 

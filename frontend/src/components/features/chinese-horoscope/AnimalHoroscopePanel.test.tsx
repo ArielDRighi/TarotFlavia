@@ -1,5 +1,5 @@
 /**
- * AnimalHoroscopePage - Tests
+ * AnimalHoroscopePanel - Tests
  *
  * Cubre estados: loading, error 404, error 5xx, éxito
  */
@@ -7,7 +7,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { AnimalHoroscopePage } from './AnimalHoroscopePage';
+import { AnimalHoroscopePanel } from './AnimalHoroscopePanel';
 
 // Mock next/navigation
 const mockPush = vi.fn();
@@ -23,10 +23,15 @@ vi.mock('@/hooks/utils/useAnimalHoroscopePage', () => ({
   useAnimalHoroscopePage: () => mockUseAnimalHoroscopePage(),
 }));
 
-// Mock child components to simplify tests
-vi.mock('@/components/features/chinese-horoscope', () => ({
+// Mock child components to simplify tests (por ruta directa: el panel ya no
+// importa del barrel, para no crear un ciclo con el componente de ruta)
+vi.mock('./ChineseHoroscopeDetail', () => ({
   ChineseHoroscopeDetail: () => <div data-testid="horoscope-detail">Detalle horóscopo</div>,
+}));
+vi.mock('./ChineseAnimalSelector', () => ({
   ChineseAnimalSelector: () => <div data-testid="animal-selector">Selector</div>,
+}));
+vi.mock('./ElementSelectorModal', () => ({
   ElementSelectorModal: () => null,
 }));
 
@@ -37,10 +42,9 @@ vi.mock('@/lib/constants/routes', () => ({
   },
 }));
 
-function createBaseHookResult(overrides = {}) {
+function createBaseHookResult() {
   return {
     animal: 'rata' as const,
-    isValidAnimal: true,
     animalInfo: { nameEs: 'Rata', emoji: '🐭' },
     userAnimal: undefined,
     isMyAnimal: false,
@@ -49,12 +53,13 @@ function createBaseHookResult(overrides = {}) {
     isLoading: false,
     error: null,
     currentYear: 2025,
-    showElementModal: false,
+    needsElementSelection: false,
+    isResolvingUserAnimal: false,
     handleElementSelect: vi.fn(),
   };
 }
 
-describe('AnimalHoroscopePage', () => {
+describe('AnimalHoroscopePanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -66,7 +71,7 @@ describe('AnimalHoroscopePage', () => {
         isLoading: true,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByText(/cargando horóscopo/i)).toBeInTheDocument();
     });
@@ -83,7 +88,7 @@ describe('AnimalHoroscopePage', () => {
         error: error404,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByText(/en preparación/i)).toBeInTheDocument();
     });
@@ -98,7 +103,7 @@ describe('AnimalHoroscopePage', () => {
         error: error404,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByRole('button', { name: /volver al listado/i })).toBeInTheDocument();
     });
@@ -113,7 +118,7 @@ describe('AnimalHoroscopePage', () => {
         error: error404,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       await userEvent.click(screen.getByRole('button', { name: /volver al listado/i }));
 
@@ -132,7 +137,7 @@ describe('AnimalHoroscopePage', () => {
         error: error500,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument();
     });
@@ -147,7 +152,7 @@ describe('AnimalHoroscopePage', () => {
         error: error503,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByTestId('error-server')).toBeInTheDocument();
     });
@@ -160,7 +165,7 @@ describe('AnimalHoroscopePage', () => {
         horoscopeData: { id: 1, year: 2025 },
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.getByTestId('horoscope-detail')).toBeInTheDocument();
     });
@@ -171,7 +176,7 @@ describe('AnimalHoroscopePage', () => {
         horoscopeData: { id: 1, year: 2025 },
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
       expect(screen.queryByText(/en preparación/i)).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /reintentar/i })).not.toBeInTheDocument();
@@ -179,16 +184,43 @@ describe('AnimalHoroscopePage', () => {
   });
 
   describe('Estado: animal inválido', () => {
-    it('muestra mensaje de animal no válido', () => {
+    it('no renderiza nada: el mensaje lo sirve AnimalHoroscopeRoute en el servidor', () => {
       mockUseAnimalHoroscopePage.mockReturnValue({
         ...createBaseHookResult(),
-        isValidAnimal: false,
         animalInfo: null,
       });
 
-      render(<AnimalHoroscopePage />);
+      render(<AnimalHoroscopePanel />);
 
-      expect(screen.getByText(/animal no válido/i)).toBeInTheDocument();
+      expect(screen.queryByTestId('animal-horoscope-panel')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Selección de elemento (T-SEO-002)', () => {
+    it('ofrece elegir el elemento sin abrir el modal solo', () => {
+      mockUseAnimalHoroscopePage.mockReturnValue({
+        ...createBaseHookResult(),
+        element: null,
+        needsElementSelection: true,
+      });
+
+      render(<AnimalHoroscopePanel />);
+
+      expect(screen.getByTestId('element-selection-prompt')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Elegir mi elemento/i })).toBeInTheDocument();
+    });
+
+    it('no parpadea el aviso mientras se resuelve el animal del usuario', () => {
+      mockUseAnimalHoroscopePage.mockReturnValue({
+        ...createBaseHookResult(),
+        element: null,
+        needsElementSelection: true,
+        isResolvingUserAnimal: true,
+      });
+
+      render(<AnimalHoroscopePanel />);
+
+      expect(screen.queryByTestId('element-selection-prompt')).not.toBeInTheDocument();
     });
   });
 });

@@ -35,4 +35,7 @@ export type { YearSelectorModalProps } from './YearSelectorModal';
 export { YearInputBanner } from './YearInputBanner';
 export type { YearInputBannerProps } from './YearInputBanner';
 
-export { AnimalHoroscopePage } from './AnimalHoroscopePage';
+// `AnimalHoroscopeRoute`, `AnimalProfile` y `AnimalHoroscopePanel` se importan
+// por ruta directa a propósito, y no se exportan acá: el componente de ruta es
+// de servidor y arrastra las 12 fichas de contenido estático. Sacarlas del barrel
+// evita que un client component las meta en su bundle sin darse cuenta.

@@ -52,7 +52,8 @@ export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeD
           label={animalInfo.nameEs}
           className="text-6xl"
         />
-        <h1 className="mt-2 font-serif text-3xl">{displayName}</h1>
+        {/* h2, no h1: el h1 de `/horoscopo-chino/[animal]` es el de `AnimalProfile`. */}
+        <h2 className="mt-2 font-serif text-3xl">{displayName}</h2>
         <Badge variant="secondary" className="mt-2">
           Horóscopo {horoscope.year}
         </Badge>
@@ -84,7 +85,8 @@ export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeD
 
       {/* Lucky Elements */}
       <Card className="p-4">
-        <h3 className="mb-4 font-serif text-lg">Elementos de Suerte</h3>
+        {/* Con el año: la ficha del signo ya muestra su suerte tradicional. */}
+        <h3 className="mb-4 font-serif text-lg">Elementos de Suerte de {horoscope.year}</h3>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <div>
             <p className="text-muted-foreground text-sm">Números</p>
@@ -106,7 +108,10 @@ export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeD
       </Card>
 
       {/* Compatibility */}
-      <ChineseCompatibility compatibility={horoscope.compatibility} />
+      <ChineseCompatibility
+        compatibility={horoscope.compatibility}
+        title={`Afinidades de ${horoscope.year}`}
+      />
 
       {/* Monthly Highlights */}
       {horoscope.monthlyHighlights && (

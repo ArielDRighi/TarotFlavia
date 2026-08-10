@@ -175,7 +175,7 @@ describe('ChineseHoroscopeDetail', () => {
       const horoscope = createMockHoroscope();
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('Elementos de Suerte')).toBeInTheDocument();
+      expect(screen.getByText(/Elementos de Suerte de 2026/)).toBeInTheDocument();
     });
 
     it('should display lucky numbers', () => {
@@ -325,8 +325,16 @@ describe('ChineseHoroscopeDetail', () => {
       const horoscope = createMockHoroscope();
       const { container } = render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      const heading = container.querySelector('h1');
+      // h2 y no h1: el h1 de la ficha lo aporta `AnimalProfile` (T-SEO-002).
+      const heading = container.querySelector('h2');
       expect(heading).toHaveClass('font-serif');
+    });
+
+    it('should not render an h1 (el h1 de la página es la ficha estática)', () => {
+      const horoscope = createMockHoroscope();
+      const { container } = render(<ChineseHoroscopeDetail horoscope={horoscope} />);
+
+      expect(container.querySelector('h1')).toBeNull();
     });
 
     it('should use grid layout for areas with md:grid-cols-2', () => {
@@ -350,7 +358,7 @@ describe('ChineseHoroscopeDetail', () => {
       });
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('Elementos de Suerte')).toBeInTheDocument();
+      expect(screen.getByText(/Elementos de Suerte de 2026/)).toBeInTheDocument();
       // Should render empty strings without errors
       expect(screen.getByText('Números')).toBeInTheDocument();
     });
