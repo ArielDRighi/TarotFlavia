@@ -289,3 +289,36 @@ describe('useHolisticServices Hooks', () => {
     });
   });
 });
+
+// ============================================================================
+// Sembrado desde el servidor (T-SEO-003)
+// ============================================================================
+
+describe('useHolisticServices — sembrado desde el servidor', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('⚠️ T-SEO-003: sirve el catálogo sembrado en el primer render, sin esqueleto', () => {
+    const { result } = renderHook(() => useHolisticServices([mockService]), {
+      wrapper: createWrapper(createTestQueryClient()),
+    });
+
+    expect(result.current.data).toEqual([mockService]);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('⚠️ refetchea igual al montar: el precio y el catálogo cambian desde el admin', async () => {
+    // `initialDataUpdatedAt: 0` — sin eso, el `staleTime` dejaría fija la copia
+    // horneada en el HTML hasta que expire el ISR.
+    vi.mocked(holisticApi.getHolisticServices).mockResolvedValue([mockService]);
+
+    renderHook(() => useHolisticServices([mockService]), {
+      wrapper: createWrapper(createTestQueryClient()),
+    });
+
+    await waitFor(() =>
+      expect(vi.mocked(holisticApi.getHolisticServices)).toHaveBeenCalledTimes(1)
+    );
+  });
+});

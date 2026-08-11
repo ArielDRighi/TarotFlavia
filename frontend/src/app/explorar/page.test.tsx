@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import ExplorarPage from './page';
-import type { Tarotista } from '@/types';
+import type { PaginatedTarotistas, Tarotista } from '@/types';
 
 // Mock Next.js router
 vi.mock('next/navigation', () => ({
@@ -13,6 +13,14 @@ vi.mock('next/navigation', () => ({
 // Mock useTarotistas hook
 vi.mock('@/hooks/api/useTarotistas', () => ({
   useTarotistas: vi.fn(),
+}));
+
+// La ruta es un server component desde T-SEO-003: resuelve la primera página
+// del listado y se la pasa al componente cliente.
+const mockGetTarotistas = vi.fn();
+
+vi.mock('@/lib/api/tarotistas-api', () => ({
+  getTarotistas: () => mockGetTarotistas(),
 }));
 
 const mockTarotistas: Tarotista[] = [
@@ -78,8 +86,17 @@ function renderWithProviders(ui: React.ReactElement) {
 describe('ExplorarPage', () => {
   const mockPush = vi.fn();
 
+  const seededPage: PaginatedTarotistas = {
+    data: mockTarotistas,
+    total: 3,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetTarotistas.mockResolvedValue(seededPage);
     (useRouter as ReturnType<typeof vi.fn>).mockReturnValue({
       push: mockPush,
     });
@@ -94,7 +111,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       expect(screen.getByText('Nuestros Guías Espirituales')).toBeInTheDocument();
     });
@@ -107,7 +124,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       expect(screen.getByText('Encuentra al mentor ideal para tu camino')).toBeInTheDocument();
     });
@@ -120,7 +137,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       const title = screen.getByText('Nuestros Guías Espirituales');
       expect(title.className).toContain('font-serif');
@@ -136,7 +153,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       const searchInput = screen.getByPlaceholderText(/buscar/i);
       expect(searchInput).toBeInTheDocument();
@@ -150,7 +167,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       const filterButtons = screen.getAllByRole('button');
       const filterTexts = filterButtons.map((btn) => btn.textContent);
@@ -171,7 +188,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       const todosChip = screen.getByText('Todos');
       expect(todosChip.className).toContain('bg-primary');
@@ -185,7 +202,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       const filterButtons = screen.getAllByRole('button');
       const amorChip = filterButtons.find((btn) => btn.textContent === 'Amor');
@@ -209,7 +226,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       const skeletons = screen.getAllByTestId('skeleton-tarotist-photo');
       expect(skeletons.length).toBeGreaterThan(0);
@@ -223,7 +240,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       await waitFor(() => {
         expect(screen.getByText('Luna Mística')).toBeInTheDocument();
@@ -240,7 +257,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      const { container } = renderWithProviders(<ExplorarPage />);
+      const { container } = renderWithProviders(await ExplorarPage());
 
       const grid = container.querySelector('.grid');
       expect(grid?.className).toContain('grid-cols-1');
@@ -256,7 +273,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       await waitFor(() => {
         const verPerfilButtons = screen.getAllByText('Ver Perfil');
@@ -276,7 +293,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       await waitFor(() => {
         expect(screen.getByText('No encontramos guías con ese criterio')).toBeInTheDocument();
@@ -291,7 +308,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       await waitFor(() => {
         expect(screen.getByText('Limpiar filtros')).toBeInTheDocument();
@@ -306,7 +323,7 @@ describe('ExplorarPage', () => {
         error: null,
       });
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       await waitFor(() => {
         const clearButton = screen.getByText('Limpiar filtros');
@@ -330,7 +347,7 @@ describe('ExplorarPage', () => {
 
       (useTarotistas as ReturnType<typeof vi.fn>).mockImplementation(mockUseTarotistas);
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       const searchInput = screen.getByPlaceholderText(/buscar/i);
       fireEvent.change(searchInput, { target: { value: 'Luna' } });
@@ -339,7 +356,8 @@ describe('ExplorarPage', () => {
       await waitFor(
         () => {
           expect(mockUseTarotistas).toHaveBeenCalledWith(
-            expect.objectContaining({ search: 'Luna' })
+            expect.objectContaining({ search: 'Luna' }),
+            undefined
           );
         },
         { timeout: 500 }
@@ -358,7 +376,7 @@ describe('ExplorarPage', () => {
 
       (useTarotistas as ReturnType<typeof vi.fn>).mockImplementation(mockUseTarotistas);
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       const filterButtons = screen.getAllByRole('button');
       const amorChip = filterButtons.find((btn) => btn.textContent === 'Amor');
@@ -369,7 +387,8 @@ describe('ExplorarPage', () => {
 
       await waitFor(() => {
         expect(mockUseTarotistas).toHaveBeenCalledWith(
-          expect.objectContaining({ especialidad: 'Amor' })
+          expect.objectContaining({ especialidad: 'Amor' }),
+          undefined
         );
       });
     });
@@ -384,7 +403,7 @@ describe('ExplorarPage', () => {
 
       (useTarotistas as ReturnType<typeof vi.fn>).mockImplementation(mockUseTarotistas);
 
-      renderWithProviders(<ExplorarPage />);
+      renderWithProviders(await ExplorarPage());
 
       // Select a specialty first
       const filterButtons = screen.getAllByRole('button');
@@ -396,7 +415,8 @@ describe('ExplorarPage', () => {
 
       await waitFor(() => {
         expect(mockUseTarotistas).toHaveBeenCalledWith(
-          expect.objectContaining({ especialidad: 'Amor' })
+          expect.objectContaining({ especialidad: 'Amor' }),
+          undefined
         );
       });
 
@@ -408,8 +428,53 @@ describe('ExplorarPage', () => {
       fireEvent.click(todosChip);
 
       await waitFor(() => {
-        expect(mockUseTarotistas).toHaveBeenCalledWith(expect.objectContaining({}));
+        expect(mockUseTarotistas).toHaveBeenCalledWith(
+          { search: undefined, especialidad: undefined },
+          seededPage
+        );
       });
+    });
+  });
+
+  describe('Contenido indexable (T-SEO-003)', () => {
+    it('⚠️ resuelve la primera página en el servidor y la siembra en el cliente', async () => {
+      const { useTarotistas } = await import('@/hooks/api/useTarotistas');
+      const mockUseTarotistas = vi.fn().mockReturnValue({
+        data: seededPage,
+        isLoading: false,
+        error: null,
+      });
+      (useTarotistas as ReturnType<typeof vi.fn>).mockImplementation(mockUseTarotistas);
+
+      renderWithProviders(await ExplorarPage());
+
+      expect(mockGetTarotistas).toHaveBeenCalledTimes(1);
+      expect(mockUseTarotistas).toHaveBeenCalledWith(
+        { search: undefined, especialidad: undefined },
+        seededPage
+      );
+      expect(screen.getByText('Luna Mística')).toBeInTheDocument();
+    });
+
+    it('⚠️ si la API falla, la ruta sigue sirviendo su contenido propio', async () => {
+      mockGetTarotistas.mockRejectedValue(new Error('API caída'));
+      const { useTarotistas } = await import('@/hooks/api/useTarotistas');
+      const mockUseTarotistas = vi.fn().mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: null,
+      });
+      (useTarotistas as ReturnType<typeof vi.fn>).mockImplementation(mockUseTarotistas);
+
+      renderWithProviders(await ExplorarPage());
+
+      expect(mockUseTarotistas).toHaveBeenCalledWith(
+        { search: undefined, especialidad: undefined },
+        undefined
+      );
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Cómo elegir un guía espiritual' })
+      ).toBeInTheDocument();
     });
   });
 });

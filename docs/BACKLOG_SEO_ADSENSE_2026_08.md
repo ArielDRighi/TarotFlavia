@@ -39,10 +39,12 @@ Muestra estratificada de 62 de las 178 URLs del sitemap, midiendo **palabras pro
 | Fichas de ritual y servicio | 9 | 243–422 | ✅ |
 | Horóscopo chino por animal | 12 | 3 → **355–401** | ✅ T-SEO-002 (10-ago) |
 | **Signos del horóscopo** | **12** | **31** | ❌ T-SEO-004 |
-| **Listados y hubs** (`/premium` 3, `/servicios` 5, `/explorar` 20, `/enciclopedia/tarot` 24, `/enciclopedia/guias` 13) | **5** | 3–24 | ❌ T-SEO-003 |
+| Listados y hubs (`/premium`, `/servicios`, `/explorar`, `/enciclopedia/tarot`, `/enciclopedia/guias`, `/enciclopedia`, `/enciclopedia/astrologia` + 3 listados astro, `/contacto`) | 11 | 3–70 → **183–822** | ✅ T-SEO-003 (10-ago) |
 
 **29 de 62 URLs muestreadas superan las 150 palabras propias** (antes de este trabajo: 13).
 Con T-SEO-002 cerrada, **41 de 62**: los 12 animales del horóscopo chino pasaron de 3 a 355–401.
+Con T-SEO-003 cerrada, la corrida completa del guardarraíl da **153 de 178 URLs** sobre las 120
+palabras: quedan los 12 signos (T-SEO-004) y 13 fichas entre 109 y 119.
 
 ### El patrón que ya funciona (replicalo, no inventes otro)
 
@@ -143,7 +145,7 @@ lógica en `app/`.
 | --- | --- | --- | --- | --- |
 | T-SEO-001 | Guardarraíl automático de contenido indexable ✅ | Frontend/CI | 🔴 Crítica | 2 pts |
 | T-SEO-002 | Horóscopo chino por animal: 12 URLs sirven 3 palabras ✅ | Frontend | 🔴 Crítica | 3 pts |
-| T-SEO-003 | Listados y hubs sin contenido para el crawler | Frontend | 🟠 Alta | 2 pts |
+| T-SEO-003 | Listados y hubs sin contenido para el crawler ✅ | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-004 | Signos del horóscopo: ficha estática del signo | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) | Infra | 🟠 Alta | 2 pts |
 | T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) | Frontend | 🟡 Media | 1.5 pts |
@@ -335,6 +337,7 @@ existía solo para no reabrir el modal descartado.
 ## T-SEO-003: Listados y Hubs sin Contenido para el Crawler
 
 **Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** ninguna
+**Estado:** ✅ COMPLETADA (10-ago-2026)
 
 ### Problema
 
@@ -353,24 +356,103 @@ sirve 3 palabras.
 
 Mismo patrón del punto *El patrón que ya funciona*, aplicado a listados en vez de fichas:
 
-- [ ] `/enciclopedia/tarot` — la ruta ya es server; resolver `getCards()` y pasar por `initialData` a
+- [x] `/enciclopedia/tarot` — la ruta ya es server; resolver `getCards()` y pasar por `initialData` a
       `EnciclopediaContent`.
-- [ ] `/enciclopedia/guias` — ídem con `GuiasContent`.
-- [ ] `/servicios` — ídem con `ServiciosPage`.
-- [ ] `/explorar` — listado de tarotistas; ojo que el endpoint es **paginado** (ver contrato en
+- [x] `/enciclopedia/guias` — ídem con `GuiasContent`.
+- [x] `/servicios` — ídem con `ServiciosPage`.
+- [x] `/explorar` — listado de tarotistas; ojo que el endpoint es **paginado** (ver contrato en
       `.github/copilot-instructions.md`): sembrar solo la primera página.
-- [ ] `/premium` — revisar por qué sirve 3 palabras: si el contenido de planes viene de la API, sembrarlo;
-      si es estático, entender qué lo está bloqueando.
-- [ ] **Sumados por T-SEO-001** (la muestra manual no los había medido): `/enciclopedia` 70,
+- [x] `/premium` — revisar por qué sirve 3 palabras: si el contenido de planes viene de la API, sembrarlo;
+      si es estático, entender qué lo está bloqueando. **Era lo segundo**: ver *Notas técnicas*.
+- [x] **Sumados por T-SEO-001** (la muestra manual no los había medido): `/enciclopedia` 70,
       `/enciclopedia/astrologia` 70, `/enciclopedia/astrologia/casas` 26, `/enciclopedia/astrologia/planetas` 18,
       `/enciclopedia/astrologia/signos` 23 y `/contacto` 34. Los cinco primeros son hubs de listado, mismo
       patrón; `/contacto` es un formulario y quizá amerite texto propio en vez de sembrado.
 
 ### Criterios de aceptación
 
-- [ ] Las 11 rutas superan las 120 palabras propias, verificado con
-      `npm run check:indexable -- --base-url https://auguriatarot.com`.
-- [ ] Sin regresión en la interactividad (filtros, búsqueda, tabs).
+- [x] Las 11 rutas superan las 120 palabras propias, verificado con
+      `npm run check:indexable -- --base-url http://localhost:3099` contra el build de producción en
+      Docker (chrome medido en 39 palabras):
+
+      | Ruta | Antes | Ahora |
+      | --- | --- | --- |
+      | `/premium` | 3 | **277** |
+      | `/servicios` | 5 | **255** |
+      | `/enciclopedia/guias` | 13 | **427** |
+      | `/enciclopedia/astrologia/planetas` | 18 | **595** |
+      | `/explorar` | 20 | **208** |
+      | `/enciclopedia/astrologia/signos` | 23 | **649** |
+      | `/enciclopedia/tarot` | 24 | **511** |
+      | `/enciclopedia/astrologia/casas` | 26 | **822** |
+      | `/contacto` | 34 | **183** |
+      | `/enciclopedia` | 70 | **270** |
+      | `/enciclopedia/astrologia` | 70 | **244** |
+
+      El total del sitio pasó de **48 URLs bajo el umbral a 25**: quedan los 12 signos (T-SEO-004) y
+      las 13 fichas al borde (109–119), ninguna de esta tarea.
+- [x] Sin regresión en la interactividad (filtros, búsqueda, tabs): los tests de `/explorar`
+      (búsqueda con debounce, chips de especialidad, estado vacío, navegación al perfil) y de la
+      enciclopedia siguen verdes, adaptados al segundo argumento de los hooks.
+
+### Notas técnicas
+
+- **`/premium` no era un problema de sembrado.** Toda la página esperaba a `usePublicPlans` detrás de un
+  esqueleto de pantalla completa, así que la comparativa, las FAQ y el "sin compromiso" —contenido
+  estático que no depende de la API— no llegaban nunca al crawler. Ahora lo único que espera es el
+  número del precio (`PriceSkeleton`). El sembrado se agregó igual, para que el HTML salga con el precio
+  real.
+- **Dos mecanismos, no uno.** Sembrar resuelve el caso feliz, pero deja el contenido de cada URL atado a
+  que la API responda durante el build. Por eso cada ruta suma además un bloque editorial propio
+  ([listing-intros.data.ts](../frontend/src/lib/constants/listing-intros.data.ts) +
+  [ListingIntro.tsx](../frontend/src/components/common/ListingIntro.tsx)): texto escrito, único por ruta,
+  que se renderiza siempre en el servidor. Es el piso garantizado —130 palabras mínimo, verificadas por
+  `listing-intros.data.test.ts`— y de paso evita que estas URLs sean listas de enlaces sin texto propio,
+  que es exactamente lo que Google llama contenido de poco valor.
+- **Los listados degradan, las fichas no.** `resolveListingData` devuelve `undefined` si la API falla, al
+  revés de `resolveRouteResource`, que propaga. La diferencia es deliberada y está documentada en
+  [route-data.ts](../frontend/src/lib/metadata/route-data.ts): una ficha sin su recurso no tiene nada que
+  mostrar; un listado tiene su introducción y el cliente reintenta al montar. `getArticlesByCategories`
+  aplica el mismo criterio por categoría: una caída no deja sin contenido a las otras seis guías.
+- **`initialDataUpdatedAt: 0` donde el dato cambia** (planes, servicios, tarotistas) y no donde es
+  estático (cartas, artículos), siguiendo el criterio de T-PROD-024.
+- **`/explorar` dejó de ser un client component.** El `useRouter` que la hacía cliente entera vive ahora
+  en `ExplorarContent`; la ruta resuelve la primera página del endpoint paginado. El sembrado se aplica
+  **solo con los filtros por defecto**: con búsqueda o especialidad activas la clave de caché es otra y
+  sembrarla con el listado sin filtrar mostraría resultados que no corresponden.
+- **`GUIDE_CATEGORIES` se movió a `encyclopedia-article.types.ts`**: la ruta (server) y `GuiasContent`
+  (cliente) necesitan la misma lista, y el server component no debería importar el módulo cliente solo
+  para leer una constante.
+- **ISR:** 1 día para la enciclopedia (contenido estático, igual que las fichas) y 1 hora para
+  `/premium`, `/servicios` y `/explorar`, donde precios y listados se editan desde el admin.
+- **El soft-404 sigue vivo** (11 rutas responden 200): es T-SEO-006, fuera de alcance acá.
+
+### Ajustes tras la revisión
+
+- **`ServiciosPage` guardaba por `isError`**, justo el anti-patrón que documenta *El patrón que ya
+  funciona*. Antes no molestaba porque sin sembrado un fetch fallido no tenía `data` que perder; con
+  `initialData` + `initialDataUpdatedAt: 0` la query refetchea al montar, y un refetch fallido en
+  background poblaba `error` **conservando el catálogo bueno**: al usuario se le borraba de la pantalla
+  una grilla que ya estaba viendo. Ahora el error se muestra solo si además no hay datos.
+- **Un `[]` del servidor ya no cuenta como sembrado.** En cartas y artículos no hay
+  `initialDataUpdatedAt: 0` (contenido estático), así que un 200 con lista vacía —ventana de migración o
+  seed— se estampaba como recién traído y el `staleTime` bloqueaba el refetch: la página quedaba vacía
+  hasta 1 h en el cliente y hasta 24 h en el HTML cacheado. Se siembra solo si hay algo que sembrar.
+- **La degradación dejó de ser muda.** `resolveListingData` y `getArticlesByCategories` logean el fallo:
+  con el ISR, una caída de un segundo dejaba la ruta sin listado por 24 h y no quedaba rastro en ningún
+  log. Es la misma clase de agujero que T-SEO-001 vino a cerrar.
+- **La ruta `/explorar` importa `ExplorarContent` por su path directo** y el barrel dejó de exportarlo,
+  igual que en T-SEO-002: el barrel arrastraba todo el marketplace al grafo de una ruta de servidor.
+- **Tres correcciones al contenido editorial**, todas verificables por un revisor de AdSense en dos
+  clics: la enciclopedia no ofrece "significado en combinación" (sí palabras clave y cartas
+  relacionadas); la tarjeta del listado de guías no muestra años de experiencia ni lecturas realizadas
+  (eso está en el perfil); y el plazo de respuesta de `/contacto` estaba dicho dos veces en la misma
+  página, con "horas" en un lado y "horas hábiles" en el otro.
+- **Test de integración de punta a punta** en
+  [signos/seeding.test.tsx](../frontend/src/app/enciclopedia/astrologia/signos/seeding.test.tsx): ruta
+  real, hook real y `QueryClient` real, con la API como único mock. Los tests de ruta verificaban la
+  cañería (que el hook reciba el dato), no que el dato terminara en el HTML, que es lo que mide el
+  crawler.
 
 ---
 

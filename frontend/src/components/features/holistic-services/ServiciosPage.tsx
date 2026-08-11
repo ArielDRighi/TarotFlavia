@@ -15,12 +15,22 @@ import { ErrorDisplay } from '@/components/ui/error-display';
 import { useHolisticServices } from '@/hooks/api/useHolisticServices';
 import { useAuthStore } from '@/stores/authStore';
 import { ROUTES } from '@/lib/constants/routes';
+import type { HolisticService } from '@/types/holistic-service.types';
 import { ServiceCard } from './ServiceCard';
 
 const SKELETON_COUNT = 6;
 
-export function ServiciosPage() {
-  const { data: services, isLoading, isError, refetch } = useHolisticServices();
+export interface ServiciosPageProps {
+  /**
+   * Catálogo resuelto por la ruta en el servidor (T-SEO-003). Sin esto la
+   * página servía 5 palabras propias: el crawler veía el título y seis
+   * esqueletos.
+   */
+  initialServices?: HolisticService[];
+}
+
+export function ServiciosPage({ initialServices }: ServiciosPageProps = {}) {
+  const { data: services, isLoading, isError, refetch } = useHolisticServices(initialServices);
   const { isAuthenticated } = useAuthStore();
 
   return (
@@ -58,8 +68,12 @@ export function ServiciosPage() {
         </div>
       )}
 
-      {/* Error state */}
-      {!isLoading && isError && (
+      {/* Error state — se guarda por `!services`, NUNCA solo por `isError`: desde
+          T-SEO-003 el catálogo llega sembrado desde el servidor y la query
+          refetchea al montar. Un refetch fallido en background puebla `error`
+          conservando el `data` bueno, así que mirar `isError` a secas borraba de
+          la pantalla un catálogo que el usuario ya estaba viendo. */}
+      {!isLoading && isError && !services && (
         <ErrorDisplay
           data-testid="servicios-error-state"
           message="Ocurrió un error al cargar los servicios. Por favor intentá de nuevo."
@@ -68,7 +82,7 @@ export function ServiciosPage() {
       )}
 
       {/* Empty state */}
-      {!isLoading && !isError && services && services.length === 0 && (
+      {!isLoading && services && services.length === 0 && (
         <EmptyState
           data-testid="servicios-empty-state"
           icon={<PackageSearch />}
@@ -78,7 +92,7 @@ export function ServiciosPage() {
       )}
 
       {/* Services grid */}
-      {!isLoading && !isError && services && services.length > 0 && (
+      {!isLoading && services && services.length > 0 && (
         <div
           data-testid="servicios-grid"
           className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"

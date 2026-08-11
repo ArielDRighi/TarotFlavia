@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AxiosError, AxiosHeaders } from 'axios';
 
-import { isNotFoundError, resolveRouteResource, safeStaticParams } from './route-data';
+import {
+  isNotFoundError,
+  resolveListingData,
+  resolveRouteResource,
+  safeStaticParams,
+} from './route-data';
 
 const mockNotFound = vi.fn(() => {
   throw new Error('NEXT_NOT_FOUND');
@@ -62,6 +67,31 @@ describe('resolveRouteResource', () => {
     const fetcher = () => Promise.reject(axiosErrorWithStatus(503));
 
     await expect(resolveRouteResource(fetcher)).rejects.toThrow('boom');
+    expect(mockNotFound).not.toHaveBeenCalled();
+  });
+});
+
+describe('resolveListingData', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('devuelve el listado cuando la API responde', async () => {
+    await expect(resolveListingData(async () => [{ id: 1 }])).resolves.toEqual([{ id: 1 }]);
+  });
+
+  it('⚠️ T-SEO-003: degrada a undefined si la API falla, sin tumbar el listado', async () => {
+    // A diferencia de una ficha, un listado tiene contenido propio que sirve
+    // igual: fallar el render dejaría la ruta entera caída por un blip de API.
+    await expect(resolveListingData(() => Promise.reject(new Error('API caída')))).resolves.toBe(
+      undefined
+    );
+  });
+
+  it('no dispara notFound() cuando la API responde 404', async () => {
+    const fetcher = () => Promise.reject(axiosErrorWithStatus(404));
+
+    await expect(resolveListingData(fetcher)).resolves.toBe(undefined);
     expect(mockNotFound).not.toHaveBeenCalled();
   });
 });

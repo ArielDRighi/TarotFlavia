@@ -136,4 +136,12 @@ describe('EnciclopediaPage (Hub principal)', () => {
     const hub = screen.getByTestId('encyclopedia-hub');
     expect(hub.textContent ?? '').not.toMatch(/[🃏⭐📚]/u);
   });
+
+  it('⚠️ T-SEO-003: renderiza la introducción editorial indexable del hub', () => {
+    renderWithProviders(<EnciclopediaPage />);
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Cómo usar la Enciclopedia Mística' })
+    ).toBeInTheDocument();
+  });
 });

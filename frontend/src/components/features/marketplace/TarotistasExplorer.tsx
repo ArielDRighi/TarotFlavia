@@ -9,6 +9,7 @@ import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import type { PaginatedTarotistas } from '@/types';
 
 const SPECIALTIES = ['Todos', 'Amor', 'Dinero', 'Carrera', 'Salud', 'Espiritual'] as const;
 
@@ -18,6 +19,12 @@ const SPECIALTIES = ['Todos', 'Amor', 'Dinero', 'Carrera', 'Salud', 'Espiritual'
 export interface TarotistasExplorerProps {
   /** Callback when a tarotista profile is clicked */
   onViewProfile: (id: number) => void;
+  /**
+   * Primera página del listado, resuelta por la ruta en el servidor
+   * (T-SEO-003). Solo siembra la vista sin filtros: con búsqueda o especialidad
+   * la clave de caché es otra y hay que pedirle a la API.
+   */
+  initialTarotistas?: PaginatedTarotistas;
 }
 
 /**
@@ -32,7 +39,7 @@ export interface TarotistasExplorerProps {
  * - Loading skeleton states
  * - Empty state with clear filters action
  */
-export function TarotistasExplorer({ onViewProfile }: TarotistasExplorerProps) {
+export function TarotistasExplorer({ onViewProfile, initialTarotistas }: TarotistasExplorerProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('Todos');
 
@@ -45,8 +52,12 @@ export function TarotistasExplorer({ onViewProfile }: TarotistasExplorerProps) {
     especialidad: selectedSpecialty !== 'Todos' ? selectedSpecialty : undefined,
   };
 
+  // El sembrado del servidor corresponde al listado sin filtrar: aplicarlo con
+  // filtros activos mostraría resultados que no coinciden con lo pedido.
+  const isDefaultView = !filters.search && !filters.especialidad;
+
   // Fetch tarotistas with filters
-  const { data, isLoading } = useTarotistas(filters);
+  const { data, isLoading } = useTarotistas(filters, isDefaultView ? initialTarotistas : undefined);
 
   const handleClearFilters = () => {
     setSearchTerm('');

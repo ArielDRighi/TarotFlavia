@@ -309,3 +309,41 @@ describe('articleKeys', () => {
     expect(articleKeys.search('aries')).toContain('encyclopedia');
   });
 });
+
+// ============================================================================
+// Sembrado desde el servidor (T-SEO-003)
+// ============================================================================
+
+describe('useArticlesByCategory — sembrado desde el servidor', () => {
+  const seededArticle: ArticleSummary = {
+    id: 99,
+    slug: 'aries',
+    nameEs: 'Aries',
+    category: ArticleCategory.ZODIAC_SIGN,
+    snippet: 'El primer signo del zodiaco.',
+    imageUrl: null,
+    sortOrder: 1,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('⚠️ T-SEO-003: sirve los artículos sembrados en el primer render, sin esqueleto', () => {
+    const { result } = renderHook(
+      () => useArticlesByCategory(ArticleCategory.ZODIAC_SIGN, [seededArticle]),
+      { wrapper: createWrapper() }
+    );
+
+    expect(result.current.data).toEqual([seededArticle]);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('no refetchea al montar: los artículos son contenido estático', () => {
+    renderHook(() => useArticlesByCategory(ArticleCategory.ZODIAC_SIGN, [seededArticle]), {
+      wrapper: createWrapper(),
+    });
+
+    expect(vi.mocked(encyclopediaArticlesApi.getArticlesByCategory)).not.toHaveBeenCalled();
+  });
+});

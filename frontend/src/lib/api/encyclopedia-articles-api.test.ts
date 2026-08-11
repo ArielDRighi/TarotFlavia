@@ -8,6 +8,7 @@ import {
   getArticleSnippet,
   getArticle,
   getArticlesByCategory,
+  getArticlesByCategories,
   globalSearch,
 } from './encyclopedia-articles-api';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
@@ -196,5 +197,57 @@ describe('encyclopedia articles API functions', () => {
       expect(result.articles).toHaveLength(0);
       expect(result.total).toBe(0);
     });
+  });
+});
+
+// ============================================================================
+// Sembrado de listados desde el servidor (T-SEO-003)
+// ============================================================================
+
+describe('getArticlesByCategories', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const article = {
+    id: 1,
+    slug: 'guia-tarot',
+    nameEs: 'Guía del Tarot',
+    category: ArticleCategory.GUIDE_TAROT,
+    snippet: 'Cómo hacer una lectura de tarot.',
+    imageUrl: null,
+    sortOrder: 1,
+  };
+
+  it('resuelve todas las categorías pedidas y las devuelve indexadas', async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: [article] });
+
+    const result = await getArticlesByCategories([
+      ArticleCategory.GUIDE_TAROT,
+      ArticleCategory.GUIDE_RITUAL,
+    ]);
+
+    expect(result[ArticleCategory.GUIDE_TAROT]).toEqual([article]);
+    expect(result[ArticleCategory.GUIDE_RITUAL]).toEqual([article]);
+    expect(vi.mocked(apiClient.get)).toHaveBeenCalledTimes(2);
+  });
+
+  it('⚠️ T-SEO-003: una categoría caída no deja sin contenido a las demás', async () => {
+    vi.mocked(apiClient.get)
+      .mockRejectedValueOnce(new Error('API caída'))
+      .mockResolvedValueOnce({ data: [article] });
+
+    const result = await getArticlesByCategories([
+      ArticleCategory.GUIDE_TAROT,
+      ArticleCategory.GUIDE_RITUAL,
+    ]);
+
+    expect(result[ArticleCategory.GUIDE_TAROT]).toBeUndefined();
+    expect(result[ArticleCategory.GUIDE_RITUAL]).toEqual([article]);
+  });
+
+  it('devuelve un objeto vacío si no se piden categorías', async () => {
+    await expect(getArticlesByCategories([])).resolves.toEqual({});
+    expect(vi.mocked(apiClient.get)).not.toHaveBeenCalled();
   });
 });

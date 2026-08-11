@@ -59,4 +59,12 @@ describe('AstrologiaPage (/enciclopedia/astrologia)', () => {
       '/enciclopedia/astrologia/casas'
     );
   });
+
+  it('⚠️ T-SEO-003: renderiza la introducción editorial indexable del hub', () => {
+    render(<AstrologiaPage />);
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Los tres ejes de una carta astral' })
+    ).toBeInTheDocument();
+  });
 });

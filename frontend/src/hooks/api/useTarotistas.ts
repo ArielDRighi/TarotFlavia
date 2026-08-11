@@ -8,7 +8,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getTarotistas, getTarotistaById } from '@/lib/api/tarotistas-api';
-import type { TarotistaFilters } from '@/types';
+import type { PaginatedTarotistas, TarotistaFilters } from '@/types';
 
 // ============================================================================
 // Query Keys (for consistency and type safety)
@@ -29,13 +29,21 @@ export const tarotistaQueryKeys = {
 /**
  * Hook to fetch paginated list of tarotistas with optional filters
  * @param filters - Optional filters (search, especialidad, orderBy, page, limit)
+ * @param initialData primera página resuelta por la ruta `/explorar` en el
+ *   servidor (T-SEO-003). Solo debe pasarse cuando los filtros son los del
+ *   primer render: con otros filtros la clave de caché es otra y sembrarla con
+ *   el listado sin filtrar mostraría resultados que no corresponden.
  * @returns TanStack Query result with tarotistas data
  */
-export function useTarotistas(filters?: TarotistaFilters) {
+export function useTarotistas(filters?: TarotistaFilters, initialData?: PaginatedTarotistas) {
   return useQuery({
     queryKey: tarotistaQueryKeys.list(filters),
     queryFn: () => getTarotistas(filters),
     staleTime: 5 * 60 * 1000, // 5 minutes - catalog data doesn't change often
+    initialData,
+    // El listado y las valoraciones cambian: sin esto, `initialData` se estampa
+    // como recién traído y con el `staleTime` el cliente NO refetchea al montar.
+    initialDataUpdatedAt: 0,
   });
 }
 

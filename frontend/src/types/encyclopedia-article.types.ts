@@ -54,6 +54,22 @@ export interface GlobalSearchResult {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+/**
+ * Categorías de guía en orden de exhibición. La guía de Tarot va primera
+ * (BUG-017). Vive acá y no en `GuiasContent` porque la ruta `/enciclopedia/guias`
+ * —un server component— necesita la misma lista para sembrar el listado sin
+ * importar el componente cliente (T-SEO-003).
+ */
+export const GUIDE_CATEGORIES: ArticleCategory[] = [
+  ArticleCategory.GUIDE_TAROT,
+  ArticleCategory.GUIDE_NUMEROLOGY,
+  ArticleCategory.GUIDE_PENDULUM,
+  ArticleCategory.GUIDE_BIRTH_CHART,
+  ArticleCategory.GUIDE_RITUAL,
+  ArticleCategory.GUIDE_HOROSCOPE,
+  ArticleCategory.GUIDE_CHINESE,
+];
+
 export const ARTICLE_CATEGORY_LABELS: Record<ArticleCategory, string> = {
   [ArticleCategory.ZODIAC_SIGN]: 'Signos Zodiacales',
   [ArticleCategory.PLANET]: 'Planetas',

@@ -374,3 +374,37 @@ describe('encyclopediaKeys', () => {
     expect(encyclopediaKeys.navigation('the-fool')).toContain('the-fool');
   });
 });
+
+// ============================================================================
+// Sembrado desde el servidor (T-SEO-003)
+// ============================================================================
+
+describe('useCards — sembrado desde el servidor', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('⚠️ T-SEO-003: sirve las cartas sembradas en el primer render, sin esqueleto', () => {
+    const { result } = renderHook(() => useCards(undefined, [mockCardSummary]), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.data).toEqual([mockCardSummary]);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('no refetchea al montar: el listado de la enciclopedia es contenido estático', () => {
+    renderHook(() => useCards(undefined, [mockCardSummary]), { wrapper: createWrapper() });
+
+    expect(vi.mocked(encyclopediaApi.getCards)).not.toHaveBeenCalled();
+  });
+
+  it('sin sembrado sigue pidiendo las cartas a la API', async () => {
+    vi.mocked(encyclopediaApi.getCards).mockResolvedValue([mockCardSummary]);
+
+    const { result } = renderHook(() => useCards(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(vi.mocked(encyclopediaApi.getCards)).toHaveBeenCalledTimes(1);
+  });
+});

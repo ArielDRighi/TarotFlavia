@@ -20,6 +20,12 @@ interface ArticleListPageContentProps {
   subtitle: string;
   /** Base path for detail URLs — slug will be appended: `${detailHrefPrefix}/${slug}` */
   detailHrefPrefix: string;
+  /**
+   * Artículos resueltos por la ruta en el servidor (T-SEO-003). Siembran la
+   * caché para que el HTML que ve Googlebot traiga la lista en vez de seis
+   * esqueletos: los tres listados servían entre 18 y 26 palabras propias.
+   */
+  initialArticles?: ArticleSummary[];
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -61,8 +67,17 @@ export function ArticleListPageContent({
   title,
   subtitle,
   detailHrefPrefix,
+  initialArticles,
 }: ArticleListPageContentProps) {
-  const { data: articles, isLoading } = useArticlesByCategory(category);
+  // Un `[]` del servidor NO es un sembrado válido: sin `initialDataUpdatedAt: 0`
+  // React Query lo estampa como recién traído y no refetchea durante el
+  // `staleTime`, así que un 200 con lista vacía (ventana de migración o seed)
+  // congelaría la página vacía. Sembrar solo cuando hay algo que sembrar deja
+  // que el cliente lo reintente.
+  const { data: articles, isLoading } = useArticlesByCategory(
+    category,
+    initialArticles?.length ? initialArticles : undefined
+  );
 
   const isAstro = isAstroCategory(category);
   const heroImage = isAstro ? getAstroCategoryHero(category) : undefined;

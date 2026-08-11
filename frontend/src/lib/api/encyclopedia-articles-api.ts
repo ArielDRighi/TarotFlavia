@@ -35,6 +35,41 @@ export async function getArticlesByCategory(category: ArticleCategory): Promise<
   return response.data;
 }
 
+/**
+ * Resuelve varias categorías en paralelo, para sembrar un listado desde el
+ * servidor (T-SEO-003 — lo usa `/enciclopedia/guias`, que muestra siete).
+ *
+ * Cada categoría degrada por separado: una que falle queda fuera del resultado
+ * y el cliente la vuelve a pedir, en vez de dejar sin contenido a las otras
+ * seis. Mismo criterio que `resolveListingData`.
+ */
+export async function getArticlesByCategories(
+  categories: ArticleCategory[]
+): Promise<Partial<Record<ArticleCategory, ArticleSummary[]>>> {
+  const resolved = await Promise.all(
+    categories.map(async (category) => {
+      try {
+        return { category, articles: await getArticlesByCategory(category) };
+      } catch (error) {
+        // Igual que `resolveListingData`: degradar sin dejar rastro convierte
+        // una API caída en una página que se ve bien y no tiene contenido.
+        console.warn(`[T-SEO-003] categoría "${category}" no resuelta:`, error);
+        return { category, articles: undefined };
+      }
+    })
+  );
+
+  return resolved.reduce<Partial<Record<ArticleCategory, ArticleSummary[]>>>(
+    (accumulator, { category, articles }) => {
+      if (articles) {
+        accumulator[category] = articles;
+      }
+      return accumulator;
+    },
+    {}
+  );
+}
+
 export async function globalSearch(term: string): Promise<GlobalSearchResult> {
   const params = new URLSearchParams({ q: term });
   const response = await apiClient.get<GlobalSearchResult>(

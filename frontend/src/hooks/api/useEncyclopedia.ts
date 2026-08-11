@@ -14,7 +14,7 @@ import {
   getRelatedCards,
   getCardNavigation,
 } from '@/lib/api/encyclopedia-api';
-import type { CardDetail, CardFilters, Suit } from '@/types/encyclopedia.types';
+import type { CardDetail, CardFilters, CardSummary, Suit } from '@/types/encyclopedia.types';
 
 const STALE_TIME_STATIC = 1000 * 60 * 60; // 1 hour — static encyclopedia data
 const STALE_TIME_SEARCH = 1000 * 60 * 5; // 5 minutes — search results
@@ -34,11 +34,18 @@ export const encyclopediaKeys = {
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 
-export function useCards(filters?: CardFilters) {
+/**
+ * @param initialData cartas ya resueltas por la ruta `/enciclopedia/tarot` en el
+ *   servidor. Siembra la caché para que el primer render —el HTML que ve
+ *   Googlebot— traiga el listado en vez del esqueleto (T-SEO-003). Con
+ *   `STALE_TIME_STATIC` no dispara refetch inmediato: el mazo no cambia.
+ */
+export function useCards(filters?: CardFilters, initialData?: CardSummary[]) {
   return useQuery({
     queryKey: encyclopediaKeys.cards(filters),
     queryFn: () => getCards(filters),
     staleTime: STALE_TIME_STATIC,
+    initialData,
   });
 }
 

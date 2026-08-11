@@ -15,6 +15,19 @@ import {
   useSearchCards,
 } from '@/hooks/api/useEncyclopedia';
 import { ArcanaType, Suit } from '@/types/encyclopedia.types';
+import type { CardSummary } from '@/types/encyclopedia.types';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface EnciclopediaContentProps {
+  /**
+   * Cartas resueltas por la ruta en el servidor (T-SEO-003). Siembran la vista
+   * por defecto —todas las cartas— para que el HTML que ve Googlebot traiga el
+   * listado en vez del esqueleto. Los filtros y la búsqueda siguen pidiendo a la
+   * API con su propia clave de caché.
+   */
+  initialCards?: CardSummary[];
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -32,7 +45,7 @@ import { ArcanaType, Suit } from '@/types/encyclopedia.types';
  * - `searchQuery`: debounced query used for API calls (updated only via onSearch callback)
  * This separation ensures the debounce in EncyclopediaSearchBar is actually effective.
  */
-export function EnciclopediaContent() {
+export function EnciclopediaContent({ initialCards }: EnciclopediaContentProps = {}) {
   const [selectedCategory, setSelectedCategory] = useState<ArcanaType | undefined>(undefined);
   const [selectedSuit, setSelectedSuit] = useState<Suit | null>(null);
   // inputValue: controlled input state (immediate, no debounce)
@@ -42,7 +55,10 @@ export function EnciclopediaContent() {
 
   // ─── Queries ─────────────────────────────────────────────────────────────
 
-  const allCards = useCards();
+  // Un `[]` del servidor no siembra: ver el mismo comentario en
+  // `ArticleListPageContent`. Con el `staleTime` estático, congelaría el mazo
+  // vacío hasta una hora en el cliente.
+  const allCards = useCards(undefined, initialCards?.length ? initialCards : undefined);
   const majorCards = useMajorArcana();
   const suitCards = useCardsBySuit(selectedSuit ?? Suit.WANDS);
   const searchResults = useSearchCards(searchQuery);

@@ -165,3 +165,30 @@ describe('usePublicPlans', () => {
     expect(result.current.isStale).toBe(false);
   });
 });
+
+// ============================================================================
+// Sembrado desde el servidor (T-SEO-003)
+// ============================================================================
+
+describe('usePublicPlans — sembrado desde el servidor', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('⚠️ T-SEO-003: sirve los planes sembrados en el primer render, sin esqueleto', () => {
+    const { result } = renderHook(() => usePublicPlans([mockFreePlan]), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.data).toEqual([mockFreePlan]);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('⚠️ refetchea igual al montar: el precio del plan cambia desde el admin', async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: [mockFreePlan] });
+
+    renderHook(() => usePublicPlans([mockFreePlan]), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(vi.mocked(apiClient.get)).toHaveBeenCalledTimes(1));
+  });
+});
