@@ -57,7 +57,12 @@ export async function resolveRouteResource<T>(fetcher: () => Promise<T>): Promis
 export async function resolveListingData<T>(fetcher: () => Promise<T>): Promise<T | undefined> {
   try {
     return await fetcher();
-  } catch {
+  } catch (error) {
+    // Degradar en silencio sería un modo de falla invisible: con el ISR, una
+    // caída de un segundo deja la ruta cacheada sin listado hasta 24 h y nadie
+    // se entera hasta correr `check:indexable` a mano. T-SEO-001 cerró esta
+    // clase de agujero; el log queda en el build y en los logs del servidor.
+    console.warn('[T-SEO-003] listado no resuelto en el servidor:', error);
     return undefined;
   }
 }

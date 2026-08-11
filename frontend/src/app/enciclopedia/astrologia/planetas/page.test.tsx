@@ -96,7 +96,7 @@ describe('PlanetasPage (/enciclopedia/astrologia/planetas)', () => {
 
     renderWithProviders(await PlanetasPage());
 
-    expect(mockUseArticlesByCategory).toHaveBeenCalledWith(ArticleCategory.PLANET, []);
+    expect(mockUseArticlesByCategory).toHaveBeenCalledWith(ArticleCategory.PLANET, undefined);
   });
 
   it('⚠️ T-SEO-003: resuelve el listado en el servidor y lo siembra en el cliente', async () => {

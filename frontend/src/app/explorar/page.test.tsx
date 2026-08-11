@@ -428,7 +428,10 @@ describe('ExplorarPage', () => {
       fireEvent.click(todosChip);
 
       await waitFor(() => {
-        expect(mockUseTarotistas).toHaveBeenCalledWith(expect.objectContaining({}), seededPage);
+        expect(mockUseTarotistas).toHaveBeenCalledWith(
+          { search: undefined, especialidad: undefined },
+          seededPage
+        );
       });
     });
   });
@@ -446,7 +449,10 @@ describe('ExplorarPage', () => {
       renderWithProviders(await ExplorarPage());
 
       expect(mockGetTarotistas).toHaveBeenCalledTimes(1);
-      expect(mockUseTarotistas).toHaveBeenCalledWith(expect.objectContaining({}), seededPage);
+      expect(mockUseTarotistas).toHaveBeenCalledWith(
+        { search: undefined, especialidad: undefined },
+        seededPage
+      );
       expect(screen.getByText('Luna Mística')).toBeInTheDocument();
     });
 
@@ -462,7 +468,10 @@ describe('ExplorarPage', () => {
 
       renderWithProviders(await ExplorarPage());
 
-      expect(mockUseTarotistas).toHaveBeenCalledWith(expect.objectContaining({}), undefined);
+      expect(mockUseTarotistas).toHaveBeenCalledWith(
+        { search: undefined, especialidad: undefined },
+        undefined
+      );
       expect(
         screen.getByRole('heading', { level: 2, name: 'Cómo elegir un guía espiritual' })
       ).toBeInTheDocument();

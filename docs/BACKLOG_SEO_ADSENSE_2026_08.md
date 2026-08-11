@@ -39,7 +39,7 @@ Muestra estratificada de 62 de las 178 URLs del sitemap, midiendo **palabras pro
 | Fichas de ritual y servicio | 9 | 243–422 | ✅ |
 | Horóscopo chino por animal | 12 | 3 → **355–401** | ✅ T-SEO-002 (10-ago) |
 | **Signos del horóscopo** | **12** | **31** | ❌ T-SEO-004 |
-| Listados y hubs (`/premium`, `/servicios`, `/explorar`, `/enciclopedia/tarot`, `/enciclopedia/guias`, `/enciclopedia`, `/enciclopedia/astrologia` + 3 listados astro, `/contacto`) | 11 | 3–70 → **177–822** | ✅ T-SEO-003 (10-ago) |
+| Listados y hubs (`/premium`, `/servicios`, `/explorar`, `/enciclopedia/tarot`, `/enciclopedia/guias`, `/enciclopedia`, `/enciclopedia/astrologia` + 3 listados astro, `/contacto`) | 11 | 3–70 → **183–822** | ✅ T-SEO-003 (10-ago) |
 
 **29 de 62 URLs muestreadas superan las 150 palabras propias** (antes de este trabajo: 13).
 Con T-SEO-002 cerrada, **41 de 62**: los 12 animales del horóscopo chino pasaron de 3 a 355–401.
@@ -381,12 +381,12 @@ Mismo patrón del punto *El patrón que ya funciona*, aplicado a listados en vez
       | `/servicios` | 5 | **255** |
       | `/enciclopedia/guias` | 13 | **427** |
       | `/enciclopedia/astrologia/planetas` | 18 | **595** |
-      | `/explorar` | 20 | **199** |
+      | `/explorar` | 20 | **208** |
       | `/enciclopedia/astrologia/signos` | 23 | **649** |
       | `/enciclopedia/tarot` | 24 | **511** |
       | `/enciclopedia/astrologia/casas` | 26 | **822** |
-      | `/contacto` | 34 | **177** |
-      | `/enciclopedia` | 70 | **260** |
+      | `/contacto` | 34 | **183** |
+      | `/enciclopedia` | 70 | **270** |
       | `/enciclopedia/astrologia` | 70 | **244** |
 
       El total del sitio pasó de **48 URLs bajo el umbral a 25**: quedan los 12 signos (T-SEO-004) y
@@ -426,6 +426,33 @@ Mismo patrón del punto *El patrón que ya funciona*, aplicado a listados en vez
 - **ISR:** 1 día para la enciclopedia (contenido estático, igual que las fichas) y 1 hora para
   `/premium`, `/servicios` y `/explorar`, donde precios y listados se editan desde el admin.
 - **El soft-404 sigue vivo** (11 rutas responden 200): es T-SEO-006, fuera de alcance acá.
+
+### Ajustes tras la revisión
+
+- **`ServiciosPage` guardaba por `isError`**, justo el anti-patrón que documenta *El patrón que ya
+  funciona*. Antes no molestaba porque sin sembrado un fetch fallido no tenía `data` que perder; con
+  `initialData` + `initialDataUpdatedAt: 0` la query refetchea al montar, y un refetch fallido en
+  background poblaba `error` **conservando el catálogo bueno**: al usuario se le borraba de la pantalla
+  una grilla que ya estaba viendo. Ahora el error se muestra solo si además no hay datos.
+- **Un `[]` del servidor ya no cuenta como sembrado.** En cartas y artículos no hay
+  `initialDataUpdatedAt: 0` (contenido estático), así que un 200 con lista vacía —ventana de migración o
+  seed— se estampaba como recién traído y el `staleTime` bloqueaba el refetch: la página quedaba vacía
+  hasta 1 h en el cliente y hasta 24 h en el HTML cacheado. Se siembra solo si hay algo que sembrar.
+- **La degradación dejó de ser muda.** `resolveListingData` y `getArticlesByCategories` logean el fallo:
+  con el ISR, una caída de un segundo dejaba la ruta sin listado por 24 h y no quedaba rastro en ningún
+  log. Es la misma clase de agujero que T-SEO-001 vino a cerrar.
+- **La ruta `/explorar` importa `ExplorarContent` por su path directo** y el barrel dejó de exportarlo,
+  igual que en T-SEO-002: el barrel arrastraba todo el marketplace al grafo de una ruta de servidor.
+- **Tres correcciones al contenido editorial**, todas verificables por un revisor de AdSense en dos
+  clics: la enciclopedia no ofrece "significado en combinación" (sí palabras clave y cartas
+  relacionadas); la tarjeta del listado de guías no muestra años de experiencia ni lecturas realizadas
+  (eso está en el perfil); y el plazo de respuesta de `/contacto` estaba dicho dos veces en la misma
+  página, con "horas" en un lado y "horas hábiles" en el otro.
+- **Test de integración de punta a punta** en
+  [signos/seeding.test.tsx](../frontend/src/app/enciclopedia/astrologia/signos/seeding.test.tsx): ruta
+  real, hook real y `QueryClient` real, con la API como único mock. Los tests de ruta verificaban la
+  cañería (que el hook reciba el dato), no que el dato terminara en el HTML, que es lo que mide el
+  crawler.
 
 ---
 

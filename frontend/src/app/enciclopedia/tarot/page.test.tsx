@@ -15,10 +15,9 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-const mockUseCards = vi.fn((_filters?: unknown, _initialData?: unknown) => ({
-  data: [] as CardSummary[],
-  isLoading: false,
-}));
+const mockUseCards = vi.fn<
+  (filters?: unknown, initialData?: unknown) => { data: CardSummary[]; isLoading: boolean }
+>(() => ({ data: [], isLoading: false }));
 
 vi.mock('@/hooks/api/useEncyclopedia', () => ({
   useCards: (filters: unknown, initialData: unknown) => mockUseCards(filters, initialData),

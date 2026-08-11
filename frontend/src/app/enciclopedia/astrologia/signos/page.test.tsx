@@ -96,7 +96,7 @@ describe('SignosPage (/enciclopedia/astrologia/signos)', () => {
 
     renderWithProviders(await SignosPage());
 
-    expect(mockUseArticlesByCategory).toHaveBeenCalledWith(ArticleCategory.ZODIAC_SIGN, []);
+    expect(mockUseArticlesByCategory).toHaveBeenCalledWith(ArticleCategory.ZODIAC_SIGN, undefined);
   });
 
   it('⚠️ T-SEO-003: resuelve el listado en el servidor y lo siembra en el cliente', async () => {

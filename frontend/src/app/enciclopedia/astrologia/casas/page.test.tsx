@@ -99,7 +99,10 @@ describe('CasasPage (/enciclopedia/astrologia/casas)', () => {
 
     renderWithProviders(await CasasPage());
 
-    expect(mockUseArticlesByCategory).toHaveBeenCalledWith(ArticleCategory.ASTROLOGICAL_HOUSE, []);
+    expect(mockUseArticlesByCategory).toHaveBeenCalledWith(
+      ArticleCategory.ASTROLOGICAL_HOUSE,
+      undefined
+    );
   });
 
   it('⚠️ T-SEO-003: resuelve el listado en el servidor y lo siembra en el cliente', async () => {

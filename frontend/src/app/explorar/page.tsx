@@ -1,5 +1,5 @@
 import { ListingIntro } from '@/components/common/ListingIntro';
-import { ExplorarContent } from '@/components/features/marketplace';
+import { ExplorarContent } from '@/components/features/marketplace/ExplorarContent';
 import { getTarotistas } from '@/lib/api/tarotistas-api';
 import { LISTING_INTROS } from '@/lib/constants/listing-intros.data';
 import { resolveListingData } from '@/lib/metadata/route-data';

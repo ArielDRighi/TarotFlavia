@@ -69,7 +69,15 @@ export function ArticleListPageContent({
   detailHrefPrefix,
   initialArticles,
 }: ArticleListPageContentProps) {
-  const { data: articles, isLoading } = useArticlesByCategory(category, initialArticles);
+  // Un `[]` del servidor NO es un sembrado válido: sin `initialDataUpdatedAt: 0`
+  // React Query lo estampa como recién traído y no refetchea durante el
+  // `staleTime`, así que un 200 con lista vacía (ventana de migración o seed)
+  // congelaría la página vacía. Sembrar solo cuando hay algo que sembrar deja
+  // que el cliente lo reintente.
+  const { data: articles, isLoading } = useArticlesByCategory(
+    category,
+    initialArticles?.length ? initialArticles : undefined
+  );
 
   const isAstro = isAstroCategory(category);
   const heroImage = isAstro ? getAstroCategoryHero(category) : undefined;

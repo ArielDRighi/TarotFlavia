@@ -92,7 +92,7 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
     sections: [
       {
         heading: 'Tres secciones, tres profundidades',
-        body: 'Tarot funciona como diccionario: se entra por una carta puntual y se sale con su significado derecho, invertido y en combinación. Astrología es un curso corto repartido en signos, planetas y casas. Guías es el manual de uso: qué hace cada herramienta, cuándo conviene usarla y cómo interpretar el resultado.',
+        body: 'Tarot funciona como diccionario: se entra por una carta puntual y se sale con su significado derecho, su significado invertido, sus palabras clave y las cartas con las que se relaciona. Astrología es un curso corto repartido en signos, planetas y casas. Guías es el manual de uso: qué hace cada herramienta, cuándo conviene usarla y cómo interpretar el resultado.',
       },
       {
         heading: 'Para quien recién empieza',
@@ -246,7 +246,7 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
 
   explorar: {
     title: 'Cómo elegir un guía espiritual',
-    lead: 'Este listado reúne a los tarotistas y guías que atienden en Auguria. Cada perfil muestra su especialidad, los años de experiencia, la cantidad de lecturas realizadas y la valoración promedio de quienes ya consultaron, para que la elección no dependa solamente de la foto.',
+    lead: 'Este listado reúne a los tarotistas y guías que atienden en Auguria. Cada tarjeta muestra sus especialidades, la valoración promedio, la cantidad de reseñas que la respaldan y una biografía breve; el perfil completo suma los años de experiencia y las lecturas realizadas, para que la elección no dependa solamente de la foto.',
     sections: [
       {
         heading: 'Buscar por especialidad',
@@ -262,7 +262,7 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
 
   contacto: {
     title: 'Antes de escribirnos',
-    lead: 'El formulario llega directo al equipo de Auguria. Sirve para consultas sobre la cuenta, problemas con un pago o con una reserva, sugerencias sobre el sitio y pedidos de baja. Respondemos todos los mensajes por correo, dentro de las 24 a 48 horas hábiles.',
+    lead: 'El formulario llega directo al equipo de Auguria. Sirve para consultas sobre la cuenta, problemas con un pago o con una reserva, sugerencias sobre el sitio y pedidos de baja. La respuesta llega siempre por correo, a la casilla desde la que se escribió, dentro del plazo indicado más arriba.',
     sections: [
       {
         heading: 'Qué conviene incluir',

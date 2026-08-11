@@ -50,7 +50,10 @@ export async function getArticlesByCategories(
     categories.map(async (category) => {
       try {
         return { category, articles: await getArticlesByCategory(category) };
-      } catch {
+      } catch (error) {
+        // Igual que `resolveListingData`: degradar sin dejar rastro convierte
+        // una API caída en una página que se ve bien y no tiene contenido.
+        console.warn(`[T-SEO-003] categoría "${category}" no resuelta:`, error);
         return { category, articles: undefined };
       }
     })

@@ -256,5 +256,35 @@ describe('ServiciosPage', () => {
       );
       expect(screen.getByTestId('servicios-grid')).toBeInTheDocument();
     });
+
+    it('⚠️ un refetch fallido en background NO borra el catálogo ya visible', () => {
+      // React Query v5 puebla `error` conservando el `data` bueno. Guardar por
+      // `isError` a secas le sacaba de la pantalla al usuario un catálogo que
+      // estaba viendo, y con el sembrado eso pasa en cada blip de la API.
+      vi.mocked(useHolisticServicesHook.useHolisticServices).mockReturnValue({
+        data: mockServices,
+        isLoading: false,
+        isError: true,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServices>);
+
+      render(<ServiciosPage initialServices={mockServices} />, { wrapper });
+
+      expect(screen.getByTestId('servicios-grid')).toBeInTheDocument();
+      expect(screen.queryByTestId('servicios-error-state')).not.toBeInTheDocument();
+    });
+
+    it('muestra el error cuando falla y no hay catálogo que mostrar', () => {
+      vi.mocked(useHolisticServicesHook.useHolisticServices).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServices>);
+
+      render(<ServiciosPage />, { wrapper });
+
+      expect(screen.getByTestId('servicios-error-state')).toBeInTheDocument();
+    });
   });
 });

@@ -55,7 +55,10 @@ export function EnciclopediaContent({ initialCards }: EnciclopediaContentProps =
 
   // ─── Queries ─────────────────────────────────────────────────────────────
 
-  const allCards = useCards(undefined, initialCards);
+  // Un `[]` del servidor no siembra: ver el mismo comentario en
+  // `ArticleListPageContent`. Con el `staleTime` estático, congelaría el mazo
+  // vacío hasta una hora en el cliente.
+  const allCards = useCards(undefined, initialCards?.length ? initialCards : undefined);
   const majorCards = useMajorArcana();
   const suitCards = useCardsBySuit(selectedSuit ?? Suit.WANDS);
   const searchResults = useSearchCards(searchQuery);

@@ -209,7 +209,11 @@ function CategorySection({
   categoryIndex: number;
   initialArticles?: ArticleSummary[];
 }) {
-  const { data: articles } = useArticlesByCategory(category, initialArticles);
+  // Un `[]` del servidor no siembra: ver `ArticleListPageContent`.
+  const { data: articles } = useArticlesByCategory(
+    category,
+    initialArticles?.length ? initialArticles : undefined
+  );
   return (
     <>
       {(articles ?? []).map((article, articleIndex) => (
