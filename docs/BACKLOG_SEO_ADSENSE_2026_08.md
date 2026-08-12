@@ -149,10 +149,12 @@ lógica en `app/`.
 | T-SEO-004 | Signos del horóscopo: ficha estática del signo | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) | Infra | 🟠 Alta | 2 pts |
 | T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) | Frontend | 🟡 Media | 1.5 pts |
+| T-SEO-007 | El panel de admin expulsa al admin (secuela de T-PROD-022) | Frontend | 🔴 Crítica | 1 pt |
 
-**Orden recomendado:** 001 → 002 → 003 → 004 → 005 → 006.
-El 001 primero porque convierte el resto en verificable; el 005 en un momento sin urgencia porque
-necesita coordinación con el panel de Railway.
+**Orden recomendado:** 007 → 004 → 005 → 006 (001, 002 y 003 ya están cerradas).
+El 007 primero porque es una regresión **en producción** que deja al único admin sin panel, y es la
+tarea más chica de la lista. El 005, en un momento sin urgencia, porque necesita coordinación con el
+panel de Railway.
 
 ---
 
@@ -554,6 +556,83 @@ comentarios del código ya se corrigieron; el backlog viejo conserva la afirmaci
 
 - [ ] Un slug inexistente en cualquier ruta dinámica pública devuelve **404**.
 - [ ] Las URLs válidas siguen devolviendo 200 con su contenido.
+
+---
+
+## T-SEO-007: El Panel de Admin Expulsa al Admin (secuela de T-PROD-022)
+
+**Prioridad:** 🔴 Crítica · **Estimación:** 1 pt · **Dependencias:** ninguna
+**Detectado:** 12-ago-2026, en producción
+
+### Problema
+
+`auguriatarot.com/admin` redirige a `/perfil` **incluso siendo admin**. Hoy el sitio no tiene ningún
+administrador que pueda entrar al panel.
+
+**No es un problema de permisos.** Verificado contra la base de producción:
+
+```
+id=7  florzenavilla@gmail.com  roles={consumer,admin}  isAdmin=t  creada 19-abr-2026
+```
+
+Cero filas en `audit_logs` para ese usuario (nadie le quitó el rol desde el panel), la base es la
+original (18 usuarios, el más viejo del 6-abr) y es la **única** cuenta admin del sistema.
+
+### Causa
+
+[admin/layout.tsx](../frontend/src/app/admin/layout.tsx) redirige cuando `user` es `null`, **sin
+esperar a que la sesión se resuelva**:
+
+```tsx
+useEffect(() => {
+  if (!isAuthenticated || !user || !user.roles.includes('admin')) {
+    router.push('/perfil'); // ⚠️ corre con el store todavía vacío
+  }
+}, [isAuthenticated, user, router]);
+```
+
+El store arranca siempre en `user: null, isAuthenticated: false, isLoading: true`
+([authStore.ts](../frontend/src/stores/authStore.ts)): el usuario y sus roles aparecen recién después
+de rehidratar `localStorage` y de que responda `GET /users/profile`. En ese hueco el efecto ya
+redirigió.
+
+**Por qué empezó ahora:** hasta el 8-ago el `AuthProvider` devolvía "Verificando sesión…" *en lugar de*
+`children`, así que el layout de admin nunca llegaba a montarse con el usuario vacío — el bug estaba
+tapado. **T-PROD-022** sacó ese splash (era lo que servía 3 palabras a Googlebot y costó el rechazo de
+AdSense) y **T-PROD-023** destrabó el deploy, así que llegó a producción. El comentario del propio
+provider ya dejaba escrito cómo tenían que quedar las rutas privadas —*"usan `useRequireAuth`, que
+espera a que `isLoading` sea `false` antes de redirigir"*— y `/admin` es la única que no se migró: es
+el **único gate del front que mira `roles` y no mira `isLoading`**.
+
+Como además no hay ningún enlace a `/admin` en la navegación, la única forma de entrar es escribiendo
+la URL, que es justo el caso que siempre falla. Por eso se ve como "perdí el rol" y no como algo
+intermitente.
+
+### Alcance
+
+- [ ] `admin/layout.tsx` espera a `isLoading === false` antes de decidir. Reutilizar `useRequireAuth`
+      para la parte de autenticación y sumar la verificación de rol encima, en vez de escribir un
+      tercer guard a mano.
+- [ ] Mientras se resuelve la sesión, mostrar el spinner del proyecto, no `null`: hoy la pantalla queda
+      en blanco antes de expulsar.
+- [ ] Evaluar un enlace al panel en el menú de la cuenta admin. No existe ninguno, así que el panel es
+      inalcanzable salvo escribiendo la URL de memoria.
+- [ ] **Barrer el resto de los guards del front** buscando la misma forma (redirigir sin esperar a
+      `isLoading`). T-PROD-022 cambió la premisa para todos: antes el provider los protegía.
+
+### Criterios de aceptación
+
+- [ ] Entrar directo a `/admin` (URL pegada o F5 dentro del panel) con una cuenta admin **no** redirige.
+- [ ] Una cuenta sin rol admin sigue siendo redirigida a `/perfil`.
+- [ ] Test de regresión que cubra el estado intermedio: `isLoading: true` con `user: null` **no** debe
+      disparar la redirección. Es exactamente el caso que ningún test cubría.
+
+### Notas
+
+- El backend está bien: `admin.guard.ts` acepta el rol por el array `roles` o por el booleano legacy
+  `isAdmin`, y la cuenta tiene los dos. La API le responde; es la web la que no la deja entrar.
+- Queda anotado en este backlog y no en uno de producción porque es **daño colateral directo** del
+  arreglo de SEO: es el precio que quedó pendiente de pagar por haber sacado el splash bloqueante.
 
 ---
 
