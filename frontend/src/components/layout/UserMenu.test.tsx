@@ -303,4 +303,73 @@ describe('UserMenu', () => {
       });
     });
   });
+
+  // T-SEO-007: sin este enlace el panel solo es alcanzable escribiendo /admin de memoria.
+  describe('Admin — acceso al panel', () => {
+    it('should show "Panel de Admin" pointing to /admin for users with the admin role', async () => {
+      mockUseAuthStore.mockReturnValue({
+        user: {
+          id: 7,
+          name: 'Flor Admin',
+          email: 'admin@test.com',
+          roles: ['consumer', 'admin'],
+          plan: 'free',
+        },
+        logout: mockLogout,
+      });
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await user.click(screen.getByTestId('user-menu-trigger'));
+
+      await waitFor(() => {
+        const adminLink = screen.getByRole('menuitem', { name: /panel de admin/i });
+        expect(adminLink).toHaveAttribute('href', '/admin');
+      });
+    });
+
+    it('should show "Panel de Admin" for users with the legacy isAdmin flag only', async () => {
+      mockUseAuthStore.mockReturnValue({
+        user: {
+          id: 7,
+          name: 'Legacy Admin',
+          email: 'legacy@test.com',
+          roles: ['consumer'],
+          isAdmin: true,
+          plan: 'free',
+        },
+        logout: mockLogout,
+      });
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await user.click(screen.getByTestId('user-menu-trigger'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /panel de admin/i })).toBeInTheDocument();
+      });
+    });
+
+    it('should NOT show "Panel de Admin" for non-admin users', async () => {
+      mockUseAuthStore.mockReturnValue({
+        user: {
+          id: 3,
+          name: 'Carlos Free',
+          email: 'carlos@free.com',
+          roles: ['consumer'],
+          plan: 'free',
+        },
+        logout: mockLogout,
+      });
+      const user = userEvent.setup();
+      render(<UserMenu />);
+
+      await user.click(screen.getByTestId('user-menu-trigger'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: /mi perfil/i })).toBeInTheDocument();
+      });
+      expect(screen.queryByRole('menuitem', { name: /panel de admin/i })).not.toBeInTheDocument();
+    });
+  });
 });

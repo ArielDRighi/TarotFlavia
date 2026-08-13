@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, Settings, BookOpen, LogOut, Star } from 'lucide-react';
+import { User, Settings, BookOpen, LogOut, Star, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -15,6 +15,8 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { CTA_AUTH } from '@/lib/constants/cta-copy';
+import { ROUTES } from '@/lib/constants/routes';
+import { isAdminUser } from '@/lib/utils/roles';
 
 /**
  * UserMenu component
@@ -44,6 +46,9 @@ export function UserMenu() {
 
   // Get user initial for avatar
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : '?';
+
+  // T-SEO-007: sin este enlace, el panel solo se alcanza escribiendo /admin de memoria
+  const isAdmin = isAdminUser(user);
 
   const handleLogout = () => {
     logout();
@@ -83,6 +88,14 @@ export function UserMenu() {
             <Link href="/carta-astral/historial" className="flex items-center">
               <Star className="mr-2 size-4" />
               Mis Cartas Astrales
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href={ROUTES.ADMIN} className="flex items-center">
+              <ShieldCheck className="mr-2 size-4" />
+              Panel de Admin
             </Link>
           </DropdownMenuItem>
         )}
