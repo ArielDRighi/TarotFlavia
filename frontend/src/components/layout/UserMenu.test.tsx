@@ -323,8 +323,9 @@ describe('UserMenu', () => {
       await user.click(screen.getByTestId('user-menu-trigger'));
 
       await waitFor(() => {
-        const adminLink = screen.getByRole('menuitem', { name: /panel de admin/i });
+        const adminLink = screen.getByTestId('user-menu-admin-link');
         expect(adminLink).toHaveAttribute('href', '/admin');
+        expect(screen.getByRole('menuitem', { name: /panel de admin/i })).toBeInTheDocument();
       });
     });
 

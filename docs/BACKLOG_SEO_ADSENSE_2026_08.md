@@ -653,6 +653,14 @@ intermitente.
 - Queda anotado en este backlog y no en uno de producción porque es **daño colateral directo** del
   arreglo de SEO: es el precio que quedó pendiente de pagar por haber sacado el splash bloqueante.
 
+**Follow-up detectado en la revisión (fuera del alcance de esta tarea):** el `catch` de `checkAuth`
+en [authStore.ts](../frontend/src/stores/authStore.ts) es un catch-all: ante **cualquier** error de
+`GET /users/profile` —un blip de red, un timeout, un 5xx— borra los tokens y hace `setUser(null)`, y
+con la sesión ya resuelta el guard manda a `/login`. Es la única vía de expulsión que queda y es
+**previa** a T-SEO-007: afecta por igual a todas las rutas protegidas, no solo al panel. El arreglo
+sería limpiar la sesión solo ante 401/403 y conservarla ante errores de red o 5xx. Merece su propia
+tarea porque toca el manejo de sesión de todo el front.
+
 ---
 
 ## 📌 Pendientes de Ops (no son código)

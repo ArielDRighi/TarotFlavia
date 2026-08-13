@@ -129,6 +129,25 @@ describe('useRequireAdmin', () => {
       expect(mockPush).not.toHaveBeenCalledWith('/perfil');
     });
 
+    it('debe mandar a /login (y no a /perfil) si el admin cierra sesión dentro del panel', () => {
+      mockAuth({
+        user: createMockUser({ roles: ['consumer', 'admin'] }),
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useRequireAdmin());
+      expect(mockPush).not.toHaveBeenCalled();
+
+      // logout(): limpia user + isAuthenticated y deja isLoading en false
+      mockAuth({ user: null, isAuthenticated: false, isLoading: false });
+      rerender();
+
+      expect(mockPush).toHaveBeenCalledTimes(1);
+      expect(mockPush).toHaveBeenCalledWith('/login');
+      expect(mockPush).not.toHaveBeenCalledWith('/perfil');
+    });
+
     it('debe aceptar el booleano legacy isAdmin cuando el array roles no lo trae', () => {
       mockAuth({
         user: createMockUser({ roles: ['consumer'], isAdmin: true }),

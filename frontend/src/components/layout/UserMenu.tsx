@@ -93,7 +93,11 @@ export function UserMenu() {
         )}
         {isAdmin && (
           <DropdownMenuItem asChild>
-            <Link href={ROUTES.ADMIN} className="flex items-center">
+            <Link
+              href={ROUTES.ADMIN}
+              className="flex items-center"
+              data-testid="user-menu-admin-link"
+            >
               <ShieldCheck className="mr-2 size-4" />
               Panel de Admin
             </Link>

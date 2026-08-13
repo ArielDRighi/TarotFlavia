@@ -41,7 +41,7 @@ export interface UseRequireAdminReturn {
  */
 export function useRequireAdmin(): UseRequireAdminReturn {
   // Delega autenticación (y la espera a que `isLoading` sea false) en el guard estándar
-  const { isLoading } = useRequireAuth();
+  const { isLoading } = useRequireAuth({ redirectTo: ROUTES.LOGIN });
   const { user } = useAuth();
   const router = useRouter();
 

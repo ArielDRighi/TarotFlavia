@@ -132,11 +132,14 @@ describe('AdminLayout', () => {
 
       render(
         <AdminLayout>
-          <div>Content</div>
+          <div data-testid="child">Content</div>
         </AdminLayout>
       );
 
       expect(mockPush).toHaveBeenCalledWith('/perfil');
+      // Ni un frame del panel: si se invirtiera el orden de los early returns,
+      // la redirección sola no alcanzaría para detectarlo.
+      expect(screen.queryByTestId('child')).not.toBeInTheDocument();
     });
 
     it('should NOT redirect if user has admin role', () => {
