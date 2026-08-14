@@ -631,7 +631,8 @@ docker run --rm --entrypoint node auguria-front-lockfile \
 docker run -d --name chk-005 -p 3099:3001 \
   -e NEXT_PUBLIC_API_URL=https://api.auguriatarot.com/api/v1 \
   -e NEXT_PUBLIC_APP_URL=https://auguriatarot.com auguria-front-lockfile
-npm run check:indexable -- --base-url http://localhost:3099 --sample 2
+# ⚠️ `-w frontend`: el script vive en frontend/package.json y acá estamos en la raíz
+npm run check:indexable -w frontend -- --base-url http://localhost:3099 --sample 2
 # → 34/34 cumplen (123–820 palabras propias), 0 por debajo del umbral.
 #   Los 11 soft-404 que reporta son los conocidos de T-SEO-006, no una regresión.
 ```
@@ -647,11 +648,22 @@ npm run check:indexable -- --base-url http://localhost:3099 --sample 2
 - **`npm ci -w frontend`** instala 759 paquetes (raíz + workspace). No necesita `legacy-peer-deps`: el
   conflicto de peers opcionales de `@hookform/resolvers` solo aparece en una resolución fresca
   (`npm install`), y el lockfile ya trae el árbol resuelto. Por eso el Dockerfile dejó de copiar
-  `frontend/.npmrc`; el archivo queda para quien instale a mano dentro de `frontend/`, con el comentario
-  corregido.
+  `frontend/.npmrc` **antes del install**; el archivo sigue entrando después, con el `COPY frontend/`, pero
+  para entonces la instalación ya está hecha. **El invariante es el orden**: si alguien adelanta ese `COPY`,
+  el `.npmrc` vuelve a gobernar la instalación. Hay un comentario en el Dockerfile diciéndolo.
+- **Costo de caché aceptado**: ahora la capa del `npm ci` se invalida ante cualquier cambio del lockfile
+  raíz, incluido un bump de dependencia del *backend*. Son ~20 s de reinstalación; barato contra la
+  reproducibilidad.
 - **El `.dockerignore` que manda ahora es el de la raíz**, no `frontend/.dockerignore` (Docker lee el del
-  contexto). El de la raíz ya excluía `frontend/node_modules`, `frontend/.next` y los tests —que es lo que
-  importa después de T-PROD-023—, así que no hubo que tocarlo.
+  contexto). El de la raíz ya cubría lo que importa —`frontend/node_modules`, `frontend/.next`, specs y
+  coverage—, pero **no había paridad completa**: los patrones de Docker no cruzan `/`, así que `.env`/`.env.*`
+  cubrían solo la raíz del repo, y `**/test/` no matchea `tests/`. Se le sumaron `frontend/.env*`,
+  `**/tests/`, `**/test-results/`, `**/docs/` y `**/*.md`. Sin eso el árbol de e2e, `test-results/` y los
+  `docs/` de cada workspace entraban al stage `builder` (a la imagen de producción no llegaban, y
+  `tests/e2e` está en el `exclude` del `tsconfig`, así que no rompía nada — pero un `frontend/.env` futuro
+  sí se habría colado en una capa).
+  **`frontend/.dockerignore` se borró**: no puede volver a aplicarse nunca, y dejarlo era garantizar que
+  alguien agregue ahí una exclusión que no hace nada.
 - **El build sigue exigiendo los `--build-arg`**: sin `NEXT_PUBLIC_API_URL` falla al recolectar
   `/tarotistas/[id]/reservar`. Es preexistente y Railway los inyecta, pero conviene saberlo al reproducir
   a mano.

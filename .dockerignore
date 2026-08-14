@@ -14,26 +14,36 @@ frontend/out
 .gitignore
 
 # Documentation
+# `docs` y `*.md` a secas solo cubren la raíz: los patrones de Docker no cruzan `/`.
 docs
+**/docs/
 *.md
+**/*.md
 !backend/tarot-app/package.json
 !frontend/package.json
 !package.json
 
 # Environment files
+# ⚠️ Los patrones de Docker NO cruzan `/`: `.env` cubre solo la raíz del repo.
+# Cada workspace necesita sus propias líneas o un `.env` nuevo se cuela en una capa.
 .env
 .env.*
 !.env.example
 backend/tarot-app/.env
 backend/tarot-app/.env.*
-frontend/.env.local
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
 
 # Test files
+# `**/test/` no matchea `tests/` (frontend): hacen falta las dos formas.
 **/*.test.ts
 **/*.test.tsx
 **/*.spec.ts
 **/*.e2e-spec.ts
 **/test/
+**/tests/
+**/test-results/
 **/coverage/
 **/__tests__/
 **/playwright-report/

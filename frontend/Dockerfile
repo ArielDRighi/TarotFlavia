@@ -22,7 +22,10 @@ COPY frontend/package.json ./frontend/
 # Instalación reproducible: exactamente las versiones del lockfile
 RUN npm ci -w frontend
 
-# Código fuente del frontend
+# Código fuente del frontend.
+# ⚠️ VA DESPUÉS del install a propósito. Además de la caché de capas: `frontend/`
+# trae el `.npmrc` con legacy-peer-deps, y adelantar este COPY lo pondría a
+# gobernar la instalación, que es justo lo que esta tarea vino a sacar del medio.
 COPY frontend/ ./frontend/
 
 # Las NEXT_PUBLIC_* llegan como build args (Railway las inyecta con --build-arg).
