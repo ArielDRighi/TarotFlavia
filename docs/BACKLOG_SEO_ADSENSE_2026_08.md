@@ -38,13 +38,16 @@ Muestra estratificada de 62 de las 178 URLs del sitemap, midiendo **palabras pro
 | Hubs con texto estático (numerología, carta astral, péndulo, horóscopo, rituales, chino) | ~8 | 215–415 | ✅ |
 | Fichas de ritual y servicio | 9 | 243–422 | ✅ |
 | Horóscopo chino por animal | 12 | 3 → **355–401** | ✅ T-SEO-002 (10-ago) |
-| **Signos del horóscopo** | **12** | **31** | ❌ T-SEO-004 |
+| Signos del horóscopo | 12 | 31 → **414–508** | ✅ T-SEO-004 (13-ago) |
 | Listados y hubs (`/premium`, `/servicios`, `/explorar`, `/enciclopedia/tarot`, `/enciclopedia/guias`, `/enciclopedia`, `/enciclopedia/astrologia` + 3 listados astro, `/contacto`) | 11 | 3–70 → **183–822** | ✅ T-SEO-003 (10-ago) |
 
 **29 de 62 URLs muestreadas superan las 150 palabras propias** (antes de este trabajo: 13).
 Con T-SEO-002 cerrada, **41 de 62**: los 12 animales del horóscopo chino pasaron de 3 a 355–401.
 Con T-SEO-003 cerrada, la corrida completa del guardarraíl da **153 de 178 URLs** sobre las 120
 palabras: quedan los 12 signos (T-SEO-004) y 13 fichas entre 109 y 119.
+Con T-SEO-004 cerrada, **162 de 178**: las 16 que faltan son las fichas al borde del umbral
+(15 arcanos menores de 108 a 119 y `/servicios/limpiezas-energeticas` en 107), ninguna vacía.
+El chrome pasó de 39 a **41 palabras**, así que las cuentas viejas se corren dos hacia abajo.
 
 ### El patrón que ya funciona (replicalo, no inventes otro)
 
@@ -146,12 +149,12 @@ lógica en `app/`.
 | T-SEO-001 | Guardarraíl automático de contenido indexable ✅ | Frontend/CI | 🔴 Crítica | 2 pts |
 | T-SEO-002 | Horóscopo chino por animal: 12 URLs sirven 3 palabras ✅ | Frontend | 🔴 Crítica | 3 pts |
 | T-SEO-003 | Listados y hubs sin contenido para el crawler ✅ | Frontend | 🟠 Alta | 2 pts |
-| T-SEO-004 | Signos del horóscopo: ficha estática del signo | Frontend | 🟠 Alta | 2 pts |
+| T-SEO-004 | Signos del horóscopo: ficha estática del signo ✅ | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) | Infra | 🟠 Alta | 2 pts |
 | T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) | Frontend | 🟡 Media | 1.5 pts |
 | T-SEO-007 | El panel de admin expulsa al admin (secuela de T-PROD-022) ✅ | Frontend | 🔴 Crítica | 1 pt |
 
-**Orden recomendado:** 004 → 005 → 006 (001, 002, 003 y 007 ya están cerradas).
+**Orden recomendado:** 005 → 006 (001, 002, 003, 004 y 007 ya están cerradas).
 El 005, en un momento sin urgencia, porque necesita coordinación con el panel de Railway.
 
 ---
@@ -459,6 +462,7 @@ Mismo patrón del punto *El patrón que ya funciona*, aplicado a listados en vez
 ## T-SEO-004: Signos del Horóscopo — Ficha Estática del Signo
 
 **Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** ninguna
+**Estado:** ✅ COMPLETADA (13-ago-2026)
 
 ### Problema
 
@@ -470,18 +474,78 @@ del servidor. Está documentado en T-PROD-020 y en `CLAUDE.md`.
 
 ### Alcance
 
-- [ ] Renderizar en el servidor la **ficha estática del signo**: nombre, símbolo, fechas, elemento,
-      modalidad, rasgos, compatibilidades. Sale de `ZODIAC_SIGNS_INFO`
-      ([zodiac.ts](../frontend/src/lib/utils/zodiac.ts)) o de la enciclopedia, sin depender del día.
-- [ ] El horóscopo del día sigue client-side, debajo o al costado.
-- [ ] Ojo con no duplicar el artículo de `/enciclopedia/astrologia/signos/[slug]`: si el texto es el
-      mismo, Google los agrupa. Usar contenido distinto o canonicalizar a uno de los dos.
+- [x] Renderizar en el servidor la **ficha estática del signo**. `ZODIAC_SIGNS_INFO` alcanzaba para
+      el encabezado pero no para 150 palabras (son 5 campos), así que el contenido propio se escribió
+      en [zodiac-sign-profiles.data.ts](../frontend/src/lib/constants/zodiac-sign-profiles.data.ts):
+      titular, dos párrafos de introducción, las tres áreas de la lectura diaria, mejor franja del
+      día, señal de alerta, palabras clave, afinidades y eje opuesto, **únicos por signo**
+      (271–319 palabras cada uno). Fechas, elemento, modalidad, afinidades y opuesto **no** se
+      escriben: se derivan en [zodiac.ts](../frontend/src/lib/utils/zodiac.ts).
+- [x] El horóscopo del día sigue client-side, dentro de la ficha y arriba del material estático
+      (`HoroscopeSignPanel`). Sin `<Suspense>`: acá no hay `useSearchParams`, así que la ruta
+      prerenderiza igual; el build lista los 12 signos como `●` (SSG).
+- [x] No duplicar el artículo de `/enciclopedia/astrologia/signos/[slug]`: ver *Cómo se evitó la
+      duplicación* abajo.
 
 ### Criterios de aceptación
 
-- [ ] Las 12 URLs superan las 150 palabras propias.
-- [ ] El horóscopo sigue cambiando a la medianoche local del visitante (no romper T-PROD-020).
-- [ ] `/horoscopo/aries` y `/enciclopedia/astrologia/signos/aries` no sirven el mismo texto.
+- [x] Las 12 URLs superan las 150 palabras propias: **414–508** (antes 31), medido contra el build de
+      producción en Docker con `npm run check:indexable -- --base-url http://localhost:3099`
+      (chrome medido en 41 palabras). El total del sitio pasó de 153 a **162 de 178** sobre el umbral.
+- [x] El horóscopo sigue cambiando a la medianoche local del visitante: `useLocalHoroscope` no se
+      tocó y sigue viviendo en un client component. Lo único que se movió al servidor es lo que **no**
+      depende del día.
+- [x] `/horoscopo/aries` y `/enciclopedia/astrologia/signos/aries` no sirven el mismo texto:
+      medido con shingles de 6 palabras contra las dos páginas servidas, el solapamiento es **6,6 %**
+      y es todo header, footer y el rango de fechas.
+
+### Cómo se evitó la duplicación con la enciclopedia
+
+El artículo de la enciclopedia ya publica el **perfil astrológico** del signo (carácter, fortalezas,
+desafíos, amor, compatibilidades, tarot, datos curiosos). Repetir eso en `/horoscopo/[sign]` era
+fabricar dos URLs para el mismo contenido.
+
+La ficha se escribió con otro ángulo, el que corresponde a la URL: **la lectura diaria**. Cómo
+transcurre un día del signo, qué mirar en cada una de las tres áreas del horóscopo de hoy —las
+mismas `love` / `wellness` / `money` que devuelve la API—, en qué franja rinde y qué señal atender
+cuando el día se complica. Además, la ficha **enlaza** al artículo de la enciclopedia con una frase
+que dice explícitamente qué hay en cada una, que es la señal que le queda a Google de que son
+complementarias y no la misma página. El ángulo está documentado al tope del archivo de datos para
+que un cambio futuro no lo desarme sin querer.
+
+### Notas técnicas
+
+- **El árbol quedó igual que en T-SEO-002**: `page.tsx` (server) → `HoroscopeSignRoute` (server:
+  valida el segmento y sirve la ficha) → `HoroscopeSignPanel` (`'use client'`, horóscopo del día).
+  `HoroscopeSignPageContent` pasó a llamarse `HoroscopeSignPanel` —ya no es la página—, recibe el
+  signo **ya validado** por props en vez de leer `useParams`, y perdió el branch de "Signo no
+  válido": esa validación vive ahora en el servidor, con una sola fuente de verdad. El "volver al
+  hub" del encabezado es un `<Link>` real en lugar de un `router.push`, así que el crawler lo recorre.
+- **El horóscopo del día va *dentro* de la ficha**, entre la introducción y el resto, por un `children`
+  del componente de ficha. Ponerlo al final del artículo lo habría escondido debajo de 300 palabras,
+  y es lo que el visitante viene a buscar; ponerlo antes del `<h1>` habría dejado el encabezado de la
+  página por debajo del pliegue.
+- **Nada se hardcodea dos veces.** `getZodiacDateRange`, `getZodiacModality`, `getHarmonicSigns`,
+  `getOppositeSign` y `getZodiacEncyclopediaSlug` derivan del signo: las fechas salen del mismo
+  `ZODIAC_DATE_RANGES` que usa `getZodiacSignFromDate` (que pasó de array a `Record`, sin cambiar su
+  comportamiento), la modalidad del lugar en la rueda, la afinidad del elemento —fuego con aire,
+  tierra con agua, la misma que describe la enciclopedia— y el opuesto de las seis posiciones.
+  Escritos como contenido, tarde o temprano se contradicen con el artículo.
+- **El slug de la enciclopedia no es la clave del enum**: el artículo de Tauro vive en
+  `/enciclopedia/astrologia/signos/tauro`, no en `/taurus`. Se deriva de `nameEs` sin acentos y los
+  12 valores están fijados en los tests, para que un cambio en la enciclopedia falle ahí y no en un
+  enlace roto en producción.
+- **`HoroscopeDetail` bajó su `<h1>` a `<h2>`**: el `<h1>` de la página es el de la ficha.
+- **El barrel `'use client'` de la feature no exporta los componentes de ruta.** Mismo motivo que en
+  T-SEO-002: exportarlos desde ahí arrastraría la ficha y los 12 perfiles al bundle del navegador.
+- **Guardarraíl de contenido en los tests**: `getSignProfileWordCount` + `MIN_SIGN_PROFILE_WORDS`
+  fallan si un perfil baja de 200 palabras, y hay tests de unicidad de párrafos y de listas de
+  palabras clave. Si alguien recorta el contenido, se entera en CI y no en el próximo rechazo.
+- **Test de punta a punta en la ruta**: `page.test.tsx` renderiza el server component ya resuelto con
+  la API del horóscopo mockeada y verifica que el texto de la ficha llegue al HTML — que es lo que
+  mide el crawler—, no solo que la cañería esté conectada.
+- **El soft-404 sigue vivo** (`/horoscopo/inventado-xyz` responde 200): es T-SEO-006, fuera de
+  alcance acá.
 
 ---
 

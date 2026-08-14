@@ -4,9 +4,15 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  getHarmonicSigns,
+  getOppositeSign,
+  getZodiacDateRange,
+  getZodiacEncyclopediaSlug,
+  getZodiacModality,
   getZodiacSignFromDate,
   getZodiacSignInfo,
   isZodiacSign,
+  ZODIAC_ELEMENT_LABELS,
   ZODIAC_SIGNS_INFO,
 } from '@/lib/utils/zodiac';
 import { ZodiacSign } from '@/types/horoscope.types';
@@ -191,4 +197,135 @@ describe('isZodiacSign', () => {
       expect(isZodiacSign(value)).toBe(false);
     }
   );
+});
+
+/**
+ * Helpers de la ficha estática del signo (T-SEO-004).
+ *
+ * Todos derivan del signo: nada de duplicar en datos lo que ya está en
+ * `ZODIAC_RANGES` o en el orden de la rueda.
+ */
+describe('helpers de la ficha del signo (T-SEO-004)', () => {
+  describe('getZodiacDateRange', () => {
+    it('devuelve el rango de fechas en español', () => {
+      expect(getZodiacDateRange(ZodiacSign.ARIES)).toBe('21 de marzo — 19 de abril');
+    });
+
+    it('resuelve el signo que cruza el año', () => {
+      expect(getZodiacDateRange(ZodiacSign.CAPRICORN)).toBe('22 de diciembre — 19 de enero');
+    });
+
+    it.each(Object.values(ZodiacSign))('%s tiene rango de fechas', (sign) => {
+      expect(getZodiacDateRange(sign)).toMatch(/^\d{1,2} de \w+ — \d{1,2} de \w+$/);
+    });
+
+    it('los 12 rangos son distintos entre sí', () => {
+      const ranges = Object.values(ZodiacSign).map(getZodiacDateRange);
+
+      expect(new Set(ranges).size).toBe(12);
+    });
+  });
+
+  describe('getZodiacModality', () => {
+    it.each([
+      [ZodiacSign.ARIES, 'Cardinal'],
+      [ZodiacSign.TAURUS, 'Fija'],
+      [ZodiacSign.GEMINI, 'Mutable'],
+      [ZodiacSign.CANCER, 'Cardinal'],
+      [ZodiacSign.SCORPIO, 'Fija'],
+      [ZodiacSign.PISCES, 'Mutable'],
+    ] as const)('la modalidad de %s es %s', (sign, modality) => {
+      expect(getZodiacModality(sign)).toBe(modality);
+    });
+
+    it('reparte 4 signos por modalidad', () => {
+      const modalities = Object.values(ZodiacSign).map(getZodiacModality);
+
+      expect(modalities.filter((m) => m === 'Cardinal')).toHaveLength(4);
+      expect(modalities.filter((m) => m === 'Fija')).toHaveLength(4);
+      expect(modalities.filter((m) => m === 'Mutable')).toHaveLength(4);
+    });
+  });
+
+  describe('getOppositeSign', () => {
+    it('el opuesto de Aries es Libra', () => {
+      expect(getOppositeSign(ZodiacSign.ARIES)).toBe(ZodiacSign.LIBRA);
+    });
+
+    it.each(Object.values(ZodiacSign))('el opuesto del opuesto de %s es el mismo signo', (sign) => {
+      expect(getOppositeSign(getOppositeSign(sign))).toBe(sign);
+    });
+
+    it.each(Object.values(ZodiacSign))('%s nunca es su propio opuesto', (sign) => {
+      expect(getOppositeSign(sign)).not.toBe(sign);
+    });
+  });
+
+  describe('getHarmonicSigns', () => {
+    it('Aries sintoniza con los otros dos de fuego y con los tres de aire', () => {
+      expect(getHarmonicSigns(ZodiacSign.ARIES)).toEqual([
+        ZodiacSign.LEO,
+        ZodiacSign.SAGITTARIUS,
+        ZodiacSign.GEMINI,
+        ZodiacSign.LIBRA,
+        ZodiacSign.AQUARIUS,
+      ]);
+    });
+
+    it('Cáncer sintoniza con agua y tierra', () => {
+      expect(getHarmonicSigns(ZodiacSign.CANCER)).toEqual([
+        ZodiacSign.SCORPIO,
+        ZodiacSign.PISCES,
+        ZodiacSign.TAURUS,
+        ZodiacSign.VIRGO,
+        ZodiacSign.CAPRICORN,
+      ]);
+    });
+
+    it.each(Object.values(ZodiacSign))('%s no se lista a sí mismo', (sign) => {
+      expect(getHarmonicSigns(sign)).not.toContain(sign);
+    });
+
+    it.each(Object.values(ZodiacSign))('la afinidad de %s es recíproca', (sign) => {
+      getHarmonicSigns(sign).forEach((partner) => {
+        expect(getHarmonicSigns(partner)).toContain(sign);
+      });
+    });
+
+    it.each(Object.values(ZodiacSign))('%s sintoniza con 5 signos', (sign) => {
+      expect(getHarmonicSigns(sign)).toHaveLength(5);
+    });
+  });
+
+  describe('getZodiacEncyclopediaSlug', () => {
+    // El artículo de la enciclopedia usa el nombre en español sin acentos como
+    // slug, y no la clave en inglés del enum: `/enciclopedia/astrologia/signos/tauro`,
+    // no `/taurus`. Los 12 valores se fijan acá para que un cambio en la
+    // enciclopedia no deje la ficha enlazando a un 404 en silencio.
+    it.each([
+      [ZodiacSign.ARIES, 'aries'],
+      [ZodiacSign.TAURUS, 'tauro'],
+      [ZodiacSign.GEMINI, 'geminis'],
+      [ZodiacSign.CANCER, 'cancer'],
+      [ZodiacSign.LEO, 'leo'],
+      [ZodiacSign.VIRGO, 'virgo'],
+      [ZodiacSign.LIBRA, 'libra'],
+      [ZodiacSign.SCORPIO, 'escorpio'],
+      [ZodiacSign.SAGITTARIUS, 'sagitario'],
+      [ZodiacSign.CAPRICORN, 'capricornio'],
+      [ZodiacSign.AQUARIUS, 'acuario'],
+      [ZodiacSign.PISCES, 'piscis'],
+    ] as const)('el slug de %s es %s', (sign, slug) => {
+      expect(getZodiacEncyclopediaSlug(sign)).toBe(slug);
+    });
+  });
+
+  describe('ZODIAC_ELEMENT_LABELS', () => {
+    it('traduce los cuatro elementos', () => {
+      expect(ZODIAC_ELEMENT_LABELS.fire).toBe('Fuego');
+      expect(ZODIAC_ELEMENT_LABELS.earth).toBe('Tierra');
+      expect(ZODIAC_ELEMENT_LABELS.air).toBe('Aire');
+      expect(ZODIAC_ELEMENT_LABELS.water).toBe('Agua');
+    });
+  });
 });

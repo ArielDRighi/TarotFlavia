@@ -61,5 +61,18 @@ export interface ZodiacSignInfo {
   nameEs: string;
   nameEn: string;
   symbol: string;
-  element: 'fire' | 'earth' | 'air' | 'water';
+  element: ZodiacElement;
 }
+
+/**
+ * Elemento de un signo occidental.
+ *
+ * Se nombra aparte de `ZodiacSignInfo` porque la ficha estática del signo
+ * (T-SEO-004) necesita tiparlo por su cuenta para las etiquetas en español.
+ */
+export type ZodiacElement = 'fire' | 'earth' | 'air' | 'water';
+
+/**
+ * Modalidad (o cualidad) de un signo, ya en español porque se muestra tal cual.
+ */
+export type ZodiacModality = 'Cardinal' | 'Fija' | 'Mutable';
