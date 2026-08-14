@@ -1,14 +1,21 @@
+/**
+ * HoroscopeSignPanel - Tests
+ *
+ * Es la parte cliente de `/horoscopo/[sign]`: el horóscopo del día, que depende
+ * del día calendario local del visitante. La ficha estática del signo y la
+ * validación del segmento viven en el servidor desde T-SEO-004.
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { HoroscopeSignPageContent } from './HoroscopeSignPageContent';
+import { HoroscopeSignPanel } from './HoroscopeSignPanel';
 import { ZodiacSign } from '@/types/horoscope.types';
 
 // Mock next/navigation
 const mockPush = vi.fn();
-const mockParams = { sign: 'aries' };
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -17,7 +24,6 @@ vi.mock('next/navigation', () => ({
     prefetch: vi.fn(),
     back: vi.fn(),
   }),
-  useParams: () => mockParams,
 }));
 
 // Mock hooks
@@ -65,11 +71,10 @@ function renderWithProviders(ui: React.ReactElement) {
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
 }
 
-describe('HoroscopeSignPageContent', () => {
+describe('HoroscopeSignPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPush.mockClear();
-    mockParams.sign = 'aries';
   });
 
   it('should render horoscope detail when data is loaded', () => {
@@ -82,10 +87,34 @@ describe('HoroscopeSignPageContent', () => {
       data: mockHoroscope,
     });
 
-    renderWithProviders(<HoroscopeSignPageContent />);
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
 
     expect(screen.getByTestId('horoscope-detail')).toBeInTheDocument();
     expect(screen.getByText('Hoy es un buen día para Aries...')).toBeInTheDocument();
+  });
+
+  it('consulta el horóscopo del signo que recibe por props', () => {
+    mockUseAuthStore.mockReturnValue({ user: null });
+    mockUseTodayHoroscope.mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockHoroscope,
+    });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.LEO} />);
+
+    expect(mockUseTodayHoroscope).toHaveBeenCalledWith(ZodiacSign.LEO);
+  });
+
+  it('expone el bloque con nombre accesible aunque no haya horóscopo todavía', () => {
+    // El único encabezado visible lo aporta `HoroscopeDetail` cuando hay datos:
+    // mientras carga, el bloque quedaba sin nombre.
+    mockUseAuthStore.mockReturnValue({ user: null });
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: true, error: null, data: null });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
+
+    expect(screen.getByRole('region', { name: 'Horóscopo de hoy' })).toBeInTheDocument();
   });
 
   it('should render skeleton when loading', () => {
@@ -98,7 +127,7 @@ describe('HoroscopeSignPageContent', () => {
       data: null,
     });
 
-    renderWithProviders(<HoroscopeSignPageContent />);
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
 
     expect(screen.getByTestId('horoscope-skeleton-detail')).toBeInTheDocument();
   });
@@ -113,9 +142,39 @@ describe('HoroscopeSignPageContent', () => {
       data: null,
     });
 
-    renderWithProviders(<HoroscopeSignPageContent />);
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
 
     expect(screen.getByText('Horóscopo no disponible')).toBeInTheDocument();
+  });
+
+  it('mantiene el horóscopo en pantalla si un refetch en background falla', () => {
+    // Guardar por `error` en vez de por `!data` le borraba al visitante un
+    // horóscopo que ya estaba viendo. Ver el patrón documentado en el backlog.
+    mockUseAuthStore.mockReturnValue({ user: null });
+    mockUseTodayHoroscope.mockReturnValue({
+      isLoading: false,
+      error: new Error('Network error'),
+      data: mockHoroscope,
+    });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
+
+    expect(screen.getByTestId('horoscope-detail')).toBeInTheDocument();
+    expect(screen.queryByText('Horóscopo no disponible')).not.toBeInTheDocument();
+  });
+
+  it('avisa cuando está mostrando el horóscopo del día anterior', () => {
+    mockUseAuthStore.mockReturnValue({ user: null });
+    mockUseTodayHoroscope.mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: mockHoroscope,
+      isShowingPreviousDay: true,
+    });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
+
+    expect(screen.getByTestId('showing-previous-day-notice')).toBeInTheDocument();
   });
 
   it('should render zodiac sign selector', () => {
@@ -128,28 +187,9 @@ describe('HoroscopeSignPageContent', () => {
       data: mockHoroscope,
     });
 
-    renderWithProviders(<HoroscopeSignPageContent />);
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
 
     expect(screen.getByTestId('zodiac-selector')).toBeInTheDocument();
-  });
-
-  it('should navigate back when clicking back button', async () => {
-    const user = userEvent.setup();
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-    });
-    mockUseTodayHoroscope.mockReturnValue({
-      isLoading: false,
-      error: null,
-      data: mockHoroscope,
-    });
-
-    renderWithProviders(<HoroscopeSignPageContent />);
-
-    const backButton = screen.getByRole('button', { name: /todos los signos/i });
-    await user.click(backButton);
-
-    expect(mockPush).toHaveBeenCalledWith('/horoscopo');
   });
 
   it('should navigate to another sign when clicking on zodiac selector', async () => {
@@ -163,28 +203,12 @@ describe('HoroscopeSignPageContent', () => {
       data: mockHoroscope,
     });
 
-    renderWithProviders(<HoroscopeSignPageContent />);
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
 
     const taurusCard = screen.getByTestId('zodiac-card-taurus');
     await user.click(taurusCard);
 
     expect(mockPush).toHaveBeenCalledWith('/horoscopo/taurus');
-  });
-
-  it('should show error for invalid zodiac sign', () => {
-    mockParams.sign = 'invalid-sign';
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-    });
-    mockUseTodayHoroscope.mockReturnValue({
-      isLoading: false,
-      error: null,
-      data: null,
-    });
-
-    renderWithProviders(<HoroscopeSignPageContent />);
-
-    expect(screen.getByText('Signo no válido')).toBeInTheDocument();
   });
 
   it('should highlight user sign in selector when authenticated with birthDate', () => {
@@ -197,7 +221,7 @@ describe('HoroscopeSignPageContent', () => {
       data: mockHoroscope,
     });
 
-    renderWithProviders(<HoroscopeSignPageContent />);
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
 
     const ariesCard = screen.getByTestId('zodiac-card-aries');
     expect(ariesCard).toHaveClass('border-accent');

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { HoroscopeSignPageContent } from '@/components/features/horoscope/HoroscopeSignPageContent';
+import { HoroscopeSignRoute } from '@/components/features/horoscope/HoroscopeSignRoute';
 import {
   INVALID_ROUTE_PARAM_METADATA,
   getHoroscopeSignMetadata,
@@ -13,15 +13,22 @@ import { ZodiacSign } from '@/types/horoscope.types';
  *
  * Route: /horoscopo/[sign]
  *
- * La ruta es server-side solo para la metadata: los 12 signos compartían el
- * `<title>` "Auguria" del root layout y Google los agrupaba como duplicados
- * (T-PROD-020). El contenido sigue siendo client: depende del día calendario
- * local del visitante (ver `HoroscopeSignPageContent`).
+ * Server component. La metadata es propia por signo desde T-PROD-020 (los 12
+ * compartían el `<title>` "Auguria" y Google los agrupaba como duplicados) y el
+ * contenido de la ficha se resuelve en el servidor desde T-SEO-004: sale de
+ * constantes del repo, sin API y sin día local.
+ *
+ * El horóscopo del día sigue siendo cliente **a propósito**: se resuelve contra
+ * el día calendario local del visitante (ver `HoroscopeSignPanel`).
  */
 
 interface PageProps {
   params: Promise<{ sign: string }>;
 }
+
+// Sin `revalidate`: el HTML estático sale entero de constantes del repo, así que
+// solo cambia con un deploy —que ya regenera las páginas—. El horóscopo del día
+// lo trae el cliente, no el prerender.
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { sign } = await params;
@@ -35,6 +42,8 @@ export function generateStaticParams(): { sign: string }[] {
   return Object.values(ZodiacSign).map((sign) => ({ sign }));
 }
 
-export default function HoroscopeSignPage() {
-  return <HoroscopeSignPageContent />;
+export default async function HoroscopeSignPage({ params }: PageProps) {
+  const { sign } = await params;
+
+  return <HoroscopeSignRoute sign={sign} />;
 }
