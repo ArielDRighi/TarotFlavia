@@ -149,12 +149,10 @@ lógica en `app/`.
 | T-SEO-004 | Signos del horóscopo: ficha estática del signo | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) | Infra | 🟠 Alta | 2 pts |
 | T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) | Frontend | 🟡 Media | 1.5 pts |
-| T-SEO-007 | El panel de admin expulsa al admin (secuela de T-PROD-022) | Frontend | 🔴 Crítica | 1 pt |
+| T-SEO-007 | El panel de admin expulsa al admin (secuela de T-PROD-022) ✅ | Frontend | 🔴 Crítica | 1 pt |
 
-**Orden recomendado:** 007 → 004 → 005 → 006 (001, 002 y 003 ya están cerradas).
-El 007 primero porque es una regresión **en producción** que deja al único admin sin panel, y es la
-tarea más chica de la lista. El 005, en un momento sin urgencia, porque necesita coordinación con el
-panel de Railway.
+**Orden recomendado:** 004 → 005 → 006 (001, 002, 003 y 007 ya están cerradas).
+El 005, en un momento sin urgencia, porque necesita coordinación con el panel de Railway.
 
 ---
 
@@ -563,6 +561,7 @@ comentarios del código ya se corrigieron; el backlog viejo conserva la afirmaci
 
 **Prioridad:** 🔴 Crítica · **Estimación:** 1 pt · **Dependencias:** ninguna
 **Detectado:** 12-ago-2026, en producción
+**Estado:** ✅ COMPLETADA (13-ago-2026)
 
 ### Problema
 
@@ -610,29 +609,57 @@ intermitente.
 
 ### Alcance
 
-- [ ] `admin/layout.tsx` espera a `isLoading === false` antes de decidir. Reutilizar `useRequireAuth`
-      para la parte de autenticación y sumar la verificación de rol encima, en vez de escribir un
-      tercer guard a mano.
-- [ ] Mientras se resuelve la sesión, mostrar el spinner del proyecto, no `null`: hoy la pantalla queda
-      en blanco antes de expulsar.
-- [ ] Evaluar un enlace al panel en el menú de la cuenta admin. No existe ninguno, así que el panel es
-      inalcanzable salvo escribiendo la URL de memoria.
-- [ ] **Barrer el resto de los guards del front** buscando la misma forma (redirigir sin esperar a
-      `isLoading`). T-PROD-022 cambió la premisa para todos: antes el provider los protegía.
+- [x] `admin/layout.tsx` espera a `isLoading === false` antes de decidir. El guard se escribió como hook
+      —[useRequireAdmin.ts](../frontend/src/hooks/useRequireAdmin.ts)— que **compone** `useRequireAuth`
+      (autenticación + espera) y le suma la verificación de rol encima, en vez de un tercer guard a mano.
+      El layout quedó sin `useEffect` de redirección y sin `useRouter`.
+- [x] Mientras se resuelve la sesión, el layout muestra el `Spinner` del proyecto (*Verificando
+      permisos…*) en vez de `null`. Ya no hay pantalla en blanco previa a la expulsión.
+- [x] Enlace **Panel de Admin** en el menú de la cuenta ([UserMenu.tsx](../frontend/src/components/layout/UserMenu.tsx)),
+      visible solo para admins. Se implementó y no solo se evaluó: sin él, la única vía de entrada era
+      justamente la que fallaba.
+- [x] **Barrido del resto de los guards del front.** `/admin` era el único con la forma. Resultado:
+      - los redirects automáticos por sesión están todos en `useRequireAuth`, que ya espera `isLoading`;
+      - `CategorySelector` y `RitualPageContent` redirigen por *capabilities*, pero ya gatean con su
+        propio `isLoading` (y `RitualPageContent` exige `user` presente);
+      - `ChartResultPageContent` y `ActivationPage` redirigen por estado de store / query param, no por
+        sesión;
+      - el resto de los `router.push` con `user`/`isAuthenticated` son handlers de click, no efectos de
+        montaje;
+      - no hay `middleware.ts` ni ningún otro punto del front que lea `roles`.
 
 ### Criterios de aceptación
 
-- [ ] Entrar directo a `/admin` (URL pegada o F5 dentro del panel) con una cuenta admin **no** redirige.
-- [ ] Una cuenta sin rol admin sigue siendo redirigida a `/perfil`.
-- [ ] Test de regresión que cubra el estado intermedio: `isLoading: true` con `user: null` **no** debe
-      disparar la redirección. Es exactamente el caso que ningún test cubría.
+- [x] Entrar directo a `/admin` (URL pegada o F5 dentro del panel) con una cuenta admin **no** redirige.
+- [x] Una cuenta sin rol admin sigue siendo redirigida a `/perfil`.
+- [x] Test de regresión que cubra el estado intermedio: `isLoading: true` con `user: null` **no** dispara
+      la redirección. Cubierto en los dos niveles: el hook
+      ([useRequireAdmin.test.ts](../frontend/src/hooks/useRequireAdmin.test.ts), incluye la transición
+      `loading → admin resuelto`) y el layout
+      ([layout.test.tsx](../frontend/src/app/admin/layout.test.tsx), sin redirección + spinner + los
+      children recién cuando resuelve).
 
 ### Notas
 
 - El backend está bien: `admin.guard.ts` acepta el rol por el array `roles` o por el booleano legacy
   `isAdmin`, y la cuenta tiene los dos. La API le responde; es la web la que no la deja entrar.
+- **El front ahora acepta los dos igual que el backend.** `UserProfileResponseDto` devuelve `roles` **y**
+  `isAdmin`, pero el tipo `AuthUser` del front solo declaraba `roles`. Se agregó `isAdmin?: boolean` al
+  tipo y la regla vive en un único lugar —[isAdminUser()](../frontend/src/lib/utils/roles.ts)— que usan
+  tanto el guard como el menú, para que no puedan divergir.
+- **Cambio de destino para el visitante anónimo:** antes `/admin` sin sesión mandaba a `/perfil`, que a
+  su vez rebota a `/login` por `useRequireAuth`. Ahora va directo a `/login`; se ahorra el salto
+  intermedio y el destino final es el mismo. Los no-admin **autenticados** siguen yendo a `/perfil`.
 - Queda anotado en este backlog y no en uno de producción porque es **daño colateral directo** del
   arreglo de SEO: es el precio que quedó pendiente de pagar por haber sacado el splash bloqueante.
+
+**Follow-up detectado en la revisión (fuera del alcance de esta tarea):** el `catch` de `checkAuth`
+en [authStore.ts](../frontend/src/stores/authStore.ts) es un catch-all: ante **cualquier** error de
+`GET /users/profile` —un blip de red, un timeout, un 5xx— borra los tokens y hace `setUser(null)`, y
+con la sesión ya resuelta el guard manda a `/login`. Es la única vía de expulsión que queda y es
+**previa** a T-SEO-007: afecta por igual a todas las rutas protegidas, no solo al panel. El arreglo
+sería limpiar la sesión solo ante 401/403 y conservarla ante errores de red o 5xx. Merece su propia
+tarea porque toca el manejo de sesión de todo el front.
 
 ---
 

@@ -12,5 +12,6 @@ export {
   formatDateCompact,
   formatDateLocalized,
 } from './date';
+export { isAdminUser } from './roles';
 export { getContrastRatio, meetsWcagAA } from './contrast';
 export type { WcagAaOptions } from './contrast';

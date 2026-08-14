@@ -22,6 +22,95 @@ describe('AdminLayout', () => {
   });
 
   describe('Authorization Guard', () => {
+    // T-SEO-007: el store arranca en `user: null, isAuthenticated: false, isLoading: true`.
+    // Decidir en ese hueco expulsaba al admin de su propio panel.
+    it('should NOT redirect while the session is still resolving', () => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: true,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      render(
+        <AdminLayout>
+          <div data-testid="child">Content</div>
+        </AdminLayout>
+      );
+
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('child')).not.toBeInTheDocument();
+    });
+
+    it('should show the spinner while the session is still resolving', () => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: true,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      render(
+        <AdminLayout>
+          <div>Content</div>
+        </AdminLayout>
+      );
+
+      expect(screen.getByTestId('spinner')).toBeInTheDocument();
+      expect(screen.getByText('Verificando permisos…')).toBeInTheDocument();
+    });
+
+    it('should render the panel for an admin whose session resolves after the first render', () => {
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: null,
+        isAuthenticated: false,
+        isLoading: true,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      const { rerender } = render(
+        <AdminLayout>
+          <div data-testid="child">Content</div>
+        </AdminLayout>
+      );
+
+      vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+        user: {
+          id: 1,
+          email: 'admin@test.com',
+          name: 'Admin',
+          roles: ['consumer', 'admin'],
+          plan: 'premium',
+          profilePicture: null,
+          birthDate: null,
+        },
+        isAuthenticated: true,
+        isLoading: false,
+        login: vi.fn(),
+        register: vi.fn(),
+        logout: vi.fn(),
+        checkAuth: vi.fn(),
+      });
+
+      rerender(
+        <AdminLayout>
+          <div data-testid="child">Content</div>
+        </AdminLayout>
+      );
+
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(screen.getByTestId('child')).toBeInTheDocument();
+    });
+
     it('should redirect to /perfil if user is not admin', () => {
       vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
         user: {
@@ -43,11 +132,14 @@ describe('AdminLayout', () => {
 
       render(
         <AdminLayout>
-          <div>Content</div>
+          <div data-testid="child">Content</div>
         </AdminLayout>
       );
 
       expect(mockPush).toHaveBeenCalledWith('/perfil');
+      // Ni un frame del panel: si se invirtiera el orden de los early returns,
+      // la redirección sola no alcanzaría para detectarlo.
+      expect(screen.queryByTestId('child')).not.toBeInTheDocument();
     });
 
     it('should NOT redirect if user has admin role', () => {
@@ -79,7 +171,9 @@ describe('AdminLayout', () => {
       expect(screen.getByTestId('child')).toBeInTheDocument();
     });
 
-    it('should redirect if user is not authenticated', () => {
+    // Antes iba a /perfil, que a su vez redirige a /login por `useRequireAuth`:
+    // ahora el guard delega la parte de autenticación y ahorra el salto intermedio.
+    it('should redirect to /login if user is not authenticated', () => {
       vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
         user: null,
         isAuthenticated: false,
@@ -96,7 +190,7 @@ describe('AdminLayout', () => {
         </AdminLayout>
       );
 
-      expect(mockPush).toHaveBeenCalledWith('/perfil');
+      expect(mockPush).toHaveBeenCalledWith('/login');
     });
   });
 

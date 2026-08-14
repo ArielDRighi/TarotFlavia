@@ -10,6 +10,12 @@ export interface AuthUser {
   email: string;
   name: string;
   roles: string[];
+  /**
+   * Booleano legacy de admin. La API lo sigue devolviendo junto a `roles`
+   * (ver `UserProfileResponseDto` y `admin.guard.ts`, que acepta cualquiera
+   * de los dos). El front lo usa solo como fallback del array `roles`.
+   */
+  isAdmin?: boolean;
   plan: 'anonymous' | 'free' | 'premium';
   profilePicture: string | null;
   birthDate?: string | null;

@@ -1,18 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useRequireAdmin } from '@/hooks/useRequireAdmin';
 import { AdminSidebar } from '@/components/layout/AdminSidebar';
+import { Spinner } from '@/components/ui/spinner';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { user, isAuthenticated } = useAuth();
-  const router = useRouter();
+  // Guard: espera a que la sesión resuelva antes de decidir (T-SEO-007)
+  const { isLoading, isAdmin } = useRequireAdmin();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -28,15 +29,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isMobileMenuOpen]);
 
-  useEffect(() => {
-    // Guard: Verificar que el usuario sea admin
-    if (!isAuthenticated || !user || !user.roles.includes('admin')) {
-      router.push('/perfil');
-    }
-  }, [isAuthenticated, user, router]);
+  // Mientras se resuelve la sesión: spinner, nunca pantalla en blanco ni redirección
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner size="lg" text="Verificando permisos…" />
+      </div>
+    );
+  }
 
-  // Si no es admin, no renderizar nada (se redirige)
-  if (!isAuthenticated || !user || !user.roles.includes('admin')) {
+  // Si no es admin, no renderizar nada (el guard ya redirigió)
+  if (!isAdmin) {
     return null;
   }
 
