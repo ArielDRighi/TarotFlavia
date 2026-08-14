@@ -79,16 +79,17 @@ NEXT_PUBLIC_APP_ENV=production
 
 ### Build y Deploy Manual
 
-```bash
-# Backend
-cd backend/tarot-app
-docker build -t auguria-backend .
-docker run -p 3000:3000 --env-file .env auguria-backend
+Los dos Dockerfiles se construyen **desde la raíz del monorepo** (necesitan el
+`package.json` y el `package-lock.json` de la raíz para instalar con `npm ci`):
 
-# Frontend
-cd frontend
-docker build -t auguria-frontend .
-docker run -p 3001:3001 --env-file .env.local auguria-frontend
+```bash
+# Backend — desde la raíz del repo
+docker build -f backend/tarot-app/Dockerfile -t auguria-backend .
+docker run -p 3000:3000 --env-file backend/tarot-app/.env auguria-backend
+
+# Frontend — desde la raíz del repo
+docker build -f frontend/Dockerfile -t auguria-frontend .
+docker run -p 3001:3001 --env-file frontend/.env.local auguria-frontend
 ```
 
 ---

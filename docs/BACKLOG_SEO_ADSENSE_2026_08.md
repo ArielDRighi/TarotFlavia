@@ -109,14 +109,16 @@ Referencias vivas: [enciclopedia/tarot/[slug]/page.tsx](../frontend/src/app/enci
 
 Lecciones que costaron caro en la sesión del 8-ago:
 
-1. **CI en verde NO significa que el deploy funcione.** CI usa `npm ci` contra el lockfile de la raíz;
-   el Dockerfile de Railway corre `npm install` sin lockfile y resuelve versiones distintas. El deploy
-   estuvo roto dos semanas con CI verde. Ver T-SEO-005.
-2. **El build local no prerenderiza lo que depende de la API** (no está levantada). Para ver el HTML real:
+1. **CI en verde NO significa que el deploy funcione.** Lo fue hasta el 14-ago-2026: CI usaba `npm ci`
+   contra el lockfile de la raíz y el Dockerfile de Railway corría `npm install` sin lockfile,
+   resolviendo versiones distintas. El deploy estuvo roto dos semanas con CI verde. **T-SEO-005 cerró
+   esa brecha**: el frontend ahora se construye desde la raíz con `npm ci`, igual que CI. Las otras
+   tres lecciones siguen vigentes.
+2. **El build local no prerenderiza lo que depende de la API** (no está levantada). Para ver el HTML real
+   (⚠️ desde la **raíz** del repo, no desde `frontend/`):
 
 ```bash
-cd frontend
-docker build --no-cache \
+docker build --no-cache -f frontend/Dockerfile \
   --build-arg NEXT_PUBLIC_APP_URL=https://auguriatarot.com \
   --build-arg NEXT_PUBLIC_API_URL=https://api.auguriatarot.com/api/v1 \
   --build-arg NEXT_PUBLIC_APP_ENV=production -t auguria-check .
@@ -150,12 +152,14 @@ lógica en `app/`.
 | T-SEO-002 | Horóscopo chino por animal: 12 URLs sirven 3 palabras ✅ | Frontend | 🔴 Crítica | 3 pts |
 | T-SEO-003 | Listados y hubs sin contenido para el crawler ✅ | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-004 | Signos del horóscopo: ficha estática del signo ✅ | Frontend | 🟠 Alta | 2 pts |
-| T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) | Infra | 🟠 Alta | 2 pts |
+| T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) 🟡 | Infra | 🟠 Alta | 2 pts |
 | T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) | Frontend | 🟡 Media | 1.5 pts |
 | T-SEO-007 | El panel de admin expulsa al admin (secuela de T-PROD-022) ✅ | Frontend | 🔴 Crítica | 1 pt |
 
 **Orden recomendado:** 005 → 006 (001, 002, 003, 004 y 007 ya están cerradas).
-El 005, en un momento sin urgencia, porque necesita coordinación con el panel de Railway.
+El 005 tiene el código listo y verificado (14-ago); queda **pendiente el cambio en el panel de Railway**
+—*Root Directory* `/` + *Dockerfile Path* `frontend/Dockerfile`, las dos juntas— antes del próximo
+deploy a `main`.
 
 ---
 
@@ -573,6 +577,7 @@ que un cambio futuro no lo desarme sin querer.
 ## T-SEO-005: El Build de Docker no Usa Lockfile
 
 **Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** coordinación con el panel de Railway
+**Estado:** 🟡 CÓDIGO LISTO Y VERIFICADO (14-ago-2026) · ⏳ **falta el cambio de panel + el deploy**
 
 ### Problema
 
@@ -591,17 +596,71 @@ cualquier deriva en dependencias de *aplicación* puede volver a romper un deplo
 
 ### Alcance (opción 1)
 
-- [ ] Adaptar `frontend/Dockerfile` a contexto de raíz (`COPY package.json package-lock.json ./`,
-      `npm ci`, rutas del monorepo).
+- [x] Adaptar `frontend/Dockerfile` a contexto de raíz (`COPY package.json package-lock.json ./`,
+      `npm ci -w frontend`, rutas del monorepo). Quedó de dos stages —builder + producción— igual que el
+      del backend, en vez de los tres de antes: el stage `deps` separado ya no aporta nada porque el orden
+      *copiar manifiestos → instalar → copiar fuente* da la misma caché de capas.
 - [ ] **Coordinar con el Delta**: en el panel de Railway hay que cambiar *Root Directory* a `/` y
       *Dockerfile Path* a `frontend/Dockerfile`. **Si sale solo una de las dos mitades, el deploy se rompe.**
-- [ ] Verificar con `docker build` real desde la raíz **antes** de tocar el panel.
+      ⚠️ El merge a `develop` **no** dispara deploy (Railway despliega desde `main`), así que la ventana de
+      coordinación es el merge a `main`, no el del PR.
+- [x] Verificar con `docker build` real desde la raíz **antes** de tocar el panel.
 
 ### Criterios de aceptación
 
-- [ ] `docker build` desde la raíz completa y resuelve **las mismas versiones que local/CI** (comparar
-      `next --version` dentro de la imagen contra el lockfile).
-- [ ] Deploy exitoso en Railway.
+- [x] `docker build` desde la raíz completa y resuelve **las mismas versiones que local/CI**:
+      **57/57** dependencias declaradas en `frontend/package.json` coinciden exactamente con el
+      `package-lock.json` raíz. `next` da **16.2.2** dentro de la imagen = 16.2.2 en el lockfile.
+- [ ] Deploy exitoso en Railway. ⏳ Depende del cambio de panel.
+
+### Cómo se verificó (14-ago-2026)
+
+```bash
+# 1. Build desde la RAÍZ del repo (no desde frontend/)
+docker build --no-cache -f frontend/Dockerfile \
+  --build-arg NEXT_PUBLIC_APP_URL=https://auguriatarot.com \
+  --build-arg NEXT_PUBLIC_API_URL=https://api.auguriatarot.com/api/v1 \
+  --build-arg NEXT_PUBLIC_APP_ENV=production -t auguria-front-lockfile .
+# → exit 0, 218 páginas estáticas generadas
+
+# 2. Versiones dentro de la imagen contra el lockfile → 57/57 idénticas
+docker run --rm --entrypoint node auguria-front-lockfile \
+  -p "require('/app/node_modules/next/package.json').version"   # 16.2.2
+
+# 3. El contenedor sirve contenido real: guardarraíl de T-SEO-001 contra la imagen
+docker run -d --name chk-005 -p 3099:3001 \
+  -e NEXT_PUBLIC_API_URL=https://api.auguriatarot.com/api/v1 \
+  -e NEXT_PUBLIC_APP_URL=https://auguriatarot.com auguria-front-lockfile
+npm run check:indexable -- --base-url http://localhost:3099 --sample 2
+# → 34/34 cumplen (123–820 palabras propias), 0 por debajo del umbral.
+#   Los 11 soft-404 que reporta son los conocidos de T-SEO-006, no una regresión.
+```
+
+### Notas técnicas
+
+- **El output `standalone` cambia de forma en contexto de monorepo.** Con la raíz en el contexto, Next
+  detecta el workspace root por el `package-lock.json` y emite `standalone/frontend/server.js` con los
+  `node_modules` izados en `standalone/node_modules` —en vez de `standalone/server.js`—. Por eso el stage
+  de producción copia a `./frontend/.next/static` y `./frontend/public`, y el `CMD` es
+  `node frontend/server.js`. **Es el mismo layout que ya producía el build local**, que siempre vio el
+  lockfile raíz: la que era rara era la imagen, no el local.
+- **`npm ci -w frontend`** instala 759 paquetes (raíz + workspace). No necesita `legacy-peer-deps`: el
+  conflicto de peers opcionales de `@hookform/resolvers` solo aparece en una resolución fresca
+  (`npm install`), y el lockfile ya trae el árbol resuelto. Por eso el Dockerfile dejó de copiar
+  `frontend/.npmrc`; el archivo queda para quien instale a mano dentro de `frontend/`, con el comentario
+  corregido.
+- **El `.dockerignore` que manda ahora es el de la raíz**, no `frontend/.dockerignore` (Docker lee el del
+  contexto). El de la raíz ya excluía `frontend/node_modules`, `frontend/.next` y los tests —que es lo que
+  importa después de T-PROD-023—, así que no hubo que tocarlo.
+- **El build sigue exigiendo los `--build-arg`**: sin `NEXT_PUBLIC_API_URL` falla al recolectar
+  `/tarotistas/[id]/reservar`. Es preexistente y Railway los inyecta, pero conviene saberlo al reproducir
+  a mano.
+- ⚠️ **`frontend/node_modules` local está desactualizado**: tiene `next` 16.0.6 contra los 16.2.2 del
+  lockfile. No lo tocó esta tarea (un `npm install` podría mover el lockfile), pero conviene un
+  `npm ci` en la raíz para que el build local deje de mentir.
+- **Lo que esta tarea NO arregla**: que el deploy de Railway no corra ningún test ni el guardarraíl. Sigue
+  siendo posible romper producción con CI en verde por otras vías; lo que se cierra es la deriva de
+  versiones.
 
 ---
 
