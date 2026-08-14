@@ -667,9 +667,11 @@ npm run check:indexable -w frontend -- --base-url http://localhost:3099 --sample
 - **El build sigue exigiendo los `--build-arg`**: sin `NEXT_PUBLIC_API_URL` falla al recolectar
   `/tarotistas/[id]/reservar`. Es preexistente y Railway los inyecta, pero conviene saberlo al reproducir
   a mano.
-- ⚠️ **`frontend/node_modules` local está desactualizado**: tiene `next` 16.0.6 contra los 16.2.2 del
-  lockfile. No lo tocó esta tarea (un `npm install` podría mover el lockfile), pero conviene un
-  `npm ci` en la raíz para que el build local deje de mentir.
+- **El `node_modules` local estaba desactualizado** (`next` 16.0.6 contra los 16.2.2 del lockfile), así que
+  el build local venía validando una versión que producción no iba a correr. Resuelto el 14-ago con un
+  `npm ci` en la raíz —que no toca el lockfile, a diferencia de `npm install`—, y revalidado con la
+  versión nueva: type-check limpio, 6039 tests y build en verde. **Local, CI y la imagen resuelven ahora
+  exactamente lo mismo**, que era el punto de la tarea.
 - **Lo que esta tarea NO arregla**: que el deploy de Railway no corra ningún test ni el guardarraíl. Sigue
   siendo posible romper producción con CI en verde por otras vías; lo que se cierra es la deriva de
   versiones.
