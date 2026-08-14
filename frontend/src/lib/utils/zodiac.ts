@@ -283,22 +283,32 @@ export function getOppositeSign(sign: ZodiacSign): ZodiacSign {
 }
 
 /**
- * Signos con los que el signo sintoniza: los otros dos de su elemento y los
- * tres del elemento complementario.
+ * Signos con los que el signo sintoniza: los otros dos de su elemento (trígono)
+ * y dos de los tres del elemento complementario (sextil).
  *
- * Es la afinidad por temperamento, la misma que describe el artículo de la
- * enciclopedia, y se deriva del elemento para que no puedan contradecirse.
- * La relación es recíproca.
+ * Es la afinidad por temperamento, la misma que declara `compatibleSigns` en la
+ * enciclopedia, y se deriva del elemento para que no puedan contradecirse. La
+ * relación es recíproca.
+ *
+ * ⚠️ **El opuesto queda afuera aunque comparta el elemento complementario.** A
+ * seis posiciones de la rueda, el opuesto cae siempre en el elemento amigo (6 ≡ 2
+ * en el ciclo de cuatro elementos), pero ese aspecto es una **oposición**, no un
+ * sextil: es tensión, no sintonía. Sin este filtro, cada ficha listaba a su
+ * opuesto en "con qué signos sintoniza" **y** en "su eje opuesto", con dos
+ * enlaces al mismo href, y contradecía al artículo de la enciclopedia, que lo
+ * lista aparte como "opuesto complementario".
  */
 export function getHarmonicSigns(sign: ZodiacSign): ZodiacSign[] {
   const { element } = ZODIAC_SIGNS_INFO[sign];
   const friendlyElement = COMPLEMENTARY_ELEMENT[element];
+  const opposite = getOppositeSign(sign);
 
   const sameElement = ZODIAC_WHEEL.filter(
     (candidate) => candidate !== sign && ZODIAC_SIGNS_INFO[candidate].element === element
   );
   const complementary = ZODIAC_WHEEL.filter(
-    (candidate) => ZODIAC_SIGNS_INFO[candidate].element === friendlyElement
+    (candidate) =>
+      candidate !== opposite && ZODIAC_SIGNS_INFO[candidate].element === friendlyElement
   );
 
   return [...sameElement, ...complementary];

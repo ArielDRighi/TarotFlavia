@@ -547,6 +547,27 @@ que un cambio futuro no lo desarme sin querer.
 - **El soft-404 sigue vivo** (`/horoscopo/inventado-xyz` responde 200): es T-SEO-006, fuera de
   alcance acá.
 
+### Ajustes tras la revisión
+
+- **`getHarmonicSigns` listaba al signo opuesto como afín.** El opuesto está a seis posiciones y
+  seis ≡ dos en el ciclo de cuatro elementos, así que **siempre** cae en el elemento complementario
+  y entraba en la lista. Resultado: cada ficha mostraba al mismo signo en "con qué signos sintoniza"
+  y en "su eje opuesto", con dos enlaces al mismo href, y contradecía al `compatibleSigns` de la
+  enciclopedia —que lista al opuesto aparte—, justo lo que derivar el dato venía a evitar.
+  Astrológicamente tampoco cerraba: mismo elemento es trígono y elemento amigo a ±2 es sextil, pero
+  ±6 es una **oposición**, que es tensión y no sintonía. Ahora se filtra: quedan 4 signos por ficha
+  (2 trígonos + 2 sextiles), idénticos a los de la enciclopedia, y hay un test que lo fija.
+- **Tests de coherencia con `birth-chart.enums.ts`.** Ese módulo ya declara fechas, modalidad,
+  elemento y slug de enciclopedia para los mismos 12 signos, con su propio enum. Los helpers los
+  derivan en vez de repetirlos, así que las dos tablas podían divergir sin que nada fallara: se
+  agregaron 48 tests que cruzan las dos. Si alguna vez difieren, la ficha del horóscopo estaría
+  mostrando un dato distinto del que muestra la carta astral para el mismo signo.
+- **El orden del enum `ZodiacSign` es load-bearing** y ahora lo dice donde se declara: la modalidad y
+  el opuesto salen de la posición en la rueda.
+- **El bloque del horóscopo del día tiene nombre accesible** (`<h2 class="sr-only">Horóscopo de
+  hoy</h2>` + `aria-labelledby`). Su único encabezado lo aportaba `HoroscopeDetail`, y solo cuando
+  hay datos: mientras cargaba, la sección quedaba anónima.
+
 ---
 
 ## T-SEO-005: El Build de Docker no Usa Lockfile

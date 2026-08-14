@@ -106,6 +106,17 @@ describe('HoroscopeSignPanel', () => {
     expect(mockUseTodayHoroscope).toHaveBeenCalledWith(ZodiacSign.LEO);
   });
 
+  it('expone el bloque con nombre accesible aunque no haya horóscopo todavía', () => {
+    // El único encabezado visible lo aporta `HoroscopeDetail` cuando hay datos:
+    // mientras carga, el bloque quedaba sin nombre.
+    mockUseAuthStore.mockReturnValue({ user: null });
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: true, error: null, data: null });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
+
+    expect(screen.getByRole('region', { name: 'Horóscopo de hoy' })).toBeInTheDocument();
+  });
+
   it('should render skeleton when loading', () => {
     mockUseAuthStore.mockReturnValue({
       user: null,

@@ -15,7 +15,28 @@ import {
   ZODIAC_ELEMENT_LABELS,
   ZODIAC_SIGNS_INFO,
 } from '@/lib/utils/zodiac';
+import {
+  ZODIAC_SIGNS,
+  ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS,
+  ZodiacSign as BirthChartZodiacSign,
+} from '@/types/birth-chart.enums';
 import { ZodiacSign } from '@/types/horoscope.types';
+
+/** Meses en español, para reconstruir el rango que formatea `getZodiacDateRange`. */
+const MESES_ES = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+];
 
 describe('zodiac utilities', () => {
   describe('getZodiacSignFromDate', () => {
@@ -203,7 +224,7 @@ describe('isZodiacSign', () => {
  * Helpers de la ficha estática del signo (T-SEO-004).
  *
  * Todos derivan del signo: nada de duplicar en datos lo que ya está en
- * `ZODIAC_RANGES` o en el orden de la rueda.
+ * `ZODIAC_DATE_RANGES` o en el orden de la rueda.
  */
 describe('helpers de la ficha del signo (T-SEO-004)', () => {
   describe('getZodiacDateRange', () => {
@@ -262,28 +283,33 @@ describe('helpers de la ficha del signo (T-SEO-004)', () => {
   });
 
   describe('getHarmonicSigns', () => {
-    it('Aries sintoniza con los otros dos de fuego y con los tres de aire', () => {
+    it('Aries sintoniza con los otros dos de fuego y con los de aire que no son su opuesto', () => {
       expect(getHarmonicSigns(ZodiacSign.ARIES)).toEqual([
         ZodiacSign.LEO,
         ZodiacSign.SAGITTARIUS,
         ZodiacSign.GEMINI,
-        ZodiacSign.LIBRA,
         ZodiacSign.AQUARIUS,
       ]);
     });
 
-    it('Cáncer sintoniza con agua y tierra', () => {
+    it('Cáncer sintoniza con agua y tierra, sin Capricornio', () => {
       expect(getHarmonicSigns(ZodiacSign.CANCER)).toEqual([
         ZodiacSign.SCORPIO,
         ZodiacSign.PISCES,
         ZodiacSign.TAURUS,
         ZodiacSign.VIRGO,
-        ZodiacSign.CAPRICORN,
       ]);
     });
 
     it.each(Object.values(ZodiacSign))('%s no se lista a sí mismo', (sign) => {
       expect(getHarmonicSigns(sign)).not.toContain(sign);
+    });
+
+    it.each(Object.values(ZodiacSign))('%s no lista a su opuesto como afín', (sign) => {
+      // El opuesto cae siempre en el elemento complementario (6 ≡ 2 en el ciclo
+      // de cuatro elementos), pero es una oposición, no un sextil: la ficha lo
+      // muestra aparte como eje opuesto y no puede aparecer dos veces.
+      expect(getHarmonicSigns(sign)).not.toContain(getOppositeSign(sign));
     });
 
     it.each(Object.values(ZodiacSign))('la afinidad de %s es recíproca', (sign) => {
@@ -292,8 +318,8 @@ describe('helpers de la ficha del signo (T-SEO-004)', () => {
       });
     });
 
-    it.each(Object.values(ZodiacSign))('%s sintoniza con 5 signos', (sign) => {
-      expect(getHarmonicSigns(sign)).toHaveLength(5);
+    it.each(Object.values(ZodiacSign))('%s sintoniza con 4 signos', (sign) => {
+      expect(getHarmonicSigns(sign)).toHaveLength(4);
     });
   });
 
@@ -327,5 +353,47 @@ describe('helpers de la ficha del signo (T-SEO-004)', () => {
       expect(ZODIAC_ELEMENT_LABELS.air).toBe('Aire');
       expect(ZODIAC_ELEMENT_LABELS.water).toBe('Agua');
     });
+  });
+});
+
+/**
+ * Coherencia con la tabla de signos de carta astral (`birth-chart.enums.ts`).
+ *
+ * Ese módulo ya declara fechas, modalidad y slug de enciclopedia para los mismos
+ * 12 signos, con su propio enum. Los helpers de acá los derivan en vez de
+ * repetirlos, así que las dos tablas pueden divergir sin que nada falle: estos
+ * tests son el puente. Si alguna vez difieren, la ficha del horóscopo estaría
+ * mostrando un dato distinto del que muestra la carta astral para el mismo signo.
+ */
+describe('coherencia con birth-chart.enums.ts', () => {
+  const SLUGS_POR_VALOR: Record<string, string> = ZODIAC_SIGN_ENCYCLOPEDIA_SLUGS;
+  const SIGNOS_POR_VALOR: Record<string, (typeof ZODIAC_SIGNS)[BirthChartZodiacSign]> =
+    ZODIAC_SIGNS;
+
+  const MODALIDAD_ES: Record<string, string> = {
+    cardinal: 'Cardinal',
+    fixed: 'Fija',
+    mutable: 'Mutable',
+  };
+
+  it.each(Object.values(ZodiacSign))('el slug de enciclopedia de %s coincide', (sign) => {
+    expect(getZodiacEncyclopediaSlug(sign)).toBe(SLUGS_POR_VALOR[sign]);
+  });
+
+  it.each(Object.values(ZodiacSign))('la modalidad de %s coincide', (sign) => {
+    expect(getZodiacModality(sign)).toBe(MODALIDAD_ES[SIGNOS_POR_VALOR[sign].modality]);
+  });
+
+  it.each(Object.values(ZodiacSign))('el rango de fechas de %s coincide', (sign) => {
+    const { startDate, endDate } = SIGNOS_POR_VALOR[sign];
+    const rango = getZodiacDateRange(sign);
+
+    expect(rango.startsWith(`${startDate.day} de `)).toBe(true);
+    expect(rango.endsWith(` ${endDate.day} de ${MESES_ES[endDate.month - 1]}`)).toBe(true);
+    expect(rango).toContain(MESES_ES[startDate.month - 1]);
+  });
+
+  it.each(Object.values(ZodiacSign))('el elemento de %s coincide', (sign) => {
+    expect(ZODIAC_SIGNS_INFO[sign].element).toBe(SIGNOS_POR_VALOR[sign].element);
   });
 });

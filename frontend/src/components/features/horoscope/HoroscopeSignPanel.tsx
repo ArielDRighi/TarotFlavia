@@ -14,6 +14,11 @@ import { getZodiacSignFromDate } from '@/lib/utils/zodiac';
 import { ROUTES } from '@/lib/constants/routes';
 import type { ZodiacSign } from '@/types/horoscope.types';
 
+export interface HoroscopeSignPanelProps {
+  /** Signo del que se muestra el horóscopo de hoy. */
+  sign: ZodiacSign;
+}
+
 /**
  * Horóscopo del día de `/horoscopo/[sign]`.
  *
@@ -27,12 +32,12 @@ import type { ZodiacSign } from '@/types/horoscope.types';
  *
  * El signo llega ya validado desde `HoroscopeSignRoute`: la validación del
  * segmento vive en el servidor, con una sola fuente de verdad.
+ *
+ * @example
+ * ```tsx
+ * <HoroscopeSignPanel sign={ZodiacSign.ARIES} />
+ * ```
  */
-export interface HoroscopeSignPanelProps {
-  /** Signo del que se muestra el horóscopo de hoy. */
-  sign: ZodiacSign;
-}
-
 export function HoroscopeSignPanel({ sign }: HoroscopeSignPanelProps) {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -41,7 +46,18 @@ export function HoroscopeSignPanel({ sign }: HoroscopeSignPanelProps) {
   const userSign = user?.birthDate ? getZodiacSignFromDate(new Date(user.birthDate)) : null;
 
   return (
-    <section className="space-y-6" data-testid="horoscope-sign-panel">
+    <section
+      className="space-y-6"
+      aria-labelledby="horoscopo-de-hoy"
+      data-testid="horoscope-sign-panel"
+    >
+      {/* El único encabezado del bloque lo aporta `HoroscopeDetail`, y solo
+          cuando hay datos: sin esto, el bloque queda sin nombre accesible
+          mientras carga o cuando el horóscopo no está disponible. */}
+      <h2 id="horoscopo-de-hoy" className="sr-only">
+        Horóscopo de hoy
+      </h2>
+
       <ZodiacSignSelector
         selectedSign={sign}
         userSign={userSign}

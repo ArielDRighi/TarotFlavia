@@ -6,6 +6,11 @@
 
 /**
  * Signos zodiacales occidentales
+ *
+ * ⚠️ **El orden importa**: `getZodiacModality` y `getOppositeSign`
+ * ([zodiac.ts](../lib/utils/zodiac.ts)) derivan de la posición en la rueda, que
+ * arranca en Aries. Reordenar este enum —por ejemplo, alfabéticamente— cambia
+ * los dos resultados. Los tests de `zodiac.test.ts` lo atrapan.
  */
 export enum ZodiacSign {
   ARIES = 'aries',

@@ -87,6 +87,10 @@ export function ZodiacSignProfile({ sign, children }: ZodiacSignProfileProps) {
   const oppositeName = ZODIAC_SIGNS_INFO[oppositeSign].nameEs;
 
   return (
+    // El `children` —el horóscopo del día, que es cliente y cambia cada día—
+    // queda dentro del `<article>` estático. Es discutible en lo semántico y
+    // deliberado en lo demás: el visitante viene a buscarlo, y dejarlo fuera del
+    // artículo lo empujaba abajo de 300 palabras de ficha.
     <article className="space-y-6" data-testid="zodiac-sign-profile">
       <header className="text-center">
         <ZodiacSymbol symbol={symbol} label={nameEs} className="text-6xl" />
