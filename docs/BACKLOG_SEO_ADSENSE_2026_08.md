@@ -109,7 +109,7 @@ Referencias vivas: [enciclopedia/tarot/[slug]/page.tsx](../frontend/src/app/enci
 
 Lecciones que costaron caro en la sesión del 8-ago:
 
-1. **CI en verde NO significa que el deploy funcione.** Lo fue hasta el 14-ago-2026: CI usaba `npm ci`
+1. **CI en verde NO significa que el deploy funcione.** Lo fue hasta el 19-ago-2026: CI usaba `npm ci`
    contra el lockfile de la raíz y el Dockerfile de Railway corría `npm install` sin lockfile,
    resolviendo versiones distintas. El deploy estuvo roto dos semanas con CI verde. **T-SEO-005 cerró
    esa brecha**: el frontend ahora se construye desde la raíz con `npm ci`, igual que CI. Las otras
@@ -152,14 +152,11 @@ lógica en `app/`.
 | T-SEO-002 | Horóscopo chino por animal: 12 URLs sirven 3 palabras ✅ | Frontend | 🔴 Crítica | 3 pts |
 | T-SEO-003 | Listados y hubs sin contenido para el crawler ✅ | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-004 | Signos del horóscopo: ficha estática del signo ✅ | Frontend | 🟠 Alta | 2 pts |
-| T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) 🟡 | Infra | 🟠 Alta | 2 pts |
+| T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) ✅ | Infra | 🟠 Alta | 2 pts |
 | T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) | Frontend | 🟡 Media | 1.5 pts |
 | T-SEO-007 | El panel de admin expulsa al admin (secuela de T-PROD-022) ✅ | Frontend | 🔴 Crítica | 1 pt |
 
-**Orden recomendado:** 005 → 006 (001, 002, 003, 004 y 007 ya están cerradas).
-El 005 tiene el código listo y verificado (14-ago); queda **pendiente el cambio en el panel de Railway**
-—*Root Directory* `/` + *Dockerfile Path* `frontend/Dockerfile`, las dos juntas— antes del próximo
-deploy a `main`.
+**Orden recomendado:** queda solo el 006 (001, 002, 003, 004, 005 y 007 ya están cerradas).
 
 ---
 
@@ -577,15 +574,15 @@ que un cambio futuro no lo desarme sin querer.
 ## T-SEO-005: El Build de Docker no Usa Lockfile
 
 **Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** coordinación con el panel de Railway
-**Estado:** 🟡 CÓDIGO LISTO Y VERIFICADO (14-ago-2026) · ⏳ **falta el cambio de panel + el deploy**
+**Estado:** ✅ COMPLETADA (19-ago-2026) — código, cambio de panel y deploy verificados en producción
 
 ### Problema
 
-El [Dockerfile del frontend](../frontend/Dockerfile) copia solo `package.json` y corre `npm install`, sin
-lockfile. Resuelve versiones **más nuevas** que local y que CI: en el incidente del 8-ago el builder trajo
+El [Dockerfile del frontend](../frontend/Dockerfile) copiaba solo `package.json` y corría `npm install`, sin
+lockfile. Resolvía versiones **más nuevas** que local y que CI: en el incidente del 8-ago el builder trajo
 **Next 16.3.0** contra **16.0.6** local, y esa deriva rompió el deploy **durante dos semanas con CI en
-verde**. T-PROD-023 eliminó la clase de fallo concreta (tipos de tests), pero la causa de fondo sigue viva:
-cualquier deriva en dependencias de *aplicación* puede volver a romper un deploy sin aviso.
+verde**. T-PROD-023 eliminó la clase de fallo concreta (tipos de tests), pero la causa de fondo seguía viva:
+cualquier deriva en dependencias de *aplicación* podía volver a romper un deploy sin aviso.
 
 ### Opciones
 
@@ -600,10 +597,19 @@ cualquier deriva en dependencias de *aplicación* puede volver a romper un deplo
       `npm ci -w frontend`, rutas del monorepo). Quedó de dos stages —builder + producción— igual que el
       del backend, en vez de los tres de antes: el stage `deps` separado ya no aporta nada porque el orden
       *copiar manifiestos → instalar → copiar fuente* da la misma caché de capas.
-- [ ] **Coordinar con el Delta**: en el panel de Railway hay que cambiar *Root Directory* a `/` y
-      *Dockerfile Path* a `frontend/Dockerfile`. **Si sale solo una de las dos mitades, el deploy se rompe.**
-      ⚠️ El merge a `develop` **no** dispara deploy (Railway despliega desde `main`), así que la ventana de
-      coordinación es el merge a `main`, no el del PR.
+- [x] **Coordinado con el Delta**: cambio aplicado por `railway api` (GraphQL `serviceInstanceUpdate`),
+      no a mano por el panel. ⚠️ **Los valores no eran los que decía este backlog**: el backend, que ya
+      construía desde la raíz, usa *Root Directory* **vacío** (no `/`) y *Dockerfile Path* **con barra
+      inicial**. Se espejó esa convención en vez de inventar una:
+
+      | Servicio | Root Directory | Dockerfile Path |
+      | --- | --- | --- |
+      | backend | `""` | `/backend/tarot-app/Dockerfile` |
+      | frontend | `""` | `/frontend/Dockerfile` |
+
+      Confirmado por API que ambos servicios tienen su *deployment trigger* en `main` y que hay un solo
+      environment (`production`), o sea un solo panel que tocar. Aplicar el cambio **no** disparó ningún
+      build, así que el sitio siguió sirviendo el deployment viejo hasta el merge a `main`.
 - [x] Verificar con `docker build` real desde la raíz **antes** de tocar el panel.
 
 ### Criterios de aceptación
@@ -611,9 +617,12 @@ cualquier deriva en dependencias de *aplicación* puede volver a romper un deplo
 - [x] `docker build` desde la raíz completa y resuelve **las mismas versiones que local/CI**:
       **57/57** dependencias declaradas en `frontend/package.json` coinciden exactamente con el
       `package-lock.json` raíz. `next` da **16.2.2** dentro de la imagen = 16.2.2 en el lockfile.
-- [ ] Deploy exitoso en Railway. ⏳ Depende del cambio de panel.
+- [x] Deploy exitoso en Railway (19-ago-2026). El *tell* en los logs del build es `RUN npm ci -w frontend`
+      + `added 759 packages` — **los mismos 759 del build local**. Antes decía `RUN npm install` y
+      `added 723 packages`: 36 paquetes de diferencia, que es exactamente la deriva que esta tarea vino
+      a cerrar.
 
-### Cómo se verificó (14-ago-2026)
+### Cómo se verificó (19-ago-2026)
 
 ```bash
 # 1. Build desde la RAÍZ del repo (no desde frontend/)
@@ -636,6 +645,19 @@ npm run check:indexable -w frontend -- --base-url http://localhost:3099 --sample
 # → 34/34 cumplen (123–820 palabras propias), 0 por debajo del umbral.
 #   Los 11 soft-404 que reporta son los conocidos de T-SEO-006, no una regresión.
 ```
+
+### Verificación en producción (19-ago-2026, post-deploy)
+
+Con cache-buster, porque el edge de Railway cachea con `s-maxage=31536000`:
+
+```bash
+npm run check:indexable -w frontend -- --base-url https://auguriatarot.com --sample 2
+# → 34/34 cumplen · 0 por debajo del umbral — idéntico a lo medido contra el contenedor local.
+#   Los 11 soft-404 siguen ahí: son T-SEO-006, no una regresión.
+```
+
+Home 650 palabras, `/horoscopo/aries` 550, `/enciclopedia/tarot/the-fool` 260, `/servicios` 294;
+imágenes de `public/` y `manifest.json` en 200. El cambio de layout del `standalone` no rompió nada.
 
 ### Notas técnicas
 
@@ -668,7 +690,7 @@ npm run check:indexable -w frontend -- --base-url http://localhost:3099 --sample
   `/tarotistas/[id]/reservar`. Es preexistente y Railway los inyecta, pero conviene saberlo al reproducir
   a mano.
 - **El `node_modules` local estaba desactualizado** (`next` 16.0.6 contra los 16.2.2 del lockfile), así que
-  el build local venía validando una versión que producción no iba a correr. Resuelto el 14-ago con un
+  el build local venía validando una versión que producción no iba a correr. Resuelto el 19-ago con un
   `npm ci` en la raíz —que no toca el lockfile, a diferencia de `npm install`—, y revalidado con la
   versión nueva: type-check limpio, 6039 tests y build en verde. **Local, CI y la imagen resuelven ahora
   exactamente lo mismo**, que era el punto de la tarea.
