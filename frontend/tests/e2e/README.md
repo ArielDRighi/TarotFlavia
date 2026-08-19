@@ -47,8 +47,13 @@ tests/e2e/
 ├── reading-premium.spec.ts       # Flujo completo usuario PREMIUM
 ├── daily-card.spec.ts            # Carta del día (todos los usuarios)
 ├── plan-restrictions.spec.ts     # Verificación de restricciones por plan
-└── limits-validation.spec.ts     # Tests de sistema de límites (ANÓNIMO, FREE, PREMIUM)
+├── limits-validation.spec.ts     # Tests de sistema de límites (ANÓNIMO, FREE, PREMIUM)
+├── horoscope-selector.spec.ts    # Layout del selector de horóscopo (bugs que jsdom no ve)
+└── soft-404.spec.ts              # Status HTTP de las rutas dinámicas: 404 real, no soft-404
 ```
+
+> ⚠️ `soft-404.spec.ts` **requiere un build de producción** (no `next dev`) y la **API levantada**;
+> el motivo está en el encabezado del propio archivo.
 
 ## 🧪 Cobertura de Tests
 

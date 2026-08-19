@@ -60,11 +60,14 @@ El sistema de diseño ya provee primitivos reutilizables en `src/components/ui/`
 **Variantes detectadas:**
 
 1. ✅ **`<Spinner size="lg" text="Cargando..." />`** (correcto, en archivos `loading.tsx` de App Router):
-   - [`src/app/loading.tsx:10`](../frontend/src/app/loading.tsx#L10)
    - [`src/app/explorar/loading.tsx:10`](../frontend/src/app/explorar/loading.tsx#L10)
    - [`src/app/tarot/loading.tsx:10`](../frontend/src/app/tarot/loading.tsx#L10)
    - [`src/app/ritual/loading.tsx:10`](../frontend/src/app/ritual/loading.tsx#L10)
    - [`src/app/historial/loading.tsx:10`](../frontend/src/app/historial/loading.tsx#L10)
+
+   > El `src/app/loading.tsx` **global** que encabezaba esta lista se eliminó en T-SEO-006: al
+   > envolver todas las rutas en un `<Suspense>`, hacía que Next confirmara la respuesta con 200
+   > antes de renderizar la página y ninguna ruta dinámica podía emitir un 404.
 
 2. ❌ **`<p className="...text-gray-500">Cargando...</p>`** (sin spinner, color hardcoded):
    - [`src/components/features/marketplace/BookingPage.tsx:86`](../frontend/src/components/features/marketplace/BookingPage.tsx#L86) → `<p className="mt-4 text-center text-sm text-gray-500">Cargando...</p>`

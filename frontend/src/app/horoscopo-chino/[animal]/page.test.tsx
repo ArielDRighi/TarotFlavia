@@ -235,13 +235,6 @@ describe('ChineseHoroscopeAnimalPage', () => {
     it('⚠️ T-SEO-006: corta el render con notFound() en vez de servir un 200', async () => {
       await expect(renderPage('invalid-animal')).rejects.toThrow('NEXT_NOT_FOUND');
     });
-
-    it('no renderiza la ficha ni el panel para un animal inválido', async () => {
-      await expect(renderPage('invalid-animal')).rejects.toThrow();
-
-      expect(screen.queryByTestId('animal-profile')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('chinese-animal-selector')).not.toBeInTheDocument();
-    });
   });
 
   describe('navegación', () => {

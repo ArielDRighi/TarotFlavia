@@ -800,10 +800,17 @@ nada.
 ### Notas técnicas
 
 - **Qué se pierde al sacar el `loading.tsx` global:** el spinner de pantalla completa en la
-  navegación client-side hacia rutas que no tenían el suyo. En la práctica esas rutas son estáticas
-  (SSG) y resuelven al instante; las que sí tardan —el circuito de tarot, el de ritual, el historial,
-  la carta astral— conservan su `loading.tsx` de segmento. Lo que se gana es que el servidor no
-  confirme un 200 antes de saber qué va a renderizar.
+  navegación client-side hacia rutas que no tenían el suyo. Los circuitos que sí tardan —tarot,
+  ritual, historial, carta astral, explorar— conservan su `loading.tsx` de segmento. Quedan sin
+  feedback de navegación cinco rutas `ƒ` (server-rendered on demand): `/tarotistas/[id]`,
+  `/tarotistas/[id]/reservar`, `/servicios/[slug]/pago`, `/servicios/reservar/[purchaseId]` y
+  `/compartida/[token]`. Las cuatro últimas son client components cuyo render en el servidor es
+  inmediato (montan su propio esqueleto), así que la espera es solo el payload RSC. La primera sí
+  hace una llamada bloqueante a la API, y **ahí no se puede agregar un `loading.tsx`**: reintroduciría
+  exactamente el soft-404 que esta tarea cerró. El remedio para esa ruta fue el opuesto —pasarle el
+  perfil ya resuelto al componente— así que el cliente no vuelve a pedirlo y el HTML trae el
+  contenido real. Lo que se gana en las once rutas públicas es que el servidor no confirme un 200
+  antes de saber qué va a renderizar.
 - **El cuerpo del 404 lo pinta el cliente.** Con `notFound()` desde una ruta ya matcheada, Next 16
   responde 404 con un documento vacío y el `not-found.tsx` se monta al hidratar (verificado también
   en las seis sondas, así que es comportamiento de Next y no algo de este árbol). No es una regresión
@@ -816,6 +823,31 @@ nada.
 - **Los tests unitarios no alcanzan para esto y por eso hay un e2e.** Las rutas llamaban a
   `notFound()` desde antes de esta tarea y sus tests lo verificaban: el status HTTP es una capa que
   jsdom no ve.
+- **`soft-404.spec.ts` exige un build de producción y la API arriba.** Corriéndolo contra
+  `next dev` el pipeline de streaming no es el mismo, así que una regresión podría no aparecer; y
+  con la API caída `resolveRouteResource` propaga y las rutas de enciclopedia/rituales/servicios
+  responden 500 en vez de 404. Queda escrito en el encabezado del spec y en `tests/e2e/README.md`.
+
+### Salió de la revisión
+
+- **`/tarotistas/[id]` descartaba el perfil que acababa de traer.** La primera versión del arreglo
+  usaba el fetch del servidor solo como portón del 404 y devolvía `<TarotistaProfilePage id={id} />`,
+  que volvía a pedir el mismo perfil desde el cliente: dos llamadas a la API por visita y, en una
+  ruta **indexable**, un HTML con el esqueleto —el agujero que T-SEO-004 cerró en las otras—. Ahora
+  se le pasa `initialTarotista`, igual que las 5 hermanas, y `useTarotistaDetail` lo acepta como
+  `initialData` con `initialDataUpdatedAt: 0` (mismo criterio que `useRitual`: las valoraciones
+  cambian, así que el cliente igual refetchea al montar).
+- **`/tarotistas/[id]/reservar` arrastraba el mismo bug de `params` que el padre.** Tipaba
+  `params` como objeto plano —en Next 16 es una `Promise`—, así que `Number(params.id)` daba `NaN` y
+  `BookingPage` arrancaba con un id inválido. Es privada, así que no era un soft-404, pero la
+  reserva salía rota. Pasó a leer el segmento con `useParams` (el patrón de las otras rutas cliente)
+  + `parseNumericRouteId`. Su test lo tapaba pasando `params` como prop; ahora mockea `useParams`.
+- **Faltaban dos casos en el e2e:** la ruta legacy `/enciclopedia/[slug]` (redirige y debe terminar
+  en 404) y `/tarotistas/999999` — solo estaba `/tarotistas/abc`, que ejercita el parseo del
+  segmento y no el 404 que devuelve la API.
+- **Quedaba un `useSearchParams` sin límite de Suspense propio:** `/servicios/[slug]/pago`. No rompe
+  el build porque la ruta sale como `ƒ` (no se prerenderiza), así que se deja como está y queda
+  anotado: si algún día se le agrega `generateStaticParams`, el build va a fallar ahí.
 
 ---
 

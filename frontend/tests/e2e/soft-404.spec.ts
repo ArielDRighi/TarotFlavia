@@ -12,6 +12,24 @@ import { test, expect } from '@playwright/test';
  *
  * Un soft-404 es lo peor de los dos mundos para SEO: Google indexa la URL como
  * válida y vacía en vez de descartarla.
+ *
+ * ⚠️ **Cómo correrlo.** Dos requisitos que no son opcionales:
+ *
+ * 1. **Contra un build de producción**, no contra `next dev`. El bug se midió
+ *    sobre `node frontend/server.js` (el comando del Dockerfile) y el pipeline
+ *    de streaming del dev server no es el mismo, así que una regresión podría
+ *    no aparecer acá:
+ *
+ *    ```bash
+ *    npm run build && npm start   # o el contenedor
+ *    PLAYWRIGHT_BASE_URL=http://localhost:3001 npx playwright test tests/e2e/soft-404.spec.ts
+ *    ```
+ *
+ * 2. **Con la API levantada.** Las rutas de `/enciclopedia`, `/rituales`,
+ *    `/servicios` y `/tarotistas` resuelven el recurso contra el backend:
+ *    `resolveRouteResource` solo convierte en 404 lo que la API declara 404, y
+ *    **propaga** cualquier otro error. Con la API caída estas URLs responden
+ *    500, no 404, y la suite falla por el motivo equivocado.
  */
 
 /** Slug/id que no existe en ninguna ruta: sondea el 404 sin depender de datos. */
@@ -23,6 +41,8 @@ const SLUG_INVENTADO = 'inventado-xyz-t-seo-006';
  * por una ruta que nadie miró.
  */
 const RUTAS_DINAMICAS_PUBLICAS = [
+  // Ruta legacy: redirige (308) a `/enciclopedia/tarot/[slug]`, que debe 404.
+  `/enciclopedia/${SLUG_INVENTADO}`,
   `/enciclopedia/tarot/${SLUG_INVENTADO}`,
   `/enciclopedia/guias/${SLUG_INVENTADO}`,
   `/enciclopedia/elementos/${SLUG_INVENTADO}`,
@@ -33,8 +53,10 @@ const RUTAS_DINAMICAS_PUBLICAS = [
   `/servicios/${SLUG_INVENTADO}`,
   `/horoscopo/${SLUG_INVENTADO}`,
   `/horoscopo-chino/${SLUG_INVENTADO}`,
-  // El id llega como string: `/tarotistas/abc` no debe salir a la API con NaN.
+  // Dos caminos distintos en `/tarotistas/[id]`: el segmento que no es un id
+  // (corta antes de la API) y el id bien formado que no existe (404 de la API).
   '/tarotistas/abc',
+  '/tarotistas/999999',
 ];
 
 /**

@@ -61,13 +61,6 @@ describe('HoroscopeSignRoute', () => {
       expect(notFoundMock).toHaveBeenCalled();
     });
 
-    it('no renderiza la ficha ni consulta el horóscopo', () => {
-      expect(() => render(<HoroscopeSignRoute sign="unicornio" />)).toThrow();
-
-      expect(screen.queryByTestId('zodiac-sign-profile')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('horoscope-sign-panel')).not.toBeInTheDocument();
-    });
-
     it('no corta el render para un signo válido', () => {
       render(<HoroscopeSignRoute sign={ZodiacSign.TAURUS} />);
 

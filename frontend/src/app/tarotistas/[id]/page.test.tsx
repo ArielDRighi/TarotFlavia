@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { AxiosError, AxiosHeaders } from 'axios';
 
 import TarotistaPerfilPage, { generateMetadata } from './page';
+import { API_ENDPOINTS } from '@/lib/api/endpoints';
 
 // `notFound()` corta el render lanzando; el mock reproduce ese contrato (T-SEO-006).
 vi.mock('next/navigation', () => ({
@@ -19,8 +20,16 @@ vi.mock('@/lib/api/axios-config', () => ({
 }));
 
 vi.mock('@/components/features/marketplace/TarotistaProfilePage', () => ({
-  TarotistaProfilePage: ({ id }: { id: number }) => (
-    <div data-testid="tarotista-profile-page">Profile for tarotista {id}</div>
+  TarotistaProfilePage: ({
+    id,
+    initialTarotista,
+  }: {
+    id: number;
+    initialTarotista?: { nombrePublico: string };
+  }) => (
+    <div data-testid="tarotista-profile-page">
+      Profile for tarotista {id} — {initialTarotista?.nombrePublico ?? 'sin perfil'}
+    </div>
   ),
 }));
 
@@ -57,7 +66,17 @@ describe('/tarotistas/[id]', () => {
 
       expect(screen.getByTestId('tarotista-profile-page')).toBeInTheDocument();
       expect(screen.getByText(/profile for tarotista 123/i)).toBeInTheDocument();
-      expect(mockGet).toHaveBeenCalledWith('/tarotistas/123');
+      expect(mockGet).toHaveBeenCalledWith(API_ENDPOINTS.TAROTISTAS.BY_ID(123));
+    });
+
+    it('le pasa al componente el perfil ya resuelto, para no repetir el fetch', async () => {
+      mockGet.mockResolvedValue({ data: TAROTISTA });
+
+      // Es la ruta indexable: sin esto el HTML servido es el esqueleto y el
+      // cliente vuelve a pedir el mismo perfil (mismo patrón que las otras 5).
+      render(await TarotistaPerfilPage({ params: Promise.resolve({ id: '123' }) }));
+
+      expect(screen.getByTestId('tarotista-profile-page')).toHaveTextContent('Luna Estrella');
     });
 
     it('genera metadata con los datos del tarotista', async () => {
@@ -103,9 +122,11 @@ describe('/tarotistas/[id]', () => {
       // una URL válida. Mismo criterio que `resolveRouteResource`.
       mockGet.mockRejectedValue(axiosStatusError(500));
 
-      await expect(
-        TarotistaPerfilPage({ params: Promise.resolve({ id: '123' }) })
-      ).rejects.not.toThrow('NEXT_NOT_FOUND');
+      // El error original, no un `notFound()`: la URL puede ser válida y el
+      // 404 quedaría cacheado por todo el ISR.
+      await expect(TarotistaPerfilPage({ params: Promise.resolve({ id: '123' }) })).rejects.toThrow(
+        'request failed'
+      );
     });
   });
 });

@@ -69,9 +69,8 @@ export async function generateMetadata({ params }: TarotistaPerfilPageProps): Pr
 export default async function TarotistaPerfilPage({ params }: TarotistaPerfilPageProps) {
   const id = await resolveId(params);
 
-  // El perfil se resuelve también acá para que un id inexistente corte el render
-  // aunque la metadata venga cacheada.
-  await getTarotista(id);
-
-  return <TarotistaProfilePage id={id} />;
+  // El perfil resuelto se le pasa al componente —mismo patrón que las otras 5
+  // rutas dinámicas—: corta el render si el id no existe, sirve el contenido
+  // real en el HTML (la ruta es indexable) y le ahorra al cliente el request.
+  return <TarotistaProfilePage id={id} initialTarotista={await getTarotista(id)} />;
 }

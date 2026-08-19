@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { FavoriteTarotistaButton } from './FavoriteTarotistaButton';
+import type { TarotistaDetail } from '@/types';
 
 // ============================================================================
 // Types
@@ -27,6 +28,12 @@ import { FavoriteTarotistaButton } from './FavoriteTarotistaButton';
 export interface TarotistaProfilePageProps {
   /** Tarotista ID (numeric) */
   id: number;
+  /**
+   * Perfil resuelto en el servidor; la ruta corta con `notFound()` si el id no
+   * existe (T-SEO-006). Sirve el contenido real en el HTML —la ruta es
+   * indexable— en vez del esqueleto, y evita el segundo request al montar.
+   */
+  initialTarotista?: TarotistaDetail;
 }
 
 // ============================================================================
@@ -107,9 +114,9 @@ function RatingStars({ rating }: { rating: number | null }) {
 // Main Component
 // ============================================================================
 
-export function TarotistaProfilePage({ id }: TarotistaProfilePageProps) {
+export function TarotistaProfilePage({ id, initialTarotista }: TarotistaProfilePageProps) {
   const router = useRouter();
-  const { data: tarotista, isLoading, error } = useTarotistaDetail(id);
+  const { data: tarotista, isLoading, error } = useTarotistaDetail(id, initialTarotista);
 
   // ============================================================================
   // Loading State

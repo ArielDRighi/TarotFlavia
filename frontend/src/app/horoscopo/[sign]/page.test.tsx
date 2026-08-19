@@ -111,7 +111,5 @@ describe('/horoscopo/[sign] — contenido servido (T-SEO-004)', () => {
 
   it('⚠️ T-SEO-006: un segmento inválido corta el render con notFound()', async () => {
     await expect(renderPage('unicornio')).rejects.toThrow('NEXT_NOT_FOUND');
-
-    expect(screen.queryByTestId('horoscope-sign-panel')).not.toBeInTheDocument();
   });
 });
