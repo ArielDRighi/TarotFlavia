@@ -81,19 +81,6 @@ function clampTitle(text: string): string {
   return clampText(text, MAX_TITLE_LENGTH - TITLE_SUFFIX.length);
 }
 
-/**
- * Metadata para un valor de ruta que no existe (`/horoscopo/unicornio`).
- *
- * Devolver `{}` no alcanzaba: la página heredaba el `alternates.canonical` del
- * layout del hub, así que una URL basura respondía 200 declarándose duplicada de
- * `/horoscopo` — el patrón exacto que originó T-PROD-020, fabricado a propósito.
- * `'./'` la hace self-canonical y el `noindex` la deja fuera del índice.
- */
-export const INVALID_ROUTE_PARAM_METADATA: Metadata = {
-  alternates: { canonical: './' },
-  robots: { index: false, follow: true },
-};
-
 export function buildPageMetadata({ title, description, canonical }: PageMetadataInput): Metadata {
   const clampedTitle = clampTitle(title);
 

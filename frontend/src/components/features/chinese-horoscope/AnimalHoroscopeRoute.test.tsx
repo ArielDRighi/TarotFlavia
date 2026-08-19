@@ -6,7 +6,7 @@
  * para que su `useSearchParams` no deopte el prerender de toda la ruta.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 import { AnimalHoroscopeRoute } from './AnimalHoroscopeRoute';
@@ -14,6 +14,15 @@ import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
 vi.mock('./AnimalHoroscopePanel', () => ({
   AnimalHoroscopePanel: () => <div data-testid="animal-horoscope-panel" />,
+}));
+
+/** `notFound()` corta el render lanzando; el mock reproduce ese contrato. */
+const notFoundMock = vi.fn(() => {
+  throw new Error('NEXT_NOT_FOUND');
+});
+
+vi.mock('next/navigation', () => ({
+  notFound: () => notFoundMock(),
 }));
 
 describe('AnimalHoroscopeRoute', () => {
@@ -53,26 +62,21 @@ describe('AnimalHoroscopeRoute', () => {
   });
 
   describe('animal inválido', () => {
-    it('muestra el mensaje de animal no válido', () => {
-      render(<AnimalHoroscopeRoute animal="unicornio" />);
+    beforeEach(() => {
+      notFoundMock.mockClear();
+    });
 
-      expect(screen.getByText('Animal no válido')).toBeInTheDocument();
+    it('⚠️ T-SEO-006: llama a notFound() para que la respuesta sea un 404 real', () => {
+      // Antes servía una ficha de "Animal no válido" en 200 (soft-404).
+      expect(() => render(<AnimalHoroscopeRoute animal="unicornio" />)).toThrow('NEXT_NOT_FOUND');
+      expect(notFoundMock).toHaveBeenCalled();
     });
 
     it('no renderiza la ficha ni el panel', () => {
-      render(<AnimalHoroscopeRoute animal="unicornio" />);
+      expect(() => render(<AnimalHoroscopeRoute animal="unicornio" />)).toThrow();
 
       expect(screen.queryByTestId('animal-profile')).not.toBeInTheDocument();
       expect(screen.queryByTestId('animal-horoscope-panel')).not.toBeInTheDocument();
-    });
-
-    it('ofrece un enlace al listado de animales', () => {
-      render(<AnimalHoroscopeRoute animal="unicornio" />);
-
-      expect(screen.getByRole('link', { name: /Ver todos los animales/i })).toHaveAttribute(
-        'href',
-        '/horoscopo-chino'
-      );
     });
   });
 });

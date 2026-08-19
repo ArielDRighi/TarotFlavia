@@ -12,9 +12,11 @@ import { notFound } from 'next/navigation';
  *   `/enciclopedia/tarot/inventado` servía el título genérico heredado y sumaba
  *   otra URL al grupo de duplicadas que T-PROD-020 vino a deshacer.
  *
- *   ⚠️ Medido: hoy esas URLs responden **200** con la página de no-encontrado, no
- *   un 404 HTTP (soft-404). Es preexistente y afecta también a las rutas que ya
- *   están en producción; queda anotado como pendiente en T-PROD-024.
+ *   ✅ Desde T-SEO-006 la respuesta es un **404 HTTP** de verdad. Antes salía un
+ *   200 con la página de no-encontrado (soft-404) porque el `app/loading.tsx`
+ *   global envolvía cada ruta en un Suspense: Next confirmaba la respuesta y
+ *   emitía el esqueleto antes de correr el cuerpo de la página, así que cuando
+ *   `notFound()` se lanzaba ya no había status que cambiar.
  * - **Cualquier otro error** (API caída, timeout, 5xx) → se propaga. Es
  *   deliberado: tragarlo dejaría prerenderizada —y cacheada por todo el ISR— una
  *   página con metadata heredada y el esqueleto vacío, exactamente el estado que

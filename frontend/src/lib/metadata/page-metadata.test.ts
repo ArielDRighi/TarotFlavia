@@ -5,7 +5,6 @@ import { ROUTES } from '@/lib/constants/routes';
 import { ZodiacSign } from '@/types/horoscope.types';
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 import {
-  INVALID_ROUTE_PARAM_METADATA,
   STATIC_PAGE_METADATA,
   buildPageMetadata,
   getCardDetailMetadata,
@@ -148,18 +147,6 @@ describe('STATIC_PAGE_METADATA', () => {
     const text = `${titleOf(metadata)} ${metadata.description}`;
 
     expect(text).not.toMatch(/\b(the|your|discover|free|read)\b/i);
-  });
-});
-
-describe('INVALID_ROUTE_PARAM_METADATA', () => {
-  it('⚠️ T-PROD-020: es self-canonical, no hereda el canonical del hub', () => {
-    // Con `{}`, `/horoscopo/unicornio` heredaba `canonical: '/horoscopo'` del
-    // layout: una URL basura declarándose duplicada de otra, en 200.
-    expect(INVALID_ROUTE_PARAM_METADATA.alternates?.canonical).toBe('./');
-  });
-
-  it('deja la URL inválida fuera del índice', () => {
-    expect(INVALID_ROUTE_PARAM_METADATA.robots).toEqual({ index: false, follow: true });
   });
 });
 

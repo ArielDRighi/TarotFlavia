@@ -11,6 +11,7 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -26,24 +27,11 @@ export interface AnimalHoroscopeRouteProps {
   animal: string;
 }
 
-/** Mensaje para un segmento que no es uno de los 12 animales. */
-function AnimalNotFound() {
-  return (
-    <div className="container mx-auto px-4 py-8 text-center" data-testid="animal-not-found">
-      <h1 className="mb-4 text-2xl">Animal no válido</h1>
-      <p className="text-muted-foreground mb-6">
-        El zodiaco chino tiene 12 animales y este no es uno de ellos.
-      </p>
-      <Button asChild>
-        <Link href={ROUTES.HOROSCOPO_CHINO}>Ver todos los animales</Link>
-      </Button>
-    </div>
-  );
-}
-
 export function AnimalHoroscopeRoute({ animal }: AnimalHoroscopeRouteProps) {
+  // Ídem `/horoscopo/[sign]`: la ficha de "animal no válido" respondía 200 y
+  // sumaba una URL vacía al índice (soft-404, T-SEO-006).
   if (!isChineseZodiacAnimal(animal)) {
-    return <AnimalNotFound />;
+    notFound();
   }
 
   return (

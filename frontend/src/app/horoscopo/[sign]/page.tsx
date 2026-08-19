@@ -1,10 +1,8 @@
+import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
 import { HoroscopeSignRoute } from '@/components/features/horoscope/HoroscopeSignRoute';
-import {
-  INVALID_ROUTE_PARAM_METADATA,
-  getHoroscopeSignMetadata,
-} from '@/lib/metadata/page-metadata';
+import { getHoroscopeSignMetadata } from '@/lib/metadata/page-metadata';
 import { isZodiacSign } from '@/lib/utils/zodiac';
 import { ZodiacSign } from '@/types/horoscope.types';
 
@@ -33,9 +31,15 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { sign } = await params;
 
-  // `/horoscopo/unicornio` no debe heredar el canonical del hub: quedaría
-  // declarada duplicada de `/horoscopo` en un 200.
-  return isZodiacSign(sign) ? getHoroscopeSignMetadata(sign) : INVALID_ROUTE_PARAM_METADATA;
+  // `/horoscopo/unicornio` no existe: 404 real desde la metadata, que es lo
+  // primero que corre. Antes devolvía una metadata `noindex` sobre un 200, y un
+  // 200 con página de "no encontrado" es justamente el soft-404 que Google
+  // penaliza (T-SEO-006).
+  if (!isZodiacSign(sign)) {
+    notFound();
+  }
+
+  return getHoroscopeSignMetadata(sign);
 }
 
 export function generateStaticParams(): { sign: string }[] {

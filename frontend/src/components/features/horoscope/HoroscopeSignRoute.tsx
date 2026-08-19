@@ -12,6 +12,7 @@
  */
 
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -26,24 +27,11 @@ export interface HoroscopeSignRouteProps {
   sign: string;
 }
 
-/** Mensaje para un segmento que no es uno de los 12 signos. */
-function SignNotFound() {
-  return (
-    <div className="container mx-auto px-4 py-8 text-center" data-testid="sign-not-found">
-      <h1 className="mb-4 text-2xl">Signo no válido</h1>
-      <p className="text-muted-foreground mb-6">
-        El zodiaco tiene 12 signos y este no es uno de ellos.
-      </p>
-      <Button asChild>
-        <Link href={ROUTES.HOROSCOPO}>Ver todos los signos</Link>
-      </Button>
-    </div>
-  );
-}
-
 export function HoroscopeSignRoute({ sign }: HoroscopeSignRouteProps) {
+  // `notFound()` y no una ficha de "signo no válido": esa página respondía 200 y
+  // Google la indexaba como una URL válida y vacía (soft-404, T-SEO-006).
   if (!isZodiacSign(sign)) {
-    return <SignNotFound />;
+    notFound();
   }
 
   return (

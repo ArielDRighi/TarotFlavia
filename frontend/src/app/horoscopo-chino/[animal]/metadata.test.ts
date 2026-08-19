@@ -1,7 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import { generateMetadata, generateStaticParams } from './page';
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
+
+// `notFound()` corta el render lanzando; el mock reproduce ese contrato (T-SEO-006).
+vi.mock('next/navigation', () => ({
+  notFound: () => {
+    throw new Error('NEXT_NOT_FOUND');
+  },
+}));
 
 describe('/horoscopo-chino/[animal] — metadata', () => {
   it('⚠️ T-PROD-020: genera title y canonical propios del animal', async () => {
@@ -24,13 +31,12 @@ describe('/horoscopo-chino/[animal] — metadata', () => {
     expect(new Set(titles).size).toBe(Object.values(ChineseZodiacAnimal).length);
   });
 
-  it('⚠️ T-PROD-020: un animal inválido no hereda el canonical del hub', async () => {
-    // Con `{}` heredaba `canonical: '/horoscopo-chino'` del layout: una URL
-    // basura declarándose duplicada de otra, en un 200.
-    const metadata = await generateMetadata({ params: Promise.resolve({ animal: 'unicornio' }) });
-
-    expect(metadata.alternates?.canonical).toBe('./');
-    expect(metadata.robots).toEqual({ index: false, follow: true });
+  it('⚠️ T-SEO-006: un animal inválido corta con notFound(), no con metadata noindex', async () => {
+    // Antes respondía 200 con metadata `noindex`: un soft-404. Solo el status
+    // HTTP saca la URL del índice.
+    await expect(
+      generateMetadata({ params: Promise.resolve({ animal: 'unicornio' }) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 });
 

@@ -417,6 +417,17 @@ describe('parseArgs', () => {
     expect(opciones.failOnSoft404).toBe(true);
     expect(opciones.userAgent).toBe('Auguria/1.0');
   });
+
+  it('⚠️ T-SEO-006: los soft-404 cuentan para el exit code por default', () => {
+    expect(parseArgs(['--base-url=http://x']).failOnSoft404).toBe(true);
+  });
+
+  it('--no-fail-on-soft-404 los vuelve a dejar fuera del exit code', () => {
+    const opciones = parseArgs(['--base-url=http://x', '--no-fail-on-soft-404']);
+
+    expect(opciones.failOnSoft404).toBe(false);
+    expect(opciones.checkSoft404).toBe(true);
+  });
 });
 
 // =============================================================================
@@ -672,25 +683,26 @@ describe('run', () => {
     expect(pico).toBeLessThanOrEqual(2);
   });
 
-  it('los soft-404 no cuentan para el exit code salvo --fail-on-soft-404', async () => {
+  it('⚠️ T-SEO-006: un soft-404 hace fallar la corrida salvo --no-fail-on-soft-404', async () => {
     const rutas = {
       ...rutasBase,
       '/premium': { html: pageHtml(300) },
       [`/horoscopo/${SLUG_INVENTADO}`]: { status: 200, html: pageHtml(2) },
     };
 
-    const sinFlag = await run(
-      { ...opcionesBase, checkSoft404: true },
-      { fetchImpl: fakeFetch(rutas), log: vi.fn() }
-    );
-    expect(sinFlag.softNotFound).toHaveLength(1);
-    expect(sinFlag.exitCode).toBe(0);
-
-    const conFlag = await run(
+    const porDefault = await run(
       { ...opcionesBase, checkSoft404: true, failOnSoft404: true },
       { fetchImpl: fakeFetch(rutas), log: vi.fn() }
     );
-    expect(conFlag.exitCode).toBe(1);
+    expect(porDefault.softNotFound).toHaveLength(1);
+    expect(porDefault.exitCode).toBe(1);
+
+    const ignorados = await run(
+      { ...opcionesBase, checkSoft404: true, failOnSoft404: false },
+      { fetchImpl: fakeFetch(rutas), log: vi.fn() }
+    );
+    expect(ignorados.softNotFound).toHaveLength(1);
+    expect(ignorados.exitCode).toBe(0);
   });
 
   it('reporta la ruta final cuando hubo redirect', async () => {
