@@ -79,16 +79,24 @@ NEXT_PUBLIC_APP_ENV=production
 
 ### Build y Deploy Manual
 
-```bash
-# Backend
-cd backend/tarot-app
-docker build -t auguria-backend .
-docker run -p 3000:3000 --env-file .env auguria-backend
+Los dos Dockerfiles se construyen **desde la raíz del monorepo** (necesitan el
+`package.json` y el `package-lock.json` de la raíz para instalar con `npm ci`):
 
-# Frontend
-cd frontend
-docker build -t auguria-frontend .
-docker run -p 3001:3001 --env-file .env.local auguria-frontend
+```bash
+# Backend — desde la raíz del repo
+docker build -f backend/tarot-app/Dockerfile -t auguria-backend .
+docker run -p 3000:3000 --env-file backend/tarot-app/.env auguria-backend
+
+# Frontend — desde la raíz del repo
+# ⚠️ Las NEXT_PUBLIC_* van como --build-arg, NO en runtime: con output standalone
+# quedan horneadas en el bundle del cliente durante el build. Sin
+# NEXT_PUBLIC_API_URL el build falla al recolectar /tarotistas/[id]/reservar.
+docker build -f frontend/Dockerfile \
+  --build-arg NEXT_PUBLIC_APP_URL=https://tudominio.com \
+  --build-arg NEXT_PUBLIC_API_URL=https://api.tudominio.com/api/v1 \
+  --build-arg NEXT_PUBLIC_APP_ENV=production \
+  -t auguria-frontend .
+docker run -p 3001:3001 auguria-frontend
 ```
 
 ---
@@ -337,7 +345,23 @@ railway variables set OPENAI_API_KEY=<tu-key>
 # O desde dashboard: https://railway.app
 ```
 
-### 4. Deploy
+### 4. Configurar el Build de Cada Servicio
+
+⚠️ **Los dos servicios se construyen desde la raíz del monorepo** (necesitan el
+`package-lock.json` de la raíz para instalar con `npm ci`). En el panel de cada
+servicio, *Settings → Build*:
+
+| Servicio | Root Directory | Dockerfile Path |
+| -------- | -------------- | ------------------------------ |
+| backend  | `/`            | `backend/tarot-app/Dockerfile` |
+| frontend | `/`            | `frontend/Dockerfile`          |
+
+**Las dos columnas van juntas por servicio: si se cambia una sola mitad, el build
+falla.** El frontend pasó a este esquema en T-SEO-005; antes tenía *Root Directory*
+`/frontend` e instalaba sin lockfile, lo que resolvía versiones distintas a las de
+CI y rompió un deploy durante dos semanas con CI en verde.
+
+### 5. Deploy
 
 ```bash
 # Deploy
@@ -347,7 +371,7 @@ railway up
 railway logs
 ```
 
-### 5. Configurar Dominio
+### 6. Configurar Dominio
 
 ```bash
 railway domain
