@@ -72,14 +72,14 @@ Conviene dejarlo escrito para no volver a auditar lo mismo:
 
 ## Tareas
 
-| ID | Tarea | Tipo | Prioridad | Estimación |
-| --- | --- | --- | --- | --- |
-| T-SEO-008 | Modelo de contenido extendido para las fichas de tarot | Backend | 🔴 Crítica | 2 pts |
-| T-SEO-009 | Redactar y cargar el contenido de las 78 fichas | Contenido | 🔴 Crítica | 5 pts |
-| T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts |
-| T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts |
-| T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts |
-| T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts |
+| ID | Tarea | Tipo | Prioridad | Estimación | Estado |
+| --- | --- | --- | --- | --- | --- |
+| T-SEO-008 | Modelo de contenido extendido para las fichas de tarot | Backend | 🔴 Crítica | 2 pts | ✅ Completada |
+| T-SEO-009 | Redactar y cargar el contenido de las 78 fichas | Contenido | 🔴 Crítica | 5 pts | ⬜ Pendiente |
+| T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts | ⬜ Pendiente |
+| T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts | ⬜ Pendiente |
+| T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts | ⬜ Pendiente |
+| T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts | ⬜ Pendiente |
 
 **Orden:** 008 → 009 → 010 son una cadena (el modelo, el contenido, el render). 011, 012 y 013 son
 independientes y se pueden hacer en paralelo.
@@ -106,6 +106,7 @@ limpieza de lo que ya existe está en T-SEO-013.
 
 ## T-SEO-008: Modelo de Contenido Extendido para las Fichas de Tarot
 
+**Estado:** ✅ COMPLETADA (19-ago-2026)
 **Prioridad:** 🔴 Crítica · **Estimación:** 2 pts · **Dependencias:** ninguna
 
 ### Problema
@@ -136,9 +137,11 @@ el largo solo se puede validar sobre el total y el frontend pierde la estructura
 varía.** El motivo es el guardarraíl: con (B) una ficha puede cumplir el total teniendo una sección
 vacía y otra inflada, y eso es exactamente lo que no queremos que pase sin que nadie se entere.
 
+**Decisión tomada: (A).** Seis columnas de texto nombradas + `combinations` en `jsonb`.
+
 ### Alcance
 
-- [ ] Campos nuevos en la entidad, **todos nullable** (el deploy tiene que poder salir antes de que
+- [x] Campos nuevos en la entidad, **todos nullable** (el deploy tiene que poder salir antes de que
       exista el contenido):
 
   | Campo | Tipo | Contenido | Largo objetivo |
@@ -155,18 +158,42 @@ vacía y otra inflada, y eso es exactamente lo que no queremos que pase sin que 
   terminología. El nombre del campo importa porque termina en el DTO, en Swagger y en el tipo del
   frontend, y un `meaningHealth` invita a que alguien escriba consejo médico adentro.
 
-- [ ] Migración TypeORM generada, no escrita a mano (`npm run migration:generate`).
-- [ ] DTOs y respuesta de la API actualizados (`CardDetailResponseDto`), con Swagger.
-- [ ] El endpoint de **listado** NO devuelve los campos nuevos: son ~450 palabras × 78 cartas y el
-      hub ya trae 79 items. Solo `CARD_DETAIL`.
-- [ ] Tests: entidad, DTO, y que el listado siga sin traer los campos nuevos.
+- [x] Migración TypeORM generada con `npm run migration:generate`
+      (`1787187733536-AddExtendedContentToEncyclopediaCards.ts`). ⚠️ El archivo generado traía además
+      decenas de sentencias de **drift preexistente ajeno a la tarea** —renombres de FKs e índices y
+      una reversión de `AuthTimestampsToTimestamptz1776900000000` que habría devuelto los timestamps
+      a `TIMESTAMP` sin zona horaria—. Se conservaron **solo** los `ALTER TABLE` de esta entidad,
+      agregándoles `IF [NOT] EXISTS` para hacerlos idempotentes. El drift restante queda como deuda a
+      resolver aparte.
+- [x] DTOs y respuesta de la API actualizados (`CardDetailDto` + `CardCombinationDto`), con Swagger
+      (`@ApiPropertyOptional`).
+- [x] El endpoint de **listado** NO devuelve los campos nuevos: `CardSummaryDto` quedó intacto y hay
+      un test que congela sus 7 claves.
+- [x] Tests: entidad (7 casos), DTO (nuevo `card-response.dto.spec.ts`), y servicio (8 casos, entre
+      ellos que el listado y las cartas relacionadas siguen sin traer los campos nuevos).
 
 ### Criterios de aceptación
 
-- [ ] La migración corre en una base con las 78 cartas cargadas sin perder datos.
-- [ ] `GET /encyclopedia/cards/:slug` devuelve los campos nuevos cuando existen y los omite cuando
-      son `null`, sin romper el contrato actual.
-- [ ] `GET /encyclopedia/cards` no engorda su respuesta.
+- [x] La migración corre en una base con las 78 cartas cargadas sin perder datos. Verificado sobre
+      la base de desarrollo: 78 cartas antes y después, mismo hash de contenido, y `down` → `up`
+      redondo.
+- [x] `GET /encyclopedia/cards/:slug` devuelve los campos nuevos cuando existen y los omite cuando
+      son `null`, sin romper el contrato actual. Verificado contra el server real: `the-fool` con
+      contenido de prueba trae las 7 claves; `the-magician` sin contenido devuelve las 19 de siempre.
+- [x] `GET /encyclopedia/cards` no engorda su respuesta. Verificado: 78 items × 7 claves.
+
+### Decisiones de implementación
+
+- **Una sección sin contenido no viaja en la respuesta.** El mapeo omite la clave cuando el valor es
+  `null`, string en blanco o lista vacía —no la manda como `null`—, así el frontend decide por
+  presencia de clave y nunca renderiza un título con el cuerpo vacío mientras se carga el contenido
+  de T-SEO-009.
+- **`yes_no` es `varchar(500)`**, no `varchar(255)`: 40 palabras no entran cómodas en 255 caracteres.
+- **El seeder y `CardSeedData` no se tocaron**: cargar contenido es T-SEO-009. Las 78 fichas existentes
+  quedan con las siete columnas en `NULL`.
+- **La proyección de los listados quedó acotada** a las 8 columnas que consume `CardSummaryDto`.
+  Sin eso, `GET /encyclopedia/cards` —y `getNavigation`, que corre en cada página de detalle— leerían
+  las ~35.000 palabras nuevas de la base solo para descartarlas apenas T-SEO-009 cargue el contenido.
 
 ### Fuera de alcance
 
@@ -202,7 +229,9 @@ T-SEO-008.
 - [ ] **Carga por seeder idempotente** (`encyclopedia-tarot-cards.seeder.ts` ya existe): correrlo dos
       veces no debe duplicar ni pisar ediciones hechas desde el panel de admin.
 - [ ] Las **combinaciones** (`combinations`) tienen que referenciar slugs que existan; un slug muerto
-      rompe el cross-link.
+      rompe el cross-link. ⚠️ **El backend no lo ataja**: T-SEO-008 solo omite `combinations` cuando la
+      lista está vacía, así que una entrada con `cardSlug` en blanco o inexistente llega igual al
+      frontend. La validación de slugs es responsabilidad de esta tarea.
 
 ### Criterios de aceptación
 

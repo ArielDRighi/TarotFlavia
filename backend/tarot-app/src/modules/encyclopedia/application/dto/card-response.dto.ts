@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ArcanaType,
   CourtRank,
@@ -24,6 +24,23 @@ export class CardKeywordsDto {
     description: 'Palabras clave en posición invertida',
   })
   reversed: string[];
+}
+
+/**
+ * DTO de una combinación de la carta con otra carta del mazo (T-SEO-008)
+ */
+export class CardCombinationDto {
+  @ApiProperty({
+    example: 'the-magician',
+    description: 'Slug de la otra carta de la combinación',
+  })
+  cardSlug: string;
+
+  @ApiProperty({
+    example: 'El impulso encuentra por fin una herramienta concreta.',
+    description: 'Lectura de la combinación entre ambas cartas',
+  })
+  reading: string;
 }
 
 /**
@@ -164,7 +181,69 @@ export class CardDetailDto extends CardSummaryDto {
     description: 'IDs de cartas relacionadas temáticamente',
   })
   relatedCards: number[] | null;
+
+  // ==========================================================================
+  // CONTENIDO EXTENDIDO (T-SEO-008)
+  // ==========================================================================
+  // Todas opcionales: la propiedad NO viaja en la respuesta mientras la sección
+  // no tenga contenido cargado. El frontend distingue "sección sin escribir"
+  // por ausencia de la clave, no por un null que obligaría a renderizar un
+  // título vacío.
+
+  @ApiPropertyOptional({
+    description: 'La carta en el amor y los vínculos',
+  })
+  meaningLove?: string;
+
+  @ApiPropertyOptional({
+    description: 'La carta en el trabajo y el dinero',
+  })
+  meaningWork?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'La carta en la energía y el bienestar: energía, descanso, hábitos y ánimo. Nunca consejo médico.',
+  })
+  meaningWellbeing?: string;
+
+  @ApiPropertyOptional({
+    description: 'Lectura de la imagen: figuras, colores y números',
+  })
+  symbolism?: string;
+
+  @ApiPropertyOptional({
+    description: 'Qué hacer cuando sale esta carta',
+  })
+  advice?: string;
+
+  @ApiPropertyOptional({
+    example: 'Sí, con la condición de animarse a lo desconocido.',
+    description: 'Respuesta en tiradas de sí/no, con su matiz',
+  })
+  yesNo?: string;
+
+  @ApiPropertyOptional({
+    type: [CardCombinationDto],
+    description: 'Combinaciones con otras cartas (3 a 5 por ficha)',
+  })
+  combinations?: CardCombinationDto[];
 }
+
+/**
+ * Secciones extendidas del detalle de carta (T-SEO-008)
+ *
+ * Todas las claves son opcionales: el mapeo omite las secciones sin contenido.
+ */
+export type CardExtendedContentDto = Pick<
+  CardDetailDto,
+  | 'meaningLove'
+  | 'meaningWork'
+  | 'meaningWellbeing'
+  | 'symbolism'
+  | 'advice'
+  | 'yesNo'
+  | 'combinations'
+>;
 
 /**
  * DTO de resultado de búsqueda global unificada

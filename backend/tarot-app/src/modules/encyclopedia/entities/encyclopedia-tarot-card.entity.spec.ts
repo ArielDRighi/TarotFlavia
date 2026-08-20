@@ -345,6 +345,91 @@ describe('EncyclopediaTarotCard Entity', () => {
     });
   });
 
+  describe('Contenido extendido (T-SEO-008)', () => {
+    beforeEach(() => {
+      card.meaningLove =
+        'En el amor, El Loco habla de un vínculo que empieza sin garantías.';
+      card.meaningWork =
+        'En el trabajo, propone aceptar un proyecto que todavía no tiene forma.';
+      card.meaningWellbeing =
+        'En la energía y el bienestar, invita a moverse y a soltar el encierro.';
+      card.symbolism =
+        'El precipicio, el perro blanco y el sol naciente ordenan la lectura de la imagen.';
+      card.advice = 'Dar el paso, pero mirando dónde se pisa.';
+      card.yesNo = 'Sí, con la condición de animarse a lo desconocido.';
+      card.combinations = [
+        {
+          cardSlug: 'the-magician',
+          reading: 'El impulso encuentra por fin una herramienta concreta.',
+        },
+      ];
+    });
+
+    it('debería tener todas las secciones extendidas', () => {
+      expect(card).toHaveProperty('meaningLove');
+      expect(card).toHaveProperty('meaningWork');
+      expect(card).toHaveProperty('meaningWellbeing');
+      expect(card).toHaveProperty('symbolism');
+      expect(card).toHaveProperty('advice');
+      expect(card).toHaveProperty('yesNo');
+      expect(card).toHaveProperty('combinations');
+    });
+
+    it('debería llamarse meaningWellbeing y nunca meaningHealth (regla YMYL)', () => {
+      expect(card.meaningWellbeing).toContain('bienestar');
+      expect(card).not.toHaveProperty('meaningHealth');
+    });
+
+    it('debería permitir null en todas las secciones extendidas', () => {
+      card.meaningLove = null;
+      card.meaningWork = null;
+      card.meaningWellbeing = null;
+      card.symbolism = null;
+      card.advice = null;
+      card.yesNo = null;
+      card.combinations = null;
+
+      expect(card.meaningLove).toBeNull();
+      expect(card.meaningWork).toBeNull();
+      expect(card.meaningWellbeing).toBeNull();
+      expect(card.symbolism).toBeNull();
+      expect(card.advice).toBeNull();
+      expect(card.yesNo).toBeNull();
+      expect(card.combinations).toBeNull();
+    });
+
+    it('debería guardar las combinaciones como lista de { cardSlug, reading }', () => {
+      expect(Array.isArray(card.combinations)).toBe(true);
+      expect(card.combinations?.[0].cardSlug).toBe('the-magician');
+      expect(typeof card.combinations?.[0].reading).toBe('string');
+    });
+
+    it('debería guardar una lista de combinaciones bien formadas', () => {
+      card.combinations = [
+        { cardSlug: 'the-magician', reading: 'Impulso con herramienta.' },
+        { cardSlug: 'the-hermit', reading: 'Impulso que pide pausa.' },
+        {
+          cardSlug: 'the-world',
+          reading: 'Un ciclo que se cierra y otro que abre.',
+        },
+      ];
+
+      expect(card.combinations).toHaveLength(3);
+      expect(
+        card.combinations.every(
+          (combo) =>
+            typeof combo.cardSlug === 'string' &&
+            typeof combo.reading === 'string',
+        ),
+      ).toBe(true);
+    });
+
+    it('debería aceptar una lista vacía de combinaciones', () => {
+      card.combinations = [];
+      expect(card.combinations).toEqual([]);
+    });
+  });
+
   describe('Imágenes', () => {
     it('debería tener imageUrl como string no vacío', () => {
       expect(typeof card.imageUrl).toBe('string');
