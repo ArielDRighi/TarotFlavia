@@ -62,6 +62,23 @@ const categoryIconColors: Record<string, string> = {
 };
 
 /**
+ * Nombre **visible** de una categoría, cuando difiere del que manda la API.
+ *
+ * El slug y el `name` de la base no se tocan —renombrarlos exige migración y
+ * romperían el gating FREE, que filtra por slug—, pero "Salud y Bienestar" no
+ * se muestra: una lectura de tarot "de salud" se lee como consejo médico
+ * (YMYL). Ver T-SEO-013.
+ */
+const CATEGORY_LABELS: Record<string, string> = {
+  'salud-bienestar': 'Energía y Bienestar',
+};
+
+/** Traduce el nombre de la API al que ve el visitante. */
+function categoryLabel(category: { slug: string; name: string }): string {
+  return CATEGORY_LABELS[category.slug] ?? category.name;
+}
+
+/**
  * Skeleton card for loading state
  */
 function SkeletonCategoryCard() {
@@ -107,13 +124,13 @@ function CategoryCard({ category, onClick }: CategoryCardProps) {
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
-      aria-label={`Seleccionar categoría ${category.name}`}
+      aria-label={`Seleccionar categoría ${categoryLabel(category)}`}
     >
       <CardContent className="flex flex-col items-center gap-4 p-6">
         <div className={cn('rounded-full p-4', bgColor)}>
           <Icon className={cn('h-10 w-10', iconColor)} aria-hidden="true" />
         </div>
-        <span className="font-serif text-lg font-medium">{category.name}</span>
+        <span className="font-serif text-lg font-medium">{categoryLabel(category)}</span>
       </CardContent>
     </Card>
   );

@@ -250,7 +250,7 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
     sections: [
       {
         heading: 'Buscar por especialidad',
-        body: 'Los filtros acotan por tema: amor, dinero, carrera, salud o espiritual. Un guía especializado no adivina mejor que otro, pero conoce el vocabulario y las preguntas típicas de ese terreno, y eso se nota en el ida y vuelta de la sesión.',
+        body: 'Los filtros acotan por tema: amor, dinero, carrera, energía y bienestar o espiritual. Un guía especializado no adivina mejor que otro, pero conoce el vocabulario y las preguntas típicas de ese terreno, y eso se nota en el ida y vuelta de la sesión.',
       },
       {
         heading: 'Qué mirar en un perfil',
