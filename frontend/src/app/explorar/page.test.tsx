@@ -53,7 +53,7 @@ const mockTarotistas: Tarotista[] = [
   {
     id: 3,
     nombrePublico: 'Estrella Guía',
-    bio: 'Guía espiritual con amplia experiencia en salud y bienestar',
+    bio: 'Guía espiritual con amplia experiencia en energía y bienestar',
     especialidades: ['Salud', 'Espiritual'],
     fotoPerfil: 'https://example.com/photo3.jpg',
     ratingPromedio: 4.9,
@@ -176,7 +176,7 @@ describe('ExplorarPage', () => {
       expect(filterTexts).toContain('Amor');
       expect(filterTexts).toContain('Dinero');
       expect(filterTexts).toContain('Carrera');
-      expect(filterTexts).toContain('Salud');
+      expect(filterTexts).toContain('Energía y Bienestar');
       expect(filterTexts).toContain('Espiritual');
     });
 

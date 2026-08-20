@@ -211,7 +211,7 @@ describe('SEO Metadata Configuration', () => {
       const metadata = generateTarotistaMetadata(
         {
           nombre: 'Ana López',
-          especialidades: ['Salud'],
+          especialidades: ['Espiritual'],
         },
         789
       );

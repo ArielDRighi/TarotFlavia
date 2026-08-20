@@ -4,7 +4,11 @@ import { Star } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/lib/utils/text';
-import { SPECIALTY_COLORS, DEFAULT_SPECIALTY_COLOR } from '@/lib/constants/marketplace';
+import {
+  SPECIALTY_COLORS,
+  DEFAULT_SPECIALTY_COLOR,
+  specialtyLabel,
+} from '@/lib/constants/marketplace';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -159,7 +163,7 @@ export function TarotistaCard({
                 SPECIALTY_COLORS[specialty] ?? DEFAULT_SPECIALTY_COLOR
               )}
             >
-              {specialty}
+              {specialtyLabel(specialty)}
             </span>
           ))}
         </div>

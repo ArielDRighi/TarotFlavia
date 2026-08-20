@@ -19,8 +19,8 @@ describe('PendulumBlockedContent', () => {
   it('should display health category message', () => {
     render(<PendulumBlockedContent open={true} category="salud" onClose={vi.fn()} />);
 
-    expect(screen.getByText(/tema de salud detectado/i)).toBeInTheDocument();
-    expect(screen.getByText(/profesional de la salud/i)).toBeInTheDocument();
+    expect(screen.getByText(/tema médico detectado/i)).toBeInTheDocument();
+    expect(screen.getByText(/profesional de la medicina/i)).toBeInTheDocument();
   });
 
   it('should display legal category message', () => {

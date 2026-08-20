@@ -401,7 +401,9 @@ describe('CategorySelector', () => {
       render(<CategorySelector freeModeCategories={FREE_MODE_SLUGS} />);
 
       expect(screen.getByText('Amor y Relaciones')).toBeInTheDocument();
-      expect(screen.getByText('Salud y Bienestar')).toBeInTheDocument();
+      // ⚠️ T-SEO-013: la API manda 'Salud y Bienestar'; la vista muestra la etiqueta sin "salud".
+      expect(screen.getByText('Energía y Bienestar')).toBeInTheDocument();
+      expect(screen.queryByText('Salud y Bienestar')).not.toBeInTheDocument();
       expect(screen.getByText('Dinero y Finanzas')).toBeInTheDocument();
 
       // Categorías no permitidas para FREE no deben aparecer
