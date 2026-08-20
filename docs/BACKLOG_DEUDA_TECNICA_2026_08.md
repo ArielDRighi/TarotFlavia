@@ -99,8 +99,16 @@ Verificarlo es T-DEUDA-003.
 | T-DEUDA-002 | Crear los índices que las entidades declaran y no existen | Backend | 🟠 Alta | 1 pt | ⬜ Pendiente |
 | T-DEUDA-003 | Verificar en producción las 4 columnas de T-PROD-021 | Verificación | 🔴 Crítica | 0,5 pts | ⬜ Pendiente |
 
-**Orden sugerido:** 003 primero (es media hora y puede destapar un bug de fechas en producción),
-después 002, y 001 al final porque es la más larga y la menos urgente.
+**Orden sugerido dentro de este backlog:** 003 primero (es media hora y puede destapar un bug de
+fechas en producción), después 002, y 001 al final porque es la más larga y la menos urgente.
+
+> 📌 **El orden completo, cruzado con las tareas de SEO, está en
+> [`BACKLOG_SEO_CONTENIDO_2026_08.md` → *Orden de desarrollo*](./BACKLOG_SEO_CONTENIDO_2026_08.md#-orden-de-desarrollo-fuente-única).**
+> Ahí vive la fuente única; este backlog no la duplica para que no se desincronicen.
+>
+> El resumen: **T-DEUDA-003 va primero de todo** —resincroniza la base local, que es contra la que
+> corre el seeder de T-SEO-009—, y 002 y 001 van **después** de pedir la tercera revisión de AdSense,
+> porque ninguna de las dos bloquea nada de ese camino.
 
 **Puerta de salida del backlog:** `npm run migration:generate -- src/database/migrations/Drift`
 genera un archivo **vacío**. Ese es el único criterio que prueba que no quedó drift.

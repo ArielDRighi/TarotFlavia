@@ -79,13 +79,55 @@ Conviene dejarlo escrito para no volver a auditar lo mismo:
 | T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts | ⬜ Pendiente |
 | T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts | ⬜ Pendiente |
 | T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts | ⬜ Pendiente |
-| T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts | ⬜ Pendiente |
-
-**Orden:** 008 → 009 → 010 son una cadena (el modelo, el contenido, el render). 011, 012 y 013 son
-independientes y se pueden hacer en paralelo.
+| T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts | 🟡 Parcial |
 
 **⛔ No pedir la tercera revisión de AdSense hasta tener 008, 009, 010, 011 y 013 en producción, más
 los pendientes de Search Console.** Ver *Puerta de salida* al final.
+
+---
+
+## 📌 Orden de desarrollo (fuente única)
+
+> Incluye las tareas de [`BACKLOG_DEUDA_TECNICA_2026_08.md`](./BACKLOG_DEUDA_TECNICA_2026_08.md),
+> porque el orden se cruza entre los dos backlogs. **Si cambia el orden, se cambia acá y en ningún
+> otro lado.**
+
+| # | Tarea | Est. | Por qué va ahí |
+| --- | --- | --- | --- |
+| 1 | **T-DEUDA-003** | 0,5 pts | Media hora, y desbloquea el resto (ver abajo) |
+| 2 | **T-SEO-009 + la parte de tarot de T-SEO-013** | 5 pts | Camino crítico, en una sola pasada |
+| 3 | **T-SEO-011** | 2 pts | En paralelo, durante la revisión humana de las 78 fichas |
+| 4 | **T-SEO-010** | 2 pts | Necesita el contenido de 009 cargado para verificar |
+| 5 | **Resto de T-SEO-013** | ~1,5 pts | Carta astral, numerología, prompts de IA, guardarraíl |
+| 6 | **Deploy + verificación en producción + Search Console** | — | Recién ahí se pide la revisión |
+| 7 | T-SEO-012 | 1,5 pts | No está en la puerta de salida |
+| 8 | T-DEUDA-002 | 1 pt | Los 2 índices reales de `sessions` |
+| 9 | T-DEUDA-001 | 2 pts | El más largo y el menos urgente |
+
+**Hasta poder pedir la tercera revisión: ~11 pts** (009 + 011 + 010 + resto de 013), más el medio
+punto de T-DEUDA-003.
+
+### Por qué este orden y no el obvio
+
+**T-DEUDA-003 primero, aunque no sea de negocio.** Son treinta minutos y hace dos cosas: dice si
+`planExpiresAt` está sano en producción, y resincroniza la base de desarrollo. Lo segundo importa
+porque T-SEO-009 es todo trabajo de seeder contra la base local, y arrancar las 78 fichas sobre una
+base desincronizada es debugging que no tiene nada que ver con el contenido.
+
+**009 y la parte de tarot de 013 van juntas.** `major-arcana.data.ts` y `minor-arcana.data.ts` tienen
+"salud" en los significados existentes y son los mismos archivos donde 009 agrega las secciones
+nuevas. Separarlas es escribir dos veces el mismo párrafo y comerse conflictos de merge en los dos
+archivos de datos más grandes del repo. Ver las notas de T-SEO-013.
+
+**011 va en el medio, no al final.** El cuello de botella de 009 no es de código: es *cada ficha
+revisada por una persona antes de cargarse*. 011 es independiente, entra en la puerta de salida y es
+el trabajo que se puede intercalar mientras se revisan fichas.
+
+**010 después de que 009 esté completo, no en paralelo.** El guardarraíl de 010 exige que ninguna
+sección quede vacía en ninguna ficha: si entra con 40 de 78 cartas cargadas, deja el CI en rojo.
+
+**"Mergeado" no es "en producción".** Es la lección del 19-ago: AdSense revisó el sitio viejo porque
+el deploy salió diez horas después del rechazo. El paso 6 no es trámite.
 
 ---
 
