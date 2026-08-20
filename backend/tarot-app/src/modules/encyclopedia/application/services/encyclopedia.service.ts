@@ -6,6 +6,7 @@ import { ArcanaType, Suit } from '../../enums/tarot.enums';
 import { CardFiltersDto } from '../dto/card-filters.dto';
 import {
   CardDetailDto,
+  CardExtendedContentDto,
   CardSummaryDto,
   GlobalSearchResultDto,
 } from '../dto/card-response.dto';
@@ -240,11 +241,47 @@ export class EncyclopediaService {
   }
 
   /**
+   * Mapea las secciones de contenido extendido (T-SEO-008)
+   *
+   * Una sección sin contenido —null, string en blanco o lista vacía— NO viaja
+   * en la respuesta: el frontend decide si renderiza el bloque por presencia de
+   * la clave, y así nunca queda un título con el cuerpo vacío mientras se carga
+   * el contenido de las 78 fichas (T-SEO-009).
+   */
+  private toExtendedContentDto(
+    card: EncyclopediaTarotCard,
+  ): CardExtendedContentDto {
+    const extended: CardExtendedContentDto = {};
+
+    const textSections = {
+      meaningLove: card.meaningLove,
+      meaningWork: card.meaningWork,
+      meaningWellbeing: card.meaningWellbeing,
+      symbolism: card.symbolism,
+      advice: card.advice,
+      yesNo: card.yesNo,
+    } as const;
+
+    for (const [key, value] of Object.entries(textSections)) {
+      if (value != null && value.trim().length > 0) {
+        extended[key as keyof typeof textSections] = value;
+      }
+    }
+
+    if (card.combinations != null && card.combinations.length > 0) {
+      extended.combinations = card.combinations;
+    }
+
+    return extended;
+  }
+
+  /**
    * Mapea una entidad a CardDetailDto (incluye todos los campos)
    */
   private toDetailDto(card: EncyclopediaTarotCard): CardDetailDto {
     return {
       ...this.toSummaryDto(card),
+      ...this.toExtendedContentDto(card),
       nameEn: card.nameEn,
       romanNumeral: card.romanNumeral,
       courtRank: card.courtRank,

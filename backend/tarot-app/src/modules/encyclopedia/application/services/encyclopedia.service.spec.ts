@@ -35,6 +35,13 @@ describe('EncyclopediaService', () => {
       upright: ['Nuevos comienzos', 'Inocencia', 'Aventura'],
       reversed: ['Imprudencia', 'Ingenuidad', 'Riesgo'],
     },
+    meaningLove: null,
+    meaningWork: null,
+    meaningWellbeing: null,
+    symbolism: null,
+    advice: null,
+    yesNo: null,
+    combinations: null,
     imageUrl: '/images/tarot/major/00-the-fool.jpg',
     thumbnailUrl: '/images/tarot/major/00-the-fool-thumb.jpg',
     relatedCards: [2, 3],
@@ -66,6 +73,13 @@ describe('EncyclopediaService', () => {
       upright: ['Amor nuevo', 'Emoción'],
       reversed: ['Bloqueo emocional', 'Vacío'],
     },
+    meaningLove: null,
+    meaningWork: null,
+    meaningWellbeing: null,
+    symbolism: null,
+    advice: null,
+    yesNo: null,
+    combinations: null,
     imageUrl: '/images/tarot/cups/01-ace-of-cups.jpg',
     thumbnailUrl: null,
     relatedCards: null,
@@ -97,6 +111,13 @@ describe('EncyclopediaService', () => {
       upright: ['Mensajes', 'Creatividad', 'Sensibilidad'],
       reversed: ['Inmadurez', 'Bloqueo creativo'],
     },
+    meaningLove: null,
+    meaningWork: null,
+    meaningWellbeing: null,
+    symbolism: null,
+    advice: null,
+    yesNo: null,
+    combinations: null,
     imageUrl: '/images/tarot/cups/11-page-of-cups.jpg',
     thumbnailUrl: null,
     relatedCards: null,
@@ -403,6 +424,162 @@ describe('EncyclopediaService', () => {
       await expect(service.findBySlug('slug-inexistente')).rejects.toThrow(
         'Carta "slug-inexistente" no encontrada',
       );
+    });
+  });
+
+  // ============================================================================
+  // Contenido extendido (T-SEO-008)
+  // ============================================================================
+
+  describe('Contenido extendido (T-SEO-008)', () => {
+    const mockExtendedCard: EncyclopediaTarotCard = {
+      ...mockCard,
+      meaningLove:
+        'En el amor, El Loco habla de un vínculo que empieza sin garantías.',
+      meaningWork:
+        'En el trabajo, propone aceptar un proyecto que todavía no tiene forma.',
+      meaningWellbeing:
+        'En la energía y el bienestar, invita a moverse y a soltar el encierro.',
+      symbolism:
+        'El precipicio, el perro blanco y el sol naciente ordenan la imagen.',
+      advice: 'Dar el paso, pero mirando dónde se pisa.',
+      yesNo: 'Sí, con la condición de animarse a lo desconocido.',
+      combinations: [
+        {
+          cardSlug: 'the-magician',
+          reading: 'El impulso encuentra por fin una herramienta concreta.',
+        },
+      ],
+    } as EncyclopediaTarotCard;
+
+    const mockEmptyExtendedCard: EncyclopediaTarotCard = {
+      ...mockCard,
+      meaningLove: null,
+      meaningWork: null,
+      meaningWellbeing: null,
+      symbolism: null,
+      advice: null,
+      yesNo: null,
+      combinations: null,
+    } as EncyclopediaTarotCard;
+
+    const mockBlankExtendedCard: EncyclopediaTarotCard = {
+      ...mockExtendedCard,
+      meaningLove: '   ',
+      advice: '',
+      combinations: [],
+      isCourtCard: mockCard.isCourtCard,
+      isMajorArcana: mockCard.isMajorArcana,
+      getDisplayName: mockCard.getDisplayName,
+    };
+
+    const mockUpdateBuilder = (): void => {
+      const uqb = createUpdateBuilderMock();
+      repository.createQueryBuilder.mockReturnValue(
+        uqb as unknown as SelectQueryBuilder<EncyclopediaTarotCard>,
+      );
+    };
+
+    it('debe devolver las secciones extendidas en el detalle cuando existen', async () => {
+      repository.findOne.mockResolvedValue(mockExtendedCard);
+      mockUpdateBuilder();
+
+      const result = await service.findBySlug('the-fool');
+
+      expect(result).toMatchObject({
+        meaningLove: mockExtendedCard.meaningLove,
+        meaningWork: mockExtendedCard.meaningWork,
+        meaningWellbeing: mockExtendedCard.meaningWellbeing,
+        symbolism: mockExtendedCard.symbolism,
+        advice: mockExtendedCard.advice,
+        yesNo: mockExtendedCard.yesNo,
+        combinations: [
+          {
+            cardSlug: 'the-magician',
+            reading: 'El impulso encuentra por fin una herramienta concreta.',
+          },
+        ],
+      });
+    });
+
+    it('debe omitir las secciones extendidas que son null', async () => {
+      repository.findOne.mockResolvedValue(mockEmptyExtendedCard);
+      mockUpdateBuilder();
+
+      const result = await service.findBySlug('the-fool');
+
+      expect(result).not.toHaveProperty('meaningLove');
+      expect(result).not.toHaveProperty('meaningWork');
+      expect(result).not.toHaveProperty('meaningWellbeing');
+      expect(result).not.toHaveProperty('symbolism');
+      expect(result).not.toHaveProperty('advice');
+      expect(result).not.toHaveProperty('yesNo');
+      expect(result).not.toHaveProperty('combinations');
+    });
+
+    it('debe mantener intacto el contrato actual cuando no hay contenido extendido', async () => {
+      repository.findOne.mockResolvedValue(mockEmptyExtendedCard);
+      mockUpdateBuilder();
+
+      const result = await service.findBySlug('the-fool');
+
+      expect(result).toMatchObject({
+        id: 1,
+        slug: 'the-fool',
+        nameEs: 'El Loco',
+        meaningUpright: expect.any(String),
+        meaningReversed: expect.any(String),
+        description: expect.any(String),
+        imageUrl: expect.any(String),
+        relatedCards: [2, 3],
+      });
+    });
+
+    it('debe omitir las secciones extendidas que llegan vacías o en blanco', async () => {
+      repository.findOne.mockResolvedValue(mockBlankExtendedCard);
+      mockUpdateBuilder();
+
+      const result = await service.findBySlug('the-fool');
+
+      expect(result).not.toHaveProperty('meaningLove');
+      expect(result).not.toHaveProperty('advice');
+      expect(result).not.toHaveProperty('combinations');
+      expect(result.symbolism).toBe(mockExtendedCard.symbolism);
+    });
+
+    it('debe devolver el contenido extendido también en findById', async () => {
+      repository.findOne.mockResolvedValue(mockExtendedCard);
+
+      const result = await service.findById(1);
+
+      expect(result.meaningWellbeing).toBe(mockExtendedCard.meaningWellbeing);
+    });
+
+    it('no debe incluir las secciones extendidas en el listado', async () => {
+      const qb = createQueryBuilderMock([mockExtendedCard]);
+      repository.createQueryBuilder.mockReturnValue(qb);
+
+      const [summary] = await service.findAll();
+
+      expect(Object.keys(summary).sort()).toEqual([
+        'arcanaType',
+        'id',
+        'nameEs',
+        'number',
+        'slug',
+        'suit',
+        'thumbnailUrl',
+      ]);
+    });
+
+    it('no debe incluir las secciones extendidas en las cartas relacionadas', async () => {
+      repository.findOne.mockResolvedValue(mockExtendedCard);
+      repository.find.mockResolvedValue([mockExtendedCard]);
+
+      const [related] = await service.getRelatedCards(1);
+
+      expect(related).not.toHaveProperty('meaningWellbeing');
+      expect(related).not.toHaveProperty('combinations');
     });
   });
 

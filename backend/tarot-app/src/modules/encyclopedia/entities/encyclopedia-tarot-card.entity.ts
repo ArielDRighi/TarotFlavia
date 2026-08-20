@@ -26,6 +26,18 @@ export interface CardKeywords {
 }
 
 /**
+ * Combinación de esta carta con otra carta del mazo
+ * Almacenada como JSONB en PostgreSQL
+ *
+ * `cardSlug` referencia el slug de otra carta de la enciclopedia; el frontend
+ * lo usa para armar el cross-link entre fichas.
+ */
+export interface CardCombination {
+  cardSlug: string;
+  reading: string;
+}
+
+/**
  * Entidad de la Enciclopedia de Tarot
  *
  * Representa cada una de las 78 cartas del Tarot con toda su información
@@ -205,6 +217,73 @@ export class EncyclopediaTarotCard {
   })
   @Column({ type: 'jsonb', name: 'keywords' })
   keywords: CardKeywords;
+
+  // ============================================================================
+  // CONTENIDO EXTENDIDO (T-SEO-008)
+  // ============================================================================
+  // Secciones que llevan la ficha de ~166 a ~500 palabras propias. Todas son
+  // nullable: el deploy sale antes de que exista el contenido (T-SEO-009) y el
+  // detalle omite las secciones vacías en lugar de renderizar títulos huecos.
+
+  @ApiProperty({
+    nullable: true,
+    description: 'La carta en el amor y los vínculos (70–100 palabras)',
+  })
+  @Column({ type: 'text', nullable: true, name: 'meaning_love' })
+  meaningLove: string | null;
+
+  @ApiProperty({
+    nullable: true,
+    description: 'La carta en el trabajo y el dinero (70–100 palabras)',
+  })
+  @Column({ type: 'text', nullable: true, name: 'meaning_work' })
+  meaningWork: string | null;
+
+  /**
+   * La carta en la energía y el bienestar.
+   *
+   * ⚠️ El campo se llama `meaningWellbeing`, NUNCA `meaningHealth`: el nombre
+   * termina en el DTO, en Swagger y en el tipo del frontend, y "salud" arrastra
+   * el contenido a territorio YMYL (consejo médico). El texto habla de energía,
+   * descanso, hábitos y ánimo.
+   */
+  @ApiProperty({
+    nullable: true,
+    description: 'La carta en la energía y el bienestar (60–90 palabras)',
+  })
+  @Column({ type: 'text', nullable: true, name: 'meaning_wellbeing' })
+  meaningWellbeing: string | null;
+
+  @ApiProperty({
+    nullable: true,
+    description:
+      'Lectura de la imagen: figuras, colores y números (80–120 palabras)',
+  })
+  @Column({ type: 'text', nullable: true, name: 'symbolism' })
+  symbolism: string | null;
+
+  @ApiProperty({
+    nullable: true,
+    description: 'Qué hacer cuando sale esta carta (50–80 palabras)',
+  })
+  @Column({ type: 'text', nullable: true, name: 'advice' })
+  advice: string | null;
+
+  @ApiProperty({
+    example: 'Sí, con la condición de animarse a lo desconocido.',
+    nullable: true,
+    description: 'Respuesta en tiradas de sí/no, con su matiz (20–40 palabras)',
+  })
+  @Column({ type: 'varchar', length: 500, nullable: true, name: 'yes_no' })
+  yesNo: string | null;
+
+  @ApiProperty({
+    nullable: true,
+    description:
+      'Combinaciones con otras cartas (3 a 5 por ficha). Almacenado como JSONB.',
+  })
+  @Column({ type: 'jsonb', nullable: true, name: 'combinations' })
+  combinations: CardCombination[] | null;
 
   // ============================================================================
   // IMÁGENES
