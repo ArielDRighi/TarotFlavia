@@ -18,8 +18,8 @@ decoradores nunca se actualizaron para reflejarlo. Resultado: el generador ve di
 son bugs**, y propone "arreglarlas" al revés — rompiendo la base para que coincida con entidades
 incompletas.
 
-**El riesgo no es teórico.** De las 91 sentencias, 8 son `DROP COLUMN` + `ADD COLUMN`, que no
-convierten el tipo: **borran la columna y la crean vacía**. Si alguien commitea el output del
+**El riesgo no es teórico.** De las 91 sentencias, 8 eran `DROP COLUMN` + `ADD COLUMN` —hoy son 83 y
+4, después de T-DEUDA-003— que no convierten el tipo: **borran la columna y la crean vacía**. Si alguien commitea el output del
 generador sin leerlo, se lleva puestas las fechas de creación de la enciclopedia entera.
 
 ```sql
@@ -39,10 +39,37 @@ ALTER TABLE "encyclopedia_tarot_cards" ADD "created_at" TIMESTAMP NOT NULL DEFAU
 | `ALTER COLUMN` / renombre de enum | 3 + 3 | cosmético |
 | **Total en `up()`** | **91** | |
 
-> 🔄 **Actualizado el 19-ago-2026, después de T-DEUDA-003: son 83, no 91.** Al resincronizar la base
-> local, 8 de esas sentencias (4 `DROP COLUMN` + 4 `ADD`) desaparecieron: eran las 4 columnas de
-> T-PROD-021 que la base local tenía naive. **No eran ruido: eran drift real**, y el generador las
-> resolvía de la forma destructiva. Ver *[Efecto colateral medido](#efecto-colateral-medido-el-generador-ya-no-propone-borrar-las-fechas-de-plan)*.
+> ⚠️ Las filas de arriba son la clasificación original y **no suman 91 sino 93**: la fila de
+> renombres de índices está sobrecontada en 2 (son 6 `DROP` + 4 `CREATE`, no 6 + 6). El total de 91 sí
+> era el medido. Abajo va el desglose exacto, ya reconciliado.
+
+#### Inventario exacto tras T-DEUDA-003 (19-ago-2026, verificado sentencia por sentencia)
+
+Al resincronizar la base local desaparecieron 8 sentencias y el total quedó en **83**. Este desglose
+**suma exacto**:
+
+| Categoría | Sentencias | Naturaleza |
+| --- | --- | --- |
+| `DROP CONSTRAINT` + `ADD CONSTRAINT` (FKs) | 27 + 27 = 54 | nombres **y** `ON DELETE` — cosmético |
+| `DROP INDEX` + `CREATE INDEX` con hash (renombres) | 6 + 4 = 10 | cosmético · ⚠️ 2 se dropean y **no** se recrean |
+| `CREATE [UNIQUE] INDEX` (índices que faltan) | 5 | **2 reales** (`sessions`) + 3 `*_slug` redundantes → T-DEUDA-002 |
+| `DROP COLUMN` + `ADD` (timestamps de enciclopedia) | 4 + 4 = 8 | ⚠️ destructivo → T-DEUDA-001 |
+| `ALTER COLUMN ... SET DEFAULT` (`temperature`, `top_p`) | 2 | cosmético |
+| Renombre del enum de `session_type` | 4 | `CREATE TYPE` + `ALTER` + `RENAME` + `DROP TYPE` |
+| **Total en `up()`** | **83** | |
+
+Las 8 que se fueron eran los `DROP COLUMN` + `ADD` de las 4 columnas de T-PROD-021. **No eran ruido:
+eran drift real**, y el generador las resolvía de la forma destructiva. Ver
+*[Efecto colateral medido](#efecto-colateral-medido-el-generador-ya-no-propone-borrar-las-fechas-de-plan)*.
+
+Dos cosas que este desglose deja a la vista y **no** estaban inventariadas:
+
+- Los `CREATE [UNIQUE] INDEX` siguen siendo **5, con 2 reales**, tal como dice T-DEUDA-002: son
+  `idx_session_completed_at_status` e `idx_session_tarotista_completed` (más los 3 `*_slug`
+  redundantes). El inventario de esa tarea queda confirmado.
+- Hay **6 `DROP INDEX` y sólo 4 `CREATE INDEX`**: el generador propone borrar 2 índices que existen en
+  la base y **ninguna entidad declara**. Eso es pérdida de índices, no un renombre. Entra en el
+  alcance de T-DEUDA-001 (decidir nombres de índices) — anotado, no resuelto acá.
 
 ### El drift va en las dos direcciones
 
@@ -59,8 +86,8 @@ de entidad y ninguna migración los crea. Con `synchronize: false` eso significa
 ninguna base**: ni dev, ni staging, ni producción.
 
 **Grupo C — cosmético.** Nombres de FKs e índices (legibles en la base vs. hash de TypeORM) y
-defaults (`0.7` vs `'0.7'`). Sin impacto funcional, pero son 66 de las 91 sentencias: son el ruido
-que esconde a los grupos A y B.
+defaults (`0.7` vs `'0.7'`). Sin impacto funcional, pero son **66 de las 83** sentencias —54 de FKs,
+10 de renombres de índices y 2 de defaults—: son el ruido que esconde a los grupos A y B.
 
 ---
 
@@ -80,6 +107,8 @@ desarrollo local: las 9 primeras quedaron en `timestamptz` y las 4 agregadas sig
 T-DEUDA-003 las convirtió a mano el 19-ago-2026.
 
 ```
+# Base de desarrollo local — ANTES de T-DEUDA-003 (19-ago-2026).
+# Muestra de 5 de las 13 columnas; faltan planStartedAt y can_change_at, también naive.
 password_reset_tokens.expires_at   = timestamp with time zone    ✅
 refresh_tokens.expires_at          = timestamp with time zone    ✅
 cached_interpretations.expires_at  = timestamp with time zone    ✅
@@ -106,17 +135,17 @@ trabajó el PR. El detalle de la consulta está en [T-DEUDA-003](#t-deuda-003-ve
 | T-DEUDA-002 | Crear los índices que las entidades declaran y no existen | Backend | 🟠 Alta | 1 pt | ⬜ Pendiente |
 | T-DEUDA-003 | Verificar en producción las 4 columnas de T-PROD-021 | Verificación | 🔴 Crítica | 0,5 pts | ✅ Completada (19-ago-2026) |
 
-**Orden sugerido dentro de este backlog:** 003 primero (es media hora y puede destapar un bug de
-fechas en producción), después 002, y 001 al final porque es la más larga y la menos urgente.
-**003 ya está cerrada:** producción estaba sana, así que no dejó trabajo de migración para las otras dos.
+**Orden dentro de este backlog:** 003 **ya está cerrada** —fue primero justamente porque podía
+destapar un bug de fechas en producción, y resultó que no había ninguno: no dejó trabajo de migración
+para las otras dos—. Queda 002, y 001 al final porque es la más larga y la menos urgente.
 
 > 📌 **El orden completo, cruzado con las tareas de SEO, está en
 > [`BACKLOG_SEO_CONTENIDO_2026_08.md` → *Orden de desarrollo*](./BACKLOG_SEO_CONTENIDO_2026_08.md#-orden-de-desarrollo-fuente-única).**
 > Ahí vive la fuente única; este backlog no la duplica para que no se desincronicen.
 >
-> El resumen: **T-DEUDA-003 va primero de todo** —resincroniza la base local, que es contra la que
-> corre el seeder de T-SEO-009—, y 002 y 001 van **después** de pedir la tercera revisión de AdSense,
-> porque ninguna de las dos bloquea nada de ese camino.
+> El resumen: **T-DEUDA-003 fue primero de todo** —resincronizó la base local, que es contra la que
+> corre el seeder de T-SEO-009, así que T-SEO-009 arranca desbloqueada—, y 002 y 001 van **después**
+> de pedir la tercera revisión de AdSense, porque ninguna de las dos bloquea nada de ese camino.
 
 **Puerta de salida del backlog:** `npm run migration:generate -- src/database/migrations/Drift`
 genera un archivo **vacío**. Ese es el único criterio que prueba que no quedó drift.
@@ -267,19 +296,45 @@ Habría sido el tercer bug de fechas del proyecto. Por eso fue primero, aunque s
 
 ### Resultado de la verificación
 
-**Fecha:** 19-ago-2026 · **Base:** Railway → proyecto `Auguria Staging`, environment `production`,
-servicio `Postgres` — el que sirve `api.auguriatarot.com` · **Consulta:** solo lectura sobre
-`information_schema.columns`, sin ningún DDL.
+**Fecha:** 19-ago-2026 · **Consulta:** solo lectura sobre `information_schema.columns`, sin ningún DDL.
+
+**Qué base se consultó, y cómo se estableció que es la de producción.** El proyecto de Railway se
+llama `Auguria Staging` por historia (nació del [ADR de staging](./ADR_STAGING_DEPLOYMENT.md), que
+anticipaba "crear un nuevo environment cuando estén listos para producción"), así que el nombre del
+proyecto **no** alcanza como evidencia. Lo que se usó es el listado de recursos del environment
+`production` de ese proyecto:
+
+```
+$ railway status        # proyecto Auguria Staging · environment production
+Services
+  - backend:  ● Online · https://api.auguriatarot.com
+  - frontend: ● Online · https://auguriatarot.com
+Databases
+  - Postgres: ● Online · postgres-volume
+```
+
+Ese environment contiene el backend que sirve el dominio productivo `api.auguriatarot.com` y **una
+sola** base Postgres, que es la que se consultó (`railway run --service Postgres --environment
+production`). Además, esa base tiene registrada la migración `1776900000000` en su tabla `migrations`,
+o sea que es una base que corrió el historial del proyecto.
+
+> ⚠️ Lo que **no** se verificó por falta de permisos de lectura de secretos: que el `DATABASE_URL` del
+> servicio `backend` apunte literalmente a ese `Postgres`. Se infiere de que es el único del
+> environment. Si alguna vez hay dos bases en el mismo environment, esta inferencia deja de valer.
 
 **Las 13 columnas de T-PROD-021 están en `timestamptz` en producción**, incluidas las 4 que se
 agregaron por feedback del PR:
 
-| Columna | Producción (19-ago) | Dev local (antes) |
-| --- | --- | --- |
-| `user.planStartedAt` | ✅ `timestamp with time zone` | ❌ `timestamp without time zone` |
-| `user.planExpiresAt` | ✅ `timestamp with time zone` | ❌ `timestamp without time zone` |
-| `user_tarotista_subscriptions.expires_at` | ✅ `timestamp with time zone` | ❌ `timestamp without time zone` |
-| `user_tarotista_subscriptions.can_change_at` | ✅ `timestamp with time zone` | ❌ `timestamp without time zone` |
+| Columna | Producción (19-ago) | Dev local (antes) | Dev local (después) |
+| --- | --- | --- | --- |
+| `user.planStartedAt` | ✅ `timestamptz` | ❌ `timestamp without time zone` | ✅ `timestamptz` |
+| `user.planExpiresAt` | ✅ `timestamptz` | ❌ `timestamp without time zone` | ✅ `timestamptz` |
+| `user_tarotista_subscriptions.expires_at` | ✅ `timestamptz` | ❌ `timestamp without time zone` | ✅ `timestamptz` |
+| `user_tarotista_subscriptions.can_change_at` | ✅ `timestamptz` | ❌ `timestamp without time zone` | ✅ `timestamptz` |
+
+Consulta de control sobre la base local después de los `ALTER`: las 13 columnas en
+`timestamp with time zone`, y el `count(*)` de columnas `timestamp without time zone` entre esas 13
+devuelve **0**.
 
 Las otras 9 (`password_reset_tokens` ×3, `refresh_tokens` ×3, `cached_interpretations` ×3) ya estaban
 en `timestamptz` en las dos bases. En ambas, `migrations` tiene registrada
@@ -311,16 +366,17 @@ migración mergeada no se la edita.
 
 ### Efecto colateral medido: el generador ya no propone borrar las fechas de plan
 
-Resincronizar la base local no fue sólo higiene. Antes y después del arreglo, con
-`npm run migration:generate` apuntando a un archivo fuera del repo:
+Resincronizar la base local no fue sólo higiene. Las dos mediciones son del mismo día (19-ago-2026),
+con `npm run migration:generate` apuntando a un archivo fuera del repo:
 
 | | Sentencias en `up()` | `DROP COLUMN` |
 | --- | --- | --- |
-| Antes (19-ago, base desincronizada) | 91 | 8 |
-| Después | **83** | **4** |
+| Antes del arreglo (base desincronizada) | 91 | 8 |
+| Después del arreglo | **83** | **4** |
 
-Las 4 que se fueron eran exactamente `user.planExpiresAt`, `user.planStartedAt`,
-`user_tarotista_subscriptions.expires_at` y `can_change_at`. Las 4 entidades **ya declaraban**
+Las 4 que se fueron eran `user.planExpiresAt`, `user.planStartedAt`,
+`user_tarotista_subscriptions.expires_at` y `can_change_at` (identificadas **por diferencia** contra el
+output posterior, no capturadas del output previo — ver la nota al pie de esta sección). Las 4 entidades **ya declaraban**
 `@Column({ type: 'timestamptz' })` —verificado en `user.entity.ts:127,135` y
 `user-tarotista-subscription.entity.ts:97,112`—, así que el generador veía una diferencia **legítima**
 contra la base local naive.
@@ -329,18 +385,18 @@ Cómo la resolvía es el punto. Los 4 `DROP COLUMN` que **siguen** en el output 
 enciclopedia, y ahí se ve el patrón textual con el que TypeORM trata un cambio de tipo de timestamp:
 
 ```sql
--- Sigue en el output de hoy, para encyclopedia_tarot_cards:
+-- Sigue en el output posterior al arreglo, para encyclopedia_tarot_cards:
 ALTER TABLE "encyclopedia_tarot_cards" DROP COLUMN "created_at";
 ALTER TABLE "encyclopedia_tarot_cards" ADD "created_at" TIMESTAMP NOT NULL DEFAULT now();
 ```
 
-Las 4 columnas de plan caían en ese mismo grupo del inventario (`DROP COLUMN` + `ADD`, 8 + 8 medidos
-el 19-ago; hoy quedan 4 + 4, y los 4 que quedan son los de la enciclopedia). O sea: **la base local
+Las 4 columnas de plan caían en ese mismo grupo del inventario (`DROP COLUMN` + `ADD`, 8 + 8 antes
+del arreglo; después quedan 4 + 4, y los 4 que quedan son los de la enciclopedia). O sea: **la base local
 estaba a un `migration:generate` mal podado de una migración que le borraba a todos los usuarios
 premium la fecha de vencimiento del plan.** Es el mismo mecanismo que la Regla A del workflow, pero
 sobre una columna de facturación en vez de una de auditoría.
 
-> ⚠️ El bloque SQL de arriba es el que quedó **observado hoy** para la enciclopedia. La forma exacta
+> ⚠️ El bloque SQL de arriba es el **observado después del arreglo** para la enciclopedia. La forma exacta
 > que tomaban las 4 sentencias de plan no quedó capturada antes del arreglo: se deduce de la
 > aritmética del inventario (8 → 4 `DROP COLUMN`, y los 4 restantes identificados por nombre). Si
 > hace falta la prueba textual, se reproduce volviendo las 4 columnas a naive en una base de
@@ -364,7 +420,9 @@ Con las tres tareas cerradas:
 
 ```bash
 cd backend/tarot-app
-npm run migration:generate -- src/database/migrations/Drift
+# Ojo: mientras esto sea una MEDICIÓN y no una migración de verdad, generar fuera del repo
+# para no dejar un archivo de 83 sentencias suelto en src/database/migrations/.
+npm run migration:generate -- /tmp/DriftProbe
 # Debe fallar con "No changes in database schema were found"
 ```
 

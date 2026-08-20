@@ -200,7 +200,8 @@ a mano con SQL que dice más de lo que dicen los decoradores (`TIMESTAMPTZ`, `ON
 nombres legibles de FKs), el generador arrastra **drift preexistente** que no tiene nada que ver con
 tu tarea.
 
-Medido el 19-ago-2026: agregar 7 columnas a una tabla generó **91 sentencias**.
+Medido el 19-ago-2026: agregar 7 columnas a una tabla generó **83 sentencias** (eran 91 antes de que
+T-DEUDA-003 resincronizara la base local).
 
 Y no son inocuas. Para "corregir" el tipo de una columna, el generador no convierte: **borra y
 recrea**.
@@ -227,7 +228,9 @@ silencio de una base nueva —que sí ejecuta la versión final—.
 
 Pasó en `1776900000000-AuthTimestampsToTimestamptz.ts`: nació con 9 columnas, el feedback del PR le
 agregó 4 más editando el mismo archivo, y la base de desarrollo —que ya había corrido la primera
-versión— se quedó con 4 columnas sin convertir.
+versión— se quedó con 4 columnas sin convertir. (Resincronizada a mano en T-DEUDA-003 el 19-ago-2026;
+**producción nunca estuvo afectada**, porque los dos commits entraron juntos en el mismo PR — pero eso
+fue suerte, no diseño.)
 
 **Si a una migración ya mergeada le falta algo, va en una migración NUEVA.** Sin excepciones, ni
 siquiera "todavía no se deployó" (alguien ya la corrió en local).
