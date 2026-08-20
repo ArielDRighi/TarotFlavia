@@ -163,8 +163,9 @@ vacía y otra inflada, y eso es exactamente lo que no queremos que pase sin que 
       decenas de sentencias de **drift preexistente ajeno a la tarea** —renombres de FKs e índices y
       una reversión de `AuthTimestampsToTimestamptz1776900000000` que habría devuelto los timestamps
       a `TIMESTAMP` sin zona horaria—. Se conservaron **solo** los `ALTER TABLE` de esta entidad,
-      agregándoles `IF [NOT] EXISTS` para hacerlos idempotentes. El drift restante queda como deuda a
-      resolver aparte.
+      agregándoles `IF [NOT] EXISTS` para hacerlos idempotentes. El drift restante —91 sentencias en
+      total— quedó inventariado y agendado en
+      [`BACKLOG_DEUDA_TECNICA_2026_08.md`](./BACKLOG_DEUDA_TECNICA_2026_08.md) (T-DEUDA-001 a 003).
 - [x] DTOs y respuesta de la API actualizados (`CardDetailDto` + `CardCombinationDto`), con Swagger
       (`@ApiPropertyOptional`).
 - [x] El endpoint de **listado** NO devuelve los campos nuevos: `CardSummaryDto` quedó intacto y hay

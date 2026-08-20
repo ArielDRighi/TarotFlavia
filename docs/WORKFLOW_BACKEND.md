@@ -187,6 +187,53 @@ Antes de crear el PR, verificar:
 
 ---
 
+## 🗄️ Migraciones — Dos Reglas que No Se Negocian
+
+> Ambas nacen de casos reales del proyecto. Ver
+> [`BACKLOG_DEUDA_TECNICA_2026_08.md`](./BACKLOG_DEUDA_TECNICA_2026_08.md) para el detalle medido.
+
+### Regla A: NUNCA commitear el output de `migration:generate` sin leerlo entero
+
+`migration:generate` compara los **decoradores de las entidades** contra la **base real** y escribe
+el SQL para que la base se parezca a las entidades. Como en este repo las migraciones se escribieron
+a mano con SQL que dice más de lo que dicen los decoradores (`TIMESTAMPTZ`, `ON DELETE CASCADE`,
+nombres legibles de FKs), el generador arrastra **drift preexistente** que no tiene nada que ver con
+tu tarea.
+
+Medido el 19-ago-2026: agregar 7 columnas a una tabla generó **91 sentencias**.
+
+Y no son inocuas. Para "corregir" el tipo de una columna, el generador no convierte: **borra y
+recrea**.
+
+```sql
+-- ⚠️ Esto NO cambia el tipo: pierde todos los datos de la columna
+ALTER TABLE "encyclopedia_tarot_cards" DROP COLUMN "created_at";
+ALTER TABLE "encyclopedia_tarot_cards" ADD "created_at" TIMESTAMP NOT NULL DEFAULT now();
+```
+
+**Procedimiento obligatorio:**
+
+1. Generar la migración.
+2. **Leer el archivo completo**, línea por línea.
+3. Borrar toda sentencia que no sea de tu tarea.
+4. Dejar escrito en el header del archivo qué se podó y por qué.
+5. Verificar `up` y `down` contra una base con datos reales antes del PR.
+
+### Regla B: una migración mergeada es INMUTABLE
+
+TypeORM **nunca re-ejecuta** una migración ya registrada en la tabla `migrations`. Si editás un
+archivo que ya corrió en alguna base, esa base **jamás** recibe el cambio, y queda divergiendo en
+silencio de una base nueva —que sí ejecuta la versión final—.
+
+Pasó en `1776900000000-AuthTimestampsToTimestamptz.ts`: nació con 9 columnas, el feedback del PR le
+agregó 4 más editando el mismo archivo, y la base de desarrollo —que ya había corrido la primera
+versión— se quedó con 4 columnas sin convertir.
+
+**Si a una migración ya mergeada le falta algo, va en una migración NUEVA.** Sin excepciones, ni
+siquiera "todavía no se deployó" (alguien ya la corrió en local).
+
+---
+
 ## ⚠️ Reglas Críticas
 
 1. **TDD NO ES OPCIONAL** - Tests primero, implementación después
@@ -196,11 +243,14 @@ Antes de crear el PR, verificar:
 5. **NO saltarse validación de arquitectura** - Debe pasar siempre
 6. **NO usar inglés** en texto user-facing
 7. **NO crear PR** sin pasar todas las validaciones
+8. **NO commitear el output de `migration:generate` sin leerlo** - Ver Regla A arriba
+9. **NO editar una migración ya mergeada** - Lo que falta va en una nueva. Ver Regla B arriba
 
 ---
 
 ## 📚 Documentos de Referencia
 
+- `docs/BACKLOG_DEUDA_TECNICA_2026_08.md` - Drift entre entidades y esquema (por qué existen las reglas de migraciones)
 - `backend/tarot-app/docs/ARCHITECTURE.md` - Patrones de arquitectura
 - `backend/tarot-app/docs/API_DOCUMENTATION.md` - Contratos de API
 - `backend/tarot-app/docs/TESTING.md` - Estrategia de testing
