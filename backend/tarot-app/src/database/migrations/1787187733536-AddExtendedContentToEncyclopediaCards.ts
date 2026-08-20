@@ -12,11 +12,13 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * ficha a territorio YMYL (consejo médico). Ver la regla transversal de
  * terminología en docs/BACKLOG_SEO_CONTENIDO_2026_08.md.
  *
- * Nota sobre el origen del SQL: los `ALTER TABLE` son los que emitió
- * `npm run migration:generate`, pero el archivo generado traía además decenas de
- * sentencias de drift preexistente ajeno a esta tarea (renombres de FKs e
- * índices, y una reversión de `AuthTimestampsToTimestamptz1776900000000`).
- * Se conservaron solo las sentencias de esta entidad.
+ * Nota sobre el origen del SQL: los `ALTER TABLE` derivan de lo que emitió
+ * `npm run migration:generate`, con `IF [NOT] EXISTS` agregado para hacerlos
+ * idempotentes (el generador emite `ADD "col" text` a secas). El archivo
+ * generado traía además decenas de sentencias de drift preexistente ajeno a
+ * esta tarea —renombres de FKs e índices, y una reversión de
+ * `AuthTimestampsToTimestamptz1776900000000`—; se conservaron solo las
+ * sentencias de esta entidad.
  */
 export class AddExtendedContentToEncyclopediaCards1787187733536 implements MigrationInterface {
   name = 'AddExtendedContentToEncyclopediaCards1787187733536';

@@ -162,8 +162,9 @@ vacía y otra inflada, y eso es exactamente lo que no queremos que pase sin que 
       (`1787187733536-AddExtendedContentToEncyclopediaCards.ts`). ⚠️ El archivo generado traía además
       decenas de sentencias de **drift preexistente ajeno a la tarea** —renombres de FKs e índices y
       una reversión de `AuthTimestampsToTimestamptz1776900000000` que habría devuelto los timestamps
-      a `TIMESTAMP` sin zona horaria—. Se conservaron **solo** los `ALTER TABLE` de esta entidad, tal
-      cual los emitió el generador. El drift restante queda como deuda a resolver aparte.
+      a `TIMESTAMP` sin zona horaria—. Se conservaron **solo** los `ALTER TABLE` de esta entidad,
+      agregándoles `IF [NOT] EXISTS` para hacerlos idempotentes. El drift restante queda como deuda a
+      resolver aparte.
 - [x] DTOs y respuesta de la API actualizados (`CardDetailDto` + `CardCombinationDto`), con Swagger
       (`@ApiPropertyOptional`).
 - [x] El endpoint de **listado** NO devuelve los campos nuevos: `CardSummaryDto` quedó intacto y hay
@@ -190,6 +191,9 @@ vacía y otra inflada, y eso es exactamente lo que no queremos que pase sin que 
 - **`yes_no` es `varchar(500)`**, no `varchar(255)`: 40 palabras no entran cómodas en 255 caracteres.
 - **El seeder y `CardSeedData` no se tocaron**: cargar contenido es T-SEO-009. Las 78 fichas existentes
   quedan con las siete columnas en `NULL`.
+- **La proyección de los listados quedó acotada** a las 8 columnas que consume `CardSummaryDto`.
+  Sin eso, `GET /encyclopedia/cards` —y `getNavigation`, que corre en cada página de detalle— leerían
+  las ~35.000 palabras nuevas de la base solo para descartarlas apenas T-SEO-009 cargue el contenido.
 
 ### Fuera de alcance
 
@@ -225,7 +229,9 @@ T-SEO-008.
 - [ ] **Carga por seeder idempotente** (`encyclopedia-tarot-cards.seeder.ts` ya existe): correrlo dos
       veces no debe duplicar ni pisar ediciones hechas desde el panel de admin.
 - [ ] Las **combinaciones** (`combinations`) tienen que referenciar slugs que existan; un slug muerto
-      rompe el cross-link.
+      rompe el cross-link. ⚠️ **El backend no lo ataja**: T-SEO-008 solo omite `combinations` cuando la
+      lista está vacía, así que una entrada con `cardSlug` en blanco o inexistente llega igual al
+      frontend. La validación de slugs es responsabilidad de esta tarea.
 
 ### Criterios de aceptación
 

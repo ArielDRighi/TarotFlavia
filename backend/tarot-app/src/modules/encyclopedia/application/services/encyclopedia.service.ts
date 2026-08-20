@@ -31,6 +31,26 @@ export interface CardNavigationDto {
  */
 @Injectable()
 export class EncyclopediaService {
+  /**
+   * Columnas que consume `toSummaryDto`.
+   *
+   * Acotan la proyección de los listados para que las secciones de contenido
+   * extendido (T-SEO-008) no se lean de la base solo para descartarse: con las
+   * 78 fichas cargadas (T-SEO-009) son ~35.000 palabras por request, y
+   * `findAll` lo usan además `getBySuit`, `search`, `globalSearch` y
+   * `getNavigation` —que corre en cada página de detalle—.
+   */
+  private static readonly SUMMARY_FIELDS = [
+    'id',
+    'slug',
+    'nameEs',
+    'arcanaType',
+    'number',
+    'suit',
+    'thumbnailUrl',
+    'imageUrl',
+  ] as const;
+
   constructor(
     @InjectRepository(EncyclopediaTarotCard)
     private readonly cardRepository: Repository<EncyclopediaTarotCard>,
@@ -47,6 +67,10 @@ export class EncyclopediaService {
    */
   async findAll(filters?: CardFiltersDto): Promise<CardSummaryDto[]> {
     const qb = this.cardRepository.createQueryBuilder('card');
+
+    qb.select(
+      EncyclopediaService.SUMMARY_FIELDS.map((field) => `card.${field}`),
+    );
 
     if (filters?.arcanaType) {
       qb.andWhere('card.arcanaType = :arcanaType', {
@@ -153,6 +177,7 @@ export class EncyclopediaService {
 
     const related = await this.cardRepository.find({
       where: { id: In(card.relatedCards) },
+      select: [...EncyclopediaService.SUMMARY_FIELDS],
     });
     return related.map((c) => this.toSummaryDto(c));
   }
@@ -269,7 +294,7 @@ export class EncyclopediaService {
     }
 
     if (card.combinations != null && card.combinations.length > 0) {
-      extended.combinations = card.combinations;
+      extended.combinations = [...card.combinations];
     }
 
     return extended;

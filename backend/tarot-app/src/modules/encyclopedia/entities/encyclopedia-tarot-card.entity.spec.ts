@@ -404,7 +404,7 @@ describe('EncyclopediaTarotCard Entity', () => {
       expect(typeof card.combinations?.[0].reading).toBe('string');
     });
 
-    it('debería aceptar entre 3 y 5 combinaciones por ficha', () => {
+    it('debería guardar una lista de combinaciones bien formadas', () => {
       card.combinations = [
         { cardSlug: 'the-magician', reading: 'Impulso con herramienta.' },
         { cardSlug: 'the-hermit', reading: 'Impulso que pide pausa.' },

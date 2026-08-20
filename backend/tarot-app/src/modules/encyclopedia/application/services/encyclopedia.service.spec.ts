@@ -134,6 +134,7 @@ describe('EncyclopediaService', () => {
     results: EncyclopediaTarotCard[],
   ): jest.Mocked<SelectQueryBuilder<EncyclopediaTarotCard>> => {
     const qb = {
+      select: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
       addOrderBy: jest.fn().mockReturnThis(),
@@ -572,6 +573,26 @@ describe('EncyclopediaService', () => {
       ]);
     });
 
+    it('no debe leer de la base las secciones extendidas en el listado', async () => {
+      const qb = createQueryBuilderMock([mockExtendedCard]);
+      repository.createQueryBuilder.mockReturnValue(qb);
+
+      await service.findAll();
+
+      // La proyección acotada evita traer ~35.000 palabras por request una vez
+      // que T-SEO-009 cargue el contenido de las 78 fichas.
+      expect(qb.select).toHaveBeenCalledWith([
+        'card.id',
+        'card.slug',
+        'card.nameEs',
+        'card.arcanaType',
+        'card.number',
+        'card.suit',
+        'card.thumbnailUrl',
+        'card.imageUrl',
+      ]);
+    });
+
     it('no debe incluir las secciones extendidas en las cartas relacionadas', async () => {
       repository.findOne.mockResolvedValue(mockExtendedCard);
       repository.find.mockResolvedValue([mockExtendedCard]);
@@ -625,6 +646,7 @@ describe('EncyclopediaService', () => {
 
       expect(repository.find).toHaveBeenCalledWith({
         where: { id: expect.objectContaining({}) },
+        select: expect.arrayContaining(['id', 'slug', 'nameEs']),
       });
       expect(result).toHaveLength(2);
     });

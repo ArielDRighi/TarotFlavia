@@ -202,7 +202,7 @@ export class CardDetailDto extends CardSummaryDto {
 
   @ApiPropertyOptional({
     description:
-      'La carta en la energía y el bienestar. No es consejo médico ni menciona salud.',
+      'La carta en la energía y el bienestar: energía, descanso, hábitos y ánimo. Nunca consejo médico.',
   })
   meaningWellbeing?: string;
 
