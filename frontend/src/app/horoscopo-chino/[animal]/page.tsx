@@ -1,10 +1,8 @@
+import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
 import { AnimalHoroscopeRoute } from '@/components/features/chinese-horoscope/AnimalHoroscopeRoute';
-import {
-  INVALID_ROUTE_PARAM_METADATA,
-  getChineseZodiacMetadata,
-} from '@/lib/metadata/page-metadata';
+import { getChineseZodiacMetadata } from '@/lib/metadata/page-metadata';
 import { getAllChineseZodiacAnimals, isChineseZodiacAnimal } from '@/lib/utils/chinese-zodiac';
 
 /**
@@ -28,11 +26,13 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { animal } = await params;
 
-  // Ídem `/horoscopo/[sign]`: una URL inventada no debe declararse duplicada
-  // del hub heredando su canonical.
-  return isChineseZodiacAnimal(animal)
-    ? getChineseZodiacMetadata(animal)
-    : INVALID_ROUTE_PARAM_METADATA;
+  // Ídem `/horoscopo/[sign]`: una URL inventada responde 404, no un 200 con
+  // metadata `noindex` (T-SEO-006).
+  if (!isChineseZodiacAnimal(animal)) {
+    notFound();
+  }
+
+  return getChineseZodiacMetadata(animal);
 }
 
 export function generateStaticParams(): { animal: string }[] {

@@ -28,6 +28,10 @@ vi.mock('next/navigation', () => ({
   }),
   useParams: () => mockParams,
   useSearchParams: () => mockSearchParams,
+  // `notFound()` corta el render lanzando; el mock reproduce ese contrato (T-SEO-006).
+  notFound: () => {
+    throw new Error('NEXT_NOT_FOUND');
+  },
 }));
 
 // Mock auth store
@@ -228,21 +232,8 @@ describe('ChineseHoroscopeAnimalPage', () => {
   });
 
   describe('animal inválido', () => {
-    it('muestra el mensaje de animal no válido y un enlace al listado', async () => {
-      await renderPage('invalid-animal');
-
-      expect(screen.getByText('Animal no válido')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /Ver todos los animales/i })).toHaveAttribute(
-        'href',
-        '/horoscopo-chino'
-      );
-    });
-
-    it('no renderiza la ficha ni el panel para un animal inválido', async () => {
-      await renderPage('invalid-animal');
-
-      expect(screen.queryByTestId('animal-profile')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('chinese-animal-selector')).not.toBeInTheDocument();
+    it('⚠️ T-SEO-006: corta el render con notFound() en vez de servir un 200', async () => {
+      await expect(renderPage('invalid-animal')).rejects.toThrow('NEXT_NOT_FOUND');
     });
   });
 

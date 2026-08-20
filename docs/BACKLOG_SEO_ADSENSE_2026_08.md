@@ -153,10 +153,10 @@ lógica en `app/`.
 | T-SEO-003 | Listados y hubs sin contenido para el crawler ✅ | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-004 | Signos del horóscopo: ficha estática del signo ✅ | Frontend | 🟠 Alta | 2 pts |
 | T-SEO-005 | El build de Docker no usa lockfile (deriva de dependencias) ✅ | Infra | 🟠 Alta | 2 pts |
-| T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) | Frontend | 🟡 Media | 1.5 pts |
+| T-SEO-006 | Los `notFound()` devuelven 200 (soft-404) ✅ | Frontend | 🟡 Media | 1.5 pts |
 | T-SEO-007 | El panel de admin expulsa al admin (secuela de T-PROD-022) ✅ | Frontend | 🔴 Crítica | 1 pt |
 
-**Orden recomendado:** queda solo el 006 (001, 002, 003, 004, 005 y 007 ya están cerradas).
+**Orden recomendado:** todas cerradas (001–007).
 
 ---
 
@@ -243,7 +243,8 @@ miden 34 URLs y **aparecen las 10 clases de problema**, no un subconjunto.
   aborta (con la línea base en 0 el umbral se ablandaba solo); una request caída se reporta como
   fila fallida en vez de tumbar las otras 177; y los soft-404 no cuentan para el exit code salvo
   `--fail-on-soft-404`, porque los 11 actuales harían fallar toda corrida hasta que se arregle
-  T-SEO-006.
+  T-SEO-006. **Actualizado el 19-ago-2026:** cerrada T-SEO-006, ese flag es el default y para
+  ignorarlos hay que pasar `--no-fail-on-soft-404`.
 
 ---
 
@@ -703,6 +704,7 @@ imágenes de `public/` y `manifest.json` en 200. El cambio de layout del `standa
 ## T-SEO-006: Los `notFound()` Devuelven 200 (Soft-404)
 
 **Prioridad:** 🟡 Media · **Estimación:** 1.5 pts · **Dependencias:** T-SEO-001 ayuda a detectarlo
+**Estado:** ✅ COMPLETADA (19-ago-2026)
 
 ### Problema
 
@@ -721,19 +723,131 @@ justamente lo que Google penaliza: la URL entra al índice como página válida 
 invalida la afirmación de "404 real" que quedó escrita en T-PROD-020, T-PROD-021 y T-PROD-024 (los
 comentarios del código ya se corrigieron; el backlog viejo conserva la afirmación).
 
+### Causa: el `app/loading.tsx` global
+
+Era **streaming**, la primera hipótesis de la lista, pero no por la razón que decía: no había ninguna
+llamada tardía a `notFound()`. El causante era
+[`src/app/loading.tsx`](../frontend/src/app/loading.tsx), un spinner global.
+
+Un `loading.tsx` es azúcar sintáctica para envolver el segmento en un `<Suspense>`. Al estar en la
+**raíz** de `app/`, envolvía **todas** las rutas del sitio. Con ese límite presente, el shell (todo lo
+que queda fuera del Suspense: `<html>`, el layout, header y footer) está listo apenas renderiza el
+layout, así que Next **confirma la respuesta con 200 y emite el esqueleto** antes de correr el cuerpo
+de la página. Cuando `notFound()` se lanzaba, ya no había status que cambiar: el error viajaba por el
+stream como `NEXT_HTTP_ERROR_FALLBACK;404` y la página de no-encontrado la pintaba el **cliente**.
+
+Medido contra el build de producción (`node frontend/server.js`, el mismo comando del Dockerfile),
+con seis rutas de sonda que aislan cada variable:
+
+| Sonda | `notFound()` en… | `revalidate` | `generateStaticParams` | Con `loading.tsx` | Sin él |
+| --- | --- | --- | --- | --- | --- |
+| a | page | no | no | **200** | 404 |
+| b | page | sí | no | **200** | 404 |
+| c | `generateMetadata` | no | no | **200** | 404 |
+| d | `generateMetadata` | sí | sí | **200** | 404 |
+| e | — (`dynamicParams = false`) | no | sí | 404 | 404 |
+| f | page (`force-dynamic`) | — | no | **200** | 404 |
+
+Las hipótesis de ISR y de `generateMetadata` quedaron descartadas: la sonda `f` (`force-dynamic`, sin
+caché de por medio) también daba 200, y la `a` —la más simple posible— también. La única que
+funcionaba era la `e`, que **nunca llega a renderizar**: con `dynamicParams = false` Next descarta el
+segmento desconocido en el router, antes del render.
+
+Lo que sí es cierto de las hipótesis originales: `/ruta-que-no-existe` (una URL que no matchea ningún
+patrón) siempre respondió 404, porque ahí Next sirve el `/_not-found` prerenderizado sin renderizar
+nada.
+
 ### Alcance
 
-- [ ] Entender por qué Next no emite 404 en estas rutas. Hipótesis a descartar: streaming (headers ya
-      enviados cuando se llama `notFound()`), interacción con ISR/`revalidate`, ausencia de un
-      `not-found.tsx` por segmento.
-- [ ] Arreglarlo o, si es una limitación real de esta configuración, documentar la alternativa
-      (p. ej. validar el slug **antes** de empezar a renderizar).
-- [ ] Test de regresión que asevere el **status HTTP**, no solo el contenido.
+- [x] **Eliminado `app/loading.tsx`.** Era el límite de Suspense que impedía emitir el 404, y además
+      hacía que **cualquier** render on-demand le sirviera un spinner al crawler en vez de la página
+      —la misma clase de bug que T-SEO-001 vino a cazar—. Los `loading.tsx` **por segmento**
+      (`/tarot`, `/ritual`, `/explorar`, `/historial`, `/carta-astral`) se conservan: ninguno envuelve
+      una ruta dinámica pública.
+- [x] Las dos páginas que dependían de ese Suspense prestado tienen el suyo:
+      [registro](../frontend/src/app/registro/page.tsx) y
+      [premium/activacion](../frontend/src/app/premium/activacion/page.tsx) leen la query string con
+      `useSearchParams`. Sin el límite propio, el build falla con *"useSearchParams() should be
+      wrapped in a suspense boundary"* — es decir que el `loading.tsx` global estaba **tapando**
+      esa deuda.
+- [x] `/horoscopo/[sign]` y `/horoscopo-chino/[animal]` llaman a `notFound()`. Estas dos **no eran un
+      problema de Next**: renderizaban a propósito una ficha de "Signo no válido" / "Animal no
+      válido" con status 200, que es un soft-404 escrito a mano. Se eliminó también
+      `INVALID_ROUTE_PARAM_METADATA` (metadata `noindex` + `canonical: './'`), que existía solo para
+      maquillar ese 200 y quedó sin sentido con un 404 real.
+- [x] `/tarotistas/[id]` (pública e indexable: `robots.ts` bloquea `/tarotistas/*/reservar`, no el
+      perfil) resuelve el perfil en el servidor y corta con `notFound()`. Tenía además un bug
+      preexistente: tipaba `params` como objeto plano cuando en Next 16 es una `Promise`, así que
+      `Number(params.id)` daba **`NaN`** y el request salía a la API como `/tarotistas/NaN`. El
+      parseo del segmento vive ahora en
+      [`parseNumericRouteId`](../frontend/src/lib/utils/route-params.ts).
+- [x] Test de regresión de **status HTTP**: [`tests/e2e/soft-404.spec.ts`](../frontend/tests/e2e/soft-404.spec.ts)
+      (16 casos) pide un slug inventado por cada patrón dinámico público y asevera 404, más cuatro
+      URLs válidas que deben seguir en 200 para que "todo 404" no pase la suite.
+- [x] **El guardarraíl ahora falla.** `check:indexable` reportaba los soft-404 sin afectar el exit
+      code, precisamente porque los 11 conocidos habrían hecho fallar toda corrida. Cerrada la
+      tarea, `--fail-on-soft-404` pasó a ser el default y se agregó `--no-fail-on-soft-404` para
+      volver atrás.
 
 ### Criterios de aceptación
 
-- [ ] Un slug inexistente en cualquier ruta dinámica pública devuelve **404**.
-- [ ] Las URLs válidas siguen devolviendo 200 con su contenido.
+- [x] Un slug inexistente en cualquier ruta dinámica pública devuelve **404**. Verificado sobre el
+      build de producción (`node frontend/server.js`): las 11 rutas que reportaba T-SEO-001, más
+      `/tarotistas/abc` y `/tarotistas/999999`.
+- [x] Las URLs válidas siguen devolviendo 200 con su contenido: `check:indexable` contra ese mismo
+      build da **45/45 cumplen** y **"✅ Sin soft-404"**.
+
+### Notas técnicas
+
+- **Qué se pierde al sacar el `loading.tsx` global:** el spinner de pantalla completa en la
+  navegación client-side hacia rutas que no tenían el suyo. Los circuitos que sí tardan —tarot,
+  ritual, historial, carta astral, explorar— conservan su `loading.tsx` de segmento. Quedan sin
+  feedback de navegación cinco rutas `ƒ` (server-rendered on demand): `/tarotistas/[id]`,
+  `/tarotistas/[id]/reservar`, `/servicios/[slug]/pago`, `/servicios/reservar/[purchaseId]` y
+  `/compartida/[token]`. Las cuatro últimas son client components cuyo render en el servidor es
+  inmediato (montan su propio esqueleto), así que la espera es solo el payload RSC. La primera sí
+  hace una llamada bloqueante a la API, y **ahí no se puede agregar un `loading.tsx`**: reintroduciría
+  exactamente el soft-404 que esta tarea cerró. El remedio para esa ruta fue el opuesto —pasarle el
+  perfil ya resuelto al componente— así que el cliente no vuelve a pedirlo y el HTML trae el
+  contenido real. Lo que se gana en las once rutas públicas es que el servidor no confirme un 200
+  antes de saber qué va a renderizar.
+- **El cuerpo del 404 lo pinta el cliente.** Con `notFound()` desde una ruta ya matcheada, Next 16
+  responde 404 con un documento vacío y el `not-found.tsx` se monta al hidratar (verificado también
+  en las seis sondas, así que es comportamiento de Next y no algo de este árbol). No es una regresión
+  —antes el crawler recibía el spinner, con status 200— y para SEO lo determinante es el status: con
+  un 404 Google descarta la URL sin mirar el cuerpo.
+- **Se corrigieron los tests que documentaban el bug como comportamiento esperado.** Los de
+  `/horoscopo/[sign]` y `/horoscopo-chino/[animal]` aseveraban el texto "Signo no válido" y la
+  metadata `noindex`; ahora aseveran que la ruta corta con `notFound()`. El de `/tarotistas/[id]`
+  pasaba `params` como objeto plano, que es justamente lo que ocultaba el `NaN` en producción.
+- **Los tests unitarios no alcanzan para esto y por eso hay un e2e.** Las rutas llamaban a
+  `notFound()` desde antes de esta tarea y sus tests lo verificaban: el status HTTP es una capa que
+  jsdom no ve.
+- **`soft-404.spec.ts` exige un build de producción y la API arriba.** Corriéndolo contra
+  `next dev` el pipeline de streaming no es el mismo, así que una regresión podría no aparecer; y
+  con la API caída `resolveRouteResource` propaga y las rutas de enciclopedia/rituales/servicios
+  responden 500 en vez de 404. Queda escrito en el encabezado del spec y en `tests/e2e/README.md`.
+
+### Salió de la revisión
+
+- **`/tarotistas/[id]` descartaba el perfil que acababa de traer.** La primera versión del arreglo
+  usaba el fetch del servidor solo como portón del 404 y devolvía `<TarotistaProfilePage id={id} />`,
+  que volvía a pedir el mismo perfil desde el cliente: dos llamadas a la API por visita y, en una
+  ruta **indexable**, un HTML con el esqueleto —el agujero que T-SEO-004 cerró en las otras—. Ahora
+  se le pasa `initialTarotista`, igual que las 5 hermanas, y `useTarotistaDetail` lo acepta como
+  `initialData` con `initialDataUpdatedAt: 0` (mismo criterio que `useRitual`: las valoraciones
+  cambian, así que el cliente igual refetchea al montar).
+- **`/tarotistas/[id]/reservar` arrastraba el mismo bug de `params` que el padre.** Tipaba
+  `params` como objeto plano —en Next 16 es una `Promise`—, así que `Number(params.id)` daba `NaN` y
+  `BookingPage` arrancaba con un id inválido. Es privada, así que no era un soft-404, pero la
+  reserva salía rota. Pasó a leer el segmento con `useParams` (el patrón de las otras rutas cliente)
+  + `parseNumericRouteId`. Su test lo tapaba pasando `params` como prop; ahora mockea `useParams`.
+- **Faltaban dos casos en el e2e:** la ruta legacy `/enciclopedia/[slug]` (redirige y debe terminar
+  en 404) y `/tarotistas/999999` — solo estaba `/tarotistas/abc`, que ejercita el parseo del
+  segmento y no el 404 que devuelve la API.
+- **Quedaba un `useSearchParams` sin límite de Suspense propio:** `/servicios/[slug]/pago`. No rompe
+  el build porque la ruta sale como `ƒ` (no se prerenderiza), así que se deja como está y queda
+  anotado: si algún día se le agrega `generateStaticParams`, el build va a fallar ahí.
 
 ---
 

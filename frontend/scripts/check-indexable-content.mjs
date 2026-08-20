@@ -356,7 +356,7 @@ export function parseArgs(argv = [], env = process.env) {
     concurrency: 6,
     timeout: 20000,
     checkSoft404: true,
-    failOnSoft404: false,
+    failOnSoft404: true,
     userAgent: USER_AGENT,
     json: false,
     help: false,
@@ -403,6 +403,9 @@ export function parseArgs(argv = [], env = process.env) {
         break;
       case '--fail-on-soft-404':
         opciones.failOnSoft404 = true;
+        break;
+      case '--no-fail-on-soft-404':
+        opciones.failOnSoft404 = false;
         break;
       case '--json':
         opciones.json = true;
@@ -518,7 +521,7 @@ export function formatReport({
   softNotFound,
   exceptions = RUTAS_EXENTAS,
   checkSoft404 = true,
-  failOnSoft404 = false,
+  failOnSoft404 = true,
 }) {
   const lineas = [];
   const anchoRuta = Math.max(20, ...rows.map((row) => row.pathname.length));
@@ -568,8 +571,8 @@ export function formatReport({
     }
     lineas.push(
       failOnSoft404
-        ? '   Ver T-SEO-006. Cuentan para el exit code (--fail-on-soft-404).'
-        : '   Ver T-SEO-006. NO cuentan para el exit code: usá --fail-on-soft-404 si querés que fallen.'
+        ? '   Cuentan para el exit code; ver T-SEO-006 por qué (--no-fail-on-soft-404 para ignorarlos).'
+        : '   NO cuentan para el exit code (--no-fail-on-soft-404).'
     );
   } else {
     lineas.push('✅ Sin soft-404: las rutas dinámicas responden 404 ante un slug inventado.');
@@ -635,7 +638,7 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
     concurrency = 6,
     timeout,
     checkSoft404 = true,
-    failOnSoft404 = false,
+    failOnSoft404 = true,
     userAgent = USER_AGENT,
     exceptions = RUTAS_EXENTAS,
     json = false,
@@ -767,12 +770,12 @@ Uso: node scripts/check-indexable-content.mjs [opciones]
   --timeout <ms>        Timeout por request (default: 20000)
   --user-agent <ua>     User-Agent de las requests (default: Googlebot)
   --no-soft-404         No sondear slugs inventados en rutas dinámicas
-  --fail-on-soft-404    Que los soft-404 también cuenten para el exit code
+  --no-fail-on-soft-404 Que los soft-404 NO cuenten para el exit code
   --json                Salida en JSON en vez de tabla
   -h, --help            Esta ayuda
 
-Exit code 1 si alguna URL queda por debajo del umbral. Los soft-404 se reportan
-pero NO afectan el exit code salvo que se pase --fail-on-soft-404.
+Exit code 1 si alguna URL queda por debajo del umbral o si hay soft-404 (desde
+T-SEO-006 los soft-404 cuentan; --no-fail-on-soft-404 vuelve al modo anterior).
 `;
 
 async function main() {

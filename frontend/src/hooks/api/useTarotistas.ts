@@ -8,7 +8,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getTarotistas, getTarotistaById } from '@/lib/api/tarotistas-api';
-import type { PaginatedTarotistas, TarotistaFilters } from '@/types';
+import type { PaginatedTarotistas, TarotistaDetail, TarotistaFilters } from '@/types';
 
 // ============================================================================
 // Query Keys (for consistency and type safety)
@@ -52,11 +52,16 @@ export function useTarotistas(filters?: TarotistaFilters, initialData?: Paginate
  * @param id - Tarotista ID (numeric)
  * @returns TanStack Query result with tarotista detail
  */
-export function useTarotistaDetail(id: number) {
+export function useTarotistaDetail(id: number, initialData?: TarotistaDetail) {
   return useQuery({
     queryKey: tarotistaQueryKeys.detail(id),
     queryFn: () => getTarotistaById(id),
     enabled: id > 0, // Only fetch if ID is valid
     staleTime: 5 * 60 * 1000, // 5 minutes
+    initialData,
+    // Mismo criterio que `useRitual`: sin esto `initialData` se estampa como
+    // recién traído y, con el `staleTime`, el cliente no refetchea al montar —
+    // la copia horneada en el HTML quedaría fija (valoraciones incluidas).
+    initialDataUpdatedAt: 0,
   });
 }

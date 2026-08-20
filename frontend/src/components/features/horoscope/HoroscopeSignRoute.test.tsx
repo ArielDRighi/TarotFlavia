@@ -6,11 +6,20 @@
  * día calendario local del visitante— en el panel cliente.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 import { HoroscopeSignRoute } from './HoroscopeSignRoute';
 import { ZodiacSign } from '@/types/horoscope.types';
+
+/** `notFound()` corta el render lanzando; el mock reproduce ese contrato. */
+const notFoundMock = vi.fn(() => {
+  throw new Error('NEXT_NOT_FOUND');
+});
+
+vi.mock('next/navigation', () => ({
+  notFound: () => notFoundMock(),
+}));
 
 vi.mock('./HoroscopeSignPanel', () => ({
   HoroscopeSignPanel: ({ sign }: { sign: ZodiacSign }) => (
@@ -41,27 +50,21 @@ describe('HoroscopeSignRoute', () => {
   });
 
   describe('segmento inválido', () => {
-    it('muestra el mensaje de signo no válido', () => {
-      render(<HoroscopeSignRoute sign="unicornio" />);
-
-      expect(screen.getByTestId('sign-not-found')).toBeInTheDocument();
-      expect(screen.getByText('Signo no válido')).toBeInTheDocument();
+    beforeEach(() => {
+      notFoundMock.mockClear();
     });
 
-    it('no renderiza la ficha ni consulta el horóscopo', () => {
-      render(<HoroscopeSignRoute sign="unicornio" />);
-
-      expect(screen.queryByTestId('zodiac-sign-profile')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('horoscope-sign-panel')).not.toBeInTheDocument();
+    it('⚠️ T-SEO-006: llama a notFound() para que la respuesta sea un 404 real', () => {
+      // Antes servía una ficha de "Signo no válido" en 200: un soft-404, que es
+      // justo lo que Google indexa como URL válida y vacía.
+      expect(() => render(<HoroscopeSignRoute sign="unicornio" />)).toThrow('NEXT_NOT_FOUND');
+      expect(notFoundMock).toHaveBeenCalled();
     });
 
-    it('ofrece la salida al listado de signos', () => {
-      render(<HoroscopeSignRoute sign="unicornio" />);
+    it('no corta el render para un signo válido', () => {
+      render(<HoroscopeSignRoute sign={ZodiacSign.TAURUS} />);
 
-      expect(screen.getByRole('link', { name: /ver todos los signos/i })).toHaveAttribute(
-        'href',
-        '/horoscopo'
-      );
+      expect(notFoundMock).not.toHaveBeenCalled();
     });
   });
 });

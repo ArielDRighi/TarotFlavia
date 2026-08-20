@@ -53,12 +53,12 @@ npm run check:indexable -- --base-url http://localhost:3099 --min-words 150
 | `--timeout <ms>`        | `20000`               | Timeout por request                                 |
 | `--user-agent <ua>`     | Googlebot             | User-Agent de las requests                          |
 | `--no-soft-404`         | —                     | No sondear slugs inventados                         |
-| `--fail-on-soft-404`    | —                     | Que los soft-404 también cuenten para el exit code  |
+| `--no-fail-on-soft-404` | —                     | Que los soft-404 NO cuenten para el exit code       |
 | `--json`                | —                     | Salida en JSON en vez de tabla                      |
 
-**Exit code 1** si alguna URL queda por debajo del umbral, así que sirve tal cual en un script. Los
-**soft-404 se reportan pero no afectan el exit code** salvo que se pase `--fail-on-soft-404`: hoy hay
-11 conocidos (T-SEO-006) y harían fallar toda corrida hasta que se arreglen.
+**Exit code 1** si alguna URL queda por debajo del umbral **o si aparece un soft-404**, así que sirve
+tal cual en un script. Los soft-404 empezaron fuera del exit code porque había 11 conocidos; T-SEO-006
+los cerró y desde entonces cuentan. `--no-fail-on-soft-404` vuelve al modo anterior.
 
 Detalles que importan:
 

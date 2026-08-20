@@ -5,20 +5,28 @@
  */
 'use client';
 
+import { notFound, useParams } from 'next/navigation';
+
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { BookingPage } from '@/components/features/marketplace';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { parseNumericRouteId } from '@/lib/utils/route-params';
 
-interface ReservarPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function ReservarPage({ params }: ReservarPageProps) {
+export default function ReservarPage() {
+  const { id } = useParams<{ id: string }>();
   const { isLoading } = useRequireAuth();
-  const tarotistaId = Number(params.id);
+
+  // El segmento se leía como `params.id` de un objeto plano, pero en Next 16
+  // `params` es una Promise: `Number(params.id)` daba `NaN` y `BookingPage`
+  // arrancaba con un id inválido. Se lee con `useParams` —igual que las otras
+  // rutas cliente del proyecto— y un id que no es un id corta con 404
+  // (T-SEO-006).
+  const tarotistaId = parseNumericRouteId(id);
+
+  if (tarotistaId === null) {
+    notFound();
+  }
 
   if (isLoading) {
     return (

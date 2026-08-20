@@ -13,6 +13,11 @@ vi.mock('next/navigation', () => ({
     prefetch: vi.fn(),
     back: vi.fn(),
   }),
+  // `notFound()` corta el render lanzando; el mock reproduce ese contrato para
+  // poder aseverar que la ruta lo llama (T-SEO-006).
+  notFound: () => {
+    throw new Error('NEXT_NOT_FOUND');
+  },
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -65,14 +70,13 @@ describe('/horoscopo/[sign] — metadata', () => {
     expect(metadata.alternates?.canonical).toBe('/horoscopo/aries');
   });
 
-  it('⚠️ T-PROD-020: un signo inválido no hereda el canonical del hub', async () => {
-    // Con `{}` heredaba `canonical: '/horoscopo'` del layout: `/horoscopo/unicornio`
-    // respondía 200 declarándose duplicada de otra URL — el patrón que originó
-    // la tarea, fabricado a propósito para URLs basura.
-    const metadata = await generateMetadata({ params: Promise.resolve({ sign: 'unicornio' }) });
-
-    expect(metadata.alternates?.canonical).toBe('./');
-    expect(metadata.robots).toEqual({ index: false, follow: true });
+  it('⚠️ T-SEO-006: un signo inválido corta con notFound(), no con metadata noindex', async () => {
+    // Antes devolvía `canonical: './'` + `noindex` sobre un 200. Un 200 con la
+    // página de "no encontrado" es el soft-404 que Google indexa igual; el
+    // status HTTP es lo único que lo cierra.
+    await expect(
+      generateMetadata({ params: Promise.resolve({ sign: 'unicornio' }) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 });
 
@@ -105,10 +109,7 @@ describe('/horoscopo/[sign] — contenido servido (T-SEO-004)', () => {
     expect(profile).toContainElement(panel);
   });
 
-  it('un segmento inválido no renderiza ficha ni horóscopo', async () => {
-    await renderPage('unicornio');
-
-    expect(screen.getByTestId('sign-not-found')).toBeInTheDocument();
-    expect(screen.queryByTestId('horoscope-sign-panel')).not.toBeInTheDocument();
+  it('⚠️ T-SEO-006: un segmento inválido corta el render con notFound()', async () => {
+    await expect(renderPage('unicornio')).rejects.toThrow('NEXT_NOT_FOUND');
   });
 });
