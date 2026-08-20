@@ -969,3 +969,16 @@ tarea porque toca el manejo de sesión de todo el front.
       previo al deploy; Google lo re-rastrea solo.
 - [ ] **Verificar que no haya www y no-www dados de alta a la vez** en Search Console sirviendo lo mismo
       (pendiente desde T-PROD-020).
+
+---
+
+## ➡️ Continúa en la fase 2
+
+El 19-ago-2026 AdSense rechazó el sitio por segunda vez, **diez horas antes** de que el deploy de
+esta fase llegara a producción (el build de Docker estuvo roto dos semanas; lo destrabó T-SEO-005).
+Midiendo producción después del deploy aparece un problema distinto, que esta fase no tocó: las **79
+fichas de tarot son el 44 % del sitio y promedian 166 palabras propias**.
+
+**[BACKLOG_SEO_CONTENIDO_2026_08.md](./BACKLOG_SEO_CONTENIDO_2026_08.md)** — T-SEO-008 a T-SEO-013:
+volumen editorial, autoría (E-E-A-T), terminología YMYL y la puerta de salida antes de pedir la
+tercera revisión.
