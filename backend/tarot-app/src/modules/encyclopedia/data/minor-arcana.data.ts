@@ -285,7 +285,7 @@ const WANDS_CARDS: CardSeedData[] = [
     suit: Suit.WANDS,
     element: Element.FIRE,
     meaningUpright:
-      'Resiliencia, coraje de continuar, límites saludables y la fuerza de seguir adelante aunque se esté cansado. La batalla no ha terminado pero la victoria está cerca.',
+      'Resiliencia, coraje de continuar, límites bien puestos y la fuerza de seguir adelante aunque se esté cansado. La batalla no ha terminado pero la victoria está cerca.',
     meaningReversed:
       'Agotamiento total, paranoia, incapacidad de confiar y rendirse cuando falta poco para llegar a la meta.',
     description:

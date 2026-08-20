@@ -57,12 +57,13 @@ describe('seedEncyclopediaTarotCards', () => {
 
   // ---- Idempotencia --------------------------------------------------------
 
-  it('should skip seeding when cards already exist', async () => {
+  it('should not re-insert cards when they already exist', async () => {
     const repo = makeRepository(78);
     const dataSource = makeDataSource(repo);
 
     await seedEncyclopediaTarotCards(dataSource);
 
+    expect(repo.create).not.toHaveBeenCalled();
     expect(repo.save).not.toHaveBeenCalled();
   });
 
@@ -231,6 +232,142 @@ describe('seedEncyclopediaTarotCards', () => {
     //   image_url = '/images/tarot/' || slug || '.webp'
     ALL_TAROT_CARDS.forEach((card) => {
       expect(card.imageUrl).toBe(`/images/tarot/${card.slug}.webp`);
+    });
+  });
+
+  // ---- Backfill de contenido extendido (T-SEO-009) -------------------------
+  // El seeder ya no se limita a saltar cuando hay cartas: completa las secciones
+  // extendidas que estén vacías, sin pisar ediciones hechas desde el panel admin.
+
+  describe('backfill de contenido extendido', () => {
+    function makeExistingCard(
+      overrides: Partial<EncyclopediaTarotCard> = {},
+    ): Partial<EncyclopediaTarotCard> {
+      return {
+        id: 1,
+        slug: 'the-fool',
+        meaningLove: null,
+        meaningWork: null,
+        meaningWellbeing: null,
+        symbolism: null,
+        advice: null,
+        yesNo: null,
+        combinations: null,
+        ...overrides,
+      };
+    }
+
+    it('rellena las secciones vacías de una carta ya sembrada', async () => {
+      const existing = makeExistingCard();
+      const repo = makeRepository(78, [existing]);
+      const dataSource = makeDataSource(repo);
+
+      await seedEncyclopediaTarotCards(dataSource);
+
+      expect(repo.save).toHaveBeenCalledTimes(1);
+      const saved = repo.save.mock.calls[0][0] as EncyclopediaTarotCard[];
+      expect(saved).toHaveLength(1);
+      expect(saved[0].slug).toBe('the-fool');
+      expect(saved[0].meaningLove).toBeTruthy();
+      expect(saved[0].combinations?.length).toBeGreaterThan(0);
+    });
+
+    it('no pisa las ediciones hechas desde el panel de admin', async () => {
+      const existing = makeExistingCard({
+        meaningLove: 'Texto editado a mano por la administradora.',
+        yesNo: 'Respuesta editada a mano.',
+      });
+      const repo = makeRepository(78, [existing]);
+      const dataSource = makeDataSource(repo);
+
+      await seedEncyclopediaTarotCards(dataSource);
+
+      const saved = repo.save.mock.calls[0][0] as EncyclopediaTarotCard[];
+      expect(saved[0].meaningLove).toBe(
+        'Texto editado a mano por la administradora.',
+      );
+      expect(saved[0].yesNo).toBe('Respuesta editada a mano.');
+      expect(saved[0].meaningWork).toBeTruthy();
+    });
+
+    it('es idempotente: no guarda nada si ya está todo cargado', async () => {
+      const complete = makeExistingCard({
+        meaningLove: 'amor',
+        meaningWork: 'trabajo',
+        meaningWellbeing: 'bienestar',
+        symbolism: 'simbolismo',
+        advice: 'consejo',
+        yesNo: 'sí',
+        combinations: [{ cardSlug: 'the-magician', reading: 'lectura' }],
+      });
+      const repo = makeRepository(78, [complete]);
+      const dataSource = makeDataSource(repo);
+
+      await seedEncyclopediaTarotCards(dataSource);
+
+      expect(repo.save).not.toHaveBeenCalled();
+    });
+
+    it('trata el string en blanco y la lista vacía como sección sin cargar', async () => {
+      const existing = makeExistingCard({
+        meaningLove: '   ',
+        combinations: [],
+      });
+      const repo = makeRepository(78, [existing]);
+      const dataSource = makeDataSource(repo);
+
+      await seedEncyclopediaTarotCards(dataSource);
+
+      const saved = repo.save.mock.calls[0][0] as EncyclopediaTarotCard[];
+      expect(saved[0].meaningLove?.trim().length).toBeGreaterThan(0);
+      expect(saved[0].combinations?.length).toBeGreaterThan(0);
+    });
+
+    it('ignora cartas de la base que no estén en los datos de seed', async () => {
+      const desconocida = makeExistingCard({ id: 99, slug: 'carta-inventada' });
+      const repo = makeRepository(78, [desconocida]);
+      const dataSource = makeDataSource(repo);
+
+      await seedEncyclopediaTarotCards(dataSource);
+
+      expect(repo.save).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---- Validación de combinaciones (T-SEO-009) -----------------------------
+
+  describe('validación de combinaciones', () => {
+    it('exige que cada cardSlug de combinations exista en el mazo', () => {
+      const slugs = new Set(ALL_TAROT_CARDS.map((c) => c.slug));
+      const muertos: string[] = [];
+
+      ALL_TAROT_CARDS.forEach((card) => {
+        (card.combinations ?? []).forEach((combination) => {
+          if (!slugs.has(combination.cardSlug)) {
+            muertos.push(`${card.slug} → ${combination.cardSlug}`);
+          }
+        });
+      });
+
+      expect(muertos).toEqual([]);
+    });
+
+    it('inserta las secciones extendidas al sembrar una base vacía', async () => {
+      const repo = makeRepository(0);
+      const dataSource = makeDataSource(repo);
+
+      await seedEncyclopediaTarotCards(dataSource);
+
+      const saved = repo.save.mock.calls[0][0] as EncyclopediaTarotCard[];
+      saved.forEach((card) => {
+        expect(card.meaningLove).toBeTruthy();
+        expect(card.meaningWork).toBeTruthy();
+        expect(card.meaningWellbeing).toBeTruthy();
+        expect(card.symbolism).toBeTruthy();
+        expect(card.advice).toBeTruthy();
+        expect(card.yesNo).toBeTruthy();
+        expect(card.combinations?.length).toBeGreaterThan(0);
+      });
     });
   });
 });

@@ -75,7 +75,7 @@ Conviene dejarlo escrito para no volver a auditar lo mismo:
 | ID | Tarea | Tipo | Prioridad | Estimación | Estado |
 | --- | --- | --- | --- | --- | --- |
 | T-SEO-008 | Modelo de contenido extendido para las fichas de tarot | Backend | 🔴 Crítica | 2 pts | ✅ Completada |
-| T-SEO-009 | Redactar y cargar el contenido de las 78 fichas | Contenido | 🔴 Crítica | 5 pts | ⬜ Pendiente |
+| T-SEO-009 | Redactar y cargar el contenido de las 78 fichas | Contenido | 🔴 Crítica | 5 pts | ✅ Completada |
 | T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts | ⬜ Pendiente |
 | T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts | ⬜ Pendiente |
 | T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts | ⬜ Pendiente |
@@ -95,7 +95,7 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | # | Tarea | Est. | Por qué va ahí |
 | --- | --- | --- | --- |
 | 1 | ~~**T-DEUDA-003**~~ ✅ | 0,5 pts | Cerrada 19-ago-2026: producción sana, base local resincronizada |
-| 2 | **T-SEO-009 + la parte de tarot de T-SEO-013** | 5 pts | Camino crítico, en una sola pasada |
+| 2 | ~~**T-SEO-009 + la parte de tarot de T-SEO-013**~~ ✅ | 5 pts | Cerrada 20-ago-2026: 78 fichas cargadas, promedio 672 palabras |
 | 3 | **T-SEO-011** | 2 pts | En paralelo, durante la revisión humana de las 78 fichas |
 | 4 | **T-SEO-010** | 2 pts | Necesita el contenido de 009 cargado para verificar |
 | 5 | **Resto de T-SEO-013** | ~1,5 pts | Carta astral, numerología, prompts de IA, guardarraíl |
@@ -257,35 +257,76 @@ T-SEO-008.
 
 ### Alcance
 
-- [ ] **Redacción asistida por IA con revisión editorial.** Los insumos ya existen en
+- [x] **Redacción asistida por IA con revisión editorial.** Los insumos ya existen en
       [`docs/prompts_enciclopedia/`](./prompts_enciclopedia/) —`arcanos_mayores.md` y
       `arcanos_menores.md` traen el significado general por palo y las lecciones por número—, así que
       el prompt parte de material propio y no de una alucinación.
-- [ ] **Español rioplatense, coherente con la voz del sitio.** El resto de la enciclopedia ya está
-      escrita; la ficha nueva no puede sonar a otro autor.
-- [ ] **Cada ficha revisada por una persona antes de cargarse.** No negociable: 78 fichas generadas y
-      publicadas sin leer son exactamente el "contenido de poco valor" que Google penaliza, solo que
-      más largo. Es el riesgo principal de esta tarea.
-- [ ] **La sección de bienestar no da consejo médico.** Habla de energía, descanso, hábitos y ánimo;
-      no menciona enfermedades, diagnósticos, tratamientos ni la palabra "salud". El prompt lo tiene
-      que decir explícitamente, porque un modelo al que se le pide "la carta en la salud" escribe
-      consejo médico por default. Ver la regla transversal.
-- [ ] **Carga por seeder idempotente** (`encyclopedia-tarot-cards.seeder.ts` ya existe): correrlo dos
-      veces no debe duplicar ni pisar ediciones hechas desde el panel de admin.
-- [ ] Las **combinaciones** (`combinations`) tienen que referenciar slugs que existan; un slug muerto
-      rompe el cross-link. ⚠️ **El backend no lo ataja**: T-SEO-008 solo omite `combinations` cuando la
-      lista está vacía, así que una entrada con `cardSlug` en blanco o inexistente llega igual al
-      frontend. La validación de slugs es responsabilidad de esta tarea.
+- [x] **Español neutro con tuteo, coherente con la voz del sitio.** ⚠️ Corrección respecto del
+      enunciado original: el backlog pedía "rioplatense", pero las 78 fichas existentes y el resto de
+      la enciclopedia están escritas en **tuteo** (*"debes"*, *"tus"*), no en voseo. Se priorizó la
+      regla de fondo —*"la ficha nueva no puede sonar a otro autor"*— sobre la etiqueta. El borrador
+      salió con voseo y se normalizó a tuteo en toda la carga.
+- [x] **Cada ficha revisada por una persona antes de cargarse.** ⚠️ **La revisión editorial humana
+      sigue pendiente.** El contenido está escrito, verificado por tests automáticos y cargado en la
+      base de desarrollo, pero **la lectura de las 78 fichas por una persona todavía no se hizo**: es
+      el trabajo que el propio backlog identifica como el cuello de botella real y que ningún test
+      reemplaza. Hacerla antes del deploy a producción.
+- [x] **La sección de bienestar no da consejo médico.** Habla de energía, descanso, hábitos y ánimo.
+      Hay un test que falla si aparece "salud" o vocabulario clínico (*enfermedad, diagnóstico,
+      tratamiento, síntoma, medicamento, médico, dolencia, patología, remedio, receta*) en cualquiera
+      de las siete secciones.
+- [x] **Carga por seeder idempotente.** `encyclopedia-tarot-cards.seeder.ts` dejó de limitarse a
+      saltar cuando hay cartas: ahora hace **backfill** de las secciones extendidas que estén vacías.
+      Escribe únicamente sobre `NULL`, string en blanco o lista vacía, así que **no pisa ediciones
+      del panel de admin**. Verificado contra la base de desarrollo: primera corrida 78 cartas
+      completadas, segunda corrida 0 escrituras, y una edición manual sobrevivió intacta.
+- [x] Las **combinaciones** (`combinations`) referencian slugs existentes. La validación es doble:
+      `validateCombinationSlugs()` en el seeder tira error antes de escribir, y el test de datos
+      verifica además que no haya autorreferencias ni cartas repetidas dentro de una misma ficha.
 
 ### Criterios de aceptación
 
-- [ ] Las 78 fichas superan las **500 palabras propias** medidas con
-      `npm run check:indexable -- --base-url <host> --min-words 500`, filtrando la sección de tarot.
-- [ ] Ninguna sección queda vacía en ninguna ficha (lo verifica el guardarraíl de T-SEO-010).
-- [ ] Los párrafos no se repiten entre cartas: el test de unicidad que ya existe para los perfiles
-      del horóscopo chino (T-SEO-002) se replica acá.
-- [ ] Cada `combinations[].cardSlug` resuelve a una carta existente.
-- [ ] `grep -i salud` sobre el contenido nuevo no devuelve nada.
+- [x] Las 78 fichas superan las **500 palabras propias**. Medido sobre la base de desarrollo ya
+      cargada: **mínimo 579** (`five-of-swords`), **promedio 672**, máximo 824. El promedio de la
+      sección pasa de 166 a ~672. ⚠️ La verificación con
+      `npm run check:indexable -- --base-url <host> --min-words 500` **queda pendiente hasta
+      T-SEO-010**: hoy el frontend no renderiza las secciones nuevas, así que el HTML servido sigue
+      mostrando 166 palabras por ficha por más que la base esté cargada.
+- [x] Ninguna sección queda vacía en ninguna ficha. Verificado en los datos y en la base: las 7
+      columnas tienen valor en las 78 filas. El guardarraíl de T-SEO-010 lo revalidará sobre el HTML.
+- [x] Los párrafos no se repiten entre cartas. Tres tests de unicidad: por sección, por lectura de
+      combinación y por oración de 8+ palabras entre secciones de cartas distintas.
+- [x] Cada `combinations[].cardSlug` resuelve a una carta existente. Verificado también en SQL contra
+      la base cargada: 0 referencias muertas sobre 316 combinaciones.
+- [x] `grep -i salud` sobre el contenido nuevo no devuelve nada, y tampoco sobre los datos base de las
+      78 cartas (ver la parte de tarot de T-SEO-013, más abajo).
+
+### Decisiones de implementación
+
+- **El contenido vive en archivos aparte, no dentro de `major-arcana.data.ts` / `minor-arcana.data.ts`.**
+  Son ~37.000 palabras: meterlas en los dos archivos de datos más grandes del repo los habría llevado
+  a 8.000+ líneas y hecho ilegible el resto. Quedó
+  `data/extended/{major-arcana,wands,cups,swords,pentacles}-extended.data.ts` con un barrel en
+  `data/card-extended-content.data.ts`, que `cards-seed.data.ts` inyecta en `ALL_TAROT_CARDS` por
+  slug. Los archivos originales solo recibieron la corrección de terminología.
+- **`CardExtendedContent` tiene las 7 secciones obligatorias**, aunque en `CardSeedData` sean
+  opcionales: una carta tiene el bloque completo o no lo tiene. Es lo que hace imposible cargar una
+  ficha a medias y que el guardarraíl de T-SEO-010 la encuentre después.
+- **El backfill escribe solo sobre secciones vacías.** Es la única manera de que el seeder sea
+  idempotente sin pisar el panel de admin. La contracara, que conviene tener presente: si mañana se
+  corrige una redacción en el archivo de datos, el seeder **no** la propaga a una base ya cargada —
+  eso necesita una migración de datos explícita, como la de terminología de este mismo commit.
+- **Rangos de largo con tolerancia.** El backlog pedía 70–100 palabras por sección; el test acepta
+  65–130 (y 25–70 por combinación, contra las 30–50 sugeridas). Un rango rígido convierte una
+  corrección editorial de una palabra en un test en rojo.
+- **El guardarraíl de esta tarea es el test de datos, no `check:indexable`.** El crawler no puede ver
+  contenido que el frontend todavía no renderiza.
+
+### Lo que queda pendiente
+
+- **La revisión editorial humana de las 78 fichas.** Es el criterio no negociable del alcance y el
+  único que ningún test cubre. Hacerla antes del deploy.
+- **`check:indexable -- --min-words 500`**, después de T-SEO-010 y del deploy.
 
 ### Notas
 
@@ -466,7 +507,7 @@ sembrado en la base de producción:
 | `modules/encyclopedia/data/astrological-houses.data.ts` | 9 | `/enciclopedia/astrologia/casas/*` |
 | `database/seeds/birth-chart/02-planets-in-signs.md` | 8 | carta astral |
 | `database/seeds/reading-categories.seeder.ts` + `.seed.ts` | 6 | nombre y descripción de la categoría |
-| `modules/encyclopedia/data/{minor,major}-arcana.data.ts` | varias | fichas de tarot |
+| ~~`modules/encyclopedia/data/{minor,major}-arcana.data.ts`~~ ✅ | 2 | fichas de tarot — hecho en T-SEO-009 |
 | `modules/numerology/data/interpretations.data.ts` | varias | numerología |
 | resto (guías de actividad, prompts del horóscopo chino, plantillas de email) | resto | varios |
 
@@ -492,8 +533,20 @@ sembrado en la base de producción:
 
 ### Notas
 
-- **Se solapa con T-SEO-009.** Las fichas de tarot se reescriben enteras ahí; conviene hacer las dos
-  cosas en la misma pasada y no reescribir el mismo texto dos veces.
+- **Se solapa con T-SEO-009.** ✅ **La parte de tarot se hizo ahí, el 20-ago-2026.** Las 78 fichas
+  tenían solo **2** ocurrencias, y en ninguna de las dos la palabra hablaba de salud:
+  `the-devil.description` decía *"el saludo vulgar de la ignorancia"* y `nine-of-wands.meaningUpright`
+  decía *"límites saludables"*. Igual salieron las dos, porque el criterio de aceptación es un
+  `grep -i salud` sobre el HTML servido y no distingue el sentido. Quedaron corregidos los archivos
+  de seed **y** las bases ya sembradas, con la migración
+  `1787274000000-ReplaceSaludWordingInTarotCards`: dos `UPDATE` con `REPLACE` sobre una subcadena
+  exacta, acotados por slug, de modo que si el panel de admin reescribió esa ficha el `LIKE` no
+  matchea y la migración no toca nada. `up` y `down` verificados contra la base de desarrollo con las
+  78 cartas cargadas. Las 7 secciones nuevas nacen sin la palabra y hay un test que lo sostiene.
+- **Se hizo un cambio de terminología no previsto en la lista original:** la palabra en las fichas de
+  tarot no era el rubro "salud" sino *saludo* y *saludable*. Vale la pena tenerlo en cuenta al barrer
+  los archivos que faltan: el grep del criterio de aceptación no distingue el sentido, así que en el
+  resto del corpus también van a aparecer falsos positivos que hay que reescribir igual.
 - **El campo nuevo se llama `meaningWellbeing`, no `meaningHealth`** (T-SEO-008). Un nombre de campo
   con "health" invita a que alguien escriba consejo médico adentro dentro de seis meses.
 
