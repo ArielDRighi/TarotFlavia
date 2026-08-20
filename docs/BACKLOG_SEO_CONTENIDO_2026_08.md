@@ -94,7 +94,7 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 
 | # | Tarea | Est. | Por qué va ahí |
 | --- | --- | --- | --- |
-| 1 | **T-DEUDA-003** | 0,5 pts | Media hora, y desbloquea el resto (ver abajo) |
+| 1 | ~~**T-DEUDA-003**~~ ✅ | 0,5 pts | Cerrada 19-ago-2026: producción sana, base local resincronizada |
 | 2 | **T-SEO-009 + la parte de tarot de T-SEO-013** | 5 pts | Camino crítico, en una sola pasada |
 | 3 | **T-SEO-011** | 2 pts | En paralelo, durante la revisión humana de las 78 fichas |
 | 4 | **T-SEO-010** | 2 pts | Necesita el contenido de 009 cargado para verificar |
@@ -104,15 +104,16 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | 8 | T-DEUDA-002 | 1 pt | Los 2 índices reales de `sessions` |
 | 9 | T-DEUDA-001 | 2 pts | El más largo y el menos urgente |
 
-**Hasta poder pedir la tercera revisión: ~11 pts** (009 + 011 + 010 + resto de 013), más el medio
-punto de T-DEUDA-003.
+**Hasta poder pedir la tercera revisión: ~11 pts** (009 + 011 + 010 + resto de 013). El medio punto
+de T-DEUDA-003 ya está gastado.
 
 ### Por qué este orden y no el obvio
 
-**T-DEUDA-003 primero, aunque no sea de negocio.** Son treinta minutos y hace dos cosas: dice si
-`planExpiresAt` está sano en producción, y resincroniza la base de desarrollo. Lo segundo importa
-porque T-SEO-009 es todo trabajo de seeder contra la base local, y arrancar las 78 fichas sobre una
-base desincronizada es debugging que no tiene nada que ver con el contenido.
+**T-DEUDA-003 primero, aunque no sea de negocio.** ✅ **Hecha el 19-ago-2026.** Eran treinta minutos
+y hacía dos cosas: decir si `planExpiresAt` está sano en producción —**lo está**, las 13 columnas en
+`timestamptz`— y resincronizar la base de desarrollo. Lo segundo importa porque T-SEO-009 es todo
+trabajo de seeder contra la base local, y arrancar las 78 fichas sobre una base desincronizada es
+debugging que no tiene nada que ver con el contenido. **T-SEO-009 arranca desbloqueada.**
 
 **009 y la parte de tarot de 013 van juntas.** `major-arcana.data.ts` y `minor-arcana.data.ts` tienen
 "salud" en los significados existentes y son los mismos archivos donde 009 agrega las secciones

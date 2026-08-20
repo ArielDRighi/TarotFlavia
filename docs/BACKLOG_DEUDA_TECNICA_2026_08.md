@@ -39,6 +39,11 @@ ALTER TABLE "encyclopedia_tarot_cards" ADD "created_at" TIMESTAMP NOT NULL DEFAU
 | `ALTER COLUMN` / renombre de enum | 3 + 3 | cosmético |
 | **Total en `up()`** | **91** | |
 
+> 🔄 **Actualizado el 19-ago-2026, después de T-DEUDA-003: son 83, no 91.** Al resincronizar la base
+> local, 8 de esas sentencias (4 `DROP COLUMN` + 4 `ADD`) desaparecieron: eran las 4 columnas de
+> T-PROD-021 que la base local tenía naive. **No eran ruido: eran drift real**, y el generador las
+> resolvía de la forma destructiva. Ver *[Efecto colateral medido](#efecto-colateral-medido-el-generador-ya-no-propone-borrar-las-fechas-de-plan)*.
+
 ### El drift va en las dos direcciones
 
 No alcanza con "arreglar las entidades" ni con "correr lo que dice el generador". Hay tres grupos
@@ -71,7 +76,8 @@ más** (`user.planStartedAt`, `user.planExpiresAt`, `user_tarotista_subscription
 
 TypeORM **nunca re-ejecuta una migración ya registrada**. Cualquier base que haya corrido la primera
 versión se quedó sin esas 4 columnas para siempre. Es exactamente lo que pasó en la base de
-desarrollo local: las 9 primeras están en `timestamptz` y las 4 agregadas siguen naive.
+desarrollo local: las 9 primeras quedaron en `timestamptz` y las 4 agregadas siguieron naive hasta que
+T-DEUDA-003 las convirtió a mano el 19-ago-2026.
 
 ```
 password_reset_tokens.expires_at   = timestamp with time zone    ✅
@@ -81,10 +87,11 @@ user.planExpiresAt                 = timestamp without time zone ❌
 user_tarotista_subscriptions.expires_at = timestamp without time zone ❌
 ```
 
-**Producción probablemente esté bien**: los dos commits entraron en el mismo PR (#618), así que
-`develop` y producción solo vieron la versión final de 13 columnas. Pero *probablemente* no alcanza
-cuando la columna en cuestión es `planExpiresAt`, que alimenta el cron que degrada premium → free.
-Verificarlo es T-DEUDA-003.
+**Producción está sana** — verificado el 19-ago-2026, no inferido: las 13 columnas están en
+`timestamptz`, las 4 agregadas incluidas. Los dos commits entraron juntos en el merge del PR #618, así
+que `develop` y `main` nunca vieron la versión de 9 columnas: los 22 minutos que existió fueron
+enteros dentro de la rama de feature. La única base que corrió esa versión es la local, donde se
+trabajó el PR. El detalle de la consulta está en [T-DEUDA-003](#t-deuda-003-verificar-en-producción-las-4-columnas-de-t-prod-021).
 
 **La regla, entonces:** una migración mergeada es inmutable. Lo que falta va en una migración
 **nueva**.
@@ -97,10 +104,11 @@ Verificarlo es T-DEUDA-003.
 | --- | --- | --- | --- | --- | --- |
 | T-DEUDA-001 | Alinear los decoradores de las entidades con el esquema real | Backend | 🟠 Alta | 2 pts | ⬜ Pendiente |
 | T-DEUDA-002 | Crear los índices que las entidades declaran y no existen | Backend | 🟠 Alta | 1 pt | ⬜ Pendiente |
-| T-DEUDA-003 | Verificar en producción las 4 columnas de T-PROD-021 | Verificación | 🔴 Crítica | 0,5 pts | ⬜ Pendiente |
+| T-DEUDA-003 | Verificar en producción las 4 columnas de T-PROD-021 | Verificación | 🔴 Crítica | 0,5 pts | ✅ Completada (19-ago-2026) |
 
 **Orden sugerido dentro de este backlog:** 003 primero (es media hora y puede destapar un bug de
 fechas en producción), después 002, y 001 al final porque es la más larga y la menos urgente.
+**003 ya está cerrada:** producción estaba sana, así que no dejó trabajo de migración para las otras dos.
 
 > 📌 **El orden completo, cruzado con las tareas de SEO, está en
 > [`BACKLOG_SEO_CONTENIDO_2026_08.md` → *Orden de desarrollo*](./BACKLOG_SEO_CONTENIDO_2026_08.md#-orden-de-desarrollo-fuente-única).**
@@ -112,6 +120,8 @@ fechas en producción), después 002, y 001 al final porque es la más larga y l
 
 **Puerta de salida del backlog:** `npm run migration:generate -- src/database/migrations/Drift`
 genera un archivo **vacío**. Ese es el único criterio que prueba que no quedó drift.
+**Marcador al 19-ago-2026, tras T-DEUDA-003: 83 sentencias.** Conviene generar el archivo **fuera del
+repo** (`-- /tmp/DriftProbe`) mientras sea una medición y no una migración de verdad.
 
 ---
 
@@ -122,9 +132,9 @@ genera un archivo **vacío**. Ese es el único criterio que prueba que no quedó
 ### Problema
 
 Las entidades describen mal la base. El generador de migraciones queda inutilizable: cada vez que
-alguien lo corra para un cambio de 1 columna, va a recibir 91 sentencias y va a tener que podarlas a
-mano —que es exactamente lo que hubo que hacer en T-SEO-008— con el riesgo de que en alguna poda se
-cuele un `DROP COLUMN`.
+alguien lo corra para un cambio de 1 columna, va a recibir **83 sentencias** (eran 91 antes de
+T-DEUDA-003) y va a tener que podarlas a mano —que es exactamente lo que hubo que hacer en
+T-SEO-008— con el riesgo de que en alguna poda se cuele un `DROP COLUMN`.
 
 ### Alcance
 
@@ -219,25 +229,26 @@ el nombre. Los dos de `sessions`, en cambio, no tienen nada que los cubra.
 ## T-DEUDA-003: Verificar en Producción las 4 Columnas de T-PROD-021
 
 **Prioridad:** 🔴 Crítica · **Estimación:** 0,5 pts · **Dependencias:** ninguna
+**Estado:** ✅ COMPLETADA (19-ago-2026) — producción sana, **no hizo falta migración**
 
 ### Problema
 
 Ver la sección *"nunca editar una migración ya aplicada"* arriba. En la base de desarrollo local, 4
-columnas que la migración T-PROD-021 dice convertir siguen en `timestamp` sin zona horaria, porque
+columnas que la migración T-PROD-021 dice convertir seguían en `timestamp` sin zona horaria, porque
 esa base corrió una versión anterior del archivo.
 
-**Si producción está en el mismo estado**, entonces:
+**Si producción estuviera en el mismo estado**, entonces:
 
 - `user.planExpiresAt` se compara contra `new Date()` en `hasPlanExpired()` y en el cron que degrada
   premium → free. Con la columna naive, esa comparación se corre el offset del timezone del proceso.
 - `user_tarotista_subscriptions.expires_at` tiene el mismo problema para las suscripciones a
   tarotistas.
 
-Es el tercer bug de fechas del proyecto si se confirma. Por eso va primero, aunque sea media hora.
+Habría sido el tercer bug de fechas del proyecto. Por eso fue primero, aunque sea media hora.
 
 ### Alcance
 
-- [ ] Correr contra **producción** (solo lectura):
+- [x] Correr contra **producción** (solo lectura):
 
   ```sql
   SELECT table_name, column_name, data_type
@@ -247,20 +258,103 @@ Es el tercer bug de fechas del proyecto si se confirma. Por eso va primero, aunq
          AND column_name IN ('expires_at', 'can_change_at'));
   ```
 
-- [ ] **Si dan `timestamp with time zone`:** cerrar la tarea. Producción está sana y el problema era
+- [x] **Dieron `timestamp with time zone`** → tarea cerrada. Producción está sana y el problema era
       solo la base local.
-- [ ] **Si dan `timestamp without time zone`:** es un bug en producción. Crear una migración
-      **nueva** (no editar T-PROD-021) que corra los 4 `ALTER COLUMN ... TYPE TIMESTAMP WITH TIME
-      ZONE USING "col" AT TIME ZONE 'UTC'`, con el mismo razonamiento y las mismas advertencias de
-      deploy que documenta `1776900000000-AuthTimestampsToTimestamptz.ts`.
-- [ ] Resincronizar la base de desarrollo local en cualquiera de los dos casos (correr los 4 `ALTER`
-      a mano, o `npm run db:dev:reset` + `migration:run` + seeds).
+- [x] ~~Si dan `timestamp without time zone`: crear una migración nueva~~ — **no aplicó.** No se
+      agregó ninguna migración.
+- [x] Resincronizar la base de desarrollo local (se corrieron los 4 `ALTER` a mano, sin
+      `db:dev:reset`, para no perder los datos de desarrollo).
+
+### Resultado de la verificación
+
+**Fecha:** 19-ago-2026 · **Base:** Railway → proyecto `Auguria Staging`, environment `production`,
+servicio `Postgres` — el que sirve `api.auguriatarot.com` · **Consulta:** solo lectura sobre
+`information_schema.columns`, sin ningún DDL.
+
+**Las 13 columnas de T-PROD-021 están en `timestamptz` en producción**, incluidas las 4 que se
+agregaron por feedback del PR:
+
+| Columna | Producción (19-ago) | Dev local (antes) |
+| --- | --- | --- |
+| `user.planStartedAt` | ✅ `timestamp with time zone` | ❌ `timestamp without time zone` |
+| `user.planExpiresAt` | ✅ `timestamp with time zone` | ❌ `timestamp without time zone` |
+| `user_tarotista_subscriptions.expires_at` | ✅ `timestamp with time zone` | ❌ `timestamp without time zone` |
+| `user_tarotista_subscriptions.can_change_at` | ✅ `timestamp with time zone` | ❌ `timestamp without time zone` |
+
+Las otras 9 (`password_reset_tokens` ×3, `refresh_tokens` ×3, `cached_interpretations` ×3) ya estaban
+en `timestamptz` en las dos bases. En ambas, `migrations` tiene registrada
+`AuthTimestampsToTimestamptz1776900000000`, así que TypeORM no la va a re-ejecutar en ninguna: por eso
+la local necesitaba los `ALTER` a mano.
+
+**Conclusión: no hay bug de fechas en producción.** `planExpiresAt` y el cron que degrada premium →
+free están sanos. El único entorno afectado era el de desarrollo local.
+
+### Por qué producción se salvó (verificado en git, no inferido)
+
+Los dos commits entraron **juntos** en el merge del PR #618:
+
+```
+$ git log --oneline 5aff21cf^1..5aff21cf^2
+e07a9363 fix: apply PR feedback - suma las 4 columnas que faltaban ...
+00ea46b3 fix(auth): las expiraciones pasan a timestamptz ... (T-PROD-021)
+```
+
+`5aff21cf` es el merge del PR #618 (8-ago-2026) y es el **primer** commit de `develop` que contiene a
+cualquiera de los dos. Los 22 minutos en que la migración existió con 9 columnas (00:22 → 00:44 del
+31-jul-2026) transcurrieron enteros dentro de la rama `feature/T-PROD-021-timestamptz-auth`. Ninguna
+base que deployee desde `develop` o desde `main` vio esa versión.
+
+Esto no invalida la regla: **la salvó la casualidad de que el feedback llegó antes del merge.** Si el
+PR se hubiera mergeado entre los dos commits —el caso normal, no el excepcional— producción habría
+quedado con las 4 columnas naive y el bug habría sido real. La regla sigue siendo la de arriba: a una
+migración mergeada no se la edita.
+
+### Efecto colateral medido: el generador ya no propone borrar las fechas de plan
+
+Resincronizar la base local no fue sólo higiene. Antes y después del arreglo, con
+`npm run migration:generate` apuntando a un archivo fuera del repo:
+
+| | Sentencias en `up()` | `DROP COLUMN` |
+| --- | --- | --- |
+| Antes (19-ago, base desincronizada) | 91 | 8 |
+| Después | **83** | **4** |
+
+Las 4 que se fueron eran exactamente `user.planExpiresAt`, `user.planStartedAt`,
+`user_tarotista_subscriptions.expires_at` y `can_change_at`. Las 4 entidades **ya declaraban**
+`@Column({ type: 'timestamptz' })` —verificado en `user.entity.ts:127,135` y
+`user-tarotista-subscription.entity.ts:97,112`—, así que el generador veía una diferencia **legítima**
+contra la base local naive.
+
+Cómo la resolvía es el punto. Los 4 `DROP COLUMN` que **siguen** en el output son los timestamps de la
+enciclopedia, y ahí se ve el patrón textual con el que TypeORM trata un cambio de tipo de timestamp:
+
+```sql
+-- Sigue en el output de hoy, para encyclopedia_tarot_cards:
+ALTER TABLE "encyclopedia_tarot_cards" DROP COLUMN "created_at";
+ALTER TABLE "encyclopedia_tarot_cards" ADD "created_at" TIMESTAMP NOT NULL DEFAULT now();
+```
+
+Las 4 columnas de plan caían en ese mismo grupo del inventario (`DROP COLUMN` + `ADD`, 8 + 8 medidos
+el 19-ago; hoy quedan 4 + 4, y los 4 que quedan son los de la enciclopedia). O sea: **la base local
+estaba a un `migration:generate` mal podado de una migración que le borraba a todos los usuarios
+premium la fecha de vencimiento del plan.** Es el mismo mecanismo que la Regla A del workflow, pero
+sobre una columna de facturación en vez de una de auditoría.
+
+> ⚠️ El bloque SQL de arriba es el que quedó **observado hoy** para la enciclopedia. La forma exacta
+> que tomaban las 4 sentencias de plan no quedó capturada antes del arreglo: se deduce de la
+> aritmética del inventario (8 → 4 `DROP COLUMN`, y los 4 restantes identificados por nombre). Si
+> hace falta la prueba textual, se reproduce volviendo las 4 columnas a naive en una base de
+> descarte.
+
+Los 4 `DROP COLUMN` que quedan son los `created_at`/`updated_at` de `encyclopedia_tarot_cards` y
+`encyclopedia_articles` — el Grupo A, que **T-DEUDA-001 resuelve en el código** (poniéndole `type` al
+decorador), no en la base.
 
 ### Criterios de aceptación
 
-- [ ] Queda escrito en esta tarea el resultado de la consulta contra producción, con fecha.
-- [ ] La base local queda con las 13 columnas de T-PROD-021 en `timestamptz`.
-- [ ] Si hizo falta migración: corre en dev y queda verificada antes del deploy.
+- [x] Queda escrito en esta tarea el resultado de la consulta contra producción, con fecha.
+- [x] La base local queda con las 13 columnas de T-PROD-021 en `timestamptz`.
+- [x] Si hizo falta migración: corre en dev y queda verificada antes del deploy. → **No hizo falta.**
 
 ---
 
