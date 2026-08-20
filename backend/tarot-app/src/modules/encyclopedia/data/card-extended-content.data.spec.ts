@@ -208,13 +208,24 @@ describe('CARD_EXTENDED_CONTENT (T-SEO-009)', () => {
       expect(repetidos).toEqual([]);
     });
 
+    /**
+     * Cubre también `combinations[].reading`: son 318 textos cortos que hablan
+     * de pares de cartas y es justo donde más fácil se cuela una fórmula
+     * repetida. Dejarlos afuera dejaba pasar solapamientos textuales que en una
+     * tarea de contenido duplicado son exactamente el problema a evitar.
+     */
     it('no repite oraciones largas entre secciones de distintas cartas', () => {
       const vistas = new Map<string, string>();
       const repetidas: string[] = [];
 
       CONTENT_ENTRIES.forEach(([slug, content]) => {
-        TEXT_SECTIONS.forEach((section) => {
-          content[section]
+        const textos = [
+          ...TEXT_SECTIONS.map((section) => content[section]),
+          ...content.combinations.map((combination) => combination.reading),
+        ];
+
+        textos.forEach((texto) => {
+          texto
             .split(/(?<=[.;:!?])\s+/)
             .map(normalize)
             .filter((sentence) => countWords(sentence) >= 8)
@@ -281,6 +292,20 @@ describe('CARD_EXTENDED_CONTENT (T-SEO-009)', () => {
       expect(duplicadas).toEqual([]);
     });
 
+    /**
+     * T-SEO-010 convierte cada combinación en un `<Link>` interno. Una ficha que
+     * nadie referencia queda sin enlaces entrantes desde la enciclopedia, que en
+     * una tarea de SEO es media función del bloque.
+     */
+    it('deja a toda carta referenciada al menos una vez por otra ficha', () => {
+      const referenciadas = new Set(
+        todasLasCombinaciones.map(([, combination]) => combination.cardSlug),
+      );
+      const huerfanas = ALL_SLUGS.filter((slug) => !referenciadas.has(slug));
+
+      expect(huerfanas).toEqual([]);
+    });
+
     it('escribe lecturas de 25 a 70 palabras', () => {
       const fueraDeRango = todasLasCombinaciones
         .map(([slug, combination]): [string, number] => [
@@ -302,10 +327,22 @@ describe('CARD_EXTENDED_CONTENT (T-SEO-009)', () => {
 
     /**
      * Vocabulario médico: la sección de bienestar habla de energía, descanso,
-     * hábitos y ánimo; no de enfermedades ni tratamientos.
+     * hábitos y ánimo; no de enfermedades, cuadros clínicos ni tratamientos.
+     *
+     * La lista incluye términos que no nombran una enfermedad pero arrastran la
+     * ficha a territorio clínico igual —`ansiedad`, `depresión`, `insomnio`,
+     * `trauma`, `terapia`, `lesión`—, que es por donde se filtró el problema en
+     * la primera pasada de T-SEO-009.
+     *
+     * ⚠️ `sanar` y `sanación` quedan deliberadamente FUERA de la lista: son el
+     * vocabulario del corpus ya publicado (32 apariciones en `major-arcana` y
+     * `minor-arcana`) y de los insumos de `docs/prompts_enciclopedia/`, donde
+     * "sanación emocional" es la lección del Cinco de Copas. Prohibirlas acá
+     * haría que la ficha nueva suene a otro autor, que es justo lo que el
+     * alcance de la tarea pide evitar.
      */
     const VOCABULARIO_MEDICO =
-      /\b(enfermedad|enfermedades|diagn[oó]stic\w*|tratamiento\w*|s[ií]ntoma\w*|medicament\w*|m[eé]dic\w*|dolencia\w*|patolog[ií]a\w*|remedio\w*|receta\w*)\b/i;
+      /\b(enfermedad|enfermedades|diagn[oó]stic\w*|tratamiento\w*|s[ií]ntoma\w*|medicament\w*|m[eé]dic\w*|dolencia\w*|patolog[ií]a\w*|remedio\w*|receta\w*|ansiedad\w*|depresi[oó]n\w*|depresiv\w*|insomnio\w*|trauma\w*|terapia\w*|terap[eé]utic\w*|lesi[oó]n\w*|lesiones|adicci[oó]n\w*)\b/i;
 
     function todosLosTextos(content: CardExtendedContent): string[] {
       return [

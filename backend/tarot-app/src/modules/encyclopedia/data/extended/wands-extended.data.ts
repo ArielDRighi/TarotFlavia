@@ -11,9 +11,9 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'En el amor es el chispazo: la atracción que aparece de golpe y enciende el cuerpo antes que la cabeza. Anuncia un encuentro con química evidente, el deseo que vuelve a una pareja de años o el impulso de declararte sin ensayar el discurso. No promete continuidad —eso lo dicen las cartas que la acompañan—, promete voltaje. Si vienes de una etapa apagada, el As te avisa que la brasa sigue ahí y que alcanza un gesto para avivarla. Lo que pide es que te muevas mientras la chispa está viva.',
     meaningWork:
-      'Es la idea que llega entera y no te deja dormir: el proyecto que quieres arrancar, la propuesta que se te ocurre en la ducha, la oportunidad que aparece antes de que la busques. En lo laboral marca comienzos con energía propia, no heredada; algo que nace de tu iniciativa y no de una orden. Para quien trabaja por cuenta propia es el momento de lanzar. En el dinero indica un ingreso nuevo todavía chico pero con potencial de crecer si lo alimentas con trabajo sostenido.',
+      'Es la idea que llega entera y no te deja dormir: el proyecto que quieres arrancar, la propuesta que se te ocurre en la ducha, la oportunidad que aparece antes de que la busques. En lo laboral marca comienzos con energía propia, no heredada; algo que nace de tu iniciativa y no de una orden. Para quien trabaja por cuenta propia es el momento de lanzar. En el dinero señala un ingreso nuevo todavía chico pero con potencial de crecer si lo alimentas con trabajo sostenido.',
     meaningWellbeing:
-      'Aparece un envión de energía que conviene aprovechar sin quemarlo en una sola noche. Es buen momento para retomar el movimiento del cuerpo, volver a una actividad que dejaste o empezar algo que venías postergando por pereza. El ánimo sube y el entusiasmo contagia. El riesgo del Fuego es arrancar a toda velocidad y abandonar en dos semanas: elige una rutina que puedas sostener con la agenda que realmente tienes, no con la que te gustaría tener.',
+      'Aparece un impulso de energía que conviene aprovechar sin quemarlo en una sola noche. Es buen momento para retomar el movimiento del cuerpo, volver a una actividad que dejaste o empezar algo que venías postergando por pereza. El ánimo sube y el entusiasmo contagia. El riesgo del Fuego es arrancar a toda velocidad y abandonar en dos semanas: elige una rutina que puedas sostener con la agenda que realmente tienes, no con la que te gustaría tener.',
     symbolism:
       'Una mano surge de una nube sosteniendo una vara todavía viva: le brotan hojas, señal de que la madera no está muerta sino germinando. Las hojas que caen alrededor son las ocho llamas hebreas que en el Tarot Rider-Waite marcan la energía en estado puro, todavía sin forma. Abajo se ve un paisaje fértil con un río, un castillo lejano y colinas verdes: el territorio que la chispa puede conquistar si alguien la sostiene. La nube indica que el impulso viene de afuera, como una inspiración recibida; la mano, que hace falta alguien que la agarre.',
     advice:
@@ -55,7 +55,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     advice:
       'Decide antes de que la decisión la tome el tiempo por ti. Tienes la información suficiente para elegir; lo que falta no es un dato más sino coraje. Escribe las dos opciones en dos columnas, asume que ninguna es perfecta y elige la que te deja más despierto. Y una vez elegida, comprométete: esta carta castiga la duda eterna más que el error.',
     yesNo:
-      'Sí, si te decides. La carta responde afirmativamente a los planes bien pensados, pero deja el resultado atado a que salgas del análisis y des el paso concreto.',
+      'Depende de que te decidas. La carta acompaña a los planes bien pensados y no resuelve nada mientras sigas evaluando: el sí aparece recién cuando das el paso concreto.',
     combinations: [
       {
         cardSlug: 'the-world',
@@ -75,7 +75,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'the-moon',
         reading:
-          'El horizonte que crees ver puede ser una proyección de tu deseo. Antes de decidir, verifica los datos con alguien de afuera: acá el mapa está dibujado con información incompleta y la niebla se disfraza de oportunidad.',
+          'El horizonte que crees ver puede ser una proyección de tu deseo. Antes de decidir, verifica los datos con alguien de afuera: aquí el mapa está dibujado con información incompleta y la niebla se disfraza de oportunidad.',
       },
     ],
   },
@@ -83,9 +83,9 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'El vínculo empieza a mostrar resultados de lo que sembraste. Aparece después de una etapa de espera: la persona que respondió, la relación que sobrevivió a la distancia, la conversación pendiente que finalmente sucede. Marca amores que llegan de lejos —de otra ciudad, de otro círculo, de un viaje— y también parejas que se animan a un proyecto compartido de largo plazo. No es la carta del enamoramiento súbito sino la de la confianza en algo que ya está navegando y todavía no llegó a puerto.',
     meaningWork:
-      'Los barcos ya zarparon: hiciste el trabajo y ahora estás en el momento de ver los primeros retornos. Señala expansión hacia mercados nuevos, colaboraciones a distancia, exportación, clientes de otras provincias o países. Es una carta favorable para quien está esperando respuesta de una postulación o el resultado de una inversión de tiempo. En el dinero anticipa ingresos que crecen, aunque todavía no estén acreditados: sigue trabajando mientras esperas, la carta premia la paciencia activa.',
+      'Los barcos ya zarparon: hiciste el trabajo y ahora estás en el momento de ver los primeros retornos. Señala expansión hacia mercados nuevos, colaboraciones a distancia, exportación, clientes de otras provincias o países. Es una carta favorable para quien está esperando respuesta de una postulación o el resultado de una inversión de tiempo. En el bolsillo, anticipa ingresos que crecen, aunque todavía no estén acreditados: sigue trabajando mientras esperas, la carta premia la paciencia activa.',
     meaningWellbeing:
-      'La energía se estabiliza después del envión inicial y aparece una sensación de resistencia sostenida. Buen momento para actividades al aire libre, caminatas largas, planes que impliquen salir de la rutina conocida. El ánimo mejora cuando cambias de escenario: si vienes de días encerrado, el cuerpo te está pidiendo horizonte. Cuida el descanso entre esfuerzos, porque el impulso de Fuego tiende a apurar los tiempos de recuperación.',
+      'La energía se estabiliza después del impulso inicial y aparece una sensación de resistencia sostenida. Buen momento para actividades al aire libre, caminatas largas, planes que impliquen salir de la rutina conocida. El ánimo mejora cuando cambias de escenario: si vienes de días encerrado, el cuerpo te está pidiendo horizonte. Cuida el descanso entre esfuerzos, porque el impulso de Fuego tiende a apurar los tiempos de recuperación.',
     symbolism:
       'Una figura de espaldas, envuelta en una capa roja y verde, observa el mar desde un promontorio elevado. De espaldas: la carta no muestra el rostro porque lo importante no es quien mira sino lo que se ve. Tres varas están plantadas firmes en la tierra y él sostiene una de ellas, apoyado, en actitud de espera confiada. En el agua se distinguen barcos pequeños que ya navegan: el trabajo hecho, viajando solo. Las montañas doradas del fondo son la ganancia posible, todavía lejana. El amarillo del cielo indica claridad mental sobre el propio proyecto.',
     advice:
@@ -132,7 +132,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'ten-of-cups',
         reading:
-          'La celebración se vuelve plenitud familiar duradera. Es la mejor dupla del mazo para preguntas sobre convivencia, casamiento o formar un hogar: lo que se festeja acá tiene raíces emocionales verdaderas, no solo protocolo.',
+          'La celebración se vuelve plenitud familiar duradera. Es la mejor dupla del mazo para preguntas sobre convivencia, casamiento o formar un hogar: lo que se festeja aquí tiene raíces emocionales verdaderas, no solo protocolo.',
       },
       {
         cardSlug: 'the-hierophant',
@@ -155,7 +155,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Hay fricción, y no siempre es grave: discusiones que se repiten por cosas chicas, competencia por tener razón, dos personas que quieren llevar la relación hacia lugares distintos al mismo tiempo. También aparece en triángulos, rivalidades por la misma persona o interferencia de terceros con opinión. La carta no habla de ruptura sino de desgaste por choque de voluntades. Bien trabajada, esta energía se vuelve pasión y juego; mal trabajada, convierte la convivencia en un ring donde nadie escucha.',
     meaningWork:
-      'Ambiente competitivo: varias personas peleando por el mismo puesto, licitaciones, entrevistas con muchos candidatos, reuniones donde todos hablan y nadie decide. Indica que tu proyecto tiene competencia real y que vas a tener que diferenciarte para destacar. No es una carta negativa para quien sabe pelear: la fricción también entrena. En el dinero avisa de gastos que se disputan entre varias urgencias y de discusiones por presupuesto o herencia.',
+      'Ambiente competitivo: varias personas peleando por el mismo puesto, licitaciones, entrevistas con muchos candidatos, reuniones donde todos hablan y nadie decide. Indica que tu proyecto tiene competencia real y que vas a tener que diferenciarte para destacar. No es una carta negativa para quien sabe pelear: la fricción también entrena. Para las finanzas, avisa de gastos que se disputan entre varias urgencias y de discusiones por presupuesto o herencia.',
     meaningWellbeing:
       'La energía está dispersa y peleada consigo misma: quieres hacer cinco cosas a la vez y terminas agotado sin haber avanzado en ninguna. El ánimo se irrita fácil y el sueño se pone liviano. El cuerpo agradece descargar el exceso de Fuego en actividad física intensa —correr, boxeo, deporte de contacto— en lugar de que salga en forma de discusiones. Conviene bajar la cantidad de frentes abiertos antes de subir el esfuerzo.',
     symbolism:
@@ -173,7 +173,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'justice',
         reading:
-          'El conflicto termina en un ámbito formal: mediación, abogados, recursos humanos, un contrato que define quién tiene razón. Prepara la documentación, porque acá gana quien puede probar lo que dice.',
+          'El conflicto termina en un ámbito formal: mediación, abogados, recursos humanos, un contrato que define quién tiene razón. Prepara la documentación, porque aquí gana quien puede probar lo que dice.',
       },
       {
         cardSlug: 'two-of-cups',
@@ -193,11 +193,11 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningWork:
       'Victoria y reconocimiento público: el ascenso, la propuesta ganada, el proyecto que sale bien y todos se enteran. Aparece cuando el esfuerzo por fin se vuelve visible para quien decide. Es una carta excelente para presentaciones, exámenes, concursos y entrevistas. En el dinero marca una mejora concreta ligada al mérito, no a la suerte. El consejo que trae es no acomodarse en el aplauso: el caballo sigue avanzando, la carta es un tramo del camino, no la meta.',
     meaningWellbeing:
-      'La energía está alta y el ánimo también: te sientes capaz y eso se nota en el cuerpo. Buen momento para exigirte un poco más en la actividad física, correr esa distancia que venías esquivando o sostener una rutina con constancia. La confianza mejora el descanso y baja la tensión acumulada. Cuidado con la soberbia física: sentirte fuerte no es lo mismo que estar entrenado, y las lesiones tontas aparecen justo en las rachas buenas.',
+      'La energía está alta y el ánimo también: te sientes capaz y eso se nota en el cuerpo. Buen momento para exigirte un poco más en la actividad física, correr esa distancia que venías esquivando o sostener una rutina con constancia. La confianza mejora el descanso y baja la tensión acumulada. Cuidado con la soberbia física: sentirte fuerte no es lo mismo que estar entrenado, y los tropiezos tontos aparecen justo en las rachas buenas.',
     symbolism:
-      'Un jinete avanza sobre un caballo blanco engalanado con una manta verde, rodeado de gente que camina a pie: la altura marca la diferencia entre quien fue reconocido y quienes acompañan. Lleva una corona de laurel en la cabeza y otra atada a la vara que sostiene, señal de que el triunfo es doble: personal y público. El caballo blanco es la fuerza instintiva ya domada. Las varas de los acompañantes están levantadas en señal de apoyo, no de amenaza. Es una procesión, no una fuga: la victoria acá tiene testigos.',
+      'Un jinete avanza sobre un caballo blanco engalanado con una manta verde, rodeado de gente que camina a pie: la altura marca la diferencia entre quien fue reconocido y quienes acompañan. Lleva una corona de laurel en la cabeza y otra atada a la vara que sostiene, señal de que el triunfo es doble: personal y público. El caballo blanco es la fuerza instintiva ya domada. Las varas de los acompañantes están levantadas en señal de apoyo, no de amenaza. Es una procesión, no una fuga: la victoria aquí tiene testigos.',
     advice:
-      'Acepta el reconocimiento sin minimizarlo y sin agrandarlo. Si te felicitan, di gracias en lugar de explicar por qué no fue para tanto. Aprovecha el envión de credibilidad para pedir lo que venías postergando: hoy tu palabra pesa más que el mes pasado. Y acuérdate de nombrar a quienes caminaron al lado del caballo.',
+      'Acepta el reconocimiento sin minimizarlo y sin agrandarlo. Si te felicitan, di gracias en lugar de explicar por qué no fue para tanto. Aprovecha el impulso de credibilidad para pedir lo que venías postergando: hoy tu palabra pesa más que el mes pasado. Y acuérdate de nombrar a quienes caminaron al lado del caballo.',
     yesNo:
       'Sí, con reconocimiento incluido. Es una de las respuestas más favorables del palo, especialmente cuando la pregunta involucra el juicio o la aprobación de otras personas.',
     combinations: [
@@ -227,7 +227,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Estás defendiendo la relación de algo: la opinión de la familia, un ex que reaparece, comentarios de gente que opina sin que le pregunten. También aparece cuando tienes que sostener tus límites dentro de la pareja frente a alguien que insiste. La carta te da la razón —estás en el lugar alto, tienes la ventaja— pero avisa que vas a tener que decirlo con firmeza más de una vez. Si estás sin pareja, indica que defiendes tu forma de vivir frente a los que te presionan para que te acomodes.',
     meaningWork:
-      'Te toca defender tu posición, tu proyecto o tu criterio profesional frente a varios que empujan en contra. Aparece en negociaciones difíciles, competencia por un cliente o cuando alguien intenta atribuirse tu trabajo. La buena noticia es la topografía: estás arriba, ellos abajo. Tienes ventaja si sostienes la firmeza sin salir del terreno. En el dinero marca la necesidad de defender tarifas, cobrar lo que corresponde y no aceptar rebajas por cansancio.',
+      'Te toca defender tu posición, tu proyecto o tu criterio profesional frente a varios que empujan en contra. Aparece en negociaciones difíciles, competencia por un cliente o cuando alguien intenta atribuirse tu trabajo. La buena noticia es la topografía: estás arriba, ellos abajo. Tienes ventaja si sostienes la firmeza sin salir del terreno. En materia de dinero, marca la necesidad de defender tarifas, cobrar lo que corresponde y no aceptar rebajas por cansancio.',
     meaningWellbeing:
       'La energía se va en estar alerta. Es un período de tensión sostenida en el cuerpo: mandíbula apretada, hombros duros, sueño en guardia. El desgaste no viene del esfuerzo sino de la vigilancia permanente. Conviene bajar el estado de alarma con actividades que aflojen —estiramiento, respiración, agua caliente— y elegir conscientemente momentos del día en los que no defiendas nada. El ánimo mejora apenas dejas de pelear en tu cabeza discusiones que ya terminaron.',
     symbolism:
@@ -263,11 +263,11 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Todo se acelera: el mensaje que llega, la cita que se arma en dos días, la conversación pendiente que por fin sucede. Es una carta de noticias y de movimiento veloz en los vínculos, muchas veces a distancia. Para una pareja estancada, señala que algo se destraba de golpe. Si estás esperando que alguien se manifieste, esta carta dice que la respuesta viene en camino y pronto. El riesgo es la precipitación: en este ritmo se dicen cosas sin pensar y se toman decisiones que después cuesta explicar.',
     meaningWork:
-      'Los proyectos que estaban frenados arrancan todos juntos. Aparecen respuestas, aprobaciones, mails que destraban procesos, viajes que se confirman con poca anticipación. Es una carta excelente para lanzamientos, envíos y todo lo que dependa de la comunicación. La agenda se llena rápido. En el dinero indica movimientos veloces: cobros que se acreditan, transferencias, pagos que llegan en el momento justo. Organízate antes de que la velocidad te organice a ti.',
+      'Los proyectos que estaban frenados arrancan todos juntos. Aparecen respuestas, aprobaciones, mails que destraban procesos, viajes que se confirman con poca anticipación. Es una carta excelente para lanzamientos, envíos y todo lo que dependa de la comunicación. La agenda se llena rápido. En lo económico indica movimientos veloces: cobros que se acreditan, transferencias, pagos que llegan en el momento justo. Organízate antes de que la velocidad te organice a ti.',
     meaningWellbeing:
-      'La energía está acelerada y el cuerpo va más rápido que la cabeza. Los días pasan volando y el descanso se vuelve la primera víctima de la agenda. Es un buen momento para actividades dinámicas, pero pésimo para saltearte las comidas y dormir cinco horas apostando a que el envión aguanta. Baja un cambio antes de dormir: el ánimo de esta carta cuesta apagar de noche y el sueño se resiente si no le das un descenso gradual.',
+      'La energía está acelerada y el cuerpo va más rápido que la cabeza. Los días pasan volando y el descanso se vuelve la primera víctima de la agenda. Es un buen momento para actividades dinámicas, pero pésimo para saltearte las comidas y dormir cinco horas apostando a que el impulso aguanta. Baja un cambio antes de dormir: el ánimo de esta carta cuesta apagar de noche y el sueño se resiente si no le das un descenso gradual.',
     symbolism:
-      'Ocho varas cruzan el aire en diagonal, paralelas, ya en la parte final de su vuelo: están descendiendo hacia la tierra, lo que indica que el mensaje está por aterrizar. No hay figuras humanas —única carta del palo sin personas—: lo que importa es el movimiento, no quien lo protagoniza. Debajo se ve un paisaje verde, un río sereno y una colina con una casa pequeña: el destino tranquilo al que llega toda esta velocidad. El cielo claro y sin obstáculos dice que nada va a interrumpir la trayectoria.',
+      'Ocho varas cruzan el aire en diagonal, paralelas, ya en la parte final de su vuelo: están descendiendo hacia la tierra, lo que indica que el mensaje está por aterrizar. No hay figuras humanas —única carta del palo sin ninguna figura en escena, ni siquiera la mano que sostiene el As—: lo que importa es el movimiento, no quien lo protagoniza. Debajo se ve un paisaje verde, un río sereno y una colina con una casa pequeña: el destino tranquilo al que llega toda esta velocidad. El cielo claro y sin obstáculos dice que nada va a interrumpir la trayectoria.',
     advice:
       'Aprovecha la ventana: lo que se mueve rápido también se cierra rápido. Responde los mensajes pendientes hoy, confirma lo que estabas dejando en suspenso y manda lo que tenías listo hace semanas. Al mismo tiempo, relee antes de enviar: la velocidad de esta carta es buena para avanzar y pésima para corregir. Un minuto de revisión ahorra una semana de aclaraciones.',
     yesNo:
@@ -299,7 +299,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Llegas al vínculo con las heridas de los anteriores todavía a la vista. Desconfías, mides cada palabra y esperas el golpe antes de que exista. La carta reconoce que el dolor fue real y avisa que la coraza está empezando a costarte más de lo que te protege. En una pareja de años marca el tramo de cansancio en el que se sigue por convicción, no por entusiasmo. Falta poco para el descanso: la última guardia siempre es la más larga.',
     meaningWork:
-      'Estás cerca del final de un proceso agotador y no quieres bajar los brazos justo ahora. Aparece cuando ya diste muchas peleas laborales y te queda una, o cuando la desconfianza acumulada te hace revisar todo tres veces. Tienes más recursos de los que sientes: las ocho varas plantadas detrás son experiencia, no cicatrices inútiles. En el dinero indica reservas ajustadas pero suficientes; no es momento de arriesgar el colchón que te queda.',
+      'Estás cerca del final de un proceso agotador y no quieres bajar los brazos justo ahora. Aparece cuando ya diste muchas peleas laborales y te queda una, o cuando la desconfianza acumulada te hace revisar todo tres veces. Tienes más recursos de los que sientes: las ocho varas plantadas detrás son experiencia, no cicatrices inútiles. En el dinero señala reservas ajustadas pero suficientes; no es momento de arriesgar el colchón que te queda.',
     meaningWellbeing:
       'El cansancio es real y viene de lejos: no es de esta semana, es acumulado. El cuerpo está en alerta permanente y eso consume más energía que el trabajo en sí. Lo que pide la carta no es más esfuerzo sino descanso verdadero, del que corta la vigilancia. Dormir mejor, aflojar la guardia con gente de confianza y dejar de anticipar problemas que todavía no pasaron. El ánimo se recupera cuando el cuerpo confirma que ya no hay que estar defendiendo.',
     symbolism:
@@ -335,7 +335,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'La relación se volvió una obligación más en una agenda que ya no da. Aparece cuando uno de los dos carga con todo —los trámites, la casa, el ánimo del otro— y el vínculo dejó de ser un lugar de descanso. También marca amores que continúan por deber, por los chicos o por costumbre. No dice que haya que terminarlo: dice que hay que repartir el peso y hablarlo antes de que el resentimiento haga el trabajo por ti. Si estás sin pareja, señala que no tienes espacio libre para que entre alguien.',
     meaningWork:
-      'Estás haciendo el trabajo de tres personas. La carta del sobrecompromiso: tareas que aceptaste por no saber decir que no, responsabilidades que te delegaron sin darte autoridad, proyectos propios que te asfixian. El éxito está ahí —las diez varas son cosecha real— pero llegar a la meta así te va a dejar sin nada. Es el momento de delegar, priorizar o negociar plazos. En el dinero indica ingresos que existen pero exigen un esfuerzo desproporcionado para sostenerlos.',
+      'Estás haciendo el trabajo de tres personas. La carta del sobrecompromiso: tareas que aceptaste por no saber decir que no, responsabilidades que te delegaron sin darte autoridad, proyectos propios que te asfixian. El éxito está ahí —las diez varas son cosecha real— pero llegar a la meta así te va a dejar sin nada. Es el momento de delegar, priorizar o negociar plazos. En lo económico indica ingresos que existen pero exigen un esfuerzo desproporcionado para sostenerlos.',
     meaningWellbeing:
       'El agotamiento ya es físico, no solo mental: espalda cargada, dormir mal, la sensación de arrastrarte por la semana. El cuerpo lleva demasiado tiempo funcionando en modo exigencia y está pidiendo pausa a los gritos. La carta no aconseja una rutina nueva sino sacar cosas de la lista. Un día entero sin obligaciones vale más que cualquier plan de mejora que agregue otra tarea. Aflojar la carga no es pereza: es la única forma de llegar entero.',
     symbolism:
@@ -343,7 +343,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     advice:
       'Baja las varas al piso y mira qué hay realmente en tus brazos. La mitad de lo que cargas no es tuyo o ya no hace falta. Delega dos cosas esta semana, aunque salgan peor que si las hicieras tú, y di que no la próxima vez que te ofrezcan una tarea más. Llegar agotado a la meta no es mérito: es una forma cara de perder el premio.',
     yesNo:
-      'Sí, pero a un costo alto en esfuerzo. Antes de avanzar, pregúntate si el resultado justifica el peso que vas a tener que cargar para conseguirlo.',
+      'Depende de cuánto estés dispuesto a cargar. El resultado está al alcance, pero llega solo si aceptas un esfuerzo desproporcionado: pregúntate si vale ese precio antes de responder que sí.',
     combinations: [
       {
         cardSlug: 'the-hanged-man',
@@ -371,7 +371,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Es el flechazo entusiasta y un poco atolondrado: mensajes a cualquier hora, planes improvisados, la alegría de recién conocerse. Marca vínculos jóvenes en el sentido de frescos, no de edad, donde todo es descubrimiento y nada está definido. Para una pareja larga, es la invitación a jugar de nuevo, a romper la rutina con algo inesperado. El aviso que trae es la inconstancia: este entusiasmo enciende rápido y también se distrae rápido si no encuentra algo que lo sostenga.',
     meaningWork:
-      'Aparecen ganas de aprender algo nuevo, un curso que te entusiasma, una propuesta que te saca de lo conocido. Es la carta del aprendiz motivado: todavía no sabes hacerlo, pero quieres. Suele señalar noticias que abren posibilidades, entrevistas prometedoras y proyectos en etapa exploratoria. Excelente para empezar a estudiar; insuficiente para sostener un negocio sin ayuda. En el dinero, ingresos pequeños ligados a algo nuevo que recién estás probando.',
+      'Aparecen ganas de aprender algo nuevo, un curso que te entusiasma, una propuesta que te saca de lo conocido. Es la carta del aprendiz motivado: todavía no sabes hacerlo, pero quieres. Suele señalar noticias que abren posibilidades, entrevistas prometedoras y proyectos en etapa exploratoria. Excelente para empezar a estudiar; insuficiente para sostener un negocio sin ayuda. En el bolsillo, ingresos pequeños ligados a algo nuevo que recién estás probando.',
     meaningWellbeing:
       'Vuelve la curiosidad por el cuerpo: ganas de probar una actividad distinta, salir a andar en bicicleta, anotarte en algo solo para ver cómo es. La energía es alta y juguetona, con poca disciplina. El ánimo mejora con novedad y se apaga con la repetición. Aprovecha el impulso para explorar sin exigirte resultados, y busca compañía: en esta carta lo que se hace con otros dura mucho más que lo que se promete en soledad.',
     symbolism:
@@ -407,9 +407,9 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Pasión intensa que llega a toda velocidad: alguien que te encanta, te desborda y no siempre se queda. Es el romance con temperatura alta, aventuras, viajes juntos y decisiones tomadas en caliente. Enciende cualquier vínculo dormido. El aviso es conocido: este Caballero galopa hacia donde el fuego lo llame, y cuando el entusiasmo baja puede irse igual de rápido que como llegó. Disfrútalo por lo que es y no le pidas estabilidad antes de que la demuestre.',
     meaningWork:
-      'Acción decidida y sin demasiado plan: lanzarte al proyecto, cambiar de trabajo de un día para otro, encarar un desafío que asusta a otros. Es una energía excelente para arrancar, mudarse, viajar por trabajo o resolver algo que estaba trabado por miedo. La debilidad es el seguimiento: empieza fuerte y se aburre en la etapa administrativa. En el dinero, movimientos audaces con retorno posible y riesgo real. Rodéate de alguien metódico antes de firmar.',
+      'Acción decidida y sin demasiado plan: lanzarte al proyecto, cambiar de trabajo de un día para otro, encarar un desafío que asusta a otros. Es una energía excelente para arrancar, mudarse, viajar por trabajo o resolver algo que estaba trabado por miedo. La debilidad es el seguimiento: empieza fuerte y se aburre en la etapa administrativa. Del lado del dinero, movimientos audaces con retorno posible y riesgo real. Rodéate de alguien metódico antes de firmar.',
     meaningWellbeing:
-      'Energía desbordante que necesita salida física urgente. El cuerpo pide velocidad, intensidad, sudor. Buen momento para el deporte exigente y las actividades que descargan adrenalina. El riesgo son los excesos y los golpes por apuro: en esta carta las lesiones vienen de no calentar, no de entrenar. El ánimo es alto y algo impaciente. Alterna el envión con descanso real, porque el Caballero no sabe frenar por sí solo y el cuerpo termina frenándolo.',
+      'Energía desbordante que necesita salida física urgente. El cuerpo pide velocidad, intensidad, sudor. Buen momento para el deporte exigente y las actividades que descargan adrenalina. El riesgo son los excesos y los golpes por apuro: en esta carta los tropiezos vienen del apuro, no del esfuerzo. El ánimo es alto y algo impaciente. Alterna el impulso con descanso real, porque el Caballero no sabe frenar por sí solo y el cuerpo termina frenándolo.',
     symbolism:
       'Un caballero con armadura avanza sobre un caballo alazán encabritado, con las patas delanteras en el aire: el impulso es tan fuerte que ni el jinete lo controla del todo. La armadura está decorada con salamandras, otra vez el fuego que no se apaga, y del yelmo brota una pluma roja larga que se dobla con la velocidad. Sostiene la vara inclinada hacia adelante, como una lanza. Al fondo, tres pirámides en un desierto árido: mucho horizonte, poca agua, un terreno que exige energía y no perdona la improvisación.',
     advice:
@@ -420,7 +420,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'the-chariot',
         reading:
-          'Impulso más dirección: la fórmula del avance imparable. Lo que arranca acá llega lejos porque la audacia encuentra por fin un rumbo definido. Excelente para viajes, mudanzas y lanzamientos.',
+          'Impulso más dirección: la fórmula del avance imparable. Lo que arranca aquí llega lejos porque la audacia encuentra por fin un rumbo definido. Excelente para viajes, mudanzas y lanzamientos.',
       },
       {
         cardSlug: 'four-of-pentacles',
@@ -443,9 +443,9 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Habla de alguien seguro de sí mismo, magnético y cálido, que atrae sin esforzarse. En una relación, marca el momento en que te muestras entero y eso gusta. Es la carta de la seducción con autoestima, no con estrategia. Si describe a una persona de tu entorno, es alguien sociable, generoso y con un límite claro: acompaña, pero no se achica por nadie. El aviso viene por el lado de los celos: cuando esta energía se siente ignorada, quema. Se le responde con presencia, no con explicaciones.',
     meaningWork:
-      'Liderazgo carismático: la persona que arma equipo, contagia entusiasmo y consigue que otros quieran trabajar con ella. Aparece cuando te toca mostrarte, vender tu proyecto o poner la cara. Excelente para emprendimientos propios, trabajos de cara al público, docencia y todo lo que dependa de convencer. En el dinero indica ingresos ligados a tu marca personal y a tu capacidad de generar confianza. Rodearte de gente que te admire está bien; rodearte solo de eso, no.',
+      'Liderazgo carismático: la persona que arma equipo, contagia entusiasmo y consigue que otros quieran trabajar con ella. Aparece cuando te toca mostrarte, vender tu proyecto o poner la cara. Excelente para emprendimientos propios, trabajos de cara al público, docencia y todo lo que dependa de convencer. Del lado del dinero, indica ingresos ligados a tu marca personal y a tu capacidad de generar confianza. Rodearte de gente que te admire está bien; rodearte solo de eso, no.',
     meaningWellbeing:
-      'Energía cálida y sostenida, muy distinta del envión del Caballero: esta se administra sola. Buen momento para rutinas que disfrutes de verdad, porque las vas a sostener. El ánimo es alto y contagioso, y el cuerpo responde bien a lo que se hace con placer. Cuida el descanso emocional: esta figura sostiene a mucha gente y rara vez pide sostén. Reservar tiempo propio, sin público, es lo que evita que el fuego se consuma a sí mismo.',
+      'Energía cálida y sostenida, muy distinta del impulso del Caballero: esta se administra sola. Buen momento para rutinas que disfrutes de verdad, porque las vas a sostener. El ánimo es alto y contagioso, y el cuerpo responde bien a lo que se hace con placer. Cuida el descanso emocional: esta figura sostiene a mucha gente y rara vez pide sostén. Reservar tiempo propio, sin público, es lo que evita que el fuego se consuma a sí mismo.',
     symbolism:
       'Una mujer coronada se sienta en un trono de piedra decorado con leones enfrentados, símbolo del Fuego dominado. Sostiene una vara florecida en una mano y un girasol en la otra: la vara es la voluntad, el girasol es la alegría que sigue a la luz. Está sentada con las piernas abiertas, en postura de autoridad relajada, no de rigidez. A sus pies hay un gato negro que la mira de frente, guardián de su intuición y de su costado menos visible. El fondo es un desierto amarillo bajo un cielo claro: territorio duro que ella habita sin dramatismo.',
     advice:
@@ -483,7 +483,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningWellbeing:
       'Energía fuerte y bien administrada, con un cuerpo que responde a la exigencia si le das descanso proporcional. Es una etapa de vitalidad alta y ánimo firme. El punto flojo es la tendencia a ignorar las señales de cansancio hasta que se vuelven imposibles de ignorar: este arquetipo no frena por prevención, frena por obligación. Fija los límites de antemano —horario de corte, un día libre real— porque en el momento no vas a querer ponerlos.',
     symbolism:
-      'Un rey coronado se sienta en un trono adornado con leones y salamandras, los mismos símbolos del Fuego que aparecen en toda la corte de Bastos, pero acá las salamandras cierran el círculo mordiéndose la cola: la transformación está completa. Sostiene la vara florecida con firmeza, apoyada en el piso. Está de perfil, ligeramente girado, como si estuviera por levantarse: la autoridad de esta carta no es estática, ejecuta. Junto al trono hay una salamandra viva. Su manto naranja y el fondo del mismo tono muestran un mundo que arde sin quemarlo.',
+      'Un rey coronado se sienta en un trono adornado con leones y salamandras, los mismos símbolos del Fuego que aparecen en toda la corte de Bastos, pero aquí las salamandras cierran el círculo mordiéndose la cola: la transformación está completa. Sostiene la vara florecida con firmeza, apoyada en el piso. Está de perfil, ligeramente girado, como si estuviera por levantarse: la autoridad de esta carta no es estática, ejecuta. Junto al trono hay una salamandra viva. Su manto naranja y el fondo del mismo tono muestran un mundo que arde sin quemarlo.',
     advice:
       'Toma la decisión que estás postergando y comunícala con claridad. Tienes la visión y la autoridad para hacerlo; lo que falta es que dejes de consultar para confirmar lo que ya sabes. Define el rumbo, reparte tareas y confía en quienes las reciben. Y mide la intensidad con la que hablas: lo que a ti te suena a convicción, del otro lado puede sonar a orden.',
     yesNo:

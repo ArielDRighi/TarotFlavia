@@ -11,7 +11,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Es el corazón que se abre otra vez. Anuncia un amor que empieza, una reconciliación sincera o el momento en que te permites sentir después de mucho tiempo cerrado. No habla de una relación armada sino del agua que empieza a correr: ternura, deseo de cuidar, disponibilidad emocional. Para una pareja de años marca el retorno de la intimidad verdadera, esa en la que uno se muestra sin defensa. Si estás solo, avisa que estás listo para recibir, y eso pesa más que salir a buscar.',
     meaningWork:
-      'Aparece cuando el trabajo vuelve a tener sentido emocional: un proyecto que te conmueve, un equipo donde te sientes querido, una vocación que asoma después de años de puro trámite. Es una carta más de satisfacción que de facturación, aunque suele abrir puertas en áreas creativas, de cuidado y de trato con personas. En el dinero indica un ingreso que llega de manera generosa y algo inesperada, muchas veces por vínculos y no por gestión.',
+      'Aparece cuando el trabajo vuelve a tener sentido emocional: un proyecto que te conmueve, un equipo donde te sientes querido, una vocación que asoma después de años de puro trámite. Es una carta más de satisfacción que de facturación, aunque suele abrir puertas en áreas creativas, de cuidado y de trato con personas. En el bolsillo, indica un ingreso que llega de manera generosa y algo inesperada, muchas veces por vínculos y no por gestión.',
     meaningWellbeing:
       'El ánimo mejora de forma notoria y eso se refleja en el cuerpo: duermes mejor, aflojas la mandíbula, vuelve el apetito por cosas simples. Es un momento propicio para retomar el contacto con el agua —nadar, ducharse largo, caminar cerca del río— y para todo lo que ablande la coraza. La energía es suave, no explosiva: no fuerces rendimiento. Lo que hoy repara es dejarse cuidar y permitir que algo lindo entre sin desconfiar de entrada.',
     symbolism:
@@ -47,11 +47,11 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Es la carta del encuentro entre iguales: dos personas que se eligen y se lo dicen. Marca noviazgos que se formalizan, reconciliaciones sinceras y esa química donde la atracción viene acompañada de respeto. No hay jerarquía, no hay uno que quiere más: hay reciprocidad. Para una pareja establecida indica una etapa de reencuentro y acuerdos que se renuevan. Si estás sin pareja, anuncia un vínculo que empieza de manera pareja, con las dos partes poniendo lo mismo desde el primer día.',
     meaningWork:
-      'Sociedades, alianzas y acuerdos que benefician a los dos lados. Aparece cuando una colaboración funciona porque hay confianza real, no solo conveniencia. Es una carta muy favorable para firmar contratos entre pares, asociarse con un colega o resolver un conflicto laboral con una conversación honesta. En el dinero indica sociedades rentables y acuerdos equilibrados. La advertencia es no confundir buena onda con contrato: la afinidad es real, escríbanla igual.',
+      'Sociedades, alianzas y acuerdos que benefician a los dos lados. Aparece cuando una colaboración funciona porque hay confianza real, no solo conveniencia. Es una carta muy favorable para firmar contratos entre pares, asociarse con un colega o resolver un conflicto laboral con una conversación honesta. Para las finanzas, indica sociedades rentables y acuerdos equilibrados. La advertencia es no confundir buena onda con contrato: la afinidad es real, escríbanla igual.',
     meaningWellbeing:
-      'El bienestar mejora cuando dejas de resolver todo solo. Es un momento de reconciliación con el propio cuerpo y también con alguien cercano: los vínculos sostienen la energía y bajan la tensión acumulada. Buenas señales para actividades compartidas, terapias de pareja, conversaciones que descargan. El ánimo se estabiliza en la compañía. Si andas cansado, revisa cuánto de ese cansancio viene de una distancia afectiva que se puede acortar hablando.',
+      'El bienestar mejora cuando dejas de resolver todo solo. Es un momento de reconciliación con el propio cuerpo y también con alguien cercano: los vínculos sostienen la energía y bajan la tensión acumulada. Buenas señales para actividades compartidas, espacios de diálogo en pareja, conversaciones que descargan. El ánimo se estabiliza en la compañía. Si andas cansado, revisa cuánto de ese cansancio viene de una distancia afectiva que se puede acortar hablando.',
     symbolism:
-      'Un hombre y una mujer se acercan y se ofrecen sendas copas en un intercambio simétrico: nadie da más que el otro. Entre ellos se eleva el caduceo de Hermes, dos serpientes entrelazadas alrededor de una vara, símbolo antiguo del equilibrio entre fuerzas opuestas, coronado por la cabeza alada de un león rojo, la pasión al servicio del vínculo. Ella lleva una corona de laurel y él una guirnalda de flores. Detrás se ve una casa sobre una colina verde: el hogar posible, todavía a distancia, que este acuerdo podría construir.',
+      'Un hombre y una mujer se acercan y se ofrecen sendas copas en un intercambio simétrico: nadie da más que el otro. Entre ellos se eleva el caduceo de Hermes, dos serpientes entrelazadas alrededor de una vara, símbolo antiguo del equilibrio entre fuerzas opuestas, coronado por la cabeza alada de un león rojo, la pasión al servicio del vínculo. Ella lleva una guirnalda de flores y él una corona de laurel. Detrás se ve una casa sobre una colina verde: el hogar posible, todavía a distancia, que este acuerdo podría construir.',
     advice:
       'Di lo que sientes en voz alta y de frente. Esta carta se activa cuando alguien se anima a hacer el primer gesto explícito: proponer, reconciliar, agradecer, pedir. No esperes a estar seguro de la respuesta. Si hay un conflicto abierto con alguien que te importa, esta es la semana para acercarte con la copa en la mano y sin lista de reproches.',
     yesNo:
@@ -96,7 +96,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'the-sun',
         reading:
-          'Felicidad plena y visible. Todo lo que se celebra acá tiene fundamento real y se sostiene en el tiempo. Una de las combinaciones más luminosas para preguntas sobre familia y amistad.',
+          'Felicidad plena y visible. Todo lo que se celebra aquí tiene fundamento real y se sostiene en el tiempo. Una de las combinaciones más luminosas para preguntas sobre familia y amistad.',
       },
       {
         cardSlug: 'seven-of-cups',
@@ -119,7 +119,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Apatía. La relación no está mal, pero tampoco te entusiasma, y esa tibieza pesa más que una pelea. Aparece cuando alguien te ofrece algo bueno y no lo ves, o cuando estás tan enganchado con lo que no funcionó que no notas lo que sí está disponible. Para quien está sin pareja indica desinterés y cansancio de intentar. La carta no pide forzar entusiasmo: pide levantar la vista y revisar si el aburrimiento es de la relación o es tuyo con la vida en general.',
     meaningWork:
-      'Estancamiento y desmotivación: el trabajo que hacías con gusto se volvió rutina y ninguna propuesta te mueve. Suele aparecer justo cuando llega una oferta que descartas sin evaluarla porque estás en modo automático. También marca la etapa previa a un cambio importante, cuando ya sabes que eso no va más pero todavía no aparece el reemplazo. En el dinero, ingresos estables que dejaron de alcanzar para sostener el interés, aunque alcancen para vivir.',
+      'Estancamiento y desmotivación: el trabajo que hacías con gusto se volvió rutina y ninguna propuesta te mueve. Suele aparecer justo cuando llega una oferta que descartas sin evaluarla porque estás en modo automático. También marca la etapa previa a un cambio importante, cuando ya sabes que eso no va más pero todavía no aparece el reemplazo. Para las finanzas, ingresos estables que dejaron de alcanzar para sostener el interés, aunque alcancen para vivir.',
     meaningWellbeing:
       'La energía está baja y plana, más por desgano que por cansancio físico. Cuesta arrancar, todo da igual, la rutina se sostiene sin placer. Es un momento para revisar hábitos que se volvieron mecánicos y para introducir un cambio chico que rompa el piloto automático: otro horario, otro recorrido, otra actividad. El ánimo mejora con estímulos nuevos y con silencio elegido, no con más obligaciones apiladas encima del desinterés.',
     symbolism:
@@ -155,7 +155,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Duelo. Una ruptura, una decepción o el peso de algo que no fue como esperabas. La carta valida la tristeza: no viene a decirte que lo superes rápido. Lo que sí muestra es que detrás tuyo quedaron dos copas en pie, y que todavía no las miraste. En una pareja indica una herida abierta que se puede reparar si se habla, y también parejas donde uno sigue llorando algo viejo mientras el otro espera. Si estás solo, aconseja no idealizar lo que ya terminó.',
     meaningWork:
-      'Un proyecto que salió mal, un despido, una oportunidad perdida. Es la carta del balance amargo, cuando la pérdida ocupa toda la pantalla y el aprendizaje todavía no se ve. Suele aparecer después de una decisión que no funcionó y antes de la recuperación. Lo que resta —contactos, experiencia, reputación— sigue disponible aunque hoy no te consuele. En el dinero marca un revés concreto: gastos imprevistos, un cobro que no llegó, una inversión que no rindió.',
+      'Un proyecto que salió mal, un despido, una oportunidad perdida. Es la carta del balance amargo, cuando la pérdida ocupa toda la pantalla y el aprendizaje todavía no se ve. Suele aparecer después de una decisión que no funcionó y antes de la recuperación. Lo que resta —contactos, experiencia, reputación— sigue disponible aunque hoy no te consuele. En el dinero anticipa un revés concreto: gastos imprevistos, un cobro que no llegó, una inversión que no rindió.',
     meaningWellbeing:
       'La tristeza baja la energía y eso es esperable, no un fracaso. El cuerpo pide menos exigencia y más cuidado básico: comer con regularidad, dormir, salir aunque sea a la esquina. Es una etapa en la que el ánimo se levanta de a poco y sin atajos. Evita las decisiones grandes hasta que el ánimo se estabilice. Lo que mejor funciona ahora es la compañía tranquila y el movimiento suave, no la disciplina heroica ni el encierro prolongado.',
     symbolism:
@@ -191,7 +191,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Nostalgia y reencuentro. Vuelve alguien del pasado, o vuelve un modo de querer que tenías olvidado: gestos simples, ternura sin cálculo, la confianza de la infancia. Es una carta cálida, aunque avisa que el recuerdo embellece. En una pareja marca el regreso del juego y de la complicidad. Si aparece un ex, la carta no dice que sea buena idea: dice que la memoria está trabajando fuerte y que conviene mirar a la persona real, no a la versión guardada en la cabeza.',
     meaningWork:
-      'Reaparecen contactos y oportunidades del pasado: un ex jefe que te llama, un cliente viejo, un proyecto que habías abandonado y encuentra su momento. También indica trabajos vinculados a la infancia, la enseñanza y el cuidado. Es un buen momento para volver a lo que sabías hacer y dejaste. En el dinero, un ingreso que llega por algo antiguo —una deuda que te pagan, una herencia, un trabajo anterior— más que por una gestión nueva.',
+      'Reaparecen contactos y oportunidades del pasado: un ex jefe que te llama, un cliente viejo, un proyecto que habías abandonado y encuentra su momento. También indica trabajos vinculados a la infancia, la enseñanza y el cuidado. Es un buen momento para volver a lo que sabías hacer y dejaste. En materia de dinero, un ingreso que llega por algo antiguo —una deuda que te pagan, una herencia, un trabajo anterior— más que por una gestión nueva.',
     meaningWellbeing:
       'La energía se recupera con lo conocido: comidas de la casa, dormir en tu cama, la caminata de siempre. Es una etapa de bienestar simple y regresivo, en el mejor sentido. Recuperar un hábito que te hacía bien y abandonaste vale más ahora que inventar una rutina nueva. El ánimo se reconforta con la memoria afectiva. El cuidado es no quedarte solo ahí: nutrirse del pasado está bien, vivir en él termina apagando el presente.',
     symbolism:
@@ -227,11 +227,11 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Demasiadas opciones o demasiada fantasía. Aparece cuando hay varias personas dando vueltas y ninguna elección clara, o cuando estás enamorado de una idea y no de alguien concreto. También marca vínculos donde falta información: promesas que no se verifican, historias que suenan lindas de lejos. La carta no dice que todo sea mentira, dice que estás mirando el humo. Baja a la realidad: pregunta, mira los hechos y elige. La indefinición sostenida es, en sí misma, una elección.',
     meaningWork:
-      'Muchos proyectos en la cabeza y ninguno en marcha. Es la carta del emprendedor que abre siete pestañas y no termina ninguna, y también la de las propuestas que prometen mucho y ofrecen poca letra escrita. Antes de comprometerte, pide números y plazos concretos. En el dinero advierte sobre inversiones que dependen de un relato entusiasta más que de un balance. Elegir una opción y descartar seis es el trabajo real de esta etapa.',
+      'Muchos proyectos en la cabeza y ninguno en marcha. Es la carta del emprendedor que abre siete pestañas y no termina ninguna, y también la de las propuestas que prometen mucho y ofrecen poca letra escrita. Antes de comprometerte, pide números y plazos concretos. En materia de dinero, advierte sobre inversiones que dependen de un relato entusiasta más que de un balance. Elegir una opción y descartar seis es el trabajo real de esta etapa.',
     meaningWellbeing:
       'La energía se dispersa entre demasiados estímulos y el descanso se resiente: la cabeza sigue funcionando aunque el cuerpo esté quieto. Suele venir con sueño irregular y sueños vívidos. Ayuda mucho reducir el consumo de pantallas antes de dormir y elegir una sola actividad en lugar de rotar entre cinco. El ánimo mejora cuando bajas la cantidad de opciones abiertas: la libertad infinita cansa más de lo que entusiasma.',
     symbolism:
-      'Una silueta oscura de espaldas contempla siete copas suspendidas sobre una nube, cada una con una ofrenda distinta: un rostro, una tela luminosa, una serpiente, un castillo, joyas, una corona de laurel y una figura tapada por un manto rojo. La única que no muestra su contenido es la más atractiva, y es también la más peligrosa. Todo flota: nada de eso está apoyado en la tierra. La figura está en sombra porque todavía no eligió, y elegir es lo único que la volvería real en esta escena.',
+      'Una silueta oscura de espaldas contempla siete copas suspendidas sobre una nube, cada una con una ofrenda distinta: un rostro, una figura velada por un manto rojo, una serpiente, un castillo, joyas, una corona de laurel y un dragón. La única que no muestra su contenido es la más atractiva, y es también la más peligrosa. Todo flota: nada de eso está apoyado en la tierra. La figura está en sombra porque todavía no eligió, y elegir es lo único que la volvería real en esta escena.',
     advice:
       'Elige una y cierra las otras seis. La carta no premia al que evalúa mejor sino al que se compromete. Escribe las opciones, tacha las que dependen de que otro haga algo, tacha las que no podrías empezar esta semana y quédate con lo que sobrevive. Y desconfía de la propuesta que no te deja ver lo que hay adentro.',
     yesNo:
@@ -263,7 +263,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Alguien se va, y muchas veces eres tú. Es la carta de la retirada consciente: la relación no explotó, simplemente dejó de tener sentido y quedarse sería traicionarte. Aparece en separaciones maduras, en distanciamientos necesarios y en el momento en que dejas de intentar que alguien cambie. Duele igual. También marca a quien se aleja para reencontrarse consigo mismo sin que haya otra persona en el medio. Lo que promete no es un reemplazo: promete un camino propio.',
     meaningWork:
-      'Renuncia. Dejar un trabajo que funcionaba pero te vaciaba, cerrar un negocio que ya no te representa, abandonar una carrera para buscar otra cosa. La carta reconoce que lo que dejas tiene valor —las ocho copas están enteras, no rotas— y aun así aconseja partir. Es un movimiento de sentido, no de conveniencia. En el dinero implica resignar seguridad a cambio de coherencia, así que conviene tener el próximo paso al menos esbozado.',
+      'Renuncia. Dejar un trabajo que funcionaba pero te vaciaba, cerrar un negocio que ya no te representa, abandonar una carrera para buscar otra cosa. La carta reconoce que lo que dejas tiene valor —las ocho copas están enteras, no rotas— y aun así aconseja partir. Es un movimiento de sentido, no de conveniencia. En lo económico implica resignar seguridad a cambio de coherencia, así que conviene tener el próximo paso al menos esbozado.',
     meaningWellbeing:
       'Necesitas alejarte de algo que te está drenando la energía, aunque no puedas explicarlo con argumentos. El cuerpo lo viene avisando hace rato: cansancio que no cede con dormir, desgano específico frente a ciertas situaciones. Es un buen momento para el retiro, el viaje solo, los días de silencio. El ánimo se recupera con distancia, no con más esfuerzo. Dejar un hábito o un vínculo que ya no nutre es, en esta etapa, el mejor cuidado posible.',
     symbolism:
@@ -286,7 +286,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'ten-of-cups',
         reading:
-          'Te vas de algo que se veía perfecto desde afuera. La familia o el entorno no van a entender la decisión: la carta pide sostenerla igual, porque el criterio acá es interno.',
+          'Te vas de algo que se veía perfecto desde afuera. La familia o el entorno no van a entender la decisión: la carta pide sostenerla igual, porque el criterio aquí es interno.',
       },
       {
         cardSlug: 'knight-of-cups',
@@ -322,7 +322,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'the-star',
         reading:
-          'Bienestar material y paz interior juntos. Una de las mejores duplas del mazo: lo que conseguiste además te hace bien de verdad y no solo te alivia la ansiedad.',
+          'Bienestar material y paz interior juntos. Una de las mejores duplas del mazo: lo que conseguiste además te hace bien de verdad y no solo te saca un peso de encima.',
       },
       {
         cardSlug: 'seven-of-pentacles',
@@ -407,7 +407,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Es el romántico que llega con una propuesta en la mano: la invitación, la declaración, el gesto que parece salido de una película. Marca cortejo, seducción elegante y vínculos que se mueven al ritmo del sentimiento. Es hermoso y también inconstante: este Caballero avanza al paso, no galopa, y a veces la fantasía le importa más que la persona concreta. Si aparece describiendo a alguien, disfruta la propuesta y observa con calma si a la promesa la sigue una acción sostenida.',
     meaningWork:
-      'Una oferta atractiva llega de manera elegante: una propuesta creativa, una invitación a colaborar, un proyecto que te seduce por sentido más que por números. Es buena para trabajos artísticos, comunicación y todo lo que requiera encantar a alguien. La advertencia es práctica: revisa el contrato debajo del entusiasmo, porque esta carta promete mucho y no siempre calcula la logística. En el dinero, propuestas que suenan lindas y necesitan que alguien haga las cuentas.',
+      'Una oferta atractiva llega de manera elegante: una propuesta creativa, una invitación a colaborar, un proyecto que te seduce por sentido más que por números. Es buena para trabajos artísticos, comunicación y todo lo que requiera encantar a alguien. La advertencia es práctica: revisa el contrato debajo del entusiasmo, porque esta carta promete mucho y no siempre calcula la logística. En lo económico, propuestas que suenan lindas y necesitan que alguien haga las cuentas.',
     meaningWellbeing:
       'El ánimo está sensible y romántico, con la energía flotando entre el entusiasmo y el ensueño. El cuerpo pide actividades que combinen movimiento y placer: nadar, bailar, caminar sin apuro. Es un buen momento para prácticas que integren la emoción con el cuerpo. El punto flojo es la constancia: arrancas motivado y abandonas cuando se vuelve rutina. Elige algo que te guste tanto que no necesites disciplina para sostenerlo.',
     symbolism:
@@ -415,7 +415,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     advice:
       'Haz la propuesta romántica que tienes en la cabeza. Esta carta favorece a quien se anima al gesto: la invitación, la carta, la escena preparada con dedicación. Al mismo tiempo, revisa que el sentimiento venga acompañado de algo concreto que puedas sostener el mes que viene. Ofrecer la copa está bien; hay que estar cuando el otro la acepte.',
     yesNo:
-      'Sí, con una propuesta encantadora. La respuesta es favorable en lo afectivo, aunque conviene verificar que a la seducción le siga una acción concreta.',
+      'Depende de lo que venga después de la propuesta. El gesto es genuino y encantador; el sí se confirma únicamente si a la seducción le sigue una acción sostenida en el tiempo.',
     combinations: [
       {
         cardSlug: 'two-of-cups',
@@ -425,7 +425,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'seven-of-cups',
         reading:
-          'Encanto sin sustancia. Lo que te ofrecen suena maravilloso y está hecho de humo. Pide fechas, montos y detalles concretos antes de entusiasmarte con la escena, porque acá la puesta vale más que el contenido.',
+          'Encanto sin sustancia. Lo que te ofrecen suena maravilloso y está hecho de humo. Pide fechas, montos y detalles concretos antes de entusiasmarte con la escena, porque aquí la puesta vale más que el contenido.',
       },
       {
         cardSlug: 'the-hierophant',
@@ -443,11 +443,11 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Habla de alguien profundamente empático, que percibe lo que el otro siente antes de que lo diga. En pareja indica una etapa de contención y comprensión mutua, donde el vínculo se cuida de verdad. Si describe a una persona, es sensible, leal y con una intuición notable para leer intenciones. El cuidado que trae es la disolución de límites: esta figura se hace cargo del ánimo ajeno hasta perder el propio. Amar bien también incluye poder decir que hoy no puedes sostener a nadie.',
     meaningWork:
-      'Es la persona que sostiene el clima del equipo: escucha, media, entiende lo que no se dice en las reuniones. Aparece cuando tu aporte pasa por la sensibilidad y no por la técnica. Muy favorable para trabajos de cuidado, acompañamiento, arte y todo lo que exija leer a las personas. En el dinero, decisiones guiadas por intuición que suelen acertar. La contra es la dificultad para poner precio y cobrar: el trabajo emocional también se factura.',
+      'Es la persona que sostiene el clima del equipo: escucha, media, entiende lo que no se dice en las reuniones. Aparece cuando tu aporte pasa por la sensibilidad y no por la técnica. Muy favorable para trabajos de cuidado, acompañamiento, arte y todo lo que exija leer a las personas. En lo económico, decisiones guiadas por intuición que suelen acertar. La contra es la dificultad para poner precio y cobrar: el trabajo emocional también se factura.',
     meaningWellbeing:
       'El bienestar depende del estado emocional más que de la rutina. Es una etapa para atender el descanso profundo, los sueños y los ciclos propios. El cuerpo pide agua, silencio y menos estímulo. Ayuda mucho llevar un registro de lo que sientes: escribirlo baja la marea. El punto a cuidar es absorber el ánimo de los demás sin darte cuenta; después de un día con mucha gente, resérvate un rato a solas para volver a tu propio eje.',
     symbolism:
-      'Una reina se sienta en un trono de piedra clara ubicado justo en el borde del agua, con los pies en la orilla: el único personaje del mazo que habita exactamente la frontera entre lo consciente y lo profundo. Sostiene una copa cerrada, con tapa y asas en forma de ángeles, distinta de todas las demás del palo: su mundo interno no se derrama en público. El trono está tallado con sirenas y conchas marinas. Mira la copa fijamente, absorta. Las piedras del primer plano son de colores: lo que el agua devolvió, ya trabajado.',
+      'Una reina se sienta en un trono de piedra clara ubicado justo en el borde del agua, con los pies en la orilla: uno de los pocos personajes del mazo que habita exactamente la frontera entre lo consciente y lo profundo. Sostiene una copa cerrada, con tapa y asas en forma de ángeles, distinta de todas las demás del palo: su mundo interno no se derrama en público. El trono está tallado con sirenas y conchas marinas. Mira la copa fijamente, absorta. Las piedras del primer plano son de colores: lo que el agua devolvió, ya trabajado.',
     advice:
       'Confía en lo que percibes, aunque no puedas fundamentarlo con datos. Tu lectura de las personas está afinada en esta etapa y suele acertar. Al mismo tiempo, distingue lo que sientes tú de lo que estás absorbiendo del otro: preguntar "¿esto es mío?" antes de hacerte cargo evita la mayoría de los desgastes de esta carta.',
     yesNo:
@@ -471,7 +471,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'the-moon',
         reading:
-          'Intuición y confusión mezcladas. Distingue la percepción certera del miedo que la disfraza de intuición. Contrasta lo que sientes con alguien de confianza antes de decidir, porque acá las dos cosas se parecen mucho.',
+          'Intuición y confusión mezcladas. Distingue la percepción certera del miedo que la disfraza de intuición. Contrasta lo que sientes con alguien de confianza antes de decidir, porque aquí las dos cosas se parecen mucho.',
       },
     ],
   },
@@ -479,7 +479,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Madurez emocional: alguien que siente hondo y no se desborda, que puede sostener una conversación difícil sin escaparse ni explotar. En pareja marca la etapa en que los conflictos se hablan con calma y el vínculo se vuelve confiable. Si describe a una persona, es contenedora, generosa y discreta. El aviso está en el reverso: cuando esta figura se cierra, la calma se vuelve distancia y el otro queda del lado de afuera sin saber qué pasó. Sentir de más no se arregla congelando.',
     meaningWork:
-      'Es el liderazgo que combina criterio y empatía: quien maneja equipos difíciles sin gritar, negocia sin humillar y sostiene la calma cuando todo se complica. Aparece en trabajos ligados al cuidado, la mediación, la terapia, la conducción de personas y el arte con oficio. En el dinero indica estabilidad manejada con prudencia y generosidad. Lo que la carta pide es que la contención tenga un límite: dirigir no es cargar con el malestar de todos.',
+      'Es el liderazgo que combina criterio y empatía: quien maneja equipos difíciles sin gritar, negocia sin humillar y sostiene la calma cuando todo se complica. Aparece en trabajos ligados al cuidado, la mediación, el acompañamiento, la conducción de personas y el arte con oficio. En lo económico indica estabilidad manejada con prudencia y generosidad. Lo que la carta pide es que la contención tenga un límite: dirigir no es cargar con el malestar de todos.',
     meaningWellbeing:
       'La energía es estable y bien administrada, con el ánimo sereno aun cuando el contexto se mueva. Es una buena etapa para consolidar hábitos tranquilos y sostenidos en el tiempo. El cuerpo agradece la regularidad más que la intensidad. El punto de atención es lo que se guarda: esta figura procesa hacia adentro y las tensiones se acumulan en silencio. Hablar de lo que te pasa, aunque no necesites que nadie lo resuelva, descomprime más de lo que parece.',
     symbolism:

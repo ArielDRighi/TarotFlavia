@@ -24,6 +24,15 @@ export async function seedEncyclopediaTarotCards(
 ): Promise<void> {
   console.log('🃏 Iniciando seed de cartas de la Enciclopedia de Tarot...');
 
+  // Los slugs de `combinations` se validan ANTES de cualquier I/O, para que
+  // falle en los dos caminos —siembra fresca y backfill— y sin dejar la base a
+  // medio escribir. Es también el único momento en que la siembra inicial pasa
+  // por acá: es cuando las combinaciones se escriben por primera vez.
+  const seedBySlug = new Map<string, CardSeedData>(
+    ALL_TAROT_CARDS.map((card) => [card.slug, card]),
+  );
+  validateCombinationSlugs(seedBySlug);
+
   const cardRepository = dataSource.getRepository(EncyclopediaTarotCard);
 
   // Verificar si ya existen cartas (idempotencia)
@@ -32,7 +41,12 @@ export async function seedEncyclopediaTarotCards(
     console.log(
       `ℹ️  Cartas de la enciclopedia ya pobladas (${existingCount} cartas encontradas). Sin reinsertar.`,
     );
-    await backfillExtendedContent(cardRepository);
+    if (existingCount !== TOTAL_CARDS) {
+      console.warn(
+        `⚠️  La base tiene ${existingCount} cartas y el seed define ${TOTAL_CARDS}. Las faltantes NO se insertan: este seeder solo inserta sobre una base vacía. Revisar antes de seguir.`,
+      );
+    }
+    await backfillExtendedContent(cardRepository, seedBySlug);
     return;
   }
 
@@ -108,7 +122,13 @@ const EXTENDED_TEXT_FIELDS = [
 
 /**
  * Una sección está sin cargar cuando es null, undefined o un string en blanco.
- * Es el mismo criterio con el que el detalle omite la clave en la respuesta.
+ *
+ * Es a propósito el mismo criterio con el que `toExtendedContentDto` omite la
+ * clave en la respuesta: lo que el frontend no va a renderizar es exactamente lo
+ * que el seeder considera pendiente. Corolario asumido: **vaciar una sección a
+ * mano no es un estado estable** — un `''` o un `[]` se vuelven a rellenar en la
+ * corrida siguiente. Para dejar una sección deliberadamente fuera hay que
+ * sacarla del archivo de datos, no vaciarla en la base.
  */
 function isBlank(value: string | null | undefined): boolean {
   return value == null || value.trim().length === 0;
@@ -117,26 +137,36 @@ function isBlank(value: string | null | undefined): boolean {
 /**
  * Completa las secciones extendidas vacías de las cartas ya sembradas.
  *
- * Regla central: se escribe únicamente sobre secciones vacías. Si el panel de
- * admin editó un texto, el seeder lo respeta aunque difiera del archivo de
- * datos. Correrlo dos veces seguidas no genera ninguna escritura la segunda vez.
+ * Regla central: **se escribe únicamente sobre secciones vacías** (`NULL`,
+ * string en blanco o lista vacía). Lo que ya tiene contenido queda como está,
+ * aunque difiera del archivo de datos. De ahí se siguen las dos propiedades que
+ * importan: correrlo dos veces seguidas no genera ninguna escritura la segunda
+ * vez, y si alguna vez existe una vía de edición del contenido —hoy la
+ * enciclopedia se sirve de solo lectura y no hay endpoint de escritura ni
+ * pantalla de admin— el seeder no la pisa.
+ *
+ * La contracara, para tenerla presente: una corrección de redacción en el
+ * archivo de datos **no** se propaga a una base ya cargada. Eso necesita una
+ * migración de datos explícita.
+ *
+ * `find()` va sin `select` a propósito: hidratar parcialmente y después llamar
+ * `save()` es la manera de perder columnas sin darse cuenta. Son 78 filas en un
+ * script de línea de comandos.
  */
 async function backfillExtendedContent(
   cardRepository: Repository<EncyclopediaTarotCard>,
+  seedBySlug: Map<string, CardSeedData>,
 ): Promise<void> {
-  const seedBySlug = new Map<string, CardSeedData>(
-    ALL_TAROT_CARDS.map((card) => [card.slug, card]),
-  );
-  validateCombinationSlugs(seedBySlug);
-
   const existingCards = await cardRepository.find();
   const updatedCards: EncyclopediaTarotCard[] = [];
+  let matchedCards = 0;
 
   for (const card of existingCards) {
     const seed = seedBySlug.get(card.slug);
     if (!seed) {
       continue;
     }
+    matchedCards++;
 
     let touched = false;
 
@@ -167,13 +197,15 @@ async function backfillExtendedContent(
   }
 
   if (updatedCards.length === 0) {
-    console.log('✅ Contenido extendido ya cargado en todas las cartas.');
+    console.log(
+      `✅ Contenido extendido ya cargado: ${matchedCards} de ${existingCards.length} carta(s) de la base reconocidas en el seed, ninguna con secciones pendientes.`,
+    );
     return;
   }
 
   await cardRepository.save(updatedCards);
   console.log(
-    `✅ Contenido extendido completado en ${updatedCards.length} carta(s).`,
+    `✅ Contenido extendido completado en ${updatedCards.length} de ${matchedCards} carta(s) reconocidas.`,
   );
 }
 

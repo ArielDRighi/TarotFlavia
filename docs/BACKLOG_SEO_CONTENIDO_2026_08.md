@@ -95,7 +95,7 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | # | Tarea | Est. | Por qué va ahí |
 | --- | --- | --- | --- |
 | 1 | ~~**T-DEUDA-003**~~ ✅ | 0,5 pts | Cerrada 19-ago-2026: producción sana, base local resincronizada |
-| 2 | ~~**T-SEO-009 + la parte de tarot de T-SEO-013**~~ ✅ | 5 pts | Cerrada 20-ago-2026: 78 fichas cargadas, promedio 672 palabras |
+| 2 | ~~**T-SEO-009 + la parte de tarot de T-SEO-013**~~ ✅ | 5 pts | Cerrada 20-ago-2026: 78 fichas cargadas, promedio 676 palabras |
 | 3 | **T-SEO-011** | 2 pts | En paralelo, durante la revisión humana de las 78 fichas |
 | 4 | **T-SEO-010** | 2 pts | Necesita el contenido de 009 cargado para verificar |
 | 5 | **Resto de T-SEO-013** | ~1,5 pts | Carta astral, numerología, prompts de IA, guardarraíl |
@@ -287,8 +287,8 @@ T-SEO-008.
 ### Criterios de aceptación
 
 - [x] Las 78 fichas superan las **500 palabras propias**. Medido sobre la base de desarrollo ya
-      cargada: **mínimo 579** (`five-of-swords`), **promedio 672**, máximo 824. El promedio de la
-      sección pasa de 166 a ~672. ⚠️ La verificación con
+      cargada: **mínimo 579** (`five-of-swords`), **promedio 676**, máximo 834. El promedio de la
+      sección pasa de 166 a ~676. ⚠️ La verificación con
       `npm run check:indexable -- --base-url <host> --min-words 500` **queda pendiente hasta
       T-SEO-010**: hoy el frontend no renderiza las secciones nuevas, así que el HTML servido sigue
       mostrando 166 palabras por ficha por más que la base esté cargada.
@@ -297,7 +297,7 @@ T-SEO-008.
 - [x] Los párrafos no se repiten entre cartas. Tres tests de unicidad: por sección, por lectura de
       combinación y por oración de 8+ palabras entre secciones de cartas distintas.
 - [x] Cada `combinations[].cardSlug` resuelve a una carta existente. Verificado también en SQL contra
-      la base cargada: 0 referencias muertas sobre 316 combinaciones.
+      la base cargada: 0 referencias muertas sobre 318 combinaciones, y ninguna de las 78 fichas queda sin enlaces entrantes.
 - [x] `grep -i salud` sobre el contenido nuevo no devuelve nada, y tampoco sobre los datos base de las
       78 cartas (ver la parte de tarot de T-SEO-013, más abajo).
 
@@ -322,11 +322,50 @@ T-SEO-008.
 - **El guardarraíl de esta tarea es el test de datos, no `check:indexable`.** El crawler no puede ver
   contenido que el frontend todavía no renderiza.
 
+### Lo que encontró la revisión automática (y se corrigió)
+
+Se pasaron dos revisores sobre el PR —uno de código y uno editorial— antes de darlo por cerrado.
+Lo que salió, porque es lo que conviene mirar primero en la revisión humana:
+
+- **El seeder validaba los slugs de combinaciones solo en el camino equivocado.** `validateCombinationSlugs()`
+  vivía dentro del backfill, que corre únicamente cuando la base ya tiene cartas. En una base **vacía**
+  —el único momento en que las combinaciones se escriben por primera vez— no se validaba nada. Ahora
+  corre al principio de la función, antes de cualquier I/O, y cubre los dos caminos.
+- **Quedaban 15 restos de voseo** después de la normalización a tuteo, más dos `con ti` que dejó el
+  script de normalización. Corregidos y verificados con un barrido exhaustivo.
+- **Tres errores factuales de Rider-Waite**: la Rueda de la Fortuna fusionaba a Hermanubis con Tifón e
+  invertía los lados; el Siete de Copas contaba dos veces la figura velada y se comía el dragón; el
+  Sol tenía los girasoles mirando al sol en vez de al niño. Más cuatro superlativos ("la única carta
+  del mazo que…") que el propio corpus contradecía.
+- **Vocabulario clínico que el test no cubría** —*ansiedad, terapia, lesiones, curación*— en ocho
+  pasajes, y dos secciones de bienestar que funcionaban como pronóstico. Reescritos, y el test ahora
+  también bloquea *ansiedad, depresión, insomnio, trauma, terapia, lesión y adicción*. `sanar` y
+  `sanación` quedan permitidas a propósito: son el vocabulario del corpus ya publicado y de los
+  insumos de `docs/prompts_enciclopedia/`.
+- **El 95 % de los `meaningWork` cerraba con la misma fórmula** ("En el dinero indica…"). Bajó al
+  33 %, repartido entre cinco variantes.
+- **Seis fichas no recibían ningún enlace entrante** desde las combinaciones —`wheel-of-fortune`,
+  `page-of-wands`, `page-of-cups`, `knight-of-swords`, `queen-of-swords`, `knight-of-pentacles`—, lo
+  que en una tarea de SEO deja media función del bloque sin cumplir, porque T-SEO-010 convierte cada
+  combinación en un `<Link>` interno. Se agregó una quinta combinación a seis Mayores y un test que
+  falla si alguna ficha vuelve a quedar huérfana.
+- **El test de unicidad no miraba las combinaciones.** Ahora sí, y sacó a la luz cuatro solapamientos
+  textuales entre pares recíprocos, reescritos para que cada lado mire desde su propia carta.
+
 ### Lo que queda pendiente
 
 - **La revisión editorial humana de las 78 fichas.** Es el criterio no negociable del alcance y el
-  único que ningún test cubre. Hacerla antes del deploy.
+  único que ningún test cubre. Hacerla antes del deploy. Dos cosas para mirar con atención, que la
+  revisión automática marcó y no se resolvieron del todo:
+  - **El registro léxico.** Se normalizaron los marcadores más frecuentes (`acá` → `aquí` ×38,
+    `envión` → `impulso` ×9), pero el corpus nuevo sigue siendo más conversacional que el existente,
+    que es formal y esotérico. Cuando T-SEO-010 renderice `meaningUpright` y `meaningLove` en la
+    misma página, la diferencia de tono se va a notar. Es una decisión editorial, no técnica.
+  - **Muletillas de estructura**: `El ánimo…` abre el 73 % de los `meaningWellbeing` y `Si estás sin
+    pareja…` cierra el 38 % de los `meaningLove`.
 - **`check:indexable -- --min-words 500`**, después de T-SEO-010 y del deploy.
+- **Cobertura**: `package.json` excluye `src/database/seeds/**` de `collectCoverageFrom`, así que las
+  ~130 líneas nuevas del seeder tienen spec pero **no** cuentan para el gate del 80 %.
 
 ### Notas
 
@@ -543,6 +582,14 @@ sembrado en la base de producción:
   exacta, acotados por slug, de modo que si el panel de admin reescribió esa ficha el `LIKE` no
   matchea y la migración no toca nada. `up` y `down` verificados contra la base de desarrollo con las
   78 cartas cargadas. Las 7 secciones nuevas nacen sin la palabra y hay un test que lo sostiene.
+- **Lo que las fichas de tarot todavía tienen y NO entra por el grep de "salud".** Medido al revisar
+  T-SEO-009: `major-arcana.data.ts` y `minor-arcana.data.ts` contienen `ansiedad`, `ansiedades`,
+  `traumas`, `dependencia emocional`, `síndrome del nido vacío`, `sanar problemas de imagen corporal`
+  y `psique` en los `meaningReversed` — texto que **hoy se renderiza en producción**. Es el mismo
+  riesgo YMYL que motivó la regla, pero por vocabulario clínico y no por la palabra "salud", así que
+  ningún criterio de aceptación actual lo atrapa. El contenido nuevo de T-SEO-009 sí está cubierto:
+  su test bloquea *ansiedad, depresión, insomnio, trauma, terapia, lesión y adicción*. Conviene
+  extender ese criterio al resto del corpus cuando se retome esta tarea.
 - **Se hizo un cambio de terminología no previsto en la lista original:** la palabra en las fichas de
   tarot no era el rubro "salud" sino *saludo* y *saludable*. Vale la pena tenerlo en cuenta al barrer
   los archivos que faltan: el grep del criterio de aceptación no distingue el sentido, así que en el
