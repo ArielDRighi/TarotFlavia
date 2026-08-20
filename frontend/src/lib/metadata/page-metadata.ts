@@ -246,7 +246,7 @@ export function getHoroscopeSignMetadata(sign: ZodiacSign): Metadata {
 
   return buildPageMetadata({
     title: `Horóscopo de ${nameEs} Hoy`,
-    description: `El horóscopo de hoy para ${nameEs} ${symbol}: amor, trabajo, salud y la energía que marca el día para el signo.`,
+    description: `El horóscopo de hoy para ${nameEs} ${symbol}: amor, trabajo, energía y bienestar, y el clima que marca el día para el signo.`,
     canonical: ROUTES.HOROSCOPO_SIGN(sign),
   });
 }

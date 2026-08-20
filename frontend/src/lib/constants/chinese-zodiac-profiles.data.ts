@@ -221,7 +221,7 @@ export const CHINESE_ZODIAC_PROFILES: Record<ChineseZodiacAnimal, ChineseZodiacP
     challenges: ['Evita confrontar', 'Susceptibilidad', 'Indecisión', 'Se guarda las molestias'],
     love: 'Busca ternura, previsibilidad y un vínculo sin sobresaltos. Es un compañero atento a los detalles chicos, pero se aleja en silencio si siente dureza o brusquedad sostenida en el trato cotidiano.',
     career:
-      'Funciona muy bien en diseño, salud, educación, mediación, atención al público, diplomacia y todo lo que requiera trato fino con personas. Prefiere ambientes cordiales y estables, donde su cuidado del detalle no compita contra la urgencia permanente.',
+      'Funciona muy bien en diseño, cuidado de personas, educación, mediación, atención al público, diplomacia y todo lo que requiera trato fino con personas. Prefiere ambientes cordiales y estables, donde su cuidado del detalle no compita contra la urgencia permanente.',
     compatibility: {
       best: [ChineseZodiacAnimal.GOAT, ChineseZodiacAnimal.PIG, ChineseZodiacAnimal.DOG],
       challenging: [ChineseZodiacAnimal.ROOSTER],
@@ -470,7 +470,7 @@ export const CHINESE_ZODIAC_PROFILES: Record<ChineseZodiacAnimal, ChineseZodiacP
     challenges: ['Pesimismo', 'Ansiedad', 'Rigidez moral', 'Cuesta perdonar'],
     love: 'Ama de manera estable y sin dobleces, con una entrega que se prueba en los tramos difíciles. Necesita seguridad y transparencia; la duda instalada lo desgasta más que cualquier conflicto abierto.',
     career:
-      'Encuentra sentido en el derecho, la docencia, la salud, la seguridad, el trabajo social, el sindicalismo y las causas colectivas. Trabaja con integridad aun sin supervisión y se vuelve el referente ético informal de su equipo.',
+      'Encuentra sentido en el derecho, la docencia, el acompañamiento terapéutico, la seguridad, el trabajo social, el sindicalismo y las causas colectivas. Trabaja con integridad aun sin supervisión y se vuelve el referente ético informal de su equipo.',
     compatibility: {
       best: [ChineseZodiacAnimal.TIGER, ChineseZodiacAnimal.HORSE, ChineseZodiacAnimal.RABBIT],
       challenging: [ChineseZodiacAnimal.DRAGON],

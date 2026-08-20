@@ -18,9 +18,13 @@ interface PendulumBlockedContentProps {
 }
 
 const CATEGORY_MESSAGES: Record<string, { title: string; recommendation: string }> = {
+  // La clave `salud` es el identificador que devuelve el validador del backend
+  // y NO se toca: es lo que detecta y bloquea la pregunta. Lo que cambia es el
+  // texto visible — la salvaguarda queda igual de firme, y más precisa
+  // (T-SEO-013).
   salud: {
-    title: 'Tema de Salud Detectado',
-    recommendation: 'Te recomendamos consultar con un profesional de la salud.',
+    title: 'Tema Médico Detectado',
+    recommendation: 'Te recomendamos consultar con un profesional de la medicina.',
   },
   legal: {
     title: 'Tema Legal Detectado',

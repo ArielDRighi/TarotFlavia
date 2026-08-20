@@ -56,8 +56,11 @@ export const HouseMetadata: Record<
   },
   [House.SIXTH]: {
     name: 'Casa VI',
-    theme: 'Trabajo y Salud',
-    keywords: ['trabajo', 'salud', 'rutina', 'servicio'],
+    // "Salud" no aparece en texto visible del sitio: una carta astral que
+    // habla de la salud del consultante se lee como consejo médico (YMYL).
+    // Ver T-SEO-013.
+    theme: 'Trabajo y Bienestar',
+    keywords: ['trabajo', 'bienestar', 'rutina', 'servicio'],
   },
   [House.SEVENTH]: {
     name: 'Casa VII',

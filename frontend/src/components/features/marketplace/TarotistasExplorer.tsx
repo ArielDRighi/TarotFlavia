@@ -8,6 +8,7 @@ import { TarotistaCard } from './TarotistaCard';
 import { SkeletonCard } from '@/components/ui/skeleton-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { specialtyLabel } from '@/lib/constants/marketplace';
 import { cn } from '@/lib/utils';
 import type { PaginatedTarotistas } from '@/types';
 
@@ -106,7 +107,7 @@ export function TarotistasExplorer({ onViewProfile, initialTarotistas }: Tarotis
                     : 'hover:border-primary hover:text-primary border border-gray-300 text-gray-700'
                 )}
               >
-                {specialty}
+                {specialtyLabel(specialty)}
               </button>
             );
           })}

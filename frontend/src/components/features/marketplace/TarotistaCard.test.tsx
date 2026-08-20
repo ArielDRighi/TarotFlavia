@@ -145,9 +145,10 @@ describe('TarotistaCard', () => {
       const carreraBadge = screen.getByText('Carrera');
       expect(carreraBadge).toHaveClass('bg-blue-100');
 
-      // Orange for Salud
-      const saludBadge = screen.getByText('Salud');
-      expect(saludBadge).toHaveClass('bg-orange-100');
+      // Orange for Salud — el badge se muestra como "Energía y Bienestar"
+      // (T-SEO-013) pero conserva el color de la especialidad guardada.
+      const bienestarBadge = screen.getByText('Energía y Bienestar');
+      expect(bienestarBadge).toHaveClass('bg-orange-100');
 
       // Purple for Espiritual
       const espiritualBadge = screen.getByText('Espiritual');

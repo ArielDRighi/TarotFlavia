@@ -45,7 +45,10 @@ export function PendulumDisclaimer({ open, onAccept, onCancel }: PendulumDisclai
                 tradiciones espirituales ancestrales.
               </p>
               <ul className="list-disc space-y-1 pl-4">
-                <li>No sustituye el consejo de profesionales de salud, legales o financieros</li>
+                <li>
+                  No sustituye el consejo de profesionales de la medicina, del derecho o de las
+                  finanzas
+                </li>
                 <li>Las respuestas son generadas aleatoriamente</li>
                 <li>No debe usarse para tomar decisiones importantes</li>
               </ul>
