@@ -9,6 +9,8 @@ import {
 import { MAJOR_ARCANA_DATA } from './major-arcana.data';
 import { MINOR_ARCANA_DATA } from './minor-arcana.data';
 import { getCardRelations } from './card-relations.data';
+import { CARD_EXTENDED_CONTENT } from './card-extended-content.data';
+import { CardCombinationSeed } from './extended/card-extended-content.types';
 
 /**
  * Interfaz de datos para sembrar una carta del Tarot
@@ -35,6 +37,17 @@ export interface CardSeedData {
   };
   imageUrl: string;
   relatedCards?: number[] | null;
+
+  // --- Contenido extendido (T-SEO-008 / T-SEO-009) --------------------------
+  // Se inyecta desde CARD_EXTENDED_CONTENT al armar ALL_TAROT_CARDS; por eso
+  // es opcional acá y obligatorio en CardExtendedContent.
+  meaningLove?: string;
+  meaningWork?: string;
+  meaningWellbeing?: string;
+  symbolism?: string;
+  advice?: string;
+  yesNo?: string;
+  combinations?: CardCombinationSeed[];
 }
 
 /**
@@ -55,4 +68,5 @@ export const ALL_TAROT_CARDS: CardSeedData[] = [
 ].map((card) => ({
   ...card,
   relatedCards: card.relatedCards ?? getCardRelations(card.slug),
+  ...(CARD_EXTENDED_CONTENT[card.slug] ?? {}),
 }));
