@@ -231,6 +231,13 @@ export const STATIC_PAGE_METADATA = {
       'Las condiciones de uso de Auguria: cuentas, suscripciones, pagos y responsabilidades del servicio.',
     canonical: ROUTES.TERMINOS,
   }),
+
+  sobreNosotros: buildPageMetadata({
+    title: 'Sobre Nosotros',
+    description:
+      'Quiénes escriben Auguria, con qué trayectoria y criterio se produce la enciclopedia, y qué límites tiene lo que ofrecemos.',
+    canonical: ROUTES.SOBRE_NOSOTROS,
+  }),
 } satisfies Record<string, Metadata>;
 
 // ─── Rutas públicas dinámicas ─────────────────────────────────────────────────

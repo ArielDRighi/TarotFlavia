@@ -77,7 +77,7 @@ Conviene dejarlo escrito para no volver a auditar lo mismo:
 | T-SEO-008 | Modelo de contenido extendido para las fichas de tarot | Backend | 🔴 Crítica | 2 pts | ✅ Completada |
 | T-SEO-009 | Redactar y cargar el contenido de las 78 fichas | Contenido | 🔴 Crítica | 5 pts | ✅ Completada |
 | T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts | ⬜ Pendiente |
-| T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts | ⬜ Pendiente |
+| T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
 | T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts | ⬜ Pendiente |
 | T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts | 🟡 Parcial |
 
@@ -96,7 +96,7 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | --- | --- | --- | --- |
 | 1 | ~~**T-DEUDA-003**~~ ✅ | 0,5 pts | Cerrada 19-ago-2026: producción sana, base local resincronizada |
 | 2 | ~~**T-SEO-009 + la parte de tarot de T-SEO-013**~~ ✅ | 5 pts | Cerrada 20-ago-2026: 78 fichas cargadas, promedio 676 palabras |
-| 3 | **T-SEO-011** | 2 pts | En paralelo, durante la revisión humana de las 78 fichas |
+| 3 | ~~**T-SEO-011**~~ ✅ | 2 pts | Cerrada 23-ago-2026: `/sobre-nosotros` sirve 1166 palabras propias |
 | 4 | **T-SEO-010** | 2 pts | Necesita el contenido de 009 cargado para verificar |
 | 5 | **Resto de T-SEO-013** | ~1,5 pts | Carta astral, numerología, prompts de IA, guardarraíl |
 | 6 | **Deploy + verificación en producción + Search Console** | — | Recién ahí se pide la revisión |
@@ -104,8 +104,8 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | 8 | T-DEUDA-002 | 1 pt | Los 2 índices reales de `sessions` |
 | 9 | T-DEUDA-001 | 2 pts | El más largo y el menos urgente |
 
-**Hasta poder pedir la tercera revisión: ~11 pts** (009 + 011 + 010 + resto de 013). El medio punto
-de T-DEUDA-003 ya está gastado.
+**Hasta poder pedir la tercera revisión: ~3,5 pts** (010 + resto de 013). Los 5 pts de T-SEO-009, los
+2 de T-SEO-011 y el medio de T-DEUDA-003 ya están gastados.
 
 ### Por qué este orden y no el obvio
 
@@ -444,31 +444,65 @@ directa en las guías de calidad de Google (E-E-A-T: *Experience, Expertise, Aut
 Trustworthiness*). Un revisor humano de AdSense que no puede identificar al autor de un sitio de
 consulta espiritual tiene un motivo más para marcarlo como de poco valor.
 
+**Estado:** ✅ COMPLETADA (23-ago-2026)
+
 ### Alcance
 
-- [ ] Página `/sobre-nosotros`, estática, **600+ palabras propias**: quién es Flavia, su formación y
+- [x] Página `/sobre-nosotros`, estática, **600+ palabras propias**: quién está detrás del sitio, su
       trayectoria, cómo trabaja, qué enfoque tiene con el tarot y la astrología, por qué existe
-      Auguria y cómo se produce el contenido de la enciclopedia.
-- [ ] Foto real. Una imagen de stock es peor que ninguna.
-- [ ] Enlace en el footer, en el bloque de enlaces legales, junto a *Contacto*.
-- [ ] Alta en `sitemap.xml` (sale sola si se agrega a las rutas estáticas de `buildSitemap`).
-- [ ] **NO** agregarla a `DISALLOWED_PATHS` de `robots.ts` — es de las que más queremos que se
-      indexen.
-- [ ] Datos estructurados `Person`/`Organization` (JSON-LD) en la página, enlazados desde el
-      `Organization` del sitio.
-- [ ] Firma de autoría visible en las guías de la enciclopedia (las 8 de `/enciclopedia/guias`), que
-      son el contenido editorial más extenso que hay.
+      Auguria y cómo se produce el contenido de la enciclopedia. **Sirve 1166 palabras propias.**
+- [x] ~~Foto real~~ → **decisión del dueño del producto: sin foto de personas.** El sitio se
+      presenta como equipo y no nombra a nadie, así que no hay retrato posible; una imagen de stock
+      haciendo de "nuestro equipo" es peor señal que ninguna. La identidad visual la aporta la marca
+      (`/images/logo-auguria.webp`).
+- [x] Enlace en el footer, en el bloque de enlaces legales, junto a *Contacto*.
+- [x] Alta en `sitemap.xml` (`STATIC_ROUTES` de `buildSitemap`, priority 0.6, monthly).
+- [x] **NO** se agregó a `DISALLOWED_PATHS` de `robots.ts`.
+- [x] Datos estructurados JSON-LD en la página: `Organization` (esta es su fuente canónica) +
+      `AboutPage`, que lo referencia por `@id` en vez de duplicarlo. **`Person` NO se emite**, por
+      la misma decisión de arriba.
+- [x] Firma de autoría visible en las guías de la enciclopedia (`AuthorByline` en
+      `ArticleDetailView`, condicionada a `isGuide`).
 
 ### Criterios de aceptación
 
-- [ ] `/sobre-nosotros` supera 600 palabras propias medidas con el guardarraíl.
-- [ ] Se llega desde el footer de cualquier página con un `<a href>` real.
-- [ ] El JSON-LD valida en el Rich Results Test de Google.
+- [x] `/sobre-nosotros` supera 600 palabras propias medidas con el guardarraíl →
+      **1166 palabras**, la URL con más contenido propio del sitio (`check:indexable`, 17/17 ✅).
+- [x] Se llega desde el footer de cualquier página con un `<a href>` real.
+- [ ] El JSON-LD valida en el Rich Results Test de Google → **verificable recién en producción**:
+      el test de Google necesita una URL pública. Los tests cubren el shape, las URLs absolutas y
+      el enlace por `@id`; la validación final va con el deploy.
 
-### Notas
+### Decisiones de implementación
 
-Es la tarea de mejor relación esfuerzo/impacto de las seis: una página y un enlace. Se puede hacer
-en paralelo con T-SEO-009, que es la larga.
+- **El sitio se presenta como equipo, sin nombres propios.** Decisión del dueño del producto. El
+  guardarraíl de contenido lo verifica (`about-page.data.test.ts` falla si aparece un nombre
+  personal), para que no se cuele en una edición posterior.
+- **Trayectoria declarada:** *más de una década de práctica acumulada* en tarot, astrología,
+  numerología, péndulo, horóscopo chino y rituales. Dato confirmado por el dueño del producto — es
+  una página de confianza y una credencial inventada la vuelve contraproducente.
+- **El texto vive en `about-page.data.ts`,** no en el JSX: mismo criterio que
+  `listing-intros.data.ts` (T-SEO-003), así el guardarraíl mide las palabras y la unicidad sin
+  renderizar. Piso declarado: `MIN_ABOUT_PAGE_WORDS = 600`.
+- **`structured-data.ts` es nuevo:** el sitio no emitía ningún JSON-LD. El `Organization` queda
+  disponible para que otras rutas (fichas, artículos) lo referencien por `@id` en el futuro sin
+  volver a describirlo.
+- **La firma va solo en las guías.** Las fichas de astrología son datos de referencia, no piezas de
+  autor; firmarlas sería ruido.
+- **Terminología:** la página no usa la palabra "salud" (regla transversal, T-SEO-013).
+
+### Archivos
+
+| Archivo | Qué es |
+| --- | --- |
+| `src/lib/constants/about-page.data.ts` | Contenido + `MIN_ABOUT_PAGE_WORDS` + `getAboutPageWordCount` |
+| `src/lib/metadata/structured-data.ts` | Builders de `Organization` y `AboutPage` (JSON-LD) |
+| `src/components/common/JsonLd.tsx` | Emite el `<script type="application/ld+json">` |
+| `src/components/common/AuthorByline.tsx` | Firma de autoría del contenido editorial |
+| `src/components/features/about/AboutContent.tsx` | Maqueta de la página |
+| `src/app/sobre-nosotros/page.tsx` | Ruta estática + metadata + los dos bloques JSON-LD |
+
+Modificados: `routes.ts`, `page-metadata.ts`, `sitemap.ts`, `Footer.tsx`, `ArticleDetailView.tsx`.
 
 ---
 
