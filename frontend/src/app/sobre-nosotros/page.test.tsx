@@ -38,19 +38,25 @@ describe('SobreNosotrosPage', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ABOUT_PAGE.title);
   });
 
-  it('emite los dos bloques de JSON-LD (Organization y AboutPage)', () => {
+  /**
+   * El `Organization` vive en el layout raíz, no acá: así lo declara toda URL del
+   * sitio y no solo esta página hoja. Lo que emite la página es su `AboutPage`,
+   * que lo referencia por `@id`.
+   */
+  it('emite el JSON-LD de AboutPage, referenciando al Organization por @id', () => {
     const { container } = render(<SobreNosotrosPage />);
 
     const blocks = container.querySelectorAll('script[type="application/ld+json"]');
 
-    expect(blocks).toHaveLength(2);
+    expect(blocks).toHaveLength(1);
 
-    const types = Array.from(blocks).map(
-      (block) => (JSON.parse(block.textContent ?? '{}') as { '@type'?: string })['@type']
-    );
+    const jsonLd = JSON.parse(blocks[0].textContent ?? '{}') as {
+      '@type'?: string;
+      about?: { '@id'?: string };
+    };
 
-    expect(types).toContain('Organization');
-    expect(types).toContain('AboutPage');
+    expect(jsonLd['@type']).toBe('AboutPage');
+    expect(jsonLd.about?.['@id']).toBe('https://auguriatarot.com/#organization');
   });
 
   it('declara metadata propia con su canonical', () => {

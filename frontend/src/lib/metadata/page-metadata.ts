@@ -235,7 +235,7 @@ export const STATIC_PAGE_METADATA = {
   sobreNosotros: buildPageMetadata({
     title: 'Sobre Nosotros',
     description:
-      'Quiénes escriben Auguria, con qué trayectoria y criterio se produce la enciclopedia, y qué límites tiene lo que ofrecemos.',
+      'Quiénes escribimos Auguria, con qué trayectoria, cómo se produce el contenido de la enciclopedia y qué límites tiene lo que ofrecemos.',
     canonical: ROUTES.SOBRE_NOSOTROS,
   }),
 } satisfies Record<string, Metadata>;

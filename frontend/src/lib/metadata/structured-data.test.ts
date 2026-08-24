@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ABOUT_PAGE } from '@/lib/constants/about-page.data';
+import { CONFIG } from '@/lib/constants';
 import { ORGANIZATION_ID, buildAboutPageJsonLd, buildOrganizationJsonLd } from './structured-data';
 
 /**
@@ -55,6 +57,24 @@ describe('structured-data', () => {
     it('⚠️ no declara ninguna persona: el sitio se presenta como equipo', () => {
       expect(JSON.stringify(buildOrganizationJsonLd())).not.toMatch(/"Person"|Flavia/i);
     });
+
+    it('expone contacto verificable, que es de lo que AdSense mira', () => {
+      const jsonLd = buildOrganizationJsonLd();
+
+      expect(jsonLd.email).toBe(CONFIG.CONTACT_EMAIL);
+      expect(jsonLd.contactPoint['@type']).toBe('ContactPoint');
+      expect(jsonLd.contactPoint.email).toBe(CONFIG.CONTACT_EMAIL);
+    });
+
+    /**
+     * `inLanguage` está definida sobre `CreativeWork`, no sobre `Organization`:
+     * declararla acá la marca como propiedad desconocida del tipo.
+     */
+    it('⚠️ NO declara inLanguage: no es una propiedad válida de Organization', () => {
+      expect(JSON.parse(JSON.stringify(buildOrganizationJsonLd()))).not.toHaveProperty(
+        'inLanguage'
+      );
+    });
   });
 
   describe('buildAboutPageJsonLd', () => {
@@ -82,6 +102,10 @@ describe('structured-data', () => {
 
     it('sirve en español, que es el idioma del sitio', () => {
       expect(buildAboutPageJsonLd().inLanguage).toBe('es');
+    });
+
+    it('declara la última revisión editorial, tomada del contenido de la página', () => {
+      expect(buildAboutPageJsonLd().dateModified).toBe(ABOUT_PAGE.lastReviewed);
     });
   });
 

@@ -76,6 +76,28 @@ describe('ABOUT_PAGE', () => {
     expect(new Set(paragraphs).size).toBe(paragraphs.length);
   });
 
+  /**
+   * `AboutContent` usa estos campos como `key` de React. Si una edición futura
+   * repite uno, React colisiona las keys en silencio.
+   */
+  it('⚠️ no repite encabezados, términos ni hrefs: se usan como key de React', () => {
+    const headings = ABOUT_PAGE.sections.map((section) => section.heading);
+    const terms = ABOUT_PAGE.principles.map((principle) => principle.term);
+    const hrefs = ABOUT_PAGE.links.map((link) => link.href);
+
+    expect(new Set(headings).size).toBe(headings.length);
+    expect(new Set(terms).size).toBe(terms.length);
+    expect(new Set(hrefs).size).toBe(hrefs.length);
+  });
+
+  it('declara el encabezado del bloque de principios como dato, no en el JSX', () => {
+    expect(ABOUT_PAGE.principlesHeading.trim().length).toBeGreaterThan(0);
+  });
+
+  it('declara la última revisión editorial en formato YYYY-MM', () => {
+    expect(ABOUT_PAGE.lastReviewed).toMatch(/^\d{4}-(0[1-9]|1[0-2])$/);
+  });
+
   it('⚠️ no reusa texto de las introducciones de listado: sería contenido duplicado', () => {
     const listingParagraphs = new Set(
       Object.values(LISTING_INTROS).flatMap((intro) => [
@@ -108,5 +130,20 @@ describe('señales de autoría (E-E-A-T)', () => {
 
   it('⚠️ no nombra personas: el sitio se presenta como equipo', () => {
     expect(fullText).not.toMatch(/flavia/);
+  });
+
+  /**
+   * Estas dos aserciones existen por el hallazgo de la revisión de T-SEO-011: el
+   * texto afirmaba cosas que el producto no cumplía —una baraja que el sitio no
+   * tiene sembrada, y que la enciclopedia señala las discrepancias entre fuentes
+   * (no lo hace: no hay una sola cita en el corpus)—. En una página de confianza
+   * eso es peor que no tenerla, porque un revisor lo refuta en dos clics.
+   */
+  it('⚠️ no nombra el Tarot de Marsella: el único mazo sembrado es Rider-Waite', () => {
+    expect(fullText).not.toMatch(/marsella/);
+  });
+
+  it('⚠️ no promete citar fuentes ni señalar discrepancias entre ellas', () => {
+    expect(fullText).not.toMatch(/lo decimos en el texto|se aclara en lugar de/);
   });
 });

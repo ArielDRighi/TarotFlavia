@@ -1,8 +1,27 @@
 import { render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('next/image', () => ({
+  default: ({ src, alt, width, height, className }: Record<string, unknown>) => (
+    <img
+      src={String(src)}
+      alt={String(alt)}
+      width={String(width)}
+      height={String(height)}
+      className={String(className)}
+    />
+  ),
+}));
+
+vi.mock('next/link', () => ({
+  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
 
 import { AboutContent } from './AboutContent';
 import { ABOUT_PAGE } from '@/lib/constants/about-page.data';
+import { LOGO } from '@/lib/constants/branding';
 
 /**
  * `/sobre-nosotros` es la página de señales de autoría (T-SEO-011): lo que se
@@ -31,7 +50,7 @@ describe('AboutContent', () => {
     expect(screen.getByText(ABOUT_PAGE.lead)).toBeInTheDocument();
   });
 
-  it('renderiza cada sección como h2, sin saltos de jerarquía', () => {
+  it('renderiza cada sección como h2', () => {
     render(<AboutContent />);
 
     const h2s = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
@@ -39,6 +58,23 @@ describe('AboutContent', () => {
     ABOUT_PAGE.sections.forEach((section) => {
       expect(h2s).toContain(section.heading);
     });
+    expect(h2s).toContain(ABOUT_PAGE.principlesHeading);
+  });
+
+  it('no salta niveles de encabezado: solo hay h1 y h2', () => {
+    const { container } = render(<AboutContent />);
+
+    expect(container.querySelectorAll('h1')).toHaveLength(1);
+    expect(container.querySelectorAll('h2').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('h3, h4, h5, h6')).toHaveLength(0);
+  });
+
+  it('muestra la fecha de la última revisión editorial en español', () => {
+    render(<AboutContent />);
+
+    expect(screen.getByTestId('about-last-reviewed')).toHaveTextContent(
+      /Última revisión editorial: [a-zá-ú]+ de \d{4}/i
+    );
   });
 
   it('renderiza todos los párrafos de todas las secciones', () => {
@@ -76,9 +112,15 @@ describe('AboutContent', () => {
     expect(screen.getByText(ABOUT_PAGE.closing)).toBeInTheDocument();
   });
 
-  it('muestra la marca sin retratar a nadie: logo con alt descriptivo', () => {
+  it('muestra la marca sin retratar a nadie, con las dimensiones reales del logo', () => {
     render(<AboutContent />);
 
-    expect(screen.getByAltText(/auguria/i)).toBeInTheDocument();
+    const logo = screen.getByAltText(/auguria/i);
+
+    expect(logo).toBeInTheDocument();
+    // El archivo es apaisado (655×386): declararlo cuadrado lo dibujaba
+    // letterboxed dentro de la caja y se veía más chico de lo previsto.
+    expect(logo).toHaveAttribute('width', String(LOGO.width));
+    expect(logo).toHaveAttribute('height', String(LOGO.height));
   });
 });

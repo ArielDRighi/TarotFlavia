@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 import { CardDetailView } from './CardDetailView';
 import { ArcanaType, Element } from '@/types/encyclopedia.types';
@@ -133,6 +133,23 @@ describe('CardDetailView', () => {
       const related = screen.getByTestId('related-cards-mock');
       expect(related).toBeInTheDocument();
       expect(related).toHaveAttribute('data-slug', 'the-fool');
+    });
+  });
+
+  /**
+   * T-SEO-011: desde T-SEO-009 las 78 fichas promedian 676 palabras de texto de
+   * autor, así que son contenido editorial y llevan firma — no son datos de
+   * referencia como las fichas de signos o planetas.
+   */
+  describe('Author byline (T-SEO-011)', () => {
+    it('firma la ficha y enlaza a /sobre-nosotros', () => {
+      render(<CardDetailView card={createTestCard()} />);
+
+      const byline = screen.getByTestId('author-byline');
+
+      expect(byline).toBeInTheDocument();
+      expect(byline).toHaveTextContent(/equipo editorial de auguria/i);
+      expect(within(byline).getByRole('link')).toHaveAttribute('href', '/sobre-nosotros');
     });
   });
 });

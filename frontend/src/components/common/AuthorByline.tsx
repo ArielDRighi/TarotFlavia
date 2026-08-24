@@ -16,8 +16,10 @@ import { cn } from '@/lib/utils';
  * personas —el sitio se presenta como equipo— pero enlaza a `/sobre-nosotros`,
  * donde se explica quién escribe y con qué criterio.
  *
- * Sin `'use client'`: es contenido que tiene que llegar al crawler en el HTML
- * inicial, y no tiene estado ni handlers.
+ * Sin `'use client'` propio: no tiene estado ni handlers. Hoy sus consumidores
+ * (`ArticleDetailView`, `CardDetailView`) sí son client components, así que la
+ * firma viaja en su bundle — llega igual al HTML inicial porque Next SSR-ea los
+ * client components, pero el componente no depende de eso.
  *
  * @example
  * ```tsx
@@ -43,8 +45,8 @@ export function AuthorByline({ className }: AuthorBylineProps) {
         >
           equipo editorial de Auguria
         </Link>
-        , que practica tarot, astrología, numerología y péndulo desde hace más de una década. El
-        contenido se revisa de forma periódica y se corrige cuando hace falta.
+        , con más de una década de práctica acumulada en tarot, astrología, numerología y péndulo.
+        El contenido se revisa de forma periódica y se corrige cuando hace falta.
       </p>
     </aside>
   );

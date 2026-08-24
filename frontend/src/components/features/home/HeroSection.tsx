@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { LOGO } from '@/lib/constants/branding';
 import { ROUTES } from '@/lib/constants/routes';
 import { Sparkles, Star } from 'lucide-react';
 
@@ -42,10 +43,10 @@ export function HeroSection() {
       {/* Brand logo — top left */}
       <div className="absolute top-6 left-6 z-10 md:top-8 md:left-10">
         <Image
-          src="/images/logo-auguria.webp"
+          src={LOGO.path}
           alt="Auguria"
-          width={655}
-          height={386}
+          width={LOGO.width}
+          height={LOGO.height}
           className="h-20 w-auto drop-shadow-lg md:h-[6.5rem]"
           priority
         />

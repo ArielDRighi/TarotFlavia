@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 // 6. Utils & types
 import { ABOUT_PAGE } from '@/lib/constants/about-page.data';
+import { LOGO } from '@/lib/constants/branding';
 import { cn } from '@/lib/utils';
 
 /**
@@ -26,12 +27,45 @@ import { cn } from '@/lib/utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const LOGO = {
-  src: '/images/logo-auguria.webp',
-  alt: 'Logo de Auguria',
-  width: 96,
-  height: 96,
-} as const;
+/**
+ * El logo es apaisado (655×386). Declararlo cuadrado lo dibujaba letterboxed
+ * dentro de una caja de 80×80 —y con un `rounded-full` que no recortaba nada—,
+ * así que la única imagen de la página se veía bastante más chica de lo que el
+ * código sugería.
+ */
+const LOGO_ALT = 'Auguria';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Nombres de mes en español, para no depender del locale del runtime. */
+const MONTH_NAMES = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+];
+
+/**
+ * Formatea `YYYY-MM` como "agosto de 2026".
+ *
+ * Sin construir un `Date`: un `new Date('2026-08')` es medianoche UTC y en
+ * UTC-3 retrocede al mes anterior — el mismo bug de zona horaria que ya mordió
+ * dos veces con las fechas de nacimiento.
+ */
+function formatReviewDate(isoMonth: string): string {
+  const [year, month] = isoMonth.split('-');
+  const monthName = MONTH_NAMES[Number(month) - 1];
+
+  return monthName ? `${monthName} de ${year}` : year;
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,7 +77,7 @@ export interface AboutContentProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function AboutContent({ className }: AboutContentProps) {
-  const { title, lead, sections, principles, closing, links } = ABOUT_PAGE;
+  const { title, lead, sections, principlesHeading, principles, closing, links } = ABOUT_PAGE;
 
   return (
     <article
@@ -54,11 +88,11 @@ export function AboutContent({ className }: AboutContentProps) {
         {/* Cabecera: marca + título + bajada */}
         <header className="space-y-5 text-center">
           <Image
-            src={LOGO.src}
-            alt={LOGO.alt}
+            src={LOGO.path}
+            alt={LOGO_ALT}
             width={LOGO.width}
             height={LOGO.height}
-            className="mx-auto h-20 w-20 rounded-full object-contain"
+            className="mx-auto h-20 w-auto"
             priority
           />
           <h1 className="text-foreground font-serif text-4xl font-bold sm:text-5xl">{title}</h1>
@@ -83,9 +117,7 @@ export function AboutContent({ className }: AboutContentProps) {
 
         {/* Principios editoriales */}
         <section data-testid="about-principles" className="border-border mt-12 border-t pt-10">
-          <h2 className="text-foreground font-serif text-2xl font-semibold">
-            Nuestros compromisos editoriales
-          </h2>
+          <h2 className="text-foreground font-serif text-2xl font-semibold">{principlesHeading}</h2>
           <dl className="mt-6 space-y-5">
             {principles.map((principle) => (
               <div key={principle.term} className="border-border bg-card rounded-xl border p-5">
@@ -100,6 +132,12 @@ export function AboutContent({ className }: AboutContentProps) {
 
         {/* Cierre */}
         <p className="text-muted-foreground mt-10 leading-relaxed">{closing}</p>
+
+        {/* La página afirma que el contenido se revisa periódicamente; sin una
+            fecha a la vista, eso no lo puede verificar nadie. */}
+        <p data-testid="about-last-reviewed" className="text-muted-foreground mt-6 text-sm">
+          Última revisión editorial: {formatReviewDate(ABOUT_PAGE.lastReviewed)}
+        </p>
 
         {/* Enlaces internos: el crawler sigue recorriendo desde acá */}
         <nav

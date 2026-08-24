@@ -1,3 +1,6 @@
+import { ABOUT_PAGE } from '@/lib/constants/about-page.data';
+import { LOGO } from '@/lib/constants/branding';
+import { CONFIG } from '@/lib/constants';
 import { ROUTES } from '@/lib/constants/routes';
 import { getBaseUrl } from './base-url';
 
@@ -29,18 +32,26 @@ import { getBaseUrl } from './base-url';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /** Referencia a una entidad ya declarada en otro bloque, por su `@id`. */
-export interface SchemaReference {
+export type SchemaReference = {
   '@id': string;
-}
+};
 
 /** Imagen de schema.org (el logo del `Organization`). */
-export interface SchemaImageObject {
+export type SchemaImageObject = {
   '@type': 'ImageObject';
   url: string;
-}
+};
+
+/** Punto de contacto público de la organización. */
+export type SchemaContactPoint = {
+  '@type': 'ContactPoint';
+  contactType: string;
+  email: string;
+  availableLanguage: string;
+};
 
 /** `Organization` del sitio: la entidad que publica todo el contenido. */
-export interface OrganizationSchema {
+export type OrganizationSchema = {
   '@context': 'https://schema.org';
   '@type': 'Organization';
   '@id': string;
@@ -51,11 +62,19 @@ export interface OrganizationSchema {
   /** Áreas sobre las que el equipo produce contenido (señal E-E-A-T). */
   knowsAbout: string[];
   foundingDate: string;
-  inLanguage: string;
-}
+  /**
+   * Contacto verificable. AdSense lo enumera entre lo que busca en un sitio, y
+   * hasta ahora solo existía como `mailto:` en `/contacto`.
+   *
+   * `inLanguage` NO va acá: schema.org la define sobre `CreativeWork`, no sobre
+   * `Organization`. En `AboutPage` sí es válida.
+   */
+  email: string;
+  contactPoint: SchemaContactPoint;
+};
 
 /** `AboutPage`: el tipo que schema.org reserva para la página institucional. */
-export interface AboutPageSchema {
+export type AboutPageSchema = {
   '@context': 'https://schema.org';
   '@type': 'AboutPage';
   name: string;
@@ -66,7 +85,9 @@ export interface AboutPageSchema {
   about: SchemaReference;
   /** Quién la publica. Misma entidad, referenciada y no duplicada. */
   publisher: SchemaReference;
-}
+  /** Última revisión editorial del contenido, de `ABOUT_PAGE.lastReviewed`. */
+  dateModified: string;
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -79,8 +100,6 @@ export interface AboutPageSchema {
 export const ORGANIZATION_ID = '/#organization';
 
 const SITE_NAME = 'Auguria';
-
-const LOGO_PATH = '/images/logo-auguria.webp';
 
 /** Año en que el proyecto empezó a publicar. */
 const FOUNDING_DATE = '2025';
@@ -104,7 +123,12 @@ const KNOWS_ABOUT = [
 
 // ─── Builders ─────────────────────────────────────────────────────────────────
 
-/** `Organization` del sitio. Se emite en `/sobre-nosotros`, que es su fuente. */
+/**
+ * `Organization` del sitio. Se emite en el layout raíz, así que **toda** URL lo
+ * declara: si viviera solo en `/sobre-nosotros`, la entidad editora existiría
+ * para Google en una página hoja y las ~120 URLs de enciclopedia quedarían sin
+ * publisher declarado.
+ */
 export function buildOrganizationJsonLd(): OrganizationSchema {
   const baseUrl = getBaseUrl();
 
@@ -116,13 +140,19 @@ export function buildOrganizationJsonLd(): OrganizationSchema {
     url: `${baseUrl}/`,
     logo: {
       '@type': 'ImageObject',
-      url: `${baseUrl}${LOGO_PATH}`,
+      url: `${baseUrl}${LOGO.path}`,
     },
     description:
       'Equipo dedicado al tarot, la astrología, la numerología y el trabajo con péndulo, que publica una enciclopedia esotérica de acceso libre y acompaña consultas personales.',
     knowsAbout: KNOWS_ABOUT,
     foundingDate: FOUNDING_DATE,
-    inLanguage: LANGUAGE,
+    email: CONFIG.CONTACT_EMAIL,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: CONFIG.CONTACT_EMAIL,
+      availableLanguage: LANGUAGE,
+    },
   };
 }
 
@@ -141,5 +171,6 @@ export function buildAboutPageJsonLd(): AboutPageSchema {
     inLanguage: LANGUAGE,
     about: organizationReference,
     publisher: organizationReference,
+    dateModified: ABOUT_PAGE.lastReviewed,
   };
 }
