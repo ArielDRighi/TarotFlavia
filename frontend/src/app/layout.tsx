@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Lato } from 'next/font/google';
 import { ReactQueryProvider, AuthProvider } from '@/lib/providers';
+import { JsonLd } from '@/components/common/JsonLd';
+import { buildOrganizationJsonLd } from '@/lib/metadata/structured-data';
 import { Toaster } from '@/components/ui/toaster';
 import { AdSenseScript } from '@/components/features/ads';
 import { Header } from '@/components/layout/Header';
@@ -42,6 +44,12 @@ export default function RootLayout({
       <body
         className={`${cormorantGaramond.variable} ${lato.variable} bg-bg-main min-h-screen antialiased`}
       >
+        {/* `Organization` del sitio (T-SEO-011): va en el layout para que TODA URL
+            declare quién publica el contenido. Si viviera solo en
+            `/sobre-nosotros`, la entidad editora existiría para Google en una
+            página hoja y las fichas de enciclopedia quedarían sin publisher. Las
+            páginas que necesiten referenciarla usan su `@id`, no la repiten. */}
+        <JsonLd id="organization-jsonld" data={buildOrganizationJsonLd()} />
         <ReactQueryProvider>
           <AuthProvider>
             {/* El gating de AdSense NO depende de este árbol: `useAdsEnabled` exige

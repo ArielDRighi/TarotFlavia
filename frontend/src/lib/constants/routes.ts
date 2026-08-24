@@ -21,6 +21,7 @@ export const ROUTES = {
   CONTACTO: '/contacto',
   PRIVACIDAD: '/privacidad',
   TERMINOS: '/terminos',
+  SOBRE_NOSOTROS: '/sobre-nosotros',
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',

@@ -63,6 +63,12 @@ describe('buildSitemap', () => {
       expect(paths).toContain('/privacidad');
     });
 
+    it('incluye /sobre-nosotros: es de las que más queremos indexar (T-SEO-011)', async () => {
+      const paths = pathsOf(await buildSitemap());
+
+      expect(paths).toContain('/sobre-nosotros');
+    });
+
     it('NO incluye rutas privadas ni sin valor de búsqueda', async () => {
       const paths = pathsOf(await buildSitemap());
 

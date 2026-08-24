@@ -25,6 +25,7 @@
  * - `element`: el elemento fijo sale de `CHINESE_ZODIAC_INFO`, no se repite acá.
  */
 
+import { countWords } from '@/lib/utils/text';
 import { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
 /** Un rasgo de personalidad: término destacado + su explicación. */
@@ -529,7 +530,7 @@ export function getChineseZodiacProfile(animal: ChineseZodiacAnimal): ChineseZod
  */
 export function getProfileWordCount(animal: ChineseZodiacAnimal): number {
   const profile = CHINESE_ZODIAC_PROFILES[animal];
-  const text = [
+  return countWords([
     profile.tagline,
     ...profile.intro,
     ...profile.personality.flatMap((trait) => [trait.term, trait.description]),
@@ -537,11 +538,5 @@ export function getProfileWordCount(animal: ChineseZodiacAnimal): number {
     ...profile.challenges,
     profile.love,
     profile.career,
-  ].join(' ');
-
-  return text
-    .replace(/\s+/g, ' ')
-    .trim()
-    .split(' ')
-    .filter((word) => word.length > 0).length;
+  ]);
 }

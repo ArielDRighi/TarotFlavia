@@ -171,3 +171,21 @@ export function extractAstroHeadings(content: string): ArticleHeading[] {
   }
   return headings;
 }
+
+/**
+ * Cuenta las palabras de un conjunto de fragmentos de texto.
+ *
+ * Es la cuenta que usan los **guardarraíles de contenido indexable** de las
+ * rutas estáticas (T-SEO-002, T-SEO-003, T-SEO-011): si alguien recorta un
+ * bloque por debajo de su piso, el test falla en CI y no en el próximo rechazo
+ * de AdSense. Vivía duplicada en tres archivos de datos con tres variantes de la
+ * misma expresión; centralizarla evita que las mediciones diverjan.
+ *
+ * @param parts - Fragmentos a medir (párrafos, descripciones, etc.).
+ * @returns Cantidad de palabras, ignorando espacios repetidos y strings vacíos.
+ * @example
+ * countWords(['dos palabras', '  ']) // 2
+ */
+export function countWords(parts: string[]): number {
+  return parts.join(' ').trim().split(/\s+/).filter(Boolean).length;
+}

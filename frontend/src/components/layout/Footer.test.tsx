@@ -99,6 +99,16 @@ describe('Footer', () => {
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/contacto');
     });
+
+    // T-SEO-011: la página de autoría se alcanza desde el footer de cualquier
+    // página, con un <a href> real, junto a los enlaces legales.
+    it('should render "Sobre Nosotros" link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /sobre nosotros/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/sobre-nosotros');
+    });
   });
 
   describe('Styling', () => {

@@ -8,6 +8,7 @@ import { CardMeaning } from './CardMeaning';
 import { CardMetadata } from './CardMetadata';
 import { CardNavigation } from './CardNavigation';
 import { RelatedCards } from './RelatedCards';
+import { AuthorByline } from '@/components/common/AuthorByline';
 
 export interface CardDetailViewProps {
   card: CardDetail;
@@ -42,6 +43,11 @@ export function CardDetailView({ card }: CardDetailViewProps) {
 
       {/* Palabras clave */}
       <CardKeywords keywords={card.keywords} />
+
+      {/* Firma de autoría (T-SEO-011). Las 78 fichas promedian 676 palabras de
+          texto de autor desde T-SEO-009, así que son contenido editorial y no
+          datos de referencia: van firmadas, igual que las guías. */}
+      <AuthorByline />
 
       {/* Cartas relacionadas */}
       <RelatedCards slug={card.slug} />

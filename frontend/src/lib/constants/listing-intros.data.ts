@@ -18,6 +18,7 @@
  * `listing-intros.data.test.ts` lo verifica, igual que el mínimo de palabras.
  */
 
+import { countWords } from '@/lib/utils/text';
 import { ROUTES } from './routes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -76,11 +77,7 @@ export const MIN_LISTING_INTRO_WORDS = 130;
 
 /** Palabras propias que aporta una introducción (lead + cuerpo de secciones). */
 export function getListingIntroWordCount(intro: ListingIntroData): number {
-  return [intro.lead, ...intro.sections.map((section) => section.body)]
-    .join(' ')
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
+  return countWords([intro.lead, ...intro.sections.map((section) => section.body)]);
 }
 
 // ─── Contenido ────────────────────────────────────────────────────────────────

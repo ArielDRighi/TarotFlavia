@@ -102,6 +102,7 @@ describe('STATIC_PAGE_METADATA', () => {
         ROUTES.CONTACTO,
         ROUTES.PRIVACIDAD,
         ROUTES.TERMINOS,
+        ROUTES.SOBRE_NOSOTROS,
       ])
     );
   });

@@ -577,4 +577,44 @@ describe('ArticleDetailView', () => {
       expect(screen.queryByTestId('next-image')).not.toBeInTheDocument();
     });
   });
+
+  /**
+   * T-SEO-011: las guías son el contenido editorial más extenso del sitio y
+   * llegaban sin firma. La firma va SOLO en ellas: las fichas de astrología son
+   * datos de referencia, no piezas de autor.
+   */
+  describe('Author byline (T-SEO-011)', () => {
+    it('firma las guías y enlaza a /sobre-nosotros', () => {
+      render(
+        <ArticleDetailView article={createTestArticle({ category: ArticleCategory.GUIDE_TAROT })} />
+      );
+
+      const byline = screen.getByTestId('author-byline');
+
+      expect(byline).toBeInTheDocument();
+      expect(byline).toHaveTextContent(/equipo editorial de auguria/i);
+      expect(within(byline).getByRole('link')).toHaveAttribute('href', '/sobre-nosotros');
+    });
+
+    it.each([
+      ArticleCategory.GUIDE_NUMEROLOGY,
+      ArticleCategory.GUIDE_PENDULUM,
+      ArticleCategory.GUIDE_BIRTH_CHART,
+      ArticleCategory.GUIDE_RITUAL,
+      ArticleCategory.GUIDE_HOROSCOPE,
+      ArticleCategory.GUIDE_CHINESE,
+    ])('firma también la guía de %s', (category) => {
+      render(<ArticleDetailView article={createTestArticle({ category })} />);
+
+      expect(screen.getByTestId('author-byline')).toBeInTheDocument();
+    });
+
+    it('NO firma las fichas de astrología: son datos de referencia, no piezas de autor', () => {
+      render(
+        <ArticleDetailView article={createTestArticle({ category: ArticleCategory.ZODIAC_SIGN })} />
+      );
+
+      expect(screen.queryByTestId('author-byline')).not.toBeInTheDocument();
+    });
+  });
 });

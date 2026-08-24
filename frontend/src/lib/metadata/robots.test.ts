@@ -120,6 +120,8 @@ describe('buildRobots', () => {
       expect(isBlocked('/servicios/lectura-de-registros', disallow)).toBe(false);
       expect(isBlocked('/premium', disallow)).toBe(false);
       expect(isBlocked('/contacto', disallow)).toBe(false);
+      // T-SEO-011: la página de autoría es de las que MÁS queremos indexar.
+      expect(isBlocked('/sobre-nosotros', disallow)).toBe(false);
     });
   });
 });

@@ -7,6 +7,7 @@ import { ArticleHero } from './ArticleHero';
 import { ArticleToc } from './ArticleToc';
 import { MarkdownArticle } from './MarkdownArticle';
 import { RelatedTarotCards } from './RelatedTarotCards';
+import { AuthorByline } from '@/components/common/AuthorByline';
 import { Reveal } from '@/components/common';
 import { ROUTES } from '@/lib/constants/routes';
 import {
@@ -232,6 +233,11 @@ export function ArticleDetailView({ article, className }: ArticleDetailViewProps
         sections={editorial?.sections}
         className={cn(isGuide && 'max-w-none')}
       />
+
+      {/* Firma de autoría (T-SEO-011). Solo en guías: son las piezas editoriales
+          extensas del sitio. Las fichas de astrología son datos de referencia y
+          no llevan firma de autor. */}
+      {isGuide && <AuthorByline />}
 
       {/* Cartas de tarot relacionadas — RelatedTarotCards renderiza la sección
           completa (título incluido) o nada si ningún ID resuelve. Las secciones

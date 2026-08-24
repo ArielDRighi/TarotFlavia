@@ -5,6 +5,7 @@ import {
   getArticleReadingMeta,
   getInitials,
   getSectionAnchorId,
+  countWords,
   stripLeadingMarkdownHeading,
 } from './text';
 
@@ -210,5 +211,23 @@ describe('extractAstroHeadings', () => {
   it('should return empty array for content without H2 headings', () => {
     expect(extractAstroHeadings('# Solo título\n\nUn párrafo.')).toEqual([]);
     expect(extractAstroHeadings('')).toEqual([]);
+  });
+});
+
+describe('countWords', () => {
+  it('cuenta las palabras de todos los fragmentos juntos', () => {
+    expect(countWords(['dos palabras', 'y dos más'])).toBe(5);
+  });
+
+  it('ignora espacios repetidos, saltos de línea y fragmentos vacíos', () => {
+    expect(countWords(['  hola   mundo  ', '', '\n\n', '  '])).toBe(2);
+  });
+
+  it('devuelve 0 para una lista vacía', () => {
+    expect(countWords([])).toBe(0);
+  });
+
+  it('cuenta las palabras con acentos y guiones como una sola', () => {
+    expect(countWords(['práctica teórico-práctica'])).toBe(2);
   });
 });

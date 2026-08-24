@@ -36,6 +36,8 @@ const STATIC_ROUTES: ReadonlyArray<{
   { path: ROUTES.SERVICIOS, priority: 0.8, changeFrequency: 'weekly' },
   { path: ROUTES.EXPLORAR, priority: 0.7, changeFrequency: 'weekly' },
   { path: ROUTES.PREMIUM, priority: 0.7, changeFrequency: 'monthly' },
+  // Señal de autoría del sitio (T-SEO-011): de las que más queremos indexar.
+  { path: ROUTES.SOBRE_NOSOTROS, priority: 0.7, changeFrequency: 'monthly' },
   { path: ROUTES.CONTACTO, priority: 0.5, changeFrequency: 'yearly' },
   { path: ROUTES.PRIVACIDAD, priority: 0.3, changeFrequency: 'yearly' },
   { path: ROUTES.TERMINOS, priority: 0.3, changeFrequency: 'yearly' },

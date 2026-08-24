@@ -81,6 +81,15 @@ export function Footer() {
                 Contacto
               </Link>
             </li>
+            {/* Señal de autoría (T-SEO-011): alcanzable desde cualquier página. */}
+            <li>
+              <Link
+                href={ROUTES.SOBRE_NOSOTROS}
+                className="hover:text-primary py-1.5 transition-colors"
+              >
+                Sobre Nosotros
+              </Link>
+            </li>
           </ul>
         </nav>
 
