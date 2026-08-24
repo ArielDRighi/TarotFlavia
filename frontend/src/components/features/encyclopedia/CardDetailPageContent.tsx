@@ -27,9 +27,15 @@ interface CardDetailPageContentProps {
   slug: string;
   /** Carta resuelta en el servidor. La ruta corta con notFound() si el slug no existe. */
   initialCard: CardDetail;
+  /** Nombres de las cartas de las combinaciones, resueltos en el servidor (T-SEO-010). */
+  combinationCardNames?: Record<string, string>;
 }
 
-export function CardDetailPageContent({ slug, initialCard }: CardDetailPageContentProps) {
+export function CardDetailPageContent({
+  slug,
+  initialCard,
+  combinationCardNames,
+}: CardDetailPageContentProps) {
   const { data: card, isLoading } = useCard(slug, initialCard);
 
   if (isLoading) {
@@ -57,7 +63,7 @@ export function CardDetailPageContent({ slug, initialCard }: CardDetailPageConte
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <CardDetailView card={card} />
+      <CardDetailView card={card} combinationCardNames={combinationCardNames} />
     </div>
   );
 }

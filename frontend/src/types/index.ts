@@ -256,6 +256,7 @@ export type {
   SuitInfo,
   CardSummary,
   CardDetail,
+  CardCombination,
   CardNavigation,
   CardFilters,
 } from './encyclopedia.types';

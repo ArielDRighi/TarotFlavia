@@ -13,6 +13,10 @@ export interface CardMeaningProps {
 export function CardMeaning({ meaningUpright, meaningReversed }: CardMeaningProps) {
   return (
     <Card data-testid="card-meaning" className="p-6">
+      {/* T-SEO-010: el bloque quedaba sin encabezado entre dos `h2`, así que la
+          ficha tenía un tramo de contenido sin rótulo en el esquema. */}
+      <h2 className="mb-4 font-serif text-lg">El significado de la carta</h2>
+
       <Tabs defaultValue="upright">
         <TabsList className="mb-4 grid w-full grid-cols-2">
           <TabsTrigger value="upright" className="gap-2">

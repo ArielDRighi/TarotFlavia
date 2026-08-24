@@ -2,9 +2,13 @@ import { cache } from 'react';
 import type { Metadata } from 'next';
 
 import { CardDetailPageContent } from '@/components/features/encyclopedia/CardDetailPageContent';
-import { getCardBySlug, getCards } from '@/lib/api/encyclopedia-api';
+import { getCardBySlug, getCards, getCombinationCardNames } from '@/lib/api/encyclopedia-api';
 import { getCardDetailMetadata } from '@/lib/metadata/page-metadata';
-import { resolveRouteResource, safeStaticParams } from '@/lib/metadata/route-data';
+import {
+  resolveListingData,
+  resolveRouteResource,
+  safeStaticParams,
+} from '@/lib/metadata/route-data';
 
 /**
  * Ficha de una carta del tarot.
@@ -43,6 +47,19 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 
 export default async function CardDetailRoute({ params }: PageProps) {
   const { slug } = await params;
+  const card = await getCard(slug);
 
-  return <CardDetailPageContent slug={slug} initialCard={await getCard(slug)} />;
+  // Los cross-links de las combinaciones (T-SEO-010) traen solo el slug: el
+  // nombre se resuelve acá para que el texto del enlace esté en el HTML. Si el
+  // listado falla, `CardCombinations` cae al slug legible y la ficha sale igual.
+  const combinationCardNames =
+    (await resolveListingData(() => getCombinationCardNames(card.combinations))) ?? {};
+
+  return (
+    <CardDetailPageContent
+      slug={slug}
+      initialCard={card}
+      combinationCardNames={combinationCardNames}
+    />
+  );
 }

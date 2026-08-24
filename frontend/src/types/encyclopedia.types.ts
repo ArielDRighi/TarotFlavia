@@ -87,6 +87,17 @@ export interface CardSummary {
   thumbnailUrl: string;
 }
 
+/**
+ * Combinación de la carta con otra carta del mazo (T-SEO-008).
+ *
+ * `cardSlug` referencia una ficha existente: el frontend la renderiza como
+ * enlace interno a `/enciclopedia/tarot/[slug]` (T-SEO-010).
+ */
+export interface CardCombination {
+  cardSlug: string;
+  reading: string;
+}
+
 export interface CardDetail extends CardSummary {
   nameEn: string;
   romanNumeral: string | null;
@@ -100,6 +111,26 @@ export interface CardDetail extends CardSummary {
   keywords: CardKeywords;
   imageUrl: string;
   relatedCards: number[] | null;
+
+  // ─── Contenido extendido (T-SEO-008) ───────────────────────────────────────
+  // Opcionales a propósito: la API **omite la clave** mientras la sección no
+  // tenga contenido cargado, en vez de mandar `null`. El frontend decide por
+  // presencia de clave y nunca renderiza un encabezado con el cuerpo vacío.
+
+  /** La carta en el amor y los vínculos. */
+  meaningLove?: string;
+  /** La carta en el trabajo y el dinero. */
+  meaningWork?: string;
+  /** La carta en la energía y el bienestar. Nunca consejo médico (YMYL). */
+  meaningWellbeing?: string;
+  /** Lectura de la imagen: figuras, colores y números. */
+  symbolism?: string;
+  /** Qué hacer cuando sale esta carta. */
+  advice?: string;
+  /** Respuesta en tiradas de sí/no, con su matiz. */
+  yesNo?: string;
+  /** Combinaciones con otras cartas (3 a 5 por ficha). */
+  combinations?: CardCombination[];
 }
 
 export interface CardNavigation {

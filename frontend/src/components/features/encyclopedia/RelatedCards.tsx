@@ -32,7 +32,7 @@ export function RelatedCards({ slug }: RelatedCardsProps) {
 
   return (
     <Card data-testid="related-cards" className="p-6">
-      <h3 className="mb-4 font-serif text-lg">Cartas Relacionadas</h3>
+      <h2 className="mb-4 font-serif text-lg">Cartas Relacionadas</h2>
       <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
         {cards.map((card) => (
           <CardThumbnail key={card.id} card={card} />
