@@ -64,10 +64,13 @@ const categoryIconColors: Record<string, string> = {
 /**
  * Nombre **visible** de una categoría, cuando difiere del que manda la API.
  *
- * El slug y el `name` de la base no se tocan —renombrarlos exige migración y
- * romperían el gating FREE, que filtra por slug—, pero "Salud y Bienestar" no
- * se muestra: una lectura de tarot "de salud" se lee como consejo médico
- * (YMYL). Ver T-SEO-013.
+ * El `name` de la base ya dice "Energía y Bienestar" desde la migración
+ * `1787583600000-ReplaceSaludWordingInSeededCorpus`, así que en una base al día
+ * este mapa no cambia nada. Se deja como red: una base que todavía no corrió la
+ * migración —un entorno de desarrollo viejo, un rollback— seguiría mandando
+ * "Salud y Bienestar", y una lectura de tarot "de salud" se lee como consejo
+ * médico (YMYL). El **slug** no se toca en ningún caso: el gating FREE filtra
+ * por él. Ver T-SEO-013.
  */
 const CATEGORY_LABELS: Record<string, string> = {
   'salud-bienestar': 'Energía y Bienestar',

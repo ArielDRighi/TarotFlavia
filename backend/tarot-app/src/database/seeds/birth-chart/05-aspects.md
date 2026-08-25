@@ -622,7 +622,7 @@
 "planet1": "moon",
 "planet2": "mercury",
 "aspect": "sextile",
-"content": "El sextil Luna-Mercurio te brinda la oportunidad de verbalizar tu mundo interior con gracia. Tienes habilidad para poner palabras a las emociones, lo que favorece tus relaciones personales. Es un aspecto ideal para desarrollar hábitos saludables y rutinas eficientes. Si practicas la escritura o el diálogo, encontrarás claridad mental. Tienes el potencial de conectar con la gente a través de ideas cotidianas y prácticas, resolviendo problemas domésticos con inteligencia."
+"content": "El sextil Luna-Mercurio te brinda la oportunidad de verbalizar tu mundo interior con gracia. Tienes habilidad para poner palabras a las emociones, lo que favorece tus relaciones personales. Es un aspecto ideal para desarrollar hábitos sostenidos y rutinas eficientes. Si practicas la escritura o el diálogo, encontrarás claridad mental. Tienes el potencial de conectar con la gente a través de ideas cotidianas y prácticas, resolviendo problemas domésticos con inteligencia."
 },
 {
 "planet1": "moon",

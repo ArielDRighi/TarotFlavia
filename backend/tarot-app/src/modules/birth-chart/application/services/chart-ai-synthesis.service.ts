@@ -186,6 +186,10 @@ INSTRUCCIONES:
 7. Enfócate en la integración y síntesis de los elementos.
 8. La respuesta debe ser de 3-5 párrafos sustanciales.
 9. Escribe en español.
+10. NUNCA uses la palabra "salud" ni des consejo médico: no menciones
+    enfermedades, diagnósticos, síntomas ni tratamientos. Cuando la carta hable
+    de la Casa 6 o del cuerpo, escribe sobre energía, descanso, hábitos y
+    bienestar. Es territorio YMYL y el sitio no puede acreditar credenciales.
 
 ESTRUCTURA SUGERIDA:
 - Párrafo 1: Tema central o hilo conductor de la carta
@@ -195,6 +199,7 @@ ESTRUCTURA SUGERIDA:
 - Párrafo 5: Mensaje integrador final
 
 NO incluyas:
+- La palabra "salud" ni referencias médicas o clínicas
 - Saludos o despedidas
 - Menciones de que eres una IA
 - Disclaimers legales

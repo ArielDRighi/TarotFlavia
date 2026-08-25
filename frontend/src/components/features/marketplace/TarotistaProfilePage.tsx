@@ -10,7 +10,11 @@ import { useRouter } from 'next/navigation';
 import { Star, Sparkles, Calendar, MessageSquare } from 'lucide-react';
 import { useTarotistaDetail } from '@/hooks/api/useTarotistas';
 import { getInitials } from '@/lib/utils/text';
-import { SPECIALTY_COLORS, DEFAULT_SPECIALTY_COLOR } from '@/lib/constants/marketplace';
+import {
+  SPECIALTY_COLORS,
+  DEFAULT_SPECIALTY_COLOR,
+  specialtyLabel,
+} from '@/lib/constants/marketplace';
 import { ROUTES } from '@/lib/constants/routes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -216,7 +220,7 @@ export function TarotistaProfilePage({ id, initialTarotista }: TarotistaProfileP
                     SPECIALTY_COLORS[especialidad] ?? DEFAULT_SPECIALTY_COLOR
                   )}
                 >
-                  {especialidad}
+                  {specialtyLabel(especialidad)}
                 </Badge>
               ))}
             </div>

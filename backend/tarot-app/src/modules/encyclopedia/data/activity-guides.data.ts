@@ -299,7 +299,7 @@ El círculo se divide en 12 áreas de la vida. Dependiendo de tu hora de nacimie
 - **Casa 3:** Comunicación, hermanos, viajes cortos, aprendizaje (Geminis/Mercurio).
 - **Casa 4:** Hogar, raíces, infancia, los padres (Cancer/Luna).
 - **Casa 5:** Creatividad, romance, hijos, placer y diversión (Leo/Sol).
-- **Casa 6:** Rutina diaria, trabajo, salud física, mascotas (Virgo/Mercurio).
+- **Casa 6:** Rutina diaria, trabajo, bienestar físico, mascotas (Virgo/Mercurio).
 - **Casa 7:** Matrimonio, socios, enemigos declarados (Libra/Venus).
 - **Casa 8:** Muerte, transformación, dinero compartido, sexualidad profunda (Escorpio/Plutón).
 - **Casa 9:** Filosofía, religión, viajes largos, educación superior (Sagitario/Júpiter).

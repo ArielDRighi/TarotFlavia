@@ -8,7 +8,7 @@
  * - Amor y Relaciones (Love & Relationships)
  * - Trabajo y Carrera (Work & Career)
  * - Dinero y Finanzas (Money & Finances)
- * - Salud y Bienestar (Health & Wellbeing)
+ * - Energía y Bienestar (Health & Wellbeing)
  * - Espiritual y Crecimiento (Spiritual & Growth)
  * - General (General)
  */
@@ -142,11 +142,11 @@ export const ALL_PREDEFINED_QUESTIONS: PredefinedQuestionData[] = [
     order: 7,
   },
 
-  // 🌿 SALUD Y BIENESTAR (6 questions)
+  // 🌿 ENERGÍA Y BIENESTAR (6 questions)
   {
     categorySlug: 'salud-bienestar',
     questionText:
-      '¿Qué aspectos de mi salud requieren atención en este momento?',
+      '¿Qué aspectos de mi bienestar requieren atención en este momento?',
     order: 1,
   },
   {
@@ -166,7 +166,7 @@ export const ALL_PREDEFINED_QUESTIONS: PredefinedQuestionData[] = [
   },
   {
     categorySlug: 'salud-bienestar',
-    questionText: '¿Qué emociones están afectando mi salud física?',
+    questionText: '¿Qué emociones están afectando mi energía física?',
     order: 5,
   },
   {

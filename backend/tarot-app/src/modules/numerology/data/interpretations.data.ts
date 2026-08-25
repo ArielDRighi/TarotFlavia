@@ -236,7 +236,7 @@ export const LIFE_PATH_INTERPRETATIONS: Record<number, LifePathInterpretation> =
       lifePurpose:
         'Servir y cuidar a otros creando armonía, aprendiendo a equilibrar sus necesidades con las de los demás',
       lessonsToLearn: [
-        'Establecer límites saludables',
+        'Establecer límites claros',
         'Autocuidado sin culpa',
         'Permitir que otros resuelvan sus propios problemas',
       ],
@@ -459,7 +459,7 @@ export const LIFE_PATH_INTERPRETATIONS: Record<number, LifePathInterpretation> =
         'Elevar a la humanidad a través del amor incondicional, enseñando y sanando con compasión suprema',
       lessonsToLearn: [
         'Autocuidado como prioridad',
-        'Establecer límites saludables',
+        'Establecer límites claros',
         'Equilibrio entre dar y recibir',
       ],
       isMaster: true,

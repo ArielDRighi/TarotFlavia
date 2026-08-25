@@ -178,7 +178,7 @@ describe('ReadingCategoriesSeeder', () => {
       expect(dineroCategory?.description).toContain('dinero');
     });
 
-    it('should seed Salud y Bienestar category with correct data', async () => {
+    it('should seed Energía y Bienestar category with correct data', async () => {
       // Arrange
       mockCategoryRepository.count.mockResolvedValue(0);
       mockCategoryRepository.save.mockResolvedValue([]);
@@ -193,11 +193,13 @@ describe('ReadingCategoriesSeeder', () => {
         .calls[0][0] as ReadingCategory[];
       const saludCategory = savedData.find((c) => c.slug === 'salud-bienestar');
       expect(saludCategory).toBeDefined();
-      expect(saludCategory?.name).toBe('Salud y Bienestar');
-      expect(saludCategory?.icon).toBe('🏥');
+      // T-SEO-013: el slug sigue siendo `salud-bienestar` (gating FREE), pero
+      // el nombre visible ya no dice "salud".
+      expect(saludCategory?.name).toBe('Energía y Bienestar');
+      expect(saludCategory?.icon).toBe('🌿');
       expect(saludCategory?.color).toBe('#7ED321');
       expect(saludCategory?.order).toBe(4);
-      expect(saludCategory?.description).toContain('salud');
+      expect(saludCategory?.description).toContain('energía');
     });
 
     it('should seed Crecimiento Espiritual category with correct data', async () => {

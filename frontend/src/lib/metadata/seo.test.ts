@@ -207,6 +207,19 @@ describe('SEO Metadata Configuration', () => {
       expect(metadata.description).toContain('Carrera');
     });
 
+    it('should use the visible label for the "Salud" specialty (T-SEO-013)', () => {
+      const metadata = generateTarotistaMetadata(
+        {
+          nombre: 'Ana López',
+          especialidades: ['Salud', 'Amor'],
+        },
+        789
+      );
+
+      expect(metadata.description).toContain('Energía y Bienestar');
+      expect(metadata.description).not.toContain('Salud');
+    });
+
     it('should set OpenGraph type to profile', () => {
       const metadata = generateTarotistaMetadata(
         {

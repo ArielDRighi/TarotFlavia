@@ -12,7 +12,7 @@ import { ALL_PREDEFINED_QUESTIONS } from './data/predefined-questions.data';
  * - Amor y Relaciones: 8 questions
  * - Trabajo y Carrera: 8 questions
  * - Dinero y Finanzas: 7 questions
- * - Salud y Bienestar: 6 questions
+ * - Energía y Bienestar: 6 questions
  * - Espiritual y Crecimiento: 7 questions
  * - General: 6 questions
  *

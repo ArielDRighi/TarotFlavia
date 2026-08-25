@@ -379,6 +379,19 @@ describe('CARD_EXTENDED_CONTENT (T-SEO-009)', () => {
       expect(infractores).toEqual([]);
     });
 
+    /**
+     * Las **promesas de resultado económico o legal** —la otra mitad de YMYL—
+     * NO se controlan acá: las cubre `src/no-salud-user-facing.spec.ts`, que
+     * escanea todo `modules/encyclopedia/data/` (estas fichas incluidas) y
+     * cruza el verbo de promesa con vocabulario económico o legal **dentro de
+     * la misma oración**.
+     *
+     * Un `augur` a secas acá daría falsos positivos: La Estrella *"augura
+     * un periodo de enorme vulnerabilidad hermosa"* y El Sol *"augura
+     * matrimonios felices"* son copy de tarot perfectamente sano. Lo que hay
+     * que atrapar es "augura… promociones merecidas", y eso pide el cruce.
+     */
+
     it('no da consejo médico en ninguna sección', () => {
       const infractores: string[] = [];
 

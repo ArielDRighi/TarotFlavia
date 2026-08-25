@@ -128,6 +128,21 @@ describe('TarotistaProfilePage', () => {
     });
   });
 
+  it('should render the visible label for the "Salud" specialty (T-SEO-013)', async () => {
+    mockUseTarotistaDetail.mockReturnValue({
+      data: { ...createMockTarotista(), especialidades: ['Salud'] },
+      isLoading: false,
+      error: null,
+    });
+
+    render(<TarotistaProfilePage id={1} />, { wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByText('Energía y Bienestar')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('Salud')).not.toBeInTheDocument();
+  });
+
   it('should show "Disponible ahora" when tarotista is active', async () => {
     mockUseTarotistaDetail.mockReturnValue({
       data: { ...createMockTarotista(), isActive: true },

@@ -208,7 +208,7 @@
 {
 "planet": "venus",
 "sign": "virgo",
-"content": "Con Venus en Virgo, expresas tu amor a través de gestos prácticos, servicio y atención al detalle. No eres de grandes declaraciones vacías, sino de estar allí cuando se te necesita, arreglando lo que está roto y cuidando la salud de tus vínculos. Eres selectivo, modesto y buscas la pureza en las relaciones. Valoras la inteligencia, la higiene y la honestidad. Tu estética es pulcra y minimalista. El desafío principal es silenciar la crítica (hacia ti y hacia tu pareja) y permitirte disfrutar del amor sin analizarlo tanto. Aprende a aceptar que la perfección no es requisito para el amor. Tu devoción silenciosa y tu lealtad inquebrantable son la base más sólida sobre la que se puede construir una vida compartida."
+"content": "Con Venus en Virgo, expresas tu amor a través de gestos prácticos, servicio y atención al detalle. No eres de grandes declaraciones vacías, sino de estar allí cuando se te necesita, arreglando lo que está roto y cuidando la calidad de tus vínculos. Eres selectivo, modesto y buscas la pureza en las relaciones. Valoras la inteligencia, la higiene y la honestidad. Tu estética es pulcra y minimalista. El desafío principal es silenciar la crítica (hacia ti y hacia tu pareja) y permitirte disfrutar del amor sin analizarlo tanto. Aprende a aceptar que la perfección no es requisito para el amor. Tu devoción silenciosa y tu lealtad inquebrantable son la base más sólida sobre la que se puede construir una vida compartida."
 },
 {
 "planet": "venus",
@@ -268,7 +268,7 @@
 {
 "planet": "mars",
 "sign": "virgo",
-"content": "Con Marte en Virgo, tu energía se canaliza hacia la eficiencia, el trabajo y la perfección técnica. No actúas al azar; planificas, analizas y ejecutas con precisión quirúrgica. Te motiva ser útil, mejorar sistemas y hacer bien el trabajo. A menudo, canalizas tu energía física a través de la salud o la artesanía. El desafío es la crítica excesiva y la ansiedad nerviosa cuando las cosas no salen perfectas, lo que puede frenar tu acción. A veces te pierdes en los detalles. Tu fortaleza es tu capacidad para trabajar incansablemente y solucionar problemas complejos que otros ignoran. Eres el maestro de la competencia técnica."
+"content": "Con Marte en Virgo, tu energía se canaliza hacia la eficiencia, el trabajo y la perfección técnica. No actúas al azar; planificas, analizas y ejecutas con precisión quirúrgica. Te motiva ser útil, mejorar sistemas y hacer bien el trabajo. A menudo, canalizas tu energía física a través del deporte o la artesanía. El desafío es la crítica excesiva y la ansiedad nerviosa cuando las cosas no salen perfectas, lo que puede frenar tu acción. A veces te pierdes en los detalles. Tu fortaleza es tu capacidad para trabajar incansablemente y solucionar problemas complejos que otros ignoran. Eres el maestro de la competencia técnica."
 },
 {
 "planet": "mars",
@@ -328,7 +328,7 @@
 {
 "planet": "jupiter",
 "sign": "virgo",
-"content": "Con Júpiter en Virgo, encuentras expansión en el servicio, el orden y el detalle. Creces mejorando tus habilidades, cuidando tu salud y siendo útil a la comunidad. Tu suerte viene del trabajo bien hecho y del discernimiento práctico. No buscas dogmas abstractos, sino una espiritualidad que funcione en el día a día. El desafío es el perfeccionismo que impide ver el panorama completo; a veces 'el árbol no te deja ver el bosque'. Puedes caer en la crítica excesiva. Tu fortaleza es la humildad y la ética de trabajo; tienes el don de sanar y mejorar la realidad material, encontrando lo sagrado en las pequeñas rutinas."
+"content": "Con Júpiter en Virgo, encuentras expansión en el servicio, el orden y el detalle. Creces mejorando tus habilidades, cuidando tu cuerpo y siendo útil a la comunidad. Tu suerte viene del trabajo bien hecho y del discernimiento práctico. No buscas dogmas abstractos, sino una espiritualidad que funcione en el día a día. El desafío es el perfeccionismo que impide ver el panorama completo; a veces 'el árbol no te deja ver el bosque'. Puedes caer en la crítica excesiva. Tu fortaleza es la humildad y la ética de trabajo; tienes el don de sanar y mejorar la realidad material, encontrando lo sagrado en las pequeñas rutinas."
 },
 {
 "planet": "jupiter",
@@ -388,7 +388,7 @@
 {
 "planet": "saturn",
 "sign": "virgo",
-"content": "Con Saturno en Virgo, la disciplina se manifiesta en el trabajo, la salud y el servicio. Tienes una capacidad innata para el detalle y la organización, pero puedes caer en un perfeccionismo paralizante o en la autocrítica destructiva. Saturno te enseña que 'lo perfecto es enemigo de lo bueno'. Tu lección es aprender a servir sin volverte un esclavo de la rutina o del deber. Tu fortaleza es tu eficiencia y tu ética laboral inquebrantable. Tienes el potencial de ser un maestro en tu oficio, alguien que entiende cómo funcionan los sistemas y los mejora con paciencia y humildad técnica."
+"content": "Con Saturno en Virgo, la disciplina se manifiesta en el trabajo, las rutinas y el servicio. Tienes una capacidad innata para el detalle y la organización, pero puedes caer en un perfeccionismo paralizante o en la autocrítica destructiva. Saturno te enseña que 'lo perfecto es enemigo de lo bueno'. Tu lección es aprender a servir sin volverte un esclavo de la rutina o del deber. Tu fortaleza es tu eficiencia y tu ética laboral inquebrantable. Tienes el potencial de ser un maestro en tu oficio, alguien que entiende cómo funcionan los sistemas y los mejora con paciencia y humildad técnica."
 },
 {
 "planet": "saturn",
@@ -448,7 +448,7 @@
 {
 "planet": "uranus",
 "sign": "virgo",
-"content": "Urano en Virgo revoluciona el trabajo, la salud y la vida cotidiana. Tu generación busca liberar al trabajador de la esclavitud de la rutina mediante la tecnología y la eficiencia innovadora. Te interesa la medicina alternativa, la ecología práctica y los nuevos métodos de organización. Tienes una mente brillante para los detalles técnicos. El desafío es el estrés nervioso por querer arreglarlo todo o la obsesión con la eficiencia. Tu aporte al mundo es la capacidad de introducir mejoras radicales en los sistemas existentes, haciendo que la vida diaria sea más libre, saludable y funcional para todos."
+"content": "Urano en Virgo revoluciona el trabajo, los hábitos y la vida cotidiana. Tu generación busca liberar al trabajador de la esclavitud de la rutina mediante la tecnología y la eficiencia innovadora. Te interesa la medicina alternativa, la ecología práctica y los nuevos métodos de organización. Tienes una mente brillante para los detalles técnicos. El desafío es el estrés nervioso por querer arreglarlo todo o la obsesión con la eficiencia. Tu aporte al mundo es la capacidad de introducir mejoras radicales en los sistemas existentes, haciendo que la vida diaria sea más libre, ligera y funcional para todos."
 },
 {
 "planet": "uranus",
@@ -508,7 +508,7 @@
 {
 "planet": "neptune",
 "sign": "virgo",
-"content": "Neptuno en Virgo busca la espiritualidad en el detalle, el servicio y la salud. Esta generación tiende a disolver los límites entre la medicina y lo holístico. Idealizas la pureza y el orden perfecto. El desafío es la hipocondría, la obsesión con dietas o rutinas 'mágicas', y la desilusión cuando el trabajo cotidiano no es perfecto. Tu aporte es traer la compasión al servicio diario, entendiendo que curar el cuerpo es también curar el alma. Tienes el don de encontrar a Dios en las pequeñas cosas y de servir con una devoción práctica y sanadora."
+"content": "Neptuno en Virgo busca la espiritualidad en el detalle, el servicio y el cuidado. Esta generación tiende a disolver los límites entre la medicina y lo holístico. Idealizas la pureza y el orden perfecto. El desafío es la hipocondría, la obsesión con dietas o rutinas 'mágicas', y la desilusión cuando el trabajo cotidiano no es perfecto. Tu aporte es traer la compasión al servicio diario, entendiendo que curar el cuerpo es también curar el alma. Tienes el don de encontrar a Dios en las pequeñas cosas y de servir con una devoción práctica y sanadora."
 },
 {
 "planet": "neptune",
@@ -568,7 +568,7 @@
 {
 "planet": "pluto",
 "sign": "virgo",
-"content": "Plutón en Virgo (1957-1972) transformó el trabajo, la salud y el servicio. Esta generación revolucionó la medicina, la tecnología laboral y la ecología, buscando poder a través de la eficiencia y el perfeccionamiento. Son los trabajadores incansables que ven los defectos del sistema. El desafío es la obsesión por el orden, la crítica destructiva y la ansiedad laboral. Su legado es la regeneración de los procesos cotidianos, empoderando a la sociedad a través del análisis crítico, la limpieza de lo tóxico y la búsqueda de la pureza funcional."
+"content": "Plutón en Virgo (1957-1972) transformó el trabajo, los hábitos y el servicio. Esta generación revolucionó la medicina, la tecnología laboral y la ecología, buscando poder a través de la eficiencia y el perfeccionamiento. Son los trabajadores incansables que ven los defectos del sistema. El desafío es la obsesión por el orden, la crítica destructiva y la ansiedad laboral. Su legado es la regeneración de los procesos cotidianos, empoderando a la sociedad a través del análisis crítico, la limpieza de lo tóxico y la búsqueda de la pureza funcional."
 },
 {
 "planet": "pluto",

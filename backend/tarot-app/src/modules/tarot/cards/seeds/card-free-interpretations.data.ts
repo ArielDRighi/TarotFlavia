@@ -1,13 +1,13 @@
 /**
  * T-FR-S01: Seed de Tiradas — 132 Interpretaciones Pre-escritas para Usuarios FREE
  *
- * Estructura: 22 Arcanos Mayores × 3 categorías (amor, salud, dinero) × 2 orientaciones (upright, reversed)
+ * Estructura: 22 Arcanos Mayores × 3 categorías (amor, bienestar, dinero) × 2 orientaciones (upright, reversed)
  * Tono: cálido, empático, orientativo, español con sensibilidad rioplatense
  * Longitud: 2-3 oraciones por texto (~50 palabras)
  *
  * Slugs de categorías FREE:
  *   - 'amor-relaciones'  → Amor y Relaciones
- *   - 'salud-bienestar'  → Salud y Bienestar
+ *   - 'salud-bienestar'  → Energía y Bienestar
  *   - 'dinero-finanzas'  → Dinero y Finanzas
  *
  * Generado con asistencia de Claude (revisado editorialmente).
@@ -365,7 +365,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'upright',
     content:
-      'Tenés la energía y la voluntad para recuperarte o mejorar tu estado físico. Enfocate en tus objetivos de salud con disciplina y los resultados van a llegar.',
+      'Tenés la energía y la voluntad para recuperarte o mejorar tu estado físico. Enfocate en tus objetivos de bienestar con disciplina y los resultados van a llegar.',
   },
   {
     cardSlug: 'el-carro',
@@ -510,7 +510,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'reversed',
     content:
-      'Puede haber altibajos en tu energía o salud. Recordá que los ciclos bajos también pasan; no te rindas y cuidate con más atención en esta etapa.',
+      'Puede haber altibajos en tu energía o tu ánimo. Recordá que los ciclos bajos también pasan; no te rindas y cuidate con más atención en esta etapa.',
   },
   {
     cardSlug: 'la-rueda-de-la-fortuna',
@@ -549,7 +549,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'upright',
     content:
-      'Lo que hacés con tu cuerpo hoy tiene consecuencias claras. Las decisiones equilibradas y conscientes sobre tu salud darán resultados justos y favorables.',
+      'Lo que hacés con tu cuerpo hoy tiene consecuencias claras. Las decisiones equilibradas y conscientes sobre tu bienestar darán resultados justos y favorables.',
   },
   {
     cardSlug: 'la-justicia',
@@ -641,7 +641,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'upright',
     content:
-      'Es momento de dejar ir hábitos o creencias que dañan tu bienestar. Esta transformación puede ser incómoda, pero es el inicio de una salud más integral.',
+      'Es momento de dejar ir hábitos o creencias que dañan tu bienestar. Esta transformación puede ser incómoda, pero es el inicio de un equilibrio más integral.',
   },
   {
     cardSlug: 'la-muerte',
@@ -694,7 +694,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'reversed',
     content:
-      'Puede haber excesos o falta de balance en algún área de tu salud. Es momento de identificar lo que está fuera de control y volver a un ritmo más equilibrado.',
+      'Puede haber excesos o falta de balance en algún área de tu bienestar. Es momento de identificar lo que está fuera de control y volver a un ritmo más equilibrado.',
   },
   {
     cardSlug: 'la-templanza',
@@ -779,7 +779,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'upright',
     content:
-      'Puede haber una crisis de salud que funcione como llamado de atención. Es momento de hacer cambios reales y no seguir ignorando lo que tu cuerpo viene pidiendo.',
+      'Puede haber una crisis que funcione como llamado de atención. Es momento de hacer cambios reales y no seguir ignorando lo que tu cuerpo viene pidiendo.',
   },
   {
     cardSlug: 'la-torre',
@@ -878,7 +878,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'reversed',
     content:
-      'La niebla mental comienza a disiparse. Con más claridad podés identificar qué es real en términos de salud y tomar las decisiones correctas para cuidarte.',
+      'La niebla mental comienza a disiparse. Con más claridad podés identificar qué es real en términos de bienestar y tomar las decisiones correctas para cuidarte.',
   },
   {
     cardSlug: 'la-luna',
@@ -924,7 +924,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'reversed',
     content:
-      'Puede haber agotamiento o una visión negativa sobre tu salud. Buscá pequeños momentos de alegría y luz en tu día; eso también es medicina.',
+      'Puede haber agotamiento o una visión negativa sobre tu bienestar. Buscá pequeños momentos de alegría y luz en tu día; eso también es medicina.',
   },
   {
     cardSlug: 'el-sol',
@@ -963,7 +963,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'upright',
     content:
-      'Hay un llamado a transformar tu relación con la salud. Dejar malos hábitos atrás y comenzar con nuevas rutinas puede marcar un antes y un después en tu bienestar.',
+      'Hay un llamado a transformar tu relación con tu cuerpo. Dejar malos hábitos atrás y comenzar con nuevas rutinas puede marcar un antes y un después en tu bienestar.',
   },
   {
     cardSlug: 'el-juicio',
@@ -1016,7 +1016,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'reversed',
     content:
-      'Puede haber algo pendiente de resolver en tu salud antes de alcanzar el bienestar pleno. No te conformes con resultados parciales; seguí buscando la integración completa.',
+      'Puede haber algo pendiente de resolver antes de alcanzar el bienestar pleno. No te conformes con resultados parciales; seguí buscando la integración completa.',
   },
   {
     cardSlug: 'el-mundo',
