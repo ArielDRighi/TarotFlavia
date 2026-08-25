@@ -97,7 +97,7 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | 1 | ~~**T-DEUDA-003**~~ ✅ | 0,5 pts | Cerrada 19-ago-2026: producción sana, base local resincronizada |
 | 2 | ~~**T-SEO-009 + la parte de tarot de T-SEO-013**~~ ✅ | 5 pts | Cerrada 20-ago-2026: 78 fichas cargadas, promedio 676 palabras |
 | 3 | ~~**T-SEO-011**~~ ✅ | 2 pts | Cerrada 23-ago-2026: `/sobre-nosotros` sirve ~1200 palabras propias |
-| 4 | ~~**T-SEO-010**~~ ✅ | 2 pts | Cerrada 24-ago-2026: las 7 secciones se renderizan y la ficha más corta pasa de 166 a ~600 palabras |
+| 4 | ~~**T-SEO-010**~~ ✅ | 2 pts | Cerrada 24-ago-2026: las 7 secciones se renderizan; las 78 fichas pasan de 166 a 766 palabras propias promedio |
 | 5 | **Resto de T-SEO-013** | ~1,5 pts | Carta astral, numerología, prompts de IA, guardarraíl |
 | 6 | **Deploy + verificación en producción + Search Console** | — | Recién ahí se pide la revisión |
 | 7 | T-SEO-012 | 1,5 pts | No está en la puerta de salida |
@@ -436,16 +436,23 @@ renderizarlo.
 
 ### Criterios de aceptación
 
-- [x] Las 78 fichas superan 500 palabras propias. Medido en dos lugares: el test de datos del
-      backend (T-SEO-009: mínimo 579, promedio 676) y el guardarraíl nuevo, que renderiza la ficha
-      **más corta del corpus** —`five-of-swords`, 579 palabras propias— y cuenta el texto del DOM.
-      ⚠️ La medición **contra el build de producción** (`check:indexable`) sigue pendiente: ver
-      *Lo que queda pendiente*.
+- [x] Las 78 fichas superan 500 palabras propias. **Medido sobre el HTML servido** con
+      `check:indexable` contra el host local con la base cargada (24-ago-2026): las 78 responden 200,
+      **mínimo 694** (`five-of-swords` y `four-of-swords`), **promedio 766**, máximo 893, y ninguna
+      queda por debajo del piso. Contra las 166 palabras que servía la ficha antes de esta tarea.
+      Los otros dos lugares donde se mide lo mismo: el test de datos del backend (T-SEO-009: mínimo
+      579 palabras de fuente, promedio 676) y el guardarraíl de render, que renderiza la ficha más
+      corta del corpus y cuenta el texto del DOM.
 - [x] Una ficha con campos nuevos en `null` sigue renderizando sin huecos ni encabezados vacíos.
       Cubierto por tres tests: sin contenido extendido, con una sola sección cargada y con un string
       en blanco.
-- [ ] `npm run check:indexable -- --base-url <host>` en verde, sin soft-404. **Pendiente**: necesita
-      un host levantado con la base cargada; se corre después del deploy.
+- [x] `npm run check:indexable -- --base-url <host>` sin soft-404. Corrido sobre las **179 URLs del
+      sitemap**: **0 soft-404** y las 78 fichas en verde con `--min-words 500`. La única URL delgada
+      de verdad que queda no es una ficha y ya tiene tarea: `/servicios/limpiezas-energeticas`, 106
+      palabras (T-SEO-012). `/explorar` marcó 2 palabras en la corrida, pero es un artefacto de
+      `next dev` —la primera request devuelve el `loading.tsx` mientras compila la ruta—: en caliente
+      sirve 210. ⚠️ La corrida fue contra el **host local**; repetirla contra producción después del
+      deploy.
 
 ### Decisiones de implementación
 
@@ -495,10 +502,10 @@ renderizarlo.
 
 ### Lo que queda pendiente
 
-- **`npm run check:indexable -- --base-url <host> --min-words 500`** contra un host con la base
-  cargada, después del deploy. Es la verificación que T-SEO-009 dejó agendada para esta tarea y la
-  única que mide el HTML realmente servido. No se pudo correr acá: no hay backend ni base levantados
-  en el entorno de desarrollo.
+- **Repetir `check:indexable -- --min-words 500` contra producción** después del deploy. La corrida
+  del 24-ago-2026 fue contra el host local con la base cargada —que es lo que cierra el criterio de
+  aceptación—, pero producción sirve el build estático con ISR y conviene confirmarlo ahí antes de
+  pedir la revisión de AdSense.
 - **La diferencia de tono entre el corpus viejo y el nuevo** que anotó T-SEO-009 ahora se ve en la
   misma página: `meaningUpright` (formal, esotérico) y `meaningLove` (más conversacional) quedaron a
   dos secciones de distancia. Es material para la revisión editorial humana, que sigue pendiente.
