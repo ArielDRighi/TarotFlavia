@@ -20,7 +20,8 @@ describe('CardKeywords', () => {
     it('should render "Palabras Clave" heading', () => {
       render(<CardKeywords keywords={defaultKeywords} />);
 
-      expect(screen.getByText('Palabras Clave')).toBeInTheDocument();
+      // T-SEO-010: el nivel importa. `getByText` pasaba igual con el `h3` viejo.
+      expect(screen.getByRole('heading', { level: 2, name: 'Palabras Clave' })).toBeInTheDocument();
     });
 
     it('should render all upright keywords as badges', () => {

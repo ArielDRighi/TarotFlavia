@@ -8,6 +8,7 @@ import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
 import type {
   CardSummary,
+  CardCombination,
   CardDetail,
   CardNavigation,
   CardFilters,
@@ -60,6 +61,30 @@ export async function searchCards(query: string): Promise<CardSummary[]> {
 export async function getCardBySlug(slug: string): Promise<CardDetail> {
   const response = await apiClient.get<CardDetail>(API_ENDPOINTS.ENCYCLOPEDIA.CARD_DETAIL(slug));
   return response.data;
+}
+
+/**
+ * Nombres en español de las cartas que aparecen en las combinaciones de una
+ * ficha (T-SEO-010).
+ *
+ * Las combinaciones traen solo el slug, y el texto del enlace tiene que viajar
+ * en el HTML para que el cross-link sirva de algo: por eso se resuelve en el
+ * servidor y no con un hook en el cliente. Se filtra a los 3-5 slugs de la ficha
+ * en vez de mandar las 78 entradas al payload del cliente.
+ */
+export async function getCombinationCardNames(
+  combinations: CardCombination[] | undefined
+): Promise<Record<string, string>> {
+  if (!combinations || combinations.length === 0) {
+    return {};
+  }
+
+  const wanted = new Set(combinations.map((combination) => combination.cardSlug));
+  const cards = await getCards();
+
+  return Object.fromEntries(
+    cards.filter((card) => wanted.has(card.slug)).map((card) => [card.slug, card.nameEs])
+  );
 }
 
 export async function getRelatedCards(slug: string): Promise<CardSummary[]> {

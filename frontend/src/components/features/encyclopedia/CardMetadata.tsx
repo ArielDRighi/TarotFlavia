@@ -56,7 +56,7 @@ export function CardMetadata({ card }: CardMetadataProps) {
 
   return (
     <Card data-testid="card-metadata" className="p-6">
-      <h3 className="mb-4 font-serif text-lg">Información</h3>
+      <h2 className="mb-4 font-serif text-lg">Información</h2>
 
       <dl className="space-y-3 text-sm">
         <div className="flex justify-between">

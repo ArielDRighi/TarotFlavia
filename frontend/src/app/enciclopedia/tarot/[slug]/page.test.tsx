@@ -1,17 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AxiosError, AxiosHeaders } from 'axios';
 
-import { generateMetadata, generateStaticParams } from './page';
+import CardDetailRoute, { generateMetadata, generateStaticParams } from './page';
 import type { CardDetail, CardSummary } from '@/types/encyclopedia.types';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 const mockGetCardBySlug = vi.fn();
 const mockGetCards = vi.fn();
+const mockGetCombinationCardNames = vi.fn();
 
 vi.mock('@/lib/api/encyclopedia-api', () => ({
   getCardBySlug: (slug: string) => mockGetCardBySlug(slug),
   getCards: () => mockGetCards(),
+  getCombinationCardNames: (combinations: unknown) => mockGetCombinationCardNames(combinations),
 }));
 
 const mockNotFound = vi.fn(() => {
@@ -116,5 +118,38 @@ describe('/enciclopedia/tarot/[slug] — generateStaticParams', () => {
     mockGetCards.mockRejectedValue(new Error('API caída'));
 
     await expect(generateStaticParams()).resolves.toEqual([]);
+  });
+});
+
+/**
+ * T-SEO-010: las combinaciones traen solo el slug. El nombre se resuelve en el
+ * servidor porque el texto del enlace tiene que estar en el HTML: un cross-link
+ * cuyo texto aparece recién en el cliente no le sirve al crawler.
+ */
+describe('/enciclopedia/tarot/[slug] — combinaciones (T-SEO-010)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('resuelve los nombres de las cartas combinadas y los pasa al render', async () => {
+    mockGetCardBySlug.mockResolvedValue(card);
+    mockGetCombinationCardNames.mockResolvedValue({ 'el-mago': 'El Mago' });
+
+    const element = await CardDetailRoute({ params: Promise.resolve({ slug: 'el-loco' }) });
+
+    expect(element.props.combinationCardNames).toEqual({ 'el-mago': 'El Mago' });
+    expect(element.props.initialCard).toBe(card);
+  });
+
+  it('sirve la ficha igual si el listado de cartas no responde', async () => {
+    // La ficha tiene contenido propio: tirar abajo el render —y con él el
+    // prerender de la ruta— por un blip de la API sería peor que perder el
+    // nombre del enlace, que degrada al slug legible.
+    mockGetCardBySlug.mockResolvedValue(card);
+    mockGetCombinationCardNames.mockRejectedValue(new Error('API caída'));
+
+    const element = await CardDetailRoute({ params: Promise.resolve({ slug: 'el-loco' }) });
+
+    expect(element.props.combinationCardNames).toEqual({});
   });
 });

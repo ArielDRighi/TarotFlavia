@@ -12,6 +12,8 @@ export {
   createMockUser,
 } from './dailyReading.factory';
 
+export { createMockCardDetail, MOCK_COMBINATION_CARD_NAMES } from './cardDetail.factory';
+
 export {
   createMockAuthUser,
   createMockAnonymousUser,

@@ -6,6 +6,7 @@ import {
   getInitials,
   getSectionAnchorId,
   countWords,
+  splitParagraphs,
   stripLeadingMarkdownHeading,
 } from './text';
 
@@ -229,5 +230,21 @@ describe('countWords', () => {
 
   it('cuenta las palabras con acentos y guiones como una sola', () => {
     expect(countWords(['práctica teórico-práctica'])).toBe(2);
+  });
+});
+
+describe('splitParagraphs', () => {
+  it('parte por líneas en blanco y recorta los extremos', () => {
+    expect(splitParagraphs('  uno  \n\ndos')).toEqual(['uno', 'dos']);
+  });
+
+  it('descarta los párrafos vacíos o en blanco', () => {
+    expect(splitParagraphs('uno\n\n   \n\ndos')).toEqual(['uno', 'dos']);
+  });
+
+  it('devuelve lista vacía sin texto', () => {
+    expect(splitParagraphs(null)).toEqual([]);
+    expect(splitParagraphs(undefined)).toEqual([]);
+    expect(splitParagraphs('   ')).toEqual([]);
   });
 });

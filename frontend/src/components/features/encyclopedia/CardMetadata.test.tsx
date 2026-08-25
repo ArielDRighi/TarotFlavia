@@ -48,7 +48,8 @@ describe('CardMetadata', () => {
     it('should render "Información" heading', () => {
       render(<CardMetadata card={createTestCard()} />);
 
-      expect(screen.getByText('Información')).toBeInTheDocument();
+      // T-SEO-010: el nivel importa. `getByText` pasaba igual con el `h3` viejo.
+      expect(screen.getByRole('heading', { level: 2, name: 'Información' })).toBeInTheDocument();
     });
   });
 

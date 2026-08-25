@@ -13,7 +13,7 @@ export interface CardKeywordsProps {
 export function CardKeywords({ keywords }: CardKeywordsProps) {
   return (
     <Card data-testid="card-keywords" className="p-6">
-      <h3 className="mb-4 font-serif text-lg">Palabras Clave</h3>
+      <h2 className="mb-4 font-serif text-lg">Palabras Clave</h2>
 
       <div className="space-y-4">
         <div>

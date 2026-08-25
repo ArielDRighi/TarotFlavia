@@ -89,7 +89,10 @@ describe('RelatedCards', () => {
 
       render(<RelatedCards slug="the-fool" />);
 
-      expect(screen.getByText('Cartas Relacionadas')).toBeInTheDocument();
+      // T-SEO-010: el nivel importa. `getByText` pasaba igual con el `h3` viejo.
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'Cartas Relacionadas' })
+      ).toBeInTheDocument();
     });
 
     it('should render all related card thumbnails', () => {

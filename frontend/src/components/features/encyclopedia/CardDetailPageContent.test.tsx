@@ -30,8 +30,19 @@ vi.mock('@/hooks/api/useEncyclopedia', () => ({
 }));
 
 vi.mock('./CardDetailView', () => ({
-  CardDetailView: ({ card }: { card: { nameEs: string } }) => (
-    <div data-testid="card-detail-view">{card.nameEs}</div>
+  CardDetailView: ({
+    card,
+    combinationCardNames,
+  }: {
+    card: { nameEs: string };
+    combinationCardNames?: Record<string, string>;
+  }) => (
+    <div
+      data-testid="card-detail-view"
+      data-combination-names={JSON.stringify(combinationCardNames)}
+    >
+      {card.nameEs}
+    </div>
   ),
 }));
 
@@ -57,6 +68,25 @@ describe('CardDetailPageContent', () => {
 
     expect(screen.getByTestId('card-detail-view')).toBeInTheDocument();
     expect(screen.getByText('El Loco')).toBeInTheDocument();
+  });
+
+  it('⚠️ T-SEO-010: pasa al render los nombres de las combinaciones resueltos en el servidor', () => {
+    // El nombre del cross-link se resuelve en la ruta; si se corta acá, el
+    // enlace cae al slug en inglés sin que nada avise.
+    mockUseCard.mockReturnValue({ data: card, isLoading: false, error: null });
+
+    render(
+      <CardDetailPageContent
+        slug="el-loco"
+        initialCard={card}
+        combinationCardNames={{ 'el-mago': 'El Mago' }}
+      />
+    );
+
+    expect(screen.getByTestId('card-detail-view')).toHaveAttribute(
+      'data-combination-names',
+      JSON.stringify({ 'el-mago': 'El Mago' })
+    );
   });
 
   it('debe mostrar skeleton mientras carga', () => {

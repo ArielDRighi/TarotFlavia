@@ -25,6 +25,16 @@ describe('CardMeaning', () => {
       expect(screen.getByText(defaultProps.meaningUpright)).toBeInTheDocument();
     });
 
+    it('⚠️ T-SEO-010: encabeza el bloque con un h2', () => {
+      // Sin esto el bloque quedaba como un tramo de contenido sin rótulo entre
+      // dos `h2`, y el esquema de la ficha tenía un agujero.
+      render(<CardMeaning meaningUpright="Derecha" meaningReversed="Invertida" />);
+
+      expect(
+        screen.getByRole('heading', { level: 2, name: 'El significado de la carta' })
+      ).toBeInTheDocument();
+    });
+
     it('should render Derecha tab trigger', () => {
       render(<CardMeaning {...defaultProps} />);
 

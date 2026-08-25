@@ -12,6 +12,7 @@ import {
   getCardBySlug,
   getRelatedCards,
   getCardNavigation,
+  getCombinationCardNames,
 } from './encyclopedia-api';
 import { ArcanaType, Suit, Element, Planet, ZodiacAssociation } from '@/types/encyclopedia.types';
 import { API_ENDPOINTS } from './endpoints';
@@ -251,6 +252,40 @@ describe('encyclopedia API functions', () => {
 
       expect(result.previous?.slug).toBe('the-fool');
       expect(result.next?.slug).toBe('the-high-priestess');
+    });
+  });
+  /**
+   * T-SEO-010: los cross-links entre fichas necesitan el nombre de la otra carta
+   * en el HTML, y las combinaciones solo guardan el slug.
+   */
+  describe('getCombinationCardNames', () => {
+    const combinations = [
+      { cardSlug: 'the-magician', reading: 'El impulso encuentra una herramienta.' },
+    ];
+
+    it('devuelve el nombre en español de cada carta combinada', async () => {
+      vi.mocked(apiClient.get).mockResolvedValueOnce({
+        data: [
+          { ...mockCardSummary, slug: 'the-magician', nameEs: 'El Mago' },
+          { ...mockCardSummary, slug: 'the-empress', nameEs: 'La Emperatriz' },
+        ],
+      });
+
+      const result = await getCombinationCardNames(combinations);
+
+      expect(result).toEqual({ 'the-magician': 'El Mago' });
+    });
+
+    it('no pide el listado cuando la ficha todavía no tiene combinaciones', async () => {
+      await expect(getCombinationCardNames(undefined)).resolves.toEqual({});
+      await expect(getCombinationCardNames([])).resolves.toEqual({});
+      expect(apiClient.get).not.toHaveBeenCalled();
+    });
+
+    it('omite los slugs que no resuelven a ninguna carta', async () => {
+      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: [mockCardSummary] });
+
+      await expect(getCombinationCardNames(combinations)).resolves.toEqual({});
     });
   });
 });

@@ -16,6 +16,8 @@
  * - CardDetailView: Full detail view for a single card
  * - CardImage: Card image with zoom modal
  * - CardMeaning: Upright/reversed meanings with tabs
+ * - CardContentSection: Sección temática con h2 propio (amor, trabajo, etc.)
+ * - CardCombinations: Combinaciones frecuentes como enlaces internos
  * - CardKeywords: Keyword badges grouped by orientation
  * - CardMetadata: Card metadata (arcana, element, suit, etc.)
  * - CardNavigation: Previous/next card navigation
@@ -55,6 +57,8 @@ export { CardDetailView } from './CardDetailView';
 export { CardDetailHero } from './CardDetailHero';
 export { CardImage } from './CardImage';
 export { CardMeaning } from './CardMeaning';
+export { CardContentSection } from './CardContentSection';
+export { CardCombinations } from './CardCombinations';
 export { CardKeywords } from './CardKeywords';
 export { CardMetadata } from './CardMetadata';
 export { CardNavigation } from './CardNavigation';
@@ -74,6 +78,8 @@ export type { EncyclopediaSkeletonProps } from './EncyclopediaSkeleton';
 export type { CardDetailViewProps } from './CardDetailView';
 export type { CardImageProps } from './CardImage';
 export type { CardMeaningProps } from './CardMeaning';
+export type { CardContentSectionProps } from './CardContentSection';
+export type { CardCombinationsProps } from './CardCombinations';
 export type { CardKeywordsProps } from './CardKeywords';
 export type { CardMetadataProps } from './CardMetadata';
 export type { CardNavigationProps } from './CardNavigation';

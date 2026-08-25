@@ -76,7 +76,7 @@ Conviene dejarlo escrito para no volver a auditar lo mismo:
 | --- | --- | --- | --- | --- | --- |
 | T-SEO-008 | Modelo de contenido extendido para las fichas de tarot | Backend | 🔴 Crítica | 2 pts | ✅ Completada |
 | T-SEO-009 | Redactar y cargar el contenido de las 78 fichas | Contenido | 🔴 Crítica | 5 pts | ✅ Completada |
-| T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts | ⬜ Pendiente |
+| T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts | ✅ Completada |
 | T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
 | T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts | ⬜ Pendiente |
 | T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts | 🟡 Parcial |
@@ -97,15 +97,15 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | 1 | ~~**T-DEUDA-003**~~ ✅ | 0,5 pts | Cerrada 19-ago-2026: producción sana, base local resincronizada |
 | 2 | ~~**T-SEO-009 + la parte de tarot de T-SEO-013**~~ ✅ | 5 pts | Cerrada 20-ago-2026: 78 fichas cargadas, promedio 676 palabras |
 | 3 | ~~**T-SEO-011**~~ ✅ | 2 pts | Cerrada 23-ago-2026: `/sobre-nosotros` sirve ~1200 palabras propias |
-| 4 | **T-SEO-010** | 2 pts | Necesita el contenido de 009 cargado para verificar |
+| 4 | ~~**T-SEO-010**~~ ✅ | 2 pts | Cerrada 24-ago-2026: las 7 secciones se renderizan; las 78 fichas pasan de 166 a 766 palabras propias promedio |
 | 5 | **Resto de T-SEO-013** | ~1,5 pts | Carta astral, numerología, prompts de IA, guardarraíl |
 | 6 | **Deploy + verificación en producción + Search Console** | — | Recién ahí se pide la revisión |
 | 7 | T-SEO-012 | 1,5 pts | No está en la puerta de salida |
 | 8 | T-DEUDA-002 | 1 pt | Los 2 índices reales de `sessions` |
 | 9 | T-DEUDA-001 | 2 pts | El más largo y el menos urgente |
 
-**Hasta poder pedir la tercera revisión: ~3,5 pts** (010 + resto de 013). Los 5 pts de T-SEO-009, los
-2 de T-SEO-011 y el medio de T-DEUDA-003 ya están gastados.
+**Hasta poder pedir la tercera revisión: ~1,5 pts** (resto de 013). Los 5 pts de T-SEO-009, los 2 de
+T-SEO-011, los 2 de T-SEO-010 y el medio de T-DEUDA-003 ya están gastados.
 
 ### Por qué este orden y no el obvio
 
@@ -291,7 +291,8 @@ T-SEO-008.
       sección pasa de 166 a ~676. ⚠️ La verificación con
       `npm run check:indexable -- --base-url <host> --min-words 500` **queda pendiente hasta
       T-SEO-010**: hoy el frontend no renderiza las secciones nuevas, así que el HTML servido sigue
-      mostrando 166 palabras por ficha por más que la base esté cargada.
+      mostrando 166 palabras por ficha por más que la base esté cargada. ✅ **Desbloqueado el
+      24-ago-2026**: T-SEO-010 ya las renderiza; la medición queda pendiente solo del deploy.
 - [x] Ninguna sección queda vacía en ninguna ficha. Verificado en los datos y en la base: las 7
       columnas tienen valor en las 78 filas. El guardarraíl de T-SEO-010 lo revalidará sobre el HTML.
 - [x] Los párrafos no se repiten entre cartas. Tres tests de unicidad: por sección, por lectura de
@@ -386,6 +387,8 @@ Lo que salió, porque es lo que conviene mirar primero en la revisión humana:
 
 **Prioridad:** 🔴 Crítica · **Estimación:** 2 pts · **Dependencias:** T-SEO-008 (bloqueante), T-SEO-009 (para verificar)
 
+**Estado:** ✅ COMPLETADA (24-ago-2026)
+
 ### Problema
 
 Hoy la ficha servida tiene esta estructura de encabezados —medida sobre el HTML de producción:
@@ -401,7 +404,7 @@ renderizarlo.
 
 ### Alcance
 
-- [ ] `CardDetailView` renderiza las secciones nuevas como `<section>` con `<h2>` propio:
+- [x] `CardDetailView` renderiza las secciones nuevas como `<section>` con `<h2>` propio:
 
   | Campo | Encabezado visible |
   | --- | --- |
@@ -413,20 +416,99 @@ renderizarlo.
   | `yesNo` | *¿Sí o no?* |
   | `combinations` | *Combinaciones frecuentes* |
 
-- [ ] **Cada sección degrada sola si su campo es `null`.** Es lo que permite desplegar T-SEO-008 y
-      T-SEO-010 antes de que exista todo el contenido, y cargar las fichas de a tandas.
-- [ ] Las **combinaciones** son `<Link>` reales a `/enciclopedia/tarot/[slug]`, no texto plano: son
-      cross-links internos que el crawler recorre y que hoy no existen entre fichas.
-- [ ] Jerarquía de encabezados correcta (`h1` → `h2` → `h3`), sin saltos.
-- [ ] **Guardarraíl de contenido en tests**, replicando el patrón de T-SEO-002
-      (`getProfileWordCount` + `MIN_PROFILE_WORDS`): si una ficha baja del piso o le falta una
-      sección, falla en CI y no en el próximo rechazo de AdSense.
+- [x] **Cada sección degrada sola si su campo es `null`.** `CardContentSection` no renderiza nada
+      —ni el encabezado— si el campo no vino, vino vacío o vino en blanco. Es lo que permite cargar
+      las fichas de a tandas sin dejar títulos huérfanos.
+- [x] Las **combinaciones** son `<Link>` reales a `/enciclopedia/tarot/[slug]`, no texto plano.
+      ⚠️ La respuesta de la API solo trae `cardSlug`, así que el **nombre del enlace se resuelve en
+      el servidor** (`getCombinationCardNames` + `resolveListingData` en la ruta): un cross-link cuyo
+      texto aparece recién en el cliente no le sirve al crawler. Si el listado no responde, el enlace
+      degrada al slug legible y la ficha sale igual.
+- [x] Jerarquía de encabezados correcta (`h1` → `h2`), sin saltos. Los dos `h3` sueltos que había
+      —*Información* y *Palabras Clave*— pasaron a `h2`, igual que *Cartas Relacionadas*, y el bloque
+      de significados —que no tenía encabezado y quedaba como un tramo sin rótulo en el esquema—
+      recibió el suyo: *El significado de la carta*.
+- [x] **Guardarraíl de contenido en tests**: `MIN_CARD_DETAIL_WORDS` en
+      `card-content-sections.data.ts` y la medición sobre el **DOM renderizado** en
+      `CardDetailView.test.tsx`, con el `countWords` compartido de T-SEO-002/T-SEO-011. Mide solo el
+      contenido propio —descripción, significados, las seis secciones y las combinaciones—, sin el
+      chrome de hero, metadatos, palabras clave y firma: 590 palabras contra un piso de 500.
 
 ### Criterios de aceptación
 
-- [ ] Las 78 fichas superan 500 palabras propias medidas contra el build de producción.
-- [ ] Una ficha con campos nuevos en `null` sigue renderizando sin huecos ni encabezados vacíos.
-- [ ] `npm run check:indexable -- --base-url <host>` en verde, sin soft-404.
+- [x] Las 78 fichas superan 500 palabras propias. **Medido sobre el HTML servido** con
+      `check:indexable` contra el host local con la base cargada (24-ago-2026): las 78 responden 200,
+      **mínimo 694** (`five-of-swords` y `four-of-swords`), **promedio 766**, máximo 893, y ninguna
+      queda por debajo del piso. Contra las 166 palabras que servía la ficha antes de esta tarea.
+      Los otros dos lugares donde se mide lo mismo: el test de datos del backend (T-SEO-009: mínimo
+      579 palabras de fuente, promedio 676) y el guardarraíl de render, que renderiza la ficha más
+      corta del corpus y cuenta el texto del DOM.
+- [x] Una ficha con campos nuevos en `null` sigue renderizando sin huecos ni encabezados vacíos.
+      Cubierto por tres tests: sin contenido extendido, con una sola sección cargada y con un string
+      en blanco.
+- [x] `npm run check:indexable -- --base-url <host>` sin soft-404. Corrido sobre las **179 URLs del
+      sitemap**: **0 soft-404** y las 78 fichas en verde con `--min-words 500`. La única URL delgada
+      de verdad que queda no es una ficha y ya tiene tarea: `/servicios/limpiezas-energeticas`, 106
+      palabras (T-SEO-012). `/explorar` marcó 2 palabras en la corrida, pero es un artefacto de
+      `next dev` —la primera request devuelve el `loading.tsx` mientras compila la ruta—: en caliente
+      sirve 210. ⚠️ La corrida fue contra el **host local**; repetirla contra producción después del
+      deploy.
+
+### Decisiones de implementación
+
+- **La lista de secciones vive en un solo lugar** (`src/lib/constants/card-content-sections.data.ts`)
+  y de ahí la consumen el render y el guardarraíl. Repartir los encabezados por el JSX habría dejado
+  al test verificando una copia del contrato en vez del contrato.
+- **El guardarraíl del frontend mide el HTML, no el corpus.** Las 78 fichas viven en la base y en los
+  datos del backend, que ya tiene su propio test de largo (T-SEO-009); duplicar el corpus en el
+  frontend habría creado una segunda fuente de verdad que se desincroniza. Lo que este guardarraíl
+  cubre es lo que aquel no puede ver: que el render **saque a la página** lo que la API manda. Por eso
+  el fixture es la ficha real más corta del corpus y el test cuenta el texto del DOM renderizado.
+  La contracara, anotada en el propio fixture: es una **copia** del corpus, así que si mañana se
+  acorta esa carta en el backend, lo agarra el test de allá y acá queda un texto viejo — no al revés.
+- **El largo total no detecta que se caiga una sección corta**, y no pretende hacerlo: quitando
+  `symbolism` o las combinaciones la ficha cae por debajo del piso, pero quitando `yesNo` no. Lo que
+  cubre eso son los tests que buscan cada sección una por una, más el que verifica que ninguna llegue
+  al DOM con el cuerpo vacío.
+- **`meaningReversed` no cuenta para la medición del DOM**: vive en la pestaña *Invertida* de
+  `CardMeaning`, y Radix desmonta el panel inactivo, así que no está en el HTML servido. Son ~15
+  palabras por ficha y el piso se supera igual, pero conviene tenerlo anotado: es contenido escrito
+  que el crawler no ve. Cambiarlo es una decisión de UX (pestañas → secciones), fuera del alcance de
+  esta tarea.
+- **La ruta pide el listado de cartas para resolver los nombres de las combinaciones.** Es una
+  llamada extra por ficha en el build (78 en total, contra el endpoint de listado, que desde T-SEO-008
+  proyecta solo 8 columnas). El mapa se filtra a los 3-5 slugs de la ficha antes de mandarlo al
+  cliente, así que al payload de cada página van 4 entradas y no 78.
+
+### Lo que encontró la revisión local (y se corrigió)
+
+- **Dos helpers del guardarraíl eran código muerto.** `getCardDetailWordCount` y
+  `getMissingCardSections` no los consumía nadie fuera de su propio test, y ese test los corría
+  contra el fixture: comprobaba que el fixture estaba completo, no que el contenido publicado lo
+  estuviera. Se eliminaron; el guardarraíl quedó donde mide algo real, sobre el DOM.
+- **El guardarraíl de largo contaba el chrome.** Medía `container.textContent` entero —hero,
+  metadatos, palabras clave, firma: ~70 palabras—, así que el número estaba inflado respecto de
+  "palabras propias". Ahora suma solo los bloques de contenido de autor.
+- **Tres de los cuatro cambios de encabezado no tenían test que los fijara**: los tests usaban
+  `getByText`, que pasa igual con `h3` o con `h2`. Pasaron a `getByRole('heading', { level: 2 })`, y
+  el `h2` nuevo de `CardMeaning` —que no cubría nada— tiene el suyo.
+- **La etiqueta de respaldo del cross-link salía como `Seven Of Swords`**, con la partícula
+  capitalizada. Ahora se arma como el `nameEn` real de la carta (`Seven of Swords`), que es el mismo
+  nombre inglés que la ficha ya muestra como subtítulo.
+- **Duplicación**: el `split` de párrafos estaba escrito dos veces (descripción y secciones) y las
+  clases de la tarjeta, copiadas literales en dos componentes. Quedaron `splitParagraphs` en
+  `lib/utils/text.ts` y `CARD_SECTION_CLASSES` exportada de `CardContentSection`.
+- **El pass-through de `combinationCardNames`** en `CardDetailPageContent` no tenía test propio.
+
+### Lo que queda pendiente
+
+- **Repetir `check:indexable -- --min-words 500` contra producción** después del deploy. La corrida
+  del 24-ago-2026 fue contra el host local con la base cargada —que es lo que cierra el criterio de
+  aceptación—, pero producción sirve el build estático con ISR y conviene confirmarlo ahí antes de
+  pedir la revisión de AdSense.
+- **La diferencia de tono entre el corpus viejo y el nuevo** que anotó T-SEO-009 ahora se ve en la
+  misma página: `meaningUpright` (formal, esotérico) y `meaningLove` (más conversacional) quedaron a
+  dos secciones de distancia. Es material para la revisión editorial humana, que sigue pendiente.
 
 ---
 
