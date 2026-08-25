@@ -28,7 +28,7 @@
 {
 "planet": "sun",
 "house": 6,
-"content": "Con el Sol en la Casa 6, encuentras tu propósito a través del servicio, el trabajo diario y la mejora de la salud. No buscas el brillo por ego, sino la satisfacción de ser útil y eficiente. Tu identidad se define por lo bien que haces tu trabajo y cómo ayudas a resolver problemas prácticos. Eres perfeccionista y detallista. Tu camino es encontrar lo sagrado en la rutina y entender que el cuerpo es el templo de tu espíritu. Brillas cuando organizas, sanas o perfeccionas sistemas. Ejemplo práctico: adoptar un estilo de vida saludable ejemplar o destacar en tu trabajo por tu impecable organización."
+"content": "Con el Sol en la Casa 6, encuentras tu propósito a través del servicio, el trabajo diario y la mejora de tus rutinas. No buscas el brillo por ego, sino la satisfacción de ser útil y eficiente. Tu identidad se define por lo bien que haces tu trabajo y cómo ayudas a resolver problemas prácticos. Eres perfeccionista y detallista. Tu camino es encontrar lo sagrado en la rutina y entender que el cuerpo es el templo de tu espíritu. Brillas cuando organizas, sanas o perfeccionas sistemas. Ejemplo práctico: adoptar un estilo de vida ordenado ejemplar o destacar en tu trabajo por tu impecable organización."
 },
 {
 "planet": "sun",
@@ -58,7 +58,7 @@
 {
 "planet": "sun",
 "house": 12,
-"content": "Con el Sol en la Casa 12, tu luz es espiritual, compasiva y a veces oculta. Puedes sentirte más cómodo tras bastidores que en el escenario central. Tu identidad es fluida y está conectada con el inconsciente colectivo. Necesitas momentos de soledad para recargar tu energía vital. Tu propósito es disolver el ego y servir desde el amor incondicional o el arte. Brillas cuando ayudas a los desfavorecidos o canalizas tu creatividad en soledad. Ejemplo práctico: trabajar en instituciones de salud, dedicarte a la meditación profunda o realizar obras de caridad anónimas."
+"content": "Con el Sol en la Casa 12, tu luz es espiritual, compasiva y a veces oculta. Puedes sentirte más cómodo tras bastidores que en el escenario central. Tu identidad es fluida y está conectada con el inconsciente colectivo. Necesitas momentos de soledad para recargar tu energía vital. Tu propósito es disolver el ego y servir desde el amor incondicional o el arte. Brillas cuando ayudas a los desfavorecidos o canalizas tu creatividad en soledad. Ejemplo práctico: trabajar en instituciones de ayuda, dedicarte a la meditación profunda o realizar obras de caridad anónimas."
 },
 {
 "planet": "moon",
@@ -88,7 +88,7 @@
 {
 "planet": "moon",
 "house": 6,
-"content": "La Luna en la Casa 6 vincula tus emociones con tu salud y tu rutina diaria. El estrés emocional se manifiesta rápidamente en tu cuerpo (somatización), especialmente en el estómago. Necesitas sentirte útil y tener un día a día organizado para estar tranquilo. Cuidar de otros o tener mascotas es una fuente importante de bienestar para ti. Tu trabajo debe tener un componente emocional o de servicio. Ejemplo práctico: adoptar una rutina de autocuidado estricta para manejar la ansiedad o trabajar en áreas de salud y bienestar."
+"content": "La Luna en la Casa 6 vincula tus emociones con tu cuerpo y tu rutina diaria. El estrés emocional se manifiesta rápidamente en tu cuerpo (somatización), especialmente en el estómago. Necesitas sentirte útil y tener un día a día organizado para estar tranquilo. Cuidar de otros o tener mascotas es una fuente importante de bienestar para ti. Tu trabajo debe tener un componente emocional o de servicio. Ejemplo práctico: adoptar una rutina de autocuidado estricta para manejar la ansiedad o trabajar en áreas de cuidado y bienestar."
 },
 {
 "planet": "moon",
@@ -148,7 +148,7 @@
 {
 "planet": "mercury",
 "house": 6,
-"content": "Con Mercurio en la Casa 6, tu mente es analítica, crítica y orientada al detalle. Eres excelente organizando, planificando y resolviendo problemas laborales. Te interesan los temas de salud, higiene y eficiencia. Aprendes nuevas técnicas de trabajo con rapidez. Puedes tener tendencia a preocuparte excesivamente por los detalles menores o por síntomas físicos (hipocondría mental). Eres el empleado o colega que recuerda todo. Ejemplo práctico: crear listas de tareas eficientes, investigar sobre nutrición o mejorar los procesos administrativos en tu oficina."
+"content": "Con Mercurio en la Casa 6, tu mente es analítica, crítica y orientada al detalle. Eres excelente organizando, planificando y resolviendo problemas laborales. Te interesan los temas de bienestar, higiene y eficiencia. Aprendes nuevas técnicas de trabajo con rapidez. Puedes tener tendencia a preocuparte excesivamente por los detalles menores o por síntomas físicos (hipocondría mental). Eres el empleado o colega que recuerda todo. Ejemplo práctico: crear listas de tareas eficientes, investigar sobre nutrición o mejorar los procesos administrativos en tu oficina."
 },
 {
 "planet": "mercury",
@@ -193,7 +193,7 @@
 {
 "planet": "venus",
 "house": 3,
-"content": "Con Venus en la Casa 3, embelleces tu entorno a través de la palabra y el pensamiento. Tienes una mente artística y te comunicas con diplomacia y dulzura. La relación con tus hermanos o vecinos suele ser armoniosa y afectuosa. Te encanta aprender sobre arte, literatura o cultura. Eres el mediador natural en disputas cercanas. Tu escritura o tu voz tienen un tono poético que encanta a quien escucha. Ejemplo práctico: escribir cartas de amor, tener un blog de estilo de vida o disfrutar de paseos estéticos por tu barrio saludando a todos."
+"content": "Con Venus en la Casa 3, embelleces tu entorno a través de la palabra y el pensamiento. Tienes una mente artística y te comunicas con diplomacia y dulzura. La relación con tus hermanos o vecinos suele ser armoniosa y afectuosa. Te encanta aprender sobre arte, literatura o cultura. Eres el mediador natural en disputas cercanas. Tu escritura o tu voz tienen un tono poético que encanta a quien escucha. Ejemplo práctico: escribir cartas de amor, tener un blog de estilo de vida o disfrutar de paseos estéticos por tu barrio charlando con todos."
 },
 {
 "planet": "venus",
@@ -208,7 +208,7 @@
 {
 "planet": "venus",
 "house": 6,
-"content": "Venus en la Casa 6 busca la armonía en la rutina diaria y el trabajo. Necesitas un ambiente laboral agradable y buenas relaciones con compañeros para ser productivo. Te gusta servir a otros con gracia y detalle. Disfrutas de rituales de belleza y salud que sean placenteros, no sacrificados. Puedes encontrar el amor en el trabajo o a través de actividades cotidianas. Tu salud se beneficia del equilibrio y la paz mental. Ejemplo práctico: decorar tu escritorio con flores, trabajar en diseño o bienestar, o disfrutar cocinando comidas saludables y bonitas."
+"content": "Venus en la Casa 6 busca la armonía en la rutina diaria y el trabajo. Necesitas un ambiente laboral agradable y buenas relaciones con compañeros para ser productivo. Te gusta servir a otros con gracia y detalle. Disfrutas de rituales de belleza y cuidado que sean placenteros, no sacrificados. Puedes encontrar el amor en el trabajo o a través de actividades cotidianas. Tu bienestar se beneficia del equilibrio y la paz mental. Ejemplo práctico: decorar tu escritorio con flores, trabajar en diseño o bienestar, o disfrutar cocinando comidas nutritivas y bonitas."
 },
 {
 "planet": "venus",
@@ -268,7 +268,7 @@
 {
 "planet": "mars",
 "house": 6,
-"content": "Con Marte en la Casa 6, eres un trabajador incansable y eficiente. Te gusta hacer las cosas rápido y bien; te impacientan los compañeros lentos. Canalizas tu energía a través del servicio y la rutina. Puedes ser propenso a fiebres, inflamaciones o accidentes laborales por estrés. Necesitas actividad física regular para mantener la salud. Eres perfeccionista en tu oficio. El desafío es no quemarte por exceso de trabajo. Ejemplo práctico: ser el empleado más rápido, trabajar con herramientas afiladas o maquinaria, o tener una rutina de gimnasio estricta."
+"content": "Con Marte en la Casa 6, eres un trabajador incansable y eficiente. Te gusta hacer las cosas rápido y bien; te impacientan los compañeros lentos. Canalizas tu energía a través del servicio y la rutina. Puedes ser propenso a fiebres, inflamaciones o accidentes laborales por estrés. Necesitas actividad física regular para mantener tu energía. Eres perfeccionista en tu oficio. El desafío es no quemarte por exceso de trabajo. Ejemplo práctico: ser el empleado más rápido, trabajar con herramientas afiladas o maquinaria, o tener una rutina de gimnasio estricta."
 },
 {
 "planet": "mars",
@@ -328,7 +328,7 @@
 {
 "planet": "jupiter",
 "house": 6,
-"content": "Con Júpiter en la Casa 6, encuentras sentido y crecimiento a través del trabajo y el servicio. Sueles tener buenas relaciones laborales y suerte encontrando empleo. Tienes una salud robusta, aunque debes cuidarte de los excesos (comida, bebida) que afecten al hígado o peso. Disfrutas ayudando a otros y mejorando tu entorno. El desafío es comprometerte con más trabajo del que puedes manejar por no saber decir 'no'. Tu don es sanar y servir con alegría. Ejemplo práctico: trabajar en ONGs, salud o educación, y ser querido por tus compañeros de trabajo."
+"content": "Con Júpiter en la Casa 6, encuentras sentido y crecimiento a través del trabajo y el servicio. Sueles tener buenas relaciones laborales y suerte encontrando empleo. Tienes una vitalidad robusta, aunque debes cuidarte de los excesos (comida, bebida) que afecten al hígado o peso. Disfrutas ayudando a otros y mejorando tu entorno. El desafío es comprometerte con más trabajo del que puedes manejar por no saber decir 'no'. Tu don es sanar y servir con alegría. Ejemplo práctico: trabajar en ONGs, en tareas de cuidado o en educación, y ser querido por tus compañeros de trabajo."
 },
 {
 "planet": "jupiter",
@@ -388,7 +388,7 @@
 {
 "planet": "saturn",
 "house": 6,
-"content": "Con Saturno en la Casa 6, eres el trabajador por excelencia: eficiente, perfeccionista y cumplidor. Te tomas tus tareas y rutinas con rigor casi militar. Puedes sufrir problemas de salud crónicos (huesos, piel, dientes) causados por el estrés y la autoexigencia. Te sientes culpable si no eres productivo. El desafío es aprender a delegar y descansar antes de que el cuerpo te obligue. Tu don es la excelencia en el servicio y la organización impecable. Ejemplo práctico: ser el empleado imprescindible que conoce todos los protocolos o gestionar tu salud con disciplina férrea."
+"content": "Con Saturno en la Casa 6, eres el trabajador por excelencia: eficiente, perfeccionista y cumplidor. Te tomas tus tareas y rutinas con rigor casi militar. El estrés y la autoexigencia pueden pasarte factura en el cuerpo si no aflojas el ritmo. Te sientes culpable si no eres productivo. El desafío es aprender a delegar y descansar antes de que el cuerpo te obligue. Tu don es la excelencia en el servicio y la organización impecable. Ejemplo práctico: ser el empleado imprescindible que conoce todos los protocolos o gestionar tus rutinas con disciplina férrea."
 },
 {
 "planet": "saturn",
@@ -448,7 +448,7 @@
 {
 "planet": "uranus",
 "house": 6,
-"content": "Con Urano en la Casa 6, necesitas libertad total en tu trabajo diario; el horario de 9 a 5 te mata. Eres genial resolviendo problemas técnicos o inventando nuevos métodos laborales. Tu salud puede sufrir por estrés nervioso; necesitas terapias alternativas. Eres el empleado que moderniza la oficina o el que renuncia de un día para otro. El desafío es la inestabilidad laboral y la dificultad para seguir órdenes. Tu don es la innovación en procesos y salud. Ejemplo práctico: trabajar como consultor externo, teletrabajar o usar biohacking para mejorar tu salud."
+"content": "Con Urano en la Casa 6, necesitas libertad total en tu trabajo diario; el horario de 9 a 5 te mata. Eres genial resolviendo problemas técnicos o inventando nuevos métodos laborales. Tu energía puede resentirse por el estrés nervioso; necesitas enfoques alternativos. Eres el empleado que moderniza la oficina o el que renuncia de un día para otro. El desafío es la inestabilidad laboral y la dificultad para seguir órdenes. Tu don es la innovación en procesos y hábitos. Ejemplo práctico: trabajar como consultor externo, teletrabajar o usar biohacking para mejorar tu rendimiento."
 },
 {
 "planet": "uranus",
@@ -508,7 +508,7 @@
 {
 "planet": "neptune",
 "house": 6,
-"content": "Con Neptuno en la Casa 6, buscas servir a los demás con devoción. El trabajo rutinario te agota; necesitas una labor con sentido espiritual o artístico. Eres muy sensible a medicamentos, toxinas y estrés ambiental; tu salud es psicosomática. Te cuesta poner límites en el trabajo y a veces te sacrificas de más. El desafío es el caos en la rutina diaria y el diagnóstico difícil de enfermedades. Tu don es la sanación y la ayuda desinteresada. Ejemplo práctico: trabajar con animales, en hospitales, como terapeuta holístico o tener alergias extrañas."
+"content": "Con Neptuno en la Casa 6, buscas servir a los demás con devoción. El trabajo rutinario te agota; necesitas una labor con sentido espiritual o artístico. Eres muy sensible a medicamentos, toxinas y estrés ambiental; tu cuerpo responde a lo emocional. Te cuesta poner límites en el trabajo y a veces te sacrificas de más. El desafío es el caos en la rutina diaria y el diagnóstico difícil de enfermedades. Tu don es la sanación y la ayuda desinteresada. Ejemplo práctico: trabajar con animales, en hospitales, como terapeuta holístico o tener alergias extrañas."
 },
 {
 "planet": "neptune",
@@ -568,7 +568,7 @@
 {
 "planet": "pluto",
 "house": 6,
-"content": "Con Plutón en la Casa 6, eres un trabajador incansable, capaz de una concentración obsesiva. Buscas transformar tu entorno laboral o dedicarte a profesiones de sanación profunda y eliminación de residuos. Tu salud está ligada a tus emociones reprimidas; necesitas purgar toxinas regularmente. Eres perfeccionista al extremo. El desafío es el agotamiento por obsesión laboral y los conflictos de poder con compañeros. Tu don es la capacidad de sanar y resolver problemas complejos que nadie más puede. Ejemplo práctico: ser cirujano, investigador médico o experto en eficiencia."
+"content": "Con Plutón en la Casa 6, eres un trabajador incansable, capaz de una concentración obsesiva. Buscas transformar tu entorno laboral o dedicarte a profesiones de sanación profunda y eliminación de residuos. Tu energía está ligada a tus emociones reprimidas; necesitas purgar toxinas regularmente. Eres perfeccionista al extremo. El desafío es el agotamiento por obsesión laboral y los conflictos de poder con compañeros. Tu don es la capacidad de sanar y resolver problemas complejos que nadie más puede. Ejemplo práctico: ser cirujano, investigador médico o experto en eficiencia."
 },
 {
 "planet": "pluto",

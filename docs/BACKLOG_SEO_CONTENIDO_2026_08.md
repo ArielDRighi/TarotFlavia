@@ -79,7 +79,7 @@ Conviene dejarlo escrito para no volver a auditar lo mismo:
 | T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts | ✅ Completada |
 | T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
 | T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts | ⬜ Pendiente |
-| T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts | 🟡 Parcial |
+| T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts | ✅ Hecha |
 
 **⛔ No pedir la tercera revisión de AdSense hasta tener 008, 009, 010, 011 y 013 en producción, más
 los pendientes de Search Console.** Ver *Puerta de salida* al final.
@@ -98,14 +98,15 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | 2 | ~~**T-SEO-009 + la parte de tarot de T-SEO-013**~~ ✅ | 5 pts | Cerrada 20-ago-2026: 78 fichas cargadas, promedio 676 palabras |
 | 3 | ~~**T-SEO-011**~~ ✅ | 2 pts | Cerrada 23-ago-2026: `/sobre-nosotros` sirve ~1200 palabras propias |
 | 4 | ~~**T-SEO-010**~~ ✅ | 2 pts | Cerrada 24-ago-2026: las 7 secciones se renderizan; las 78 fichas pasan de 166 a 766 palabras propias promedio |
-| 5 | **Resto de T-SEO-013** | ~1,5 pts | Carta astral, numerología, prompts de IA, guardarraíl |
-| 6 | **Deploy + verificación en producción + Search Console** | — | Recién ahí se pide la revisión |
+| 5 | ~~**Resto de T-SEO-013**~~ ✅ | ~1,5 pts | Cerrada 24-ago-2026: corpus sembrado, prompts de IA y guardarraíl |
+| 6 | **Deploy + verificación en producción + Search Console** | — | ⬅️ **Acá estamos.** Recién ahí se pide la revisión |
 | 7 | T-SEO-012 | 1,5 pts | No está en la puerta de salida |
 | 8 | T-DEUDA-002 | 1 pt | Los 2 índices reales de `sessions` |
 | 9 | T-DEUDA-001 | 2 pts | El más largo y el menos urgente |
 
-**Hasta poder pedir la tercera revisión: ~1,5 pts** (resto de 013). Los 5 pts de T-SEO-009, los 2 de
-T-SEO-011, los 2 de T-SEO-010 y el medio de T-DEUDA-003 ya están gastados.
+**Hasta poder pedir la tercera revisión: 0 pts de desarrollo.** Queda el paso 6 —deploy,
+verificación en producción y Search Console—, que no es código. Los 5 pts de T-SEO-009, los 2 de
+T-SEO-011, los 2 de T-SEO-010, los 2 de T-SEO-013 y el medio de T-DEUDA-003 ya están gastados.
 
 ### Por qué este orden y no el obvio
 
@@ -628,10 +629,11 @@ Otras correcciones aplicadas:
 
 ### Hallazgos derivados — NO son de esta tarea
 
-1. **Tres fichas de arcanos mayores prometen resultados** (`major-arcana.data.ts`): La Emperatriz
-   *"promete… prosperidad financiera"*, La Justicia *"garantiza resolución a favor en temas
-   legales"*, El Emperador *"augurio excelente… disciplina financiera"*. Las dos primeras además
-   rozan lo legal/financiero (YMYL). **Van en T-SEO-013**, que ya toca ese archivo.
+1. ~~**Tres fichas de arcanos mayores prometen resultados**~~ ✅ **Resuelto en T-SEO-013**
+   (24-ago-2026). La Emperatriz *"promete… prosperidad financiera"*, La Justicia *"garantiza
+   resolución a favor en temas legales"* y El Emperador *"augurio excelente… disciplina
+   financiera"* ahora describen el simbolismo en vez de garantizar el resultado, en el archivo de
+   seed **y** en la base ya sembrada.
 2. **La enciclopedia no cita una sola fuente.** Un bloque *"Fuentes"* al pie de las 7 guías (Waite,
    Pollack, etc.) es de las señales E-E-A-T más baratas que quedan sin explotar. Tarea nueva.
 3. **Voseo vs. tuteo inconsistente en el sitio.** `/sobre-nosotros` está en voseo pleno;
@@ -670,7 +672,7 @@ ahí, ve una ficha de producto delgada.
 ## T-SEO-013: "Salud" Fuera del Texto Visible (YMYL)
 
 **Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** ninguna
-**Estado:** 🟡 PARCIAL — el código está hecho ([PR #629](https://github.com/ArielDRighi/TarotFlavia/pull/629)); falta el corpus sembrado en la base
+**Estado:** ✅ COMPLETADA (24-ago-2026) — código en [PR #629](https://github.com/ArielDRighi/TarotFlavia/pull/629); corpus sembrado, prompts y guardarraíl en el PR de cierre
 
 ### Problema
 
@@ -701,9 +703,9 @@ Las tres clases de ocurrencia se tratan distinto, y ésa es la parte que importa
       ve el usuario: *"Tema Médico Detectado"* y *"consultá con un profesional de la medicina"* —
       igual de firme y más preciso.
 
-### Pendiente: el corpus sembrado en la base
+### Hecho: el corpus sembrado en la base (24-ago-2026)
 
-Quedan **~180 ocurrencias** que no alcanza con cambiar en el repo, porque el contenido ya está
+Quedaban **~180 ocurrencias** que no alcanzaba con cambiar en el repo, porque el contenido ya está
 sembrado en la base de producción:
 
 | Archivo | Ocurrencias | Dónde se ve |
@@ -718,25 +720,70 @@ sembrado en la base de producción:
 | `modules/numerology/data/interpretations.data.ts` | varias | numerología |
 | resto (guías de actividad, prompts del horóscopo chino, plantillas de email) | resto | varios |
 
-- [ ] Reescribir el corpus con la terminología nueva.
-- [ ] **Re-seed o migración de datos**, según si el registro se edita desde el panel de admin: si se
-      edita, una migración que pise el texto borraría cambios editoriales.
-- [ ] Renombrar el `name` y la `description` de la categoría `salud-bienestar` en la base — con eso
-      el `categoryLabel()` del frontend queda redundante y se puede sacar. **El slug se queda como
-      está**: migrarlo toca el gating FREE en los dos lados.
-- [ ] Revisar los prompts de IA (`chinese-horoscope.prompts.ts`, síntesis de carta astral): si el
-      prompt dice "salud", el modelo devuelve texto con la palabra y reaparece por la puerta de
-      atrás, sin pasar por ningún archivo del repo.
-- [ ] Guardarraíl: un test que falle si aparece "salud" en los datos de seed. Es la única forma de
-      que esto no vuelva dentro de tres meses.
+- [x] Reescribir el corpus con la terminología nueva. **51 ocurrencias** en 16 archivos de seed y
+      datos (las ~180 del inventario original contaban `categorySlug: 'salud-bienestar'`, que es
+      slug y no se toca).
+- [x] **Migración de datos, no re-seed.** Los cinco seeders del corpus son *skip-if-exists*
+      (`seedReadingCategories`, `seedEncyclopediaArticles`, `seedBirthChartInterpretations`,
+      `seedPredefinedQuestions`, `seedTarotCards` cortan apenas encuentran una fila), así que en una
+      base ya poblada un re-seed no cambia una sola letra. Va
+      `1787583600000-ReplaceSaludWordingInSeededCorpus`: 60 pares `[viejo, nuevo]` aplicados con
+      `REPLACE` por subcadena exacta, **parametrizado** y acotado por `POSITION(...) > 0`, sobre 6
+      tablas. Si alguien editó una fila, el `POSITION` no matchea y la migración no la toca: no
+      puede pisar una edición editorial. El panel de admin, además, hoy no edita ninguna de esas
+      tablas (`admin` es dashboard + usuarios).
+      **Verificado contra la base de desarrollo con datos reales** (132 interpretaciones libres, 42
+      preguntas, 78 cartas, 48 artículos, 476 interpretaciones de carta astral): `up` deja las 6
+      tablas en 0 ocurrencias, `down` restaura el texto viejo con **hash idéntico** al de partida, y
+      un segundo `up` reproduce exactamente el mismo hash (idempotente).
+- [x] Renombrado el `name` (*Energía y Bienestar*), la `description` y —no estaba previsto— el
+      `icon`: era 🏥, un hospital, que es la misma señal YMYL que el nombre. Ahora 🌿. **El slug
+      quedó como está**: migrarlo toca el gating FREE en los dos lados.
+      `categoryLabel()` en `CategorySelector.tsx` **se dejó** aunque ahora sea redundante: es la red
+      para una base que todavía no corrió la migración (entorno viejo, rollback). Cuesta tres líneas
+      y evita que un `name` viejo se filtre a la página.
+- [x] Prompts de IA revisados. `chinese-horoscope.prompts.ts` ya estaba bien: su única mención es
+      la instrucción **negativa** *"NO uses términos médicos o menciones condiciones de salud"*, que
+      es justamente lo que impide que el modelo devuelva texto médico — sacarla apagaría la
+      protección. `chart-ai-synthesis.service.ts` **no la tenía**: el prompt le pasa al modelo las
+      interpretaciones individuales de la carta, así que con el corpus viejo la palabra volvía por
+      la puerta de atrás. Se le agregó la regla 10 (*nunca la palabra "salud" ni consejo médico;
+      energía, descanso, hábitos y bienestar*) y la línea equivalente en el bloque `NO incluyas`.
+- [x] **Promesas de resultado legal/financiero** (hallazgo derivado de T-SEO-012, asignado acá).
+      Prometer un desenlace es la otra mitad de YMYL: La Emperatriz *"promete… prosperidad
+      financiera"*, La Justicia *"garantiza resolución a favor en temas legales"* y El Emperador
+      *"augurio excelente… disciplina financiera"*. Las tres reescritas en `major-arcana.data.ts` y
+      migradas en `encyclopedia_tarot_cards.meaning_upright`.
+      El guardarraíl que lo sostiene prohíbe **`garantiza` y `augurio`**, no `promete`: el corpus de
+      T-SEO-009 usa `promete` 13 veces y casi siempre para *negar* la promesa (*"no promete
+      continuidad"*, *"la que menos promete atajos"*). Prohibirlo daría 13 falsos positivos y cero
+      hallazgos reales — el mismo criterio con el que `sanar` quedó fuera de la lista médica.
+- [x] Guardarraíl: `src/no-salud-user-facing.spec.ts`, calcado del patrón de
+      `no-ia-user-facing.spec.ts` (FBK-003). Escanea `database/seeds/**` y todo `data/`, `seeds/`,
+      `prompts/` y `templates/` de los módulos —`.ts`, `.md` y `.hbs`—, replicando el mismo
+      `grep -i salud` del criterio de aceptación sobre el **origen**. Ignora comentarios, el slug
+      `salud-bienestar` y una allowlist de dos entradas justificadas.
+      Va con un segundo test, `src/database/seeds/salud-wording-sync.spec.ts`, que ata la migración
+      a los archivos de seed: por cada par verifica que el texto nuevo **está** en el seed y que el
+      viejo **no**. Sin él, migración y seed pueden divergir y una base nueva termina distinta de
+      una migrada, sin que nada se ponga en rojo.
+      ⚠️ El spec vive en `seeds/` y no en `migrations/` a propósito: el glob de TypeORM
+      (`database/migrations/*{.ts,.js}`) carga **todo** lo que haya en esa carpeta, así que un
+      `.spec.ts` ahí adentro rompe el CLI de migraciones y el arranque de la app
+      (`migrationsRun: true`) con *"describe is not defined"*. Verificado en carne propia.
 
 ### Criterios de aceptación
 
-- [ ] `grep -rniI "salud" frontend/src backend/tarot-app/src` solo devuelve slugs, valores de base,
-      claves de mapas, comentarios, fixtures de test y la lista de términos bloqueados del péndulo.
+- [x] `grep -rniI "salud" frontend/src backend/tarot-app/src` solo devuelve slugs, valores de base,
+      claves de mapas, comentarios, fixtures de test, la lista de términos bloqueados del péndulo y
+      las **instrucciones negativas de los prompts de IA** (*"NO uses…"*, *"NO incluyas…"*), que son
+      protección y no contenido. Ninguna cadena renderizable quedó con la palabra.
 - [ ] Ninguna página de producción muestra la palabra: verificable barriendo el HTML servido de las
-      178 URLs del sitemap.
-- [ ] Las preguntas sobre enfermedad siguen bloqueadas en el péndulo (test de regresión existente).
+      178 URLs del sitemap. **Pendiente del deploy** — el repo y la migración están listos, pero
+      "mergeado" no es "en producción" (paso 6 del orden de desarrollo).
+- [x] Las preguntas sobre enfermedad siguen bloqueadas en el péndulo: no se tocó `blockedTerms` ni
+      la categoría `'salud'` del validador, y sus tests de regresión siguen en verde (321 suites,
+      4667 tests del backend).
 
 ### Notas
 
@@ -764,6 +811,23 @@ sembrado en la base de producción:
   resto del corpus también van a aparecer falsos positivos que hay que reescribir igual.
 - **El campo nuevo se llama `meaningWellbeing`, no `meaningHealth`** (T-SEO-008). Un nombre de campo
   con "health" invita a que alguien escriba consejo médico adentro dentro de seis meses.
+- **Vocabulario clínico: barrido parcial, queda deuda.** Al reescribir el corpus se sacaron también
+  los términos clínicos que estaban **en las mismas frases** que "salud" —`enfermedad`,
+  `enfermedades`, `problemas inflamatorios`— porque eran el mismo párrafo y el mismo riesgo. Lo que
+  **no** se tocó es el vocabulario clínico que vive en frases sin la palabra: `hipocondría`,
+  `psicosomática`, `somatización`, `medicina alternativa`, `cirujano`, `investigador médico`,
+  `alergias` en las interpretaciones de carta astral, y `ansiedad`, `traumas`, `dependencia
+  emocional`, `psique` en los `meaningReversed` de las 78 fichas. Ampliar el barrido a todo eso es
+  reescribir cientos de párrafos de contenido astrológico legítimo y merece su propia tarea con su
+  propio criterio; ningún criterio de aceptación de T-SEO-013 lo atrapa. **El contenido nuevo sí
+  está cubierto**: `card-extended-content.data.spec.ts` bloquea 20 términos médicos en las 7
+  secciones de las fichas.
+- **`reading-categories.seed.ts` es código muerto.** Nadie lo importa; el seeder vivo es
+  `reading-categories.seeder.ts`, que exporta una función con el **mismo nombre** pero con los slugs
+  reales. Los slugs del archivo muerto (`amor`, `salud`, `espiritual`) romperían el gating FREE si
+  alguien lo cableara. Se le sacó la palabra del texto visible y se le puso un encabezado de
+  advertencia, pero **borrarlo queda como candidato a una tarea de deuda técnica**: no es trabajo de
+  esta tarea decidir su suerte.
 
 ---
 
@@ -773,7 +837,9 @@ Un tercer rechazo cuesta más que dos semanas de trabajo. **Todo esto tiene que 
 verificado en producción antes de tocar el botón:**
 
 - [ ] T-SEO-008, 009, 010, 011 y 013 desplegadas y verificadas **en producción** (no solo mergeadas
-      — ver qué pasó el 19-ago con el deploy roto).
+      — ver qué pasó el 19-ago con el deploy roto). Las cinco están mergeadas o en PR; falta el
+      deploy. ⚠️ **013 incluye una migración de datos**: el deploy tiene que correr
+      `migration:run`, o producción queda con el texto viejo aunque el código esté al día.
 - [ ] `npm run check:indexable -- --base-url https://auguriatarot.com` en **verde**: 178/178 sobre el
       umbral y sin soft-404.
 - [ ] El promedio de `/enciclopedia/tarot` por encima de **500 palabras** (hoy 166).
@@ -794,4 +860,4 @@ npm run check:indexable -- --base-url https://auguriatarot.com
 
 ---
 
-**Última actualización:** 19-ago-2026
+**Última actualización:** 24-ago-2026

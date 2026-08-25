@@ -1,3 +1,15 @@
+/**
+ * ⚠️ ARCHIVO SIN USO. Nadie lo importa: el seeder vivo es
+ * `reading-categories.seeder.ts`, que exporta una función con el MISMO nombre
+ * pero con los slugs reales (`amor-relaciones`, `salud-bienestar`, ...). Los
+ * slugs de acá (`amor`, `salud`, ...) romperían el gating FREE, que filtra por
+ * slug en `reading-validator.service.ts`.
+ *
+ * T-SEO-013 le sacó la palabra "salud" del texto visible; el slug se deja como
+ * está porque el criterio de aceptación permite slugs y renombrarlo acá no
+ * arregla la divergencia de fondo. Candidato a borrarse en una tarea de deuda
+ * técnica propia.
+ */
 import { DataSource } from 'typeorm';
 import { ReadingCategory } from '../../modules/categories/entities/reading-category.entity';
 
@@ -45,10 +57,10 @@ export async function seedReadingCategories(
       isActive: true,
     },
     {
-      name: 'Salud y Bienestar',
+      name: 'Energía y Bienestar',
       slug: 'salud',
       description:
-        'Bienestar físico, salud emocional, energía vital y equilibrio personal',
+        'Bienestar físico, equilibrio emocional, energía vital y armonía personal',
       icon: '🌿',
       color: '#7ED321',
       order: 4,

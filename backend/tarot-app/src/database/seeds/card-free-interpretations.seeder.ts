@@ -9,7 +9,7 @@ import { buildCardSlug } from './seed-slug.helper';
  * T-FR-S01: Seed Card Free Interpretations
  *
  * Populates the `card_free_interpretation` table with 132 pre-written texts:
- * 22 Major Arcana × 3 categories (amor, salud, dinero) × 2 orientations (upright, reversed)
+ * 22 Major Arcana × 3 categories (amor, bienestar, dinero) × 2 orientations (upright, reversed)
  *
  * Features:
  * - Idempotent: upsert by (cardId + categoryId + orientation) unique constraint

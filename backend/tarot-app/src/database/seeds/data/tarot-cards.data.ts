@@ -291,7 +291,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     category: 'arcanos_mayores',
     imageUrl: '/images/tarot/judgement.webp',
     meaningUpright:
-      'Renacimiento, renovación, cambiar para mejorar, transformarse, ruptura de lo convencional. En cuanto al amor es un muy buen periodo para sentar las bases y mejorar la relación. Buen momento para acuerdos, contratos, actividades nuevas con impactos económicos. Momento positivo para dejar malos hábitos e iniciar una vida más saludable.',
+      'Renacimiento, renovación, cambiar para mejorar, transformarse, ruptura de lo convencional. En cuanto al amor es un muy buen periodo para sentar las bases y mejorar la relación. Buen momento para acuerdos, contratos, actividades nuevas con impactos económicos. Momento positivo para dejar malos hábitos e iniciar una vida más equilibrada.',
     meaningReversed:
       'Deseo de liberarnos de una situación sin salida, atados a situaciones creadas por nosotros mismos, negar nuestra esencia o nuestra naturaleza. Crisis en la pareja, pérdida de afecto, separaciones, desilusiones. Engaño en lo laboral, disputas problemas, negocios suspendidos, contratos poco claros o confiables. Pérdidas económicas, materiales.',
     description:
@@ -442,7 +442,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     category: 'bastos',
     imageUrl: '/images/tarot/ten-of-wands.webp',
     meaningUpright:
-      'Nos muestra la situación límite y está impedida de avanzar. Presión, resistencia, perseverancia, determinación, exceso de obligaciones. "Quien mucho abarca, poco aprieta". Pesada carga que estamos llevando nuestras espaldas. Nos enseña a liberarnos de los miedos racionales, la moral rígida y el autoengaño y ver con claridad las imposiciones autoimpuestas como barreras psicológicas. Invita a reconsiderar tu forma de trabajar, de equilibrar las obligaciones y cuidar la salud. Invita a aprender a parar y respirar. Dejar el trabajo en el trabajo. En el amor: la relación se volvió una carga pesada, ya no vive su propia vida. Sentimientos de saturación y angustia. La relación ya no da para más.',
+      'Nos muestra la situación límite y está impedida de avanzar. Presión, resistencia, perseverancia, determinación, exceso de obligaciones. "Quien mucho abarca, poco aprieta". Pesada carga que estamos llevando nuestras espaldas. Nos enseña a liberarnos de los miedos racionales, la moral rígida y el autoengaño y ver con claridad las imposiciones autoimpuestas como barreras psicológicas. Invita a reconsiderar tu forma de trabajar, de equilibrar las obligaciones y cuidar tu energía. Invita a aprender a parar y respirar. Dejar el trabajo en el trabajo. En el amor: la relación se volvió una carga pesada, ya no vive su propia vida. Sentimientos de saturación y angustia. La relación ya no da para más.',
     meaningReversed:
       'Enfrentar las dificultades. Fuerzas que se oponen, apatía, descuido, pérdida, malicia.',
     description:

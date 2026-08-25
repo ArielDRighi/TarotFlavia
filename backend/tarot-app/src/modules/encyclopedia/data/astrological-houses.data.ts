@@ -35,7 +35,7 @@ El signo en el Ascendente (cusp de la Casa 1) y los planetas en esta casa moldea
 
 - Imagen personal y apariencia física
 - Temperamento y actitud general
-- Vitalidad y salud del cuerpo físico
+- Vitalidad y energía del cuerpo físico
 - Primeras impresiones que generamos
 - El ego y el sentido del yo
 - Comienzos y nuevos comienzos
@@ -284,7 +284,7 @@ El eje Casa 5-11 representa la tensión entre la autoexpresión individual y el 
     nameEn: 'Sixth House',
     category: ArticleCategory.ASTROLOGICAL_HOUSE,
     snippet:
-      'La Casa 6 rige el trabajo cotidiano, la salud y el servicio. Abarca las rutinas diarias, la relación con los compañeros de trabajo, los hábitos saludables y la capacidad de ser útil. Representa el vínculo entre el cuerpo físico y la mente a través de la disciplina diaria.',
+      'La Casa 6 rige el trabajo cotidiano, el bienestar y el servicio. Abarca las rutinas diarias, la relación con los compañeros de trabajo, los hábitos sostenidos y la capacidad de ser útil. Representa el vínculo entre el cuerpo físico y la mente a través de la disciplina diaria.',
     content: `# Casa 6 — La Casa del Servicio
 
 **Eje:** Casa 6 / Casa 12
@@ -293,14 +293,14 @@ El eje Casa 5-11 representa la tensión entre la autoexpresión individual y el 
 
 ## Significado Astrológico
 
-La Casa 6 rige el mundo del trabajo cotidiano, la salud y el servicio. Es la casa de las rutinas que sostienen la vida: los hábitos de salud, la organización del día a día, las tareas y el trabajo funcional.
+La Casa 6 rige el mundo del trabajo cotidiano, el bienestar y el servicio. Es la casa de las rutinas que sostienen la vida: los hábitos de cuidado, la organización del día a día, las tareas y el trabajo funcional.
 
 A diferencia de la Casa 10 (carrera y ambición), la Casa 6 habla del trabajo en su aspecto más práctico: las tareas diarias, los empleados y empleadores, y cómo servimos a los demás.
 
 ## Áreas de Vida
 
 - Trabajo cotidiano y rutinas laborales
-- Salud, alimentación y hábitos físicos
+- Bienestar, alimentación y hábitos físicos
 - Servicio y utilidad
 - Empleados y personas a nuestro cargo
 - Mascotas y animales pequeños
@@ -308,15 +308,15 @@ A diferencia de la Casa 10 (carrera y ambición), la Casa 6 habla del trabajo en
 
 ## Planetas en la Casa 6
 
-- **Sol:** Identidad centrada en el trabajo y la salud, gran dedicación laboral
-- **Marte:** Trabajo activo y enérgico, posibles problemas inflamatorios de salud
-- **Saturno:** Disciplina laboral excepcional, aprendizajes a través de la enfermedad
-- **Júpiter:** Trabajo abundante y expansivo, buena recuperación de enfermedades
-- **Neptuno:** Trabajo en campos de sanación, sensibilidad a sustancias, enfermedades difusas
+- **Sol:** Identidad centrada en el trabajo y el bienestar, gran dedicación laboral
+- **Marte:** Trabajo activo y enérgico, posible desgaste por exceso de exigencia
+- **Saturno:** Disciplina laboral excepcional, aprendizajes a través de la constancia
+- **Júpiter:** Trabajo abundante y expansivo, gran capacidad de recuperación
+- **Neptuno:** Trabajo en campos de sanación, sensibilidad a los ambientes, límites difusos
 
 ## Temas de Desarrollo
 
-El eje Casa 6-12 es el eje del servicio. En la Casa 6, el trabajo implica desarrollar hábitos saludables, encontrar satisfacción en el servicio cotidiano y cuidar el cuerpo como templo del espíritu.
+El eje Casa 6-12 es el eje del servicio. En la Casa 6, el trabajo implica desarrollar hábitos sostenidos, encontrar satisfacción en el servicio cotidiano y cuidar el cuerpo como templo del espíritu.
 `,
     metadata: {
       houseNumber: 6,

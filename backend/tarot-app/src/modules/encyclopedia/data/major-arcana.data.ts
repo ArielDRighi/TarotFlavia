@@ -123,7 +123,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.EARTH,
     planet: Planet.VENUS,
     meaningUpright:
-      'La Emperatriz es la máxima expresión de la feminidad, la fertilidad, la abundancia y la conexión con la madre naturaleza. En el amor, anuncia sensualidad, relaciones sumamente protectoras, gestación (física o de ideas) y armonía doméstica. En el trabajo, promete el crecimiento exuberante de tus proyectos, prosperidad financiera y éxito creativo sin precedentes. Espiritualmente, te enseña a nutrir tu cuerpo como templo y a encontrar la divinidad en los placeres sensoriales y la belleza terrenal.',
+      'La Emperatriz es la máxima expresión de la feminidad, la fertilidad, la abundancia y la conexión con la madre naturaleza. En el amor, anuncia sensualidad, relaciones sumamente protectoras, gestación (física o de ideas) y armonía doméstica. En el trabajo, habla del crecimiento exuberante de tus proyectos, de abundancia material y de un empuje creativo poco común. Espiritualmente, te enseña a nutrir tu cuerpo como templo y a encontrar la divinidad en los placeres sensoriales y la belleza terrenal.',
     meaningReversed:
       'Su sombra se manifiesta como dependencia emocional extrema, asfixia afectiva, bloqueos creativos o abandono del autocuidado. El bloqueo proviene del síndrome del nido vacío o de dar en exceso hasta agotarse. Para trabajarlo, es imperativo establecer límites sanos, aprender a nutrirte a ti misma antes que a los demás, y reconectar con la naturaleza para sanar problemas de imagen corporal o complejos de inferioridad que secan tu creatividad.',
     description:
@@ -157,7 +157,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.FIRE,
     zodiacSign: ZodiacAssociation.ARIES,
     meaningUpright:
-      'El Emperador representa la estructura, el liderazgo consolidado, la autoridad benevolente y la ley del mundo material. En el amor, señala una pareja estable, protectora y proveedora, o la necesidad de poner límites claros y fundaciones sólidas en tu relación. En el trabajo, es un augurio excelente para ascensos, emprendimientos con bases firmes, disciplina financiera y organización sistemática. Espiritualmente, enseña que para alcanzar metas superiores, primero se necesita maestría, disciplina y orden sobre los instintos básicos terrenales.',
+      'El Emperador representa la estructura, el liderazgo consolidado, la autoridad benevolente y la ley del mundo material. En el amor, señala una pareja estable, protectora y proveedora, o la necesidad de poner límites claros y fundaciones sólidas en tu relación. En el trabajo, se asocia a los ascensos, a los emprendimientos con bases firmes, al orden en las cuentas y a la organización sistemática. Espiritualmente, enseña que para alcanzar metas superiores, primero se necesita maestría, disciplina y orden sobre los instintos básicos terrenales.',
     meaningReversed:
       'La sombra del Emperador es la tiranía, la rigidez mental, el abuso de poder o, por el contrario, la total falta de disciplina y cobardía. El bloqueo se origina en traumas con figuras de autoridad o un ego desmedido que se niega a ceder el control. Para trabajarlo, debes ablandar tu coraza, aprender a delegar con confianza, abrazar la vulnerabilidad y reestructurar tus rutinas diarias sin que se conviertan en una prisión autoimpuesta.',
     description:
@@ -395,7 +395,7 @@ export const MAJOR_ARCANA_DATA: CardSeedData[] = [
     element: Element.AIR,
     zodiacSign: ZodiacAssociation.LIBRA,
     meaningUpright:
-      'La Justicia simboliza la verdad objetiva, la ley de causa y efecto, el equilibrio racional y la integridad ética absoluta. En el amor, exige honestidad radical, acuerdos equitativos, divorcios limpios o matrimonios justos basados en el respeto mutuo real, no en la fantasía. En el trabajo, garantiza resolución a favor en temas legales, firmas de contratos importantes y recompensas proporcionales a tu esfuerzo puro. Espiritualmente, es el veredicto del karma: cosechas exactamente lo que siembras, obligándote a asumir la responsabilidad total de tus pensamientos y acciones.',
+      'La Justicia simboliza la verdad objetiva, la ley de causa y efecto, el equilibrio racional y la integridad ética absoluta. En el amor, exige honestidad radical, acuerdos equitativos, divorcios limpios o matrimonios justos basados en el respeto mutuo real, no en la fantasía. En el trabajo, se asocia a los asuntos que se destraban, a las firmas de contratos importantes y a las recompensas proporcionales a tu esfuerzo. Espiritualmente, es el veredicto del karma: cosechas exactamente lo que siembras, obligándote a asumir la responsabilidad total de tus pensamientos y acciones.',
     meaningReversed:
       'La sombra de la Justicia muestra deshonestidad, prejuicios, burocracia aplastante, juicios injustos o trato desigual. El bloqueo radica en evadir tu propia responsabilidad, culpar a otros de tu situación y rehusarte a ver la verdad objetiva de un conflicto. Para trabajarlo, debes dejar las justificaciones, limpiar tu karma pidiendo perdón si has obrado mal, y actuar con integridad total aunque nadie te esté mirando, equilibrando tu propia balanza interna.',
     description:

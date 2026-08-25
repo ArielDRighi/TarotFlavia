@@ -37,11 +37,12 @@ const READING_CATEGORIES_DATA = [
     isActive: true,
   },
   {
-    name: 'Salud y Bienestar',
+    name: 'Energía y Bienestar',
     slug: 'salud-bienestar',
     description:
-      'Consultas sobre salud física, bienestar emocional y equilibrio en tu vida. El tarot como guía para tu bienestar integral.',
-    icon: '🏥',
+      'Consultas sobre energía, bienestar emocional y equilibrio en tu vida. El tarot como guía para tu bienestar integral.',
+    // T-SEO-013: el ícono de hospital era la misma señal YMYL que el nombre.
+    icon: '🌿',
     color: '#7ED321',
     order: 4,
     isActive: true,
