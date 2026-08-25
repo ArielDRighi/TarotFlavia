@@ -74,12 +74,26 @@ describe('CardCombinations', () => {
   });
 
   it('enlaza igual cuando el nombre de la carta no se pudo resolver', () => {
+    // Respaldo: el slug es el nombre inglés de la carta, el mismo que la ficha
+    // ya muestra como subtítulo. Se arma con las partículas en minúscula para
+    // que coincida con `nameEn` y no salga un "Seven Of Swords" capitalizado a
+    // lo bruto.
     render(<CardCombinations combinations={COMBINACIONES} />);
 
-    expect(screen.getByRole('link', { name: 'Seven Of Swords' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Seven of Swords' })).toHaveAttribute(
       'href',
       '/enciclopedia/tarot/seven-of-swords'
     );
+  });
+
+  it('mantiene el artículo inicial del respaldo en mayúscula', () => {
+    render(
+      <CardCombinations
+        combinations={[{ cardSlug: 'the-devil', reading: 'La pelea se volvió vínculo.' }]}
+      />
+    );
+
+    expect(screen.getByRole('link', { name: 'The Devil' })).toBeInTheDocument();
   });
 
   it('no renderiza nada cuando la ficha todavía no tiene combinaciones', () => {

@@ -258,26 +258,48 @@ describe('CardDetailView · secciones extendidas (T-SEO-010)', () => {
   });
 
   /**
-   * Guardarraíl de largo. `five-of-swords` es la ficha más corta de las 78 (579
-   * palabras propias): si el render deja de sacar una sección a la página, es la
-   * primera que cae por debajo del piso de AdSense.
+   * Guardarraíl de largo.
+   *
+   * Mide **solo el contenido propio** de la ficha —descripción, significados,
+   * las seis secciones y las combinaciones—, no el `textContent` entero: el
+   * hero, los metadatos, las palabras clave y la firma son chrome que inflaría
+   * el número sin aportar texto de lectura.
+   *
+   * Lo que este test cubre es el largo del conjunto. Que **falte** una sección
+   * lo cubren los tests de arriba, que la buscan una por una: acá una sección
+   * caída se compensaría con el resto y pasaría igual.
    */
   describe('guardarraíl de largo', () => {
-    it(`la ficha más corta del corpus renderiza más de ${MIN_CARD_DETAIL_WORDS} palabras`, () => {
-      const { container } = render(
+    /** Bloques que aportan texto de autor, en orden de lectura. */
+    const OWN_CONTENT_TEST_IDS = [
+      'card-detail-description',
+      'card-meaning',
+      ...CARD_TEXT_SECTIONS.map((section) => section.testId),
+      CARD_COMBINATIONS_SECTION.testId,
+    ];
+
+    function renderedOwnWords(): number {
+      return countWords(
+        OWN_CONTENT_TEST_IDS.flatMap((testId) => {
+          const bloque = screen.queryByTestId(testId);
+          return bloque ? [bloque.textContent ?? ''] : [];
+        })
+      );
+    }
+
+    it(`la ficha más corta del corpus renderiza más de ${MIN_CARD_DETAIL_WORDS} palabras propias`, () => {
+      render(
         <CardDetailView
           card={createMockCardDetail()}
           combinationCardNames={MOCK_COMBINATION_CARD_NAMES}
         />
       );
 
-      expect(countWords([container.textContent ?? ''])).toBeGreaterThanOrEqual(
-        MIN_CARD_DETAIL_WORDS
-      );
+      expect(renderedOwnWords()).toBeGreaterThanOrEqual(MIN_CARD_DETAIL_WORDS);
     });
 
     it('sin las secciones nuevas la misma ficha no llega al piso', () => {
-      const { container } = render(
+      render(
         <CardDetailView
           card={createMockCardDetail({
             meaningLove: undefined,
@@ -291,7 +313,21 @@ describe('CardDetailView · secciones extendidas (T-SEO-010)', () => {
         />
       );
 
-      expect(countWords([container.textContent ?? ''])).toBeLessThan(MIN_CARD_DETAIL_WORDS);
+      expect(renderedOwnWords()).toBeLessThan(MIN_CARD_DETAIL_WORDS);
+    });
+
+    it('ninguna sección llega al DOM con el cuerpo vacío', () => {
+      const card = createMockCardDetail();
+      render(<CardDetailView card={card} />);
+
+      CARD_TEXT_SECTIONS.forEach((section) => {
+        const cuerpo = screen.getByTestId(section.testId).textContent ?? '';
+        const encabezado = countWords([section.heading]);
+
+        // `yesNo` es la sección corta del modelo (20-40 palabras); el resto va
+        // de 50 para arriba. El piso mira que haya cuerpo, no que sea largo.
+        expect(countWords([cuerpo]) - encabezado).toBeGreaterThanOrEqual(15);
+      });
     });
   });
 });

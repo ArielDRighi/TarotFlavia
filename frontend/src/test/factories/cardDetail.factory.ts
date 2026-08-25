@@ -3,13 +3,22 @@
  *
  * `createMockCardDetail` devuelve la ficha **real** de `five-of-swords`: la más
  * corta de las 78 que cargó T-SEO-009 (579 palabras propias medidas sobre la
- * base). Es el canario del guardarraíl de largo: si el render deja de sacar a la
- * página alguna de las secciones, la ficha más corta del corpus es la primera
- * que cae por debajo del piso de `MIN_CARD_DETAIL_WORDS`.
+ * base). Es el caso peor del corpus, y por eso es el que usa el guardarraíl de
+ * largo de `CardDetailView.test.tsx`: si el render pierde contenido, la ficha
+ * más corta es la primera que cae por debajo de `MIN_CARD_DETAIL_WORDS`.
  *
- * ⚠️ No recortar este contenido para "achicar el fixture": el número que mide el
- * guardarraíl deja de significar nada si el texto no es el que se publica.
- * La fuente es `backend/tarot-app/src/modules/encyclopedia/data/` —
+ * ## Qué garantiza y qué no
+ *
+ * Es una **copia** del corpus, no el corpus. El piso de las 78 fichas lo
+ * verifica el test de datos del backend, que sí las recorre todas; acá lo que se
+ * mide es el render. Si mañana se acorta el texto de esta carta en el backend,
+ * ese test lo agarra y este fixture queda desactualizado sin romper nada — la
+ * consecuencia es que el guardarraíl del frontend mide un texto viejo, no que un
+ * contenido corto pase inadvertido.
+ *
+ * ⚠️ Aun así, no recortar este contenido para "achicar el fixture": el número
+ * que mide el guardarraíl solo significa algo mientras el texto sea el que se
+ * publica. La fuente es `backend/tarot-app/src/modules/encyclopedia/data/` —
  * `minor-arcana.data.ts` (campos base) y `extended/swords-extended.data.ts`
  * (secciones extendidas).
  */

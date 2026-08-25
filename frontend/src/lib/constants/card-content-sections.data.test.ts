@@ -4,22 +4,16 @@ import {
   CARD_COMBINATIONS_SECTION,
   CARD_TEXT_SECTIONS,
   MIN_CARD_DETAIL_WORDS,
-  getCardDetailWordCount,
-  getMissingCardSections,
 } from '@/lib/constants/card-content-sections.data';
-import { createMockCardDetail } from '@/test/factories';
 
 /**
- * Guardarraíl de contenido de las fichas de tarot (T-SEO-010).
+ * Contrato de secciones de la ficha de tarot (T-SEO-010).
  *
- * Mismo criterio que `about-page.data.test.ts` y
- * `chinese-zodiac-profiles.data.test.ts`: si una ficha baja del piso o le falta
- * una sección, se entera acá y no en el próximo rechazo de AdSense.
- *
- * El corpus de las 78 fichas vive en el backend, así que lo que se mide desde el
- * frontend es la ficha **más corta** del corpus (`five-of-swords`, el fixture) y
- * el contrato de secciones que consume el render. La verificación sobre el HTML
- * servido la hace `npm run check:indexable -- --min-words 500`.
+ * Acá se verifica **la declaración**: qué secciones existen, con qué encabezado
+ * salen y que ninguna use vocabulario prohibido. La medición del largo es otra
+ * cosa y vive donde puede medir algo real: el corpus de las 78 fichas, en el test
+ * de datos del backend (T-SEO-009), y el HTML renderizado, en el guardarraíl de
+ * `CardDetailView.test.tsx`.
  */
 
 describe('CARD_TEXT_SECTIONS', () => {
@@ -62,84 +56,5 @@ describe('CARD_TEXT_SECTIONS', () => {
 describe('MIN_CARD_DETAIL_WORDS', () => {
   it('cubre el criterio de aceptación de T-SEO-010 (500 palabras propias)', () => {
     expect(MIN_CARD_DETAIL_WORDS).toBeGreaterThanOrEqual(500);
-  });
-});
-
-describe('getCardDetailWordCount', () => {
-  it(`la ficha más corta del corpus supera las ${MIN_CARD_DETAIL_WORDS} palabras`, () => {
-    expect(getCardDetailWordCount(createMockCardDetail())).toBeGreaterThanOrEqual(
-      MIN_CARD_DETAIL_WORDS
-    );
-  });
-
-  it('cuenta las secciones extendidas: sin ellas la misma ficha no llega al piso', () => {
-    const sinExtendido = createMockCardDetail({
-      meaningLove: undefined,
-      meaningWork: undefined,
-      meaningWellbeing: undefined,
-      symbolism: undefined,
-      advice: undefined,
-      yesNo: undefined,
-      combinations: undefined,
-    });
-
-    expect(getCardDetailWordCount(sinExtendido)).toBeLessThan(MIN_CARD_DETAIL_WORDS);
-  });
-
-  it('cuenta las lecturas de las combinaciones', () => {
-    const conCombinaciones = createMockCardDetail();
-    const sinCombinaciones = createMockCardDetail({ combinations: undefined });
-
-    expect(getCardDetailWordCount(conCombinaciones)).toBeGreaterThan(
-      getCardDetailWordCount(sinCombinaciones)
-    );
-  });
-
-  it('tolera una ficha sin descripción', () => {
-    expect(getCardDetailWordCount(createMockCardDetail({ description: null }))).toBeGreaterThan(0);
-  });
-});
-
-describe('getMissingCardSections', () => {
-  it('no reporta nada en una ficha completa', () => {
-    expect(getMissingCardSections(createMockCardDetail())).toEqual([]);
-  });
-
-  it('reporta la clave ausente', () => {
-    expect(getMissingCardSections(createMockCardDetail({ advice: undefined }))).toEqual(['advice']);
-  });
-
-  it('trata un string en blanco como sección faltante', () => {
-    expect(getMissingCardSections(createMockCardDetail({ symbolism: '   ' }))).toEqual([
-      'symbolism',
-    ]);
-  });
-
-  it('trata una lista de combinaciones vacía como sección faltante', () => {
-    expect(getMissingCardSections(createMockCardDetail({ combinations: [] }))).toEqual([
-      'combinations',
-    ]);
-  });
-
-  it('reporta las siete secciones en una ficha sin contenido extendido', () => {
-    const sinExtendido = createMockCardDetail({
-      meaningLove: undefined,
-      meaningWork: undefined,
-      meaningWellbeing: undefined,
-      symbolism: undefined,
-      advice: undefined,
-      yesNo: undefined,
-      combinations: undefined,
-    });
-
-    expect(getMissingCardSections(sinExtendido)).toEqual([
-      'meaningLove',
-      'meaningWork',
-      'meaningWellbeing',
-      'symbolism',
-      'advice',
-      'yesNo',
-      'combinations',
-    ]);
   });
 });

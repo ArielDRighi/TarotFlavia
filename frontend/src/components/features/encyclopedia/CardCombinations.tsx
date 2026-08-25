@@ -9,9 +9,12 @@ import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
 import type { CardCombination } from '@/types/encyclopedia.types';
 
+import { CARD_SECTION_CLASSES } from './CardContentSection';
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const SECTION_CLASSES = 'bg-card text-card-foreground rounded-xl border p-6 shadow-sm';
+/** Partículas que en el nombre inglés de una carta van en minúscula. */
+const LOWERCASE_WORDS = new Set(['of', 'the']);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,16 +32,22 @@ export interface CardCombinationsProps {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
- * Etiqueta de respaldo cuando el nombre de la carta no se pudo resolver:
- * `seven-of-swords` → `Seven Of Swords`.
+ * Etiqueta de respaldo cuando el listado no resolvió el nombre en español:
+ * `seven-of-swords` → `Seven of Swords`.
  *
- * Es peor que el nombre en español, pero deja el enlace con texto propio en vez
- * de repetir la misma etiqueta genérica en las cuatro combinaciones.
+ * El slug **es** el nombre inglés de la carta, que la ficha ya muestra como
+ * subtítulo debajo del nombre en español (`CardDetailHero`), así que no es texto
+ * ajeno a la página; solo hay que armarlo bien —las partículas van en minúscula,
+ * como en `nameEn`— en vez de capitalizar cada palabra a lo bruto. Lo que no
+ * puede pasar es que las cuatro combinaciones queden con la misma etiqueta
+ * genérica: son enlaces distintos y necesitan texto distinto.
  */
 function humanizeSlug(slug: string): string {
   return slug
     .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word, i) =>
+      i > 0 && LOWERCASE_WORDS.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1)
+    )
     .join(' ');
 }
 
@@ -62,7 +71,7 @@ export function CardCombinations({ combinations, cardNames, className }: CardCom
   return (
     <section
       data-testid={CARD_COMBINATIONS_SECTION.testId}
-      className={cn(SECTION_CLASSES, className)}
+      className={cn(CARD_SECTION_CLASSES, className)}
     >
       <h2 className="mb-4 font-serif text-lg">{CARD_COMBINATIONS_SECTION.heading}</h2>
 

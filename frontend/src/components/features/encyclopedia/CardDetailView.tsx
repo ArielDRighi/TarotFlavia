@@ -1,6 +1,7 @@
 'use client';
 
 import { CARD_TEXT_SECTIONS } from '@/lib/constants/card-content-sections.data';
+import { splitParagraphs } from '@/lib/utils/text';
 import type { CardDetail } from '@/types/encyclopedia.types';
 
 import { CardCombinations } from './CardCombinations';
@@ -24,9 +25,7 @@ export interface CardDetailViewProps {
 }
 
 export function CardDetailView({ card, combinationCardNames }: CardDetailViewProps) {
-  const descriptionParagraphs = card.description
-    ? card.description.split(/\r?\n\r?\n/).filter((p) => p.trim().length > 0)
-    : [];
+  const descriptionParagraphs = splitParagraphs(card.description);
 
   return (
     <div data-testid="card-detail-view" className="mx-auto max-w-3xl space-y-8">
@@ -41,7 +40,7 @@ export function CardDetailView({ card, combinationCardNames }: CardDetailViewPro
         <div data-testid="card-detail-description" className="space-y-4">
           {descriptionParagraphs.map((paragraph, i) => (
             <p key={i} className="leading-relaxed text-gray-700">
-              {paragraph.trim()}
+              {paragraph}
             </p>
           ))}
         </div>

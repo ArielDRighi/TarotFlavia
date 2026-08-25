@@ -9,9 +9,10 @@
  * palabras por ficha: nadie las renderizaba. Este archivo es la única
  * declaración de qué secciones existen y con qué encabezado salen a la página.
  *
- * Que la lista viva acá —y no repartida en el JSX— es lo que permite que el
- * guardarraíl de `card-content-sections.data.test.ts` verifique el contrato sin
- * duplicarlo: el render itera esta lista, y el test mide contra ella.
+ * Que la lista viva acá —y no repartida en el JSX— es lo que permite que los
+ * tests verifiquen el contrato sin duplicarlo: el render itera esta lista, y el
+ * guardarraíl de `CardDetailView.test.tsx` recorre la misma para comprobar que
+ * cada sección llegó al DOM.
  *
  * ## ⚠️ Al editar
  *
@@ -23,9 +24,6 @@
  *   carga el backend; el render degrada solo si el campo no viene.
  */
 
-import { countWords } from '@/lib/utils/text';
-import type { CardDetail } from '@/types/encyclopedia.types';
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /** Campos de texto de `CardDetail` que se renderizan como sección propia. */
@@ -36,9 +34,6 @@ export type CardTextSectionKey =
   | 'symbolism'
   | 'advice'
   | 'yesNo';
-
-/** Toda sección de la ficha, incluida la de combinaciones. */
-export type CardSectionKey = CardTextSectionKey | 'combinations';
 
 export interface CardTextSection {
   /** Campo de `CardDetail` del que sale el cuerpo. */
@@ -68,7 +63,7 @@ export const CARD_TEXT_SECTIONS: readonly CardTextSection[] = [
   { key: 'symbolism', heading: 'El simbolismo de la carta', testId: 'card-section-symbolism' },
   { key: 'advice', heading: 'El consejo de la carta', testId: 'card-section-advice' },
   { key: 'yesNo', heading: '¿Sí o no?', testId: 'card-section-yes-no' },
-] as const;
+];
 
 /**
  * La séptima sección. Va aparte porque su cuerpo no es texto sino enlaces
@@ -82,56 +77,12 @@ export const CARD_COMBINATIONS_SECTION = {
 // ─── Guardarraíl ──────────────────────────────────────────────────────────────
 
 /**
- * Mínimo de palabras propias por ficha.
+ * Mínimo de palabras propias que la ficha tiene que **poner en la página**.
  *
- * Es el criterio de aceptación de T-SEO-010. El corpus que cargó T-SEO-009 tiene
- * margen de sobra (mínimo 579, promedio 676), así que una ficha que se acerque a
- * este número es señal de que algo dejó de renderizarse, no de que el texto sea
- * corto.
+ * Es el criterio de aceptación de T-SEO-010, y lo mide el guardarraíl de
+ * `CardDetailView.test.tsx` sobre el DOM renderizado, no sobre los datos: el
+ * corpus vive en el backend y allá tiene su propio test de largo (T-SEO-009,
+ * mínimo 579 palabras, promedio 676). Lo que se verifica acá es lo que aquel no
+ * puede ver — que el render saque a la página lo que la API manda.
  */
 export const MIN_CARD_DETAIL_WORDS = 500;
-
-/**
- * Palabras propias que aporta una ficha.
- *
- * Cuenta el cuerpo —descripción, ambos significados, las seis secciones de texto
- * y las lecturas de las combinaciones— y deja fuera encabezados, palabras clave y
- * metadatos: se renderizan, pero medirlos infla el número sin aportar texto de
- * lectura. Es la misma cuenta conservadora que hace `getAboutPageWordCount`.
- */
-export function getCardDetailWordCount(card: CardDetail): number {
-  return countWords([
-    card.description ?? '',
-    card.meaningUpright,
-    card.meaningReversed,
-    ...CARD_TEXT_SECTIONS.map((section) => card[section.key] ?? ''),
-    ...(card.combinations ?? []).map((combination) => combination.reading),
-  ]);
-}
-
-/**
- * Secciones que la ficha todavía no tiene cargadas.
- *
- * El criterio es el mismo que usa el render para decidir si dibuja la sección:
- * una clave ausente, un string en blanco o una lista vacía cuentan como
- * faltantes. Así el guardarraíl no puede aprobar una ficha que la página no
- * muestra.
- *
- * @returns Las claves faltantes, en el orden de lectura de la ficha.
- */
-export function getMissingCardSections(card: CardDetail): CardSectionKey[] {
-  const missing: CardSectionKey[] = CARD_TEXT_SECTIONS.filter(
-    (section) => !hasSectionText(card[section.key])
-  ).map((section) => section.key);
-
-  if (!card.combinations?.length) {
-    missing.push('combinations');
-  }
-
-  return missing;
-}
-
-/** `true` si el campo trae texto real (no ausente ni en blanco). */
-export function hasSectionText(text: string | undefined): text is string {
-  return typeof text === 'string' && text.trim().length > 0;
-}

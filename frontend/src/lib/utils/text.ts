@@ -189,3 +189,23 @@ export function extractAstroHeadings(content: string): ArticleHeading[] {
 export function countWords(parts: string[]): number {
   return parts.join(' ').trim().split(/\s+/).filter(Boolean).length;
 }
+
+/**
+ * Parte un texto en párrafos por líneas en blanco.
+ *
+ * La misma expresión estaba escrita dos veces en la ficha de una carta —la
+ * descripción en `CardDetailView` y el cuerpo de cada sección en
+ * `CardContentSection` (T-SEO-010)—, con el riesgo de que una de las dos
+ * evolucionara sola.
+ *
+ * @param text - Texto a partir. `null`/`undefined` devuelven lista vacía.
+ * @returns Los párrafos con los extremos recortados, sin los vacíos.
+ * @example
+ * splitParagraphs('uno\n\n  \n\ndos') // ['uno', 'dos']
+ */
+export function splitParagraphs(text: string | null | undefined): string[] {
+  return (text ?? '')
+    .split(/\r?\n\r?\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => paragraph.length > 0);
+}

@@ -428,9 +428,11 @@ renderizarlo.
       —*Información* y *Palabras Clave*— pasaron a `h2`, igual que *Cartas Relacionadas*, y el bloque
       de significados —que no tenía encabezado y quedaba como un tramo sin rótulo en el esquema—
       recibió el suyo: *El significado de la carta*.
-- [x] **Guardarraíl de contenido en tests**, con el patrón de T-SEO-002/T-SEO-011:
-      `MIN_CARD_DETAIL_WORDS` + `getCardDetailWordCount` + `getMissingCardSections` en
-      `card-content-sections.data.ts`, y el mismo `countWords` compartido.
+- [x] **Guardarraíl de contenido en tests**: `MIN_CARD_DETAIL_WORDS` en
+      `card-content-sections.data.ts` y la medición sobre el **DOM renderizado** en
+      `CardDetailView.test.tsx`, con el `countWords` compartido de T-SEO-002/T-SEO-011. Mide solo el
+      contenido propio —descripción, significados, las seis secciones y las combinaciones—, sin el
+      chrome de hero, metadatos, palabras clave y firma: 590 palabras contra un piso de 500.
 
 ### Criterios de aceptación
 
@@ -455,6 +457,12 @@ renderizarlo.
   frontend habría creado una segunda fuente de verdad que se desincroniza. Lo que este guardarraíl
   cubre es lo que aquel no puede ver: que el render **saque a la página** lo que la API manda. Por eso
   el fixture es la ficha real más corta del corpus y el test cuenta el texto del DOM renderizado.
+  La contracara, anotada en el propio fixture: es una **copia** del corpus, así que si mañana se
+  acorta esa carta en el backend, lo agarra el test de allá y acá queda un texto viejo — no al revés.
+- **El largo total no detecta que se caiga una sección corta**, y no pretende hacerlo: quitando
+  `symbolism` o las combinaciones la ficha cae por debajo del piso, pero quitando `yesNo` no. Lo que
+  cubre eso son los tests que buscan cada sección una por una, más el que verifica que ninguna llegue
+  al DOM con el cuerpo vacío.
 - **`meaningReversed` no cuenta para la medición del DOM**: vive en la pestaña *Invertida* de
   `CardMeaning`, y Radix desmonta el panel inactivo, así que no está en el HTML servido. Son ~15
   palabras por ficha y el piso se supera igual, pero conviene tenerlo anotado: es contenido escrito
@@ -464,6 +472,26 @@ renderizarlo.
   llamada extra por ficha en el build (78 en total, contra el endpoint de listado, que desde T-SEO-008
   proyecta solo 8 columnas). El mapa se filtra a los 3-5 slugs de la ficha antes de mandarlo al
   cliente, así que al payload de cada página van 4 entradas y no 78.
+
+### Lo que encontró la revisión local (y se corrigió)
+
+- **Dos helpers del guardarraíl eran código muerto.** `getCardDetailWordCount` y
+  `getMissingCardSections` no los consumía nadie fuera de su propio test, y ese test los corría
+  contra el fixture: comprobaba que el fixture estaba completo, no que el contenido publicado lo
+  estuviera. Se eliminaron; el guardarraíl quedó donde mide algo real, sobre el DOM.
+- **El guardarraíl de largo contaba el chrome.** Medía `container.textContent` entero —hero,
+  metadatos, palabras clave, firma: ~70 palabras—, así que el número estaba inflado respecto de
+  "palabras propias". Ahora suma solo los bloques de contenido de autor.
+- **Tres de los cuatro cambios de encabezado no tenían test que los fijara**: los tests usaban
+  `getByText`, que pasa igual con `h3` o con `h2`. Pasaron a `getByRole('heading', { level: 2 })`, y
+  el `h2` nuevo de `CardMeaning` —que no cubría nada— tiene el suyo.
+- **La etiqueta de respaldo del cross-link salía como `Seven Of Swords`**, con la partícula
+  capitalizada. Ahora se arma como el `nameEn` real de la carta (`Seven of Swords`), que es el mismo
+  nombre inglés que la ficha ya muestra como subtítulo.
+- **Duplicación**: el `split` de párrafos estaba escrito dos veces (descripción y secciones) y las
+  clases de la tarjeta, copiadas literales en dos componentes. Quedaron `splitParagraphs` en
+  `lib/utils/text.ts` y `CARD_SECTION_CLASSES` exportada de `CardContentSection`.
+- **El pass-through de `combinationCardNames`** en `CardDetailPageContent` no tenía test propio.
 
 ### Lo que queda pendiente
 

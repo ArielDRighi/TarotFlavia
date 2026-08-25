@@ -2,6 +2,7 @@
 
 // 6. Utils & types
 import { cn } from '@/lib/utils';
+import { splitParagraphs } from '@/lib/utils/text';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -12,7 +13,7 @@ import { cn } from '@/lib/utils';
  * sección de la ficha es una sección del artículo, con su `h2` propio, y es lo
  * que le da al crawler la estructura que antes no existía (T-SEO-010).
  */
-const SECTION_CLASSES = 'bg-card text-card-foreground rounded-xl border p-6 shadow-sm';
+export const CARD_SECTION_CLASSES = 'bg-card text-card-foreground rounded-xl border p-6 shadow-sm';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,17 +41,14 @@ export interface CardContentSectionProps {
  * tandas sin dejar títulos huérfanos en la página.
  */
 export function CardContentSection({ heading, text, testId, className }: CardContentSectionProps) {
-  const paragraphs = (text ?? '')
-    .split(/\r?\n\r?\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter((paragraph) => paragraph.length > 0);
+  const paragraphs = splitParagraphs(text);
 
   if (paragraphs.length === 0) {
     return null;
   }
 
   return (
-    <section data-testid={testId} className={cn(SECTION_CLASSES, className)}>
+    <section data-testid={testId} className={cn(CARD_SECTION_CLASSES, className)}>
       <h2 className="mb-4 font-serif text-lg">{heading}</h2>
 
       <div className="space-y-4">
