@@ -380,49 +380,17 @@ describe('CARD_EXTENDED_CONTENT (T-SEO-009)', () => {
     });
 
     /**
-     * Prometer un desenlace legal o financiero concreto es la otra mitad de
-     * YMYL: "garantiza resolución a favor en temas legales" (La Justicia),
-     * "promete… prosperidad financiera" (La Emperatriz) y "augurio excelente…
-     * disciplina financiera" (El Emperador) salieron en T-SEO-013. Una ficha
-     * describe el simbolismo de la carta; no garantiza un resultado.
+     * Las **promesas de resultado económico o legal** —la otra mitad de YMYL—
+     * NO se controlan acá: las cubre `src/no-salud-user-facing.spec.ts`, que
+     * escanea todo `modules/encyclopedia/data/` (estas fichas incluidas) y
+     * cruza el verbo de promesa con vocabulario económico o legal **dentro de
+     * la misma oración**.
      *
-     * ⚠️ `promete` queda deliberadamente FUERA de la lista, por el mismo motivo
-     * que `sanar`: el corpus de T-SEO-009 lo usa 13 veces y casi siempre para
-     * *negar* la promesa —"no promete continuidad", "lo que promete no es un
-     * reemplazo", "la que menos promete atajos", "propuestas que prometen mucho
-     * y ofrecen poca letra escrita"—. Prohibirlo daría 13 falsos positivos y
-     * cero hallazgos reales. Lo que se prohíbe son los verbos que en este
-     * corpus SOLO aparecieron garantizando un resultado.
+     * Un `augur` a secas acá daría falsos positivos: La Estrella *"augura
+     * un periodo de enorme vulnerabilidad hermosa"* y El Sol *"augura
+     * matrimonios felices"* son copy de tarot perfectamente sano. Lo que hay
+     * que atrapar es "augura… promociones merecidas", y eso pide el cruce.
      */
-    const PROMESA_DE_RESULTADO = /\b(garantiza\w*|augurio\w*)\b/i;
-
-    it('no promete resultados legales ni financieros en los datos base', () => {
-      const infractores: string[] = [];
-
-      ALL_TAROT_CARDS.forEach((card) => {
-        [card.meaningUpright, card.meaningReversed, card.description].forEach(
-          (text) => {
-            const match = PROMESA_DE_RESULTADO.exec(text);
-            if (match) infractores.push(`${card.slug}: "${match[0]}"`);
-          },
-        );
-      });
-
-      expect(infractores).toEqual([]);
-    });
-
-    it('no promete resultados legales ni financieros en las secciones nuevas', () => {
-      const infractores: string[] = [];
-
-      CONTENT_ENTRIES.forEach(([slug, content]) => {
-        todosLosTextos(content).forEach((text) => {
-          const match = PROMESA_DE_RESULTADO.exec(text);
-          if (match) infractores.push(`${slug}: "${match[0]}"`);
-        });
-      });
-
-      expect(infractores).toEqual([]);
-    });
 
     it('no da consejo médico en ninguna sección', () => {
       const infractores: string[] = [];

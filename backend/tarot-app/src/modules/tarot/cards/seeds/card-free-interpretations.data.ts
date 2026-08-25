@@ -641,7 +641,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'upright',
     content:
-      'Es momento de dejar ir hábitos o creencias que dañan tu bienestar. Esta transformación puede ser incómoda, pero es el inicio de un bienestar más integral.',
+      'Es momento de dejar ir hábitos o creencias que dañan tu bienestar. Esta transformación puede ser incómoda, pero es el inicio de un equilibrio más integral.',
   },
   {
     cardSlug: 'la-muerte',
@@ -779,7 +779,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'upright',
     content:
-      'Puede haber una crisis de energía que funcione como llamado de atención. Es momento de hacer cambios reales y no seguir ignorando lo que tu cuerpo viene pidiendo.',
+      'Puede haber una crisis que funcione como llamado de atención. Es momento de hacer cambios reales y no seguir ignorando lo que tu cuerpo viene pidiendo.',
   },
   {
     cardSlug: 'la-torre',
@@ -1016,7 +1016,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'reversed',
     content:
-      'Puede haber algo pendiente de resolver en tu energía antes de alcanzar el bienestar pleno. No te conformes con resultados parciales; seguí buscando la integración completa.',
+      'Puede haber algo pendiente de resolver antes de alcanzar el bienestar pleno. No te conformes con resultados parciales; seguí buscando la integración completa.',
   },
   {
     cardSlug: 'el-mundo',

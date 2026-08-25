@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getBaseUrl } from './base-url';
 import { isIndexingAllowed } from './indexing';
 import { OG_IMAGE_PATH } from './og-image';
+import { specialtyLabel } from '@/lib/constants/marketplace';
 
 /**
  * SEO Configuration for Auguria
@@ -216,7 +217,9 @@ export function generateTarotistaMetadata(
   const title = `${tarotista.nombre} - Tarotista Profesional`;
   const description =
     tarotista.descripcion ||
-    `Consulta con ${tarotista.nombre}, especialista en ${tarotista.especialidades.join(', ')}. Reserva tu sesión de tarot personalizada.`;
+    // `specialtyLabel` y no el valor crudo: `/tarotistas/[id]` es indexable y
+    // la especialidad guardada todavía puede ser 'Salud' (T-SEO-013).
+    `Consulta con ${tarotista.nombre}, especialista en ${tarotista.especialidades.map(specialtyLabel).join(', ')}. Reserva tu sesión de tarot personalizada.`;
 
   return {
     title,

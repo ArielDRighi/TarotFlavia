@@ -121,7 +121,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     category: 'arcanos_mayores',
     imageUrl: '/images/tarot/the-chariot.webp',
     meaningUpright:
-      'Éxito, recuperación, buen momento, buenos resultados. Requiere prestar atención plena con los cinco sentidos para lograr los objetivos. Buen augurio de rápidos resultados o avances importantes tanto en lo económico como laboral. En el amor, tentación de ir demasiado rápido o precipitarse.',
+      'Éxito, recuperación, buen momento, buenos resultados. Requiere prestar atención plena con los cinco sentidos para lograr los objetivos. Señala un momento de rápidos resultados y avances importantes, tanto en lo económico como en lo laboral. En el amor, tentación de ir demasiado rápido o precipitarse.',
     meaningReversed:
       'Energía mal canalizada, falta de concentración en los objetivos o no saber qué es lo que se quiere. Lo deseado se da pero de forma lenta. En lo económico, despilfarro de dinero o gastos imprevistos. En el amor, relaciones que van muy rápido o tienen falta de impulso.',
     description:
@@ -278,7 +278,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     category: 'arcanos_mayores',
     imageUrl: '/images/tarot/the-sun.webp',
     meaningUpright:
-      'Éxito, abundancia, satisfacción, felicidad, positividad. Momento de claridad sobre el camino a seguir. Unión, bienestar, equilibrio, armonía, perdones y reconciliaciones; salir de una etapa difícil. Si el consultante no está en relación, augura la llegada de una persona que lo llenará de emociones. En finanzas es muy positiva, augura llegada de dinero inesperado, suerte en el azar, estado de mejoría.',
+      'Éxito, abundancia, satisfacción, felicidad, positividad. Momento de claridad sobre el camino a seguir. Unión, bienestar, equilibrio, armonía, perdones y reconciliaciones; salir de una etapa difícil. Si el consultante no está en relación, augura la llegada de una persona que lo llenará de emociones. En finanzas es muy positiva: habla de dinero inesperado, de suerte en el azar y de una etapa de mejoría.',
     meaningReversed:
       'Infelicidad, confusión, sentirse vacío y sin propósito, visión negativa de uno mismo. Existen disputas, incomprensión, bloqueo de proyectos, momentos difíciles donde la persona no escucha consejos. En el amor desilusiones, diferencias e incluso ruptura, la pareja no está pudiendo construir bases sólidas. En cuanto al trabajo, existe estrés, tedio, sobrecarga laboral. Las ganancias disminuyen o son menos de lo esperado.',
     description:

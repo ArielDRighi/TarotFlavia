@@ -28,7 +28,7 @@
 {
 "planet": "sun",
 "house": 6,
-"content": "Con el Sol en la Casa 6, encuentras tu propósito a través del servicio, el trabajo diario y la mejora de tus rutinas. No buscas el brillo por ego, sino la satisfacción de ser útil y eficiente. Tu identidad se define por lo bien que haces tu trabajo y cómo ayudas a resolver problemas prácticos. Eres perfeccionista y detallista. Tu camino es encontrar lo sagrado en la rutina y entender que el cuerpo es el templo de tu espíritu. Brillas cuando organizas, sanas o perfeccionas sistemas. Ejemplo práctico: adoptar un estilo de vida ordenado ejemplar o destacar en tu trabajo por tu impecable organización."
+"content": "Con el Sol en la Casa 6, encuentras tu propósito a través del servicio, el trabajo diario y la mejora de tus rutinas. No buscas el brillo por ego, sino la satisfacción de ser útil y eficiente. Tu identidad se define por lo bien que haces tu trabajo y cómo ayudas a resolver problemas prácticos. Eres perfeccionista y detallista. Tu camino es encontrar lo sagrado en la rutina y entender que el cuerpo es el templo de tu espíritu. Brillas cuando organizas, sanas o perfeccionas sistemas. Ejemplo práctico: adoptar un estilo de vida ejemplarmente ordenado o destacar en tu trabajo por tu impecable organización."
 },
 {
 "planet": "sun",
@@ -508,7 +508,7 @@
 {
 "planet": "neptune",
 "house": 6,
-"content": "Con Neptuno en la Casa 6, buscas servir a los demás con devoción. El trabajo rutinario te agota; necesitas una labor con sentido espiritual o artístico. Eres muy sensible a medicamentos, toxinas y estrés ambiental; tu cuerpo responde a lo emocional. Te cuesta poner límites en el trabajo y a veces te sacrificas de más. El desafío es el caos en la rutina diaria y el diagnóstico difícil de enfermedades. Tu don es la sanación y la ayuda desinteresada. Ejemplo práctico: trabajar con animales, en hospitales, como terapeuta holístico o tener alergias extrañas."
+"content": "Con Neptuno en la Casa 6, buscas servir a los demás con devoción. El trabajo rutinario te agota; necesitas una labor con sentido espiritual o artístico. Eres muy sensible a medicamentos, toxinas y estrés ambiental; tu cuerpo responde a lo emocional. Te cuesta poner límites en el trabajo y a veces te sacrificas de más. El desafío es el caos en la rutina diaria y las señales confusas que te manda el cuerpo. Tu don es la sanación y la ayuda desinteresada. Ejemplo práctico: trabajar con animales, en hospitales, como terapeuta holístico o tener alergias extrañas."
 },
 {
 "planet": "neptune",

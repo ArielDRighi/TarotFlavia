@@ -29,8 +29,15 @@ const SEED_SOURCES: Record<string, string[]> = {
   reading_category: ['database/seeds/reading-categories.seeder.ts'],
   predefined_question: ['database/seeds/data/predefined-questions.data.ts'],
   tarot_card: ['database/seeds/data/tarot-cards.data.ts'],
+  // Los 6 archivos que componen `ALL_ARTICLES_DATA` (`articles-seed.data.ts`).
+  // Van todos aunque hoy solo dos tengan reemplazos: si mañana un par apunta a
+  // texto de otro, el test tiene que poder encontrarlo en vez de fallar con un
+  // "falta el texto nuevo" engañoso.
   encyclopedia_articles: [
+    'modules/encyclopedia/data/zodiac-signs.data.ts',
+    'modules/encyclopedia/data/planets.data.ts',
     'modules/encyclopedia/data/astrological-houses.data.ts',
+    'modules/encyclopedia/data/elements-modalities.data.ts',
     'modules/encyclopedia/data/activity-guides.data.ts',
   ],
   encyclopedia_tarot_cards: ['modules/encyclopedia/data/major-arcana.data.ts'],
@@ -105,7 +112,7 @@ describe('ReplaceSaludWordingInSeededCorpus (T-SEO-013)', () => {
      * médica aunque no sea texto) y los verbos que prometen un resultado legal
      * o financiero concreto.
      */
-    const SENAL_YMYL = /salud|enfermedad|🏥|promete|garantiza|augurio/i;
+    const SENAL_YMYL = /salud|enfermedad|🏥|garanti|augur|promet/i;
 
     const sinSenal = CORPUS_REPLACEMENTS.flatMap((entry) =>
       entry.replacements

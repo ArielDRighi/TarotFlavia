@@ -727,9 +727,11 @@ sembrado en la base de producción:
       (`seedReadingCategories`, `seedEncyclopediaArticles`, `seedBirthChartInterpretations`,
       `seedPredefinedQuestions`, `seedTarotCards` cortan apenas encuentran una fila), así que en una
       base ya poblada un re-seed no cambia una sola letra. Va
-      `1787583600000-ReplaceSaludWordingInSeededCorpus`: 60 pares `[viejo, nuevo]` aplicados con
-      `REPLACE` por subcadena exacta, **parametrizado** y acotado por `POSITION(...) > 0`, sobre 6
-      tablas. Si alguien editó una fila, el `POSITION` no matchea y la migración no la toca: no
+      `1787583600000-ReplaceSaludWordingInSeededCorpus`: **67 pares** `[viejo, nuevo]` aplicados con
+      `REPLACE` por subcadena exacta, **parametrizado** y acotado por `POSITION(...) > 0`, sobre **7
+      tablas**. El par del ícono va en su propia entrada, anclada a la columna `icon` y al slug: un
+      emoji es una subcadena de un carácter y sin anclar el `down` reescribiría cualquier 🌿 de la
+      tabla. Si alguien editó una fila, el `POSITION` no matchea y la migración no la toca: no
       puede pisar una edición editorial. El panel de admin, además, hoy no edita ninguna de esas
       tablas (`admin` es dashboard + usuarios).
       **Verificado contra la base de desarrollo con datos reales** (132 interpretaciones libres, 42
@@ -754,19 +756,32 @@ sembrado en la base de producción:
       financiera"*, La Justicia *"garantiza resolución a favor en temas legales"* y El Emperador
       *"augurio excelente… disciplina financiera"*. Las tres reescritas en `major-arcana.data.ts` y
       migradas en `encyclopedia_tarot_cards.meaning_upright`.
-      El guardarraíl que lo sostiene prohíbe **`garantiza` y `augurio`**, no `promete`: el corpus de
-      T-SEO-009 usa `promete` 13 veces y casi siempre para *negar* la promesa (*"no promete
-      continuidad"*, *"la que menos promete atajos"*). Prohibirlo daría 13 falsos positivos y cero
-      hallazgos reales — el mismo criterio con el que `sanar` quedó fuera de la lista médica.
+      La revisión local encontró **tres más** que el primer barrido no vio: El Carro (*"augura
+      victorias… promociones merecidas"*) y dos del seed de lecturas (*"Buen augurio de rápidos
+      resultados… en lo económico como laboral"*, *"en finanzas… augura llegada de dinero
+      inesperado"*). Salieron todas.
+      El guardarraíl que lo sostiene **no** prohíbe `promete` a secas: el corpus de T-SEO-009 lo usa
+      13 veces y casi siempre para *negar* la promesa (*"no promete continuidad"*, *"la que menos
+      promete atajos"*) — mismo criterio con el que `sanar` quedó fuera de la lista médica. Tampoco
+      alcanza con prohibir `augur`: *"augura matrimonios felices"* (El Sol) es copy de tarot
+      perfectamente sano. Lo que se prohíbe es el **cruce**: un verbo de promesa y vocabulario
+      económico o legal **en la misma oración**. Sobre el corpus da 0 falsos positivos.
 - [x] Guardarraíl: `src/no-salud-user-facing.spec.ts`, calcado del patrón de
       `no-ia-user-facing.spec.ts` (FBK-003). Escanea `database/seeds/**` y todo `data/`, `seeds/`,
       `prompts/` y `templates/` de los módulos —`.ts`, `.md` y `.hbs`—, replicando el mismo
       `grep -i salud` del criterio de aceptación sobre el **origen**. Ignora comentarios, el slug
       `salud-bienestar` y una allowlist de dos entradas justificadas.
-      Va con un segundo test, `src/database/seeds/salud-wording-sync.spec.ts`, que ata la migración
-      a los archivos de seed: por cada par verifica que el texto nuevo **está** en el seed y que el
-      viejo **no**. Sin él, migración y seed pueden divergir y una base nueva termina distinta de
-      una migrada, sin que nada se ponga en rojo.
+      El mismo archivo trae un segundo test que cubre la otra mitad de YMYL —la *Money*—: cruza un
+      verbo de promesa (`garanti*`, `augur*`) con vocabulario económico o legal **dentro de la misma
+      oración**. Cruzarlos es lo que lo hace preciso: sobre el corpus actual da 0 hits y, medido
+      antes de arreglar, daba exactamente los 3 que quedaban, sin un solo falso positivo.
+      Va con un segundo archivo, `src/database/seeds/salud-wording-sync.spec.ts`, que ata la
+      migración a los archivos de seed: por cada par verifica que el texto nuevo **está** en el seed
+      y que el viejo **no**. Sin él, migración y seed pueden divergir y una base nueva termina
+      distinta de una migrada, sin que nada se ponga en rojo.
+      Y un tercero en el frontend, `frontend/src/no-salud-user-facing.test.ts`, espejo de
+      `no-ia-user-facing.test.ts`: barre todo `frontend/src` (menos admin y tests). Sin él, un
+      componente nuevo con la palabra en copy visible no rompía nada.
       ⚠️ El spec vive en `seeds/` y no en `migrations/` a propósito: el glob de TypeORM
       (`database/migrations/*{.ts,.js}`) carga **todo** lo que haya en esa carpeta, así que un
       `.spec.ts` ahí adentro rompe el CLI de migraciones y el arranque de la app
@@ -822,6 +837,24 @@ sembrado en la base de producción:
   propio criterio; ningún criterio de aceptación de T-SEO-013 lo atrapa. **El contenido nuevo sí
   está cubierto**: `card-extended-content.data.spec.ts` bloquea 20 términos médicos en las 7
   secciones de las fichas.
+- **Lo que encontró la revisión local y se aplicó** (además de las tres promesas de arriba): el
+  regex del guardarraíl no matcheaba `augura` (solo `augurio`); la exención por slug eximía la
+  **línea entera**, así que `{ slug: 'salud-bienestar', name: 'Salud y Bienestar' }` —una línea que
+  prettier puede generar— pasaba limpia; `SEED_SOURCES` listaba 2 de los 6 archivos que componen
+  `ALL_ARTICLES_DATA`; el par del emoji no estaba anclado; y quedaba `enfermedades` en el mismo
+  párrafo de Neptuno/Casa 6 que ya se había reescrito. Todo corregido y probado inyectando un
+  archivo de prueba para ver el guardarraíl fallar.
+- **Camino renderizable que no estaba en el inventario original: las especialidades del tarotista.**
+  `TarotistaProfilePage.tsx` renderizaba `{especialidad}` **crudo** (a diferencia de
+  `TarotistaCard.tsx`, que sí usaba `specialtyLabel()`), y `lib/metadata/seo.ts` metía
+  `especialidades.join(', ')` en la `<meta name="description">` de `/tarotistas/[id]`, que es una
+  ruta indexable. Con un tarotista de especialidad `'Salud'` la palabra salía publicada en el HTML.
+  Hoy no pasaba porque el único tarotista sembrado no la tiene: era latente. Los dos usos ahora
+  pasan por `specialtyLabel()`, con un test cada uno.
+- **Fuera de alcance, anotado:** `birth_charts.chartData.aiSynthesis` es `jsonb` persistido; las
+  síntesis generadas con el prompt viejo pueden traer la palabra y no hay migración para ellas. El
+  impacto SEO es nulo —son páginas privadas de usuarios Premium, no indexables—, pero técnicamente
+  el criterio de "texto visible" no las cubre.
 - **`reading-categories.seed.ts` es código muerto.** Nadie lo importa; el seeder vivo es
   `reading-categories.seeder.ts`, que exporta una función con el **mismo nombre** pero con los slugs
   reales. Los slugs del archivo muerto (`amor`, `salud`, `espiritual`) romperían el gating FREE si

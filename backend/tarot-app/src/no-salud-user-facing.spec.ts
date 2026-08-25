@@ -28,6 +28,13 @@ import * as path from 'path';
  *    escaneadas, y la instrucción negativa del prompt del horóscopo chino
  *    (allowlist explícita más abajo).
  *  - Los fixtures de los `.spec.ts`.
+ *
+ * ⚠️ Alcance: se escanean las carpetas donde vive el **corpus** (`database/seeds/`
+ * y los `data/`, `seeds/`, `prompts/` y `templates/` de los módulos). Un prompt
+ * que viva fuera de `prompts/` —hoy `chart-ai-synthesis.service.ts`, que tiene
+ * la instrucción negativa en `application/services/`— NO pasa por acá. Si se
+ * mueve un prompt a una carpeta escaneada, va a necesitar su entrada en la
+ * allowlist, como la del horóscopo chino.
  */
 
 const SRC = __dirname;
@@ -117,14 +124,65 @@ function scan(file: string): string[] {
   const hits: string[] = [];
   stripped.split('\n').forEach((line, i) => {
     if (!TERMINO_PROHIBIDO.test(line)) return;
-    if (line.includes(SLUG_PERMITIDO)) return;
-    if (permitidos.some((a) => line.includes(a.snippet))) return;
+
+    // Se borran los tramos permitidos y se vuelve a mirar. Eximir la LÍNEA
+    // entera dejaría pasar `{ slug: 'salud-bienestar', name: 'Salud y
+    // Bienestar' }`, que es una sola línea que prettier puede generar en
+    // cualquier objeto corto.
+    let resto = line.split(SLUG_PERMITIDO).join('');
+    permitidos.forEach((a) => {
+      resto = resto.split(a.snippet).join('');
+    });
+    if (!TERMINO_PROHIBIDO.test(resto)) return;
+
     hits.push(`${rel}:${i + 1} → ${line.trim()}`);
   });
   return hits;
 }
 
-describe('Guardarraíl: sin "salud" en el corpus de contenido (T-SEO-013)', () => {
+/**
+ * La otra mitad de YMYL —la *Money* de "Your Money or Your Life"—: prometer un
+ * desenlace económico o legal concreto. Salieron en T-SEO-013 seis casos: tres
+ * arcanos mayores de la enciclopedia ("garantiza resolución a favor en temas
+ * legales"), dos del seed de lecturas ("augura llegada de dinero inesperado") y
+ * el de El Carro ("augura victorias… promociones merecidas").
+ *
+ * El test cruza **dentro de la misma oración** un verbo de promesa con
+ * vocabulario económico o legal. Cruzarlos es lo que lo hace preciso: sobre el
+ * corpus actual da 0 hits y, medido antes de arreglar, daba exactamente los 3
+ * que quedaban, sin un solo falso positivo.
+ *
+ * ⚠️ `promete` queda FUERA de los verbos, por el mismo motivo que `sanar` está
+ * fuera de la lista médica: el corpus de T-SEO-009 lo usa 13 veces y casi
+ * siempre para *negar* la promesa ("no promete continuidad", "la que menos
+ * promete atajos"). Con `garanti` y `augur` alcanza: en este corpus solo
+ * aparecieron garantizando un resultado.
+ */
+const VERBO_DE_PROMESA = /\b(garanti\w*|augur\w*)\b/i;
+
+const VOCABULARIO_ECONOMICO_LEGAL =
+  /\b(financier\w*|econ[oó]mic\w*|dinero|finanzas|inversi[oó]n\w*|inversiones|contrato\w*|legal\w*|juicio\w*|deuda\w*|ingresos?|sueldo\w*|salario\w*|prosperidad|ganancias?|capital|patrimonio|laboral\w*|negocios?|ascensos?|promoci[oó]n\w*|promociones)\b/i;
+
+function scanPromesas(file: string): string[] {
+  const rel = path.relative(SRC, file);
+  const raw = fs.readFileSync(file, 'utf8');
+  const stripped = file.endsWith('.md') ? raw : stripTsComments(raw);
+
+  const hits: string[] = [];
+  stripped.split('\n').forEach((line, i) => {
+    line.split(/(?<=[.!?])\s+/).forEach((oracion) => {
+      if (
+        VERBO_DE_PROMESA.test(oracion) &&
+        VOCABULARIO_ECONOMICO_LEGAL.test(oracion)
+      ) {
+        hits.push(`${rel}:${i + 1} → ${oracion.trim()}`);
+      }
+    });
+  });
+  return hits;
+}
+
+describe('Guardarraíl: sin señales YMYL en el corpus de contenido (T-SEO-013)', () => {
   const corpusFiles = walk(SRC, isCorpusFile);
 
   it('encuentra archivos de corpus para escanear', () => {
@@ -133,6 +191,11 @@ describe('Guardarraíl: sin "salud" en el corpus de contenido (T-SEO-013)', () =
 
   it('no usa la palabra "salud" en seeds, datos, prompts ni plantillas', () => {
     const violaciones = corpusFiles.flatMap(scan);
+    expect(violaciones).toEqual([]);
+  });
+
+  it('no promete resultados económicos ni legales', () => {
+    const violaciones = corpusFiles.flatMap(scanPromesas);
     expect(violaciones).toEqual([]);
   });
 });

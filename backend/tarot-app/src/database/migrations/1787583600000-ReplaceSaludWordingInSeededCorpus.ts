@@ -38,6 +38,11 @@ export interface CorpusReplacement {
   columns: string[];
   /** Pares [texto viejo, texto nuevo]. */
   replacements: [string, string][];
+  /**
+   * Ancla opcional: limita el UPDATE a la fila de ese `slug`. Se usa cuando el
+   * texto viejo es tan corto que podría existir en otra fila por casualidad.
+   */
+  slug?: string;
 }
 
 export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
@@ -58,13 +63,13 @@ export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
         'conscientes sobre tu bienestar darán',
       ],
       [
-        'el inicio de una salud más integral',
-        'el inicio de un bienestar más integral',
+        'pero es el inicio de una salud más integral.',
+        'pero es el inicio de un equilibrio más integral.',
       ],
       ['en algún área de tu salud.', 'en algún área de tu bienestar.'],
       [
-        'una crisis de salud que funcione',
-        'una crisis de energía que funcione',
+        'Puede haber una crisis de salud que funcione como llamado de atención.',
+        'Puede haber una crisis que funcione como llamado de atención.',
       ],
       [
         'real en términos de salud y tomar',
@@ -79,23 +84,31 @@ export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
         'transformar tu relación con tu cuerpo.',
       ],
       [
-        'resolver en tu salud antes de alcanzar',
-        'resolver en tu energía antes de alcanzar',
+        'Puede haber algo pendiente de resolver en tu salud antes de alcanzar el bienestar pleno.',
+        'Puede haber algo pendiente de resolver antes de alcanzar el bienestar pleno.',
       ],
     ],
   },
   {
     table: 'reading_category',
-    columns: ['name', 'description', 'icon'],
+    columns: ['name', 'description'],
     replacements: [
       ['Salud y Bienestar', 'Energía y Bienestar'],
       [
         'Consultas sobre salud física, bienestar emocional y equilibrio en tu vida.',
         'Consultas sobre energía, bienestar emocional y equilibrio en tu vida.',
       ],
-      // El ícono de hospital era la misma señal YMYL que el nombre.
-      ['🏥', '🌿'],
     ],
+  },
+  {
+    // El ícono de hospital era la misma señal YMYL que el nombre. Va en su
+    // propia entrada, anclada a la columna `icon` y al slug: un emoji es una
+    // subcadena de un solo carácter y sin anclar el `down` reescribiría
+    // cualquier 🌿 de la tabla a 🏥.
+    table: 'reading_category',
+    columns: ['icon'],
+    replacements: [['🏥', '🌿']],
+    slug: 'salud-bienestar',
   },
   {
     table: 'predefined_question',
@@ -119,6 +132,16 @@ export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
       [
         'las obligaciones y cuidar la salud',
         'las obligaciones y cuidar tu energía',
+      ],
+      // Promesas de resultado económico: mismo criterio YMYL que los tres
+      // arcanos mayores de más abajo.
+      [
+        'Buen augurio de rápidos resultados o avances importantes tanto en lo económico como laboral.',
+        'Señala un momento de rápidos resultados y avances importantes, tanto en lo económico como en lo laboral.',
+      ],
+      [
+        'En finanzas es muy positiva, augura llegada de dinero inesperado, suerte en el azar, estado de mejoría.',
+        'En finanzas es muy positiva: habla de dinero inesperado, de suerte en el azar y de una etapa de mejoría.',
       ],
     ],
   },
@@ -203,6 +226,10 @@ export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
         'En el trabajo, garantiza resolución a favor en temas legales, firmas de contratos importantes y recompensas proporcionales a tu esfuerzo puro.',
         'En el trabajo, se asocia a los asuntos que se destraban, a las firmas de contratos importantes y a las recompensas proporcionales a tu esfuerzo.',
       ],
+      [
+        'En el trabajo, augura victorias contundentes, ambición bien canalizada, viajes de negocios y promociones merecidas.',
+        'En el trabajo, habla de victorias contundentes, ambición bien canalizada, viajes de negocios y promociones merecidas.',
+      ],
     ],
   },
   {
@@ -247,7 +274,13 @@ export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
       ],
       [
         'adoptar un estilo de vida saludable ejemplar',
-        'adoptar un estilo de vida ordenado ejemplar',
+        'adoptar un estilo de vida ejemplarmente ordenado',
+      ],
+      // Media señal clínica que quedaba en pie en el mismo párrafo que ya se
+      // reescribió (Neptuno en Casa 6).
+      [
+        'El desafío es el caos en la rutina diaria y el diagnóstico difícil de enfermedades.',
+        'El desafío es el caos en la rutina diaria y las señales confusas que te manda el cuerpo.',
       ],
       [
         'trabajar en instituciones de salud, dedicarte a la meditación',
@@ -333,16 +366,19 @@ export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
 /** REPLACE por subcadena exacta; no toca las filas que no la contienen. */
 async function replaceSubstring(
   queryRunner: QueryRunner,
-  table: string,
+  entry: CorpusReplacement,
   column: string,
   from: string,
   to: string,
 ): Promise<void> {
+  const anclaSlug = entry.slug === undefined ? '' : ' AND "slug" = $3';
+  const params = entry.slug === undefined ? [from, to] : [from, to, entry.slug];
+
   await queryRunner.query(
-    `UPDATE "${table}"
+    `UPDATE "${entry.table}"
      SET "${column}" = REPLACE("${column}", $1, $2)
-     WHERE POSITION($1 IN "${column}") > 0`,
-    [from, to],
+     WHERE POSITION($1 IN "${column}") > 0${anclaSlug}`,
+    params,
   );
 }
 
@@ -353,7 +389,7 @@ export class ReplaceSaludWordingInSeededCorpus1787583600000 implements Migration
     for (const entry of CORPUS_REPLACEMENTS) {
       for (const column of entry.columns) {
         for (const [from, to] of entry.replacements) {
-          await replaceSubstring(queryRunner, entry.table, column, from, to);
+          await replaceSubstring(queryRunner, entry, column, from, to);
         }
       }
     }
@@ -363,7 +399,7 @@ export class ReplaceSaludWordingInSeededCorpus1787583600000 implements Migration
     for (const entry of [...CORPUS_REPLACEMENTS].reverse()) {
       for (const column of [...entry.columns].reverse()) {
         for (const [from, to] of [...entry.replacements].reverse()) {
-          await replaceSubstring(queryRunner, entry.table, column, to, from);
+          await replaceSubstring(queryRunner, entry, column, to, from);
         }
       }
     }
