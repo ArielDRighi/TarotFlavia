@@ -21,7 +21,32 @@ import {
  * carta en el servidor: `title`/`description` propios y contenido real en el HTML.
  */
 
-/** La enciclopedia es contenido estático; un día de ISR alcanza y sobra. */
+/**
+ * La enciclopedia es contenido estático; un día de ISR alcanza y sobra.
+ *
+ * ⚠️ **Esto acopla el deploy al contenido de la base.** Las 78 fichas se
+ * prerenderizan en el `npm run build` contra la API: el HTML que ve Google es
+ * una foto de los datos que había en ese instante, y esa foto dura 24 h. Si el
+ * frontend se construye antes de que el backend tenga el contenido, sirve
+ * fichas vacías durante un día entero.
+ *
+ * Pasó el 26-ago-2026 con T-SEO-009/013 y costó una hora de diagnóstico. El
+ * orden del deploy no es opcional:
+ *
+ *   1. backend (las migraciones corren solas al arrancar)
+ *   2. `npm run db:seed:encyclopedia` — los seeders NO corren en el deploy, y
+ *      el contenido extendido de las fichas vive en un seeder, no en una
+ *      migración
+ *   3. recién ahí, el build del frontend
+ *
+ * Y el paso 3 tiene su propia trampa: `railway redeploy`, incluso con
+ * `--from-source`, reusa la capa de Docker del build si el commit es el mismo
+ * —el `Dockerfile` hace `COPY frontend/` y después `RUN npm run build`—, así
+ * que devuelve el MISMO HTML byte a byte. Para reconstruir de verdad hace falta
+ * que cambie algo dentro de `frontend/`.
+ *
+ * El runbook completo está en `docs/BACKLOG_SEO_CONTENIDO_2026_08.md`.
+ */
 export const revalidate = 86400;
 
 interface PageProps {

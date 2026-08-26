@@ -36,6 +36,7 @@
     "clean:test-users": "ts-node -r tsconfig-paths/register scripts/clean-test-users.ts",
     "db:reset": "npm run db:dev:reset",
     "db:seed:all": "ts-node -r tsconfig-paths/register scripts/db-seed-all.ts",
+    "db:seed:encyclopedia": "ts-node -r tsconfig-paths/register scripts/db-seed-encyclopedia.ts",
     "db:seed:cards": "ts-node -r tsconfig-paths/register scripts/db-seed-cards.ts",
     "db:seed:users": "ts-node -r tsconfig-paths/register scripts/db-seed-users.ts",
     "db:seed:admin": "ts-node -r tsconfig-paths/register scripts/db-seed-admin.ts",
