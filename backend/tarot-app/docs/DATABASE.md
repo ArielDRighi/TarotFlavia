@@ -378,7 +378,7 @@ Almacena las interpretaciones generadas por IA para cada lectura.
 | `reading_id`         | INTEGER       | FK tarot_reading, NOT NULL | Lectura asociada                                 |
 | `interpretation`     | TEXT          | NOT NULL                   | Interpretación completa generada                 |
 | `ai_provider`        | VARCHAR(50)   | NOT NULL                   | Proveedor: 'groq', 'openai', 'deepseek'          |
-| `model`              | VARCHAR(100)  | NOT NULL                   | Modelo: 'llama-3.1-70b-versatile', 'gpt-4-turbo' |
+| `model`              | VARCHAR(100)  | NOT NULL                   | Modelo: 'openai/gpt-oss-120b', 'deepseek-v4-flash' |
 | `prompt_tokens`      | INTEGER       | DEFAULT 0                  | Tokens usados en el prompt                       |
 | `completion_tokens`  | INTEGER       | DEFAULT 0                  | Tokens usados en la respuesta                    |
 | `cost_usd`           | DECIMAL(10,4) | DEFAULT 0                  | Costo estimado en USD                            |
@@ -599,7 +599,7 @@ Información de los tarotistas profesionales. Soporte completo para marketplace 
 ```json
 {
   "provider": "groq",
-  "model": "llama-3.1-70b-versatile",
+  "model": "openai/gpt-oss-120b",
   "systemPrompt": "Eres Flavia, una tarotista profesional...",
   "temperature": 0.7
 }
@@ -1155,7 +1155,7 @@ Logs de uso de proveedores de IA.
 | `reading_id`        | INTEGER       | FK tarot_reading, NULL | Lectura relacionada                |
 | `tarotista_id`      | INTEGER       | NULLABLE               | Tarotista asociado                 |
 | `provider`          | ENUM          | NOT NULL               | Proveedor: groq, openai, deepseek  |
-| `model_used`        | VARCHAR(100)  | NOT NULL               | Modelo usado (llama-3.1-70b, etc.) |
+| `model_used`        | VARCHAR(100)  | NOT NULL               | Modelo usado (openai/gpt-oss-120b, etc.) |
 | `prompt_tokens`     | INTEGER       | DEFAULT 0              | Tokens del prompt                  |
 | `completion_tokens` | INTEGER       | DEFAULT 0              | Tokens de la respuesta             |
 | `total_tokens`      | INTEGER       | DEFAULT 0              | Total de tokens                    |

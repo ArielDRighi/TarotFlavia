@@ -5,6 +5,7 @@ import { HoroscopeCronService } from './horoscope-cron.service';
 import { HoroscopeGenerationService } from './horoscope-generation.service';
 import { ZodiacSign } from '../../../../common/utils/zodiac.utils';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
+import { DELAY_BETWEEN_SIGNS_MS } from './horoscope-cron.config';
 
 describe('HoroscopeCronService', () => {
   let service: HoroscopeCronService;
@@ -222,7 +223,7 @@ describe('HoroscopeCronService', () => {
       // Assert
       // Debe haber llamado delay 11 veces (12 signos - 1, no hay delay antes del primero)
       expect(delaySpy).toHaveBeenCalledTimes(11);
-      expect(delaySpy).toHaveBeenCalledWith(6000);
+      expect(delaySpy).toHaveBeenCalledWith(DELAY_BETWEEN_SIGNS_MS);
     });
 
     it('should log summary with success and failure counts', async () => {
@@ -476,7 +477,7 @@ describe('HoroscopeCronService', () => {
 
   describe('constants', () => {
     it('should have DELAY_BETWEEN_SIGNS_MS configured', () => {
-      expect(service['DELAY_BETWEEN_SIGNS_MS']).toBe(6000);
+      expect(service['DELAY_BETWEEN_SIGNS_MS']).toBe(DELAY_BETWEEN_SIGNS_MS);
     });
 
     it('should have ZODIAC_ORDER with 12 signs', () => {

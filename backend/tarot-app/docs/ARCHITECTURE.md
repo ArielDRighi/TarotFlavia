@@ -10,7 +10,7 @@ Backend del marketplace de tarotistas construido con **NestJS**, aplicando arqui
 - **ORM:** TypeORM 0.3.x
 - **Database:** PostgreSQL 16 (Docker)
 - **Cache:** In-memory (preparado para Redis)
-- **AI Providers:** Groq Llama 3.1 70B (principal), OpenAI GPT-4, DeepSeek (fallback)
+- **AI Providers:** DeepSeek deepseek-v4-flash (tarot y premium), Groq openai/gpt-oss-120b (horóscopos), OpenAI como fallback opcional
 - **Testing:** Jest (TDD)
 - **Validation:** class-validator, class-transformer
 

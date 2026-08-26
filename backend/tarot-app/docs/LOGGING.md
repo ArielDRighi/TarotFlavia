@@ -524,7 +524,7 @@ export class InterpretationsService {
 
     this.logger.debug('Calling AI service', 'InterpretationsService', {
       provider: 'groq',
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       readingId: reading.id,
     });
 

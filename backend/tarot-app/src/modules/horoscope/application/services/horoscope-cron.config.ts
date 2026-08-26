@@ -8,11 +8,22 @@
 /**
  * Delay en milisegundos entre la generación de cada signo
  *
- * Valor: 6000ms (6 segundos)
- * Razón: Permite max 10 requests/minuto, respetando el límite de 15 RPM de Gemini
- * Cálculo: 60000ms / 10 = 6000ms
+ * Valor: 15000ms (15 segundos)
+ * Razón: El tier gratuito de Groq limita a 8.000 TOKENS por minuto (leído de los
+ *   headers `x-ratelimit-*` de la propia API el 26-ago-2026; el límite que manda
+ *   es el de tokens, no el de requests). Cada horóscopo consume ~1.345 tokens
+ *   con `openai/gpt-oss-120b` + `reasoning_effort: 'low'`, medido sobre el
+ *   prompt real.
+ * Cálculo: 60000ms / 15000ms = 4 requests/minuto × 1.400 tokens ≈ 5.600 tokens/min,
+ *   bajo el techo de 8.000 con margen para la variabilidad del modelo.
+ * Total: 12 signos × 15s = 180s (~3 minutos), holgado dentro de la ventana
+ *   [01:00, 03:00) UTC que exige GENERATION_SCHEDULE.
+ *
+ * ⚠️ El valor anterior (6000ms) daba 10 req/min ≈ 13.450 tokens/min, muy por
+ *   encima del techo de 8.000: se comía 429s a mitad de la tanda. (Sin
+ *   `reasoning_effort: 'low'` el mismo ritmo llegaba a ~18.700 tokens/min.)
  */
-export const DELAY_BETWEEN_SIGNS_MS = 6000;
+export const DELAY_BETWEEN_SIGNS_MS = 15000;
 
 /**
  * Días de retención de horóscopos en la base de datos

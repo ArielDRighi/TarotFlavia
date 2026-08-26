@@ -23,7 +23,7 @@ tarot/
 - **Framework:** NestJS 10.x (TypeScript)
 - **ORM:** TypeORM 0.3.x
 - **Database:** PostgreSQL 16
-- **AI Providers:** Groq Llama 3.1 70B (principal), OpenAI GPT-4, DeepSeek (fallback)
+- **AI Providers:** DeepSeek deepseek-v4-flash (tarot y premium), Groq openai/gpt-oss-120b (horóscopos), OpenAI como fallback opcional
 - **Testing:** Jest (TDD)
 
 ### Arquitectura

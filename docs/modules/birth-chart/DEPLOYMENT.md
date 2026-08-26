@@ -119,7 +119,7 @@ NOMINATIM_EMAIL=your-email@example.com  # REQUERIDO por TOS de Nominatim
 # AI PROVIDER (OPCIONAL - Premium)
 # ============================================================================
 GROQ_API_KEY=your_groq_api_key_here  # Para síntesis IA Premium
-GROQ_MODEL=llama-3.1-70b-versatile
+GROQ_MODEL=openai/gpt-oss-120b
 GROQ_MAX_TOKENS=2000
 GROQ_TEMPERATURE=0.7
 

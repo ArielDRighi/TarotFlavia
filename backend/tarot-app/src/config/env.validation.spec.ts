@@ -254,7 +254,7 @@ describe('EnvironmentVariables', () => {
           GROQ_API_KEY: 'gsk_test',
         });
 
-        expect(envConfig.GROQ_MODEL).toBe('llama-3.3-70b-versatile');
+        expect(envConfig.GROQ_MODEL).toBe('openai/gpt-oss-120b');
       });
 
       it('should accept custom GROQ_MODEL', () => {

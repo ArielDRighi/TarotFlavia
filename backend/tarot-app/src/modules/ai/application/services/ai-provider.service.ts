@@ -287,6 +287,17 @@ export class AIProviderService {
     );
 
     if (!preferred) {
+      // Sin este aviso, una API key faltante o mal escrita degrada en silencio:
+      // la feature sigue respondiendo con otro proveedor y nadie se entera de
+      // que el reparto por feature dejó de aplicarse. Es lo que hizo que el
+      // tarot consumiera la cuota gratuita de Groq durante el incidente del
+      // 26-ago-2026 sin dejar rastro en los logs.
+      this.logger.warn(
+        `El proveedor primario pedido (${primaryProvider}) no está configurado. ` +
+          `Se usa el orden por defecto: ${configured
+            .map((provider) => provider.getProviderType())
+            .join(' → ')}. Revisá su API key.`,
+      );
       return configured;
     }
 

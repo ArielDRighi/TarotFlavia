@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AIProviderService } from './ai-provider.service';
 import { GroqProvider } from '../../infrastructure/providers/groq.provider';
@@ -158,6 +159,30 @@ describe('AIProviderService', () => {
           fallbackUsed: false,
         }),
       );
+    });
+
+    it('avisa por log cuando el proveedor primario pedido no está configurado', async () => {
+      // Escenario del 26-ago-2026: DEEPSEEK_API_KEY sin setear en producción.
+      // El tarot pedía DeepSeek, caía a Groq y se comía su cuota gratuita sin
+      // dejar ni una línea en los logs.
+      deepseekProvider.isConfigured.mockReturnValue(false);
+      groqProvider.generateCompletion.mockResolvedValue(mockSuccessResponse);
+      const warnSpy = jest
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+
+      await service.generateCompletion(
+        mockMessages,
+        1,
+        1,
+        undefined,
+        AIProviderType.DEEPSEEK,
+      );
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('deepseek'));
+      expect(groqProvider.generateCompletion).toHaveBeenCalledTimes(1);
+
+      warnSpy.mockRestore();
     });
 
     it('should try the preferred primaryProvider first (DeepSeek) without using Groq', async () => {

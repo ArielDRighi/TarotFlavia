@@ -24,7 +24,7 @@ Auguria es una plataforma completa de lecturas de tarot que combina inteligencia
 
 - **Backend NestJS**: API RESTful robusta con arquitectura feature-based y capas (domain/application/infrastructure)
 - **Base de datos PostgreSQL 16**: Esquema completo con 29 tablas para usuarios, lecturas, interpretaciones y marketplace
-- **IA Multi-Provider**: Groq Llama 3.1 70B (principal), OpenAI GPT-4 Turbo y DeepSeek (fallback) con circuit breaker y retry
+- **IA Multi-Provider**: DeepSeek `deepseek-v4-flash` (tarot y premium), Groq `openai/gpt-oss-120b` (horóscopos), con circuit breaker, retry y fallback automático
 - **Sistema de Usuarios**: Autenticación JWT con refresh tokens, roles (CONSUMER, TAROTIST, ADMIN) y 3 planes configurables
 - **Caché Inteligente**: Optimización de costos de IA mediante caché en memoria (preparado para Redis)
 - **Testing Completo**: >80% coverage con 147 tests unitarios + 72 tests E2E/integración
@@ -52,7 +52,7 @@ Auguria es una plataforma completa de lecturas de tarot que combina inteligencia
 
 ✅ **IA Multi-Provider con Fallback**
 
-- **Groq Llama 3.1 70B Versatile** como proveedor principal (más rápido y económico)
+- **DeepSeek `deepseek-v4-flash`** para tarot, numerología y carta astral; **Groq `openai/gpt-oss-120b`** para los horóscopos
 - **OpenAI GPT-4 Turbo** como fallback secundario
 - **DeepSeek Chat** como último fallback
 - Circuit breaker pattern para resiliencia
@@ -225,7 +225,7 @@ Los límites y features son **configurables dinámicamente** desde el admin pane
 
 ### IA Providers
 
-- **Groq**: Llama 3.1 70B Versatile (principal - rápido y económico)
+- **Groq**: `openai/gpt-oss-120b` (horóscopos - tier gratuito)
 - **OpenAI**: GPT-4 Turbo (fallback secundario)
 - **DeepSeek**: DeepSeek Chat (fallback terciario)
 
@@ -877,7 +877,7 @@ Para preguntas o soporte:
 
 ## 🙏 Agradecimientos
 
-- **Groq**: Por Llama 3.1 70B y la API ultrarrápida
+- **Groq**: Por la API ultrarrápida
 - **OpenAI**: Por GPT-4 Turbo y la API
 - **DeepSeek**: Por DeepSeek Chat como fallback confiable
 - **NestJS**: Por el framework backend robusto y escalable
