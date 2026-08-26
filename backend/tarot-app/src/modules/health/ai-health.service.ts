@@ -3,6 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import OpenAI from 'openai';
 import { AIProviderService } from '../ai/application/services/ai-provider.service';
+import {
+  DEEPSEEK_THINKING_DISABLED,
+  DEFAULT_DEEPSEEK_MODEL,
+  DEFAULT_GROQ_MODEL,
+  GROQ_FREE_TIER_REQUESTS_PER_DAY,
+} from '../ai/domain/constants/ai-models.constants';
+import { DeepSeekChatCompletionParams } from '../ai/infrastructure/providers/deepseek.provider';
 
 export interface AIProviderHealth {
   provider: string;
@@ -77,7 +84,9 @@ export class AIHealthService {
         model,
         responseTime,
         rateLimits: {
-          limit: 14400, // 14,400 requests per day
+          // Tier gratuito, leído de los headers `x-ratelimit-*` el 26-ago-2026.
+          // Antes decía 14.400: ese número ya no existe.
+          limit: GROQ_FREE_TIER_REQUESTS_PER_DAY,
           remaining: undefined, // Will be populated from actual API response
         },
       };
@@ -239,8 +248,7 @@ export class AIHealthService {
       groq.chat.completions.create({
         messages: [{ role: 'user', content: 'test' }],
         model:
-          this.configService.get<string>('GROQ_MODEL') ||
-          'llama-3.1-70b-versatile',
+          this.configService.get<string>('GROQ_MODEL') || DEFAULT_GROQ_MODEL,
         max_tokens: 1,
       }),
       this.timeout(this.GROQ_TIMEOUT),
@@ -257,14 +265,19 @@ export class AIHealthService {
       baseURL: 'https://api.deepseek.com',
     });
 
+    // Misma configuración que la generación real: con el modo pensante
+    // encendido la sonda tarda 18–32s y daría un falso negativo.
+    const probe: DeepSeekChatCompletionParams = {
+      messages: [{ role: 'user', content: 'test' }],
+      model:
+        this.configService.get<string>('DEEPSEEK_MODEL') ||
+        DEFAULT_DEEPSEEK_MODEL,
+      max_tokens: 1,
+      thinking: DEEPSEEK_THINKING_DISABLED,
+    };
+
     await Promise.race([
-      deepseek.chat.completions.create({
-        messages: [{ role: 'user', content: 'test' }],
-        model:
-          this.configService.get<string>('DEEPSEEK_MODEL') ||
-          'deepseek-v4-flash',
-        max_tokens: 1,
-      }),
+      deepseek.chat.completions.create(probe),
       this.timeout(this.DEEPSEEK_TIMEOUT),
     ]);
   }

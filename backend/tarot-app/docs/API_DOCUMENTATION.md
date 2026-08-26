@@ -30,7 +30,7 @@
 
 La API de TarotFlavia es una API RESTful construida con NestJS que proporciona:
 
-- **Generación de lecturas de tarot con IA** (Groq Llama 3.1 70B como principal, OpenAI GPT-4 y DeepSeek como fallback)
+- **Generación de lecturas de tarot con IA** (DeepSeek `deepseek-v4-flash` como principal, Groq `openai/gpt-oss-120b` como fallback)
 - **Sistema completo de usuarios** con roles y permisos (CONSUMER, TAROTIST, ADMIN)
 - **78 cartas del tarot Rider-Waite** con interpretaciones detalladas
 - **5+ tipos de tiradas** (Cruz Celta, Tres Cartas, etc.)
@@ -1894,7 +1894,7 @@ GET /api/health/ai
     },
     {
       "provider": "deepseek",
-      "model": "deepseek-chat",
+      "model": "deepseek-v4-flash",
       "configured": true,
       "priority": 2
     }
@@ -2069,7 +2069,7 @@ curl http://localhost:3000/api/readings?page=1&limit=10 \
 
 ### Ejemplo: Regenerar Interpretación con Otro Proveedor
 
-Por defecto se usa **Groq (Llama 3.1 70B)**. Puedes forzar un proveedor específico:
+Por defecto el tarot usa **DeepSeek (`deepseek-v4-flash`)**. Puedes forzar un proveedor específico:
 
 ```bash
 # Usar OpenAI GPT-4 como alternativa

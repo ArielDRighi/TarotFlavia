@@ -126,50 +126,77 @@ describe('DeepSeekProvider', () => {
   });
 
   describe('timeout', () => {
-    it('sigue esperando a los 20s (una interpretación real tarda 14–17s)', async () => {
-      jest.useFakeTimers();
+    /**
+     * El presupuesto lo fija el cliente, no el proveedor: el axios del frontend
+     * aborta a los 30s (`frontend/src/lib/api/axios-config.ts`). Un timeout más
+     * largo que eso solo consigue que el backend siga trabajando en una lectura
+     * que el usuario ya vio fallar. 25s deja margen sobre los 14–17,6s medidos
+     * y entra en el presupuesto del cliente.
+     */
+    const TIMEOUT_MS = 25_000;
+
+    const startNeverResolvingCall = (): Promise<unknown> => {
       mockClient.chat.completions.create.mockReturnValue(
         new Promise(() => {
           // nunca resuelve: simula una generación lenta
         }),
       );
 
-      let settled = false;
-      const pending = provider
+      return provider
         .generateCompletion(mockMessages, {})
-        .catch((error: unknown) => {
-          settled = true;
-          return error;
-        });
+        .catch((error: unknown) => error);
+    };
 
-      await jest.advanceTimersByTimeAsync(20_000);
+    it('sigue esperando un milisegundo antes del corte', async () => {
+      jest.useFakeTimers();
+      let settled = false;
+      const pending = startNeverResolvingCall().then((result) => {
+        settled = true;
+        return result;
+      });
+
+      await jest.advanceTimersByTimeAsync(TIMEOUT_MS - 1);
 
       expect(settled).toBe(false);
 
       // Se deja vencer para no dejar la promesa colgada al terminar el test
-      await jest.advanceTimersByTimeAsync(30_000);
+      await jest.advanceTimersByTimeAsync(1);
       await pending;
     });
 
-    it('corta a los 45s con un error de timeout reintentable', async () => {
+    it('corta exactamente en el presupuesto con un error reintentable', async () => {
       jest.useFakeTimers();
-      mockClient.chat.completions.create.mockReturnValue(
-        new Promise(() => {
-          // nunca resuelve
-        }),
-      );
+      const pending = startNeverResolvingCall();
 
-      const pending = provider
-        .generateCompletion(mockMessages, {})
-        .catch((error: unknown) => error);
-
-      await jest.advanceTimersByTimeAsync(45_000);
+      await jest.advanceTimersByTimeAsync(TIMEOUT_MS);
       const error = await pending;
 
       expect(error).toBeInstanceOf(AIProviderException);
       const aiError = error as AIProviderException;
       expect(aiError.errorType).toBe(AIErrorType.TIMEOUT);
       expect(aiError.retryable).toBe(true);
+      expect(aiError.message).toContain(`${TIMEOUT_MS / 1000}s`);
+    });
+
+    it('no deja el timer colgado cuando la respuesta llega a tiempo', async () => {
+      jest.useFakeTimers();
+
+      await provider.generateCompletion(mockMessages, {});
+
+      // Promise.race no cancela al perdedor: sin un clearTimeout explícito
+      // queda un setTimeout retenido por cada llamada, que mantiene vivo el
+      // event loop (y hace fallar el shutdown limpio en Railway).
+      expect(jest.getTimerCount()).toBe(0);
+    });
+  });
+
+  describe('sonda de disponibilidad', () => {
+    it('usa el mismo modo no pensante que la generación real', async () => {
+      await provider.isAvailable();
+
+      expect(mockClient.chat.completions.create).toHaveBeenCalledWith(
+        expect.objectContaining({ thinking: { type: 'disabled' } }),
+      );
     });
   });
 });

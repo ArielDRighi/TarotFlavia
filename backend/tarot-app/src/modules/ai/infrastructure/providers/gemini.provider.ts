@@ -51,6 +51,7 @@ export class GeminiProvider implements IAIProvider {
     const contents = this.convertMessages(messages);
 
     const startTime = Date.now();
+    const timeout = this.createTimeout(this.TIMEOUT);
 
     try {
       // Create model with system instruction and generation config
@@ -67,7 +68,7 @@ export class GeminiProvider implements IAIProvider {
         geminiModel.generateContent({
           contents,
         }),
-        this.timeout(this.TIMEOUT),
+        timeout.promise,
       ]);
 
       if (!response || typeof response === 'string') {
@@ -213,6 +214,8 @@ export class GeminiProvider implements IAIProvider {
         true,
         error as Error,
       );
+    } finally {
+      timeout.cancel();
     }
   }
 
@@ -256,9 +259,26 @@ export class GeminiProvider implements IAIProvider {
     return 1000; // 10-card spreads
   }
 
-  private timeout(ms: number): Promise<never> {
-    return new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout exceeded')), ms),
-    );
+  /**
+   * Crea la promesa de timeout junto con su cancelación.
+   *
+   * `Promise.race` no cancela al perdedor: sin el `clearTimeout` explícito,
+   * cada llamada exitosa dejaba un `setTimeout` retenido hasta vencer, que
+   * mantiene vivo el event loop y ensucia el apagado del proceso.
+   */
+  private createTimeout(ms: number): {
+    promise: Promise<never>;
+    cancel: () => void;
+  } {
+    let handle: NodeJS.Timeout | undefined;
+
+    const promise = new Promise<never>((_, reject) => {
+      handle = setTimeout(
+        () => reject(new Error(`Timeout exceeded (>${ms / 1000}s)`)),
+        ms,
+      );
+    });
+
+    return { promise, cancel: () => clearTimeout(handle) };
   }
 }

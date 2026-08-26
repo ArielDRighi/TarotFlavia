@@ -25,6 +25,14 @@ import {
 } from '../prompts/chinese-horoscope.prompts';
 
 /**
+ * Delay entre generaciones del horóscopo chino.
+ *
+ * Calibrado contra el límite de 8.000 tokens/minuto del tier gratuito de Groq
+ * (ver DELAY_BETWEEN_SIGNS_MS en horoscope-cron.config.ts, misma restricción).
+ */
+const CHINESE_DELAY_BETWEEN_GENERATIONS_MS = 15000;
+
+/**
  * Interface para la respuesta parseada de la IA
  * Estructura del JSON retornado por el modelo de IA
  */
@@ -254,10 +262,14 @@ export class ChineseHoroscopeService {
     for (const animal of animals) {
       for (const element of elements) {
         counter++;
-        // TASK-125: Delay de 10s entre cada generación (excepto la primera)
-        // 10s = 6 RPM (requests per minute), seguro para proveedores gratuitos
+        // Delay entre cada generación (excepto la primera).
+        // El límite que manda en el tier gratuito de Groq es el de TOKENS
+        // (8.000/min), no el de requests: con maxTokens 1500, los 10s de antes
+        // daban 6 req/min ≈ 9.000 tokens/min, por encima del techo.
+        // 15s ⇒ 4 req/min ≈ 6.000 tokens/min. Correr una vez al año las 60
+        // generaciones pasa de ~10 a ~15 minutos, que es irrelevante acá.
         if (counter > 1) {
-          await this.delay(10000);
+          await this.delay(CHINESE_DELAY_BETWEEN_GENERATIONS_MS);
         }
 
         this.logger.log(`[${counter}/60] Generando ${animal} de ${element}...`);
@@ -322,9 +334,10 @@ export class ChineseHoroscopeService {
     let counter = 0;
     for (const { animal, element } of missing) {
       counter++;
-      // Delay entre generaciones (excepto la primera)
+      // Delay entre generaciones (excepto la primera). Ver la nota sobre el
+      // límite por tokens en CHINESE_DELAY_BETWEEN_GENERATIONS_MS.
       if (counter > 1) {
-        await this.delay(10000);
+        await this.delay(CHINESE_DELAY_BETWEEN_GENERATIONS_MS);
       }
 
       this.logger.log(

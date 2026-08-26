@@ -9,6 +9,10 @@ import {
   IAIProvider,
 } from '../../domain/interfaces/ai-provider.interface';
 import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
+import {
+  DEEPSEEK_THINKING_DISABLED,
+  DEFAULT_DEEPSEEK_MODEL,
+} from '../../domain/constants/ai-models.constants';
 
 /**
  * Parámetros de chat con la extensión `thinking` de DeepSeek.
@@ -17,7 +21,7 @@ import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
  * acá para pasarla sin recurrir a `any` ni a `@ts-ignore`.
  * Doc: https://api-docs.deepseek.com/guides/thinking_mode
  */
-type DeepSeekChatCompletionParams =
+export type DeepSeekChatCompletionParams =
   OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming & {
     thinking: { type: 'enabled' | 'disabled' };
   };
@@ -25,29 +29,23 @@ type DeepSeekChatCompletionParams =
 @Injectable()
 export class DeepSeekProvider implements IAIProvider {
   private client: OpenAI | null = null;
-  private readonly DEFAULT_MODEL = 'deepseek-v4-flash';
+  private readonly DEFAULT_MODEL = DEFAULT_DEEPSEEK_MODEL;
   private readonly DEFAULT_TEMPERATURE = 0.6; // Más determinista que el default de OpenAI
   /**
    * Timeout de la llamada a DeepSeek.
    *
-   * Medido el 26-ago-2026 con el prompt real de una tirada de 3 cartas y
-   * `thinking` apagado: 14–17,6s por interpretación. Con los 15s que había
-   * antes, toda tirada premium cortaba por timeout y caía al fallback.
-   * Se deja margen sin pasarse de los 30s que espera el axios del frontend.
-   */
-  private readonly TIMEOUT = 45000; // 45s
-  private readonly BASE_URL = 'https://api.deepseek.com';
-
-  /**
-   * Modo de razonamiento de DeepSeek v4.
+   * El presupuesto NO lo fija este provider sino el cliente: el axios del
+   * frontend aborta a los 30s (`frontend/src/lib/api/axios-config.ts`). Un
+   * timeout más largo que eso solo consigue que el backend siga trabajando en
+   * una lectura que el usuario ya vio fallar (y que igual se le descuenta del
+   * límite diario).
    *
-   * Viene ENCENDIDO por defecto y, medido el 26-ago-2026 sobre el prompt real
-   * de una tirada, agrega ~1.400 tokens de razonamiento facturables y lleva la
-   * respuesta de 14–17s a 18–32s (por encima del timeout del axios del
-   * frontend). Además, en modo pensante DeepSeek IGNORA `temperature`, que es
-   * justo lo que cada tarotista configura para variar su voz.
+   * 25s deja margen sobre los 14–17,6s medidos el 26-ago-2026 con el prompt
+   * real de una tirada de 3 cartas y el modo pensante apagado, y entra en el
+   * presupuesto del cliente. Los 15s que había antes cortaban toda tirada.
    */
-  private readonly THINKING_MODE = { type: 'disabled' } as const;
+  private readonly TIMEOUT = 25000; // 25s
+  private readonly BASE_URL = 'https://api.deepseek.com';
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('DEEPSEEK_API_KEY');
@@ -81,6 +79,7 @@ export class DeepSeekProvider implements IAIProvider {
     const maxTokens = config.maxTokens ?? this.calculateMaxTokens(messages);
 
     const startTime = Date.now();
+    const timeout = this.createTimeout(this.TIMEOUT);
 
     try {
       const params: DeepSeekChatCompletionParams = {
@@ -91,19 +90,19 @@ export class DeepSeekProvider implements IAIProvider {
         })),
         temperature,
         max_tokens: maxTokens,
-        thinking: this.THINKING_MODE,
+        thinking: DEEPSEEK_THINKING_DISABLED,
       };
 
       const response = await Promise.race([
         this.client.chat.completions.create(params),
-        this.timeout(this.TIMEOUT),
+        timeout.promise,
       ]);
 
       if (!response || typeof response === 'string') {
         throw new AIProviderException(
           AIProviderType.DEEPSEEK,
           AIErrorType.TIMEOUT,
-          'DeepSeek request timeout exceeded (>45s)',
+          `DeepSeek request timeout exceeded (>${this.TIMEOUT / 1000}s)`,
           true,
           new Error('Timeout'),
         );
@@ -250,6 +249,8 @@ export class DeepSeekProvider implements IAIProvider {
         true,
         error as Error,
       );
+    } finally {
+      timeout.cancel();
     }
   }
 
@@ -259,14 +260,24 @@ export class DeepSeekProvider implements IAIProvider {
     }
 
     try {
-      await Promise.race([
-        this.client.chat.completions.create({
-          model: this.DEFAULT_MODEL,
-          messages: [{ role: 'user', content: 'test' }],
-          max_tokens: 5,
-        }),
-        this.timeout(5000),
-      ]);
+      // Misma configuración que la generación real: una sonda que no ejercita
+      // el modo no pensante puede dar un falso resultado justo cuando se está
+      // verificando el despliegue.
+      const probe: DeepSeekChatCompletionParams = {
+        model: this.DEFAULT_MODEL,
+        messages: [{ role: 'user', content: 'test' }],
+        max_tokens: 5,
+        thinking: DEEPSEEK_THINKING_DISABLED,
+      };
+      const timeout = this.createTimeout(5000);
+      try {
+        await Promise.race([
+          this.client.chat.completions.create(probe),
+          timeout.promise,
+        ]);
+      } finally {
+        timeout.cancel();
+      }
       return true;
     } catch {
       return false;
@@ -295,9 +306,26 @@ export class DeepSeekProvider implements IAIProvider {
     return 1200; // 10-card spreads
   }
 
-  private timeout(ms: number): Promise<never> {
-    return new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout exceeded')), ms),
-    );
+  /**
+   * Crea la promesa de timeout junto con su cancelación.
+   *
+   * `Promise.race` no cancela al perdedor: sin el `clearTimeout` explícito,
+   * cada llamada exitosa dejaba un `setTimeout` retenido hasta vencer, que
+   * mantiene vivo el event loop y ensucia el apagado del proceso.
+   */
+  private createTimeout(ms: number): {
+    promise: Promise<never>;
+    cancel: () => void;
+  } {
+    let handle: NodeJS.Timeout | undefined;
+
+    const promise = new Promise<never>((_, reject) => {
+      handle = setTimeout(
+        () => reject(new Error(`Timeout exceeded (>${ms / 1000}s)`)),
+        ms,
+      );
+    });
+
+    return { promise, cancel: () => clearTimeout(handle) };
   }
 }

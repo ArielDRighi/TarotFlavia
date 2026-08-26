@@ -197,7 +197,7 @@ describe('ChineseHoroscopeService', () => {
       expect(failedResult?.error).toContain('Error de IA');
     });
 
-    it('debe incluir delay de 10s entre cada generación (TASK-125)', async () => {
+    it('debe incluir delay de 15s entre cada generación (techo de 8.000 tokens/min de Groq)', async () => {
       // Arrange
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockResolvedValue(mockAIResponse);
@@ -214,7 +214,7 @@ describe('ChineseHoroscopeService', () => {
       // Assert
       // Debe haber 59 delays (no hay delay antes de la primera combinación)
       expect(delaySpy).toHaveBeenCalledTimes(59);
-      expect(delaySpy).toHaveBeenCalledWith(10000); // TASK-125: 10s delay
+      expect(delaySpy).toHaveBeenCalledWith(15000); // 4 req/min ≈ 6.000 tokens/min
     });
   });
 

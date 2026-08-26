@@ -91,7 +91,7 @@ GROQ_MODEL=openai/gpt-oss-120b  # default; verificá que siga en el catálogo
 ### DeepSeek (requerido — tarot, numerología, carta astral)
 
 ```bash
-DEEPSEEK_API_KEY=sk_your_deepseek_key_here
+DEEPSEEK_API_KEY=sk-your_deepseek_key_here
 DEEPSEEK_MODEL=deepseek-v4-flash  # default
 ```
 
@@ -194,8 +194,8 @@ curl http://localhost:3000/health/ai
     "model": "openai/gpt-oss-120b",
     "responseTime": 150,
     "rateLimits": {
-      "remaining": 14350,
-      "limit": 14400,
+      "remaining": 997,
+      "limit": 1000,
       "reset": "2024-01-15T00:00:00Z"
     }
   },
@@ -252,9 +252,12 @@ curl http://localhost:3000/health/ai
 ### Timeouts by Provider
 
 - **Groq:** 10s — con `reasoning_effort: 'low'` responde en ~2s.
-- **DeepSeek:** 45s — medido 14–17,6s por tirada con el modo pensante apagado.
-  Con el modo pensante encendido trepa a 18–32s y se pasa del timeout de 30s
-  que tiene el axios del frontend.
+- **DeepSeek:** 25s — medido 14–17,6s por tirada con el modo pensante apagado.
+  El techo NO lo fija el provider sino el axios del frontend, que aborta a los
+  30s: un timeout más largo solo consigue que el backend siga generando una
+  lectura que el usuario ya vio fallar (y que igual se le descontó del límite
+  diario). Con el modo pensante encendido la generación trepa a 18–32s y no
+  entra en ese presupuesto.
 - **OpenAI:** 30s (puede ser más lento en horario pico).
 
 ### Best Practices

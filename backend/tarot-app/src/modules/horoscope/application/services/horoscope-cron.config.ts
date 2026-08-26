@@ -19,8 +19,9 @@
  * Total: 12 signos × 15s = 180s (~3 minutos), holgado dentro de la ventana
  *   [01:00, 03:00) UTC que exige GENERATION_SCHEDULE.
  *
- * ⚠️ El valor anterior (6000ms) daba 10 req/min ≈ 18.700 tokens/min con el
- *   modelo nuevo: se comía 429s a mitad de la tanda.
+ * ⚠️ El valor anterior (6000ms) daba 10 req/min ≈ 13.450 tokens/min, muy por
+ *   encima del techo de 8.000: se comía 429s a mitad de la tanda. (Sin
+ *   `reasoning_effort: 'low'` el mismo ritmo llegaba a ~18.700 tokens/min.)
  */
 export const DELAY_BETWEEN_SIGNS_MS = 15000;
 

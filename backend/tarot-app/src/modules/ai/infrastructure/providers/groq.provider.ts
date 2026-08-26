@@ -9,34 +9,18 @@ import {
   IAIProvider,
 } from '../../domain/interfaces/ai-provider.interface';
 import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
+import {
+  DEFAULT_GROQ_MODEL,
+  GROQ_REASONING_EFFORT,
+  GROQ_REASONING_MODEL_PREFIX,
+} from '../../domain/constants/ai-models.constants';
 
 @Injectable()
 export class GroqProvider implements IAIProvider {
   private client: Groq | null = null;
-  /**
-   * Modelo por defecto de Groq.
-   *
-   * ⚠️ 26-ago-2026: Groq decomisionó toda la familia Llama y
-   * `llama-3.3-70b-versatile` dejó de existir en la cuenta (404
-   * `model_not_found`), lo que dejó a producción sin IA. El reemplazo es
-   * `openai/gpt-oss-120b`, verificado contra `/v1/models` de la cuenta.
-   * Antes de cambiarlo, confirmá que el modelo siga en el catálogo.
-   */
-  private readonly DEFAULT_MODEL = 'openai/gpt-oss-120b';
+  private readonly DEFAULT_MODEL = DEFAULT_GROQ_MODEL;
   private readonly DEFAULT_TEMPERATURE = 0.6; // Lower than GPT for more deterministic responses
   private readonly TIMEOUT = 10000; // 10s - Groq is ultra-fast
-
-  /**
-   * Esfuerzo de razonamiento de los modelos gpt-oss.
-   *
-   * Medido el 26-ago-2026 con el prompt real de horóscopo: sin este parámetro
-   * el modelo gasta ~565 tokens de razonamiento por llamada (851 de completion
-   * sobre un tope de 1.000, al borde de truncar el JSON). Con `'low'` baja a 15
-   * tokens de razonamiento y 335 de completion, y el total por llamada cae de
-   * 1.874 a 1.345 tokens — lo que además hace entrar la tanda de 12 signos en
-   * el techo de 8.000 tokens/minuto del tier gratuito.
-   */
-  private readonly REASONING_EFFORT = 'low' as const;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
@@ -67,6 +51,7 @@ export class GroqProvider implements IAIProvider {
     const maxTokens = config.maxTokens ?? this.calculateMaxTokens(messages);
 
     const startTime = Date.now();
+    const timeout = this.createTimeout(this.TIMEOUT);
 
     try {
       const response = await Promise.race([
@@ -78,16 +63,20 @@ export class GroqProvider implements IAIProvider {
           })),
           temperature,
           max_tokens: maxTokens,
-          reasoning_effort: this.REASONING_EFFORT,
+          // Solo los gpt-oss aceptan este parámetro; mandárselo a los demás
+          // modelos del catálogo rompería el "migrar es cambiar la env var".
+          ...(model.startsWith(GROQ_REASONING_MODEL_PREFIX)
+            ? { reasoning_effort: GROQ_REASONING_EFFORT }
+            : {}),
         }),
-        this.timeout(this.TIMEOUT),
+        timeout.promise,
       ]);
 
       if (!response || typeof response === 'string') {
         throw new AIProviderException(
           AIProviderType.GROQ,
           AIErrorType.TIMEOUT,
-          'Groq request timeout exceeded (>10s)',
+          `Groq request timeout exceeded (>${this.TIMEOUT / 1000}s)`,
           true,
           new Error('Timeout'),
         );
@@ -148,6 +137,25 @@ export class GroqProvider implements IAIProvider {
           AIProviderType.GROQ,
           AIErrorType.INVALID_KEY,
           `Groq API key invalid: ${errorMessage}`,
+          false,
+          error as Error,
+        );
+      }
+
+      // Check for 404 (modelo inexistente o sin acceso)
+      // NO es reintentable: el modelo no va a aparecer entre reintento y
+      // reintento. Marcarlo como tal hacía que cada llamada gastara los 3
+      // intentos de MAX_RETRY_ATTEMPTS antes de pasar al siguiente proveedor
+      // — exactamente lo que pasó en la caída del 26-ago-2026.
+      if (
+        statusCode === 404 ||
+        errorMessage.toLowerCase().includes('model_not_found') ||
+        errorMessage.toLowerCase().includes('does not exist')
+      ) {
+        throw new AIProviderException(
+          AIProviderType.GROQ,
+          AIErrorType.PROVIDER_UNAVAILABLE,
+          `Groq model unavailable: ${errorMessage}`,
           false,
           error as Error,
         );
@@ -219,6 +227,8 @@ export class GroqProvider implements IAIProvider {
         true,
         error as Error,
       );
+    } finally {
+      timeout.cancel();
     }
   }
 
@@ -229,14 +239,19 @@ export class GroqProvider implements IAIProvider {
 
     try {
       // Simple test call to verify connectivity
-      await Promise.race([
-        this.client.chat.completions.create({
-          model: this.DEFAULT_MODEL,
-          messages: [{ role: 'user', content: 'test' }],
-          max_tokens: 5,
-        }),
-        this.timeout(5000),
-      ]);
+      const timeout = this.createTimeout(5000);
+      try {
+        await Promise.race([
+          this.client.chat.completions.create({
+            model: this.DEFAULT_MODEL,
+            messages: [{ role: 'user', content: 'test' }],
+            max_tokens: 5,
+          }),
+          timeout.promise,
+        ]);
+      } finally {
+        timeout.cancel();
+      }
       return true;
     } catch {
       return false;
@@ -266,9 +281,26 @@ export class GroqProvider implements IAIProvider {
     return 1500; // 10-card spreads
   }
 
-  private timeout(ms: number): Promise<never> {
-    return new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout exceeded')), ms),
-    );
+  /**
+   * Crea la promesa de timeout junto con su cancelación.
+   *
+   * `Promise.race` no cancela al perdedor: sin el `clearTimeout` explícito,
+   * cada llamada exitosa dejaba un `setTimeout` retenido hasta vencer, que
+   * mantiene vivo el event loop y ensucia el apagado del proceso.
+   */
+  private createTimeout(ms: number): {
+    promise: Promise<never>;
+    cancel: () => void;
+  } {
+    let handle: NodeJS.Timeout | undefined;
+
+    const promise = new Promise<never>((_, reject) => {
+      handle = setTimeout(
+        () => reject(new Error(`Timeout exceeded (>${ms / 1000}s)`)),
+        ms,
+      );
+    });
+
+    return { promise, cancel: () => clearTimeout(handle) };
   }
 }

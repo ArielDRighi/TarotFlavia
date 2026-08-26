@@ -78,8 +78,9 @@ Saldo de la cuenta al momento del diagnóstico: **USD 1,91** (`is_available: tru
 | --------- | ------------------------------------------------------------------ | -------- | ---------- | ------------------------- |
 | T-IA-001  | Migrar Groq a `openai/gpt-oss-120b` y ajustar la cadencia del cron | Backend  | 🔴 Crítica | ✅ Completada             |
 | T-IA-002  | Dejar DeepSeek operativo para tarot y features premium             | Backend  | 🔴 Crítica | ✅ Completada             |
-| T-IA-003  | Setear las variables en Railway y reiniciar                        | Deploy   | 🔴 Crítica | ⬜ Pendiente (manual)     |
+| T-IA-003  | Setear las variables en Railway y reiniciar                        | Deploy   | 🔴 Crítica | 🟡 Parcial: `GROQ_MODEL` aplicado |
 | T-IA-004  | Que el health no reporte `ok` con la IA caída                      | Backend  | 🟠 Alta    | ⬜ Pendiente (fuera de alcance de este PR) |
+| T-IA-005  | Acotar la tormenta de reintentos que desborda el techo de tokens   | Backend  | 🟠 Alta    | ⬜ Pendiente (fuera de alcance de este PR) |
 
 ---
 
@@ -127,8 +128,11 @@ configura para variar su voz.
 
 ### Alcance
 
-- [x] `TIMEOUT`: 15s → **45s** (con margen contra el axios de 30s del frontend, que no se
-      alcanza porque la generación real termina en 14–17s).
+- [x] `TIMEOUT`: 15s → **25s**. El techo NO lo fija el provider sino el axios del frontend,
+      que aborta a los 30s (`frontend/src/lib/api/axios-config.ts`): un timeout más largo
+      solo consigue que el backend siga generando una lectura que el usuario ya vio fallar
+      y que igual se le descontó del límite diario. 25s deja margen sobre los 14–17,6s
+      medidos y entra en el presupuesto del cliente.
 - [x] El provider manda `thinking: { type: 'disabled' }`, tipado sin `any` ni `@ts-ignore`
       mediante `DeepSeekChatCompletionParams`.
 - [x] Mensaje de timeout coherente con la constante (decía `>15s`).
@@ -148,13 +152,27 @@ piden DeepSeek como primario). No se tocó.
 
 ## T-IA-003: Variables en Railway
 
-**Estado:** ⬜ PENDIENTE — acción manual, no se puede hacer desde el repo.
+**Estado:** 🟡 PARCIAL.
+
+`GROQ_MODEL=openai/gpt-oss-120b` **ya está aplicado en producción** (26-ago-2026): tras el
+redeploy, `primary.status` pasó a `"ok"` (179ms) y el backfill de bootstrap regeneró los
+12 signos del día.
+
+Las dos variables de DeepSeek **se dejaron sin setear a propósito** hasta que este PR esté
+desplegado: con el código viejo (timeout de 15s) y `MAX_RETRY_ATTEMPTS = 3`, una key de
+DeepSeek configurada quemaría 45s antes de caer a Groq, más que los 30s del axios del
+frontend. Sería cambiar "tarot roto" por "tarot roto más lento".
 
 ```bash
-GROQ_MODEL=openai/gpt-oss-120b
-DEEPSEEK_API_KEY=sk_...            # la que hoy tiene USD 1,91 de saldo
-DEEPSEEK_MODEL=deepseek-v4-flash
+GROQ_MODEL=openai/gpt-oss-120b     # ✅ aplicado el 26-ago-2026
+DEEPSEEK_API_KEY=sk-...            # ⬜ tras el deploy de este PR (prefijo sk- obligatorio)
+DEEPSEEK_MODEL=deepseek-v4-flash   # ⬜ tras el deploy de este PR
 ```
+
+También conviene revisar `GEMINI_API_KEY`, que sigue seteada en producción con
+`GEMINI_MODEL=gemini-1.5-flash` a pesar de que el `.env` local documenta a Gemini como
+deshabilitado "porque ensuciaba las métricas con errores". Queda en la cadena de fallback
+con un modelo que probablemente ya no exista.
 
 Al reiniciar, el backfill de `onApplicationBootstrap` regenera los horóscopos del día en
 curso: no hay que esperar al cron de las 01:00 UTC.
@@ -168,6 +186,57 @@ curl -s https://api.auguriatarot.com/api/v1/health | jq .info.ai
 curl -s https://api.auguriatarot.com/api/v1/horoscope/today | jq 'length'
 # debe devolver 12
 ```
+
+---
+
+## Correcciones de la Revisión (segunda vuelta)
+
+Salieron de la revisión del PR #637 y entraron en el mismo PR:
+
+- **Un 404 no era motivo para reintentar.** `groq.provider.ts` mandaba los 404 al `default`
+  del catch, que devuelve `NETWORK_ERROR` con `retryable: true`. Durante la caída, cada
+  llamada gastó los 3 intentos de `MAX_RETRY_ATTEMPTS` contra un modelo que ya no existía
+  antes de pasar al siguiente proveedor. Ahora un 404 / `model_not_found` es
+  `PROVIDER_UNAVAILABLE` no reintentable, y falla rápido.
+- **Timers colgados.** `Promise.race` no cancela al perdedor: cada llamada exitosa dejaba
+  vivo un `setTimeout` hasta vencer, reteniendo el event loop y ensuciando el apagado en
+  Railway. Los dos providers pasan a cancelarlo en un `finally`.
+- **`DEEPSEEK_API_KEY` podía quedar inválida en silencio.** El provider exige el prefijo
+  `sk-`, pero la validación de entorno no lo pedía y el `.env.example` traía un placeholder
+  con `sk_`. Un typo en el prefijo pasaba el arranque, DeepSeek no se registraba y el tarot
+  caía a Groq sin dejar rastro — el mismo modo de falla del incidente. Ahora hay `@Matches`
+  y `getOrderedProviders` loguea un `warn` cuando el primario pedido no está configurado.
+- **Un default decomisionado sobreviviente.** `ai-health.service.ts` seguía cayendo a
+  `llama-3.1-70b-versatile`, y es justo la sonda que usa el runbook de T-IA-003 para
+  verificar el fix. Todos los defaults viven ahora en
+  `src/modules/ai/domain/constants/ai-models.constants.ts`.
+- **`reasoning_effort` viajaba a todos los modelos.** Solo los gpt-oss lo entienden; el
+  runbook promete que migrar es cambiar la env var, y eso solo es cierto si el parámetro no
+  se le manda a `qwen/*` ni a `groq/compound*`.
+- **La sonda de salud de DeepSeek no ejercitaba el modo no pensante**, así que podía tardar
+  18–32s y dar un falso negativo justo durante la verificación del despliegue.
+- **El horóscopo chino tenía la misma miscalibración**: 10s entre generaciones con
+  `maxTokens: 1500` da ~9.000 tokens/min, por encima del techo de 8.000. Pasó a 15s.
+- **El health reportaba `limit: 14400`** hardcodeado, el número que este mismo incidente
+  probó falso.
+
+---
+
+## T-IA-005: La Tormenta de Reintentos Desborda el Techo de Tokens
+
+**Estado:** ⬜ PENDIENTE — preexistente, fuera del alcance de este PR.
+
+El cálculo de la nueva cadencia (15s entre signos) modela el camino feliz. En el camino de
+error se apilan dos niveles de reintento: `MAX_RETRIES_PER_SIGN = 3` con backoff
+`[6s, 12s, 24s]` en el cron, **por encima** de `retryWithBackoff(3)` (2s/4s) dentro de
+`AIProviderService`. Un signo que falla puede disparar hasta 12 llamadas, la mayoría dentro
+del mismo minuto: 12.000–16.000 tokens/min contra un techo de 8.000.
+
+Peor: `AIErrorType.RATE_LIMIT` es `retryable: true` y el reintento no honra el header
+`retry-after`, así que la respuesta a un 429 por tokens es volver a pedir a los 2s — lo que
+realimenta el 429.
+
+Conviene revisarlo junto con T-IA-004.
 
 ---
 
@@ -186,7 +255,9 @@ Ver `health.controller.ts:90`, `:133` y `:200`.
 
 ## Puerta de Salida
 
-- [x] Ningún modelo decomisionado en defaults del código ni en runbooks de deploy.
+- [x] Ningún modelo decomisionado en defaults del código ni en runbooks de deploy
+      (incluida la sonda de `ai-health.service.ts`, que se había pasado por alto en la
+      primera vuelta).
 - [x] Los límites reales del tier gratuito están documentados y cubiertos por tests.
 - [ ] Producción con `primary.status: "ok"` y 12 horóscopos del día (depende de T-IA-003).
 - [ ] Una tirada de tarot premium generada end-to-end contra DeepSeek (depende de T-IA-003).

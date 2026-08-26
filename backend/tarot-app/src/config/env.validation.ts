@@ -126,9 +126,16 @@ export class EnvironmentVariables {
   @IsString()
   GROQ_MODEL: string = 'openai/gpt-oss-120b';
 
-  // DeepSeek (Growth - Low Cost)
+  // DeepSeek (primario de tarot, numerología y carta astral)
+  // El provider solo instancia el cliente si la key arranca con "sk-"
+  // (deepseek.provider.ts). Sin este @Matches, un typo en el prefijo pasaba la
+  // validación, el provider quedaba sin registrar EN SILENCIO y el tarot caía a
+  // Groq — el mismo modo de falla del incidente del 26-ago-2026.
   @IsString()
   @IsOptional()
+  @Matches(/^sk-/, {
+    message: 'DEEPSEEK_API_KEY must start with "sk-"',
+  })
   DEEPSEEK_API_KEY?: string;
 
   @IsString()
