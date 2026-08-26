@@ -1,62 +1,69 @@
 # AI Provider Configuration Guide
 
-## 📋 Overview
+## 📋 Resumen
 
-This application supports multiple AI providers with a cost-optimized strategy:
+La aplicación soporta varios proveedores de IA con fallback automático. El
+reparto **no** es por escala de usuarios sino **por feature**, y está fijado en
+el código con el parámetro `primaryProvider` de `AIProviderService.generateCompletion`:
 
-- **Groq** (Primary - Free): Ultra-fast inference with Llama models
-- **DeepSeek** (Growth - Low Cost): Cost-effective alternative at scale
-- **OpenAI** (Fallback/Premium - Optional): Highest quality for premium features
+| Feature                                   | Primario     | Dónde se decide                                    |
+| ----------------------------------------- | ------------ | -------------------------------------------------- |
+| Horóscopo diario (occidental)             | **Groq**     | `horoscope-generation.service.ts`                   |
+| Horóscopo chino                           | **Groq**     | `chinese-horoscope.service.ts`                      |
+| Tarot (tiradas y carta del día)           | **DeepSeek** | `interpretations.service.ts`                        |
+| Numerología                               | **DeepSeek** | `numerology.service.ts`                             |
+| Carta astral                              | **DeepSeek** | `chart-ai-synthesis.service.ts`                     |
 
-## 🎯 Provider Strategy by Scale
+**El motivo del reparto:** los horóscopos son 12 generaciones por día, fijas y
+predecibles, que entran cómodas en el tier gratuito de Groq. El tarot y las
+features premium son a demanda, necesitan respuestas más largas y no pueden
+depender de una cuota gratuita que se agota — por eso van a DeepSeek, que se
+paga por uso.
 
-### MVP Stage (0-100 users)
+Si el primario falla, `getOrderedProviders` prueba los demás proveedores
+**configurados** en su orden por defecto. Un proveedor sin API key no se
+registra: no es fallback, sencillamente no existe.
 
-**Use:** Groq exclusively  
-**Cost:** $0/month  
-**Reason:** Free tier covers all needs, excellent quality with Llama 3.3 70B
-
-### Growth Stage (100-1,000 users)
-
-**Use:** DeepSeek as primary, Groq as fallback  
-**Cost:** ~$0.80 per 1,000 interpretations  
-**Reason:** Very affordable scaling, maintains quality
-
-### Scale Stage (1,000+ users)
-
-**Use:** Mix of DeepSeek and OpenAI based on features  
-**Cost:** Varies by usage mix  
-**Reason:** Optimize cost vs quality per feature
-
+⚠️ **Esto último causó una caída completa** el 26-ago-2026: en producción solo
+estaba `GROQ_API_KEY`, así que cuando Groq decomisionó el modelo no había a qué
+caer. Ver el runbook más abajo.
 ## 🔑 Getting API Keys
 
-### Groq (Required for MVP)
+### Groq (requerido)
 
-1. Visit [console.groq.com](https://console.groq.com)
-2. Sign up for free (no credit card required)
-3. Navigate to API Keys section
-4. Click "Create API Key"
-5. Copy the key (starts with `gsk_`)
+1. Entrá a [console.groq.com](https://console.groq.com)
+2. Registrate gratis (no pide tarjeta)
+3. Andá a la sección API Keys
+4. Creá la key y copiala (arranca con `gsk_`)
 
-**Limits:**
+**Límites del tier gratuito** (leídos de los headers `x-ratelimit-*` el
+26-ago-2026, **por modelo**):
 
-- 14,400 requests per day (free tier)
-- 30 requests per minute
-- Ultra-fast response times (<1s typically)
+- 1.000 requests por día
+- 8.000 tokens por minuto ← es el que manda en la generación de horóscopos
+- Respuestas de ~2s con `reasoning_effort: 'low'`
 
-### DeepSeek (Optional - For Growth)
+⚠️ La documentación de Groq y las versiones viejas de este archivo hablaban de
+14.400 requests/día y 30 RPM. Ya no aplica: verificá siempre contra los headers.
 
-1. Visit [platform.deepseek.com](https://platform.deepseek.com)
-2. Create account
-3. Go to API Keys
-4. Generate new key
-5. Add credits to account (pay-as-you-go)
+**Modelos disponibles en la cuenta** (26-ago-2026): `openai/gpt-oss-120b`,
+`openai/gpt-oss-20b`, `groq/compound`, `groq/compound-mini` (se decomisiona el
+21-09-2026), `qwen/qwen3.6-27b`, `qwen/qwen3.8-27b`. **Ningún Llama.**
 
-**Pricing:**
+### DeepSeek (requerido)
 
-- ~$0.0008 per tarot interpretation
-- ~$0.14 per 1M input tokens
-- ~$0.28 per 1M output tokens
+1. Entrá a [platform.deepseek.com](https://platform.deepseek.com)
+2. Creá la cuenta
+3. Generá la key en API Keys
+4. Cargá saldo (pago por uso)
+
+**Precios** ([doc oficial](https://api-docs.deepseek.com/quick_start/pricing)):
+
+- Entrada (cache miss): $0,22 / 1M off-peak — $0,44 en pico
+- Salida: $0,66 / 1M off-peak — $1,32 en pico
+- Horario pico: 01:00-04:00 y 06:00-10:00 UTC, de lunes a viernes
+
+Consultá el saldo con `curl -H "Authorization: Bearer $DEEPSEEK_API_KEY" https://api.deepseek.com/user/balance`.
 
 ### OpenAI (Optional - For Premium/Fallback)
 
@@ -72,107 +79,101 @@ This application supports multiple AI providers with a cost-optimized strategy:
 - $0.150 per 1M input tokens
 - $0.600 per 1M output tokens
 
-## ⚙️ Environment Variables
+## ⚙️ Variables de Entorno
 
-### Required (Groq)
+### Groq (requerido — horóscopos)
 
 ```bash
-# Groq Configuration (Primary Provider - FREE)
 GROQ_API_KEY=gsk_your_api_key_here
-GROQ_MODEL=llama-3.3-70b-versatile  # Default, can be changed
+GROQ_MODEL=openai/gpt-oss-120b  # default; verificá que siga en el catálogo
 ```
 
-### Optional (DeepSeek)
+### DeepSeek (requerido — tarot, numerología, carta astral)
 
 ```bash
-# DeepSeek Configuration (Growth Provider - LOW COST)
 DEEPSEEK_API_KEY=sk_your_deepseek_key_here
-DEEPSEEK_MODEL=deepseek-chat  # Default
+DEEPSEEK_MODEL=deepseek-v4-flash  # default
 ```
 
-### Optional (OpenAI)
+Sin `DEEPSEEK_API_KEY` el provider no se registra y esas features caen a Groq,
+consumiendo su cuota gratuita (que está dimensionada solo para los horóscopos).
+
+### OpenAI (opcional — fallback)
 
 ```bash
-# OpenAI Configuration (Fallback/Premium - OPTIONAL)
 OPENAI_API_KEY=sk_your_openai_key_here
-OPENAI_MODEL=gpt-4o-mini  # Default for cost efficiency
+OPENAI_MODEL=gpt-4o-mini
 ```
 
-## 📊 Cost Comparison
+## 📊 Costos (medidos el 26-ago-2026)
 
-| Provider     | Cost per 1K Interpretations | Quality    | Speed      | Best For          |
-| ------------ | --------------------------- | ---------- | ---------- | ----------------- |
-| **Groq**     | **$0** (free tier)          | ⭐⭐⭐⭐   | ⚡⚡⚡⚡⚡ | MVP, Testing      |
-| **DeepSeek** | **$0.80**                   | ⭐⭐⭐⭐   | ⚡⚡⚡⚡   | Growth, Scale     |
-| **OpenAI**   | **$4.50**                   | ⭐⭐⭐⭐⭐ | ⚡⚡⚡     | Premium, Fallback |
+| Proveedor    | Costo por interpretación | Base de la medición                              |
+| ------------ | ------------------------ | ------------------------------------------------ |
+| **Groq**     | **$0** (tier gratuito)   | 1.345 tokens por horóscopo, dentro de la cuota    |
+| **DeepSeek** | **~$0,0008** off-peak    | Tirada real de 3 cartas: 164 in / 1.250 out       |
+| **OpenAI**   | no configurado           | —                                                 |
 
-### Example Cost Scenarios
+DeepSeek cobra el doble en horario pico (01:00-04:00 y 06:00-10:00 UTC, de lunes
+a viernes), o sea ~$0,0016 por tirada. Con un saldo de USD 2 alcanza para unas
+2.300 tiradas off-peak.
 
-**Scenario 1: 100 users, 10 readings/month each (1,000 readings)**
+⚠️ El costo se dispara si se deja el modo pensante encendido: la misma tirada
+pasa a 2.498 tokens de salida (1.395 de ellos de razonamiento, facturados como
+salida), o sea ~$0,0017 — el doble. Por eso el provider manda
+`thinking: { type: 'disabled' }`.
 
-- Groq: $0 ✅
-- DeepSeek: $0.80
-- OpenAI: $4.50
+## 🔄 Qué Hacer Cuando un Proveedor Decomisiona un Modelo
 
-**Scenario 2: 1,000 users, 10 readings/month each (10,000 readings)**
+Pasó el 26-ago-2026 y dejó producción sin IA: Groq retiró toda la familia Llama
+y `llama-3.3-70b-versatile` empezó a devolver 404 `model_not_found`. Como Groq
+era el único proveedor configurado en producción, se cayeron los horóscopos
+diarios Y las tiradas de tarot al mismo tiempo.
 
-- Groq: $0 (but limited to 14,400/day) ⚠️
-- DeepSeek: $8.00 ✅
-- OpenAI: $45.00
+**Runbook:**
 
-**Scenario 3: 5,000 users, 10 readings/month each (50,000 readings)**
+1. **Confirmar el diagnóstico** en el health de producción — el bloque `ai`
+   muestra el modelo y el error crudo del proveedor:
 
-- Groq: Not viable (rate limits) ❌
-- DeepSeek: $40.00 ✅
-- OpenAI: $225.00
+   ```bash
+   curl -s https://api.auguriatarot.com/api/v1/health | jq .info.ai
+   ```
 
-## 🔄 Migration Strategy
+2. **Pedirle a la API qué modelos habilita la cuenta** (no confiar en la doc del
+   proveedor, que lista modelos que tu key puede no tener):
 
-### Phase 1: MVP (Launch - 100 users)
+   ```bash
+   curl -s -H "Authorization: Bearer $GROQ_API_KEY" \
+     https://api.groq.com/openai/v1/models | jq -r '.data[].id'
 
-```bash
-# .env
-GROQ_API_KEY=gsk_xxx  # Only Groq needed
-GROQ_MODEL=llama-3.3-70b-versatile
-```
+   curl -s -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+     https://api.deepseek.com/models | jq -r '.data[].id'
+   ```
 
-**Action:** None needed, stay on free tier
+3. **Probar el candidato con el prompt real** antes de adoptarlo: verificar que
+   el JSON siga parseando, que el español rioplatense se mantenga y medir
+   tokens y latencia. Los modelos de razonamiento (gpt-oss, deepseek-v4)
+   cambian ambos números de forma drástica.
 
-### Phase 2: Early Growth (100-500 users)
+4. **Leer los límites de los headers de la respuesta**, no de la documentación:
 
-```bash
-# .env
-GROQ_API_KEY=gsk_xxx  # Keep as fallback
-GROQ_MODEL=llama-3.3-70b-versatile
+   ```bash
+   curl -s -D - -o /dev/null -X POST https://api.groq.com/openai/v1/chat/completions \
+     -H "Authorization: Bearer $GROQ_API_KEY" -H "Content-Type: application/json" \
+     -d '{"model":"openai/gpt-oss-120b","max_tokens":10,"messages":[{"role":"user","content":"hola"}]}' \
+     | grep -i x-ratelimit
+   ```
 
-DEEPSEEK_API_KEY=sk_xxx  # Add DeepSeek
-DEEPSEEK_MODEL=deepseek-chat
-```
+   El reset es proporcional a lo consumido, así que sirve para deducir la
+   ventana: 3 requests con `reset-requests: 4m19.2s` ⇒ 3/1000 × 86400s ⇒ el
+   límite es de 1.000 requests **por día**.
 
-**Action:**
+5. **Cambiar la variable de entorno en Railway y reiniciar.** El backfill de
+   `onApplicationBootstrap` regenera los horóscopos del día en curso al
+   arrancar, así que no hace falta esperar al cron de la madrugada.
 
-1. Get DeepSeek API key
-2. Add environment variables
-3. Deploy update
-4. Monitor costs (~$4-8/month)
-
-### Phase 3: Scale (500+ users)
-
-```bash
-# .env - All providers configured
-GROQ_API_KEY=gsk_xxx
-DEEPSEEK_API_KEY=sk_xxx
-OPENAI_API_KEY=sk_xxx  # Optional for premium features
-```
-
-**Action:**
-
-1. Implement feature-based routing:
-   - Free users → DeepSeek
-   - Premium users → OpenAI
-   - Fallback → Groq
-2. Monitor costs and quality metrics
-3. Adjust strategy based on data
+6. **Actualizar el default en el código** (`env.validation.ts` y el
+   `DEFAULT_MODEL` del provider) para que un entorno sin la variable no vuelva
+   a apuntar a un modelo muerto.
 
 ## 🏥 Health Checks
 
@@ -190,7 +191,7 @@ curl http://localhost:3000/health/ai
     "provider": "groq",
     "configured": true,
     "status": "ok",
-    "model": "llama-3.3-70b-versatile",
+    "model": "openai/gpt-oss-120b",
     "responseTime": 150,
     "rateLimits": {
       "remaining": 14350,
@@ -250,9 +251,11 @@ curl http://localhost:3000/health/ai
 
 ### Timeouts by Provider
 
-- **Groq:** 10s (ultra-fast, rarely needs more)
-- **DeepSeek:** 15s (fast, but slightly slower)
-- **OpenAI:** 30s (can be slower at peak times)
+- **Groq:** 10s — con `reasoning_effort: 'low'` responde en ~2s.
+- **DeepSeek:** 45s — medido 14–17,6s por tirada con el modo pensante apagado.
+  Con el modo pensante encendido trepa a 18–32s y se pasa del timeout de 30s
+  que tiene el axios del frontend.
+- **OpenAI:** 30s (puede ser más lento en horario pico).
 
 ### Best Practices
 

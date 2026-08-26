@@ -767,7 +767,7 @@ Authorization: Bearer <token>
       }
     ],
     "aiProvider": "groq",
-    "model": "llama-3.1-70b-versatile"
+    "model": "openai/gpt-oss-120b"
   },
   "createdAt": "2025-11-20T10:30:00.000Z"
 }
@@ -1495,7 +1495,7 @@ Content-Type: application/json
   "maxTokens": 600,
   "topP": 0.95,
   "provider": "groq",
-  "model": "llama-3.1-70b-versatile"
+  "model": "openai/gpt-oss-120b"
 }
 ```
 
@@ -1882,7 +1882,7 @@ GET /api/health/ai
   "status": "healthy",
   "primary": {
     "provider": "groq",
-    "model": "llama-3.1-70b-versatile",
+    "model": "openai/gpt-oss-120b",
     "configured": true
   },
   "fallbacks": [

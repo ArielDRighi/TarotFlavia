@@ -170,7 +170,7 @@ Configura los parámetros de IA para las lecturas de Flavia.
 {
   tarotistaId: [ID de Flavia tarotista],
   provider: 'groq',
-  model: 'llama-3.3-70b-versatile',
+  model: 'openai/gpt-oss-120b',
   temperature: 0.7,
   maxTokens: 2000,
   systemPrompt: 'Eres Flavia, una tarotista profesional...',

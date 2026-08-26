@@ -10,13 +10,44 @@ import {
 } from '../../domain/interfaces/ai-provider.interface';
 import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
 
+/**
+ * Parámetros de chat con la extensión `thinking` de DeepSeek.
+ *
+ * El SDK de OpenAI no la tipa porque es propia de DeepSeek, así que se declara
+ * acá para pasarla sin recurrir a `any` ni a `@ts-ignore`.
+ * Doc: https://api-docs.deepseek.com/guides/thinking_mode
+ */
+type DeepSeekChatCompletionParams =
+  OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming & {
+    thinking: { type: 'enabled' | 'disabled' };
+  };
+
 @Injectable()
 export class DeepSeekProvider implements IAIProvider {
   private client: OpenAI | null = null;
   private readonly DEFAULT_MODEL = 'deepseek-v4-flash';
-  private readonly DEFAULT_TEMPERATURE = 0.6; // Similar to Llama
-  private readonly TIMEOUT = 15000; // 15s
+  private readonly DEFAULT_TEMPERATURE = 0.6; // Más determinista que el default de OpenAI
+  /**
+   * Timeout de la llamada a DeepSeek.
+   *
+   * Medido el 26-ago-2026 con el prompt real de una tirada de 3 cartas y
+   * `thinking` apagado: 14–17,6s por interpretación. Con los 15s que había
+   * antes, toda tirada premium cortaba por timeout y caía al fallback.
+   * Se deja margen sin pasarse de los 30s que espera el axios del frontend.
+   */
+  private readonly TIMEOUT = 45000; // 45s
   private readonly BASE_URL = 'https://api.deepseek.com';
+
+  /**
+   * Modo de razonamiento de DeepSeek v4.
+   *
+   * Viene ENCENDIDO por defecto y, medido el 26-ago-2026 sobre el prompt real
+   * de una tirada, agrega ~1.400 tokens de razonamiento facturables y lleva la
+   * respuesta de 14–17s a 18–32s (por encima del timeout del axios del
+   * frontend). Además, en modo pensante DeepSeek IGNORA `temperature`, que es
+   * justo lo que cada tarotista configura para variar su voz.
+   */
+  private readonly THINKING_MODE = { type: 'disabled' } as const;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('DEEPSEEK_API_KEY');
@@ -52,16 +83,19 @@ export class DeepSeekProvider implements IAIProvider {
     const startTime = Date.now();
 
     try {
+      const params: DeepSeekChatCompletionParams = {
+        model,
+        messages: messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        temperature,
+        max_tokens: maxTokens,
+        thinking: this.THINKING_MODE,
+      };
+
       const response = await Promise.race([
-        this.client.chat.completions.create({
-          model,
-          messages: messages.map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-          temperature,
-          max_tokens: maxTokens,
-        }),
+        this.client.chat.completions.create(params),
         this.timeout(this.TIMEOUT),
       ]);
 
@@ -69,7 +103,7 @@ export class DeepSeekProvider implements IAIProvider {
         throw new AIProviderException(
           AIProviderType.DEEPSEEK,
           AIErrorType.TIMEOUT,
-          'DeepSeek request timeout exceeded (>15s)',
+          'DeepSeek request timeout exceeded (>45s)',
           true,
           new Error('Timeout'),
         );

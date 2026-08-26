@@ -124,7 +124,7 @@ export class EnvironmentVariables {
 
   @IsOptional()
   @IsString()
-  GROQ_MODEL: string = 'llama-3.3-70b-versatile';
+  GROQ_MODEL: string = 'openai/gpt-oss-120b';
 
   // DeepSeek (Growth - Low Cost)
   @IsString()

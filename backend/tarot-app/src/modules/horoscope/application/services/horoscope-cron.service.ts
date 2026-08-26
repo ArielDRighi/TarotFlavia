@@ -34,14 +34,14 @@ interface GenerationResult {
  * Responsabilidades:
  * - Generar horóscopos diarios a las 01:00 UTC de forma SECUENCIAL
  * - Rellenar los faltantes de hoy al arrancar la app (backfill de bootstrap)
- * - Respetar límites de rate de la API de IA (15 RPM para Gemini)
+ * - Respetar el límite de 8.000 tokens/minuto del tier gratuito de Groq
  * - Limpiar horóscopos antiguos semanalmente
  * - Proveer método manual para testing
  *
  * IMPORTANTE:
  * - La generación es SECUENCIAL (un signo a la vez)
- * - Delay de 6 segundos entre signos para no superar 15 RPM
- * - Total: ~72 segundos para 12 signos
+ * - Delay de 15 segundos entre signos (ver DELAY_BETWEEN_SIGNS_MS)
+ * - Total: ~3 minutos para 12 signos
  * - Si un signo falla, continúa con el siguiente
  * - Al arrancar la app (OnApplicationBootstrap) rellena los horóscopos faltantes
  *   de hoy, para recuperarse de corridas de cron perdidas por deploys/reinicios

@@ -76,7 +76,7 @@ describe('env-validator', () => {
     expect(result.CORS_ORIGIN).toBe('http://localhost:3000');
     expect(result.RATE_LIMIT_TTL).toBe(60);
     expect(result.RATE_LIMIT_MAX).toBe(100);
-    expect(result.GROQ_MODEL).toBe('llama-3.3-70b-versatile');
+    expect(result.GROQ_MODEL).toBe('openai/gpt-oss-120b');
     // El frontend corre en 3001; 3000 es el puerto del backend (T-PROD-015)
     expect(result.FRONTEND_URL).toBe('http://localhost:3001');
   });

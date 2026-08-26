@@ -13,9 +13,30 @@ import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
 @Injectable()
 export class GroqProvider implements IAIProvider {
   private client: Groq | null = null;
-  private readonly DEFAULT_MODEL = 'llama-3.1-70b-versatile';
+  /**
+   * Modelo por defecto de Groq.
+   *
+   * ⚠️ 26-ago-2026: Groq decomisionó toda la familia Llama y
+   * `llama-3.3-70b-versatile` dejó de existir en la cuenta (404
+   * `model_not_found`), lo que dejó a producción sin IA. El reemplazo es
+   * `openai/gpt-oss-120b`, verificado contra `/v1/models` de la cuenta.
+   * Antes de cambiarlo, confirmá que el modelo siga en el catálogo.
+   */
+  private readonly DEFAULT_MODEL = 'openai/gpt-oss-120b';
   private readonly DEFAULT_TEMPERATURE = 0.6; // Lower than GPT for more deterministic responses
   private readonly TIMEOUT = 10000; // 10s - Groq is ultra-fast
+
+  /**
+   * Esfuerzo de razonamiento de los modelos gpt-oss.
+   *
+   * Medido el 26-ago-2026 con el prompt real de horóscopo: sin este parámetro
+   * el modelo gasta ~565 tokens de razonamiento por llamada (851 de completion
+   * sobre un tope de 1.000, al borde de truncar el JSON). Con `'low'` baja a 15
+   * tokens de razonamiento y 335 de completion, y el total por llamada cae de
+   * 1.874 a 1.345 tokens — lo que además hace entrar la tanda de 12 signos en
+   * el techo de 8.000 tokens/minuto del tier gratuito.
+   */
+  private readonly REASONING_EFFORT = 'low' as const;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
@@ -57,6 +78,7 @@ export class GroqProvider implements IAIProvider {
           })),
           temperature,
           max_tokens: maxTokens,
+          reasoning_effort: this.REASONING_EFFORT,
         }),
         this.timeout(this.TIMEOUT),
       ]);

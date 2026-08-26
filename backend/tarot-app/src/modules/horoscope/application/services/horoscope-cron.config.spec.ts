@@ -2,6 +2,7 @@ import {
   GENERATION_SCHEDULE,
   VERIFICATION_SCHEDULE,
   CLEANUP_SCHEDULE,
+  DELAY_BETWEEN_SIGNS_MS,
   HOROSCOPE_CRON_CONFIG,
 } from './horoscope-cron.config';
 
@@ -46,6 +47,45 @@ describe('horoscope-cron.config', () => {
     expect(getCronHour(VERIFICATION_SCHEDULE)).toBeGreaterThan(
       getCronHour(GENERATION_SCHEDULE),
     );
+  });
+
+  describe('cadencia de generación (rate limit de Groq)', () => {
+    /**
+     * Medido el 26-ago-2026 contra `openai/gpt-oss-120b` con el prompt real de
+     * horóscopo y `reasoning_effort: 'low'`: ~1.345 tokens por signo
+     * (prompt + completion). Se redondea hacia arriba para dejar margen.
+     */
+    const TOKENS_POR_SIGNO = 1400;
+
+    /**
+     * Techo del tier gratuito de Groq, leído de los headers `x-ratelimit-*`
+     * de la propia API el 26-ago-2026: 8.000 tokens por minuto y 1.000
+     * requests por día, por modelo.
+     */
+    const GROQ_FREE_TPM = 8000;
+
+    const CANTIDAD_DE_SIGNOS = 12;
+    const MS_POR_MINUTO = 60_000;
+
+    it('no supera los 8.000 tokens/minuto del tier gratuito de Groq', () => {
+      const requestsPorMinuto = MS_POR_MINUTO / DELAY_BETWEEN_SIGNS_MS;
+      const tokensPorMinuto = requestsPorMinuto * TOKENS_POR_SIGNO;
+
+      expect(tokensPorMinuto).toBeLessThanOrEqual(GROQ_FREE_TPM);
+    });
+
+    it('termina los 12 signos dentro de la ventana [01:00, 03:00) UTC', () => {
+      const duracionMs = CANTIDAD_DE_SIGNOS * DELAY_BETWEEN_SIGNS_MS;
+      const ventanaMs = 2 * 60 * MS_POR_MINUTO; // de 01:00 a 03:00 UTC
+
+      expect(duracionMs).toBeLessThan(ventanaMs);
+    });
+
+    it('expone el delay en el objeto agregado de config', () => {
+      expect(HOROSCOPE_CRON_CONFIG.DELAY_BETWEEN_SIGNS_MS).toBe(
+        DELAY_BETWEEN_SIGNS_MS,
+      );
+    });
   });
 
   it('expone los schedules en el objeto agregado de config', () => {
