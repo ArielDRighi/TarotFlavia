@@ -864,15 +864,67 @@ sembrado en la base de producción:
 
 ---
 
+## 🚀 Runbook de deploy — el orden NO es opcional
+
+> Escrito el 26-ago-2026 después de que el deploy de T-SEO-013 saliera "verde" y **el sitio quedara
+> exactamente igual que antes**. Una hora de diagnóstico. Si vas a deployar algo que cambia
+> contenido de la base, leé esto primero.
+
+### Los tres pasos, en este orden
+
+| # | Paso | Por qué |
+| --- | --- | --- |
+| 1 | **Deploy del backend** | Las migraciones corren solas al arrancar (`migrationsRun: true` en `config/typeorm.ts`). Esto sí es automático. |
+| 2 | **`npm run db:seed:encyclopedia`** contra la base de producción | **Los seeders NO corren en el deploy.** Y el contenido extendido de las 78 fichas —las 7 secciones de T-SEO-009, lo que las lleva de 166 a ~766 palabras— vive en un **seeder**, no en una migración. |
+| 3 | **Build del frontend**, recién después de verificar el paso 2 por API | Las páginas de la enciclopedia son estáticas (`revalidate = 86400`): se prerenderizan **durante el build**, contra la API. El HTML que ve Google es una foto de ese instante y dura 24 h. |
+
+### Las tres trampas que nos comimos
+
+**1. "Deploy en verde" no es "contenido en producción".** Los dos servicios dieron `SUCCESS` y la
+base tenía las 78 cartas… con los 7 campos nuevos en `NULL`. La API devolvía las fichas de 166
+palabras. El trabajo entero de T-SEO-009 no lo veía nadie.
+
+**2. `db:seed:all` NO se puede correr contra producción.** Incluye `seedUsers`, que crea
+`free@test.com`, `premium@test.com` y `admin@test.com` **con una contraseña conocida**. Por eso
+existe `scripts/db-seed-encyclopedia.ts`: corre solo los dos seeders de la enciclopedia, los dos
+seguros de repetir (el de cartas hace *backfill* y no pisa ediciones del panel de admin; el de
+artículos es skip-if-exists).
+
+**3. `railway redeploy` no reconstruye.** Ni siquiera con `--from-source`. El `Dockerfile` del
+frontend hace `COPY frontend/` y después `RUN npm run build`: si el commit es el mismo, Docker
+reusa esa capa y devuelve el **mismo HTML byte a byte** (lo medimos: 52618 bytes, mismo md5, en tres
+deploys seguidos). Para que se reconstruya de verdad **tiene que cambiar algún archivo dentro de
+`frontend/`**.
+
+> Si el frontend ya salió con datos viejos y no querés forzar un build: las páginas se arreglan
+> solas cuando vence el ISR, hasta 24 h después del build. Es una salida válida si no hay apuro.
+
+### Verificación (no alcanza con mirar el sitio)
+
+```bash
+# 1. La base y la API — esto es lo que tiene que estar bien primero
+curl -s https://api.auguriatarot.com/api/v1/encyclopedia/cards/the-devil | jq 'keys'
+#    Tienen que aparecer meaningLove, meaningWork, meaningWellbeing, symbolism,
+#    advice, yesNo y combinations.
+
+# 2. El HTML servido — que es otra cosa
+curl -s https://auguriatarot.com/enciclopedia/tarot/the-devil | grep -c "En la energía y el bienestar"
+
+# 3. El barrido completo
+cd frontend && npm run check:indexable -- --base-url https://auguriatarot.com
+```
+
+---
+
 ## 🚪 Puerta de salida: cuándo pedir la tercera revisión
 
 Un tercer rechazo cuesta más que dos semanas de trabajo. **Todo esto tiene que estar hecho y
 verificado en producción antes de tocar el botón:**
 
 - [ ] T-SEO-008, 009, 010, 011 y 013 desplegadas y verificadas **en producción** (no solo mergeadas
-      — ver qué pasó el 19-ago con el deploy roto). Las cinco están mergeadas o en PR; falta el
-      deploy. ⚠️ **013 incluye una migración de datos**: el deploy tiene que correr
-      `migration:run`, o producción queda con el texto viejo aunque el código esté al día.
+      — ver qué pasó el 19-ago con el deploy roto). ⚠️ Seguir el **Runbook de deploy** de arriba:
+      backend → `db:seed:encyclopedia` → build del frontend. Las migraciones corren solas; **los
+      seeders no**, y el contenido de las fichas está en un seeder.
 - [ ] `npm run check:indexable -- --base-url https://auguriatarot.com` en **verde**: 178/178 sobre el
       umbral y sin soft-404.
 - [ ] El promedio de `/enciclopedia/tarot` por encima de **500 palabras** (hoy 166).
@@ -893,4 +945,4 @@ npm run check:indexable -- --base-url https://auguriatarot.com
 
 ---
 
-**Última actualización:** 24-ago-2026
+**Última actualización:** 26-ago-2026
