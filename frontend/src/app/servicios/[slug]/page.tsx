@@ -1,8 +1,12 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
 
-import { ServiceDetailPage } from '@/components/features/holistic-services';
+import {
+  ServiceDetailPage,
+  ServiceEditorialContent,
+} from '@/components/features/holistic-services';
 import { getHolisticServiceDetail, getHolisticServices } from '@/lib/api/holistic-services-api';
+import { getServiceEditorialContent } from '@/lib/constants/service-details.data';
 import { getServiceDetailMetadata } from '@/lib/metadata/page-metadata';
 import { resolveRouteResource, safeStaticParams } from '@/lib/metadata/route-data';
 
@@ -36,6 +40,18 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 
 export default async function ServicioDetailRoute({ params }: Props) {
   const { slug } = await params;
+  /**
+   * El bloque editorial se renderiza en el servidor y fuera de `ServiceDetailPage`
+   * (T-SEO-012): así el crawler lo ve aunque la parte cliente quede en su
+   * esqueleto. Un servicio creado desde el admin no tiene entrada y la ficha
+   * degrada a lo que trae la API, sin romperse.
+   */
+  const editorial = getServiceEditorialContent(slug);
 
-  return <ServiceDetailPage slug={slug} initialService={await getServiceCached(slug)} />;
+  return (
+    <>
+      <ServiceDetailPage slug={slug} initialService={await getServiceCached(slug)} />
+      {editorial && <ServiceEditorialContent content={editorial} />}
+    </>
+  );
 }

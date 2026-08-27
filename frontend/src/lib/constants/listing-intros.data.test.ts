@@ -3,7 +3,9 @@ import { describe, it, expect } from 'vitest';
 import {
   LISTING_INTROS,
   MIN_LISTING_INTRO_WORDS,
+  MIN_LISTING_INTRO_WORDS_BY_KEY,
   getListingIntroWordCount,
+  getMinListingIntroWords,
   type ListingIntroData,
   type ListingIntroKey,
 } from './listing-intros.data';
@@ -40,10 +42,21 @@ describe('LISTING_INTROS', () => {
     expect([...KEYS].sort()).toEqual([...RUTAS_ESPERADAS].sort());
   });
 
-  it.each(RUTAS_ESPERADAS)('%s aporta al menos MIN_LISTING_INTRO_WORDS palabras propias', (key) => {
+  it.each(RUTAS_ESPERADAS)('%s aporta al menos el piso de palabras propias de su ruta', (key) => {
     expect(getListingIntroWordCount(LISTING_INTROS[key])).toBeGreaterThanOrEqual(
-      MIN_LISTING_INTRO_WORDS
+      getMinListingIntroWords(key)
     );
+  });
+
+  it('⚠️ T-SEO-012: /servicios tiene un piso propio, más alto que el general', () => {
+    // Es la cuarta URL de la sección y la única que no es una ficha: sin este
+    // piso, borrar las secciones que T-SEO-012 agregó dejaba el CI en verde.
+    expect(getMinListingIntroWords('servicios')).toBeGreaterThan(MIN_LISTING_INTRO_WORDS);
+  });
+
+  it('una ruta sin piso propio cae en el general', () => {
+    expect(MIN_LISTING_INTRO_WORDS_BY_KEY.contacto).toBeUndefined();
+    expect(getMinListingIntroWords('contacto')).toBe(MIN_LISTING_INTRO_WORDS);
   });
 
   it.each(RUTAS_ESPERADAS)('%s tiene título, lead y al menos dos secciones', (key) => {

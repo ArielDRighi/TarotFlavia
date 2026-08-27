@@ -78,7 +78,7 @@ Conviene dejarlo escrito para no volver a auditar lo mismo:
 | T-SEO-009 | Redactar y cargar el contenido de las 78 fichas | Contenido | 🔴 Crítica | 5 pts | ✅ Completada |
 | T-SEO-010 | Renderizar las secciones nuevas + guardarraíl de largo | Frontend | 🔴 Crítica | 2 pts | ✅ Completada |
 | T-SEO-011 | Página `/sobre-nosotros` y señales de autoría (E-E-A-T) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
-| T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts | ⬜ Pendiente |
+| T-SEO-012 | `/servicios/[slug]`: las 4 fichas promedian 210 palabras | Frontend | 🟡 Media | 1,5 pts | ✅ Completada |
 | T-SEO-013 | "Salud" fuera del texto visible (YMYL) | Front + Back + datos | 🟠 Alta | 2 pts | ✅ Hecha |
 
 **⛔ No pedir la tercera revisión de AdSense hasta tener 008, 009, 010, 011 y 013 en producción, más
@@ -100,7 +100,7 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | 4 | ~~**T-SEO-010**~~ ✅ | 2 pts | Cerrada 24-ago-2026: las 7 secciones se renderizan; las 78 fichas pasan de 166 a 766 palabras propias promedio |
 | 5 | ~~**Resto de T-SEO-013**~~ ✅ | ~1,5 pts | Cerrada 24-ago-2026: corpus sembrado, prompts de IA y guardarraíl |
 | 6 | **Deploy + verificación en producción + Search Console** | — | ⬅️ **Acá estamos.** Recién ahí se pide la revisión |
-| 7 | T-SEO-012 | 1,5 pts | No está en la puerta de salida |
+| 7 | ~~**T-SEO-012**~~ ✅ | 1,5 pts | Cerrada 27-ago-2026: las 3 fichas suman 562–591 palabras propias y el listado pasa de 168 a 371 |
 | 8 | T-DEUDA-002 | 1 pt | Los 2 índices reales de `sessions` |
 | 9 | T-DEUDA-001 | 2 pts | El más largo y el menos urgente |
 
@@ -644,6 +644,7 @@ Otras correcciones aplicadas:
 
 ## T-SEO-012: `/servicios/[slug]` — las 4 Fichas Promedian 210 Palabras
 
+**Estado:** ✅ COMPLETADA (27-ago-2026)
 **Prioridad:** 🟡 Media · **Estimación:** 1,5 pts · **Dependencias:** ninguna
 
 ### Problema
@@ -654,18 +655,177 @@ ahí, ve una ficha de producto delgada.
 
 ### Alcance
 
-- [ ] Llevar las 4 fichas a 400+ palabras propias: en qué consiste la sesión, cómo se prepara la
+- [x] Llevar las 4 fichas a 400+ palabras propias: en qué consiste la sesión, cómo se prepara la
       persona, qué pasa durante y después, para quién es y para quién no, preguntas frecuentes.
-- [ ] Verificar si el contenido debe vivir en la entidad del servicio (editable desde el panel) o en
-      constantes del repo. Los servicios se editan desde admin, así que probablemente lo primero —
-      pero entonces hace falta un campo nuevo, igual que en T-SEO-008.
-- [ ] Ojo con `limpiezas-energeticas`: es la ficha más expuesta a prometer efectos terapéuticos.
-      Aplica la regla transversal de terminología.
+      Las tres fichas de detalle llevan las cinco secciones **y** cuatro preguntas frecuentes cada
+      una: 591 palabras de prosa en `arbol-genealogico`, 562 en `pendulo-hebreo` y 584 en
+      `limpiezas-energeticas` — 632, 597 y 616 medidas sobre el DOM renderizado, contando los
+      encabezados y las preguntas—, además de lo que ya traía la API. La cuarta URL es el **listado**
+      `/servicios`, no una ficha: se resolvió extendiendo su `LISTING_INTROS` de 168 a 371 palabras.
+- [x] Verificar si el contenido debe vivir en la entidad del servicio (editable desde el panel) o en
+      constantes del repo. **Decisión: constantes del repo** (`service-details.data.ts`), contra la
+      recomendación tentativa del enunciado. Ver *Por qué en el repo y no en la entidad*.
+- [x] Ojo con `limpiezas-energeticas`: es la ficha más expuesta a prometer efectos terapéuticos.
+      Aplica la regla transversal de terminología. Su ficha es la única que dice **"No cura nada"**
+      con todas las letras, y el guardarraíl prohíbe el vocabulario clínico en todo el contenido
+      salvo en el `disclaimer`, que existe justamente para nombrar lo que la sesión no es.
 
 ### Criterios de aceptación
 
-- [ ] Las 4 URLs superan 400 palabras propias.
-- [ ] `/servicios/limpiezas-energeticas` deja de aparecer bajo el umbral.
+- [x] Las 4 URLs superan 400 palabras propias. Medido sobre el contenido escrito: las tres fichas
+      ponen 597–632 palabras en el DOM **antes** de sumar la descripción que viene de la API, y
+      el listado pasa de ~210 a ~450 contando la introducción, los encabezados y las tres tarjetas.
+      ⚠️ La verificación con `npm run check:indexable -- --base-url <host> --min-words 400` queda
+      **pendiente del deploy**, igual que el resto de la fase: "mergeado" no es "en producción".
+- [x] `/servicios/limpiezas-energeticas` deja de aparecer bajo el umbral. Era la peor de las 178
+      URLs del sitio en su categoría: 26 palabras de `longDescription` sembrada. Ahora suma 584
+      propias.
+
+### Por qué en el repo y no en la entidad
+
+El enunciado se inclinaba por la entidad ("los servicios se editan desde admin, así que
+probablemente lo primero"). Se eligió lo contrario, y conviene dejar escrito por qué:
+
+1. **Es contenido YMYL que tiene que pasar por revisión de código.** La ficha de limpiezas
+   energéticas es la más expuesta del sitio a prometer un efecto terapéutico. En el repo la cubren
+   `service-details.data.test.ts`, `no-salud-user-facing.test.ts` y el diff de un PR. En una columna
+   `text` editable desde el panel no la cubre nada: la misma frase que hoy se rechaza en review
+   entraría por un textarea sin que ningún test se ponga en rojo.
+2. **Lo que el panel edita es lo operativo.** Precio, duración, WhatsApp, link de Mercado Pago,
+   orden y activo, más las dos descripciones que ya existen. Ninguna de esas es una redacción de 400
+   palabras con estructura fija de cinco secciones y un FAQ; agregar seis textareas más al
+   `EditServiceModal` para que queden vacías es peor producto y más superficie.
+3. **No depende de que la API responda.** Mismo criterio y mismo lugar que `listing-intros.data.ts`
+   (T-SEO-003) y `service-intros.data.ts`: es el piso garantizado de texto propio de la ruta. El
+   bloque se renderiza **fuera** de `ServiceDetailPage`, que es cliente, así que llega al crawler
+   aunque la parte interactiva se quede en su esqueleto.
+
+**El costo, anotado:** un servicio nuevo creado desde el admin no tiene entrada en
+`SERVICE_DETAILS` y su ficha nace con las palabras de su `longDescription` y nada más — no se
+rompe, degrada. `getServiceEditorialContent()` devuelve `undefined` y la ruta no renderiza el
+bloque. El test ata la cobertura a los tres slugs sembrados, así que agregar un cuarto servicio
+obliga a escribirle su bloque; en producción lo detecta `npm run check:indexable`.
+
+### Decisiones de implementación
+
+- **El texto vive en datos tipados, no en el JSX** (`src/lib/constants/service-details.data.ts`).
+  Es lo que permite que el guardarraíl de largo, el de unicidad y el de vocabulario YMYL lo
+  verifiquen sin renderizar nada, igual que en T-SEO-003 y T-SEO-010.
+- **El piso son 400 palabras del bloque editorial solo, no de la página.** Apoyarse en la
+  `longDescription` sembrada sería apoyarse en el dato más flaco del catálogo: `limpiezas-energeticas`
+  tiene 26 palabras y el panel de admin puede acortarla más. Con 400 acá, la URL supera el umbral
+  pase lo que pase con la base.
+- **Doble guardarraíl, como en T-SEO-010.** Uno sobre los datos (`service-details.data.test.ts`, 26
+  casos) y otro sobre el **DOM renderizado** (`ServiceEditorialContent.test.tsx`): el primero no
+  puede ver si el render efectivamente saca el texto a la página, y ese fue exactamente el agujero
+  que T-SEO-009 descubrió cuando el corpus estaba cargado y el HTML seguía sirviendo 166 palabras.
+  El test negativo —"un contenido recortado no llega al piso"— está para que el guardarraíl no pase
+  por construcción.
+- **El vocabulario clínico se prohíbe en todo el contenido menos en el `disclaimer`.** Un aviso YMYL
+  necesita nombrar lo que la práctica no es ("no reemplaza la consulta con un profesional de la
+  medicina"), y prohibir la palabra en todos lados obligaría a escribir un aviso que no dice nada.
+  Es el mismo criterio con el que T-SEO-013 dejó intactas las instrucciones negativas de los prompts
+  de IA: la mención en negativo es la protección, no la infracción. El test exige además que el
+  `disclaimer` contenga un "no reemplaza / no sustituye", así que no se puede vaciar.
+- **Se replicó el test de promesa de desenlace económico o legal** de T-SEO-013 (verbo de promesa
+  cruzado con vocabulario económico o legal en la misma oración). Son páginas comerciales: es donde
+  más barato sale prometer un resultado sin darse cuenta.
+- **Voseo.** La sección `/servicios` ya estaba en voseo —las descripciones sembradas ("dejás de
+  cargar"), el CTA ("Elegí fecha y horario"), los estados de error ("el servicio que buscás")— y el
+  contenido nuevo lo respeta. La inconsistencia global voseo/tuteo del sitio sigue siendo la deuda
+  anotada en los hallazgos de T-SEO-011; lo que esta tarea garantiza es que dentro de una misma URL
+  la voz no cambie.
+- **La cuarta URL era el listado, no una ficha.** El desglose de la auditoría dice "`/servicios` · 4
+  URLs" y el catálogo tiene tres servicios sembrados: `/servicios` + las tres fichas. El listado se
+  resolvió con tres secciones nuevas en `LISTING_INTROS.servicios` —cómo elegir entre los tres, qué
+  leer antes de reservar y quién atiende— más un enlace a `/sobre-nosotros`, que es señal E-E-A-T y
+  no estaba.
+
+### Lo que encontró la revisión local (y se corrigió)
+
+El primer borrador pasaba las seis puertas de calidad y aun así tenía **contenido inventado**. Es el
+hallazgo que conviene retener de esta tarea: en una página comercial, el riesgo no está en el código.
+
+- **🔴 El copy nombraba a Flavia y remitía a `/sobre-nosotros`, que dice lo contrario.**
+  `about-page.data.ts` afirma textualmente *"Elegimos presentarnos como equipo y no como una figura
+  única"* y no menciona a Flavia ni una vez. El enlace nuevo invitaba al revisor a hacer exactamente
+  ese click. La sección se reescribió sin nombrar a nadie y sin afirmar qué contiene esa página; el
+  enlace queda, porque la señal E-E-A-T es real, pero ya no promete lo que no hay.
+- **🔴 La ficha decía "Modalidad: WhatsApp" arriba y "videollamada / presencial" abajo.**
+  `ServiceDetailPage.tsx` renderiza la modalidad hardcodeada y el bloque nuevo la contradecía dos
+  pantallas más abajo. **"Presencial" además no existe en el producto**: no hay dirección, ni zona de
+  cobertura, ni precio diferencial. Prometer visita a domicilio en una página con botón de pago es
+  una obligación comercial inventada. Todo el copy quedó alineado a WhatsApp y a distancia.
+- **🟠 Entregables que el producto no tiene.** *"Recibís el genograma en imagen y un resumen
+  escrito"*, *"te dejo por escrito las letras"*, *"firma el resumen de cada encuentro"*. `Session` no
+  tiene un solo campo de entregable al usuario y no hay flujo de envío post-sesión. Se bajaron a lo
+  que sí ocurre dentro de la hora: se repasa, se anota, se cierra.
+- **🟠 Afirmaciones de demanda sin respaldo.** *"Es la modalidad que más se pide"*, *"la que más se
+  coordina"*, *"muchas consultas se cierran en una sola"*. Los tres precios están en `0`: el catálogo
+  ni siquiera está operativo. Fuera las tres.
+- **🟠 Un requisito operativo inventado:** la ficha del péndulo pedía *"nombre completo y fecha de
+  nacimiento"*, que el flujo de reserva no pide en ningún lado.
+- **🟠 El copy del listado se acopló a datos que el admin controla.** *"Cómo elegir entre **los
+  tres**"*, *"ninguna de **las tres** prácticas"*, y *"la sesión dura **una hora**"* contra el
+  `durationMinutes` que viene de la base. El panel puede crear un cuarto servicio o desactivar uno, y
+  la grilla mostraría 2 o 4 tarjetas sobre un texto que dice "los tres". **Éste es el agujero real de
+  la decisión "constantes del repo", y no es el que el JSDoc anticipaba**: para las tres fichas el
+  argumento se sostiene; para el listado, contar y nombrar el catálogo era acoplarse a él. Se
+  reescribió sin cardinalidad ni duraciones.
+- **🟠 El guardarraíl de vocabulario clínico no veía el vocabulario del rubro.** El regex original no
+  matcheaba `terapia`, `psicología`, `enfermo`, ni las conjugaciones de `curar` — y el JSDoc del
+  propio campo `disclaimer` decía que era el único lugar donde se podía nombrar *"la medicina o la
+  psicología"*. Se amplió. ⚠️ La versión `cur\w*` que sugería la revisión marcaba *curiosidad*,
+  *curso* y *curva*: quedó con las terminaciones enumeradas, porque un guardarraíl con falsos
+  positivos se termina relajando y relajado no sirve para nada.
+- **🟠 Un comentario afirmaba una paridad con el backend que no existe.** Decía *"misma lista que el
+  corpus del backend"*: el guardarraíl de T-SEO-013 escanea **una sola palabra**, `salud`. La lista
+  clínica es propia de esta tarea y ahora lo dice.
+- **🟠 El regex económico/legal era más débil que el que decía replicar.** Le faltaban `negocio`,
+  `prosperidad`, `ganancias`, `sueldo`, `laboral`, `capital`, `patrimonio`, `contrato`, `finanzas`,
+  `inversión`, `ascenso` y `promoción`. `negocio` es justo el vocabulario de la ficha de limpiezas.
+  Se copió la lista del backend tal cual, más `herencia`, `demanda` y `sentencia`.
+- **🟠 Los dos guardarraíles YMYL pasaban por construcción.** Afirmaban una lista vacía, así que un
+  regex que no matchea nada los dejaba en verde para siempre — que es exactamente cómo los falsos
+  negativos de arriba pasaron desapercibidos. Van con cuatro casos que **deben** dar hit (y uno que
+  no debe), calcados del negativo que el guardarraíl de largo ya tenía.
+- **🟠 `/servicios` era la única de las 4 URLs sin piso propio.** `MIN_LISTING_INTRO_WORDS` es 130 y
+  la ruta necesita 400: borrar las tres secciones nuevas dejaba el CI en verde y la URL de nuevo bajo
+  el umbral. Se agregó `MIN_LISTING_INTRO_WORDS_BY_KEY` con 360 para esa clave.
+- **🟡 `ServiceEditorialContent` era un clon de `ListingIntro`**, carácter por carácter salvo el
+  envoltorio y el pie. El núcleo —título, lead y grilla de secciones— se extrajo a
+  `components/common/EditorialCard.tsx`. El tipo de `sections` se declara ahí y **no** se importa de
+  ningún archivo de datos: TypeScript es estructural, así que ni `ListingIntro` ni la ficha de
+  servicio tienen que conocer el dominio del otro.
+- **🟡 La meta description de `/servicios` describía servicios que no existen.** Decía *"Sesiones
+  personales con Flavia: registros akáshicos, terapias holísticas y acompañamiento espiritual"* —
+  ninguno de los tres es un servicio sembrado, "terapias" es vocabulario que el guardarraíl de esta
+  misma tarea prohíbe, y es el texto que sale en el resultado de búsqueda. Corregida. Era deuda
+  preexistente, pero es una línea y es la misma URL.
+- **🟡 Se quitó *"no intervienen animales"*.** La intención era diferenciarse de prácticas con
+  sacrificio; en una página que un revisor de AdSense va a leer, introducir la idea para negarla
+  juega en contra.
+
+**No se aplicó**, con motivo: emitir `FAQPage` en JSON-LD queda como tarea nueva (abajo), y
+`about-page.data.ts` no se tocó — la decisión de presentarse como equipo es de T-SEO-011 y
+deliberada; lo que estaba mal era el copy nuevo que la contradecía.
+
+### Hallazgos derivados — NO son de esta tarea
+
+1. **Dos `longDescription` sembradas traen vocabulario clínico.** `arbol-genealogico` dice
+   *"enfermedades"*, *"síntoma"* y *"Sanar / sanación"*; `pendulo-hebreo` abre con *"tratar, sanar y
+   transformar la energía"*. Es texto que **hoy se renderiza en producción**, en las páginas
+   comerciales, justo arriba del bloque nuevo. No lo atrapa ningún criterio actual: el guardarraíl de
+   T-SEO-013 busca `salud` y estas palabras no la contienen. Arreglarlo es el patrón ya probado de
+   T-SEO-013 —reescribir el seed + una migración de datos con `REPLACE` acotado por slug— y es
+   backend, no frontend. **Tarea nueva.**
+2. **Las fichas de servicio no emiten `FAQPage` en JSON-LD.** Ahora que tienen preguntas frecuentes
+   reales, el bloque de datos estructurados sale casi gratis con la infraestructura de T-SEO-011
+   (`JsonLd` + `structured-data.ts`). Se dejó afuera para no ensanchar una tarea de 1,5 pts.
+   **Tarea nueva.**
+3. **Los precios de los tres servicios están en `0`.** El seeder los deja en cero para que el admin
+   los cargue, y la ficha muestra *"0 ARS"*. En una página comercial que un revisor de AdSense puede
+   abrir, un precio en cero es una señal de sitio incompleto. Es dato de producción, no de código.
 
 ---
 
