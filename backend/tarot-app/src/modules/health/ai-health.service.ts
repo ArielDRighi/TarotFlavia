@@ -26,6 +26,13 @@ export interface AIProviderHealth {
 }
 
 export interface AIHealthCheckResult {
+  /** Hay credenciales para al menos un proveedor. */
+  configured: boolean;
+  /**
+   * Al menos un proveedor **respondió** la sonda. Es lo único que dice si la
+   * IA funciona: tener la API key seteada no alcanza (T-IA-004).
+   */
+  available: boolean;
   primary: AIProviderHealth;
   fallback: AIProviderHealth[];
   circuitBreakers?: ReturnType<AIProviderService['getCircuitBreakerStats']>;
@@ -230,7 +237,16 @@ export class AIHealthService {
       ? this.aiProviderService.getCircuitBreakerStats()
       : undefined;
 
+    // T-IA-004: `configured` y `available` son cosas distintas y confundirlas
+    // fue lo que hizo que el health reportara `ok` con la IA caída. La única
+    // señal de que la IA funciona es que algún proveedor haya respondido.
+    const configured = groq.configured || fallback.length > 0;
+    const available =
+      groq.status === 'ok' || fallback.some((f) => f.status === 'ok');
+
     return {
+      configured,
+      available,
       primary: groq,
       fallback,
       circuitBreakers,

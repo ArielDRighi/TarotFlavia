@@ -3,6 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { AIHealthService } from './ai-health.service';
 import { AIProviderService } from '../ai/application/services/ai-provider.service';
+import {
+  DEFAULT_DEEPSEEK_MODEL,
+  DEFAULT_GROQ_MODEL,
+} from '../ai/domain/constants/ai-models.constants';
 
 describe('AIHealthService', () => {
   let service: AIHealthService;
@@ -279,6 +283,93 @@ describe('AIHealthService', () => {
 
       expect(result.primary.configured).toBe(false);
       expect(result.primary.status).toBe('error');
+    });
+  });
+
+  /**
+   * T-IA-004: el health mentia. `available` se calculaba sobre `configured`
+   * (hay API key?) en lugar de sobre `status === 'ok'`, asi que un monitor
+   * apuntado al health nunca se enteraba de una caida de IA.
+   */
+  describe('checkAllProviders - availability aggregate (T-IA-004)', () => {
+    interface ConnectionProbes {
+      testGroqConnection: (apiKey: string) => Promise<void>;
+      testDeepSeekConnection: (apiKey: string) => Promise<void>;
+      testOpenAIConnection: (apiKey: string) => Promise<void>;
+    }
+
+    const probes = (): ConnectionProbes =>
+      service as unknown as ConnectionProbes;
+
+    it('should report available when the primary provider responds', async () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'GROQ_API_KEY') return 'gsk_validkey123';
+        if (key === 'GROQ_MODEL') return DEFAULT_GROQ_MODEL;
+        return undefined;
+      });
+      jest.spyOn(probes(), 'testGroqConnection').mockResolvedValue(undefined);
+
+      const result = await service.checkAllProviders();
+
+      expect(result.primary.status).toBe('ok');
+      expect(result.configured).toBe(true);
+      expect(result.available).toBe(true);
+    });
+
+    it('should report unavailable when every configured provider fails', async () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'GROQ_API_KEY') return 'gsk_validkey123';
+        if (key === 'GROQ_MODEL') return DEFAULT_GROQ_MODEL;
+        if (key === 'DEEPSEEK_API_KEY') return 'sk-deepseek123';
+        if (key === 'DEEPSEEK_MODEL') return DEFAULT_DEEPSEEK_MODEL;
+        return undefined;
+      });
+      jest
+        .spyOn(probes(), 'testGroqConnection')
+        .mockRejectedValue(
+          new Error('404 The model does not exist or you do not have access'),
+        );
+      jest
+        .spyOn(probes(), 'testDeepSeekConnection')
+        .mockRejectedValue(new Error('Request timeout'));
+
+      const result = await service.checkAllProviders();
+
+      // Este es exactamente el estado del incidente del 26-ago-2026:
+      // credenciales presentes, ningun proveedor capaz de responder.
+      expect(result.configured).toBe(true);
+      expect(result.available).toBe(false);
+    });
+
+    it('should report available when the primary fails but a fallback responds', async () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'GROQ_API_KEY') return 'gsk_validkey123';
+        if (key === 'GROQ_MODEL') return DEFAULT_GROQ_MODEL;
+        if (key === 'DEEPSEEK_API_KEY') return 'sk-deepseek123';
+        if (key === 'DEEPSEEK_MODEL') return DEFAULT_DEEPSEEK_MODEL;
+        return undefined;
+      });
+      jest
+        .spyOn(probes(), 'testGroqConnection')
+        .mockRejectedValue(new Error('Server error'));
+      jest
+        .spyOn(probes(), 'testDeepSeekConnection')
+        .mockResolvedValue(undefined);
+
+      const result = await service.checkAllProviders();
+
+      expect(result.primary.status).toBe('error');
+      expect(result.fallback[0].status).toBe('ok');
+      expect(result.available).toBe(true);
+    });
+
+    it('should report neither configured nor available without credentials', async () => {
+      mockConfigService.get.mockImplementation(() => undefined);
+
+      const result = await service.checkAllProviders();
+
+      expect(result.configured).toBe(false);
+      expect(result.available).toBe(false);
     });
   });
 

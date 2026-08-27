@@ -1,6 +1,6 @@
 # Backlog — Incidente de IA de agosto 2026 (modelos decomisionados)
 
-> **Estado:** 🟠 En curso — el código está listo; faltan las variables de entorno en Railway.
+> **Estado:** 🟠 En curso — T-IA-001 a T-IA-004 cerradas; queda T-IA-005.
 > **Fecha del diagnóstico:** 26-ago-2026
 > **Rama:** `fix/T-IA-001-modelos-ia-decomisionados`
 
@@ -21,7 +21,7 @@ Diagnóstico, tal cual salió del health de producción:
 ```jsonc
 // GET https://api.auguriatarot.com/api/v1/health
 "ai": {
-  "status": "up",          // ⚠️ el health miente, ver T-IA-004
+  "status": "up",          // ⚠️ el health mentía, arreglado en T-IA-004
   "available": false,
   "primary": {
     "provider": "groq",
@@ -79,7 +79,7 @@ Saldo de la cuenta al momento del diagnóstico: **USD 1,91** (`is_available: tru
 | T-IA-001  | Migrar Groq a `openai/gpt-oss-120b` y ajustar la cadencia del cron | Backend  | 🔴 Crítica | ✅ Completada             |
 | T-IA-002  | Dejar DeepSeek operativo para tarot y features premium             | Backend  | 🔴 Crítica | ✅ Completada             |
 | T-IA-003  | Setear las variables en Railway y reiniciar                        | Deploy   | 🔴 Crítica | ✅ Completada (27-ago-2026) |
-| T-IA-004  | Que el health no reporte `ok` con la IA caída                      | Backend  | 🟠 Alta    | ⬜ Pendiente (fuera de alcance de este PR) |
+| T-IA-004  | Que el health no reporte `ok` con la IA caída                      | Backend  | 🟠 Alta    | ✅ Completada (27-ago-2026) |
 | T-IA-005  | Acotar la tormenta de reintentos que desborda el techo de tokens   | Backend  | 🟠 Alta    | ⬜ Pendiente (fuera de alcance de este PR) |
 
 ---
@@ -253,20 +253,86 @@ Peor: `AIErrorType.RATE_LIMIT` es `retryable: true` y el reintento no honra el h
 `retry-after`, así que la respuesta a un 429 por tokens es volver a pedir a los 2s — lo que
 realimenta el 429.
 
-Conviene revisarlo junto con T-IA-004.
+Conviene revisarlo junto con T-IA-004 (ya cerrada): el health ahora **detecta** la caída,
+pero no hace nada para evitar que la tormenta de reintentos la provoque.
 
 ---
 
 ## T-IA-004: El Health Miente
 
-**Estado:** ⬜ PENDIENTE — fuera del alcance de este PR, se deja anotado.
+**Estado:** ✅ COMPLETADA
+
+### Problema
 
 `/health` devolvió `"status": "ok"` y `ai.status: "up"` con la IA completamente caída,
-porque `available` se calcula sobre `configured` (¿hay API key?) en lugar de sobre
-`status === 'ok'`. Un monitor externo apuntado al health nunca se iba a enterar del
-incidente: lo detectó un usuario.
+porque el `status` del indicador se calculaba sobre `configured` (¿hay API key?) en lugar
+de sobre si algún proveedor respondía. Un monitor externo apuntado al health nunca se iba
+a enterar del incidente: lo detectó un usuario.
 
-Ver `health.controller.ts:90`, `:133` y `:200`.
+El cálculo estaba duplicado en tres endpoints de `health.controller.ts` (`:90`, `:133` y
+`:200`), así que la misma mentira había que arreglarla tres veces.
+
+### Alcance
+
+- [x] `AIHealthCheckResult` expone `configured` (hay credenciales) y `available` (alguien
+      respondió la sonda) como **dos señales separadas**, calculadas una sola vez en
+      `checkAllProviders()`. Antes cada endpoint las re-derivaba por su cuenta.
+- [x] `/health` y `/health/details` derivan `ai.status` de `available`: con la IA caída
+      devuelven **503** con `ai.status: "down"`.
+- [x] Las tres copias del cálculo colapsan en `buildAIIndicator()`.
+- [x] El indicador caído incluye un `message` con el error crudo de cada proveedor
+      (`groq (llama-3.3-70b-versatile): 404 The model ... does not exist`), para que la
+      alerta llegue con la causa y no solo con un 503.
+- [x] `/health/ai` expone `configured` y `available` en el payload y en el schema Swagger.
+      De paso, el ejemplo del schema apuntaba a `llama-3.1-70b-versatile`, decomisionado.
+- [x] `@ApiResponse({ status: 503 })` documentado en `/health` y `/health/details`.
+
+### La readiness NO se cae con la IA — decisión deliberada
+
+`/health/ready` sigue devolviendo `up` con la IA caída, y no es la mentira vieja: la
+readiness gobierna el **ruteo de tráfico**. Sacar la instancia de rotación porque un
+proveedor externo se cayó convierte una degradación (tarot sin interpretación) en una
+caída total del sitio, y reiniciar el contenedor no revive un modelo decomisionado.
+
+Lo que cambia es que deja de esconderlo: el bloque expone `available: false`,
+`degraded: true` y el `message` con la causa. La **ausencia total** de credenciales sí
+sigue siendo bloqueante — eso es un despliegue mal configurado, no una caída transitoria.
+
+Reparto de responsabilidades resultante:
+
+| Endpoint          | Pregunta que responde         | ¿La IA caída lo tumba?              |
+| ----------------- | ----------------------------- | ----------------------------------- |
+| `/health/live`    | ¿El proceso está vivo?        | No                                  |
+| `/health/ready`   | ¿Esta instancia puede servir? | No (`degraded: true`)               |
+| `/health`         | ¿Está sano todo el sistema?   | **Sí: 503 con `ai.status: "down"`** |
+| `/health/details` | Igual + circuit breakers      | **Sí**                              |
+| `/health/ai`      | Estado crudo por proveedor    | No (siempre 200, es diagnóstico)    |
+
+### Criterios de aceptación
+
+- [x] Test que verifica que con todos los proveedores configurados pero en `error`,
+      `/health` reporta `status: error` y `ai.status: down` — el estado exacto del
+      incidente del 26-ago-2026.
+- [x] Test que verifica que con el primario caído y un fallback `ok`, `/health` sigue `up`.
+- [x] Test que verifica que `/health/ready` sigue sirviendo tráfico con la IA caída, pero
+      con `degraded: true`.
+- [x] Test que verifica que `/health/ready` sí cae sin credenciales.
+- [x] Test que verifica que el `message` del indicador caído nombra al proveedor y al modelo.
+- [x] El mock de `HealthCheckService` en `health.controller.spec.ts` ejecuta de verdad los
+      indicadores (replica el `HealthCheckExecutor` de terminus). El mock anterior devolvía
+      un resultado fijo, así que **el indicador `ai` —el que mintió— nunca se ejercitaba
+      desde los tests**: por eso el bug pasó la suite entera.
+
+### ⚠️ Antes de desplegar: revisar el healthcheck de Railway
+
+`/health` ahora puede devolver 503. El `HEALTHCHECK` del `Dockerfile` apunta a
+`/health/live` y está bien, pero **si el healthcheck configurado en el dashboard de
+Railway apunta a `/health`, un incidente de IA marcaría el deploy como fallido**. Tiene
+que apuntar a `/health/live` o `/health/ready`.
+
+Y el corolario del incidente: hay que **apuntar un monitor externo a `/health`**. Sin eso
+el arreglo no cambia nada — el health puede decir la verdad, pero si nadie la escucha la
+próxima caída también la reporta un usuario.
 
 ---
 

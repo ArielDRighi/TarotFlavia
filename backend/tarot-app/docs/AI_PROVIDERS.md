@@ -177,6 +177,33 @@ diarios Y las tiradas de tarot al mismo tiempo.
 
 ## 🏥 Health Checks
 
+### Qué endpoint monitorear
+
+| Endpoint          | Qué responde                        | La IA caída lo tumba                |
+| ----------------- | ----------------------------------- | ----------------------------------- |
+| `/health/live`    | ¿El proceso está vivo?              | No (no consulta proveedores)        |
+| `/health/ready`   | ¿Esta instancia puede servir?       | No, a propósito — ver abajo         |
+| `/health`         | ¿Está sano todo el sistema?         | **Sí: 503 con `ai.status: "down"`** |
+| `/health/details` | Igual que `/health` + circuit breakers | **Sí**                           |
+| `/health/ai`      | Estado crudo de cada proveedor      | No (siempre 200, para diagnóstico)  |
+
+**Alertar sobre `/health`.** Hasta T-IA-004, `ai.status` se calculaba sobre
+`configured` —o sea, sobre si existía la API key— así que durante la caída del
+26-ago-2026 el endpoint devolvió `"ok"` con Groq contestando 404 a todo. La
+detectó un usuario, no el monitoreo. Ahora `ai.status` sale de `available`:
+verdadero solo si algún proveedor **respondió** la sonda.
+
+**La readiness no se cae con la IA, y es deliberado.** Gobierna el ruteo de
+tráfico: sacar la instancia de rotación porque un proveedor externo se cayó
+convierte una degradación (tarot sin interpretación) en una caída total del
+sitio, y reiniciar el contenedor no revive un modelo decomisionado. `/health/ready`
+sigue en `up` pero lo declara con `degraded: true` y `available: false`. Lo único
+que sí bloquea la readiness es la **ausencia total** de credenciales: eso es un
+despliegue mal configurado, no una caída transitoria.
+
+> ⚠️ Si el healthcheck de Railway apunta a `/health`, un incidente de IA marca el
+> deploy como fallido. Debe apuntar a `/health/live` o `/health/ready`.
+
 ### Check All Providers
 
 ```bash
@@ -187,6 +214,8 @@ curl http://localhost:3000/health/ai
 
 ```json
 {
+  "configured": true,
+  "available": true,
   "primary": {
     "provider": "groq",
     "configured": true,

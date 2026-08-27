@@ -1,10 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HealthController } from './health.controller';
-import { HealthCheckService, HealthCheckResult } from '@nestjs/terminus';
+import {
+  HealthCheckService,
+  HealthCheckResult,
+  HealthIndicatorFunction,
+  HealthIndicatorResult,
+} from '@nestjs/terminus';
 import { TypeOrmHealthIndicator } from '@nestjs/terminus';
 import { MemoryHealthIndicator } from '@nestjs/terminus';
 import { DiskHealthIndicator } from '@nestjs/terminus';
-import { AIHealthService } from './ai-health.service';
+import { AIHealthService, AIHealthCheckResult } from './ai-health.service';
 import { DatabaseHealthService } from './database-health.service';
 
 /**
@@ -17,32 +22,81 @@ import { DatabaseHealthService } from './database-health.service';
  * - https://github.com/nestjs/nest/issues/1228
  *
  * Los errores son FALSOS POSITIVOS del análisis estático y no afectan la ejecución real.
- * Por ello se deshabilitan las reglas de unsafe type checking solo en este archivo.
  */
+
+type IndicatorDetail = { status: 'up' | 'down' } & Record<string, unknown>;
+
+/**
+ * Réplica del `HealthCheckExecutor` de terminus: reparte cada indicador entre
+ * `info` y `error` según su `status` y marca la corrida como `error` si alguno
+ * cayó. El mock anterior devolvía un resultado fijo sin ejecutar los closures,
+ * así que la lógica del indicador `ai` —la que mintió en producción— nunca se
+ * ejercitaba desde los tests.
+ */
+async function executeIndicators(
+  indicators: HealthIndicatorFunction[],
+): Promise<HealthCheckResult> {
+  const info: Record<string, IndicatorDetail> = {};
+  const error: Record<string, IndicatorDetail> = {};
+
+  for (const indicator of indicators) {
+    const outcome = (await indicator()) as Record<string, IndicatorDetail>;
+    for (const [key, detail] of Object.entries(outcome)) {
+      if (detail.status === 'up') {
+        info[key] = detail;
+      } else {
+        error[key] = detail;
+      }
+    }
+  }
+
+  return {
+    status: Object.keys(error).length > 0 ? 'error' : 'ok',
+    info: info as HealthIndicatorResult,
+    error: error as HealthIndicatorResult,
+    details: { ...info, ...error } as HealthIndicatorResult,
+  };
+}
+
+function aiSnapshot(
+  overrides: Partial<AIHealthCheckResult> = {},
+): AIHealthCheckResult {
+  return {
+    configured: true,
+    available: true,
+    primary: {
+      provider: 'groq',
+      configured: true,
+      status: 'ok',
+      model: 'openai/gpt-oss-120b',
+    },
+    fallback: [],
+    timestamp: new Date().toISOString(),
+    ...overrides,
+  };
+}
+
+/** El estado real del incidente: key presente, modelo decomisionado. */
+function outageSnapshot(): AIHealthCheckResult {
+  return aiSnapshot({
+    configured: true,
+    available: false,
+    primary: {
+      provider: 'groq',
+      configured: true,
+      status: 'error',
+      model: 'llama-3.3-70b-versatile',
+      error:
+        '404 The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.',
+    },
+    fallback: [],
+  });
+}
 
 describe('HealthController', () => {
   let controller: HealthController;
   let healthCheckService: HealthCheckService;
   let aiHealthService: AIHealthService;
-
-  const mockHealthCheckResult: HealthCheckResult = {
-    status: 'ok',
-    info: {
-      database: { status: 'up' },
-      memory_heap: { status: 'up' },
-      memory_rss: { status: 'up' },
-      disk: { status: 'up' },
-      ai: { status: 'up' },
-    },
-    error: {},
-    details: {
-      database: { status: 'up' },
-      memory_heap: { status: 'up' },
-      memory_rss: { status: 'up' },
-      disk: { status: 'up' },
-      ai: { status: 'up' },
-    },
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -51,7 +105,7 @@ describe('HealthController', () => {
         {
           provide: HealthCheckService,
           useValue: {
-            check: jest.fn().mockResolvedValue(mockHealthCheckResult),
+            check: jest.fn(executeIndicators),
           },
         },
         {
@@ -84,11 +138,7 @@ describe('HealthController', () => {
         {
           provide: AIHealthService,
           useValue: {
-            checkAllProviders: jest.fn().mockResolvedValue({
-              primary: { status: 'ok', provider: 'groq', configured: true },
-              fallback: [],
-              timestamp: new Date().toISOString(),
-            }),
+            checkAllProviders: jest.fn().mockResolvedValue(aiSnapshot()),
           },
         },
         {
@@ -152,6 +202,16 @@ describe('HealthController', () => {
           expect.any(Function),
         ]),
       );
+    });
+
+    it('should report ai as up when a provider actually answers', async () => {
+      const result = await controller.check();
+
+      expect(result.info?.ai).toMatchObject({
+        status: 'up',
+        configured: true,
+        available: true,
+      });
     });
   });
 
@@ -232,23 +292,120 @@ describe('HealthController', () => {
       expect(result.status).toBe('error');
       expect(result.error).toHaveProperty('database');
     });
+  });
 
-    it('should handle degraded status when AI is down but app is functional', async () => {
-      jest.spyOn(aiHealthService, 'checkAllProviders').mockResolvedValue({
-        primary: {
-          provider: 'groq',
-          status: 'error',
-          configured: true,
-          error: 'Connection failed',
-        },
-        fallback: [],
-        timestamp: new Date().toISOString(),
+  /**
+   * T-IA-004: durante el incidente del 26-ago-2026 `/health` devolvió
+   * `"status": "ok"` con `ai.status: "up"` mientras la IA estaba caída,
+   * porque el indicador se calculaba sobre `configured` (¿hay API key?)
+   * en lugar de sobre si algún proveedor respondía. Ningún monitor externo
+   * podía detectar la caída: la reportó un usuario.
+   */
+  describe('el health no puede mentir sobre la IA (T-IA-004)', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(aiHealthService, 'checkAllProviders')
+        .mockResolvedValue(outageSnapshot());
+    });
+
+    it('should mark ai as down in GET /health when no provider answers', async () => {
+      const result = await controller.check();
+
+      expect(result.status).toBe('error');
+      expect(result.error?.ai).toMatchObject({
+        status: 'down',
+        configured: true,
+        available: false,
       });
+      expect(result.info?.ai).toBeUndefined();
+    });
+
+    it('should surface the provider error so an alert says why', async () => {
+      const result = await controller.check();
+
+      const ai = result.error?.ai as { message?: string } | undefined;
+      expect(ai?.message).toContain('groq');
+      expect(ai?.message).toContain('llama-3.3-70b-versatile');
+    });
+
+    it('should mark ai as down in GET /health/details as well', async () => {
+      const result = await controller.checkDetails();
+
+      expect(result.status).toBe('error');
+      expect(result.error?.ai).toMatchObject({
+        status: 'down',
+        available: false,
+      });
+    });
+
+    it('should keep ai up in GET /health when a fallback still answers', async () => {
+      jest.spyOn(aiHealthService, 'checkAllProviders').mockResolvedValue(
+        aiSnapshot({
+          available: true,
+          primary: {
+            provider: 'groq',
+            configured: true,
+            status: 'error',
+            error: 'Rate limit exceeded (too many requests)',
+          },
+          fallback: [
+            {
+              provider: 'deepseek',
+              configured: true,
+              status: 'ok',
+              model: 'deepseek-v4-flash',
+            },
+          ],
+        }),
+      );
 
       const result = await controller.check();
 
-      // App should still work, just degraded
-      expect(result).toBeDefined();
+      expect(result.status).toBe('ok');
+      expect(result.info?.ai).toMatchObject({ status: 'up', available: true });
+    });
+
+    /**
+     * Decisión deliberada: la readiness gobierna el ruteo de tráfico. Sacar la
+     * instancia de rotación porque un proveedor externo se cayó convierte una
+     * degradación (tarot sin IA) en una caída total del sitio, y reiniciar el
+     * contenedor no revive un modelo decomisionado. La readiness sigue en `up`
+     * pero deja de mentir: expone `available` y `degraded`.
+     */
+    it('should keep GET /health/ready serving traffic but flag the degradation', async () => {
+      const result = await controller.checkReady();
+
+      expect(result.status).toBe('ok');
+      expect(result.info?.ai).toMatchObject({
+        status: 'up',
+        configured: true,
+        available: false,
+        degraded: true,
+      });
+    });
+
+    it('should fail GET /health/ready when AI is not configured at all', async () => {
+      jest.spyOn(aiHealthService, 'checkAllProviders').mockResolvedValue(
+        aiSnapshot({
+          configured: false,
+          available: false,
+          primary: {
+            provider: 'groq',
+            configured: false,
+            status: 'error',
+            error: 'API key not configured',
+          },
+          fallback: [],
+        }),
+      );
+
+      const result = await controller.checkReady();
+
+      expect(result.status).toBe('error');
+      expect(result.error?.ai).toMatchObject({
+        status: 'down',
+        configured: false,
+      });
     });
   });
 });
