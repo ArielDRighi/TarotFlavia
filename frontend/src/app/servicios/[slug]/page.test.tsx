@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { AxiosError, AxiosHeaders } from 'axios';
 
-import { generateMetadata, generateStaticParams } from './page';
+import ServicioDetailRoute, { generateMetadata, generateStaticParams } from './page';
+import { SERVICE_DETAILS } from '@/lib/constants/service-details.data';
 import type { HolisticService, HolisticServiceDetail } from '@/types/holistic-service.types';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -21,6 +23,17 @@ const mockNotFound = vi.fn(() => {
 vi.mock('next/navigation', () => ({
   notFound: () => mockNotFound(),
 }));
+
+// La ficha en sí ya está cubierta por `ServiceDetailPage.test.tsx`; acá interesa
+// qué compone la ruta alrededor.
+vi.mock('@/components/features/holistic-services', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/components/features/holistic-services')>();
+
+  return {
+    ...actual,
+    ServiceDetailPage: () => <div data-testid="service-detail-page" />,
+  };
+});
 
 function apiError(status: number): AxiosError {
   const error = new AxiosError('boom');
@@ -98,5 +111,31 @@ describe('/servicios/[slug] — generateStaticParams', () => {
     mockGetServices.mockRejectedValue(new Error('API caída'));
 
     await expect(generateStaticParams()).resolves.toEqual([]);
+  });
+});
+
+describe('/servicios/[slug] — bloque editorial (T-SEO-012)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('sirve el bloque editorial de un servicio del catálogo en el servidor', async () => {
+    mockGetDetail.mockResolvedValue({ ...service, slug: 'pendulo-hebreo' });
+
+    render(await ServicioDetailRoute({ params: Promise.resolve({ slug: 'pendulo-hebreo' }) }));
+
+    expect(screen.getByTestId('service-editorial')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: SERVICE_DETAILS['pendulo-hebreo'].title })
+    ).toBeInTheDocument();
+  });
+
+  it('un servicio creado desde el admin no tiene bloque y la ficha no se rompe', async () => {
+    mockGetDetail.mockResolvedValue(service);
+
+    render(await ServicioDetailRoute({ params: Promise.resolve({ slug: 'registros-akashicos' }) }));
+
+    expect(screen.getByTestId('service-detail-page')).toBeInTheDocument();
+    expect(screen.queryByTestId('service-editorial')).not.toBeInTheDocument();
   });
 });

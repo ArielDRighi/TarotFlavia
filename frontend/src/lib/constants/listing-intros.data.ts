@@ -234,8 +234,21 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
         heading: 'En qué se diferencian de una lectura del sitio',
         body: 'Las lecturas de tarot, numerología y carta astral se generan al instante y se pueden repetir cuantas veces haga falta. Un servicio holístico ocupa una agenda y a otra persona: por eso tiene turno, precio y una duración pactada de antemano.',
       },
+      {
+        heading: 'Cómo elegir entre los tres',
+        body: 'El árbol genealógico mira hacia atrás: sirve cuando algo se repite y el origen parece estar en la historia familiar. El Péndulo Hebreo trabaja sobre el presente de la persona, con las letras hebreas como referencia. La limpieza energética actúa sobre un lugar o una etapa concreta, sea una casa, un local o una mudanza. Si la duda persiste, conviene abrir las tres fichas y leer la sección que dice para quién es cada una.',
+      },
+      {
+        heading: 'Antes de reservar un turno',
+        body: 'Cada ficha detalla cómo se prepara la persona, qué pasa durante la hora y qué queda después. Leerla completa evita la mayor parte de los malentendidos: ninguna de las tres prácticas promete un desenlace para una fecha ni decide nada en tu lugar. Conviene además elegir un horario con margen por delante, porque el rato siguiente a una sesión rara vez es un buen momento para volver a una reunión.',
+      },
+      {
+        heading: 'Quién atiende las sesiones',
+        body: 'Las tres prácticas las atiende Flavia, la misma persona que responde los mensajes y firma el resumen de cada encuentro. No hay un equipo rotativo ni derivaciones: el turno que reservás es con ella. En la página Sobre nosotros está su recorrido y el criterio con el que se escribe todo lo que se publica en el sitio.',
+      },
     ],
     links: [
+      { label: 'Sobre nosotros', href: ROUTES.SOBRE_NOSOTROS },
       { label: 'Ver los guías espirituales', href: ROUTES.EXPLORAR },
       { label: 'Guías prácticas', href: ROUTES.ENCICLOPEDIA_GUIAS },
     ],
