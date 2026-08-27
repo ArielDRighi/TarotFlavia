@@ -1,6 +1,6 @@
 # Backlog — Incidente de IA de agosto 2026 (modelos decomisionados)
 
-> **Estado:** 🟠 En curso — T-IA-001 a T-IA-004 cerradas; queda T-IA-005.
+> **Estado:** ✅ Cerrado — T-IA-001 a T-IA-005 completadas.
 > **Fecha del diagnóstico:** 26-ago-2026
 > **Rama:** `fix/T-IA-001-modelos-ia-decomisionados`
 
@@ -80,7 +80,7 @@ Saldo de la cuenta al momento del diagnóstico: **USD 1,91** (`is_available: tru
 | T-IA-002  | Dejar DeepSeek operativo para tarot y features premium             | Backend  | 🔴 Crítica | ✅ Completada             |
 | T-IA-003  | Setear las variables en Railway y reiniciar                        | Deploy   | 🔴 Crítica | ✅ Completada (27-ago-2026) |
 | T-IA-004  | Que el health no reporte `ok` con la IA caída                      | Backend  | 🟠 Alta    | ✅ Completada (27-ago-2026) |
-| T-IA-005  | Acotar la tormenta de reintentos que desborda el techo de tokens   | Backend  | 🟠 Alta    | ⬜ Pendiente (fuera de alcance de este PR) |
+| T-IA-005  | Acotar la tormenta de reintentos que desborda el techo de tokens   | Backend  | 🟠 Alta    | ✅ Completada (27-ago-2026) |
 
 ---
 
@@ -241,20 +241,96 @@ Salieron de la revisión del PR #637 y entraron en el mismo PR:
 
 ## T-IA-005: La Tormenta de Reintentos Desborda el Techo de Tokens
 
-**Estado:** ⬜ PENDIENTE — preexistente, fuera del alcance de este PR.
+**Estado:** ✅ COMPLETADA
 
-El cálculo de la nueva cadencia (15s entre signos) modela el camino feliz. En el camino de
-error se apilan dos niveles de reintento: `MAX_RETRIES_PER_SIGN = 3` con backoff
+### Problema
+
+El cálculo de la cadencia de T-IA-001 (15s entre signos) modela el camino feliz. En el
+camino de error se apilaban dos niveles de reintento: `MAX_RETRIES_PER_SIGN = 3` con backoff
 `[6s, 12s, 24s]` en el cron, **por encima** de `retryWithBackoff(3)` (2s/4s) dentro de
-`AIProviderService`. Un signo que falla puede disparar hasta 12 llamadas, la mayoría dentro
-del mismo minuto: 12.000–16.000 tokens/min contra un techo de 8.000.
+`AIProviderService`. Un signo que fallaba podía disparar hasta 12 llamadas, la mayoría
+dentro del mismo minuto: 12.000–16.000 tokens/min contra un techo de 8.000.
 
-Peor: `AIErrorType.RATE_LIMIT` es `retryable: true` y el reintento no honra el header
-`retry-after`, así que la respuesta a un 429 por tokens es volver a pedir a los 2s — lo que
-realimenta el 429.
+Peor: `AIErrorType.RATE_LIMIT` es `retryable: true` y el reintento no honraba el header
+`retry-after`, así que la respuesta a un 429 por tokens era volver a pedir a los 2s — dentro
+de la misma ventana del bucket que se acababa de vaciar. **El reintento realimentaba el
+429.** El health de T-IA-004 detecta esa caída, pero no evita que la tormenta la provoque.
 
-Conviene revisarlo junto con T-IA-004 (ya cerrada): el health ahora **detecta** la caída,
-pero no hace nada para evitar que la tormenta de reintentos la provoque.
+### Alcance
+
+- [x] **El reintento le pregunta al proveedor cuándo volver.** `AIProviderException` lleva
+      `retryAfterMs` y los cuatro providers lo llenan desde las cabeceras del 429 (y del
+      503) con `parseRetryAfterMs`: `retry-after-ms` (OpenAI), `retry-after` en segundos o
+      fecha HTTP (estándar), y el formato propio de Groq
+      `x-ratelimit-reset-tokens` (`"7.66s"`, `"2m59.56s"`). Cuando llegan varias ventanas se
+      toma la **más lejana**: el techo que se toca primero es el de tokens, y volver cuando
+      se repuso el de requests garantiza otro 429.
+- [x] **Un 429 que no dice cuándo volver ya no se reintenta contra el mismo proveedor.** El
+      backoff ciego sigue siendo correcto para un 5xx o un timeout, pero contra un bucket
+      vacío solo gasta cuota. Quien puede responder ahora es el proveedor siguiente, y el
+      error se propaga para que la cadena de fallback llegue a él.
+- [x] **Presupuesto de espera** (`MAX_RETRY_WAIT_MS = 20s`): si el proveedor pide más que
+      eso, no se duerme adentro. El techo real lo fija el axios del frontend, que aborta a
+      los 30s: dormir 45s no salva la request —el usuario ya vio el error— y encima bloquea
+      el fallback.
+- [x] **`MAX_RETRY_ATTEMPTS`: 3 → 2**, y mudado a
+      `ai/domain/constants/ai-retry.constants.ts`. Con 3, la ráfaga era de 3 llamadas en
+      ~6s; sumadas a los signos que la cadencia de 15s mete en el resto del minuto daban 6
+      llamadas ≈ 8.400 tokens/min, por encima del techo. Con 2, la peor ventana queda en 5
+      llamadas ≈ 7.000.
+- [x] **El cron deja de reintentar fallos definitivos.** `AIProviderService` ya no tira un
+      `Error` pelado: tira `AllProvidersFailedException`, que lleva el detalle por proveedor
+      y un `retryable` (true solo si alguno falló por algo transitorio). El cron lo consulta
+      antes de reintentar. Durante el incidente reintentaba cuatro veces por signo contra un
+      404 que no iba a cambiar.
+- [x] **`MAX_RETRIES_PER_SIGN`: 3 → 1** y **`RETRY_DELAYS_MS`: `[6s, 12s, 24s]` → `[60s]`**.
+      El bucket de Groq se repone por minuto: los 6s caían dentro de la misma ventana del
+      429 que se acababa de provocar. Y el reintento del cron no es el último recurso —
+      arriba están la pasada de verificación de las 02:00 UTC y el backfill de bootstrap.
+- [x] **El horóscopo chino tenía la misma miscalibración**, con sus propios valores locales
+      (3 reintentos con `[10s, 20s, 40s]`; los 10s, otra vez dentro del mismo minuto).
+      Ahora importa la política compartida: las dos generaciones pelean por el mismo bucket,
+      así que el presupuesto tiene que ser uno solo.
+
+### El presupuesto, en números
+
+| Nivel                          | Antes                       | Ahora                    |
+| ------------------------------ | --------------------------- | ------------------------ |
+| Intentos por proveedor         | 3 (2s, 4s)                  | **2** (2s)               |
+| Reintentos del cron por signo  | 3 (6s, 12s, 24s)            | **1** (60s)              |
+| Llamadas máx. por signo (2 proveedores) | 24                 | **8**                    |
+| Peor ventana de 60s vs. Groq   | 6 llamadas ≈ 8.400 tokens   | **5 llamadas ≈ 7.000**   |
+
+### Criterios de aceptación
+
+- [x] Test que verifica que un 429 sin `retry-after` NO se reintenta contra el mismo
+      proveedor (una sola llamada, y se cae al siguiente).
+- [x] Test que verifica que con `retry-after` se espera esa ventana y no los 2s del backoff.
+- [x] Test que verifica que un `retry-after` por encima del presupuesto corta en vez de
+      dormir.
+- [x] Tests de `parseRetryAfterMs` para los tres formatos de cabecera, incluida la fecha
+      HTTP y el criterio de quedarse con la ventana de **tokens** por sobre la de requests.
+- [x] Tests de que `AllProvidersFailedException` es reintentable solo si algún proveedor
+      falló por algo transitorio, y no lo es sin proveedores configurados ni con el circuit
+      breaker abierto.
+- [x] Test de que el cron NO reintenta ante un fallo definitivo y SÍ ante uno transitorio.
+- [x] Test de guarda que falla si la ráfaga de reintentos supera los 8.000 tokens/minuto.
+- [x] Test de guarda que falla si un backoff del cron cae dentro de la misma ventana del
+      bucket (< 60s), o si `RETRY_DELAYS_MS` se desincroniza de `MAX_RETRIES_PER_SIGN`.
+- [x] Test de guarda que falla si la tanda con los 12 signos agotando reintentos se pisa con
+      la pasada de verificación de las 02:00 UTC.
+
+### Lo que NO se tocó, a propósito
+
+- **El circuit breaker.** Ya cumple su función (5 fallos consecutivos → 5 minutos abierto).
+      Lo único que cambió es que un breaker abierto cuenta como fallo **no** reintentable:
+      contarlo como transitorio haría que el cron vuelva a apilar llamadas sobre un
+      proveedor que se declaró caído.
+- **Los timeouts de los providers.** El presupuesto lo fija el axios del frontend (30s) y
+      eso ya se resolvió en T-IA-002.
+- **Un límite de tiempo total para la tanda de generación.** Hay un test de guarda que
+      verifica que el peor caso entra antes de la verificación de las 02:00; si algún día
+      deja de entrar, el build lo dice antes que producción.
 
 ---
 
@@ -389,6 +465,8 @@ próxima caída también la reporta un usuario.
 - [x] Los límites reales del tier gratuito están documentados y cubiertos por tests.
 - [x] Producción con `primary.status: "ok"` y 12 horóscopos del día.
 - [x] DeepSeek registrado y respondiendo desde producción (`fallback[0].status: "ok"`).
+- [x] El camino de error acotado: ninguna combinación de reintentos puede volver a superar
+      los 8.000 tokens/minuto, y hay tests de guarda que lo verifican (T-IA-005).
 - [x] Una tirada de tarot premium generada end-to-end contra DeepSeek (27-ago-2026, 00:29 UTC,
       `reading 40`). Traza en los logs de Railway:
 

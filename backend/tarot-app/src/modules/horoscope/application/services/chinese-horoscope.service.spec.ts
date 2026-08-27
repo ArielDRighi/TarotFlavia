@@ -10,6 +10,15 @@ import {
   ChineseZodiacAnimal,
   ChineseElement,
 } from '../../../../common/utils/chinese-zodiac.utils';
+import { MAX_RETRIES_PER_SIGN } from './horoscope-cron.config';
+import { AllProvidersFailedException } from '../../../ai/infrastructure/errors/ai-error.types';
+
+/**
+ * T-IA-005: los intentos por combinación salen de la política compartida con
+ * el horóscopo occidental (las dos generaciones pelean por el mismo bucket de
+ * 8.000 tokens/minuto de Groq), así que los tests no la hardcodean.
+ */
+const INTENTOS_POR_COMBINACION = MAX_RETRIES_PER_SIGN + 1;
 
 describe('ChineseHoroscopeService', () => {
   let service: ChineseHoroscopeService;
@@ -165,13 +174,16 @@ describe('ChineseHoroscopeService', () => {
 
     it('debe manejar fallos parciales durante generación masiva', async () => {
       // Arrange
-      // La 3ra combinación (índice 2) debe fallar sus 4 intentos (1 inicial + 3 retries)
-      // Llamadas 3,4,5,6 corresponden a los 4 intentos de la 3ra combinación
+      // La 3ra combinación (índice 2) falla todos sus intentos: las llamadas
+      // 3..(2 + INTENTOS_POR_COMBINACION) son las suyas.
       let globalCallCount = 0;
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockImplementation(() => {
         globalCallCount++;
-        if (globalCallCount >= 3 && globalCallCount <= 6) {
+        if (
+          globalCallCount >= 3 &&
+          globalCallCount <= 2 + INTENTOS_POR_COMBINACION
+        ) {
           return Promise.reject(new Error('Error de IA'));
         }
         return Promise.resolve(mockAIResponse);
@@ -548,14 +560,14 @@ describe('ChineseHoroscopeService', () => {
   });
 
   describe('retry logic en generateAllForYear', () => {
-    it('debe reintentar hasta MAX_RETRIES veces con backoff si la IA falla', async () => {
+    it('debe reintentar hasta MAX_RETRIES_PER_SIGN veces con backoff si la IA falla', async () => {
       // Arrange — la tercera combinación falla en todos los intentos
       let callCount = 0;
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockImplementation(() => {
         callCount++;
-        // La 3ra combinación falla en intentos 3, 4, 5, 6 (1 inicial + 3 retries = 4 totales)
-        if (callCount >= 3 && callCount <= 6) {
+        // La 3ra combinación falla en todos sus INTENTOS_POR_COMBINACION.
+        if (callCount >= 3 && callCount <= 2 + INTENTOS_POR_COMBINACION) {
           return Promise.reject(new Error('Rate limit error'));
         }
         return Promise.resolve(mockAIResponse);
@@ -607,8 +619,8 @@ describe('ChineseHoroscopeService', () => {
       repository.findOne.mockResolvedValue(null);
       aiProviderService.generateCompletion.mockImplementation(() => {
         callCount++;
-        // Los primeros 4 intentos siempre fallan (1 inicial + 3 retries para rat/metal)
-        if (callCount <= 4) {
+        // Todos los intentos de rat/metal (la primera combinación) fallan.
+        if (callCount <= INTENTOS_POR_COMBINACION) {
           return Promise.reject(new Error('Persistent error'));
         }
         return Promise.resolve(mockAIResponse);
@@ -627,6 +639,45 @@ describe('ChineseHoroscopeService', () => {
       expect(result.failed).toBe(1);
       expect(result.successful).toBe(59);
       expect(result.results).toHaveLength(60);
+    });
+
+    /**
+     * T-IA-005: un modelo decomisionado o una key faltante no cambian entre
+     * reintento y reintento. Insistir solo gasta cuota del mismo bucket de
+     * Groq que este generador comparte con el horóscopo occidental.
+     */
+    it('NO reintenta cuando el fallo de la IA es definitivo', async () => {
+      let callCount = 0;
+      repository.findOne.mockResolvedValue(null);
+      aiProviderService.generateCompletion.mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.reject(
+            new AllProvidersFailedException([
+              {
+                provider: 'groq',
+                error: 'Groq model unavailable: 404 model_not_found',
+                retryable: false,
+              },
+            ]),
+          );
+        }
+        return Promise.resolve(mockAIResponse);
+      });
+      repository.create.mockReturnValue(mockHoroscope as ChineseHoroscope);
+      repository.save.mockResolvedValue(mockHoroscope as ChineseHoroscope);
+
+      const delaySpy = jest
+        .spyOn(service as unknown as Record<string, jest.Mock>, 'delay')
+        .mockResolvedValue(undefined);
+      delaySpy.mockClear();
+
+      const result = await service.generateAllForYear(2026);
+
+      // La primera combinación falla en su único intento: 60 llamadas, no 61.
+      expect(aiProviderService.generateCompletion).toHaveBeenCalledTimes(60);
+      expect(result.failed).toBe(1);
+      expect(result.successful).toBe(59);
     });
   });
 

@@ -15,6 +15,7 @@ import {
   MAX_RETRIES_PER_SIGN,
   RETRY_DELAYS_MS,
 } from './horoscope-cron.config';
+import { AllProvidersFailedException } from '../../../ai/infrastructure/errors/ai-error.types';
 
 /**
  * Resultado de la generación de un horóscopo
@@ -208,10 +209,17 @@ export class HoroscopeCronService implements OnApplicationBootstrap {
   /**
    * Genera un horóscopo individual para un signo
    *
-   * T-BUG-016-B: Reintenta hasta MAX_RETRIES_PER_SIGN veces con backoff
-   * exponencial ante fallos transitorios (5xx / rate limit / timeout) antes
-   * de marcar el signo como definitivamente fallido. Esto evita que un error
-   * puntual deje un hueco permanente en la generación diaria.
+   * T-BUG-016-B: Reintenta hasta MAX_RETRIES_PER_SIGN veces con backoff ante
+   * fallos transitorios (5xx / timeout) antes de marcar el signo como
+   * definitivamente fallido. Esto evita que un error puntual deje un hueco
+   * permanente en la generación diaria.
+   *
+   * T-IA-005: un fallo DEFINITIVO no se reintenta. Cuando la cadena entera de
+   * proveedores murió por algo que no cambia entre reintentos —un modelo
+   * decomisionado, una API key inválida, ningún proveedor configurado—, volver
+   * a pedir solo gasta cuota y empuja la tanda contra el techo de 8.000
+   * tokens/minuto. Es lo que pasó el 26-ago-2026: cuatro pasadas por signo
+   * contra un 404.
    *
    * @param sign - Signo zodiacal
    * @param date - Fecha del horóscopo
@@ -251,6 +259,14 @@ export class HoroscopeCronService implements OnApplicationBootstrap {
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
 
+        if (!this.isWorthRetrying(error)) {
+          this.logger.error(
+            `[${index}/12] ✗ ${signInfo.nameEs}: ${lastError} (sin reintentos: el fallo no es transitorio)`,
+          );
+
+          return { sign, success: false, error: lastError };
+        }
+
         if (attempt <= MAX_RETRIES_PER_SIGN) {
           const retryDelay = RETRY_DELAYS_MS[attempt - 1];
           this.logger.warn(
@@ -270,6 +286,25 @@ export class HoroscopeCronService implements OnApplicationBootstrap {
       success: false,
       error: lastError,
     };
+  }
+
+  /**
+   * T-IA-005: decide si vale la pena volver a pedirle a la IA.
+   *
+   * Solo `AllProvidersFailedException` sabe clasificar el fallo: llega con el
+   * detalle de por qué murió cada proveedor de la cadena. Cualquier otro error
+   * (parseo de la respuesta, escritura en base, un bug) se asume transitorio,
+   * porque tragarse un fallo pasajero deja un hueco visible en el día y el
+   * reintento ahora cuesta una sola llamada extra.
+   *
+   * @private
+   */
+  private isWorthRetrying(error: unknown): boolean {
+    if (error instanceof AllProvidersFailedException) {
+      return error.retryable;
+    }
+
+    return true;
   }
 
   /**

@@ -22,6 +22,12 @@ import {
   CircuitBreakerState,
 } from '../../infrastructure/errors/circuit-breaker.utils';
 import { retryWithBackoff } from '../../infrastructure/errors/retry.utils';
+import {
+  AIProviderException,
+  AIProviderFailure,
+  AllProvidersFailedException,
+} from '../../infrastructure/errors/ai-error.types';
+import { MAX_RETRY_ATTEMPTS } from '../../domain/constants/ai-retry.constants';
 
 /**
  * AI Provider Service
@@ -35,7 +41,6 @@ export class AIProviderService {
   private circuitBreakers: Map<AIProviderType, CircuitBreaker> = new Map();
 
   // Configuration constants
-  private readonly MAX_RETRY_ATTEMPTS = 3;
   private readonly CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5;
   private readonly CIRCUIT_BREAKER_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -107,7 +112,7 @@ export class AIProviderService {
     config?: Partial<AIProviderConfig>,
     primaryProvider?: AIProviderType,
   ): Promise<AIResponse> {
-    const errors: Array<{ provider: string; error: string }> = [];
+    const errors: AIProviderFailure[] = [];
     let fallbackUsed = false;
     let providerIndex = 0;
 
@@ -116,7 +121,10 @@ export class AIProviderService {
     // Si ningún proveedor tiene API key configurada, el bucle no correría y se
     // lanzaría "All AI providers failed:" con resumen vacío (confuso). Avisar claro.
     if (orderedProviders.length === 0) {
-      throw new Error(
+      // Sin fallos que reportar: no es reintentable, una API key que falta no
+      // aparece entre reintento y reintento (T-IA-005).
+      throw new AllProvidersFailedException(
+        [],
         'No hay ningún proveedor de IA configurado (falta API key). ' +
           'Configurá al menos GROQ_API_KEY o DEEPSEEK_API_KEY.',
       );
@@ -134,6 +142,10 @@ export class AIProviderService {
         errors.push({
           provider: providerType,
           error: 'Circuit breaker open',
+          // El breaker abierto YA es la contención: contarlo como transitorio
+          // haría que quien reintenta por encima vuelva a apilar llamadas
+          // sobre un proveedor que se declaró caído (T-IA-005).
+          retryable: false,
         });
         providerIndex++;
         if (providerIndex > 0) {
@@ -150,7 +162,10 @@ export class AIProviderService {
         // Wrap provider call with retry logic, passing config to provider
         const response = await retryWithBackoff(async () => {
           return await provider.generateCompletion(messages, config || {});
-        }, this.MAX_RETRY_ATTEMPTS);
+          // T-IA-005: la cantidad de intentos vive en ai-retry.constants.ts
+          // porque el techo de tokens depende de cómo se combina con el
+          // reintento del cron de horóscopos.
+        }, MAX_RETRY_ATTEMPTS);
 
         const durationMs = Date.now() - startTime;
 
@@ -216,6 +231,10 @@ export class AIProviderService {
         errors.push({
           provider: providerType,
           error: errorMessage,
+          // Ante un error sin clasificar se asume transitorio: es preferible
+          // conceder el único reintento del cron a tragarse un fallo pasajero.
+          retryable:
+            error instanceof AIProviderException ? error.retryable : true,
         });
 
         // Log failed call
@@ -258,10 +277,7 @@ export class AIProviderService {
     }
 
     // All providers failed
-    const errorSummary = errors
-      .map((e) => `${e.provider}: ${e.error}`)
-      .join('; ');
-    throw new Error(`All AI providers failed: ${errorSummary}`);
+    throw new AllProvidersFailedException(errors);
   }
 
   /**

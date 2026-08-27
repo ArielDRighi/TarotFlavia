@@ -75,18 +75,38 @@ export const VERIFICATION_SCHEDULE = '0 0 2 * * *';
 /**
  * T-BUG-016-B: Cantidad máxima de reintentos por signo ante fallo transitorio
  *
- * Valor: 3 reintentos (4 intentos totales por signo)
- * Razón: Tolerar errores transitorios (5xx / rate limit / timeout) de los proveedores de IA
+ * Valor: 1 reintento (2 intentos totales por signo)
+ * Razón: Tolerar errores transitorios (5xx / timeout) de los proveedores de IA
+ *   sin volver a apilar reintentos sobre los que ya hace `AIProviderService`.
+ *
+ * ⚠️ T-IA-005 — por qué bajó de 3 a 1. Este reintento se monta ENCIMA de otros
+ *   dos niveles: los MAX_RETRY_ATTEMPTS intentos por proveedor de
+ *   `retryWithBackoff` y la cadena de fallback entre proveedores. Con 3
+ *   reintentos, un signo que fallaba disparaba hasta 12 llamadas —la mayoría
+ *   dentro del mismo minuto—: 12.000–16.000 tokens/min contra un techo de
+ *   8.000. La tormenta de reintentos se auto-provocaba el 429 que después el
+ *   health reportaba como caída.
+ *
+ *   Y no es el último recurso: si el signo igual queda sin generar, lo levanta
+ *   la pasada de verificación de las 02:00 UTC (VERIFICATION_SCHEDULE) y el
+ *   backfill de bootstrap de cada deploy.
  */
-export const MAX_RETRIES_PER_SIGN = 3;
+export const MAX_RETRIES_PER_SIGN = 1;
 
 /**
- * T-BUG-016-B: Delays (ms) de backoff exponencial antes de cada reintento
+ * T-BUG-016-B: Delays (ms) de backoff antes de cada reintento
  *
- * Valor: [6000, 12000, 24000]
- * Razón: Backoff creciente respetando rate limits sin bloquear el lote completo
+ * Valor: [60000]
+ * Razón: El bucket de tokens de Groq se repone POR MINUTO. Los 6s del valor
+ *   anterior caían dentro de la MISMA ventana del 429 que se acababa de
+ *   provocar, así que el reintento chocaba seguro y gastaba cuota que no
+ *   existía. Una ventana completa es el mínimo que tiene sentido esperar.
+ *
+ * ⚠️ Tiene que tener exactamente MAX_RETRIES_PER_SIGN elementos: un array más
+ *   corto deja `RETRY_DELAYS_MS[i]` en `undefined` y `delay(undefined)`
+ *   reintenta al instante. Hay un test de guarda para eso.
  */
-export const RETRY_DELAYS_MS = [6000, 12000, 24000];
+export const RETRY_DELAYS_MS = [60000];
 
 /**
  * Configuración completa del cron de horóscopos

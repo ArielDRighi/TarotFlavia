@@ -175,6 +175,7 @@ describe('GroqProvider', () => {
   describe('mapeo de errores', () => {
     interface GroqApiError extends Error {
       status?: number;
+      headers?: Record<string, string>;
     }
 
     const buildApiError = (status: number, message: string): GroqApiError => {
@@ -217,6 +218,52 @@ describe('GroqProvider', () => {
       const aiError = error as AIProviderException;
       expect(aiError.errorType).toBe(AIErrorType.RATE_LIMIT);
       expect(aiError.retryable).toBe(true);
+    });
+
+    /**
+     * T-IA-005: sin esto, la respuesta a un 429 por tokens es volver a pedir a
+     * los 2s del backoff ciego, dentro de la misma ventana del bucket que se
+     * acaba de vaciar. Groq dice cuándo vuelve a haber cuota; hay que leerlo.
+     */
+    it('propaga el `retry-after` del 429 para que el reintento lo respete', async () => {
+      const error429 = buildApiError(429, 'Rate limit reached');
+      error429.headers = { 'retry-after': '17' };
+      mockGroqClient.chat.completions.create.mockRejectedValue(error429);
+
+      const error = await provider
+        .generateCompletion(mockMessages, {})
+        .catch((e: unknown) => e);
+
+      expect((error as AIProviderException).retryAfterMs).toBe(17_000);
+    });
+
+    it('lee la ventana de reset de TOKENS de Groq cuando no hay `retry-after`', async () => {
+      // El techo que se toca primero en el tier gratuito es el de tokens
+      // (8.000/min), no el de requests: hay que esperar al reset más lejano.
+      const error429 = buildApiError(429, 'Rate limit reached');
+      error429.headers = {
+        'x-ratelimit-reset-requests': '1s',
+        'x-ratelimit-reset-tokens': '12.5s',
+      };
+      mockGroqClient.chat.completions.create.mockRejectedValue(error429);
+
+      const error = await provider
+        .generateCompletion(mockMessages, {})
+        .catch((e: unknown) => e);
+
+      expect((error as AIProviderException).retryAfterMs).toBe(12_500);
+    });
+
+    it('deja `retryAfterMs` sin definir cuando el proveedor no lo dice', async () => {
+      mockGroqClient.chat.completions.create.mockRejectedValue(
+        buildApiError(429, 'Rate limit reached'),
+      );
+
+      const error = await provider
+        .generateCompletion(mockMessages, {})
+        .catch((e: unknown) => e);
+
+      expect((error as AIProviderException).retryAfterMs).toBeUndefined();
     });
   });
 });

@@ -23,6 +23,8 @@ import {
   CHINESE_HOROSCOPE_SYSTEM_PROMPT,
   CHINESE_HOROSCOPE_USER_PROMPT,
 } from '../prompts/chinese-horoscope.prompts';
+import { AllProvidersFailedException } from '../../../ai/infrastructure/errors/ai-error.types';
+import { MAX_RETRIES_PER_SIGN, RETRY_DELAYS_MS } from './horoscope-cron.config';
 
 /**
  * Delay entre generaciones del horóscopo chino.
@@ -557,13 +559,18 @@ export class ChineseHoroscopeService {
   }
 
   /**
-   * T-BUG-001-A: Genera un horóscopo con reintentos y backoff exponencial.
+   * T-BUG-001-A: Genera un horóscopo con reintentos y backoff.
    *
-   * Intenta generar con hasta MAX_RETRIES reintentos (4 intentos totales):
-   *   - Intento 1: falla → espera 10s
-   *   - Reintento 1: falla → espera 20s
-   *   - Reintento 2: falla → espera 40s
-   *   - Reintento 3: falla → resultado definitivo fallido
+   * T-IA-005: la política de reintentos es la MISMA que la del horóscopo
+   * occidental (MAX_RETRIES_PER_SIGN / RETRY_DELAYS_MS) porque las dos
+   * generaciones compiten por el mismo bucket de 8.000 tokens/minuto de Groq,
+   * y los tests de guarda de `horoscope-cron.config.spec.ts` dimensionan ese
+   * presupuesto. Los valores locales de antes (3 reintentos con [10s, 20s,
+   * 40s]) tenían la misma miscalibración que se corrigió allá: los 10s caían
+   * dentro de la misma ventana del 429 que se acababa de provocar.
+   *
+   * Tampoco se reintenta un fallo definitivo: un modelo decomisionado o una
+   * API key faltante no cambian entre reintento y reintento.
    *
    * Si todos los intentos fallan, retorna un GenerationResult con success=false.
    *
@@ -578,11 +585,9 @@ export class ChineseHoroscopeService {
     element: ChineseElement,
     year: number,
   ): Promise<GenerationResult> {
-    const MAX_RETRIES = 3; // 3 reintentos = 4 intentos totales
-    const RETRY_DELAYS_MS = [10000, 20000, 40000]; // delay antes de cada reintento
     let lastError = '';
 
-    for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
+    for (let attempt = 1; attempt <= MAX_RETRIES_PER_SIGN + 1; attempt++) {
       try {
         const horoscope = await this.generateForAnimalAndElement(
           animal,
@@ -593,10 +598,17 @@ export class ChineseHoroscopeService {
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
 
-        if (attempt <= MAX_RETRIES) {
+        if (error instanceof AllProvidersFailedException && !error.retryable) {
+          this.logger.error(
+            `Sin reintentos para ${animal}/${element}: el fallo no es transitorio (${lastError})`,
+          );
+          return { animal, element, success: false, error: lastError };
+        }
+
+        if (attempt <= MAX_RETRIES_PER_SIGN) {
           const retryDelay = RETRY_DELAYS_MS[attempt - 1];
           this.logger.warn(
-            `Reintento ${attempt}/${MAX_RETRIES} para ${animal}/${element} en ${retryDelay / 1000}s: ${lastError}`,
+            `Reintento ${attempt}/${MAX_RETRIES_PER_SIGN} para ${animal}/${element} en ${retryDelay / 1000}s: ${lastError}`,
           );
           await this.delay(retryDelay);
         }
