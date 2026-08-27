@@ -5,7 +5,13 @@ import { HoroscopeCronService } from './horoscope-cron.service';
 import { HoroscopeGenerationService } from './horoscope-generation.service';
 import { ZodiacSign } from '../../../../common/utils/zodiac.utils';
 import { DailyHoroscope } from '../../entities/daily-horoscope.entity';
-import { DELAY_BETWEEN_SIGNS_MS } from './horoscope-cron.config';
+import {
+  DELAY_BETWEEN_SIGNS_MS,
+  MAX_RETRIES_PER_SIGN,
+  RETRY_DELAYS_MS,
+} from './horoscope-cron.config';
+import { AllProvidersFailedException } from '../../../ai/infrastructure/errors/ai-error.types';
+import { AIProviderType } from '../../../ai/domain/interfaces/ai-provider.interface';
 
 describe('HoroscopeCronService', () => {
   let service: HoroscopeCronService;
@@ -191,11 +197,11 @@ describe('HoroscopeCronService', () => {
       await service.generateDailyHoroscopes();
 
       // Assert
-      // T-BUG-016-B: 11 signos exitosos (1 llamada cada uno) + Cáncer reintentado
-      // 4 veces (1 intento + 3 reintentos) = 15 llamadas totales
+      // T-BUG-016-B / T-IA-005: 11 signos exitosos (1 llamada cada uno) +
+      // Cáncer reintentado 1 + MAX_RETRIES_PER_SIGN veces.
       expect(
         mockHoroscopeGenerationService.generateForSign,
-      ).toHaveBeenCalledTimes(15);
+      ).toHaveBeenCalledTimes(11 + (MAX_RETRIES_PER_SIGN + 1));
 
       // Verificar que se logueo el error de Cancer tras agotar reintentos
       expect(Logger.prototype.error).toHaveBeenCalledWith(
@@ -312,14 +318,19 @@ describe('HoroscopeCronService', () => {
   });
 
   describe('retry behavior (T-BUG-016-B)', () => {
+    const countCallsForSign = (sign: ZodiacSign): number =>
+      mockHoroscopeGenerationService.generateForSign.mock.calls.filter(
+        (call) => call[0] === sign,
+      ).length;
+
     it('should retry a transient failure and succeed without leaving a gap', async () => {
-      // Arrange: Leo falla 2 veces y luego tiene éxito
+      // Arrange: Leo falla una vez y luego tiene éxito
       let leoAttempts = 0;
       mockHoroscopeGenerationService.generateForSign.mockImplementation(
         (sign: ZodiacSign) => {
           if (sign === ZodiacSign.LEO) {
             leoAttempts++;
-            if (leoAttempts <= 2) {
+            if (leoAttempts === 1) {
               return Promise.reject(new Error('Transient 5xx'));
             }
           }
@@ -330,10 +341,10 @@ describe('HoroscopeCronService', () => {
       // Act
       await service.generateDailyHoroscopes();
 
-      // Assert: 11 signos OK (1 llamada) + Leo (3 llamadas) = 14 llamadas
+      // Assert: 11 signos OK (1 llamada) + Leo (2 llamadas) = 13 llamadas
       expect(
         mockHoroscopeGenerationService.generateForSign,
-      ).toHaveBeenCalledTimes(14);
+      ).toHaveBeenCalledTimes(13);
 
       // No debe haber error definitivo, los 12 fueron exitosos
       expect(Logger.prototype.log).toHaveBeenCalledWith(
@@ -355,16 +366,105 @@ describe('HoroscopeCronService', () => {
       // Act
       await service.generateDailyHoroscopes();
 
-      // Assert: Virgo intentado 4 veces (1 + 3 reintentos)
-      const virgoCalls =
-        mockHoroscopeGenerationService.generateForSign.mock.calls.filter(
-          (call) => call[0] === ZodiacSign.VIRGO,
-        );
-      expect(virgoCalls).toHaveLength(4);
+      // Assert: Virgo intentado 1 + MAX_RETRIES_PER_SIGN veces
+      expect(countCallsForSign(ZodiacSign.VIRGO)).toBe(
+        MAX_RETRIES_PER_SIGN + 1,
+      );
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         expect.stringContaining('sin más reintentos'),
       );
+    });
+
+    /**
+     * T-IA-005: durante el incidente del 26-ago-2026 el cron reintentó cuatro
+     * veces por signo contra un modelo que devolvía 404. El modelo no reaparece
+     * entre reintento y reintento: cada pasada solo gastaba cuota y empujaba la
+     * tanda contra el techo de tokens.
+     */
+    it('NO reintenta cuando la IA falló por algo definitivo', async () => {
+      const definitivo = new AllProvidersFailedException([
+        {
+          provider: AIProviderType.GROQ,
+          error: 'Groq model unavailable: 404 model_not_found',
+          retryable: false,
+        },
+      ]);
+
+      mockHoroscopeGenerationService.generateForSign.mockImplementation(
+        (sign: ZodiacSign) => {
+          if (sign === ZodiacSign.VIRGO) {
+            return Promise.reject(definitivo);
+          }
+          return Promise.resolve(createMockHoroscope(sign));
+        },
+      );
+
+      await service.generateDailyHoroscopes();
+
+      expect(countCallsForSign(ZodiacSign.VIRGO)).toBe(1);
+      expect(Logger.prototype.error).toHaveBeenCalledWith(
+        expect.stringContaining('sin reintentos'),
+      );
+    });
+
+    it('SÍ reintenta cuando algún proveedor falló por algo transitorio', async () => {
+      const transitorio = new AllProvidersFailedException([
+        {
+          provider: AIProviderType.GROQ,
+          error: 'Groq model unavailable: 404 model_not_found',
+          retryable: false,
+        },
+        {
+          provider: AIProviderType.DEEPSEEK,
+          error: 'DeepSeek server error: 503',
+          retryable: true,
+        },
+      ]);
+
+      mockHoroscopeGenerationService.generateForSign.mockImplementation(
+        (sign: ZodiacSign) => {
+          if (sign === ZodiacSign.VIRGO) {
+            return Promise.reject(transitorio);
+          }
+          return Promise.resolve(createMockHoroscope(sign));
+        },
+      );
+
+      await service.generateDailyHoroscopes();
+
+      expect(countCallsForSign(ZodiacSign.VIRGO)).toBe(
+        MAX_RETRIES_PER_SIGN + 1,
+      );
+    });
+
+    it('espera el backoff configurado antes de cada reintento', async () => {
+      // El delay está mockeado; se verifica que se pide la espera correcta.
+      const delaySpy = jest.spyOn(
+        service as unknown as Record<string, jest.Mock>,
+        'delay',
+      );
+
+      mockHoroscopeGenerationService.generateForSign.mockImplementation(
+        (sign: ZodiacSign) => {
+          if (sign === ZodiacSign.VIRGO) {
+            return Promise.reject(new Error('Persistent failure'));
+          }
+          return Promise.resolve(createMockHoroscope(sign));
+        },
+      );
+
+      await service.generateDailyHoroscopes();
+
+      const esperas = delaySpy.mock.calls.map((call) => call[0] as number);
+      const esperasDeReintento = esperas.filter(
+        (ms) => ms !== DELAY_BETWEEN_SIGNS_MS,
+      );
+
+      // Si el backoff del reintento coincidiera con la cadencia entre signos,
+      // este test no podría distinguirlos: la guarda de que sean distintos
+      // vive en horoscope-cron.config.spec.ts (backoff >= 60s > 15s).
+      expect(esperasDeReintento).toEqual(RETRY_DELAYS_MS);
     });
   });
 

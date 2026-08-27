@@ -15,6 +15,12 @@ import {
   AIResponse,
 } from '../../domain/interfaces/ai-provider.interface';
 import { CircuitBreakerState } from '../../infrastructure/errors/circuit-breaker.utils';
+import {
+  AIErrorType,
+  AIProviderException,
+  AllProvidersFailedException,
+} from '../../infrastructure/errors/ai-error.types';
+import { MAX_RETRY_WAIT_MS } from '../../domain/constants/ai-retry.constants';
 
 describe('AIProviderService', () => {
   let service: AIProviderService;
@@ -357,6 +363,130 @@ describe('AIProviderService', () => {
       expect(openaiProvider.generateCompletion).toHaveBeenCalled();
     });
 
+    /**
+     * T-IA-005: el `Error` pelado no le decía al cron si tenía sentido volver
+     * a intentar, así que el cron reintentaba siempre — cuatro pasadas contra
+     * un 404 durante el incidente del 26-ago-2026.
+     */
+    describe('clasificación del fallo total (T-IA-005)', () => {
+      const providerError = (retryable: boolean, message: string) =>
+        new AIProviderException(
+          AIProviderType.GROQ,
+          retryable
+            ? AIErrorType.SERVER_ERROR
+            : AIErrorType.PROVIDER_UNAVAILABLE,
+          message,
+          retryable,
+          new Error(message),
+          // Un `retry-after` por encima del presupuesto hace que
+          // `retryWithBackoff` corte sin dormir: el error sigue siendo
+          // reintentable, pero el test no espera los backoffs reales.
+          retryable ? MAX_RETRY_WAIT_MS + 1 : undefined,
+        );
+
+      const failAllWith = (error: Error) => {
+        groqProvider.generateCompletion.mockRejectedValue(error);
+        deepseekProvider.generateCompletion.mockRejectedValue(error);
+        geminiProvider.generateCompletion.mockRejectedValue(error);
+        openaiProvider.generateCompletion.mockRejectedValue(error);
+      };
+
+      it('marca el fallo como NO reintentable cuando todos son definitivos', async () => {
+        failAllWith(providerError(false, 'Groq model unavailable: 404'));
+
+        const error = await service
+          .generateCompletion(mockMessages, 1, 1)
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(AllProvidersFailedException);
+        expect((error as AllProvidersFailedException).retryable).toBe(false);
+      });
+
+      it('marca el fallo como reintentable si alguno fue transitorio', async () => {
+        groqProvider.generateCompletion.mockRejectedValue(
+          providerError(false, 'Groq model unavailable: 404'),
+        );
+        deepseekProvider.generateCompletion.mockRejectedValue(
+          providerError(true, 'DeepSeek server error: 503'),
+        );
+        geminiProvider.generateCompletion.mockRejectedValue(
+          providerError(false, 'Gemini model unavailable: 404'),
+        );
+        openaiProvider.generateCompletion.mockRejectedValue(
+          providerError(false, 'OpenAI model unavailable: 404'),
+        );
+
+        const error = await service
+          .generateCompletion(mockMessages, 1, 1)
+          .catch((e: unknown) => e);
+
+        expect((error as AllProvidersFailedException).retryable).toBe(true);
+      });
+
+      it('ante un error sin clasificar asume reintentable (no se traga un fallo transitorio)', async () => {
+        failAllWith(new Error('Service unavailable'));
+
+        const error = await service
+          .generateCompletion(mockMessages, 1, 1)
+          .catch((e: unknown) => e);
+
+        expect((error as AllProvidersFailedException).retryable).toBe(true);
+      });
+
+      it('conserva el detalle por proveedor', async () => {
+        failAllWith(providerError(false, 'Groq model unavailable: 404'));
+
+        const error = await service
+          .generateCompletion(mockMessages, 1, 1)
+          .catch((e: unknown) => e);
+
+        const failures = (error as AllProvidersFailedException).failures;
+        expect(failures.map((f) => f.provider)).toEqual([
+          AIProviderType.GROQ,
+          AIProviderType.GEMINI,
+          AIProviderType.DEEPSEEK,
+          AIProviderType.OPENAI,
+        ]);
+        expect(failures.every((f) => f.retryable === false)).toBe(true);
+      });
+
+      it('un circuit breaker abierto no cuenta como fallo reintentable del proveedor', async () => {
+        // El breaker abierto ya es la contención: reintentar por encima de él
+        // vuelve a apilar llamadas sobre un proveedor que se declaró caído.
+        //
+        // Se abre con un error RETRYABLE a propósito: si el fallo de base
+        // fuera definitivo, el `retryable: false` del resultado no probaría
+        // nada sobre el aporte del breaker.
+        failAllWith(providerError(true, 'DeepSeek server error: 503'));
+
+        const primerFallo = await service
+          .generateCompletion(mockMessages, 1, 1)
+          .catch((e: unknown) => e);
+
+        // Antes de abrir los breakers, el mismo fallo SÍ es reintentable.
+        expect((primerFallo as AllProvidersFailedException).retryable).toBe(
+          true,
+        );
+
+        // Abre los breakers de los cuatro proveedores (umbral: 5 fallos).
+        for (let i = 0; i < 5; i++) {
+          await service
+            .generateCompletion(mockMessages, 1, 1)
+            .catch(() => undefined);
+        }
+
+        const error = await service
+          .generateCompletion(mockMessages, 1, 1)
+          .catch((e: unknown) => e);
+
+        const failures = (error as AllProvidersFailedException).failures;
+        expect(failures.every((f) => f.error === 'Circuit breaker open')).toBe(
+          true,
+        );
+        expect((error as AllProvidersFailedException).retryable).toBe(false);
+      });
+    });
+
     it('should throw a clear error when NO provider is configured', async () => {
       groqProvider.isConfigured.mockReturnValue(false);
       deepseekProvider.isConfigured.mockReturnValue(false);
@@ -370,6 +500,21 @@ describe('AIProviderService', () => {
       // No se intenta ningún provider ni se loguea error vacío
       expect(groqProvider.generateCompletion).not.toHaveBeenCalled();
       expect(aiUsageService.createLog).not.toHaveBeenCalled();
+    });
+
+    it('la ausencia de proveedores NO es reintentable (T-IA-005)', async () => {
+      // Una API key faltante no aparece entre reintento y reintento.
+      groqProvider.isConfigured.mockReturnValue(false);
+      deepseekProvider.isConfigured.mockReturnValue(false);
+      geminiProvider.isConfigured.mockReturnValue(false);
+      openaiProvider.isConfigured.mockReturnValue(false);
+
+      const error = await service
+        .generateCompletion(mockMessages, 1, 1)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(AllProvidersFailedException);
+      expect((error as AllProvidersFailedException).retryable).toBe(false);
     });
 
     it('should log all provider failures', async () => {

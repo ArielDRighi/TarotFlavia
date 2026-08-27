@@ -9,6 +9,10 @@ import {
   IAIProvider,
 } from '../../domain/interfaces/ai-provider.interface';
 import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
+import {
+  parseRateLimitRetryAfterMs,
+  parseRetryAfterMs,
+} from '../errors/retry-after.utils';
 
 @Injectable()
 export class OpenAIProvider implements IAIProvider {
@@ -141,6 +145,11 @@ export class OpenAIProvider implements IAIProvider {
           `OpenAI rate limit exceeded: ${errorMessage}`,
           true,
           error as Error,
+          // T-IA-005: el proveedor dice cuándo vuelve a haber cuota. Sin este
+          // dato el reintento volvía a los 2s, dentro de la misma ventana del
+          // bucket, y realimentaba el 429. Acá sí se miran los
+          // `x-ratelimit-reset-*`: estamos ante un rate limit.
+          parseRateLimitRetryAfterMs(error),
         );
       }
 
@@ -157,6 +166,11 @@ export class OpenAIProvider implements IAIProvider {
           `OpenAI server error: ${errorMessage}`,
           true,
           error as Error,
+          // Un 503 también puede traer `Retry-After` (T-IA-005). NO se miran
+          // los `x-ratelimit-reset-*`: son estado del bucket y viajan en
+          // respuestas normales, así que leerlos acá dejaría un 5xx
+          // transitorio sin ningún reintento.
+          parseRetryAfterMs(error),
         );
       }
 
