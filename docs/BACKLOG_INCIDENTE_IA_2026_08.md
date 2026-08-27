@@ -78,7 +78,7 @@ Saldo de la cuenta al momento del diagnóstico: **USD 1,91** (`is_available: tru
 | --------- | ------------------------------------------------------------------ | -------- | ---------- | ------------------------- |
 | T-IA-001  | Migrar Groq a `openai/gpt-oss-120b` y ajustar la cadencia del cron | Backend  | 🔴 Crítica | ✅ Completada             |
 | T-IA-002  | Dejar DeepSeek operativo para tarot y features premium             | Backend  | 🔴 Crítica | ✅ Completada             |
-| T-IA-003  | Setear las variables en Railway y reiniciar                        | Deploy   | 🔴 Crítica | 🟡 Parcial: `GROQ_MODEL` aplicado |
+| T-IA-003  | Setear las variables en Railway y reiniciar                        | Deploy   | 🔴 Crítica | ✅ Completada (27-ago-2026) |
 | T-IA-004  | Que el health no reporte `ok` con la IA caída                      | Backend  | 🟠 Alta    | ⬜ Pendiente (fuera de alcance de este PR) |
 | T-IA-005  | Acotar la tormenta de reintentos que desborda el techo de tokens   | Backend  | 🟠 Alta    | ⬜ Pendiente (fuera de alcance de este PR) |
 
@@ -152,22 +152,39 @@ piden DeepSeek como primario). No se tocó.
 
 ## T-IA-003: Variables en Railway
 
-**Estado:** 🟡 PARCIAL.
+**Estado:** ✅ COMPLETADA.
 
-`GROQ_MODEL=openai/gpt-oss-120b` **ya está aplicado en producción** (26-ago-2026): tras el
-redeploy, `primary.status` pasó a `"ok"` (179ms) y el backfill de bootstrap regeneró los
-12 signos del día.
+Se aplicó en dos tiempos, a propósito:
 
-Las dos variables de DeepSeek **se dejaron sin setear a propósito** hasta que este PR esté
-desplegado: con el código viejo (timeout de 15s) y `MAX_RETRY_ATTEMPTS = 3`, una key de
-DeepSeek configurada quemaría 45s antes de caer a Groq, más que los 30s del axios del
-frontend. Sería cambiar "tarot roto" por "tarot roto más lento".
+1. **26-ago-2026** — `GROQ_MODEL=openai/gpt-oss-120b`, antes del deploy, para cortar la
+   caída cuanto antes. `primary.status` pasó a `"ok"` (179ms) y el backfill de bootstrap
+   regeneró los 12 signos del día.
+2. **27-ago-2026** — `DEEPSEEK_API_KEY` y `DEEPSEEK_MODEL`, recién **después** de desplegar
+   el PR #637. Con el código viejo (timeout de 15s) y `MAX_RETRY_ATTEMPTS = 3`, una key de
+   DeepSeek configurada habría quemado 45s antes de caer a Groq — más que los 30s del axios
+   del frontend. Habría sido cambiar "tarot roto" por "tarot roto más lento".
 
 ```bash
-GROQ_MODEL=openai/gpt-oss-120b     # ✅ aplicado el 26-ago-2026
-DEEPSEEK_API_KEY=sk-...            # ⬜ tras el deploy de este PR (prefijo sk- obligatorio)
-DEEPSEEK_MODEL=deepseek-v4-flash   # ⬜ tras el deploy de este PR
+GROQ_MODEL=openai/gpt-oss-120b     # ✅ 26-ago-2026
+DEEPSEEK_API_KEY=sk-...            # ✅ 27-ago-2026 (el prefijo sk- ahora lo exige env.validation)
+DEEPSEEK_MODEL=deepseek-v4-flash   # ✅ 27-ago-2026
 ```
+
+### Resultado verificado en producción (27-ago-2026, 00:0x UTC)
+
+```jsonc
+"ai": {
+  "available": true,
+  "primary":  { "provider": "groq",     "status": "ok", "model": "openai/gpt-oss-120b",
+                "responseTime": 252, "rateLimits": { "limit": 1000 } },
+  "fallback": [{ "provider": "deepseek", "status": "ok", "model": "deepseek-v4-flash",
+                "responseTime": 1492 }]
+}
+```
+
+El backfill de bootstrap generó los 12 signos del día nuevo con la cadencia nueva: los
+últimos 4 tardaron 65s, o sea ~16s por signo (15s de delay + ~1s de generación), tal como
+fue calculado.
 
 También conviene revisar `GEMINI_API_KEY`, que sigue seteada en producción con
 `GEMINI_MODEL=gemini-1.5-flash` a pesar de que el `.env` local documenta a Gemini como
@@ -259,5 +276,9 @@ Ver `health.controller.ts:90`, `:133` y `:200`.
       (incluida la sonda de `ai-health.service.ts`, que se había pasado por alto en la
       primera vuelta).
 - [x] Los límites reales del tier gratuito están documentados y cubiertos por tests.
-- [ ] Producción con `primary.status: "ok"` y 12 horóscopos del día (depende de T-IA-003).
-- [ ] Una tirada de tarot premium generada end-to-end contra DeepSeek (depende de T-IA-003).
+- [x] Producción con `primary.status: "ok"` y 12 horóscopos del día.
+- [x] DeepSeek registrado y respondiendo desde producción (`fallback[0].status: "ok"`).
+- [ ] Una tirada de tarot premium generada end-to-end contra DeepSeek. **Falta hacerla
+      desde la app**: la sonda de salud usa `max_tokens: 1`, así que prueba conectividad y
+      configuración, no una interpretación completa de 4.000 tokens dentro del timeout de
+      25s desde la red de Railway.
