@@ -309,7 +309,10 @@ de la misma ventana del bucket que se acababa de vaciar. **El reintento realimen
 - [x] Test que verifica que un `retry-after` por encima del presupuesto corta en vez de
       dormir.
 - [x] Tests de `parseRetryAfterMs` para los tres formatos de cabecera, incluida la fecha
-      HTTP y el criterio de quedarse con la ventana de **tokens** por sobre la de requests.
+      HTTP, la cabecera vacía, y el criterio de quedarse con la ventana **más lejana** —
+      incluso cuando el `retry-after` es más corto que el reset de tokens.
+- [x] Test de que `parseRetryAfterMs` **ignora** los `x-ratelimit-reset-*`, para que un 5xx
+      no quede sin reintento por el estado del bucket.
 - [x] Tests de que `AllProvidersFailedException` es reintentable solo si algún proveedor
       falló por algo transitorio, y no lo es sin proveedores configurados ni con el circuit
       breaker abierto.
@@ -319,6 +322,39 @@ de la misma ventana del bucket que se acababa de vaciar. **El reintento realimen
       bucket (< 60s), o si `RETRY_DELAYS_MS` se desincroniza de `MAX_RETRIES_PER_SIGN`.
 - [x] Test de guarda que falla si la tanda con los 12 signos agotando reintentos se pisa con
       la pasada de verificación de las 02:00 UTC.
+
+### Correcciones de la revisión
+
+Salieron del revisor local sobre el PR #639 y entraron en el mismo PR:
+
+- **El `retry-after` tapaba la ventana de tokens.** El docblock prometía quedarse con la
+  ventana más lejana, pero la implementación retornaba en la primera cabecera que parseaba.
+  Un 429 de Groq manda las tres juntas (`retry-after: 2`, `reset-requests: 1s`,
+  `reset-tokens: 45s`): se reintentaba a los 2,5s con el bucket de tokens todavía vacío — el
+  mismo lazo de realimentación que la tarea vino a cortar. Ahora se juntan todos los
+  candidatos y gana el máximo.
+- **Las cabeceras de bucket se leían también en el 5xx.** `x-ratelimit-reset-*` es *estado*
+  del bucket y viaja en respuestas normales, no solo en los 429. Un 503 con
+  `reset-tokens: 2m59s` se interpretaba como "esperá 3 minutos" y, por el presupuesto de
+  `MAX_RETRY_WAIT_MS`, quedaba **sin ningún reintento**: lo contrario de lo buscado. Hay dos
+  lectores ahora: `parseRetryAfterMs` (solo `retry-after` / `retry-after-ms`) y
+  `parseRateLimitRetryAfterMs` (agrega los resets), y el segundo se usa solo ante un 429.
+- **Un `retry-after` vacío valía 0.** `Number('')` es `0`, así que un proxy que mandara la
+  cabecera en blanco convertía un "429 sin ventana" —que la política nueva manda **no**
+  reintentar— en un "429 con ventana 0", que sí se reintentaba. Desactivaba la regla entera
+  por una cabecera vacía.
+- **El presupuesto no acotaba la espera final.** `maxWaitMs` se comparaba solo contra el
+  `retryAfterMs` declarado, nunca contra el backoff. Inocuo hoy (con 2 intentos el backoff
+  máximo es ~2,4s), pero el nombre de la opción prometía un techo que no cumplía.
+- **`AIProviderFailure.provider` era `string`** habiendo un enum (`AIProviderType`) que el
+  servicio ya empuja.
+- **El log del cron mentía en el último intento.** `isWorthRetrying` se evaluaba antes de
+  saber si quedaban reintentos, así que un fallo definitivo en el intento final decía "sin
+  reintentos: el fallo no es transitorio" en vez de "sin más reintentos".
+- **Tres tests no mordían lo que decían morder**: el de backoff creciente era vacuo con un
+  solo reintento configurado; el de la espera del reintento no podía distinguirla de la
+  cadencia entre signos; y el del circuit breaker abría los breakers con un error que ya era
+  no reintentable, así que la aserción no aislaba el aporte del breaker.
 
 ### Lo que NO se tocó, a propósito
 

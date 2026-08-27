@@ -20,6 +20,12 @@
  * ⚠️ No es el único nivel de recuperación: por encima están la cadena de
  *   fallback entre proveedores, el reintento del cron y la pasada de
  *   verificación de las 02:00 UTC.
+ *
+ * ⚠️ El valor está dimensionado por el bucket de Groq (el caso más apretado)
+ *   pero se aplica a TODOS los proveedores, incluido DeepSeek —el primario del
+ *   tarot, que es pago y no comparte ese bucket—. Ahí el reintento de menos es
+ *   irrelevante: con el TIMEOUT de 25s de T-IA-002, dos intentos ya se pasan de
+ *   los 30s a los que el axios del frontend aborta la lectura.
  */
 export const MAX_RETRY_ATTEMPTS = 2;
 

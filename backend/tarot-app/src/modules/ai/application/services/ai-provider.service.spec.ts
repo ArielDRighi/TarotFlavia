@@ -20,6 +20,7 @@ import {
   AIProviderException,
   AllProvidersFailedException,
 } from '../../infrastructure/errors/ai-error.types';
+import { MAX_RETRY_WAIT_MS } from '../../domain/constants/ai-retry.constants';
 
 describe('AIProviderService', () => {
   let service: AIProviderService;
@@ -377,6 +378,10 @@ describe('AIProviderService', () => {
           message,
           retryable,
           new Error(message),
+          // Un `retry-after` por encima del presupuesto hace que
+          // `retryWithBackoff` corte sin dormir: el error sigue siendo
+          // reintentable, pero el test no espera los backoffs reales.
+          retryable ? MAX_RETRY_WAIT_MS + 1 : undefined,
         );
 
       const failAllWith = (error: Error) => {
@@ -448,9 +453,22 @@ describe('AIProviderService', () => {
       it('un circuit breaker abierto no cuenta como fallo reintentable del proveedor', async () => {
         // El breaker abierto ya es la contención: reintentar por encima de él
         // vuelve a apilar llamadas sobre un proveedor que se declaró caído.
-        failAllWith(providerError(false, 'Groq model unavailable: 404'));
+        //
+        // Se abre con un error RETRYABLE a propósito: si el fallo de base
+        // fuera definitivo, el `retryable: false` del resultado no probaría
+        // nada sobre el aporte del breaker.
+        failAllWith(providerError(true, 'DeepSeek server error: 503'));
 
-        // Abre los breakers de los cuatro proveedores.
+        const primerFallo = await service
+          .generateCompletion(mockMessages, 1, 1)
+          .catch((e: unknown) => e);
+
+        // Antes de abrir los breakers, el mismo fallo SÍ es reintentable.
+        expect((primerFallo as AllProvidersFailedException).retryable).toBe(
+          true,
+        );
+
+        // Abre los breakers de los cuatro proveedores (umbral: 5 fallos).
         for (let i = 0; i < 5; i++) {
           await service
             .generateCompletion(mockMessages, 1, 1)
@@ -461,6 +479,10 @@ describe('AIProviderService', () => {
           .generateCompletion(mockMessages, 1, 1)
           .catch((e: unknown) => e);
 
+        const failures = (error as AllProvidersFailedException).failures;
+        expect(failures.every((f) => f.error === 'Circuit breaker open')).toBe(
+          true,
+        );
         expect((error as AllProvidersFailedException).retryable).toBe(false);
       });
     });

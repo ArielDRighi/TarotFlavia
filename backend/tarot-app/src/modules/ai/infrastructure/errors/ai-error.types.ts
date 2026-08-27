@@ -60,7 +60,7 @@ export class AIProviderException extends HttpException {
  * Fallo de un proveedor dentro de la cadena de fallback.
  */
 export interface AIProviderFailure {
-  provider: string;
+  provider: AIProviderType;
   error: string;
   /** Si tiene sentido volver a intentar contra este proveedor más tarde. */
   retryable: boolean;

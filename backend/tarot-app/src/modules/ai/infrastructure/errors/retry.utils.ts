@@ -94,16 +94,27 @@ function resolveDelay(
   if (error.retryAfterMs === undefined) {
     // Un rate limit que no dice cuándo volver: insistir a ciegas dentro de la
     // misma ventana del bucket es lo que realimentaba el 429.
-    return error.errorType === AIErrorType.RATE_LIMIT ? null : backoffDelay;
-  }
+    if (error.errorType === AIErrorType.RATE_LIMIT) {
+      return null;
+    }
 
-  // El proveedor puede pedir minutos. Dormirlos acá adentro no salva la request
-  // (el axios del frontend aborta a los 30s) y encima bloquea el fallback.
-  if (error.retryAfterMs > maxWaitMs) {
-    return null;
+    return withinBudget(backoffDelay, maxWaitMs);
   }
 
   // El `retry-after` es un piso, no un techo: si el backoff pide más, manda el
   // backoff. Y se le suma un margen para no volver justo en el borde.
-  return Math.max(error.retryAfterMs + RETRY_AFTER_MARGIN_MS, backoffDelay);
+  return withinBudget(
+    Math.max(error.retryAfterMs + RETRY_AFTER_MARGIN_MS, backoffDelay),
+    maxWaitMs,
+  );
+}
+
+/**
+ * El presupuesto se aplica a la espera FINAL, venga del `retry-after` o del
+ * backoff. El proveedor puede pedir minutos, y dormirlos acá adentro no salva
+ * la request —el axios del frontend aborta a los 30s— y encima bloquea el
+ * fallback: cortar y pasar al proveedor siguiente es lo que sí puede responder.
+ */
+function withinBudget(delay: number, maxWaitMs: number): number | null {
+  return delay > maxWaitMs ? null : delay;
 }

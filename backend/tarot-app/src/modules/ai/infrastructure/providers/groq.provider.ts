@@ -9,7 +9,10 @@ import {
   IAIProvider,
 } from '../../domain/interfaces/ai-provider.interface';
 import { AIProviderException, AIErrorType } from '../errors/ai-error.types';
-import { parseRetryAfterMs } from '../errors/retry-after.utils';
+import {
+  parseRateLimitRetryAfterMs,
+  parseRetryAfterMs,
+} from '../errors/retry-after.utils';
 import {
   DEFAULT_GROQ_MODEL,
   GROQ_REASONING_EFFORT,
@@ -176,8 +179,9 @@ export class GroqProvider implements IAIProvider {
           error as Error,
           // T-IA-005: el proveedor dice cuándo vuelve a haber cuota. Sin este
           // dato el reintento volvía a los 2s, dentro de la misma ventana del
-          // bucket, y realimentaba el 429.
-          parseRetryAfterMs(error),
+          // bucket, y realimentaba el 429. Acá sí se miran los
+          // `x-ratelimit-reset-*`: estamos ante un rate limit.
+          parseRateLimitRetryAfterMs(error),
         );
       }
 
@@ -194,7 +198,10 @@ export class GroqProvider implements IAIProvider {
           `Groq server error: ${errorMessage}`,
           true,
           error as Error,
-          // Un 503 también puede traer `Retry-After` (T-IA-005).
+          // Un 503 también puede traer `Retry-After` (T-IA-005). NO se miran
+          // los `x-ratelimit-reset-*`: son estado del bucket y viajan en
+          // respuestas normales, así que leerlos acá dejaría un 5xx
+          // transitorio sin ningún reintento.
           parseRetryAfterMs(error),
         );
       }

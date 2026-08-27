@@ -11,6 +11,7 @@ import {
   RETRY_DELAYS_MS,
 } from './horoscope-cron.config';
 import { AllProvidersFailedException } from '../../../ai/infrastructure/errors/ai-error.types';
+import { AIProviderType } from '../../../ai/domain/interfaces/ai-provider.interface';
 
 describe('HoroscopeCronService', () => {
   let service: HoroscopeCronService;
@@ -384,7 +385,7 @@ describe('HoroscopeCronService', () => {
     it('NO reintenta cuando la IA falló por algo definitivo', async () => {
       const definitivo = new AllProvidersFailedException([
         {
-          provider: 'groq',
+          provider: AIProviderType.GROQ,
           error: 'Groq model unavailable: 404 model_not_found',
           retryable: false,
         },
@@ -410,12 +411,12 @@ describe('HoroscopeCronService', () => {
     it('SÍ reintenta cuando algún proveedor falló por algo transitorio', async () => {
       const transitorio = new AllProvidersFailedException([
         {
-          provider: 'groq',
+          provider: AIProviderType.GROQ,
           error: 'Groq model unavailable: 404 model_not_found',
           retryable: false,
         },
         {
-          provider: 'deepseek',
+          provider: AIProviderType.DEEPSEEK,
           error: 'DeepSeek server error: 503',
           retryable: true,
         },
@@ -455,9 +456,15 @@ describe('HoroscopeCronService', () => {
 
       await service.generateDailyHoroscopes();
 
-      RETRY_DELAYS_MS.forEach((retryDelay) => {
-        expect(delaySpy).toHaveBeenCalledWith(retryDelay);
-      });
+      const esperas = delaySpy.mock.calls.map((call) => call[0] as number);
+      const esperasDeReintento = esperas.filter(
+        (ms) => ms !== DELAY_BETWEEN_SIGNS_MS,
+      );
+
+      // Si el backoff del reintento coincidiera con la cadencia entre signos,
+      // este test no podría distinguirlos: la guarda de que sean distintos
+      // vive en horoscope-cron.config.spec.ts (backoff >= 60s > 15s).
+      expect(esperasDeReintento).toEqual(RETRY_DELAYS_MS);
     });
   });
 

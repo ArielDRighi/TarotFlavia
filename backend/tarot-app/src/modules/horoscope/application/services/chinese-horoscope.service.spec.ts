@@ -10,7 +10,7 @@ import {
   ChineseZodiacAnimal,
   ChineseElement,
 } from '../../../../common/utils/chinese-zodiac.utils';
-import { MAX_RETRIES_PER_SIGN } from './horoscope-cron.config';
+import { MAX_RETRIES_PER_SIGN, RETRY_DELAYS_MS } from './horoscope-cron.config';
 import { AllProvidersFailedException } from '../../../ai/infrastructure/errors/ai-error.types';
 
 /**
@@ -655,7 +655,7 @@ describe('ChineseHoroscopeService', () => {
           return Promise.reject(
             new AllProvidersFailedException([
               {
-                provider: 'groq',
+                provider: AIProviderType.GROQ,
                 error: 'Groq model unavailable: 404 model_not_found',
                 retryable: false,
               },
@@ -676,6 +676,8 @@ describe('ChineseHoroscopeService', () => {
 
       // La primera combinación falla en su único intento: 60 llamadas, no 61.
       expect(aiProviderService.generateCompletion).toHaveBeenCalledTimes(60);
+      // Y no se durmió el backoff de reintento que nunca se hizo.
+      expect(delaySpy).not.toHaveBeenCalledWith(RETRY_DELAYS_MS[0]);
       expect(result.failed).toBe(1);
       expect(result.successful).toBe(59);
     });

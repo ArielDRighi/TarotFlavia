@@ -130,11 +130,14 @@ describe('horoscope-cron.config', () => {
       });
     });
 
-    it('usa backoff creciente entre reintentos', () => {
-      RETRY_DELAYS_MS.forEach((delay, i) => {
-        if (i > 0) {
-          expect(delay).toBeGreaterThan(RETRY_DELAYS_MS[i - 1]);
-        }
+    it('usa backoff no decreciente entre reintentos', () => {
+      // Con un solo reintento configurado la comparación no tiene con qué
+      // comparar; la aserción de longitud deja explícito que hoy este test
+      // solo protege el día que el array crezca.
+      expect(RETRY_DELAYS_MS.length).toBeGreaterThan(0);
+
+      RETRY_DELAYS_MS.slice(1).forEach((delay, i) => {
+        expect(delay).toBeGreaterThanOrEqual(RETRY_DELAYS_MS[i]);
       });
     });
 

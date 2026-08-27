@@ -598,7 +598,11 @@ export class ChineseHoroscopeService {
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
 
-        if (error instanceof AllProvidersFailedException && !error.retryable) {
+        if (
+          attempt <= MAX_RETRIES_PER_SIGN &&
+          error instanceof AllProvidersFailedException &&
+          !error.retryable
+        ) {
           this.logger.error(
             `Sin reintentos para ${animal}/${element}: el fallo no es transitorio (${lastError})`,
           );

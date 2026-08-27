@@ -156,8 +156,12 @@ describe('AIProviderException', () => {
 describe('AllProvidersFailedException (T-IA-005)', () => {
   it('mantiene el prefijo del mensaje histórico con el resumen por proveedor', () => {
     const exception = new AllProvidersFailedException([
-      { provider: 'groq', error: '404 model_not_found', retryable: false },
-      { provider: 'deepseek', error: 'timeout', retryable: true },
+      {
+        provider: AIProviderType.GROQ,
+        error: '404 model_not_found',
+        retryable: false,
+      },
+      { provider: AIProviderType.DEEPSEEK, error: 'timeout', retryable: true },
     ]);
 
     expect(exception.message).toBe(
@@ -167,8 +171,12 @@ describe('AllProvidersFailedException (T-IA-005)', () => {
 
   it('es reintentable si al menos un proveedor falló por algo transitorio', () => {
     const exception = new AllProvidersFailedException([
-      { provider: 'groq', error: '404 model_not_found', retryable: false },
-      { provider: 'deepseek', error: 'timeout', retryable: true },
+      {
+        provider: AIProviderType.GROQ,
+        error: '404 model_not_found',
+        retryable: false,
+      },
+      { provider: AIProviderType.DEEPSEEK, error: 'timeout', retryable: true },
     ]);
 
     expect(exception.retryable).toBe(true);
@@ -178,8 +186,16 @@ describe('AllProvidersFailedException (T-IA-005)', () => {
     // El estado exacto del incidente: el modelo no va a reaparecer entre
     // reintento y reintento. Insistir solo quema cuota.
     const exception = new AllProvidersFailedException([
-      { provider: 'groq', error: '404 model_not_found', retryable: false },
-      { provider: 'deepseek', error: 'API key invalid', retryable: false },
+      {
+        provider: AIProviderType.GROQ,
+        error: '404 model_not_found',
+        retryable: false,
+      },
+      {
+        provider: AIProviderType.DEEPSEEK,
+        error: 'API key invalid',
+        retryable: false,
+      },
     ]);
 
     expect(exception.retryable).toBe(false);
@@ -194,7 +210,7 @@ describe('AllProvidersFailedException (T-IA-005)', () => {
 
   it('conserva el detalle por proveedor para el log', () => {
     const failures = [
-      { provider: 'groq', error: 'rate limit', retryable: true },
+      { provider: AIProviderType.GROQ, error: 'rate limit', retryable: true },
     ];
     const exception = new AllProvidersFailedException(failures);
 

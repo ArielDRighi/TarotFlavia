@@ -259,7 +259,7 @@ export class HoroscopeCronService implements OnApplicationBootstrap {
       } catch (error) {
         lastError = error instanceof Error ? error.message : String(error);
 
-        if (!this.isWorthRetrying(error)) {
+        if (attempt <= MAX_RETRIES_PER_SIGN && !this.isWorthRetrying(error)) {
           this.logger.error(
             `[${index}/12] ✗ ${signInfo.nameEs}: ${lastError} (sin reintentos: el fallo no es transitorio)`,
           );
