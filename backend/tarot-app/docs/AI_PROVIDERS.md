@@ -177,6 +177,46 @@ diarios Y las tiradas de tarot al mismo tiempo.
 
 ## 🏥 Health Checks
 
+### Qué endpoint monitorear
+
+| Endpoint          | Qué responde                        | La IA caída lo tumba                |
+| ----------------- | ----------------------------------- | ----------------------------------- |
+| `/health/live`    | ¿El proceso está vivo?              | No (no consulta proveedores)        |
+| `/health/ready`   | ¿Esta instancia puede servir?       | Nunca, a propósito — ver abajo      |
+| `/health`         | ¿Está sano todo el sistema?         | **Sí: 503 con `ai.status: "down"`** |
+| `/health/details` | Igual que `/health` + circuit breakers | **Sí**                           |
+| `/health/ai`      | Estado crudo de cada proveedor      | No (siempre 200, para diagnóstico)  |
+
+**Alertar sobre `/health`.** Hasta T-IA-004, `ai.status` se calculaba sobre
+`configured` —o sea, sobre si existía la API key— así que durante la caída del
+26-ago-2026 el endpoint devolvió `"ok"` con Groq contestando 404 a todo. La
+detectó un usuario, no el monitoreo. Ahora `ai.status` sale de `available`:
+verdadero solo si algún proveedor **respondió** la sonda.
+
+**La readiness nunca se cae con la IA, y es deliberado.** Gobierna el ruteo de
+tráfico: sacar la instancia de rotación porque un proveedor externo se cayó
+convierte una degradación (tarot sin interpretación) en una caída total del
+sitio, y reiniciar el contenedor no revive un modelo decomisionado ni repone una
+credencial que alguien borró. `/health/ready` sigue en `up` pero lo declara con
+`degraded: true`, `available: false` y el `message` con la causa. Vale también
+para la ausencia total de credenciales: el check corre **continuamente**, no solo
+al arrancar, así que rotar mal una key en producción apagaría el sitio entero por
+una dependencia sin la que la app funciona.
+
+> ⚠️ El health check de la plataforma (Railway, Render, probes de K8s) **no puede
+> apuntar a `/health`**: devuelve 503 con la IA caída y marcaría el deploy como
+> fallido o reiniciaría el contenedor en loop. Va a `/health/live` (liveness) o
+> `/health/ready` (readiness). `/health` es para el monitor externo, que sí tiene
+> que enterarse.
+
+**Costo de sondear.** Cada llamada a estos endpoints dispara sondas reales contra
+los proveedores, y el tier gratuito de Groq son 1.000 requests/día. Los resultados
+se cachean **30 segundos** (`PROBE_CACHE_TTL_MS` en `ai-health.service.ts`) para
+que un monitor no se coma la cuota ni se auto-provoque el 429 que después reporta
+como caída. El `timestamp` de la respuesta es el de la sonda, no el del request:
+si dice 25 segundos atrás, el dato tiene 25 segundos. **No sondear a menos de 30s
+de intervalo** — no sirve de nada.
+
 ### Check All Providers
 
 ```bash
@@ -187,6 +227,8 @@ curl http://localhost:3000/health/ai
 
 ```json
 {
+  "configured": true,
+  "available": true,
   "primary": {
     "provider": "groq",
     "configured": true,

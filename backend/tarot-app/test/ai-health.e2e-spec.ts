@@ -13,7 +13,7 @@ describe('AI Health (e2e)', () => {
     get: jest.fn((key: string) => {
       const config: Record<string, string> = {
         GROQ_API_KEY: 'gsk_test_key_12345',
-        GROQ_MODEL: 'llama-3.1-70b-versatile',
+        GROQ_MODEL: 'openai/gpt-oss-120b',
         OPENAI_API_KEY: '',
         OPENAI_MODEL: '',
         DEEPSEEK_API_KEY: '',
@@ -128,7 +128,23 @@ describe('AI Health (e2e)', () => {
         .get('/api/v1/health/ai')
         .expect(200)
         .expect((res) => {
-          expect(res.body.primary.model).toBe('llama-3.1-70b-versatile');
+          expect(res.body.primary.model).toBe('openai/gpt-oss-120b');
+        });
+    });
+
+    /**
+     * T-IA-004: `configured` (¿hay API key?) y `available` (¿respondió alguien?)
+     * son cosas distintas. Confundirlas fue lo que hizo que el health reportara
+     * `ok` durante la caída de agosto de 2026.
+     */
+    it('should expose configured and available as separate signals', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/health/ai')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.configured).toBe(true);
+          expect(typeof res.body.available).toBe('boolean');
+          expect(res.body.available).toBe(res.body.primary.status === 'ok');
         });
     });
   });

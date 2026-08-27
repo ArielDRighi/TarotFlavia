@@ -19,13 +19,24 @@ export class AIHealthController {
     schema: {
       type: 'object',
       properties: {
+        configured: {
+          type: 'boolean',
+          example: true,
+          description: 'Hay credenciales para al menos un proveedor',
+        },
+        available: {
+          type: 'boolean',
+          example: true,
+          description:
+            'Al menos un proveedor respondió la sonda. Es la única señal de que la IA funciona: tener la API key seteada no alcanza',
+        },
         primary: {
           type: 'object',
           properties: {
             provider: { type: 'string', example: 'groq' },
             configured: { type: 'boolean', example: true },
             status: { type: 'string', enum: ['ok', 'error', 'not_configured'] },
-            model: { type: 'string', example: 'llama-3.1-70b-versatile' },
+            model: { type: 'string', example: 'openai/gpt-oss-120b' },
             responseTime: { type: 'number', example: 150 },
             error: { type: 'string', nullable: true },
             rateLimits: {

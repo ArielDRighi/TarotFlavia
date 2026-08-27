@@ -3,6 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { AIHealthService } from './ai-health.service';
 import { AIProviderService } from '../ai/application/services/ai-provider.service';
+import {
+  DEFAULT_DEEPSEEK_MODEL,
+  DEFAULT_GROQ_MODEL,
+} from '../ai/domain/constants/ai-models.constants';
 
 describe('AIHealthService', () => {
   let service: AIHealthService;
@@ -65,7 +69,10 @@ describe('AIHealthService', () => {
       const result = await service.checkGroqHealth();
 
       expect(result.provider).toBe('groq');
-      expect(result.configured).toBe(false);
+      // T-IA-004: la credencial está, solo que mal escrita. Reportarla como
+      // "no configurada" la borraba del reporte y el health terminaba diciendo
+      // "no hay ningún proveedor configurado" con una key presente.
+      expect(result.configured).toBe(true);
       expect(result.status).toBe('error');
       expect(result.error).toContain('Invalid API key format');
     });
@@ -235,7 +242,7 @@ describe('AIHealthService', () => {
 
       const result = await service.checkOpenAIHealth();
 
-      expect(result.configured).toBe(false);
+      expect(result.configured).toBe(true);
       expect(result.status).toBe('error');
       expect(result.error).toContain('Invalid API key format');
     });
@@ -279,6 +286,192 @@ describe('AIHealthService', () => {
 
       expect(result.primary.configured).toBe(false);
       expect(result.primary.status).toBe('error');
+    });
+  });
+
+  /**
+   * T-IA-004: el health mentia. `available` se calculaba sobre `configured`
+   * (hay API key?) en lugar de sobre `status === 'ok'`, asi que un monitor
+   * apuntado al health nunca se enteraba de una caida de IA.
+   */
+  describe('checkAllProviders - availability aggregate (T-IA-004)', () => {
+    interface ConnectionProbes {
+      testGroqConnection: (apiKey: string) => Promise<void>;
+      testDeepSeekConnection: (apiKey: string) => Promise<void>;
+      testOpenAIConnection: (apiKey: string) => Promise<void>;
+    }
+
+    const probes = (): ConnectionProbes =>
+      service as unknown as ConnectionProbes;
+
+    it('should report available when the primary provider responds', async () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'GROQ_API_KEY') return 'gsk_validkey123';
+        if (key === 'GROQ_MODEL') return DEFAULT_GROQ_MODEL;
+        return undefined;
+      });
+      jest.spyOn(probes(), 'testGroqConnection').mockResolvedValue(undefined);
+
+      const result = await service.checkAllProviders();
+
+      expect(result.primary.status).toBe('ok');
+      expect(result.configured).toBe(true);
+      expect(result.available).toBe(true);
+    });
+
+    it('should report unavailable when every configured provider fails', async () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'GROQ_API_KEY') return 'gsk_validkey123';
+        if (key === 'GROQ_MODEL') return DEFAULT_GROQ_MODEL;
+        if (key === 'DEEPSEEK_API_KEY') return 'sk-deepseek123';
+        if (key === 'DEEPSEEK_MODEL') return DEFAULT_DEEPSEEK_MODEL;
+        return undefined;
+      });
+      jest
+        .spyOn(probes(), 'testGroqConnection')
+        .mockRejectedValue(
+          new Error('404 The model does not exist or you do not have access'),
+        );
+      jest
+        .spyOn(probes(), 'testDeepSeekConnection')
+        .mockRejectedValue(new Error('Request timeout'));
+
+      const result = await service.checkAllProviders();
+
+      // Este es exactamente el estado del incidente del 26-ago-2026:
+      // credenciales presentes, ningun proveedor capaz de responder.
+      expect(result.configured).toBe(true);
+      expect(result.available).toBe(false);
+    });
+
+    it('should report available when the primary fails but a fallback responds', async () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'GROQ_API_KEY') return 'gsk_validkey123';
+        if (key === 'GROQ_MODEL') return DEFAULT_GROQ_MODEL;
+        if (key === 'DEEPSEEK_API_KEY') return 'sk-deepseek123';
+        if (key === 'DEEPSEEK_MODEL') return DEFAULT_DEEPSEEK_MODEL;
+        return undefined;
+      });
+      jest
+        .spyOn(probes(), 'testGroqConnection')
+        .mockRejectedValue(new Error('Server error'));
+      jest
+        .spyOn(probes(), 'testDeepSeekConnection')
+        .mockResolvedValue(undefined);
+
+      const result = await service.checkAllProviders();
+
+      expect(result.primary.status).toBe('error');
+      expect(result.fallback[0].status).toBe('ok');
+      expect(result.available).toBe(true);
+    });
+
+    it('should report neither configured nor available without credentials', async () => {
+      mockConfigService.get.mockImplementation(() => undefined);
+
+      const result = await service.checkAllProviders();
+
+      expect(result.configured).toBe(false);
+      expect(result.available).toBe(false);
+    });
+  });
+
+  describe('malformed credentials stay visible (T-IA-004)', () => {
+    it('should list a provider with a malformed key instead of hiding it', async () => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'GROQ_API_KEY') return 'gsk_validkey123';
+        if (key === 'GROQ_MODEL') return DEFAULT_GROQ_MODEL;
+        if (key === 'OPENAI_API_KEY') return 'oops-wrong-prefix';
+        if (key === 'OPENAI_MODEL') return 'gpt-4o-mini';
+        return undefined;
+      });
+
+      const result = await service.checkAllProviders();
+
+      expect(result.configured).toBe(true);
+      expect(result.fallback).toHaveLength(1);
+      expect(result.fallback[0]).toMatchObject({
+        provider: 'openai',
+        configured: true,
+        status: 'error',
+      });
+      expect(result.fallback[0].error).toContain('Invalid API key format');
+    });
+  });
+
+  /**
+   * Cada sonda es una llamada real a la API del proveedor y `/health` es
+   * público. Groq da 1.000 requests/día: sin cache, un monitor a 1/min se come
+   * la cuota entera y provoca el 429 que después reporta como caída.
+   */
+  describe('probe cache', () => {
+    interface CachedProbes {
+      testGroqConnection: (apiKey: string) => Promise<void>;
+      PROBE_CACHE_TTL_MS: number;
+    }
+
+    const cached = (): CachedProbes => service as unknown as CachedProbes;
+
+    beforeEach(() => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'GROQ_API_KEY') return 'gsk_validkey123';
+        if (key === 'GROQ_MODEL') return DEFAULT_GROQ_MODEL;
+        return undefined;
+      });
+    });
+
+    it('should probe the providers once for repeated checks within the TTL', async () => {
+      const probe = jest
+        .spyOn(cached(), 'testGroqConnection')
+        .mockResolvedValue(undefined);
+
+      await service.checkAllProviders();
+      await service.checkAllProviders();
+      await service.checkAllProviders();
+
+      expect(probe).toHaveBeenCalledTimes(1);
+    });
+
+    it('should share a single round of probes between concurrent requests', async () => {
+      const probe = jest
+        .spyOn(cached(), 'testGroqConnection')
+        .mockResolvedValue(undefined);
+
+      await Promise.all([
+        service.checkAllProviders(),
+        service.checkAllProviders(),
+      ]);
+
+      expect(probe).toHaveBeenCalledTimes(1);
+    });
+
+    it('should re-probe once the TTL expires', async () => {
+      const probe = jest
+        .spyOn(cached(), 'testGroqConnection')
+        .mockResolvedValue(undefined);
+      const start = Date.now();
+      const clock = jest.spyOn(Date, 'now').mockReturnValue(start);
+
+      await service.checkAllProviders();
+      clock.mockReturnValue(start + cached().PROBE_CACHE_TTL_MS + 1);
+      await service.checkAllProviders();
+
+      expect(probe).toHaveBeenCalledTimes(2);
+      clock.mockRestore();
+    });
+
+    it('should timestamp the result with the probe time, not the request time', async () => {
+      jest.spyOn(cached(), 'testGroqConnection').mockResolvedValue(undefined);
+      const start = Date.now();
+      const clock = jest.spyOn(Date, 'now').mockReturnValue(start);
+
+      const first = await service.checkAllProviders();
+      clock.mockReturnValue(start + 5000);
+      const second = await service.checkAllProviders();
+
+      // La respuesta cacheada declara su antigüedad en vez de disimularla.
+      expect(second.timestamp).toBe(first.timestamp);
+      clock.mockRestore();
     });
   });
 

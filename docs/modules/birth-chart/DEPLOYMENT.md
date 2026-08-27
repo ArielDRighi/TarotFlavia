@@ -457,8 +457,10 @@ USER nodejs
 EXPOSE 3000
 
 # Healthcheck
+# /health/live y no /health: desde T-IA-004 /health devuelve 503 con la IA
+# caída, y eso reiniciaría el contenedor en loop por una dependencia externa.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
+  CMD curl -f http://localhost:3000/health/live || exit 1
 
 CMD ["node", "dist/main.js"]
 ```
@@ -609,15 +611,19 @@ spec:
             limits:
               memory: '1Gi'
               cpu: '1000m'
+          # Ni la liveness ni la readiness pueden apuntar a /health: devuelve
+          # 503 cuando ningún proveedor de IA responde (T-IA-004), y eso
+          # evictaría los pods por una dependencia externa sin la que la app
+          # degrada perfectamente. /health es para el monitor externo.
           livenessProbe:
             httpGet:
-              path: /health
+              path: /health/live
               port: 3000
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /health
+              path: /health/ready
               port: 3000
             initialDelaySeconds: 10
             periodSeconds: 5

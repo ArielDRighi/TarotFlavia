@@ -193,7 +193,7 @@ services:
     plan: starter
     buildCommand: cd backend/tarot-app && npm install && npm run build
     startCommand: cd backend/tarot-app && npm run start:prod
-    healthCheckPath: /health
+    healthCheckPath: /health/ready # NO /health: devuelve 503 con la IA caída
     envVars:
       - key: NODE_ENV
         value: production
@@ -797,12 +797,23 @@ npm run migration:revert
 Configurar health checks en Render/Railway:
 
 ```
-Path: /health
+Path: /health/ready
 Expected Status: 200
 Interval: 30s
 Timeout: 10s
 Unhealthy Threshold: 3 failures
 ```
+
+> ⚠️ **No apuntar el health check de la plataforma a `/health`.** Desde T-IA-004
+> ese endpoint devuelve **503 cuando ningún proveedor de IA responde**, que es
+> lo que hace que el monitoreo se entere de una caída. Si la plataforma lo usa
+> para decidir si el deploy está sano, un incidente de un proveedor externo
+> marcaría el deploy como fallido y reiniciaría el contenedor en loop —
+> convirtiendo una degradación (tarot sin interpretación) en una caída total.
+>
+> `/health/ready` nunca cae por la IA a propósito; `/health` es para el monitor
+> externo, que sí tiene que enterarse. Ver
+> [`AI_PROVIDERS.md`](./AI_PROVIDERS.md) → *Qué endpoint monitorear*.
 
 ### Logs
 
@@ -857,7 +868,7 @@ Configurar:
 
 ```
 URL to monitor: https://api.tarotflavia.com/health
-Interval: 5 minutes
+Interval: 5 minutes   # /health es el correcto acá: alerta si la IA se cae
 Alert via: Email, Slack
 ```
 

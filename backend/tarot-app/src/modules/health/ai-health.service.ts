@@ -25,7 +25,17 @@ export interface AIProviderHealth {
   };
 }
 
+/** Las tres sondas, en el orden en que las lanza `probeAllProviders()`. */
+type ProviderProbes = [AIProviderHealth, AIProviderHealth, AIProviderHealth];
+
 export interface AIHealthCheckResult {
+  /** Hay credenciales para al menos un proveedor. */
+  configured: boolean;
+  /**
+   * Al menos un proveedor **respondió** la sonda. Es lo único que dice si la
+   * IA funciona: tener la API key seteada no alcanza (T-IA-004).
+   */
+  available: boolean;
   primary: AIProviderHealth;
   fallback: AIProviderHealth[];
   circuitBreakers?: ReturnType<AIProviderService['getCircuitBreakerStats']>;
@@ -38,6 +48,25 @@ export class AIHealthService {
   private readonly GROQ_TIMEOUT = 10000; // 10s - Groq is ultra-fast
   private readonly DEEPSEEK_TIMEOUT = 15000; // 15s
   private readonly OPENAI_TIMEOUT = 30000; // 30s
+
+  /**
+   * Cada sonda es una llamada real a la API del proveedor y `/health` es
+   * público y sin auth. Groq da **1.000 requests por día** en el tier gratuito
+   * (medido, ver BACKLOG_INCIDENTE_IA_2026_08), así que un monitor a 1/min
+   * gastaría 1.440 sondas diarias: el health se comería la cuota entera y se
+   * auto-provocaría el 429 que después reporta como caída. Con 30s de TTL el
+   * techo queda en ~2.880 sondas/día repartidas entre los tres proveedores,
+   * y cualquier ráfaga de tráfico anónimo cuesta lo mismo que una sola.
+   *
+   * El `timestamp` de la respuesta es el de la sonda, no el del request, así
+   * que la antigüedad del dato siempre está a la vista.
+   */
+  private readonly PROBE_CACHE_TTL_MS = 30000;
+
+  private probeCache: {
+    probedAt: number;
+    probes: Promise<ProviderProbes>;
+  } | null = null;
 
   constructor(
     private readonly configService: ConfigService,
@@ -62,10 +91,14 @@ export class AIHealthService {
     }
 
     if (!apiKey.startsWith('gsk_')) {
+      // La credencial está, solo que mal escrita: `configured: true` para que
+      // el proveedor entre en el reporte y el health diga *por qué* falla, en
+      // vez de contestar "no hay ningún proveedor configurado" (T-IA-004).
       return {
         provider: 'groq',
-        configured: false,
+        configured: true,
         status: 'error',
+        model,
         error: 'Invalid API key format (must start with gsk_)',
       };
     }
@@ -167,10 +200,13 @@ export class AIHealthService {
     }
 
     if (!apiKey.startsWith('sk-')) {
+      // Ídem Groq: una key mal escrita es un proveedor configurado y roto, no
+      // un proveedor ausente.
       return {
         provider: 'openai',
-        configured: false,
+        configured: true,
         status: 'error',
+        model,
         error: 'Invalid API key format (must start with sk-)',
       };
     }
@@ -209,11 +245,8 @@ export class AIHealthService {
    * Check all configured AI providers
    */
   async checkAllProviders(): Promise<AIHealthCheckResult> {
-    const [groq, deepseek, openai] = await Promise.all([
-      this.checkGroqHealth(),
-      this.checkDeepSeekHealth(),
-      this.checkOpenAIHealth(),
-    ]);
+    const { probedAt, probes } = this.getProbes();
+    const [groq, deepseek, openai] = await probes;
 
     const fallback: AIProviderHealth[] = [];
 
@@ -230,12 +263,49 @@ export class AIHealthService {
       ? this.aiProviderService.getCircuitBreakerStats()
       : undefined;
 
+    // T-IA-004: `configured` y `available` son cosas distintas y confundirlas
+    // fue lo que hizo que el health reportara `ok` con la IA caída. La única
+    // señal de que la IA funciona es que algún proveedor haya respondido.
+    const configured = groq.configured || fallback.length > 0;
+    const available =
+      groq.status === 'ok' || fallback.some((f) => f.status === 'ok');
+
     return {
+      configured,
+      available,
       primary: groq,
       fallback,
       circuitBreakers,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(probedAt).toISOString(),
     };
+  }
+
+  /**
+   * Devuelve las sondas vigentes, lanzándolas solo si el TTL venció. Se cachea
+   * la **promesa**, no el resultado, así dos requests concurrentes comparten
+   * una sola tanda de llamadas a los proveedores. Ningún `check*Health()`
+   * rechaza (todos capturan), así que el cache nunca queda envenenado.
+   */
+  private getProbes(): { probedAt: number; probes: Promise<ProviderProbes> } {
+    const now = Date.now();
+
+    if (
+      this.probeCache &&
+      now - this.probeCache.probedAt < this.PROBE_CACHE_TTL_MS
+    ) {
+      return this.probeCache;
+    }
+
+    this.probeCache = {
+      probedAt: now,
+      probes: Promise.all([
+        this.checkGroqHealth(),
+        this.checkDeepSeekHealth(),
+        this.checkOpenAIHealth(),
+      ]),
+    };
+
+    return this.probeCache;
   }
 
   /**
