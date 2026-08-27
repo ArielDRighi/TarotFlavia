@@ -75,6 +75,24 @@ export type ListingIntroKey =
  */
 export const MIN_LISTING_INTRO_WORDS = 130;
 
+/**
+ * Pisos más altos que el general, por ruta.
+ *
+ * `/servicios` es la cuarta URL de T-SEO-012 y la única de esa sección que no es
+ * una ficha: su criterio de aceptación son 400 palabras propias de la página, y
+ * la introducción es lo único que la ruta garantiza. Sin este piso, borrar las
+ * tres secciones que T-SEO-012 agregó dejaba el CI en verde y la URL de nuevo
+ * bajo el umbral.
+ */
+export const MIN_LISTING_INTRO_WORDS_BY_KEY: Partial<Record<ListingIntroKey, number>> = {
+  servicios: 360,
+};
+
+/** Piso de palabras propias que le corresponde a una ruta. */
+export function getMinListingIntroWords(key: ListingIntroKey): number {
+  return MIN_LISTING_INTRO_WORDS_BY_KEY[key] ?? MIN_LISTING_INTRO_WORDS;
+}
+
 /** Palabras propias que aporta una introducción (lead + cuerpo de secciones). */
 export function getListingIntroWordCount(intro: ListingIntroData): number {
   return countWords([intro.lead, ...intro.sections.map((section) => section.body)]);
@@ -235,16 +253,16 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
         body: 'Las lecturas de tarot, numerología y carta astral se generan al instante y se pueden repetir cuantas veces haga falta. Un servicio holístico ocupa una agenda y a otra persona: por eso tiene turno, precio y una duración pactada de antemano.',
       },
       {
-        heading: 'Cómo elegir entre los tres',
-        body: 'El árbol genealógico mira hacia atrás: sirve cuando algo se repite y el origen parece estar en la historia familiar. El Péndulo Hebreo trabaja sobre el presente de la persona, con las letras hebreas como referencia. La limpieza energética actúa sobre un lugar o una etapa concreta, sea una casa, un local o una mudanza. Si la duda persiste, conviene abrir las tres fichas y leer la sección que dice para quién es cada una.',
+        heading: 'Cómo elegir la práctica',
+        body: 'El árbol genealógico mira hacia atrás: sirve cuando algo se repite y el origen parece estar en la historia familiar. El Péndulo Hebreo trabaja sobre el presente de la persona, con las letras hebreas como referencia. La limpieza energética actúa sobre un lugar o una etapa concreta, sea una casa, un local o una mudanza. Cuando la duda persiste, conviene abrir cada ficha y leer la sección que dice para quién es y para quién no.',
       },
       {
         heading: 'Antes de reservar un turno',
-        body: 'Cada ficha detalla cómo se prepara la persona, qué pasa durante la hora y qué queda después. Leerla completa evita la mayor parte de los malentendidos: ninguna de las tres prácticas promete un desenlace para una fecha ni decide nada en tu lugar. Conviene además elegir un horario con margen por delante, porque el rato siguiente a una sesión rara vez es un buen momento para volver a una reunión.',
+        body: 'Cada ficha detalla cómo se prepara la persona, qué pasa durante el encuentro y qué queda después. Leerla completa evita la mayor parte de los malentendidos: ninguna de estas prácticas promete un desenlace para una fecha ni decide nada en tu lugar. Conviene además elegir un horario con margen por delante, porque el rato siguiente a una sesión rara vez es un buen momento para volver a una reunión.',
       },
       {
-        heading: 'Quién atiende las sesiones',
-        body: 'Las tres prácticas las atiende Flavia, la misma persona que responde los mensajes y firma el resumen de cada encuentro. No hay un equipo rotativo ni derivaciones: el turno que reservás es con ella. En la página Sobre nosotros está su recorrido y el criterio con el que se escribe todo lo que se publica en el sitio.',
+        heading: 'Quién atiende y con qué criterio',
+        body: 'Las sesiones no se derivan ni rotan: el turno que reservás es con quien va a estar del otro lado, y quien acompaña la sesión es también quien responde los mensajes que quedan pendientes. En la página Sobre nosotros está el criterio con el que se escribe y se revisa todo lo que se publica en el sitio, que es el mismo con el que se atiende acá.',
       },
     ],
     links: [

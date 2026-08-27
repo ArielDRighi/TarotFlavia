@@ -1,3 +1,5 @@
+// 5. Components
+import { EditorialCard } from '@/components/common/EditorialCard';
 // 6. Utils & types
 import { cn } from '@/lib/utils';
 import type { ServiceDetailContent } from '@/lib/constants/service-details.data';
@@ -15,6 +17,10 @@ import type { ServiceDetailContent } from '@/lib/constants/service-details.data'
  *
  * El texto vive en `service-details.data.ts`, no acá: así el guardarraíl de
  * palabras, de unicidad y de vocabulario YMYL puede verificarlo sin renderizar.
+ *
+ * La tarjeta la dibuja `EditorialCard`, que comparte con `ListingIntro`; lo
+ * propio de este componente es el envoltorio, el bloque de preguntas frecuentes
+ * y el aviso YMYL del pie.
  *
  * @example
  * ```tsx
@@ -34,48 +40,37 @@ export function ServiceEditorialContent({ content, className }: ServiceEditorial
   const { title, lead, sections, faq, disclaimer } = content;
 
   return (
-    <section
-      data-testid="service-editorial"
+    <EditorialCard
+      testId="service-editorial"
+      title={title}
+      lead={lead}
+      sections={sections}
       className={cn('bg-bg-main px-4 pb-12 md:px-8', className)}
     >
-      <div className="border-border bg-card mx-auto max-w-3xl rounded-2xl border p-6 sm:p-8">
-        <h2 className="text-card-foreground font-serif text-2xl font-bold">{title}</h2>
-        <p className="text-muted-foreground mt-3 leading-relaxed">{lead}</p>
-
-        <div className="mt-6 grid gap-6 sm:grid-cols-2">
-          {sections.map((section) => (
-            <div key={section.heading}>
-              <h3 className="text-card-foreground font-semibold">{section.heading}</h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{section.body}</p>
-            </div>
-          ))}
+      {faq.length > 0 && (
+        <div data-testid="service-editorial-faq" className="border-border mt-8 border-t pt-6">
+          <h3 className="text-card-foreground font-serif text-xl font-semibold">
+            Preguntas frecuentes
+          </h3>
+          <dl className="mt-4 space-y-4">
+            {faq.map((item) => (
+              <div key={item.question}>
+                <dt className="text-card-foreground text-sm font-semibold">{item.question}</dt>
+                <dd className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                  {item.answer}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
+      )}
 
-        {faq.length > 0 && (
-          <div data-testid="service-editorial-faq" className="border-border mt-8 border-t pt-6">
-            <h3 className="text-card-foreground font-serif text-xl font-semibold">
-              Preguntas frecuentes
-            </h3>
-            <dl className="mt-4 space-y-4">
-              {faq.map((item) => (
-                <div key={item.question}>
-                  <dt className="text-card-foreground text-sm font-semibold">{item.question}</dt>
-                  <dd className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                    {item.answer}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        )}
-
-        <p
-          data-testid="service-editorial-disclaimer"
-          className="text-muted-foreground border-border mt-8 border-t pt-4 text-xs leading-relaxed"
-        >
-          {disclaimer}
-        </p>
-      </div>
-    </section>
+      <p
+        data-testid="service-editorial-disclaimer"
+        className="text-muted-foreground border-border mt-8 border-t pt-4 text-xs leading-relaxed"
+      >
+        {disclaimer}
+      </p>
+    </EditorialCard>
   );
 }

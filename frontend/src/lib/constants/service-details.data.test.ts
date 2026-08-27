@@ -28,18 +28,38 @@ import {
 const SLUGS = Object.keys(SERVICE_DETAILS) as ServiceDetailSlug[];
 
 /**
- * Vocabulario clínico. Misma lista que el corpus del backend
- * (`no-salud-user-facing.spec.ts`, T-SEO-013), más `salud`, que en el frontend
- * ya cubre `src/no-salud-user-facing.test.ts` pero conviene tener acá al lado
- * del texto que protege.
+ * Vocabulario clínico.
+ *
+ * ⚠️ **No existe en el backend.** El guardarraíl de T-SEO-013
+ * (`no-salud-user-facing.spec.ts`) escanea una sola palabra, `salud`, porque su
+ * criterio de aceptación era literalmente un `grep -i salud` sobre el HTML
+ * servido. Esta lista es propia de T-SEO-012 y existe porque las fichas de
+ * servicio son las páginas comerciales del sitio: `limpiezas-energeticas` es la
+ * más expuesta a prometer un efecto terapéutico, y ahí `salud` sola no alcanza.
+ *
+ * `sanar` y `sanación` quedan **fuera a propósito**: son vocabulario estándar
+ * del rubro y describen la práctica, no un desenlace clínico. Es el mismo
+ * criterio con el que T-SEO-013 dejó `promete` fuera de la lista de promesas.
+ *
+ * ⚠️ `cur` va con las terminaciones enumeradas y no como `cur\w*`: esa versión
+ * marcaba *curiosidad*, *curso* y *curva*. Un guardarraíl con falsos positivos
+ * se termina relajando, y relajado no sirve para nada.
  */
 const VOCABULARIO_CLINICO =
-  /\b(salud|enfermedad|enfermedades|diagn[óo]stic\w*|tratamient\w*|s[íi]ntoma\w*|medicament\w*|m[ée]dic\w*|dolenci\w*|patolog[íi]\w*|remedi\w*|receta\w*|cur(a|ar|ación)\w*|terap[ée]utic\w*)\b/i;
+  /\b(salud|enferm\w*|diagn[óo]stic\w*|tratamient\w*|s[íi]ntoma\w*|medicament\w*|m[ée]dic\w*|dolenci\w*|patolog[íi]\w*|remedi\w*|receta\w*|cur(a|as|an|ar|ás|é|ó|aba|ando|ad[oa]s?|aci[óo]n|aciones|ativ[oa]s?)|terap\w*|psic[oó]log\w*|psiqui[áa]tr\w*)\b/i;
 
-/** Verbo de promesa cruzado con vocabulario económico o legal (T-SEO-013). */
+/**
+ * Verbo de promesa cruzado con vocabulario económico o legal.
+ *
+ * La lista económica es la del backend (`no-salud-user-facing.spec.ts`, T-SEO-013)
+ * **tal cual**, más `herencia`, `demanda` y `sentencia`, que en fichas de árbol
+ * genealógico y de limpiezas aparecen con más facilidad que en el corpus de
+ * tarot. `negocio` viene de esa lista y es el término que más importa acá: la
+ * ficha de limpiezas habla de locales y emprendimientos.
+ */
 const VERBO_DE_PROMESA = /\b(garanti\w*|augur\w*|asegur\w*)\b/i;
 const VOCABULARIO_ECONOMICO_LEGAL =
-  /\b(dinero|econ[óo]mic\w*|financier\w*|ingres\w*|deuda\w*|juicio\w*|legal\w*|herencia\w*|deman\w*|sentenci\w*)\b/i;
+  /\b(financier\w*|econ[oó]mic\w*|dinero|finanzas|inversi[oó]n\w*|inversiones|contrato\w*|legal\w*|juicio\w*|deuda\w*|ingresos?|sueldo\w*|salario\w*|prosperidad|ganancias?|capital|patrimonio|laboral\w*|negocios?|ascensos?|promoci[oó]n\w*|promociones|herencia\w*|deman\w*|sentenci\w*)\b/i;
 
 function oraciones(texto: string): string[] {
   return texto.split(/(?<=[.!?])\s+/);
@@ -47,6 +67,15 @@ function oraciones(texto: string): string[] {
 
 function textoDe(content: ServiceDetailContent): string[] {
   return getServiceEditorialParagraphs(content);
+}
+
+/** Oraciones que cruzan un verbo de promesa con vocabulario económico o legal. */
+function promesasDe(content: ServiceDetailContent): string[] {
+  return [...textoDe(content), content.disclaimer]
+    .flatMap(oraciones)
+    .filter(
+      (oracion) => VERBO_DE_PROMESA.test(oracion) && VOCABULARIO_ECONOMICO_LEGAL.test(oracion)
+    );
 }
 
 describe('SERVICE_DETAILS', () => {
@@ -125,13 +154,51 @@ describe('SERVICE_DETAILS — guardarraíl YMYL', () => {
   );
 
   it.each(SERVICE_DETAIL_SLUGS)('%s no promete un desenlace económico ni legal', (slug) => {
-    const hits = [...textoDe(SERVICE_DETAILS[slug]), SERVICE_DETAILS[slug].disclaimer]
-      .flatMap(oraciones)
-      .filter(
-        (oracion) => VERBO_DE_PROMESA.test(oracion) && VOCABULARIO_ECONOMICO_LEGAL.test(oracion)
-      );
+    expect(promesasDe(SERVICE_DETAILS[slug])).toEqual([]);
+  });
 
-    expect(hits).toEqual([]);
+  /**
+   * Los dos guardarraíles de arriba afirman una lista vacía, así que un regex
+   * que no matchea nada los deja en verde para siempre. Estos dos casos son los
+   * que impiden que pasen por construcción: si alguien recorta la lista, acá se
+   * entera.
+   */
+  describe('los guardarraíles miden de verdad', () => {
+    it('detecta vocabulario clínico si alguien lo mete en una sección', () => {
+      const roto: ServiceDetailContent = {
+        ...SERVICE_DETAILS['limpiezas-energeticas'],
+        lead: 'La sesión alivia los síntomas de tu enfermedad sin tratamiento médico.',
+      };
+
+      expect(textoDe(roto).filter((parrafo) => VOCABULARIO_CLINICO.test(parrafo))).not.toEqual([]);
+    });
+
+    it('detecta la palabra que el disclaimer sí puede usar cuando aparece fuera de él', () => {
+      const roto: ServiceDetailContent = {
+        ...SERVICE_DETAILS['pendulo-hebreo'],
+        lead: 'Es una terapia de acompañamiento psicológico.',
+      };
+
+      expect(textoDe(roto).filter((parrafo) => VOCABULARIO_CLINICO.test(parrafo))).not.toEqual([]);
+    });
+
+    it('detecta una promesa de desenlace económico', () => {
+      const roto: ServiceDetailContent = {
+        ...SERVICE_DETAILS['limpiezas-energeticas'],
+        lead: 'La limpieza garantiza que el negocio recupere sus ingresos.',
+      };
+
+      expect(promesasDe(roto)).not.toEqual([]);
+    });
+
+    it('no confunde una promesa sin desenlace económico con una infracción', () => {
+      const sano: ServiceDetailContent = {
+        ...SERVICE_DETAILS['limpiezas-energeticas'],
+        lead: 'Nadie te asegura que el lugar se sienta distinto el mismo día.',
+      };
+
+      expect(promesasDe(sano)).toEqual([]);
+    });
   });
 });
 

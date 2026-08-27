@@ -199,7 +199,7 @@ export const STATIC_PAGE_METADATA = {
   servicios: buildPageMetadata({
     title: 'Servicios Holísticos',
     description:
-      'Sesiones personales con Flavia: registros akáshicos, terapias holísticas y acompañamiento espiritual. Reservá tu turno.',
+      'Sesiones holísticas con turno: trabajo con el árbol genealógico, Péndulo Hebreo y limpiezas energéticas de espacios y personas. Reservá tu turno.',
     canonical: ROUTES.SERVICIOS,
   }),
 

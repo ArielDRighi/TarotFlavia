@@ -741,6 +741,75 @@ obliga a escribirle su bloque; en producción lo detecta `npm run check:indexabl
   leer antes de reservar y quién atiende— más un enlace a `/sobre-nosotros`, que es señal E-E-A-T y
   no estaba.
 
+### Lo que encontró la revisión local (y se corrigió)
+
+El primer borrador pasaba las seis puertas de calidad y aun así tenía **contenido inventado**. Es el
+hallazgo que conviene retener de esta tarea: en una página comercial, el riesgo no está en el código.
+
+- **🔴 El copy nombraba a Flavia y remitía a `/sobre-nosotros`, que dice lo contrario.**
+  `about-page.data.ts` afirma textualmente *"Elegimos presentarnos como equipo y no como una figura
+  única"* y no menciona a Flavia ni una vez. El enlace nuevo invitaba al revisor a hacer exactamente
+  ese click. La sección se reescribió sin nombrar a nadie y sin afirmar qué contiene esa página; el
+  enlace queda, porque la señal E-E-A-T es real, pero ya no promete lo que no hay.
+- **🔴 La ficha decía "Modalidad: WhatsApp" arriba y "videollamada / presencial" abajo.**
+  `ServiceDetailPage.tsx` renderiza la modalidad hardcodeada y el bloque nuevo la contradecía dos
+  pantallas más abajo. **"Presencial" además no existe en el producto**: no hay dirección, ni zona de
+  cobertura, ni precio diferencial. Prometer visita a domicilio en una página con botón de pago es
+  una obligación comercial inventada. Todo el copy quedó alineado a WhatsApp y a distancia.
+- **🟠 Entregables que el producto no tiene.** *"Recibís el genograma en imagen y un resumen
+  escrito"*, *"te dejo por escrito las letras"*, *"firma el resumen de cada encuentro"*. `Session` no
+  tiene un solo campo de entregable al usuario y no hay flujo de envío post-sesión. Se bajaron a lo
+  que sí ocurre dentro de la hora: se repasa, se anota, se cierra.
+- **🟠 Afirmaciones de demanda sin respaldo.** *"Es la modalidad que más se pide"*, *"la que más se
+  coordina"*, *"muchas consultas se cierran en una sola"*. Los tres precios están en `0`: el catálogo
+  ni siquiera está operativo. Fuera las tres.
+- **🟠 Un requisito operativo inventado:** la ficha del péndulo pedía *"nombre completo y fecha de
+  nacimiento"*, que el flujo de reserva no pide en ningún lado.
+- **🟠 El copy del listado se acopló a datos que el admin controla.** *"Cómo elegir entre **los
+  tres**"*, *"ninguna de **las tres** prácticas"*, y *"la sesión dura **una hora**"* contra el
+  `durationMinutes` que viene de la base. El panel puede crear un cuarto servicio o desactivar uno, y
+  la grilla mostraría 2 o 4 tarjetas sobre un texto que dice "los tres". **Éste es el agujero real de
+  la decisión "constantes del repo", y no es el que el JSDoc anticipaba**: para las tres fichas el
+  argumento se sostiene; para el listado, contar y nombrar el catálogo era acoplarse a él. Se
+  reescribió sin cardinalidad ni duraciones.
+- **🟠 El guardarraíl de vocabulario clínico no veía el vocabulario del rubro.** El regex original no
+  matcheaba `terapia`, `psicología`, `enfermo`, ni las conjugaciones de `curar` — y el JSDoc del
+  propio campo `disclaimer` decía que era el único lugar donde se podía nombrar *"la medicina o la
+  psicología"*. Se amplió. ⚠️ La versión `cur\w*` que sugería la revisión marcaba *curiosidad*,
+  *curso* y *curva*: quedó con las terminaciones enumeradas, porque un guardarraíl con falsos
+  positivos se termina relajando y relajado no sirve para nada.
+- **🟠 Un comentario afirmaba una paridad con el backend que no existe.** Decía *"misma lista que el
+  corpus del backend"*: el guardarraíl de T-SEO-013 escanea **una sola palabra**, `salud`. La lista
+  clínica es propia de esta tarea y ahora lo dice.
+- **🟠 El regex económico/legal era más débil que el que decía replicar.** Le faltaban `negocio`,
+  `prosperidad`, `ganancias`, `sueldo`, `laboral`, `capital`, `patrimonio`, `contrato`, `finanzas`,
+  `inversión`, `ascenso` y `promoción`. `negocio` es justo el vocabulario de la ficha de limpiezas.
+  Se copió la lista del backend tal cual, más `herencia`, `demanda` y `sentencia`.
+- **🟠 Los dos guardarraíles YMYL pasaban por construcción.** Afirmaban una lista vacía, así que un
+  regex que no matchea nada los dejaba en verde para siempre — que es exactamente cómo los falsos
+  negativos de arriba pasaron desapercibidos. Van con cuatro casos que **deben** dar hit (y uno que
+  no debe), calcados del negativo que el guardarraíl de largo ya tenía.
+- **🟠 `/servicios` era la única de las 4 URLs sin piso propio.** `MIN_LISTING_INTRO_WORDS` es 130 y
+  la ruta necesita 400: borrar las tres secciones nuevas dejaba el CI en verde y la URL de nuevo bajo
+  el umbral. Se agregó `MIN_LISTING_INTRO_WORDS_BY_KEY` con 360 para esa clave.
+- **🟡 `ServiceEditorialContent` era un clon de `ListingIntro`**, carácter por carácter salvo el
+  envoltorio y el pie. El núcleo —título, lead y grilla de secciones— se extrajo a
+  `components/common/EditorialCard.tsx`. El tipo de `sections` se declara ahí y **no** se importa de
+  ningún archivo de datos: TypeScript es estructural, así que ni `ListingIntro` ni la ficha de
+  servicio tienen que conocer el dominio del otro.
+- **🟡 La meta description de `/servicios` describía servicios que no existen.** Decía *"Sesiones
+  personales con Flavia: registros akáshicos, terapias holísticas y acompañamiento espiritual"* —
+  ninguno de los tres es un servicio sembrado, "terapias" es vocabulario que el guardarraíl de esta
+  misma tarea prohíbe, y es el texto que sale en el resultado de búsqueda. Corregida. Era deuda
+  preexistente, pero es una línea y es la misma URL.
+- **🟡 Se quitó *"no intervienen animales"*.** La intención era diferenciarse de prácticas con
+  sacrificio; en una página que un revisor de AdSense va a leer, introducir la idea para negarla
+  juega en contra.
+
+**No se aplicó**, con motivo: emitir `FAQPage` en JSON-LD queda como tarea nueva (abajo), y
+`about-page.data.ts` no se tocó — la decisión de presentarse como equipo es de T-SEO-011 y
+deliberada; lo que estaba mal era el copy nuevo que la contradecía.
+
 ### Hallazgos derivados — NO son de esta tarea
 
 1. **Dos `longDescription` sembradas traen vocabulario clínico.** `arbol-genealogico` dice

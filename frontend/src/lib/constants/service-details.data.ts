@@ -152,7 +152,7 @@ export function getServiceEditorialContent(slug: string): ServiceDetailContent |
 export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = {
   'arbol-genealogico': {
     title: 'Cómo es una sesión de árbol genealógico',
-    lead: 'La sesión de árbol genealógico es un encuentro de una hora en el que reconstruimos juntos el mapa de tu familia y miramos qué historias se repiten en él. No es una investigación de apellidos ni una búsqueda de documentos: lo que se trabaja son las lealtades invisibles, los silencios y los lugares vacíos que tu sistema familiar te dejó para ocupar.',
+    lead: 'La sesión de árbol genealógico es un encuentro por WhatsApp en el que reconstruimos juntos el mapa de tu familia y miramos qué historias se repiten en él. No es una investigación de apellidos ni una búsqueda de documentos: lo que se trabaja son las lealtades invisibles, los silencios y los lugares vacíos que tu sistema familiar te dejó para ocupar.',
     sections: [
       {
         heading: 'Qué armamos durante el encuentro',
@@ -168,7 +168,7 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
       },
       {
         heading: 'Qué te llevás después',
-        body: 'Al cierre recibís el genograma en imagen y un resumen escrito con los tres o cuatro patrones que más peso tuvieron, más una práctica simbólica sencilla para quien quiera hacerla: una carta que no se envía, un objeto que vuelve a su lugar, una frase dicha en voz alta. La integración lleva semanas, no minutos, y conviene saberlo antes de empezar.',
+        body: 'Antes de cerrar repasamos los tres o cuatro patrones que más peso tuvieron, para que te los lleves anotados junto con el genograma tal como quedó dibujado. Se propone además una práctica simbólica sencilla, para quien quiera hacerla: una carta que no se envía, un objeto que vuelve a su lugar, una frase dicha en voz alta. La integración lleva semanas, no minutos, y conviene saberlo antes de empezar.',
       },
       {
         heading: 'Para quién es y para quién no',
@@ -189,7 +189,7 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
       {
         question: '¿Cuánto dura y cómo se hace?',
         answer:
-          'Una hora, en el turno que elijas en el calendario de la ficha. Si el relato se extiende, se acuerda una segunda sesión en lugar de apurar el cierre: cortar a mitad de un hilo deja peor que no haberlo abierto.',
+          'Por WhatsApp, en el turno que elijas en el calendario de la ficha y con la duración que figura arriba. Si el relato se extiende, se acuerda una segunda sesión en lugar de apurar el cierre: cortar a mitad de un hilo deja peor que no haberlo abierto.',
       },
       {
         question: '¿Tengo que contarle a mi familia que hice la sesión?',
@@ -203,7 +203,7 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
 
   'pendulo-hebreo': {
     title: 'Cómo es una sesión de Péndulo Hebreo',
-    lead: 'El Péndulo Hebreo es un método de armonización energética que usa las letras del alfabeto hebreo como referencia. La sesión dura una hora, se coordina en el calendario de esta ficha y funciona igual a distancia: el trabajo se apoya en la palabra y en el símbolo, no en el contacto físico.',
+    lead: 'El Péndulo Hebreo es un método de armonización energética que usa las letras del alfabeto hebreo como referencia. La sesión se coordina por WhatsApp, en el calendario de esta ficha, y funciona igual a distancia: el trabajo se apoya en la palabra y en el símbolo, no en el contacto físico.',
     sections: [
       {
         heading: 'En qué consiste el método',
@@ -211,7 +211,7 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
       },
       {
         heading: 'Cómo te preparás antes',
-        body: 'Llegá con un tema concreto escrito en una línea: un vínculo, una mudanza, una etapa que no termina de cerrar. Buscá un lugar donde nadie te interrumpa durante la hora, con el teléfono en silencio y agua a mano. No hace falta ayuno, ropa especial ni saber una palabra de hebreo: las letras las nombro yo y te explico qué significa cada una cuando aparece.',
+        body: 'Llegá con un tema concreto escrito en una línea: un vínculo, una mudanza, una etapa que no termina de cerrar. Buscá un lugar donde nadie te interrumpa mientras dure el encuentro, con el teléfono en silencio y agua a mano. No hace falta ayuno, ropa especial ni saber una palabra de hebreo: las letras las nombro yo y te explico qué significa cada una cuando aparece.',
       },
       {
         heading: 'Qué pasa durante la sesión',
@@ -219,18 +219,18 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
       },
       {
         heading: 'Qué pasa los días siguientes',
-        body: 'Es habitual sentir cansancio o sueño las primeras horas y bastante claridad al día siguiente. También es habitual no sentir nada particular, y eso no significa que la sesión no haya servido. Te dejo por escrito las letras que se trabajaron y una pauta breve: descansar, tomar agua y anotar lo que aparezca en los sueños durante la primera semana.',
+        body: 'Es habitual sentir cansancio o sueño las primeras horas y bastante claridad al día siguiente. También es habitual no sentir nada particular, y eso no significa que la sesión no haya servido. Antes de cerrar te digo qué letras se trabajaron, para que las anotes, y repasamos una pauta breve: descansar, tomar agua y prestarle atención a lo que aparezca en los sueños durante la primera semana.',
       },
       {
         heading: 'Para quién es y para quién no',
-        body: 'Le sirve a quien arrastra una sensación de estancamiento difusa, a quien atraviesa un cambio grande y quiere ordenarse por dentro, y a quien ya trabaja con otras prácticas simbólicas y quiere sumar una herramienta. No es para quien espera que una hora resuelva sola un problema concreto en un plazo fijo, ni para quien necesita atención profesional sostenida: ahí la sesión acompaña, no sustituye.',
+        body: 'Le sirve a quien arrastra una sensación de estancamiento difusa, a quien atraviesa un cambio grande y quiere ordenarse por dentro, y a quien ya trabaja con otras prácticas simbólicas y quiere sumar una herramienta. No es para quien espera que un solo encuentro resuelva por sí mismo un problema concreto en un plazo fijo, ni para quien necesita atención profesional sostenida: ahí la sesión acompaña, no sustituye.',
       },
     ],
     faq: [
       {
         question: '¿Se puede hacer a distancia?',
         answer:
-          'Sí, y es la modalidad que más se pide. El método trabaja con el nombre y la intención, así que la sesión a distancia es equivalente a la presencial. Se coordina por videollamada y hacen falta tu nombre completo y tu fecha de nacimiento.',
+          'Sí. El método trabaja con el nombre y la intención, así que estar en la misma habitación no cambia el resultado. Toda la coordinación pasa por WhatsApp y lo único que hace falta de tu parte es el tema que traés y un rato sin interrupciones.',
       },
       {
         question: '¿Tengo que creer para que funcione?',
@@ -240,7 +240,7 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
       {
         question: '¿Cuántas sesiones se necesitan?',
         answer:
-          'Muchas consultas se cierran en una sola. Cuando el tema es de arrastre, se suele proponer una segunda a las tres o cuatro semanas, nunca antes: el intervalo forma parte del método y acelerar no mejora nada.',
+          'Cuando el tema es acotado, un solo encuentro suele alcanzar. Cuando es de arrastre, se propone una segunda sesión a las tres o cuatro semanas, nunca antes: el intervalo forma parte del método y acelerar no mejora nada.',
       },
       {
         question: '¿Necesito un péndulo o saber hebreo?',
@@ -254,7 +254,7 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
 
   'limpiezas-energeticas': {
     title: 'Cómo es una limpieza energética',
-    lead: 'Una limpieza energética es una intervención sobre el clima de un lugar o de una etapa: una casa que quedó pesada después de una mudanza o una separación, un local que no arranca, una persona que siente que carga algo que no es suyo. La sesión dura una hora y se coordina en el calendario de esta ficha.',
+    lead: 'Una limpieza energética es una intervención sobre el clima de un lugar o de una etapa: una casa que quedó pesada después de una mudanza o una separación, un local que no arranca, una persona que siente que carga algo que no es suyo. La sesión se coordina por WhatsApp, en el calendario de esta ficha.',
     sections: [
       {
         heading: 'Qué se limpia y qué no',
@@ -266,11 +266,11 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
       },
       {
         heading: 'Qué pasa durante la sesión',
-        body: 'Empezamos recorriendo el lugar, ambiente por ambiente, o repasando la etapa que estés atravesando si el trabajo es personal. Uso sahumado, sal, agua y palabra, y te voy diciendo qué hago en cada rincón y por qué. No se rompe nada, no intervienen animales y no queda nada prendido cuando termino: todo lo que se usa se apaga y se descarta en el cierre.',
+        body: 'Empezamos recorriendo el lugar ambiente por ambiente —vos vas mostrando y describiendo, y yo voy preguntando— o repasando la etapa que estés atravesando si el trabajo es personal. Se usan sahumado, sal, agua y palabra, y te voy diciendo qué se hace en cada rincón y por qué. Nada de lo que se enciende queda prendido al terminar: todo se apaga y se descarta en el cierre.',
       },
       {
         heading: 'Los días siguientes',
-        body: 'Es frecuente que durante las primeras cuarenta y ocho horas el lugar se sienta raro antes de sentirse liviano, y que aparezcan conversaciones pendientes. Te dejo una pauta breve: ventilar todas las mañanas durante una semana y dejar un vaso con agua y sal gruesa en el ambiente más cargado, cambiándolo a los siete días. Si el espacio se vuelve a cargar en un mes, lo que conviene mirar es qué lo carga.',
+        body: 'Es frecuente que durante las primeras cuarenta y ocho horas el lugar se sienta raro antes de sentirse liviano, y que aparezcan conversaciones pendientes. Antes de cerrar repasamos una pauta breve: ventilar todas las mañanas durante una semana y dejar un vaso con agua y sal gruesa en el ambiente más cargado, cambiándolo a los siete días. Si el espacio se vuelve a cargar en un mes, lo que conviene mirar es qué lo carga.',
       },
       {
         heading: 'Para quién es y para quién no',
@@ -279,9 +279,9 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
     ],
     faq: [
       {
-        question: '¿Es presencial o a distancia?',
+        question: '¿Cómo se hace una limpieza a distancia?',
         answer:
-          'Las dos modalidades están disponibles. Para casas grandes y mudanzas conviene la presencial; para personas y locales chicos, la sesión por videollamada rinde igual y es la que más se coordina.',
+          'Se trabaja sobre el lugar a partir de lo que vos mostrás y contás: el recorrido lo hacés vos, ambiente por ambiente, y la intervención se sostiene desde acá. Por eso importa que quien vive o trabaja ahí esté presente durante el encuentro.',
       },
       {
         question: '¿Tengo que estar en la casa?',
