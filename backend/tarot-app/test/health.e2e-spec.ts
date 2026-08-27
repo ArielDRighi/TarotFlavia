@@ -136,9 +136,11 @@ describe('Health (E2E)', () => {
     });
 
     /**
-     * La readiness gobierna el ruteo de tráfico: una caída del proveedor de IA
-     * NO puede sacar la instancia de rotación (convertiría una degradación en
-     * una caída total). Sigue en `up`, pero declara la degradación (T-IA-004).
+     * La readiness gobierna el ruteo de tráfico: la IA NUNCA la bloquea —ni
+     * caída ni sin credenciales—, porque sacar la instancia de rotación
+     * convertiría una degradación en una caída total y reiniciar no revive un
+     * modelo decomisionado. Sigue en `up`, pero declara la degradación. La
+     * alarma la levanta GET /health (T-IA-004).
      */
     it('should keep serving traffic with the AI down, flagging the degradation', async () => {
       const response = await request(httpServer)
@@ -152,7 +154,6 @@ describe('Health (E2E)', () => {
       ).details.ai;
 
       expect(ai.status).toBe('up');
-      expect(ai.configured).toBe(true);
       expect(ai.degraded).toBe(!ai.available);
     });
   });

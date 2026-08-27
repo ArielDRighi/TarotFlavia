@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { HealthController } from './health.controller';
 import {
   HealthCheckService,
@@ -27,11 +28,19 @@ import { DatabaseHealthService } from './database-health.service';
 type IndicatorDetail = { status: 'up' | 'down' } & Record<string, unknown>;
 
 /**
- * Réplica del `HealthCheckExecutor` de terminus: reparte cada indicador entre
- * `info` y `error` según su `status` y marca la corrida como `error` si alguno
- * cayó. El mock anterior devolvía un resultado fijo sin ejecutar los closures,
- * así que la lógica del indicador `ai` —la que mintió en producción— nunca se
- * ejercitaba desde los tests.
+ * Réplica de `HealthCheckService.check()` de terminus, ejecutor incluido:
+ * corre los indicadores en paralelo con `Promise.allSettled`, reparte cada
+ * resultado entre `info` y `error` según su `status` (descartando cualquier
+ * otro valor, igual que el real) y **lanza `ServiceUnavailableException`**
+ * cuando alguno cayó — que es de dónde sale el 503 en producción.
+ *
+ * El mock anterior devolvía un resultado fijo sin ejecutar los closures, así
+ * que la lógica del indicador `ai` —la que mintió en producción— nunca se
+ * ejercitaba desde los tests. Y devolver el resultado en vez de lanzarlo
+ * dejaba sin aserción justamente el 503 que hace que el monitor se entere.
+ *
+ * Ver `@nestjs/terminus/dist/health-check/health-check.service.js` y
+ * `.../health-check-executor.service.js`.
  */
 async function executeIndicators(
   indicators: HealthIndicatorFunction[],
@@ -39,23 +48,56 @@ async function executeIndicators(
   const info: Record<string, IndicatorDetail> = {};
   const error: Record<string, IndicatorDetail> = {};
 
-  for (const indicator of indicators) {
-    const outcome = (await indicator()) as Record<string, IndicatorDetail>;
-    for (const [key, detail] of Object.entries(outcome)) {
+  // `HealthIndicatorFunction` puede devolver el resultado sincrónicamente, así
+  // que se normaliza igual que hace el executor real antes de agregarlo.
+  const settled = await Promise.allSettled(
+    indicators.map((indicator) => Promise.resolve(indicator())),
+  );
+
+  for (const outcome of settled) {
+    if (outcome.status === 'rejected') {
+      throw outcome.reason;
+    }
+
+    const details = outcome.value as Record<string, IndicatorDetail>;
+    for (const [key, detail] of Object.entries(details)) {
       if (detail.status === 'up') {
         info[key] = detail;
-      } else {
+      } else if (detail.status === 'down') {
         error[key] = detail;
       }
     }
   }
 
-  return {
+  const result: HealthCheckResult = {
     status: Object.keys(error).length > 0 ? 'error' : 'ok',
     info: info as HealthIndicatorResult,
     error: error as HealthIndicatorResult,
     details: { ...info, ...error } as HealthIndicatorResult,
   };
+
+  if (result.status !== 'ok') {
+    throw new ServiceUnavailableException(result);
+  }
+
+  return result;
+}
+
+/** Corre un check que se espera caído y devuelve el cuerpo del 503. */
+async function expectServiceUnavailable(
+  run: () => Promise<HealthCheckResult>,
+): Promise<HealthCheckResult> {
+  await expect(run()).rejects.toBeInstanceOf(ServiceUnavailableException);
+
+  try {
+    await run();
+  } catch (caught) {
+    return (
+      caught as ServiceUnavailableException
+    ).getResponse() as HealthCheckResult;
+  }
+
+  throw new Error('Se esperaba un 503 y el check respondió ok');
 }
 
 function aiSnapshot(
@@ -292,6 +334,16 @@ describe('HealthController', () => {
       expect(result.status).toBe('error');
       expect(result.error).toHaveProperty('database');
     });
+
+    it('should surface a 503 when an indicator is down', async () => {
+      jest
+        .spyOn(aiHealthService, 'checkAllProviders')
+        .mockResolvedValue(outageSnapshot());
+
+      await expect(controller.check()).rejects.toBeInstanceOf(
+        ServiceUnavailableException,
+      );
+    });
   });
 
   /**
@@ -309,7 +361,7 @@ describe('HealthController', () => {
     });
 
     it('should mark ai as down in GET /health when no provider answers', async () => {
-      const result = await controller.check();
+      const result = await expectServiceUnavailable(() => controller.check());
 
       expect(result.status).toBe('error');
       expect(result.error?.ai).toMatchObject({
@@ -321,21 +373,79 @@ describe('HealthController', () => {
     });
 
     it('should surface the provider error so an alert says why', async () => {
-      const result = await controller.check();
+      const result = await expectServiceUnavailable(() => controller.check());
 
       const ai = result.error?.ai as { message?: string } | undefined;
       expect(ai?.message).toContain('groq');
       expect(ai?.message).toContain('llama-3.3-70b-versatile');
+      expect(ai?.message).toContain('404');
+    });
+
+    it('should fall back to the provider status when there is no error text', async () => {
+      jest.spyOn(aiHealthService, 'checkAllProviders').mockResolvedValue(
+        aiSnapshot({
+          available: false,
+          primary: {
+            provider: 'groq',
+            configured: true,
+            status: 'error',
+            model: 'openai/gpt-oss-120b',
+          },
+        }),
+      );
+
+      const result = await expectServiceUnavailable(() => controller.check());
+
+      const ai = result.error?.ai as { message?: string } | undefined;
+      expect(ai?.message).toBe(
+        'No AI provider responded: groq (openai/gpt-oss-120b): error',
+      );
+    });
+
+    it('should say so plainly when nothing is configured', async () => {
+      jest.spyOn(aiHealthService, 'checkAllProviders').mockResolvedValue(
+        aiSnapshot({
+          configured: false,
+          available: false,
+          primary: {
+            provider: 'groq',
+            configured: false,
+            status: 'error',
+            error: 'API key not configured',
+          },
+        }),
+      );
+
+      const result = await expectServiceUnavailable(() => controller.check());
+
+      expect(result.error?.ai).toMatchObject({
+        status: 'down',
+        configured: false,
+        message: 'No AI provider is configured',
+      });
     });
 
     it('should mark ai as down in GET /health/details as well', async () => {
-      const result = await controller.checkDetails();
+      const result = await expectServiceUnavailable(() =>
+        controller.checkDetails(),
+      );
 
       expect(result.status).toBe('error');
       expect(result.error?.ai).toMatchObject({
         status: 'down',
         available: false,
       });
+    });
+
+    it('should not let the circuit breaker extras override the verdict', async () => {
+      const result = await expectServiceUnavailable(() =>
+        controller.checkDetails(),
+      );
+
+      // `extras` se spreadea antes que el veredicto: nada accesorio puede
+      // devolver el indicador a `up`.
+      expect(result.error?.ai).toMatchObject({ status: 'down' });
+      expect(result.error?.ai).toHaveProperty('timestamp');
     });
 
     it('should keep ai up in GET /health when a fallback still answers', async () => {
@@ -384,7 +494,15 @@ describe('HealthController', () => {
       });
     });
 
-    it('should fail GET /health/ready when AI is not configured at all', async () => {
+    /**
+     * Tampoco cae sin credenciales. El check se evalúa continuamente, no solo
+     * al arrancar: si alguien rota o borra la key en Railway con la app
+     * corriendo, tumbar la readiness apagaría el sitio entero —auth, historial,
+     * horóscopos ya generados— por una dependencia sin la que la app degrada.
+     * El blast radius es idéntico al de una caída del proveedor, así que la
+     * respuesta tiene que ser la misma. La alarma la levanta GET /health.
+     */
+    it('should keep GET /health/ready serving traffic with no credentials either', async () => {
       jest.spyOn(aiHealthService, 'checkAllProviders').mockResolvedValue(
         aiSnapshot({
           configured: false,
@@ -401,10 +519,19 @@ describe('HealthController', () => {
 
       const result = await controller.checkReady();
 
-      expect(result.status).toBe('error');
-      expect(result.error?.ai).toMatchObject({
-        status: 'down',
+      expect(result.status).toBe('ok');
+      expect(result.info?.ai).toMatchObject({
+        status: 'up',
         configured: false,
+        available: false,
+        degraded: true,
+        message: 'No AI provider is configured',
+      });
+    });
+
+    it('should never take the instance out of rotation for the AI', async () => {
+      await expect(controller.checkReady()).resolves.toMatchObject({
+        status: 'ok',
       });
     });
   });

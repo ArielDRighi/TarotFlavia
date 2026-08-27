@@ -65,30 +65,37 @@ export class HealthController {
   ): HealthIndicatorResult<'ai'> {
     return {
       ai: {
+        // `extras` va primero a propósito: ningún dato accesorio puede pisar el
+        // veredicto del indicador, que es justamente lo que este PR arregla.
+        ...extras,
         status: aiHealth.available ? 'up' : 'down',
         configured: aiHealth.configured,
         available: aiHealth.available,
         primary: aiHealth.primary,
         fallback: aiHealth.fallback,
-        ...(aiHealth.available
-          ? {}
-          : { message: this.describeAIOutage(aiHealth) }),
-        ...extras,
+        ...this.buildAIMessage(aiHealth),
       },
     };
   }
 
   /**
-   * Resume por qué no hay IA disponible, para que la alerta del monitor llegue
-   * con la causa y no solo con un 503.
+   * `message` con la causa de la caída, para que la alerta del monitor llegue
+   * con el motivo y no solo con un 503. Vacío mientras haya IA disponible.
    */
-  private describeAIOutage(aiHealth: AIHealthCheckResult): string {
-    const providers = [aiHealth.primary, ...aiHealth.fallback];
-    const reasons = providers.map((p) => this.describeProvider(p)).join('; ');
+  private buildAIMessage(aiHealth: AIHealthCheckResult): { message?: string } {
+    if (aiHealth.available) {
+      return {};
+    }
 
-    return aiHealth.configured
-      ? `No AI provider responded: ${reasons}`
-      : 'No AI provider is configured';
+    if (!aiHealth.configured) {
+      return { message: 'No AI provider is configured' };
+    }
+
+    const reasons = [aiHealth.primary, ...aiHealth.fallback]
+      .map((provider) => this.describeProvider(provider))
+      .join('; ');
+
+    return { message: `No AI provider responded: ${reasons}` };
   }
 
   private describeProvider(provider: AIProviderHealth): string {
@@ -121,7 +128,7 @@ export class HealthController {
   @ApiResponse({
     status: 503,
     description:
-      'Algún componente está caído. Incluye el caso de la IA: `ai.status` es `down` cuando ningún proveedor responde, aunque haya API keys configuradas (T-IA-004).',
+      'A component is down. This includes the AI: `ai.status` is `down` whenever no provider answers, even if API keys are configured (T-IA-004).',
   })
   async check(): Promise<HealthCheckResult> {
     return this.health.check([
@@ -151,7 +158,7 @@ export class HealthController {
   @ApiOperation({
     summary: 'Readiness check',
     description:
-      'Returns OK only if all critical services are ready. Used by Kubernetes readiness probe. La IA no bloquea la readiness cuando está configurada pero caída (sacar la instancia de rotación convertiría una degradación en una caída total): se reporta con `degraded: true`. Para alertar sobre la IA, monitorear GET /health.',
+      'Returns OK only if all critical services are ready. Used by Kubernetes readiness probe. The AI never blocks readiness: it is an external dependency the app degrades gracefully without, and evicting the instance would turn a degradation into a full outage. The degradation is reported with `degraded: true`. To alert on the AI, monitor GET /health.',
   })
   @ApiResponse({
     status: 200,
@@ -167,25 +174,26 @@ export class HealthController {
       () =>
         this.db.pingCheck('database', { timeout: this.DATABASE_TIMEOUT_MS }),
 
-      // AI providers: la readiness gobierna el ruteo de tráfico, así que una
-      // caída del proveedor externo NO saca la instancia de rotación —el resto
-      // de la app sigue funcionando y reiniciar el contenedor no revive un
-      // modelo decomisionado—. Pero deja de mentir: `available` y `degraded`
-      // dicen la verdad aunque el `status` siga en `up` (T-IA-004).
-      // La falta total de credenciales sí es bloqueante: es un error de
-      // configuración del despliegue, no una caída transitoria.
+      // AI providers: la readiness gobierna el ruteo de tráfico, así que la IA
+      // NUNCA la bloquea. Es una dependencia externa sin la cual la app degrada
+      // (el resto del sitio funciona) y sacar la instancia de rotación
+      // convertiría esa degradación en una caída total; reiniciar el contenedor
+      // tampoco revive un modelo decomisionado ni repone una credencial que
+      // alguien borró en Railway.
+      //
+      // Lo que sí cambia respecto del incidente es que deja de esconderlo:
+      // `available`, `degraded` y `message` dicen la verdad. La alarma la
+      // levanta GET /health, que sí devuelve 503 (T-IA-004).
       async () => {
         const aiHealth = await this.aiHealthService.checkAllProviders();
 
         return {
           ai: {
-            status: aiHealth.configured ? ('up' as const) : ('down' as const),
+            status: 'up' as const,
             configured: aiHealth.configured,
             available: aiHealth.available,
-            degraded: aiHealth.configured && !aiHealth.available,
-            ...(aiHealth.available
-              ? {}
-              : { message: this.describeAIOutage(aiHealth) }),
+            degraded: !aiHealth.available,
+            ...this.buildAIMessage(aiHealth),
           },
         };
       },
@@ -224,7 +232,7 @@ export class HealthController {
   @ApiResponse({
     status: 503,
     description:
-      'Algún componente está caído, la IA incluida cuando ningún proveedor responde (T-IA-004).',
+      'A component is down, the AI included whenever no provider answers (T-IA-004).',
   })
   async checkDetails(): Promise<HealthCheckResult> {
     return this.health.check([
