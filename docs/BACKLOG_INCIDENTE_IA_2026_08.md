@@ -278,7 +278,15 @@ Ver `health.controller.ts:90`, `:133` y `:200`.
 - [x] Los límites reales del tier gratuito están documentados y cubiertos por tests.
 - [x] Producción con `primary.status: "ok"` y 12 horóscopos del día.
 - [x] DeepSeek registrado y respondiendo desde producción (`fallback[0].status: "ok"`).
-- [ ] Una tirada de tarot premium generada end-to-end contra DeepSeek. **Falta hacerla
-      desde la app**: la sonda de salud usa `max_tokens: 1`, así que prueba conectividad y
-      configuración, no una interpretación completa de 4.000 tokens dentro del timeout de
-      25s desde la red de Railway.
+- [x] Una tirada de tarot premium generada end-to-end contra DeepSeek (27-ago-2026, 00:29 UTC,
+      `reading 40`). Traza en los logs de Railway:
+
+      ```
+      Attempting completion with deepseek
+      Success with deepseek (8573ms, 2231 tokens)
+      Interpretation generated successfully with deepseek in 8616ms for tarotista 1
+      ```
+
+      Fue al primer intento, sin fallback a Groq ni reintentos. 8,6s desde la red de Railway
+      contra los 14–17,6s medidos en desarrollo: entra holgado en el timeout de 25s y en los
+      30s del axios del frontend. Costo ~$0,0014 off-peak.
