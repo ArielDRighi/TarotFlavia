@@ -31,7 +31,10 @@ export class ServicePurchase {
   userId: number;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({
+    name: 'user_id',
+    foreignKeyConstraintName: 'FK_service_purchases_user',
+  })
   user: User;
 
   @Column({ name: 'holistic_service_id', type: 'int' })
@@ -40,14 +43,20 @@ export class ServicePurchase {
   @ManyToOne(() => HolisticService, (service) => service.purchases, {
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'holistic_service_id' })
+  @JoinColumn({
+    name: 'holistic_service_id',
+    foreignKeyConstraintName: 'FK_service_purchases_holistic_service',
+  })
   holisticService: HolisticService;
 
   @Column({ name: 'session_id', type: 'int', nullable: true })
   sessionId: number | null;
 
   @ManyToOne(() => Session, { onDelete: 'SET NULL', nullable: true })
-  @JoinColumn({ name: 'session_id' })
+  @JoinColumn({
+    name: 'session_id',
+    foreignKeyConstraintName: 'FK_service_purchases_session',
+  })
   session: Session | null;
 
   @Column({
@@ -106,6 +115,7 @@ export class ServicePurchase {
   /**
    * Mercado Pago payment ID for reconciliation (populated via webhook IPN).
    */
+  @Index('idx_service_purchases_mp_payment_id')
   @Column({
     name: 'mercado_pago_payment_id',
     type: 'varchar',

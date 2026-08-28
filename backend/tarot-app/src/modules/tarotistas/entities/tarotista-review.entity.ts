@@ -30,7 +30,9 @@ export class TarotistaReview {
     description: 'Relación con el tarotista',
     type: () => Tarotista,
   })
-  @ManyToOne(() => Tarotista, (tarotista) => tarotista.reviews)
+  @ManyToOne(() => Tarotista, (tarotista) => tarotista.reviews, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'tarotista_id' })
   tarotista: Tarotista;
 
@@ -42,7 +44,7 @@ export class TarotistaReview {
     description: 'Relación con el usuario',
     type: () => User,
   })
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
@@ -58,7 +60,7 @@ export class TarotistaReview {
     type: () => TarotReading,
     required: false,
   })
-  @ManyToOne(() => TarotReading, { nullable: true })
+  @ManyToOne(() => TarotReading, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'reading_id' })
   reading: TarotReading | null;
 

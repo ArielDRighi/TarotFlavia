@@ -51,6 +51,7 @@ export class HolisticService {
     name: 'session_type',
     type: 'enum',
     enum: SessionType,
+    enumName: 'sessions_session_type_enum',
   })
   sessionType: SessionType;
 

@@ -34,7 +34,7 @@ export class UsageLimit {
   @Column({ name: 'user_id' })
   userId: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

@@ -24,7 +24,10 @@ export class TarotInterpretation {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne('TarotReading', 'interpretations', { eager: false })
+  @ManyToOne('TarotReading', 'interpretations', {
+    eager: false,
+    onDelete: 'NO ACTION',
+  })
   @JoinColumn()
   reading: ITarotReading;
 

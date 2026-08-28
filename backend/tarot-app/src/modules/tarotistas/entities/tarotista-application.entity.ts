@@ -33,7 +33,7 @@ export class TarotistaApplication {
     description: 'Relación con el usuario',
     type: () => User,
   })
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
@@ -103,7 +103,7 @@ export class TarotistaApplication {
     description: 'Admin que revisó la aplicación',
     type: () => User,
   })
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'reviewed_by_user_id' })
   reviewedBy: User | null;
 

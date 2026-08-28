@@ -33,7 +33,7 @@ export class DailyReading {
   @Column({ name: 'user_id', nullable: true })
   userId: number | null;
 
-  @ManyToOne(() => User, { eager: false })
+  @ManyToOne(() => User, { eager: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
@@ -58,7 +58,7 @@ export class DailyReading {
   @Column({ name: 'tarotista_id' })
   tarotistaId: number;
 
-  @ManyToOne(() => Tarotista, { eager: false })
+  @ManyToOne(() => Tarotista, { eager: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'tarotista_id' })
   tarotista: Tarotista;
 
@@ -69,7 +69,7 @@ export class DailyReading {
   @Column({ name: 'card_id' })
   cardId: number;
 
-  @ManyToOne(() => TarotCard, { eager: true })
+  @ManyToOne(() => TarotCard, { eager: true, onDelete: 'NO ACTION' })
   @JoinColumn({ name: 'card_id' })
   card: TarotCard;
 
