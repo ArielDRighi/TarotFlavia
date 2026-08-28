@@ -17,7 +17,8 @@ import { RitualMaterial } from './ritual-material.entity';
  */
 @Entity('rituals')
 @Index('idx_ritual_category', ['category'])
-@Index('idx_ritual_slug', ['slug'], { unique: true })
+// Sin @Index sobre `slug`: `unique: true` en la columna ya crea
+// `rituals_slug_key` (T-DEUDA-002).
 @Index('idx_ritual_difficulty', ['difficulty'])
 @Index('idx_ritual_lunar_phase', ['bestLunarPhase'])
 @Index('idx_ritual_featured', ['isFeatured'])

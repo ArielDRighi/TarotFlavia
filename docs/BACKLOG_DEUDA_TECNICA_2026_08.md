@@ -52,7 +52,7 @@ Al resincronizar la base local desaparecieron 8 sentencias y el total quedó en 
 | --- | --- | --- |
 | `DROP CONSTRAINT` + `ADD CONSTRAINT` (FKs) | 27 + 27 = 54 | nombres **y** `ON DELETE` — cosmético |
 | `DROP INDEX` + `CREATE INDEX` con hash (renombres) | 6 + 4 = 10 | cosmético · ⚠️ 2 se dropean y **no** se recrean |
-| `CREATE [UNIQUE] INDEX` (índices que faltan) | 5 | **2 reales** (`sessions`) + 3 `*_slug` redundantes → T-DEUDA-002 |
+| `CREATE [UNIQUE] INDEX` (índices que faltan) | 5 | **2 reales** (`sessions`) + 3 `*_slug` redundantes → T-DEUDA-002 ✅ |
 | `DROP COLUMN` + `ADD` (timestamps de enciclopedia) | 4 + 4 = 8 | ⚠️ destructivo → T-DEUDA-001 |
 | `ALTER COLUMN ... SET DEFAULT` (`temperature`, `top_p`) | 2 | cosmético |
 | Renombre del enum de `session_type` | 4 | `CREATE TYPE` + `ALTER` + `RENAME` + `DROP TYPE` |
@@ -66,7 +66,8 @@ Dos cosas que este desglose deja a la vista y **no** estaban inventariadas:
 
 - Los `CREATE [UNIQUE] INDEX` siguen siendo **5, con 2 reales**, tal como dice T-DEUDA-002: son
   `idx_session_completed_at_status` e `idx_session_tarotista_completed` (más los 3 `*_slug`
-  redundantes). El inventario de esa tarea queda confirmado.
+  redundantes). El inventario de esa tarea queda confirmado. **Resueltos el 27-ago-2026:** los 2
+  reales por migración, los 3 redundantes borrando el decorador.
 - Hay **6 `DROP INDEX` y sólo 4 `CREATE INDEX`**: el generador propone borrar 2 índices que existen en
   la base y **ninguna entidad declara**. Eso es pérdida de índices, no un renombre. Entra en el
   alcance de T-DEUDA-001 (decidir nombres de índices) — anotado, no resuelto acá.
@@ -132,12 +133,13 @@ trabajó el PR. El detalle de la consulta está en [T-DEUDA-003](#t-deuda-003-ve
 | ID | Tarea | Tipo | Prioridad | Estimación | Estado |
 | --- | --- | --- | --- | --- | --- |
 | T-DEUDA-001 | Alinear los decoradores de las entidades con el esquema real | Backend | 🟠 Alta | 2 pts | ⬜ Pendiente |
-| T-DEUDA-002 | Crear los índices que las entidades declaran y no existen | Backend | 🟠 Alta | 1 pt | ⬜ Pendiente |
+| T-DEUDA-002 | Crear los índices que las entidades declaran y no existen | Backend | 🟠 Alta | 1 pt | ✅ Completada (27-ago-2026) |
 | T-DEUDA-003 | Verificar en producción las 4 columnas de T-PROD-021 | Verificación | 🔴 Crítica | 0,5 pts | ✅ Completada (19-ago-2026) |
 
 **Orden dentro de este backlog:** 003 **ya está cerrada** —fue primero justamente porque podía
 destapar un bug de fechas en producción, y resultó que no había ninguno: no dejó trabajo de migración
-para las otras dos—. Queda 002, y 001 al final porque es la más larga y la menos urgente.
+para las otras dos—. 002 **también está cerrada** (27-ago-2026). Queda 001, que iba al final porque es
+la más larga y la menos urgente.
 
 > 📌 **El orden completo, cruzado con las tareas de SEO, está en
 > [`BACKLOG_SEO_CONTENIDO_2026_08.md` → *Orden de desarrollo*](./BACKLOG_SEO_CONTENIDO_2026_08.md#-orden-de-desarrollo-fuente-única).**
@@ -149,7 +151,7 @@ para las otras dos—. Queda 002, y 001 al final porque es la más larga y la me
 
 **Puerta de salida del backlog:** `npm run migration:generate -- src/database/migrations/Drift`
 genera un archivo **vacío**. Ese es el único criterio que prueba que no quedó drift.
-**Marcador al 19-ago-2026, tras T-DEUDA-003: 83 sentencias.** Conviene generar el archivo **fuera del
+**Marcador al 27-ago-2026, tras T-DEUDA-002: 78 sentencias** (eran 83 tras T-DEUDA-003). Conviene generar el archivo **fuera del
 repo** (`-- /tmp/DriftProbe`) mientras sea una medición y no una migración de verdad.
 
 ---
@@ -215,6 +217,7 @@ resuelve en una migración aparte — no acá.
 ## T-DEUDA-002: Crear los Índices que las Entidades Declaran y No Existen
 
 **Prioridad:** 🟠 Alta · **Estimación:** 1 pt · **Dependencias:** ninguna
+**Estado:** ✅ COMPLETADA (27-ago-2026) — 2 índices creados, 3 decoradores redundantes borrados
 
 ### Problema
 
@@ -237,21 +240,113 @@ el nombre. Los dos de `sessions`, en cambio, no tienen nada que los cubra.
 
 ### Alcance
 
-- [ ] Verificar **columna por columna** cuáles de los 5 están realmente cubiertos por el índice del
+- [x] Verificar **columna por columna** cuáles de los 5 están realmente cubiertos por el índice del
       `UNIQUE` de la columna (`pg_indexes` sobre cada tabla).
-- [ ] Los que estén cubiertos: **borrar el `@Index` redundante** de la entidad, no crear el índice.
+- [x] Los que estén cubiertos: **borrar el `@Index` redundante** de la entidad, no crear el índice.
       Un índice unique duplicado es escritura extra en cada `INSERT` sin ningún beneficio de lectura.
-- [ ] Los que no estén cubiertos (`sessions` × 2): migración nueva que los cree con
+- [x] Los que no estén cubiertos (`sessions` × 2): migración nueva que los cree con
       `CREATE INDEX IF NOT EXISTS`.
-- [ ] Medir si los índices de `sessions` cambian algo: son para las queries de métricas de
+- [x] Medir si los índices de `sessions` cambian algo: son para las queries de métricas de
       tarotistas. Dejar anotado el `EXPLAIN` antes y después.
+
+### Verificación: `pg_indexes` columna por columna (27-ago-2026)
+
+Consulta sobre las 4 tablas afectadas en la base de desarrollo:
+
+```sql
+SELECT tablename, indexname, indexdef FROM pg_indexes
+WHERE tablename IN ('sessions','encyclopedia_tarot_cards','encyclopedia_articles','rituals')
+ORDER BY tablename, indexname;
+```
+
+| Índice declarado | ¿Cubierto? | Por qué | Resolución |
+| --- | --- | --- | --- |
+| `idx_enc_card_slug` | ✅ | `encyclopedia_tarot_cards_slug_key` (`UNIQUE` de la columna) | `@Index` borrado |
+| `idx_article_slug` | ✅ | `encyclopedia_articles_slug_key` | `@Index` borrado |
+| `idx_ritual_slug` | ✅ | `rituals_slug_key` | `@Index` borrado |
+| `idx_session_completed_at_status` | ❌ | nada lo cubre | migración nueva |
+| `idx_session_tarotista_completed` | ❌ | nada lo cubre | migración nueva |
+
+Los tres `*_slug_key` los crea Postgres solo, por el `UNIQUE` que las migraciones originales pusieron
+en la columna (`CreateEncyclopediaTarotCards:50`, `CreateEncyclopediaArticles:39`,
+`CreateRitualsTables:70`). El decorador pedía un **segundo** índice unique sobre la misma columna.
+
+### La migración: `1787832000000-AddSessionMetricsIndexes.ts`
+
+Crea los dos índices de `sessions` con `CREATE INDEX IF NOT EXISTS`, y `down()` los borra con
+`DROP INDEX IF EXISTS`. Verificado contra la base de desarrollo: `migration:run` → los 2 índices
+aparecen en `pg_indexes`; `migration:revert` → quedan 0; `migration:run` de nuevo → vuelven los 2.
+
+**Decisión sobre `CONCURRENTLY`: no se usa.** TypeORM corre cada migración dentro de una transacción y
+`CREATE INDEX CONCURRENTLY` no puede ejecutarse ahí adentro. El `CREATE INDEX` común toma un lock
+`SHARE` sobre `sessions` —bloquea escrituras, no lecturas— mientras construye. Se acepta porque
+`sessions` está vacía en dev y el módulo de agendamiento todavía no tiene volumen. Si algún día la
+tabla creciera lo suficiente como para que el lock moleste, la salida es correr los dos
+`CREATE INDEX CONCURRENTLY` a mano fuera de TypeORM: los `IF NOT EXISTS` de la migración los
+encuentran ya creados y no hacen nada.
+
+### `EXPLAIN` antes y después (27-ago-2026)
+
+`sessions` tiene **0 filas** en dev, así que medir ahí no dice nada: cualquier plan gana con una tabla
+vacía. La medición se hizo sobre una copia de la estructura (`CREATE TABLE sessions_probe (LIKE
+sessions INCLUDING DEFAULTS)`) con **200.000 filas sintéticas** —40 tarotistas, 600 días, 25% en
+`completed`—, los 3 índices que `sessions` ya tenía, y todo dentro de una transacción con `ROLLBACK`:
+no se escribió nada en la base.
+
+Las tres queries son las de `typeorm-metrics.repository.ts` (`EXPLAIN (ANALYZE, BUFFERS)`):
+
+| Query | Antes | Después | |
+| --- | --- | --- | --- |
+| **Q1** — completadas de toda la plataforma en un período (`:284`) | `13,9 ms` · costo `5353` · 3.955 buffers | `1,3 ms` · costo `1684` · 496 buffers | **11×** |
+| **Q2** — completadas de un tarotista en un período (`:211`) | `5,5 ms` · costo `3204` · 3.960 buffers | `0,39 ms` · costo `62` · 337 buffers | **14×** |
+| **Q3** — agregado del top 5, `GROUP BY tarotista_id` (`:347`) | `9,0 ms` · costo `4798` · 3.941 buffers | `0,37 ms` · costo `307` · 349 buffers | **24×** |
+
+Lo que cambia no es sólo el tiempo, es el plan:
+
+- **Q1 antes** entraba por `idx_session_status`, traía **50.000 filas** del índice y filtraba hasta
+  2.338 en el heap. **Después** el `Bitmap Index Scan` sobre `idx_session_completed_at_status` devuelve
+  las 2.338 directo: el rango de fecha se resuelve *dentro* del índice.
+- **Q2 antes** hacía un `BitmapAnd` de dos índices (`idx_tarotista_session_date_time` +
+  `idx_session_status`) y descartaba en el heap. **Después**, un solo `Bitmap Index Scan` sobre
+  `idx_session_tarotista_completed` con las tres condiciones como `Index Cond`.
+- **Q3 antes** leía 25.000 filas por `tarotista_id` y tiraba 24.666 con el filtro
+  (`Rows Removed by Filter: 24666`). **Después**, 334 filas y ningún descarte.
+
+Los índices son útiles: no son documentación decorativa. Con `sessions` vacía hoy no se nota, pero el
+orden de las columnas (`status, completed_at` y `tarotista_id, status, completed_at`) está bien
+elegido para estas tres queries.
+
+### Test de regresión
+
+`src/database/entity-index-migration-sync.spec.ts` recorre **los 48 `@Index('nombre', ...)`** de todas
+las entidades y exige que alguna migración lo **cree**. Es el test que fallaba con los 5 de esta tarea
+y que ahora pasa. Vive en `database/` y no en `database/migrations/` a propósito: el glob de TypeORM
+carga todo lo que haya en esa carpeta y un `.spec.ts` ahí rompe el CLI y el arranque de la app.
+
+Que lo **cree**, no que lo mencione: el matcher exige una sentencia de creación real —SQL crudo
+(`CREATE INDEX "nombre"`) o la API de TypeORM (`new TableIndex({ name: 'nombre' })`)—, después de
+sacar los comentarios. Si no, el propio docblock de una migración alcanzaría para dar por creado un
+`CREATE INDEX` que alguien borró, y un `DROP INDEX` suelto también. Y matchea el nombre con un
+lookahead que descarta prefijos: hoy `idx_birth_chart_user` es prefijo de
+`idx_birth_chart_user_birth`, así que un `includes` pelado habría dado verde al corto a costa del
+largo — justo el falso verde que esta tarea vino a evitar.
+
+El spec cubre sólo los `@Index` **con nombre**. Los `@Index()` sin nombre reciben un hash de TypeORM
+que no se puede cruzar por texto — son los renombres del Grupo C, que resuelve T-DEUDA-001.
 
 ### Criterios de aceptación
 
-- [ ] `pg_indexes` y los decoradores `@Index` coinciden en las 5 tablas.
-- [ ] El generador deja de proponer `CREATE INDEX` (junto con T-DEUDA-001, archivo vacío).
-- [ ] La migración corre sobre una base con datos sin bloqueos largos (`CREATE INDEX` toma
+- [x] `pg_indexes` y los decoradores `@Index` coinciden en las 5 tablas.
+- [x] El generador deja de proponer `CREATE INDEX` **para índices con nombre**. Medición del
+      27-ago-2026: **83 → 78 sentencias** (bajan las 5 de esta tarea). Los 4 `CREATE INDEX` y 6
+      `DROP INDEX` que quedan son los renombres de `@Index()` sin nombre (`ip_blocks`,
+      `card_free_interpretation`) más los 2 `DROP` sin `CREATE` que ya estaban anotados: todo eso es
+      T-DEUDA-001. El archivo vacío sigue siendo la puerta de salida conjunta.
+- [x] La migración corre sobre una base con datos sin bloqueos largos (`CREATE INDEX` toma
       `SHARE` sobre la tabla; evaluar `CONCURRENTLY` si `sessions` está grande en producción).
+      → Ver *Decisión sobre `CONCURRENTLY`* arriba.
+- [x] `npm run format`, `npm run lint`, `npm run test:cov`, `npm run build` y
+      `node scripts/validate-architecture.js` en verde.
 
 ---
 

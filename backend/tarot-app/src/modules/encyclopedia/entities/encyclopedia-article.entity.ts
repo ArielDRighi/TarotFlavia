@@ -36,7 +36,9 @@ export class EncyclopediaArticle {
     description:
       'Slug único URL-safe para el artículo (minúsculas, guiones en lugar de espacios)',
   })
-  @Index('idx_article_slug', { unique: true })
+  // Sin @Index: `unique: true` ya crea `encyclopedia_articles_slug_key`.
+  // Un índice unique duplicado es escritura extra en cada INSERT sin
+  // beneficio de lectura (T-DEUDA-002).
   @Column({ type: 'varchar', length: 80, unique: true, name: 'slug' })
   slug: string;
 

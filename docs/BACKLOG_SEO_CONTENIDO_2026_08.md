@@ -101,7 +101,7 @@ los pendientes de Search Console.** Ver *Puerta de salida* al final.
 | 5 | ~~**Resto de T-SEO-013**~~ ✅ | ~1,5 pts | Cerrada 24-ago-2026: corpus sembrado, prompts de IA y guardarraíl |
 | 6 | **Deploy + verificación en producción + Search Console** | — | ⬅️ **Acá estamos.** Recién ahí se pide la revisión |
 | 7 | ~~**T-SEO-012**~~ ✅ | 1,5 pts | Cerrada 27-ago-2026: las 3 fichas suman 562–591 palabras propias y el listado pasa de 168 a 371 |
-| 8 | T-DEUDA-002 | 1 pt | Los 2 índices reales de `sessions` |
+| 8 | ~~**T-DEUDA-002**~~ ✅ | 1 pt | Cerrada 27-ago-2026: los 2 índices de `sessions` creados (Q1/Q2/Q3 de métricas 11×–24× más rápidas) y 3 `@Index` unique duplicados borrados |
 | 9 | T-DEUDA-001 | 2 pts | El más largo y el menos urgente |
 
 **Hasta poder pedir la tercera revisión: 0 pts de desarrollo.** Queda el paso 6 —deploy,
