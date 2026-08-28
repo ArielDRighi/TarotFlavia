@@ -53,7 +53,8 @@ export interface CardCombination {
 @Entity('encyclopedia_tarot_cards')
 @Index('idx_enc_card_arcana', ['arcanaType'])
 @Index('idx_enc_card_suit', ['suit'])
-@Index('idx_enc_card_slug', ['slug'], { unique: true })
+// Sin @Index sobre `slug`: `unique: true` en la columna ya crea
+// `encyclopedia_tarot_cards_slug_key` (T-DEUDA-002).
 export class EncyclopediaTarotCard {
   @ApiProperty({ example: 1, description: 'ID único de la carta' })
   @PrimaryGeneratedColumn()
