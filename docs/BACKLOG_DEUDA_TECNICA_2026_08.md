@@ -318,10 +318,18 @@ elegido para estas tres queries.
 
 ### Test de regresión
 
-`src/database/entity-index-migration-sync.spec.ts` recorre **los 50 `@Index('nombre', ...)`** de todas
-las entidades y exige que alguna migración nombre a cada uno. Es el test que fallaba con los 5 de esta
-tarea y que ahora pasa. Vive en `database/` y no en `database/migrations/` a propósito: el glob de
-TypeORM carga todo lo que haya en esa carpeta y un `.spec.ts` ahí rompe el CLI y el arranque de la app.
+`src/database/entity-index-migration-sync.spec.ts` recorre **los 48 `@Index('nombre', ...)`** de todas
+las entidades y exige que alguna migración lo **cree**. Es el test que fallaba con los 5 de esta tarea
+y que ahora pasa. Vive en `database/` y no en `database/migrations/` a propósito: el glob de TypeORM
+carga todo lo que haya en esa carpeta y un `.spec.ts` ahí rompe el CLI y el arranque de la app.
+
+Que lo **cree**, no que lo mencione: el matcher exige una sentencia de creación real —SQL crudo
+(`CREATE INDEX "nombre"`) o la API de TypeORM (`new TableIndex({ name: 'nombre' })`)—, después de
+sacar los comentarios. Si no, el propio docblock de una migración alcanzaría para dar por creado un
+`CREATE INDEX` que alguien borró, y un `DROP INDEX` suelto también. Y matchea el nombre con un
+lookahead que descarta prefijos: hoy `idx_birth_chart_user` es prefijo de
+`idx_birth_chart_user_birth`, así que un `includes` pelado habría dado verde al corto a costa del
+largo — justo el falso verde que esta tarea vino a evitar.
 
 El spec cubre sólo los `@Index` **con nombre**. Los `@Index()` sin nombre reciben un hash de TypeORM
 que no se puede cruzar por texto — son los renombres del Grupo C, que resuelve T-DEUDA-001.
