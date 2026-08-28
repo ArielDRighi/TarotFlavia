@@ -270,19 +270,33 @@ Que además es lo que se quiere decir: el default es la **expresión** `0.7`, no
 ### El test de regresión
 
 `src/database/entity-schema-drift.spec.ts` (19 tests) lee el texto de las entidades y exige lo que
-se decidió acá: `onDelete` en las 52 relaciones que crean una FK, los 6 nombres legibles de índices
-y los 6 de constraints fijados en el decorador, `@Index()` pelado **sólo** en las tres entidades
-cuyos índices tienen hash en la base, `timestamptz` en la enciclopedia, `enumName` en
-`holistic_services` y los defaults como expresión SQL.
+se decidió acá. Lo importante es que **no chequea presencia, chequea valor**: lleva la tabla de las
+52 relaciones con el `ON DELETE` que la base tiene de verdad y la compara entera con `toEqual`, así
+que agarra las tres formas de romperlo —una relación nueva sin `onDelete`, una relación borrada, y
+un `onDelete` cambiado a un valor que no es el de la base—. La última es la peligrosa: un
+`CASCADE` que alguien convierte en `SET NULL` no rompe ningún test de comportamiento y no se nota
+hasta que se borra una fila.
+
+Por la misma razón los nombres van **atados a su columna**: cada índice legible se verifica sobre la
+propiedad que decora y cada `foreignKeyConstraintName` dentro del `@JoinColumn` de su columna. Sin
+eso, intercambiar `IDX_ip_blocks_ip` con `IDX_ip_blocks_blocked_until` —o
+`FK_service_purchases_user` con `FK_service_purchases_session`— dejaba los strings presentes en el
+archivo y pasaba el test con el drift reintroducido.
+
+El resto: `@Index` sin nombre **sólo** en las 14 entidades cuyos índices la base guarda con hash (y
+en la cantidad exacta), `timestamptz` en la enciclopedia, `enumName` en `holistic_services` y los
+defaults como expresión SQL.
+
+Los tres escenarios de arriba se probaron mutando las entidades a propósito: el spec falla en los
+tres y vuelve a verde al revertir.
 
 Es estático a propósito: no habla con Postgres, así que corre en CI sin base. La verificación contra
 la base real —el archivo vacío— es la puerta de salida del backlog y se corre a mano.
 
-Lleva los mismos canarios que el spec de T-DEUDA-002 (mínimo de entidades y de relaciones
-encontradas): sin ellos, un regex roto que no matchea nada dejaría todo en verde sin haber
-verificado nada. Y vive en `database/` y no en `database/migrations/` por la misma razón: el glob de
-TypeORM carga todo lo que haya en esa carpeta y un `.spec.ts` ahí adentro rompe el CLI y el arranque
-de la app.
+Lleva el mismo canario que el spec de T-DEUDA-002 (mínimo de entidades encontradas, 51): sin él, un
+`listFiles` roto que no encuentra nada dejaría todo en verde sin haber verificado nada. Y vive en
+`database/` y no en `database/migrations/` por la misma razón: el glob de TypeORM carga todo lo que
+haya en esa carpeta y un `.spec.ts` ahí adentro rompe el CLI y el arranque de la app.
 
 ### Criterios de aceptación
 
