@@ -16,7 +16,11 @@ import { ReadingCategory } from '../../../categories/entities/reading-category.e
 export type CardOrientation = 'upright' | 'reversed';
 
 @Entity('card_free_interpretation')
-@Unique(['cardId', 'categoryId', 'orientation'])
+@Unique('UQ_card_free_interpretation_card_category_orientation', [
+  'cardId',
+  'categoryId',
+  'orientation',
+])
 export class CardFreeInterpretation {
   @ApiProperty({ example: 1, description: 'ID único de la interpretación' })
   @PrimaryGeneratedColumn()
@@ -26,7 +30,7 @@ export class CardFreeInterpretation {
     example: 1,
     description: 'ID de la carta de tarot asociada',
   })
-  @Index()
+  @Index('IDX_card_free_interpretation_cardId')
   @Column()
   cardId: number;
 
@@ -34,7 +38,7 @@ export class CardFreeInterpretation {
     example: 1,
     description: 'ID de la categoría de lectura asociada',
   })
-  @Index()
+  @Index('IDX_card_free_interpretation_categoryId')
   @Column()
   categoryId: number;
 
@@ -57,11 +61,17 @@ export class CardFreeInterpretation {
   content: string;
 
   @ManyToOne(() => TarotCard, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'cardId' })
+  @JoinColumn({
+    name: 'cardId',
+    foreignKeyConstraintName: 'FK_card_free_interpretation_card',
+  })
   card: TarotCard;
 
   @ManyToOne(() => ReadingCategory, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'categoryId' })
+  @JoinColumn({
+    name: 'categoryId',
+    foreignKeyConstraintName: 'FK_card_free_interpretation_category',
+  })
   category: ReadingCategory;
 
   @CreateDateColumn()

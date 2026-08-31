@@ -15,11 +15,11 @@ export class IpBlock {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Index()
+  @Index('IDX_ip_blocks_ip')
   @Column({ type: 'varchar' })
   ip: string;
 
-  @Index()
+  @Index('IDX_ip_blocks_blocked_until')
   @Column({ name: 'blocked_until', type: 'timestamptz' })
   blockedUntil: Date;
 

@@ -58,7 +58,7 @@ export class PredefinedQuestion {
   @Column({ default: 0, name: 'usage_count' })
   usageCount: number;
 
-  @ManyToOne(() => ReadingCategory, { eager: false })
+  @ManyToOne(() => ReadingCategory, { eager: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'category_id' })
   category: ReadingCategory;
 

@@ -73,7 +73,7 @@ export class TarotReading {
     description: 'Relación con la pregunta predefinida',
     required: false,
   })
-  @ManyToOne('PredefinedQuestion', { nullable: true })
+  @ManyToOne('PredefinedQuestion', { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'predefinedQuestionId' })
   predefinedQuestion: IPredefinedQuestion | null;
 
@@ -95,17 +95,17 @@ export class TarotReading {
   @Column({ type: 'varchar', length: 20, nullable: true })
   questionType: 'predefined' | 'custom' | null;
 
-  @ManyToOne('User')
+  @ManyToOne('User', { onDelete: 'NO ACTION' })
   user: IUser;
 
-  @ManyToOne('TarotDeck')
+  @ManyToOne('TarotDeck', { onDelete: 'NO ACTION' })
   deck: ITarotDeck;
 
   @ApiProperty({
     description: 'Tarotista que realizó la lectura',
     required: false,
   })
-  @ManyToOne('Tarotista', 'readings', { nullable: true })
+  @ManyToOne('Tarotista', 'readings', { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'tarotista_id' })
   tarotista: unknown;
 
@@ -132,7 +132,7 @@ export class TarotReading {
     description: 'Categoría de la lectura',
     required: false,
   })
-  @ManyToOne('ReadingCategory', { nullable: true })
+  @ManyToOne('ReadingCategory', { nullable: true, onDelete: 'SET NULL' })
   category: IReadingCategory | null;
 
   @ApiProperty({

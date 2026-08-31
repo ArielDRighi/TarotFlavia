@@ -27,7 +27,9 @@ export class TarotistaConfig {
     description: 'Relación con el tarotista',
     type: () => Tarotista,
   })
-  @ManyToOne(() => Tarotista, (tarotista) => tarotista.configs)
+  @ManyToOne(() => Tarotista, (tarotista) => tarotista.configs, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'tarotista_id' })
   tarotista: Tarotista;
 
@@ -53,7 +55,7 @@ export class TarotistaConfig {
     type: 'decimal',
     precision: 3,
     scale: 2,
-    default: 0.7,
+    default: () => '0.7',
     transformer: {
       to: (value: number) => value,
       from: (value: string) => parseFloat(value),
@@ -77,7 +79,7 @@ export class TarotistaConfig {
     type: 'decimal',
     precision: 3,
     scale: 2,
-    default: 0.9,
+    default: () => '0.9',
     transformer: {
       to: (value: number) => value,
       from: (value: string) => parseFloat(value),

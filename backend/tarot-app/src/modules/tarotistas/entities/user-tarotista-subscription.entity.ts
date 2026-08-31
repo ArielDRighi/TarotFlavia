@@ -37,7 +37,7 @@ export class UserTarotistaSubscription {
     description: 'Relación con el usuario',
     type: () => User,
   })
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
@@ -55,6 +55,7 @@ export class UserTarotistaSubscription {
   })
   @ManyToOne(() => Tarotista, (tarotista) => tarotista.subscriptions, {
     nullable: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'tarotista_id' })
   tarotista: Tarotista | null;

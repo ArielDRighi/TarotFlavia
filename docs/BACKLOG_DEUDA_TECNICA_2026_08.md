@@ -70,7 +70,9 @@ Dos cosas que este desglose deja a la vista y **no** estaban inventariadas:
   reales por migración, los 3 redundantes borrando el decorador.
 - Hay **6 `DROP INDEX` y sólo 4 `CREATE INDEX`**: el generador propone borrar 2 índices que existen en
   la base y **ninguna entidad declara**. Eso es pérdida de índices, no un renombre. Entra en el
-  alcance de T-DEUDA-001 (decidir nombres de índices) — anotado, no resuelto acá.
+  alcance de T-DEUDA-001 (decidir nombres de índices) — anotado acá y **resuelto el 27-ago-2026**:
+  eran `IDX_user_mp_preapproval_id` e `idx_service_purchases_mp_payment_id`, y ahora los declaran
+  `user.entity.ts` y `service-purchase.entity.ts`.
 
 ### El drift va en las dos direcciones
 
@@ -132,14 +134,14 @@ trabajó el PR. El detalle de la consulta está en [T-DEUDA-003](#t-deuda-003-ve
 
 | ID | Tarea | Tipo | Prioridad | Estimación | Estado |
 | --- | --- | --- | --- | --- | --- |
-| T-DEUDA-001 | Alinear los decoradores de las entidades con el esquema real | Backend | 🟠 Alta | 2 pts | ⬜ Pendiente |
+| T-DEUDA-001 | Alinear los decoradores de las entidades con el esquema real | Backend | 🟠 Alta | 2 pts | ✅ Completada (27-ago-2026) |
 | T-DEUDA-002 | Crear los índices que las entidades declaran y no existen | Backend | 🟠 Alta | 1 pt | ✅ Completada (27-ago-2026) |
 | T-DEUDA-003 | Verificar en producción las 4 columnas de T-PROD-021 | Verificación | 🔴 Crítica | 0,5 pts | ✅ Completada (19-ago-2026) |
 
-**Orden dentro de este backlog:** 003 **ya está cerrada** —fue primero justamente porque podía
+**Orden dentro de este backlog:** las tres están cerradas. 003 fue primero justamente porque podía
 destapar un bug de fechas en producción, y resultó que no había ninguno: no dejó trabajo de migración
-para las otras dos—. 002 **también está cerrada** (27-ago-2026). Queda 001, que iba al final porque es
-la más larga y la menos urgente.
+para las otras dos. 002 siguió (27-ago-2026) y 001 fue al final porque era la más larga y la menos
+urgente. **El backlog está cerrado.**
 
 > 📌 **El orden completo, cruzado con las tareas de SEO, está en
 > [`BACKLOG_SEO_CONTENIDO_2026_08.md` → *Orden de desarrollo*](./BACKLOG_SEO_CONTENIDO_2026_08.md#-orden-de-desarrollo-fuente-única).**
@@ -149,68 +151,175 @@ la más larga y la menos urgente.
 > corre el seeder de T-SEO-009, así que T-SEO-009 arranca desbloqueada—, y 002 y 001 van **después**
 > de pedir la tercera revisión de AdSense, porque ninguna de las dos bloquea nada de ese camino.
 
-**Puerta de salida del backlog:** `npm run migration:generate -- src/database/migrations/Drift`
-genera un archivo **vacío**. Ese es el único criterio que prueba que no quedó drift.
-**Marcador al 27-ago-2026, tras T-DEUDA-002: 78 sentencias** (eran 83 tras T-DEUDA-003). Conviene generar el archivo **fuera del
-repo** (`-- /tmp/DriftProbe`) mientras sea una medición y no una migración de verdad.
+**Puerta de salida del backlog: ✅ ALCANZADA (27-ago-2026).**
+`npm run migration:generate -- /tmp/DriftProbe` responde
+`No changes in database schema were found - cannot generate a migration`: el generador **no
+encuentra nada**. Ese era el único criterio que prueba que no quedó drift.
+
+| Momento | Sentencias en `up()` |
+| --- | --- |
+| Origen (T-SEO-008, 19-ago-2026) | 91 |
+| Tras T-DEUDA-003 (resincronizar la base local) | 83 |
+| Tras T-DEUDA-002 (índices de `sessions`) | 78 |
+| Tras T-DEUDA-001 (decoradores) | **0** |
+
+Conviene seguir generando el archivo **fuera del repo** (`-- /tmp/DriftProbe`) mientras sea una
+medición y no una migración de verdad.
 
 ---
 
 ## T-DEUDA-001: Alinear los Decoradores de las Entidades con el Esquema Real
 
 **Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Dependencias:** ninguna
+**Estado:** ✅ COMPLETADA (27-ago-2026) — **78 → 0 sentencias**, sin tocar la base
 
 ### Problema
 
-Las entidades describen mal la base. El generador de migraciones queda inutilizable: cada vez que
-alguien lo corra para un cambio de 1 columna, va a recibir **83 sentencias** (eran 91 antes de
-T-DEUDA-003) y va a tener que podarlas a mano —que es exactamente lo que hubo que hacer en
-T-SEO-008— con el riesgo de que en alguna poda se cuele un `DROP COLUMN`.
+Las entidades describían mal la base. El generador de migraciones quedaba inutilizable: cada vez que
+alguien lo corriera para un cambio de 1 columna iba a recibir **78 sentencias** (eran 91 antes de
+T-DEUDA-003 y 83 antes de T-DEUDA-002) y a tener que podarlas a mano —que es exactamente lo que hubo
+que hacer en T-SEO-008— con el riesgo de que en alguna poda se colara un `DROP COLUMN`.
 
 ### Alcance
 
 Es **solo código**: no se toca la base. Cada cambio hace que el decorador diga lo que la base ya
 hace.
 
-- [ ] **Timestamps de la enciclopedia.** `encyclopedia-tarot-card.entity.ts` y
+- [x] **Timestamps de la enciclopedia.** `encyclopedia-tarot-card.entity.ts` y
       `encyclopedia-article.entity.ts`: declarar el tipo en `@CreateDateColumn`/`@UpdateDateColumn`.
 
   ```ts
-  // ❌ hoy — TypeORM asume `timestamp` sin zona; la base tiene timestamptz
+  // ❌ antes — TypeORM asume `timestamp` sin zona; la base tiene timestamptz
   @CreateDateColumn({ name: 'created_at' })
 
   // ✅
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   ```
 
-- [ ] **`ON DELETE` de las relaciones.** La base tiene `CASCADE` en las FKs (verificado en
-      `pg_constraint`); las entidades no lo declaran, así que el generador propone `NO ACTION`.
-      Declarar `onDelete: 'CASCADE'` (o el que corresponda) en cada `@ManyToOne`/`@OneToOne`.
-      ⚠️ **Verificar cada FK contra la base antes de escribirla**, una por una. No asumir CASCADE
-      para todas: hay al menos una con `SET NULL`.
+- [x] **`ON DELETE` de las relaciones** — 26 relaciones, verificadas **una por una** contra
+      `pg_constraint`. La advertencia estaba bien puesta: no eran todas CASCADE.
 
-- [ ] **Nombres de FKs e índices.** Decidir explícitamente y dejarlo escrito: o se le pone a las
-      entidades el nombre legible que ya tiene la base, o se acepta el hash de TypeORM. Lo que no
-      puede quedar es la mitad y la mitad.
+- [x] **Nombres de FKs e índices** — decidido y escrito abajo.
 
-- [ ] **Defaults numéricos** de `tarotista_config` (`temperature`, `top_p`): `0.7` vs `'0.7'`.
+- [x] **Defaults numéricos** de `tarotista_config` (`temperature`, `top_p`).
 
-- [ ] **Renombre del enum** `sessions_session_type_enum` → `holistic_services_session_type_enum`:
-      decidir si se renombra en la base (migración) o se fija `enumName` en la entidad (código).
-      Preferir lo segundo: renombrar un tipo en producción no aporta nada.
+- [x] **Renombre del enum** `sessions_session_type_enum` → se fija `enumName` en la entidad, como
+      recomendaba la tarea: renombrar un tipo en producción no aporta nada.
+
+### Las 78 sentencias, una por una
+
+| Grupo | Sentencias | Qué callaba el decorador | Cómo se arregló |
+| --- | --- | --- | --- |
+| FKs con `ON DELETE` ≠ `NO ACTION` | 42 (21 `DROP` + 21 `ADD`) | la base tiene CASCADE / SET NULL; el default de TypeORM es NO ACTION | `onDelete` en el `@ManyToOne`/`@OneToOne` |
+| FKs con nombre legible | 10 (5 `DROP` + 5 `ADD`) | la migración les puso nombre; TypeORM quería su hash | `foreignKeyConstraintName` en el `@JoinColumn` |
+| `UNIQUE` con nombre legible | 2 | ídem, en `card_free_interpretation` | primer argumento de `@Unique(...)` |
+| Índices con nombre legible | 10 (6 `DROP` + 4 `CREATE`) | 4 eran renombres a hash; **2 eran pérdida de índice** | `@Index('nombre')` en la columna |
+| Timestamps de la enciclopedia | 8 (4 `DROP COLUMN` + 4 `ADD`) | ⚠️ destructivo: borraba las fechas | `type: 'timestamptz'` |
+| Renombre del enum de `session_type` | 4 | `holistic_services` reusa el tipo que creó `sessions` | `enumName: 'sessions_session_type_enum'` |
+| Defaults de `tarotista_config` | 2 | `numeric(3,2)`, ver abajo | `default: () => '0.7'` |
+| **Total** | **78** | | **0 migraciones nuevas** |
+
+Los **2 `DROP INDEX` sin `CREATE`** que T-DEUDA-002 dejó anotados eran
+`IDX_user_mp_preapproval_id` e `idx_service_purchases_mp_payment_id`: dos índices que existen en la
+base, que crearon migraciones reales y que **ninguna entidad declaraba**. El generador los proponía
+borrar. Ahora los declaran `user.entity.ts` y `service-purchase.entity.ts`, y el spec de T-DEUDA-002
+—que exige una migración por cada `@Index` con nombre— ata el otro extremo.
+
+### La decisión sobre los nombres, escrita
+
+La tarea pedía decidir "el nombre legible o el hash, no la mitad y la mitad". La mitad y la mitad
+**está en la base**, no en las entidades: 49 de las 54 FKs tienen hash de TypeORM y 5 tienen nombre
+legible (las de `service_purchases` y `card_free_interpretation`). Unificarlas es renombrar
+constraints en producción, o sea **cambiar el esquema**, que esta tarea declara fuera de alcance.
+
+**La decisión, entonces:**
+
+1. **El decorador dice lo que la base tiene.** Donde la base guarda un hash, el decorador no nombra
+   nada; donde guarda un nombre legible, lo fija. Es lo único que deja al generador en cero sin
+   tocar el esquema.
+2. **Para lo nuevo, el default de TypeORM** (el hash), que es lo que ya usa el 90% de la base.
+3. Unificar los 5 legacy queda **anotado como no-trabajo**: renombrar un constraint no cambia el
+   comportamiento de nada y cuesta una migración con `ALTER TABLE ... RENAME CONSTRAINT` sobre
+   producción. Si algún día se hace, va en su propia migración.
+
+Lo mismo aplica a los índices: `refresh_tokens`, `cached_interpretations` y `cache_metrics` tienen
+los suyos con hash **en la base** (verificado en `pg_indexes`), así que sus `@Index()` pelados dicen
+la verdad y se dejaron como estaban. Ponerles un nombre legible habría creado drift nuevo.
+
+### El default de `numeric` no se arregla con un literal
+
+`temperature` y `top_p` son `numeric(3,2)` con default `0.7` y `0.9`. Lo natural es probar
+`default: 0.7` (estaba así) y después `default: '0.7'`. **Ninguna de las dos funciona**, y la razón
+está en `PostgresDriver.normalizeDefault`: envuelve en comillas tanto los números como los strings,
+o sea que las dos formas dan `'0.7'`, mientras que `pg` devuelve el default de la columna **sin**
+comillas, `0.7`. La comparación es texto contra texto y nunca puede dar igual.
+
+La única forma que matchea es la de expresión SQL:
+
+```ts
+// ❌ las dos generan '0.7' y nunca coinciden con el 0.7 que devuelve pg
+@Column({ type: 'decimal', precision: 3, scale: 2, default: 0.7 })
+@Column({ type: 'decimal', precision: 3, scale: 2, default: '0.7' })
+
+// ✅ normalizeDefault la pasa tal cual
+@Column({ type: 'decimal', precision: 3, scale: 2, default: () => '0.7' })
+```
+
+Que además es lo que se quiere decir: el default es la **expresión** `0.7`, no el string `"0.7"`.
+
+### El test de regresión
+
+`src/database/entity-schema-drift.spec.ts` (19 tests) lee el texto de las entidades y exige lo que
+se decidió acá. Lo importante es que **no chequea presencia, chequea valor**: lleva la tabla de las
+52 relaciones con el `ON DELETE` que la base tiene de verdad y la compara entera con `toEqual`, así
+que agarra las tres formas de romperlo —una relación nueva sin `onDelete`, una relación borrada, y
+un `onDelete` cambiado a un valor que no es el de la base—. La última es la peligrosa: un
+`CASCADE` que alguien convierte en `SET NULL` no rompe ningún test de comportamiento y no se nota
+hasta que se borra una fila.
+
+Por la misma razón los nombres van **atados a su columna**: cada índice legible se verifica sobre la
+propiedad que decora y cada `foreignKeyConstraintName` dentro del `@JoinColumn` de su columna. Sin
+eso, intercambiar `IDX_ip_blocks_ip` con `IDX_ip_blocks_blocked_until` —o
+`FK_service_purchases_user` con `FK_service_purchases_session`— dejaba los strings presentes en el
+archivo y pasaba el test con el drift reintroducido.
+
+El resto: `@Index` sin nombre **sólo** en las 14 entidades cuyos índices la base guarda con hash (y
+en la cantidad exacta), `timestamptz` en la enciclopedia, `enumName` en `holistic_services` y los
+defaults como expresión SQL.
+
+Los tres escenarios de arriba se probaron mutando las entidades a propósito: el spec falla en los
+tres y vuelve a verde al revertir.
+
+Es estático a propósito: no habla con Postgres, así que corre en CI sin base. La verificación contra
+la base real —el archivo vacío— es la puerta de salida del backlog y se corre a mano.
+
+Lleva el mismo canario que el spec de T-DEUDA-002 (mínimo de entidades encontradas, 51): sin él, un
+`listFiles` roto que no encuentra nada dejaría todo en verde sin haber verificado nada. Y vive en
+`database/` y no en `database/migrations/` por la misma razón: el glob de TypeORM carga todo lo que
+haya en esa carpeta y un `.spec.ts` ahí adentro rompe el CLI y el arranque de la app.
 
 ### Criterios de aceptación
 
-- [ ] `npm run migration:generate` genera un archivo **vacío** (junto con T-DEUDA-002).
-- [ ] No se agregó ninguna migración: la tarea es solo de decoradores.
-- [ ] `npm run test:cov`, `npm run build` y `node scripts/validate-architecture.js` en verde.
-- [ ] La app arranca contra la base existente y los endpoints de enciclopedia, planes y suscripciones
-      siguen respondiendo (los cambios de tipo en decoradores afectan la hidratación de entidades).
+- [x] `npm run migration:generate` genera un archivo **vacío**: responde
+      `No changes in database schema were found - cannot generate a migration`.
+- [x] No se agregó ninguna migración: los 20 archivos tocados son entidades (más el spec nuevo).
+- [x] `npm run format`, `npm run lint`, `npm run test:cov` (4791 tests, 85,83% statements),
+      `npm run build` y `node scripts/validate-architecture.js` en verde.
+- [x] La app arranca contra la base existente y los endpoints siguen respondiendo. Verificado el
+      27-ago-2026 con la app levantada contra la base de desarrollo: `/health` 200,
+      `/encyclopedia/cards` devuelve las 78 fichas, `/encyclopedia/articles` 200,
+      `/holistic-services` 200, `/tarotistas` 200, `/plan-config` 401 (la ruta resuelve, pide auth).
+- [x] Hidratación verificada entidad por entidad sobre la base real: `createdAt` de la enciclopedia
+      llega como `Date` con el instante correcto en UTC, `temperature` sigue llegando como `number`
+      (el transformer no se tocó) y las relaciones con `onDelete` nuevo (`tarot_reading` → user/deck,
+      `card_free_interpretation` → card/category, `user_tarotista_subscriptions` → user/tarotista)
+      cargan sin error.
 
 ### Fuera de alcance
 
-Cambiar el esquema. Si aparece un caso donde la base está mal y la entidad bien, se anota y se
-resuelve en una migración aparte — no acá.
+Cambiar el esquema. **No apareció ningún caso donde la base estuviera mal y la entidad bien**: las 78
+sentencias eran todas decoradores incompletos. Lo único que queda anotado para una migración aparte
+—y que es explícitamente no-trabajo— es unificar los 5 nombres legacy de FKs con el hash de TypeORM.
 
 ---
 
@@ -332,7 +441,9 @@ lookahead que descarta prefijos: hoy `idx_birth_chart_user` es prefijo de
 largo — justo el falso verde que esta tarea vino a evitar.
 
 El spec cubre sólo los `@Index` **con nombre**. Los `@Index()` sin nombre reciben un hash de TypeORM
-que no se puede cruzar por texto — son los renombres del Grupo C, que resuelve T-DEUDA-001.
+que no se puede cruzar por texto — son los renombres del Grupo C, que resolvió T-DEUDA-001 poniéndole
+el nombre legible a los que la base tiene con nombre legible y dejando pelados los tres cuyos índices
+la base guarda con hash. El spec de T-DEUDA-001 cubre justamente ese lado.
 
 ### Criterios de aceptación
 
@@ -341,7 +452,8 @@ que no se puede cruzar por texto — son los renombres del Grupo C, que resuelve
       27-ago-2026: **83 → 78 sentencias** (bajan las 5 de esta tarea). Los 4 `CREATE INDEX` y 6
       `DROP INDEX` que quedan son los renombres de `@Index()` sin nombre (`ip_blocks`,
       `card_free_interpretation`) más los 2 `DROP` sin `CREATE` que ya estaban anotados: todo eso es
-      T-DEUDA-001. El archivo vacío sigue siendo la puerta de salida conjunta.
+      T-DEUDA-001, **cerrada el 27-ago-2026**. El archivo vacío era la puerta de salida conjunta y
+      quedó alcanzada: el generador ya no encuentra nada.
 - [x] La migración corre sobre una base con datos sin bloqueos largos (`CREATE INDEX` toma
       `SHARE` sobre la tabla; evaluar `CONCURRENTLY` si `sessions` está grande en producción).
       → Ver *Decisión sobre `CONCURRENTLY`* arriba.

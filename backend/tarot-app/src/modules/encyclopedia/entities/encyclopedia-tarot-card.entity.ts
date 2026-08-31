@@ -336,11 +336,11 @@ export class EncyclopediaTarotCard {
   viewCount: number;
 
   @ApiProperty({ description: 'Fecha de creación del registro' })
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
 
   @ApiProperty({ description: 'Fecha de última actualización' })
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   updatedAt: Date;
 
   // ============================================================================

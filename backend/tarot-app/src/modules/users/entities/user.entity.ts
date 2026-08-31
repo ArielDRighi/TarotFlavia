@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { TarotReading } from '../../tarot/readings/entities/tarot-reading.entity';
@@ -164,6 +165,7 @@ export class User {
     description: 'ID del preapproval de MercadoPago (suscripción recurrente)',
     nullable: true,
   })
+  @Index('IDX_user_mp_preapproval_id')
   @Column({
     name: 'mp_preapproval_id',
     type: 'varchar',

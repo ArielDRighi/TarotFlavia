@@ -128,7 +128,7 @@ export class TarotCard {
   @Column({ type: 'text', nullable: true })
   dailyFreeReversed: string | null;
 
-  @ManyToOne('TarotDeck', 'cards', { eager: true })
+  @ManyToOne('TarotDeck', 'cards', { eager: true, onDelete: 'NO ACTION' })
   @JoinColumn({ name: 'deckId' })
   deck: ITarotDeck;
 

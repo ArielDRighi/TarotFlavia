@@ -36,7 +36,7 @@ export class Tarotista {
     description: 'Relación con el usuario',
     type: () => User,
   })
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

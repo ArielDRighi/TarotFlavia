@@ -30,7 +30,9 @@ export class TarotistaCardMeaning {
     description: 'Relación con el tarotista',
     type: () => Tarotista,
   })
-  @ManyToOne(() => Tarotista, (tarotista) => tarotista.customCardMeanings)
+  @ManyToOne(() => Tarotista, (tarotista) => tarotista.customCardMeanings, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'tarotista_id' })
   tarotista: Tarotista;
 
@@ -42,7 +44,7 @@ export class TarotistaCardMeaning {
     description: 'Relación con la carta',
     type: () => TarotCard,
   })
-  @ManyToOne(() => TarotCard)
+  @ManyToOne(() => TarotCard, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'card_id' })
   card: TarotCard;
 
