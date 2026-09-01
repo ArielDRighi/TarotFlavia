@@ -233,11 +233,34 @@ describe('RitualsController', () => {
     it('debe retornar detalle de ritual', async () => {
       ritualsService.findBySlug.mockResolvedValue(mockRitualDetail);
 
-      const result = await controller.getRitualBySlug('ritual-luna-nueva');
+      const result = await controller.getRitualBySlug(
+        'ritual-luna-nueva',
+        false,
+      );
 
       expect(result).toEqual(mockRitualDetail);
       expect(ritualsService.findBySlug).toHaveBeenCalledWith(
         'ritual-luna-nueva',
+        { countView: true },
+      );
+    });
+
+    /**
+     * T-DEPLOY-002. `rituales/[slug]` se prerenderiza: los 4 rituales sumaban
+     * una vista falsa por deploy.
+     *
+     * ⚠️ Este test pasa el booleano a mano, así que **no** ejercita el
+     * `@IsPrerender()`. El cableado real vive en
+     * `test/prerender-view-count.e2e-spec.ts`.
+     */
+    it('no debe contar la vista cuando la request es un prerender', async () => {
+      ritualsService.findBySlug.mockResolvedValue(mockRitualDetail);
+
+      await controller.getRitualBySlug('ritual-luna-nueva', true);
+
+      expect(ritualsService.findBySlug).toHaveBeenCalledWith(
+        'ritual-luna-nueva',
+        { countView: false },
       );
     });
 
@@ -246,9 +269,9 @@ describe('RitualsController', () => {
         new NotFoundException('Ritual "invalid" no encontrado'),
       );
 
-      await expect(controller.getRitualBySlug('invalid')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        controller.getRitualBySlug('invalid', false),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

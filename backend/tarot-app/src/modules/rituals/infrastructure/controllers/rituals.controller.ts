@@ -16,6 +16,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiHeader,
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
@@ -36,6 +37,10 @@ import {
 import { CompleteRitualDto } from '../../application/dto/complete-ritual.dto';
 import { RitualRecommendationsResponseDto } from '../../application/dto/pattern-analysis.dto';
 import { UserPlan } from '../../../users/entities/user.entity';
+import {
+  IsPrerender,
+  PRERENDER_HEADER,
+} from '../../../../common/decorators/is-prerender.decorator';
 
 /**
  * Controlador de endpoints REST para rituales
@@ -281,8 +286,17 @@ export class RitualsController {
   @ApiParam({ name: 'slug', example: 'ritual-luna-nueva' })
   @ApiResponse({ status: 200, type: RitualDetailDto })
   @ApiResponse({ status: 404, description: 'Ritual no encontrado' })
-  async getRitualBySlug(@Param('slug') slug: string): Promise<RitualDetailDto> {
-    return this.ritualsService.findBySlug(slug);
+  @ApiHeader({
+    name: PRERENDER_HEADER,
+    required: false,
+    description:
+      'Lo manda el build del frontend para que el prerender no cuente como vista (T-DEPLOY-002).',
+  })
+  async getRitualBySlug(
+    @Param('slug') slug: string,
+    @IsPrerender() isPrerender: boolean,
+  ): Promise<RitualDetailDto> {
+    return this.ritualsService.findBySlug(slug, { countView: !isPrerender });
   }
 
   /**

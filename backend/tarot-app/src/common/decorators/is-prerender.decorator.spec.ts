@@ -1,10 +1,6 @@
 import { ExecutionContext } from '@nestjs/common';
 import { IncomingHttpHeaders } from 'http';
-import {
-  IsPrerender,
-  PRERENDER_HEADER,
-  resolveIsPrerender,
-} from './is-prerender.decorator';
+import { PRERENDER_HEADER, resolveIsPrerender } from './is-prerender.decorator';
 
 function contextoCon(headers: IncomingHttpHeaders): ExecutionContext {
   return {
@@ -56,8 +52,13 @@ describe('resolveIsPrerender (T-DEPLOY-002)', () => {
     );
   });
 
-  it('expone el decorador que envuelve al resolver', () => {
-    expect(typeof IsPrerender).toBe('function');
-    expect(typeof IsPrerender()).toBe('function');
-  });
+  /**
+   * No hay acá un test de "IsPrerender es una función": sobrevive intacto a
+   * cualquier mutación del resolver y no afirma nada — es exactamente el test
+   * vacuo que el docblock de este decorador le critica a `CurrentUser`.
+   *
+   * El cableado real (decorador → controller → servicio) lo cubre
+   * `test/prerender-view-count.e2e-spec.ts` sobre HTTP, que es el único lugar
+   * donde se puede afirmar.
+   */
 });

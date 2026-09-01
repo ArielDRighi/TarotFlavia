@@ -20,13 +20,22 @@ const PHASE_PRODUCTION_BUILD = 'phase-production-build';
  *
  * **Dos decisiones que no son obvias:**
  *
- * 1. **La guarda de `window` va primero.** Next inlinea en el bundle del
- *    cliente sólo `NODE_ENV` y las `NEXT_PUBLIC_*`, así que `NEXT_PHASE`
- *    debería quedar `undefined` en el navegador — pero si algún día eso
- *    cambiara y el valor quedara horneado, la función devolvería `true` para
- *    siempre en el navegador y **dejaríamos de contar todas las vistas
- *    reales**, en silencio. Un prerender es server-side por definición, así que
- *    la guarda no cuesta nada y tapa ese modo de falla entero.
+ * 1. **La guarda de `window` va primero, y hace más de lo que parece.** El
+ *    riesgo que tapa es que `NEXT_PHASE` quedara horneado en el bundle del
+ *    cliente: la función devolvería `true` para siempre en el navegador y
+ *    **dejaríamos de contar todas las vistas reales**, en silencio.
+ *
+ *    Pero además de ser un cinturón de runtime, es lo que **borra este código
+ *    del bundle del navegador**. SWC constant-foldea `typeof window !==
+ *    'undefined'` a `true` en el build de cliente, así que `isPrerenderBuild()`
+ *    colapsa a `return false` y el bloque que agrega el header muere por
+ *    dead-code elimination. Verificado sobre `.next/static/`: cero apariciones
+ *    de `phase-production-build`, `NEXT_PHASE` y `X-Prerender` en los 119
+ *    chunks, y el interceptor compilado no tiene el bloque.
+ *
+ *    Ojo con esto al testear: en jsdom la condición se evalúa en runtime, así
+ *    que el test verifica el comportamiento pero no puede ver la eliminación.
+ *    La garantía real es más fuerte que la que el test prueba.
  *
  * 2. **Lee `process.env` en cada llamada.** Durante el build Next levanta
  *    workers y este módulo puede cargarse antes de que la variable esté puesta.

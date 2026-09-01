@@ -250,17 +250,22 @@ porque sin catch no hay log — y de paso cubre lo que de verdad importa, que el
 ## T-DEPLOY-002: Que el Export Estático No Escriba en la Base
 
 **Prioridad:** 🟡 Media · **Estimación:** 1 pt · **Dependencias:** T-DEPLOY-001
-**Estado:** ✅ COMPLETADA (31-ago-2026) — **126 → 0 vistas falsas por deploy, medido**
+**Estado:** ✅ COMPLETADA (31-ago-2026) — **130 → 0 vistas falsas por deploy, medido**
 
 ### Problema
 
 T-DEPLOY-001 sacó el fallo del camino crítico, pero el build **seguía escribiendo**.
 
-Y no son sólo las fichas: las rutas de artículos también se prerenderizan
-(`enciclopedia/elementos/[slug]`, `guias/[slug]`, `astrologia/{signos,planetas,casas}/[slug]`) y
-también incrementan, vía `ArticlesService.findBySlug`. Con **78 fichas + 48 artículos**, cada
-deploy del frontend suma **~126 vistas falsas** y dispara otros tantos `UPDATE` contra el pool
-mientras el backend puede estar redeployando.
+Y no son sólo las fichas. También se prerenderizan las rutas de artículos
+(`enciclopedia/elementos/[slug]`, `guias/[slug]`, `astrologia/{signos,planetas,casas}/[slug]`), que
+incrementan vía `ArticlesService.findBySlug`, **y las de rituales** (`rituales/[slug]`), vía
+`RitualsService.findBySlug`.
+
+Con **78 fichas + 48 artículos + 4 rituales**, cada deploy del frontend sumaba **130 vistas falsas**
+y disparaba otros tantos `UPDATE` contra el pool mientras el backend puede estar redeployando.
+
+> Los rituales aparecieron en la revisión: el alcance original de esta tarea sólo hablaba de fichas
+> y artículos. Ver *[Lo que faltaba](#lo-que-faltaba-rituales)*.
 
 Dos consecuencias, ninguna catastrófica ya:
 
@@ -272,7 +277,7 @@ Dos consecuencias, ninguna catastrófica ya:
 
 ### Alcance
 
-- [x] Que el prerender no cuente como vista, **en fichas y en artículos**.
+- [x] Que el prerender no cuente como vista, **en fichas, artículos y rituales**.
 - [ ] ~~Bajar la concurrencia del export~~ — ver *Lo que no hizo falta*.
 - [ ] ~~Desacoplar los deploys~~ — ídem.
 
@@ -298,12 +303,19 @@ acceso— pero queda escrito en el decorador: **no usarlo para nada que tenga co
 
 Los dos habrían dejado el fix sin efecto **sin romper un solo test**:
 
-1. **Que `NEXT_PHASE` quedara horneado en el bundle del cliente.** Next inlinea sólo `NODE_ENV` y
-   las `NEXT_PUBLIC_*`, así que no debería pasar — pero si pasara, `isPrerenderBuild()` daría
+1. **Que `NEXT_PHASE` quedara horneado en el bundle del cliente.** `isPrerenderBuild()` daría
    `true` para siempre en el navegador y **dejaríamos de contar todas las vistas reales**. Por eso
-   la función corta con `typeof window !== 'undefined'` antes de mirar la variable: un prerender es
-   server-side por definición, la guarda no cuesta nada y tapa el modo de falla entero. Tiene su
-   test.
+   la función corta con `typeof window !== 'undefined'` antes de mirar la variable.
+
+   Verificado contra el bundle construido: `phase-production-build`, `NEXT_PHASE` y `X-Prerender`
+   aparecen **cero veces** en los 119 chunks de `.next/static/`. Y la guarda resultó hacer más de
+   lo que se esperaba: SWC constant-foldea `typeof window !== 'undefined'` a `true` en el build de
+   cliente, así que la función colapsa a `return false` y **el bloque del header se elimina del
+   bundle por dead-code elimination**. No es sólo un cinturón de runtime: el código ni siquiera
+   viaja al navegador.
+
+   (El test corre en jsdom, donde la condición se evalúa en runtime: verifica el comportamiento
+   pero no puede ver la eliminación. La garantía real es más fuerte que la que el test prueba.)
 2. **Cachear `NEXT_PHASE` al importar el módulo.** Durante el build Next levanta workers y el
    módulo puede cargarse antes de que la variable esté puesta; una `const` de módulo daría `false`
    para siempre. Se lee en cada llamada, y hay un test que lo fija.
@@ -314,17 +326,36 @@ Un test unitario no puede probar que el header viaja de punta a punta en un buil
 corrió el build del frontend contra el backend local y se midió la suma de `view_count` antes y
 después. Y para que la medición signifique algo, se corrió **también con el header desactivado**:
 
-| Build | fichas | artículos |
-| --- | --- | --- |
-| **Con** el header | 416 → **416** | 3782 → **3782** |
-| **Sin** el header (mutación) | 416 → **494** (+78) | 3782 → **3830** (+48) |
+| Build | fichas | artículos | rituales |
+| --- | --- | --- | --- |
+| **Con** el header | 416 → **416** | 3782 → **3782** | 31 → **31** |
+| **Sin** el header (mutación) | 416 → **494** (+78) | 3782 → **3830** (+48) | 29 → **33** (+4) |
 
-**+78 y +48 = las 126 vistas falsas**, exactamente el número que decía este backlog. Ahora está
-medido en vez de estimado.
+**+78, +48 y +4 = las 130 vistas falsas.** Ahora está medido en vez de estimado.
 
 El build sí pegó a la API en los dos casos —304 queries de enciclopedia en el log del backend,
 incluidas las de `findBySlug`—, así que el 416 → 416 es "no contó", no "no preguntó". (Los
-contadores de la base de desarrollo se restauraron a 416/3782 después de la prueba.)
+contadores de la base de desarrollo se restauraron después de cada prueba.)
+
+### Lo que faltaba: rituales
+
+La primera versión de este fix cubría fichas y artículos, que era el alcance escrito. La revisión
+fue a buscar **otras páginas prerenderizadas que pegaran a endpoints con contador** y encontró
+`rituales/[slug]`: `generateStaticParams` con 4 slugs, `getRitualBySlug` awaiteado en
+`generateMetadata` y en el body, y `RitualsService.findBySlug` incrementando.
+
+Medido con la app corriendo: `GET /rituals/:slug` **ignoraba el header** —el header viajaba, el
+backend lo tiraba— y un build completo sumaba +4. Se arregló con el mismo patrón, que ya estaba
+escrito: `@IsPrerender()` en el controller y `DetailReadOptions` en el servicio.
+
+Por eso `DetailReadOptions` terminó en `common/interfaces/` y no dentro del módulo de enciclopedia:
+lo usan dos módulos.
+
+**Los que se revisaron y no tenían el problema:** los horóscopos (`/horoscopo/[sign]` y
+`/horoscopo-chino/[animal]` prerenderizan desde constantes del repo; su API sólo la tocan
+componentes `'use client'`, cero requests en build), `/servicios/[slug]` (pega a la API en build
+pero `holistic-services` no tiene contador), y el resto de los `increment()` del backend, que están
+detrás de auth o de POSTs de uso.
 
 ### Lo que no hizo falta
 
@@ -338,17 +369,41 @@ deploys. **Ninguna de las dos se hizo, y no por falta de tiempo:**
 
 Bajar los workers habría hecho el build más lento a cambio de nada.
 
+### ⚠️ Lo que este fix NO arregla, y conviene saber antes de confiar en `view_count`
+
+La revisión levantó algo que cambia cómo hay que leer la columna, y que **no es un defecto de esta
+tarea** pero sí material para quien la use.
+
+Las cuatro rutas de detalle son SSG con `revalidate = 86400`, y `useCard(slug, initialCard)`
+(`hooks/api/useEncyclopedia.ts`) siembra React Query con `initialData` y `staleTime` de 1 h. O sea
+que **una visita real a `/enciclopedia/tarot/[slug]` no genera ninguna request** a la API: el HTML
+sale del caché estático y el cliente no refetchea.
+
+Antes de esta tarea, el prerender era prácticamente lo único que incrementaba en producción.
+Después, lo único que queda es la regeneración de ISR: **~1 incremento por página por día, haya 0 o
+10.000 visitas**.
+
+`view_count` pasó de "visitas infladas por deploy" a **"días desde el último deploy"**. Ninguna de
+las dos cosas es "visitas". Si algún día el número tiene que significar algo, hay que medirlo desde
+el cliente o desde los logs del edge, no desde este endpoint.
+
 ### Fuera de alcance
 
-Rediseñar el conteo de vistas (buffer en memoria, batch, Redis). Si `view_count` llega a importar
-de verdad, es su propia tarea.
+Rediseñar el conteo de vistas (buffer en memoria, batch, Redis, medición desde el cliente). Si
+`view_count` llega a importar de verdad, es su propia tarea — y el párrafo de arriba es el punto de
+partida.
 
 ### Criterios de aceptación
 
 - [x] Un build completo del frontend no mueve ningún `view_count` — medido.
-- [x] La medición es significativa: sin el header, el mismo build suma 126.
-- [x] Una visita real sigue contando (el default de `countView` es `true`, y el header nunca sale
-      del navegador).
+- [x] La medición es significativa: sin el header, el mismo build suma 130.
+- [x] El cableado decorador → controller → servicio está cubierto sobre HTTP real
+      (`test/prerender-view-count.e2e-spec.ts`, 9 tests). Los unitarios **no** lo cubrían: le pasan
+      el booleano a mano al controller, así que desconectar el `@IsPrerender()` los dejaba a los
+      237 en verde. Verificado mutando exactamente eso: los unitarios siguen verdes, el e2e falla.
+- [x] Una visita real al **endpoint** sigue contando: el default de `countView` es `true` y el
+      header nunca sale del navegador. Verificado por HTTP en
+      `test/prerender-view-count.e2e-spec.ts`.
 - [x] Backend: `format`, `lint`, `test:cov` (4815 tests, 85,89% statements), `build`,
       `validate-architecture` en verde.
 - [x] Frontend: `format`, `lint:fix`, `type-check`, `test:run` (6211 tests), `build`,

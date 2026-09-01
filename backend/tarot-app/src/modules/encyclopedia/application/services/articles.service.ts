@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EncyclopediaArticle } from '../../entities/encyclopedia-article.entity';
 import { ArticleCategory } from '../../enums/article.enums';
-import { DetailReadOptions } from '../dto/detail-read-options';
+import { DetailReadOptions } from '../../../../common/interfaces/detail-read-options';
 import {
   ArticleDetailDto,
   ArticleSnippetDto,

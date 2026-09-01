@@ -11,7 +11,7 @@ import {
   GlobalSearchResultDto,
 } from '../dto/card-response.dto';
 import { ArticlesService } from './articles.service';
-import { DetailReadOptions } from '../dto/detail-read-options';
+import { DetailReadOptions } from '../../../../common/interfaces/detail-read-options';
 
 /**
  * DTO de navegación entre cartas

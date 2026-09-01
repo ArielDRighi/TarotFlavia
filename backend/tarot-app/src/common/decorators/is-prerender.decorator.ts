@@ -21,6 +21,12 @@ export const PRERENDER_HEADER = 'x-prerender';
  *
  * Express normaliza los nombres de header a minúsculas, así que `X-Prerender`,
  * `x-prerender` y `X-PRERENDER` entran todos por la misma clave.
+ *
+ * Lo que decide es la **presencia** del header, no su valor: un
+ * `X-Prerender: 0` cuenta como prerender igual que un `1`. Es deliberado —el
+ * frontend manda siempre `'1'` y no hay ningún caso de uso para apagarlo con un
+ * valor— pero conviene saberlo antes de sorprenderse. Sólo el header ausente o
+ * vacío cuenta la vista.
  */
 export function resolveIsPrerender(ctx: ExecutionContext): boolean {
   const request = ctx.switchToHttp().getRequest<Request>();
