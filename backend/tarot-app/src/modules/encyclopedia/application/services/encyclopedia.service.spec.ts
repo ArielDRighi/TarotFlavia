@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
-import { Repository, SelectQueryBuilder, UpdateQueryBuilder } from 'typeorm';
+import { Logger, NotFoundException } from '@nestjs/common';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { EncyclopediaService } from './encyclopedia.service';
 import { ArticlesService } from './articles.service';
 import { EncyclopediaTarotCard } from '../../entities/encyclopedia-tarot-card.entity';
@@ -143,18 +143,6 @@ describe('EncyclopediaService', () => {
     return qb;
   };
 
-  const createUpdateBuilderMock = (): jest.Mocked<
-    UpdateQueryBuilder<EncyclopediaTarotCard>
-  > => {
-    const uqb = {
-      update: jest.fn().mockReturnThis(),
-      set: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      execute: jest.fn().mockResolvedValue({ affected: 1 }),
-    } as unknown as jest.Mocked<UpdateQueryBuilder<EncyclopediaTarotCard>>;
-    return uqb;
-  };
-
   beforeEach(async () => {
     mockArticlesService = {
       search: jest.fn(),
@@ -169,6 +157,10 @@ describe('EncyclopediaService', () => {
             createQueryBuilder: jest.fn(),
             findOne: jest.fn(),
             find: jest.fn(),
+            // La implementación tiene que sobrevivir al clearAllMocks() del
+            // beforeEach (mockClear no la borra). Si algún día se cambia por
+            // resetAllMocks(), increment devuelve undefined, el .catch() del
+            // servicio explota en sincrónico y se caen todos los findBySlug.
             increment: jest.fn().mockResolvedValue({ affected: 1 }),
           },
         },
@@ -366,11 +358,6 @@ describe('EncyclopediaService', () => {
   describe('findBySlug', () => {
     it('debe retornar el detalle de la carta por slug', async () => {
       repository.findOne.mockResolvedValue(mockCard);
-      // Mock del incrementViewCount (query builder para update)
-      const uqb = createUpdateBuilderMock();
-      repository.createQueryBuilder.mockReturnValue(
-        uqb as unknown as SelectQueryBuilder<EncyclopediaTarotCard>,
-      );
 
       const result = await service.findBySlug('the-fool');
 
@@ -385,10 +372,6 @@ describe('EncyclopediaService', () => {
 
     it('debe retornar CardDetailDto con todos los campos', async () => {
       repository.findOne.mockResolvedValue(mockCard);
-      const uqb = createUpdateBuilderMock();
-      repository.createQueryBuilder.mockReturnValue(
-        uqb as unknown as SelectQueryBuilder<EncyclopediaTarotCard>,
-      );
 
       const result = await service.findBySlug('the-fool');
 
@@ -475,16 +458,8 @@ describe('EncyclopediaService', () => {
       getDisplayName: mockCard.getDisplayName,
     };
 
-    const mockUpdateBuilder = (): void => {
-      const uqb = createUpdateBuilderMock();
-      repository.createQueryBuilder.mockReturnValue(
-        uqb as unknown as SelectQueryBuilder<EncyclopediaTarotCard>,
-      );
-    };
-
     it('debe devolver las secciones extendidas en el detalle cuando existen', async () => {
       repository.findOne.mockResolvedValue(mockExtendedCard);
-      mockUpdateBuilder();
 
       const result = await service.findBySlug('the-fool');
 
@@ -506,7 +481,6 @@ describe('EncyclopediaService', () => {
 
     it('debe omitir las secciones extendidas que son null', async () => {
       repository.findOne.mockResolvedValue(mockEmptyExtendedCard);
-      mockUpdateBuilder();
 
       const result = await service.findBySlug('the-fool');
 
@@ -521,7 +495,6 @@ describe('EncyclopediaService', () => {
 
     it('debe mantener intacto el contrato actual cuando no hay contenido extendido', async () => {
       repository.findOne.mockResolvedValue(mockEmptyExtendedCard);
-      mockUpdateBuilder();
 
       const result = await service.findBySlug('the-fool');
 
@@ -539,7 +512,6 @@ describe('EncyclopediaService', () => {
 
     it('debe omitir las secciones extendidas que llegan vacías o en blanco', async () => {
       repository.findOne.mockResolvedValue(mockBlankExtendedCard);
-      mockUpdateBuilder();
 
       const result = await service.findBySlug('the-fool');
 
@@ -909,17 +881,34 @@ describe('EncyclopediaService', () => {
       await expect(service.findBySlug('the-fool')).resolves.toBeDefined();
     });
 
-    it('no debe dejar una promesa rechazada sin manejar', async () => {
-      const sinManejar = jest.fn();
-      process.on('unhandledRejection', sinManejar);
+    /**
+     * El fallo no llega al usuario, pero tiene que llegar al log: en producción
+     * TypeORM corre con `logging: false`, así que un `.catch()` mudo dejaría el
+     * contador roto sin ningún rastro. Este test es además el que prueba que el
+     * rechazo está **manejado**: si alguien borra el `.catch()`, el `warn` no
+     * se llama y el test falla.
+     *
+     * (No se testea vía `process.on('unhandledRejection')`: Jest intercepta los
+     * rechazos colgados y nunca emite ese evento, así que un test así pasaría
+     * igual con el `.catch()` borrado.)
+     */
+    it('debe loguear el fallo del contador sin propagarlo', async () => {
+      const warn = jest
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
       repository.findOne.mockResolvedValue(mockCard);
       repository.increment.mockRejectedValue(new Error('Query read timeout'));
 
       await service.findBySlug('the-fool');
       await new Promise((resolve) => setImmediate(resolve));
-      process.off('unhandledRejection', sinManejar);
 
-      expect(sinManejar).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('No se pudo incrementar view_count'),
+      );
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('Query read timeout'),
+      );
+      warn.mockRestore();
     });
 
     it('no debe incrementar el contador si el slug no existe', async () => {

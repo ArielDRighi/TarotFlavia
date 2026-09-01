@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EncyclopediaArticle } from '../../entities/encyclopedia-article.entity';
@@ -21,6 +21,8 @@ import {
  */
 @Injectable()
 export class ArticlesService {
+  private readonly logger = new Logger(ArticlesService.name);
+
   constructor(
     @InjectRepository(EncyclopediaArticle)
     private readonly articleRepository: Repository<EncyclopediaArticle>,
@@ -163,11 +165,18 @@ export class ArticlesService {
 
   /**
    * Incrementa el view_count del artículo sin bloquear la respuesta.
-   * Fire-and-forget: los errores se silencian intencionalmente.
+   * Fire-and-forget: el error no llega al usuario, pero sí al log.
+   *
+   * Silenciarlo del todo dejaba el fallo invisible en producción, donde
+   * TypeORM corre con `logging: false` (`config/typeorm.ts:80`).
    */
   private incrementViewCount(id: number): void {
-    this.articleRepository.increment({ id }, 'viewCount', 1).catch(() => {
-      /* silencioso — no bloquea la respuesta al usuario */
+    this.articleRepository.increment({ id }, 'viewCount', 1).catch((error) => {
+      this.logger.warn(
+        `No se pudo incrementar view_count del artículo ${id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     });
   }
 

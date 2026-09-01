@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { EncyclopediaTarotCard } from '../../entities/encyclopedia-tarot-card.entity';
@@ -31,6 +31,8 @@ export interface CardNavigationDto {
  */
 @Injectable()
 export class EncyclopediaService {
+  private readonly logger = new Logger(EncyclopediaService.name);
+
   /**
    * Columnas que consume `toSummaryDto`.
    *
@@ -247,11 +249,21 @@ export class EncyclopediaService {
    * `Query read timeout` del contador se convirtieron en **500 de un endpoint
    * de lectura**. Un contador de vistas no puede tumbar la lectura de la ficha.
    *
+   * Se loguea a nivel `warn` en vez de silenciarse: en producción
+   * `logging: false` para TypeORM (`config/typeorm.ts:80`), así que sin esto un
+   * contador que falla no deja **ningún** rastro. El log de arriba, el que
+   * permitió diagnosticar el incidente, salía del interceptor HTTP — que es
+   * justamente lo que este cambio deja de alcanzar.
+   *
    * Mismo patrón que `ArticlesService.incrementViewCount`.
    */
   private incrementViewCount(id: number): void {
-    this.cardRepository.increment({ id }, 'viewCount', 1).catch(() => {
-      /* silencioso — no bloquea la respuesta al usuario */
+    this.cardRepository.increment({ id }, 'viewCount', 1).catch((error) => {
+      this.logger.warn(
+        `No se pudo incrementar view_count de la carta ${id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     });
   }
 
