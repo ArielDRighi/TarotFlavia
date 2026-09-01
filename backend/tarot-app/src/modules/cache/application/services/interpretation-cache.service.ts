@@ -102,19 +102,44 @@ export class InterpretationCacheService {
       return null;
     }
 
-    // Actualizar hit_count y last_used_at
-    await this.cacheRepository.update(
-      { id: dbCache.id },
-      {
-        hit_count: dbCache.hit_count + 1,
-        last_used_at: new Date(),
-      },
-    );
+    this.touchCacheEntry(dbCache.id);
 
     // Guardar en caché in-memory para próximas consultas
     await this.cacheManager.set(cacheKey, dbCache, this.MEMORY_CACHE_TTL);
 
     return dbCache;
+  }
+
+  /**
+   * Marca el uso de una entrada del caché sin bloquear la respuesta.
+   *
+   * Dos arreglos en uno (T-DEPLOY-003):
+   *
+   * 1. **Atómico.** Antes era `hit_count: dbCache.hit_count + 1`, o sea
+   *    read-modify-write sobre un valor leído antes: dos hits concurrentes
+   *    escribían el mismo número y uno se perdía. Ahora el `+ 1` lo resuelve
+   *    Postgres.
+   * 2. **Fuera del camino crítico.** El `await` convertía un timeout del UPDATE
+   *    en un error de `getFromCache` — un **cache hit** que falla con el dato
+   *    ya en la mano. El fallo se loguea, no se propaga.
+   *
+   * Va en un solo `UPDATE` en vez de un `increment()` más un `update()`: son
+   * dos columnas de la misma fila y no hay razón para pagar dos round-trips.
+   */
+  private touchCacheEntry(id: string): void {
+    this.cacheRepository
+      .createQueryBuilder()
+      .update(CachedInterpretation)
+      .set({ hit_count: () => 'hit_count + 1', last_used_at: new Date() })
+      .where('id = :id', { id })
+      .execute()
+      .catch((error) => {
+        this.logger.warn(
+          `No se pudo actualizar el contador de hits del caché ${id}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      });
   }
 
   /**

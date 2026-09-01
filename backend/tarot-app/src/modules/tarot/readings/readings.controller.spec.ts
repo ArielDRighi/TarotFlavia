@@ -400,6 +400,13 @@ describe('ReadingsController', () => {
   });
 
   describe('getReadingShareText', () => {
+    /**
+     * T-DEPLOY-003. Acá no hay test de "el contador falla": el orquestador
+     * declara `incrementShareCount(id): void` y se traga el rechazo adentro,
+     * así que el controller no tiene forma de recibir ese fallo — lo garantiza
+     * el tipo, no un test. Los tests del fallo viven donde vive la lógica:
+     * `readings-orchestrator.service.spec.ts`.
+     */
     it('should generate share text and increment share count', async () => {
       const readingWithShareCount = {
         ...mockReading,

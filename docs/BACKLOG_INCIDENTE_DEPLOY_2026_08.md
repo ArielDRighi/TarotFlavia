@@ -1,6 +1,6 @@
 # Backlog — Incidente de deploy del 31-ago-2026 (el contador de vistas tiró el build)
 
-> **Estado:** ✅ Cerrado — T-DEPLOY-001 completada.
+> **Estado:** 🟡 Abierto — T-DEPLOY-001 y T-DEPLOY-003 completadas, queda T-DEPLOY-002.
 > **Fecha del diagnóstico:** 31-ago-2026
 > **Rama:** `fix/encyclopedia-view-count-fire-and-forget`
 
@@ -126,7 +126,7 @@ ver *[Sobre el log del error](#sobre-el-log-del-error)*.)
 | --- | --- | --- | --- | --- | --- |
 | T-DEPLOY-001 | Hacer fire-and-forget el contador de vistas de las fichas | Backend | 🔴 Crítica | 0,5 pts | ✅ Completada (31-ago-2026) |
 | T-DEPLOY-002 | Que el export estático no escriba en la base | Backend/Frontend | 🟡 Media | 1 pt | ⬜ Pendiente |
-| T-DEPLOY-003 | Sacar las escrituras de telemetría de los otros tres caminos de lectura | Backend | 🟠 Alta | 1 pt | ⬜ Pendiente |
+| T-DEPLOY-003 | Sacar las escrituras de telemetría de los otros tres caminos de lectura | Backend | 🟠 Alta | 1 pt | ✅ Completada (31-ago-2026) |
 
 ---
 
@@ -288,7 +288,7 @@ de verdad, es su propia tarea.
 ## T-DEPLOY-003: Sacar las Escrituras de Telemetría de los Otros Tres Caminos de Lectura
 
 **Prioridad:** 🟠 Alta · **Estimación:** 1 pt · **Dependencias:** ninguna
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (31-ago-2026)
 
 ### Problema
 
@@ -337,11 +337,83 @@ pierde cuentas, independientemente del `await`. Van las dos cosas juntas: `incre
 
 ### Alcance
 
-- [ ] `getSharedReading`: fire-and-forget con log, igual que T-DEPLOY-001.
-- [ ] `incrementShareCount`: pasar a `Promise<void>`, borrar el `findOne` y el `throw`, y sacarlo
-      del `await` en el controller. Actualizar la interfaz y el orquestador.
-- [ ] `getFromCache`: `increment()` atómico para `hit_count` y fuera del camino crítico.
-- [ ] Tests de regresión en los tres, con la mutación verificada (que fallen si se revierte).
+- [x] `getSharedReading`: fire-and-forget con log, igual que T-DEPLOY-001.
+- [x] `incrementShareCount`: el repositorio pasa a `Promise<void>` y se le borran el `findOne` y el
+      `throw`; el orquestador pasa a `void` y se traga el rechazo con log; el controller deja de
+      esperarlo. Actualizada la interfaz `IReadingRepository`.
+- [x] `getFromCache`: un solo `UPDATE` atómico, fuera del camino crítico.
+- [x] Tests de regresión en los tres, con la mutación verificada.
+
+### Dónde quedó la responsabilidad
+
+El fire-and-forget vive en el **orquestador**, no en el controller. Es lo que hace que el controller
+no pueda equivocarse: `incrementShareCount(id): void` no devuelve nada que se pueda esperar, así
+que el tipo garantiza lo que antes garantizaba la disciplina.
+
+Por eso el spec del controller **no** tiene un test de "el contador falla": no hay forma de que ese
+fallo le llegue. El primer intento sí lo tenía, mockeando un throw síncrono, y se descartó porque
+modelaba algo que el código no puede hacer. Los tests del fallo viven donde vive la lógica.
+
+### El `UPDATE` del caché, verificado
+
+Va en una sola sentencia en vez de un `increment()` más un `update()`: son dos columnas de la misma
+fila y no hay razón para pagar dos round-trips. El SQL que genera, impreso desde el propio
+query builder:
+
+```sql
+UPDATE "cached_interpretations"
+SET "hit_count" = "hit_count" + 1, "last_used_at" = :orm_param_0
+WHERE "id" = :id
+```
+
+El `+ 1` lo resuelve Postgres. Antes era `hit_count: dbCache.hit_count + 1`, sumado en JS sobre un
+valor leído antes: dos hits concurrentes escribían el mismo número y uno se perdía.
+
+### Verificación en runtime
+
+`getSharedReading` es el que más importa porque es público. Probado contra la base de desarrollo
+marcando una lectura como compartida y bloqueando su fila desde otra sesión
+(`SELECT ... FOR UPDATE` + `pg_sleep(12)`), igual que en T-DEPLOY-001:
+
+| | Resultado |
+| --- | --- |
+| Camino sano | **200**, `viewCount` 0 → 1 |
+| Con el contador bloqueado | **200 en 28ms** |
+
+Y el fallo queda logueado con el `correlationId` de la request:
+
+```
+warn [1bfa1a18-...] [ReadingsOrchestratorService]: No se pudo incrementar viewCount de la lectura 1: Query read timeout
+```
+
+(La lectura que se usó para la prueba quedó como estaba: `sharedToken` en `null`, `isPublic` en
+`false`, `viewCount` en 0.)
+
+### Los tests, verificados por mutación
+
+Un test que no falla cuando el código se rompe no sirve. Las cuatro mutaciones se aplicaron a
+propósito:
+
+| Mutación | Qué falla |
+| --- | --- |
+| `getSharedReading` vuelve a esperar al contador | 2 tests del orquestador |
+| `incrementShareCount` del orquestador deja de tragar el rechazo | 1 test del orquestador |
+| El repositorio vuelve al `findOne` extra | 1 test del repositorio |
+| El caché vuelve al read-modify-write bloqueante | 3 tests del caché |
+
+El test "devuelve el hit aunque el contador falle" hace fallar los **dos** caminos de escritura
+—el query builder y `repository.update`— justamente para que siga siendo load-bearing si alguien
+vuelve al `update()` de antes.
+
+### Criterios de aceptación
+
+- [x] Los tres endpoints responden con el contador roto.
+- [x] `hit_count` se incrementa de forma atómica.
+- [x] `incrementShareCount` no hace queries de más ni tira excepciones por telemetría.
+- [x] Los fallos se loguean, no se silencian.
+- [x] Las cuatro mutaciones rompen tests.
+- [x] `npm run format`, `npm run lint`, `npm run test:cov` (4804 tests, 85,88% statements),
+      `npm run build` y `node scripts/validate-architecture.js` en verde.
 
 ### Fuera de alcance
 

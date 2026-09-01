@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { Repository, SelectQueryBuilder, DeleteResult } from 'typeorm';
+import {
+  Repository,
+  SelectQueryBuilder,
+  UpdateQueryBuilder,
+  DeleteResult,
+} from 'typeorm';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InterpretationCacheService } from './interpretation-cache.service';
@@ -10,11 +15,21 @@ import { CachedInterpretation } from '../../infrastructure/entities/cached-inter
 import { TarotistaConfig } from '../../../tarotistas/entities/tarotista-config.entity';
 import { TarotistaCardMeaning } from '../../../tarotistas/entities/tarotista-card-meaning.entity';
 
+/**
+ * El mismo `createQueryBuilder()` sirve para los DELETE de limpieza y para el
+ * UPDATE del contador de hits, así que el mock tiene que exponer el `set` del
+ * `UpdateQueryBuilder` además de la superficie del `SelectQueryBuilder`.
+ */
+type CacheQueryBuilderMock = jest.Mocked<
+  SelectQueryBuilder<CachedInterpretation>
+> &
+  Pick<jest.Mocked<UpdateQueryBuilder<CachedInterpretation>>, 'set' | 'update'>;
+
 describe('InterpretationCacheService', () => {
   let service: InterpretationCacheService;
   let repository: jest.Mocked<Repository<CachedInterpretation>>;
   let cacheManager: jest.Mocked<Cache>;
-  let queryBuilder: jest.Mocked<SelectQueryBuilder<CachedInterpretation>>;
+  let queryBuilder: CacheQueryBuilderMock;
 
   const mockCardCombination = [
     { card_id: '1', position: 0, is_reversed: false },
@@ -24,6 +39,8 @@ describe('InterpretationCacheService', () => {
   beforeEach(async () => {
     queryBuilder = {
       delete: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      set: jest.fn().mockReturnThis(),
       from: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
@@ -31,10 +48,10 @@ describe('InterpretationCacheService', () => {
       setParameter: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       addSelect: jest.fn().mockReturnThis(),
-      execute: jest.fn(),
+      execute: jest.fn().mockResolvedValue({ affected: 1 }),
       getMany: jest.fn(),
       getRawOne: jest.fn(),
-    } as unknown as jest.Mocked<SelectQueryBuilder<CachedInterpretation>>;
+    } as unknown as CacheQueryBuilderMock;
 
     const mockRepository = {
       findOne: jest.fn(),
@@ -221,13 +238,81 @@ describe('InterpretationCacheService', () => {
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { cache_key: cacheKey },
       });
-      expect(repository.update).toHaveBeenCalledWith(
-        { id: mockDbEntry.id },
-        expect.objectContaining({
-          hit_count: 6,
-        }),
-      );
       expect(cacheManager.set).toHaveBeenCalled();
+    });
+
+    /**
+     * T-DEPLOY-003. `hit_count: dbCache.hit_count + 1` era read-modify-write
+     * sobre un valor leído antes: dos hits concurrentes escribían el mismo
+     * número y uno se perdía. El SET tiene que resolverse en la base.
+     */
+    it('should increment hit_count atomically, not read-modify-write', async () => {
+      const mockDbEntry = {
+        id: 1,
+        cache_key: cacheKey,
+        hit_count: 5,
+        expires_at: new Date(Date.now() + 100000),
+      } as unknown as CachedInterpretation;
+
+      cacheManager.get.mockResolvedValue(null);
+      repository.findOne.mockResolvedValue(mockDbEntry);
+
+      await service.getFromCache(cacheKey);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      const set = queryBuilder.set.mock.calls[0][0] as Record<string, unknown>;
+      expect(typeof set.hit_count).toBe('function');
+      expect((set.hit_count as () => string)()).toBe('hit_count + 1');
+      expect(set.last_used_at).toBeInstanceOf(Date);
+      expect(queryBuilder.where).toHaveBeenCalledWith('id = :id', { id: 1 });
+    });
+
+    /**
+     * T-DEPLOY-003. El UPDATE del contador estaba en el camino crítico: un
+     * timeout convertía un **cache hit** en un error, con el dato ya en la mano.
+     */
+    it('should return the cache hit even if the counter update fails', async () => {
+      const mockDbEntry = {
+        id: 1,
+        cache_key: cacheKey,
+        hit_count: 5,
+        expires_at: new Date(Date.now() + 100000),
+      } as unknown as CachedInterpretation;
+
+      cacheManager.get.mockResolvedValue(null);
+      repository.findOne.mockResolvedValue(mockDbEntry);
+      // Los dos caminos de escritura fallan, para que el test siga siendo
+      // load-bearing si alguien vuelve al repository.update() bloqueante.
+      queryBuilder.execute.mockRejectedValue(new Error('Query read timeout'));
+      repository.update.mockRejectedValue(new Error('Query read timeout'));
+
+      await expect(service.getFromCache(cacheKey)).resolves.toEqual(
+        mockDbEntry,
+      );
+    });
+
+    it('should log the counter failure without propagating it', async () => {
+      const warn = jest
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+      const mockDbEntry = {
+        id: 1,
+        cache_key: cacheKey,
+        hit_count: 5,
+        expires_at: new Date(Date.now() + 100000),
+      } as unknown as CachedInterpretation;
+
+      cacheManager.get.mockResolvedValue(null);
+      repository.findOne.mockResolvedValue(mockDbEntry);
+      queryBuilder.execute.mockRejectedValue(new Error('Query read timeout'));
+
+      await service.getFromCache(cacheKey);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('Query read timeout'),
+      );
+      warn.mockRestore();
     });
 
     it('should return null if not found in memory or DB', async () => {

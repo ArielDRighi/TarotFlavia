@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { ReadingsOrchestratorService } from './readings-orchestrator.service';
 import { CreateReadingUseCase } from '../use-cases/create-reading.use-case';
 import { ListReadingsUseCase } from '../use-cases/list-readings.use-case';
@@ -88,6 +88,7 @@ describe('ReadingsOrchestratorService', () => {
       hardDelete: jest.fn(),
       findByShareToken: jest.fn(),
       incrementViewCount: jest.fn(),
+      incrementShareCount: jest.fn().mockResolvedValue(undefined),
       archiveOldReadings: jest.fn(),
     };
 
@@ -605,6 +606,37 @@ describe('ReadingsOrchestratorService', () => {
       });
     });
 
+    /**
+     * T-DEPLOY-003. `incrementShareCount` era `Promise<TarotReading>` y el
+     * controller la esperaba; el repositorio, además de incrementar, hacía un
+     * `findOne` extra y tiraba un Error genérico —un 500— si no encontraba la
+     * fila. Todo eso para un valor que el controller descartaba.
+     */
+    describe('incrementShareCount', () => {
+      it('should delegate to the repository', () => {
+        service.incrementShareCount(7);
+
+        expect(readingRepo.incrementShareCount).toHaveBeenCalledWith(7);
+      });
+
+      it('should not throw when the repository rejects', async () => {
+        const warn = jest
+          .spyOn(Logger.prototype, 'warn')
+          .mockImplementation(() => undefined);
+        readingRepo.incrementShareCount.mockRejectedValue(
+          new Error('Query read timeout'),
+        );
+
+        expect(() => service.incrementShareCount(7)).not.toThrow();
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringContaining('Query read timeout'),
+        );
+        warn.mockRestore();
+      });
+    });
+
     describe('getSharedReading', () => {
       it('should return shared reading and increment view count', async () => {
         const sharedReading = {
@@ -623,6 +655,51 @@ describe('ReadingsOrchestratorService', () => {
           sharedReading.id,
         );
         expect(result).toEqual(sharedReading);
+      });
+
+      /**
+       * T-DEPLOY-003. `getSharedReading` sirve un endpoint **público sin auth**
+       * y esperaba al contador de vistas: un timeout del UPDATE devolvía 500
+       * con la lectura ya en la mano. Mismo bug que tiró el deploy del
+       * 31-ago-2026 en la enciclopedia.
+       */
+      it('should return the reading even if the view counter fails', async () => {
+        const sharedReading = {
+          ...mockReading,
+          sharedToken: 'abc123',
+          isPublic: true,
+        };
+        readingRepo.findByShareToken.mockResolvedValue(sharedReading);
+        readingRepo.incrementViewCount.mockRejectedValue(
+          new Error('Query read timeout'),
+        );
+
+        await expect(service.getSharedReading('abc123')).resolves.toEqual(
+          sharedReading,
+        );
+      });
+
+      it('should log the counter failure without propagating it', async () => {
+        const warn = jest
+          .spyOn(Logger.prototype, 'warn')
+          .mockImplementation(() => undefined);
+        const sharedReading = {
+          ...mockReading,
+          sharedToken: 'abc123',
+          isPublic: true,
+        };
+        readingRepo.findByShareToken.mockResolvedValue(sharedReading);
+        readingRepo.incrementViewCount.mockRejectedValue(
+          new Error('Query read timeout'),
+        );
+
+        await service.getSharedReading('abc123');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringContaining('Query read timeout'),
+        );
+        warn.mockRestore();
       });
 
       it('should throw NotFoundException if shared reading not found', async () => {

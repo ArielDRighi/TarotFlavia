@@ -7,12 +7,24 @@ import { CachedInterpretation } from '../../src/modules/cache/infrastructure/ent
 describe('InterpretationCacheService', () => {
   let service: InterpretationCacheService;
 
+  /**
+   * `touchCacheEntry` usa el query builder para el UPDATE atómico del contador
+   * de hits (T-DEPLOY-003), así que el mock tiene que devolver un builder
+   * encadenable en vez de `undefined`.
+   */
+  const mockUpdateBuilder = {
+    update: jest.fn().mockReturnThis(),
+    set: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    execute: jest.fn().mockResolvedValue({ affected: 1 }),
+  };
+
   const mockRepository = {
     findOne: jest.fn(),
     save: jest.fn(),
     update: jest.fn(),
     create: jest.fn((entity: unknown) => entity),
-    createQueryBuilder: jest.fn(),
+    createQueryBuilder: jest.fn(() => mockUpdateBuilder),
   };
 
   const mockCacheManager = {
@@ -41,6 +53,13 @@ describe('InterpretationCacheService', () => {
     );
 
     jest.clearAllMocks();
+
+    // clearAllMocks limpia los mockReturnThis del builder encadenable
+    mockUpdateBuilder.update.mockReturnThis();
+    mockUpdateBuilder.set.mockReturnThis();
+    mockUpdateBuilder.where.mockReturnThis();
+    mockUpdateBuilder.execute.mockResolvedValue({ affected: 1 });
+    mockRepository.createQueryBuilder.mockReturnValue(mockUpdateBuilder);
   });
 
   it('should be defined', () => {
@@ -245,18 +264,20 @@ describe('InterpretationCacheService', () => {
 
       mockCacheManager.get.mockResolvedValue(null);
       mockRepository.findOne.mockResolvedValue(dbCached);
-      mockRepository.update.mockResolvedValue(undefined);
 
       await service.getFromCache(cacheKey);
+      await new Promise((resolve) => setImmediate(resolve));
 
-      expect(mockRepository.update).toHaveBeenCalledWith(
-        { id: '123' },
-        expect.objectContaining({
-          hit_count: 6,
-
-          last_used_at: expect.any(Date),
-        }),
-      );
+      // El `+ 1` lo resuelve Postgres, no JS: el SET lleva una función, no un 6
+      const set = mockUpdateBuilder.set.mock.calls[0][0] as Record<
+        string,
+        unknown
+      >;
+      expect((set.hit_count as () => string)()).toBe('hit_count + 1');
+      expect(set.last_used_at).toBeInstanceOf(Date);
+      expect(mockUpdateBuilder.where).toHaveBeenCalledWith('id = :id', {
+        id: '123',
+      });
     });
 
     it('should save to in-memory cache when found in DB', async () => {
