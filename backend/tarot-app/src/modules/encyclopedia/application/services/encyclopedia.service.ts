@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { EncyclopediaTarotCard } from '../../entities/encyclopedia-tarot-card.entity';
@@ -31,6 +31,8 @@ export interface CardNavigationDto {
  */
 @Injectable()
 export class EncyclopediaService {
+  private readonly logger = new Logger(EncyclopediaService.name);
+
   /**
    * Columnas que consume `toSummaryDto`.
    *
@@ -136,7 +138,7 @@ export class EncyclopediaService {
 
   /**
    * Retorna el detalle completo de una carta por su slug
-   * Incrementa el contador de vistas
+   * Incrementa el contador de vistas (fire-and-forget)
    * @throws NotFoundException si el slug no existe
    */
   async findBySlug(slug: string): Promise<CardDetailDto> {
@@ -145,7 +147,7 @@ export class EncyclopediaService {
       throw new NotFoundException(`Carta "${slug}" no encontrada`);
     }
 
-    await this.incrementViewCount(card.id);
+    this.incrementViewCount(card.id);
     return this.toDetailDto(card);
   }
 
@@ -238,15 +240,31 @@ export class EncyclopediaService {
   // ============================================================================
 
   /**
-   * Incrementa el view_count de la carta sin cargar la entidad completa
+   * Incrementa el view_count de la carta sin bloquear la respuesta.
+   * Fire-and-forget: los errores se silencian intencionalmente.
+   *
+   * El `await` que había acá tiró el deploy del 31-ago-2026: el export
+   * estático del frontend levanta 31 workers que piden las 78 fichas a la vez,
+   * cada `findBySlug` disparaba un UPDATE, se saturó el pool y los
+   * `Query read timeout` del contador se convirtieron en **500 de un endpoint
+   * de lectura**. Un contador de vistas no puede tumbar la lectura de la ficha.
+   *
+   * Se loguea a nivel `warn` en vez de silenciarse: en producción
+   * `logging: false` para TypeORM (`config/typeorm.ts:80`), así que sin esto un
+   * contador que falla no deja **ningún** rastro. El log de arriba, el que
+   * permitió diagnosticar el incidente, salía del interceptor HTTP — que es
+   * justamente lo que este cambio deja de alcanzar.
+   *
+   * Mismo patrón que `ArticlesService.incrementViewCount`.
    */
-  private async incrementViewCount(id: number): Promise<void> {
-    await this.cardRepository
-      .createQueryBuilder()
-      .update(EncyclopediaTarotCard)
-      .set({ viewCount: () => 'view_count + 1' })
-      .where('id = :id', { id })
-      .execute();
+  private incrementViewCount(id: number): void {
+    this.cardRepository.increment({ id }, 'viewCount', 1).catch((error) => {
+      this.logger.warn(
+        `No se pudo incrementar view_count de la carta ${id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    });
   }
 
   /**
