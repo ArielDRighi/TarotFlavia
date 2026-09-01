@@ -169,6 +169,7 @@ describe('EncyclopediaService', () => {
             createQueryBuilder: jest.fn(),
             findOne: jest.fn(),
             find: jest.fn(),
+            increment: jest.fn().mockResolvedValue({ affected: 1 }),
           },
         },
         {
@@ -876,6 +877,58 @@ describe('EncyclopediaService', () => {
       expect(result.tarotCards).toHaveLength(2);
       expect(result.articles).toHaveLength(1);
       expect(result.total).toBe(3);
+    });
+  });
+  // ============================================================================
+  // incrementViewCount (fire-and-forget via findBySlug)
+  // ============================================================================
+
+  describe('incrementViewCount (integrado en findBySlug)', () => {
+    it('debe llamar increment al obtener el detalle de una carta', async () => {
+      repository.findOne.mockResolvedValue(mockCard);
+
+      await service.findBySlug('the-fool');
+
+      expect(repository.increment).toHaveBeenCalledWith(
+        { id: 1 },
+        'viewCount',
+        1,
+      );
+    });
+
+    /**
+     * Regresión del deploy fallido del 31-ago-2026. El contador era un `await`
+     * dentro del read, así que un `Query read timeout` en el UPDATE devolvía
+     * 500 en un endpoint de lectura. El export estático del frontend, con 31
+     * workers pidiendo las 78 fichas a la vez, saturó el pool y tiró el build.
+     */
+    it('no debe bloquear la respuesta aunque increment falle', async () => {
+      repository.findOne.mockResolvedValue(mockCard);
+      repository.increment.mockRejectedValue(new Error('Query read timeout'));
+
+      await expect(service.findBySlug('the-fool')).resolves.toBeDefined();
+    });
+
+    it('no debe dejar una promesa rechazada sin manejar', async () => {
+      const sinManejar = jest.fn();
+      process.on('unhandledRejection', sinManejar);
+      repository.findOne.mockResolvedValue(mockCard);
+      repository.increment.mockRejectedValue(new Error('Query read timeout'));
+
+      await service.findBySlug('the-fool');
+      await new Promise((resolve) => setImmediate(resolve));
+      process.off('unhandledRejection', sinManejar);
+
+      expect(sinManejar).not.toHaveBeenCalled();
+    });
+
+    it('no debe incrementar el contador si el slug no existe', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.findBySlug('inexistente')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(repository.increment).not.toHaveBeenCalled();
     });
   });
 });
