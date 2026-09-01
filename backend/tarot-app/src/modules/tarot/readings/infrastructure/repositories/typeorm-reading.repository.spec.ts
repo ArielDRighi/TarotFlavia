@@ -916,6 +916,33 @@ describe('TypeOrmReadingRepository - BUG HUNTING', () => {
     });
   });
 
+  /**
+   * T-DEPLOY-003. Antes hacía `increment` + un `findOne` extra, y tiraba un
+   * `Error` genérico —o sea un 500— si no encontraba la fila. El `TarotReading`
+   * que devolvía lo descartaba su único caller, así que el round-trip y el
+   * throw eran puro costo: un contador de shares no puede romper la request.
+   */
+  describe('incrementShareCount', () => {
+    it('should increment share count with a single atomic query', async () => {
+      mockReadingRepository.increment.mockResolvedValue({ affected: 1 });
+
+      await repository.incrementShareCount(1);
+
+      expect(mockReadingRepository.increment).toHaveBeenCalledWith(
+        { id: 1 },
+        'shareCount',
+        1,
+      );
+      expect(mockReadingRepository.findOne).not.toHaveBeenCalled();
+    });
+
+    it('should not throw if the reading does not exist', async () => {
+      mockReadingRepository.increment.mockResolvedValue({ affected: 0 });
+
+      await expect(repository.incrementShareCount(999)).resolves.not.toThrow();
+    });
+  });
+
   describe('incrementViewCount', () => {
     it('should increment view count by 1', async () => {
       mockReadingRepository.increment.mockResolvedValue({ affected: 1 });

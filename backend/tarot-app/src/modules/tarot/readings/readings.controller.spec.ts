@@ -400,6 +400,13 @@ describe('ReadingsController', () => {
   });
 
   describe('getReadingShareText', () => {
+    /**
+     * T-DEPLOY-003. Acá no hay test de "el contador falla": el orquestador
+     * declara `incrementShareCount(id): void` y se traga el rechazo adentro,
+     * así que el controller no tiene forma de recibir ese fallo — lo garantiza
+     * el tipo, no un test. Los tests del fallo viven donde vive la lógica:
+     * `readings-orchestrator.service.spec.ts`.
+     */
     it('should generate share text and increment share count', async () => {
       const readingWithShareCount = {
         ...mockReading,
@@ -407,10 +414,6 @@ describe('ReadingsController', () => {
       };
 
       mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
-      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
-        ...readingWithShareCount,
-        shareCount: 1,
-      });
       mockShareTextGenerator.generateShareText.mockReturnValue(
         'Compartir mi lectura de tarot ✨',
       );
@@ -435,10 +438,6 @@ describe('ReadingsController', () => {
       };
 
       mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
-      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
-        ...readingWithShareCount,
-        shareCount: 6,
-      });
       mockShareTextGenerator.generateShareText.mockReturnValue(
         'Mi lectura premium de tarot 🔮',
       );
@@ -463,10 +462,6 @@ describe('ReadingsController', () => {
       };
 
       mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
-      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
-        ...readingWithShareCount,
-        shareCount: 3,
-      });
       mockShareTextGenerator.generateShareText.mockReturnValue(
         'Compartir lectura ✨',
       );

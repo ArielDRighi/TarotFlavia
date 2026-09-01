@@ -1,6 +1,7 @@
 import {
   Injectable,
   Inject,
+  Logger,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
@@ -25,6 +26,8 @@ import { ReadingMapperService } from './reading-mapper.service';
  */
 @Injectable()
 export class ReadingsOrchestratorService {
+  private readonly logger = new Logger(ReadingsOrchestratorService.name);
+
   constructor(
     @Inject('IReadingRepository')
     private readonly readingRepo: IReadingRepository,
@@ -185,18 +188,41 @@ export class ReadingsOrchestratorService {
       );
     }
 
-    // Incrementar el contador de visualizaciones
-    await this.readingRepo.incrementViewCount(reading.id);
+    this.incrementViewCount(reading.id);
 
     return reading;
+  }
+
+  /**
+   * Incrementa el contador de visualizaciones sin bloquear la respuesta.
+   *
+   * Fire-and-forget con log: `getSharedReading` sirve un endpoint público sin
+   * auth, y con el `await` que había acá un timeout del UPDATE devolvía 500 con
+   * la lectura ya en la mano. Mismo bug que tiró el deploy del 31-ago-2026 en
+   * la enciclopedia (T-DEPLOY-001).
+   */
+  private incrementViewCount(id: number): void {
+    this.readingRepo.incrementViewCount(id).catch((error) => {
+      this.logger.warn(
+        `No se pudo incrementar viewCount de la lectura ${id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    });
   }
 
   /**
    * Incrementa el contador de veces que se compartió una lectura.
    * Este método se invoca cuando el usuario obtiene el texto para compartir.
    */
-  async incrementShareCount(id: number): Promise<TarotReading> {
-    return this.readingRepo.incrementShareCount(id);
+  incrementShareCount(id: number): void {
+    this.readingRepo.incrementShareCount(id).catch((error) => {
+      this.logger.warn(
+        `No se pudo incrementar shareCount de la lectura ${id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    });
   }
 
   // ==================== Retention Policy Methods ====================
