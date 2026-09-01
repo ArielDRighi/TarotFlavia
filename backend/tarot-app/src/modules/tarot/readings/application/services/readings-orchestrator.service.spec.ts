@@ -87,7 +87,9 @@ describe('ReadingsOrchestratorService', () => {
       restore: jest.fn(),
       hardDelete: jest.fn(),
       findByShareToken: jest.fn(),
-      incrementViewCount: jest.fn(),
+      // Los dos devuelven promesa: el orquestador les hace .catch() encima,
+      // así que un jest.fn() pelado daría un TypeError sincrónico.
+      incrementViewCount: jest.fn().mockResolvedValue(undefined),
       incrementShareCount: jest.fn().mockResolvedValue(undefined),
       archiveOldReadings: jest.fn(),
     };

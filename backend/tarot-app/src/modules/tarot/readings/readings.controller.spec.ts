@@ -414,10 +414,6 @@ describe('ReadingsController', () => {
       };
 
       mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
-      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
-        ...readingWithShareCount,
-        shareCount: 1,
-      });
       mockShareTextGenerator.generateShareText.mockReturnValue(
         'Compartir mi lectura de tarot ✨',
       );
@@ -442,10 +438,6 @@ describe('ReadingsController', () => {
       };
 
       mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
-      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
-        ...readingWithShareCount,
-        shareCount: 6,
-      });
       mockShareTextGenerator.generateShareText.mockReturnValue(
         'Mi lectura premium de tarot 🔮',
       );
@@ -470,10 +462,6 @@ describe('ReadingsController', () => {
       };
 
       mockOrchestrator.findOne.mockResolvedValue(readingWithShareCount);
-      mockOrchestrator.incrementShareCount = jest.fn().mockResolvedValue({
-        ...readingWithShareCount,
-        shareCount: 3,
-      });
       mockShareTextGenerator.generateShareText.mockReturnValue(
         'Compartir lectura ✨',
       );

@@ -53,13 +53,6 @@ describe('InterpretationCacheService', () => {
     );
 
     jest.clearAllMocks();
-
-    // clearAllMocks limpia los mockReturnThis del builder encadenable
-    mockUpdateBuilder.update.mockReturnThis();
-    mockUpdateBuilder.set.mockReturnThis();
-    mockUpdateBuilder.where.mockReturnThis();
-    mockUpdateBuilder.execute.mockResolvedValue({ affected: 1 });
-    mockRepository.createQueryBuilder.mockReturnValue(mockUpdateBuilder);
   });
 
   it('should be defined', () => {

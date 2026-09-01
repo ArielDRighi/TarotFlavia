@@ -1,6 +1,6 @@
 # Backlog — Incidente de deploy del 31-ago-2026 (el contador de vistas tiró el build)
 
-> **Estado:** 🟡 Abierto — T-DEPLOY-001 y T-DEPLOY-003 completadas, queda T-DEPLOY-002.
+> **Estado:** 🟡 Abierto — T-DEPLOY-001 y T-DEPLOY-003 completadas; quedan T-DEPLOY-002 y T-DEPLOY-004.
 > **Fecha del diagnóstico:** 31-ago-2026
 > **Rama:** `fix/encyclopedia-view-count-fire-and-forget`
 
@@ -127,6 +127,7 @@ ver *[Sobre el log del error](#sobre-el-log-del-error)*.)
 | T-DEPLOY-001 | Hacer fire-and-forget el contador de vistas de las fichas | Backend | 🔴 Crítica | 0,5 pts | ✅ Completada (31-ago-2026) |
 | T-DEPLOY-002 | Que el export estático no escriba en la base | Backend/Frontend | 🟡 Media | 1 pt | ⬜ Pendiente |
 | T-DEPLOY-003 | Sacar las escrituras de telemetría de los otros tres caminos de lectura | Backend | 🟠 Alta | 1 pt | ✅ Completada (31-ago-2026) |
+| T-DEPLOY-004 | Los rezagados: `lastLogin` en el login, catches mudos y el fixture del e2e | Backend | 🟡 Media | 1 pt | ⬜ Pendiente |
 
 ---
 
@@ -357,37 +358,64 @@ modelaba algo que el código no puede hacer. Los tests del fallo viven donde viv
 ### El `UPDATE` del caché, verificado
 
 Va en una sola sentencia en vez de un `increment()` más un `update()`: son dos columnas de la misma
-fila y no hay razón para pagar dos round-trips. El SQL que genera, impreso desde el propio
-query builder:
+fila y no hay razón para pagar dos round-trips. El SQL tal como lo ejecuta Postgres:
 
 ```sql
 UPDATE "cached_interpretations"
-SET "hit_count" = "hit_count" + 1, "last_used_at" = :orm_param_0
-WHERE "id" = :id
+SET "hit_count" = "hit_count" + 1, "last_used_at" = $1
+WHERE "id" = $2
 ```
 
 El `+ 1` lo resuelve Postgres. Antes era `hit_count: dbCache.hit_count + 1`, sumado en JS sobre un
 valor leído antes: dos hits concurrentes escribían el mismo número y uno se perdía.
 
+**La prueba de que ahora no se pierde:** tres hits concurrentes sobre la misma fila con
+`hit_count = 5` la dejan en **8**. Los tres leyeron valores distintos y ninguna cuenta se perdió.
+Con el read-modify-write viejo se habría perdido al menos una.
+
 ### Verificación en runtime
 
-`getSharedReading` es el que más importa porque es público. Probado contra la base de desarrollo
-marcando una lectura como compartida y bloqueando su fila desde otra sesión
-(`SELECT ... FOR UPDATE` + `pg_sleep(12)`), igual que en T-DEPLOY-001:
+Los tres se probaron contra la base de desarrollo bloqueando la fila desde otra sesión
+(`SELECT ... FOR UPDATE` + `pg_sleep`), que es lo que hace un `UPDATE` concurrente:
 
-| | Resultado |
-| --- | --- |
-| Camino sano | **200**, `viewCount` 0 → 1 |
-| Con el contador bloqueado | **200 en 28ms** |
+| Endpoint | Camino sano | Con el contador bloqueado |
+| --- | --- | --- |
+| `GET /shared/:token` (público) | **200**, `viewCount` 0 → 1 | **200 en 28ms** |
+| `GET /readings/:id/share-text` | **200 en 46ms**, `shareCount` 0 → 1 | **200 en 60ms** |
+| `getFromCache` | `hit_count` 5 → 6 y `last_used_at` seteado, 8ms | devuelve el hit en **11ms** |
 
-Y el fallo queda logueado con el `correlationId` de la request:
+Los fallos quedan logueados con el `correlationId` de la request:
 
 ```
 warn [1bfa1a18-...] [ReadingsOrchestratorService]: No se pudo incrementar viewCount de la lectura 1: Query read timeout
 ```
 
-(La lectura que se usó para la prueba quedó como estaba: `sharedToken` en `null`, `isPublic` en
-`false`, `viewCount` en 0.)
+El `UPDATE` de `share-text` es una sola sentencia y **no hay ningún SELECT después** — el `findOne`
+que se borró efectivamente no está:
+
+```sql
+UPDATE "tarot_reading" SET "shareCount" = "shareCount" + 1, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = $1
+```
+
+(Los datos de prueba quedaron como estaban: la lectura con `sharedToken` en `null`, `isPublic` en
+`false` y los contadores en 0, y la fila sembrada en `cached_interpretations` borrada.)
+
+### Un detalle que cambia cómo se leen estos logs
+
+`query_timeout` es del **lado del cliente**: `pg` deja de esperar la respuesta y rechaza la promesa,
+pero **no cancela la sentencia en el servidor**. El `statement_timeout` es 30000ms
+(`config/typeorm.ts:117`).
+
+Medido: con la fila bloqueada 9 segundos, el endpoint responde 200 en 36ms, `view_count` se queda
+quieto mientras el lock está tomado, y **sube igual cuando el lock se libera** — con el `warn` ya
+emitido a los 5 segundos.
+
+Dos consecuencias:
+
+- **El fire-and-forget no pierde la cuenta por contención**, sólo deja de esperarla. Mejor de lo que
+  prometía este backlog.
+- **Un `warn` no significa que la escritura se perdió.** Significa que se dejó de esperar. Si algún
+  día hay que auditar contadores, el log es una señal de lentitud, no de pérdida.
 
 ### Los tests, verificados por mutación
 
@@ -426,3 +454,75 @@ Vale para las tres y para T-DEPLOY-001: un UPDATE fire-and-forget puede perderse
 SIGTERM entre la respuesta y el commit. Para contadores de vistas y de shares es aceptable —es el
 trade-off que se elige a cambio de no tumbar la lectura—. Si algún día alguno de estos números
 tiene que ser exacto, no se arregla con `await`: se arregla con un buffer y un flush.
+
+---
+
+## T-DEPLOY-004: Los Rezagados
+
+**Prioridad:** 🟡 Media · **Estimación:** 1 pt · **Dependencias:** ninguna
+**Estado:** ⬜ Pendiente
+
+Tres cosas que salieron de la revisión de T-DEPLOY-003 y quedaron fuera de su alcance. Ninguna es
+urgente; las tres son de la misma familia.
+
+### 1. `lastLogin` bloquea el login
+
+`auth/application/use-cases/login.use-case.ts:113-114`
+
+```ts
+user.lastLogin = new Date();
+await this.usersService.update(user.id, { lastLogin: user.lastLogin });
+```
+
+Es **la misma forma de falla** que este backlog viene arreglando, sólo que en un camino de escritura
+y no de lectura: un timeout ahí convierte un login con credenciales válidas en un 500. Y no es
+telemetría opinable — `lastLogin` es exactamente igual de prescindible que un contador de vistas
+frente a la posibilidad de no dejar entrar a alguien.
+
+El precedente correcto está **tres líneas más abajo**, en el mismo método: el `logSecurityEvent` ya
+va envuelto en try/catch.
+
+- [ ] Sacar el `await` del camino crítico, con log.
+- [ ] Test de regresión con la mutación verificada.
+
+⚠️ Va con más cuidado que las tres de T-DEPLOY-003: es el camino de autenticación. Merece su propia
+tarea y no colarse en otra.
+
+### 2. Catches mudos: el patrón quedó a medias
+
+El criterio que fijó T-DEPLOY-001 es "los fallos se loguean, no se silencian" —porque en producción
+TypeORM corre con `logging: false` y un `.catch()` vacío no deja rastro—. Quedaron cinco rezagados
+con `.catch(() => {})`:
+
+| Archivo | Líneas |
+| --- | --- |
+| `rituals/application/services/rituals.service.ts` | 115 |
+| `horoscope/infrastructure/controllers/horoscope.controller.ts` | 139, 199, 274 |
+| `horoscope/infrastructure/controllers/chinese-horoscope.controller.ts` | 186, 389 |
+
+Son preexistentes y estructuralmente correctos —no bloquean la respuesta—, pero mudos. Con esto
+cerrado, el repo tiene un solo patrón de fire-and-forget.
+
+- [ ] Agregar el `logger.warn` a los seis.
+
+### 3. El fixture que le falta al e2e de `share-text`
+
+`test/share-text.e2e-spec.ts` tiene **2 tests en rojo** desde antes de todo esto, los dos con 404 en
+`/daily-reading/share-text`.
+
+**No es un endpoint roto.** La ruta se mapea bien (`Mapped {/api/v1/daily-reading/share-text, GET}`)
+y el 404 es la respuesta documentada del handler: *"No existe carta del día para hoy"*. Lo que falta
+es el dato: el setup del e2e siembra lecturas de tarot pero **nunca crea la carta del día** —no hay
+`POST /daily-reading` ni insert en `daily_readings`—, y después los tests esperan `'El Loco'` y una
+interpretación de IA.
+
+- [ ] Crear la carta del día en el setup del e2e.
+
+Queda escrito para que el próximo que vea esos dos rojos no salga a arreglar el endpoint, que está
+bien.
+
+### Nota: `share-text` hace 3 SELECT por request
+
+Preexistente, no lo introdujo T-DEPLOY-003 y no es parte de esta tarea. El `findOne` con relations
+del orquestador cuesta 2 queries por el patrón de distinct-id de TypeORM, más un fetch
+independiente. Si alguna vez el endpoint importa por volumen, ahí está el margen.
