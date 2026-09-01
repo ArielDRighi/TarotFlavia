@@ -59,6 +59,7 @@ describe('axios-config', () => {
   });
 
   afterEach(() => {
+    delete process.env.NEXT_PHASE;
     // Restore original values
     Object.defineProperty(global, 'localStorage', {
       value: originalLocalStorage,
@@ -193,6 +194,74 @@ describe('axios-config', () => {
       const result = successHandler(mockConfig);
 
       expect(result.headers.Authorization).toBeUndefined();
+    });
+  });
+
+  describe('request interceptor - header de prerender (T-DEPLOY-002)', () => {
+    async function handlerDeRequest() {
+      const mockRequestUse = vi.fn();
+      vi.mocked(axios.create).mockImplementation(
+        vi.fn().mockReturnValue({
+          interceptors: {
+            request: { use: mockRequestUse },
+            response: { use: vi.fn() },
+          },
+          defaults: { headers: {} },
+        })
+      );
+
+      vi.resetModules();
+      await import('./axios-config');
+
+      const [[successHandler]] = mockRequestUse.mock.calls;
+      return successHandler;
+    }
+
+    const configVacia = (): InternalAxiosRequestConfig => ({
+      headers: new AxiosHeaders(),
+      method: 'get',
+      url: '/encyclopedia/cards/the-fool',
+    });
+
+    // El interceptor corre en el servidor durante el build, donde no hay
+    // `window`. Sin sacarlo, la guarda de `isPrerenderBuild` corta antes y el
+    // test no probaría nada.
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('manda X-Prerender durante el build de producción', async () => {
+      vi.stubGlobal('window', undefined);
+      process.env.NEXT_PHASE = 'phase-production-build';
+      const successHandler = await handlerDeRequest();
+
+      const result = successHandler(configVacia());
+
+      expect(result.headers['X-Prerender']).toBe('1');
+    });
+
+    it('no manda el header fuera del build', async () => {
+      vi.stubGlobal('window', undefined);
+      delete process.env.NEXT_PHASE;
+      const successHandler = await handlerDeRequest();
+
+      const result = successHandler(configVacia());
+
+      expect(result.headers['X-Prerender']).toBeUndefined();
+    });
+
+    /**
+     * La guarda que evita el modo de falla peor: si `NEXT_PHASE` quedara
+     * horneado en el bundle del cliente, sin esto el navegador mandaría el
+     * header en cada request y dejaríamos de contar **todas** las vistas.
+     */
+    it('nunca manda el header desde el navegador, aunque NEXT_PHASE diga build', async () => {
+      process.env.NEXT_PHASE = 'phase-production-build';
+      const successHandler = await handlerDeRequest();
+
+      const result = successHandler(configVacia());
+
+      expect(result.headers['X-Prerender']).toBeUndefined();
     });
   });
 

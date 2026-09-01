@@ -402,6 +402,23 @@ describe('ArticlesService', () => {
       );
     });
 
+    /**
+     * T-DEPLOY-002. Igual que las fichas: las rutas de artículos
+     * (`elementos`, `guias`, `astrologia/*`) también se prerenderizan, y son
+     * otros 48 incrementos falsos por deploy.
+     */
+    it('no debe contar la vista cuando countView es false', async () => {
+      const qb = createQueryBuilderMock([]);
+      repository.findOne.mockResolvedValue(mockArticleAries);
+      repository.createQueryBuilder.mockReturnValue(
+        qb as unknown as SelectQueryBuilder<EncyclopediaArticle>,
+      );
+
+      await service.findBySlug('aries', { countView: false });
+
+      expect(repository.increment).not.toHaveBeenCalled();
+    });
+
     it('no debe bloquear la respuesta aunque increment falle', async () => {
       const qb = createQueryBuilderMock([]);
       repository.findOne.mockResolvedValue(mockArticleAries);

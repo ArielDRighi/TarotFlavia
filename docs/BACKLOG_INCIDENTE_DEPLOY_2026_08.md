@@ -1,6 +1,6 @@
 # Backlog — Incidente de deploy del 31-ago-2026 (el contador de vistas tiró el build)
 
-> **Estado:** 🟡 Abierto — T-DEPLOY-001 y T-DEPLOY-003 completadas; quedan T-DEPLOY-002 y T-DEPLOY-004.
+> **Estado:** 🟡 Abierto — 001, 002 y 003 completadas; queda T-DEPLOY-004.
 > **Fecha del diagnóstico:** 31-ago-2026
 > **Rama:** `fix/encyclopedia-view-count-fire-and-forget`
 
@@ -125,7 +125,7 @@ ver *[Sobre el log del error](#sobre-el-log-del-error)*.)
 | ID | Tarea | Tipo | Prioridad | Estimación | Estado |
 | --- | --- | --- | --- | --- | --- |
 | T-DEPLOY-001 | Hacer fire-and-forget el contador de vistas de las fichas | Backend | 🔴 Crítica | 0,5 pts | ✅ Completada (31-ago-2026) |
-| T-DEPLOY-002 | Que el export estático no escriba en la base | Backend/Frontend | 🟡 Media | 1 pt | ⬜ Pendiente |
+| T-DEPLOY-002 | Que el export estático no escriba en la base | Backend/Frontend | 🟡 Media | 1 pt | ✅ Completada (31-ago-2026) |
 | T-DEPLOY-003 | Sacar las escrituras de telemetría de los otros tres caminos de lectura | Backend | 🟠 Alta | 1 pt | ✅ Completada (31-ago-2026) |
 | T-DEPLOY-004 | Los rezagados: `lastLogin` en el login, catches mudos y el fixture del e2e | Backend | 🟡 Media | 1 pt | ⬜ Pendiente |
 
@@ -250,11 +250,11 @@ porque sin catch no hay log — y de paso cubre lo que de verdad importa, que el
 ## T-DEPLOY-002: Que el Export Estático No Escriba en la Base
 
 **Prioridad:** 🟡 Media · **Estimación:** 1 pt · **Dependencias:** T-DEPLOY-001
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (31-ago-2026) — **126 → 0 vistas falsas por deploy, medido**
 
 ### Problema
 
-T-DEPLOY-001 saca el fallo del camino crítico, pero el build **sigue escribiendo**.
+T-DEPLOY-001 sacó el fallo del camino crítico, pero el build **seguía escribiendo**.
 
 Y no son sólo las fichas: las rutas de artículos también se prerenderizan
 (`enciclopedia/elementos/[slug]`, `guias/[slug]`, `astrologia/{signos,planetas,casas}/[slug]`) y
@@ -270,19 +270,89 @@ Dos consecuencias, ninguna catastrófica ya:
   producción cada vez que se deploye, ahora sin romper nada pero ensuciando el diagnóstico del
   próximo incidente.
 
-### Alcance propuesto
+### Alcance
 
-- [ ] Que el prerender no cuente como vista, **en fichas y en artículos**. Lo más limpio es un
-      header o query param que el build mande y los dos servicios respeten (`?prerender=1`, o un
-      `User-Agent` propio del build), o que el export pegue a un endpoint de lectura pura.
-- [ ] Evaluar bajar la concurrencia del export estático del frontend, hoy 31 workers.
-- [ ] Considerar que el backend termine de deployar antes de que el frontend haga el export. Hoy
-      los dos servicios salen del mismo push y compiten.
+- [x] Que el prerender no cuente como vista, **en fichas y en artículos**.
+- [ ] ~~Bajar la concurrencia del export~~ — ver *Lo que no hizo falta*.
+- [ ] ~~Desacoplar los deploys~~ — ídem.
+
+### La decisión: un header, no un query param
+
+Se evaluaron tres mecanismos:
+
+| Opción | Por qué no |
+| --- | --- |
+| `?prerender=1` | Ensucia las URLs y rompe la semántica de caché/CDN por query string |
+| **Header `X-Prerender`** | **La elegida.** Invisible para el caché, no toca el contrato de rutas |
+| Endpoint de lectura pura aparte | Duplica código y hay que mantener dos caminos en sincronía |
+
+El frontend lo manda desde el interceptor de request de axios —el criterio es del transporte, no
+de cada endpoint: **nada de lo que pasa durante el build es la acción de una persona**— y el
+backend lo lee con un decorador de parámetro, `@IsPrerender()`.
+
+⚠️ **Es una pista, no una credencial.** Cualquiera puede mandar el header y dejar de ser contado.
+Para un contador de vistas es aceptable —no hay nada que ganar falsificándolo y no gatea ningún
+acceso— pero queda escrito en el decorador: **no usarlo para nada que tenga consecuencias**.
+
+### Los dos modos de falla silenciosa que había que tapar
+
+Los dos habrían dejado el fix sin efecto **sin romper un solo test**:
+
+1. **Que `NEXT_PHASE` quedara horneado en el bundle del cliente.** Next inlinea sólo `NODE_ENV` y
+   las `NEXT_PUBLIC_*`, así que no debería pasar — pero si pasara, `isPrerenderBuild()` daría
+   `true` para siempre en el navegador y **dejaríamos de contar todas las vistas reales**. Por eso
+   la función corta con `typeof window !== 'undefined'` antes de mirar la variable: un prerender es
+   server-side por definición, la guarda no cuesta nada y tapa el modo de falla entero. Tiene su
+   test.
+2. **Cachear `NEXT_PHASE` al importar el módulo.** Durante el build Next levanta workers y el
+   módulo puede cargarse antes de que la variable esté puesta; una `const` de módulo daría `false`
+   para siempre. Se lee en cada llamada, y hay un test que lo fija.
+
+### Verificación: medida, no deducida
+
+Un test unitario no puede probar que el header viaja de punta a punta en un build real. Así que se
+corrió el build del frontend contra el backend local y se midió la suma de `view_count` antes y
+después. Y para que la medición signifique algo, se corrió **también con el header desactivado**:
+
+| Build | fichas | artículos |
+| --- | --- | --- |
+| **Con** el header | 416 → **416** | 3782 → **3782** |
+| **Sin** el header (mutación) | 416 → **494** (+78) | 3782 → **3830** (+48) |
+
+**+78 y +48 = las 126 vistas falsas**, exactamente el número que decía este backlog. Ahora está
+medido en vez de estimado.
+
+El build sí pegó a la API en los dos casos —304 queries de enciclopedia en el log del backend,
+incluidas las de `findBySlug`—, así que el 416 → 416 es "no contó", no "no preguntó". (Los
+contadores de la base de desarrollo se restauraron a 416/3782 después de la prueba.)
+
+### Lo que no hizo falta
+
+El alcance original proponía además bajar la concurrencia del export (31 workers) y desacoplar los
+deploys. **Ninguna de las dos se hizo, y no por falta de tiempo:**
+
+- Con el prerender sin escribir, los 31 workers ya no disparan ningún `UPDATE`. La concurrencia
+  dejó de ser un problema en vez de mitigarse.
+- El orden de los deploys sigue importando por otra razón —el contenido de las fichas, ver el
+  docblock de `enciclopedia/tarot/[slug]/page.tsx`— pero eso es T-SEO, no este backlog.
+
+Bajar los workers habría hecho el build más lento a cambio de nada.
 
 ### Fuera de alcance
 
 Rediseñar el conteo de vistas (buffer en memoria, batch, Redis). Si `view_count` llega a importar
 de verdad, es su propia tarea.
+
+### Criterios de aceptación
+
+- [x] Un build completo del frontend no mueve ningún `view_count` — medido.
+- [x] La medición es significativa: sin el header, el mismo build suma 126.
+- [x] Una visita real sigue contando (el default de `countView` es `true`, y el header nunca sale
+      del navegador).
+- [x] Backend: `format`, `lint`, `test:cov` (4815 tests, 85,89% statements), `build`,
+      `validate-architecture` en verde.
+- [x] Frontend: `format`, `lint:fix`, `type-check`, `test:run` (6211 tests), `build`,
+      `validate-architecture` en verde.
 
 ---
 

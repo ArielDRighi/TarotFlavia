@@ -1,11 +1,16 @@
 import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common';
 import {
+  ApiHeader,
   ApiOperation,
   ApiParam,
   ApiProperty,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import {
+  IsPrerender,
+  PRERENDER_HEADER,
+} from '../../../../common/decorators/is-prerender.decorator';
 import { ArticlesService } from '../../application/services/articles.service';
 import { ArticleFiltersDto } from '../../application/dto/article-filters.dto';
 import {
@@ -184,7 +189,16 @@ export class ArticlesController {
     type: ArticleDetailDto,
   })
   @ApiResponse({ status: 404, description: 'Artículo no encontrado' })
-  async getArticle(@Param('slug') slug: string): Promise<ArticleDetailDto> {
-    return this.articlesService.findBySlug(slug);
+  @ApiHeader({
+    name: PRERENDER_HEADER,
+    required: false,
+    description:
+      'Lo manda el build del frontend para que el prerender no cuente como vista (T-DEPLOY-002).',
+  })
+  async getArticle(
+    @Param('slug') slug: string,
+    @IsPrerender() isPrerender: boolean,
+  ): Promise<ArticleDetailDto> {
+    return this.articlesService.findBySlug(slug, { countView: !isPrerender });
   }
 }

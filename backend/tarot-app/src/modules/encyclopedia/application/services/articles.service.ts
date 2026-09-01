@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EncyclopediaArticle } from '../../entities/encyclopedia-article.entity';
 import { ArticleCategory } from '../../enums/article.enums';
+import { DetailReadOptions } from '../dto/detail-read-options';
 import {
   ArticleDetailDto,
   ArticleSnippetDto,
@@ -63,14 +64,19 @@ export class ArticlesService {
    * Incrementa el contador de vistas (fire-and-forget).
    * @throws NotFoundException si el slug no existe
    */
-  async findBySlug(slug: string): Promise<ArticleDetailDto> {
+  async findBySlug(
+    slug: string,
+    { countView = true }: DetailReadOptions = {},
+  ): Promise<ArticleDetailDto> {
     const article = await this.articleRepository.findOne({ where: { slug } });
 
     if (!article) {
       throw new NotFoundException(`Artículo "${slug}" no encontrado`);
     }
 
-    this.incrementViewCount(article.id);
+    if (countView) {
+      this.incrementViewCount(article.id);
+    }
 
     const relatedArticles = await this.findRelated(
       article.relatedArticles ?? [],

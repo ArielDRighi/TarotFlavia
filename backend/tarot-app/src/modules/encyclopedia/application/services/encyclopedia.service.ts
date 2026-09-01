@@ -11,6 +11,7 @@ import {
   GlobalSearchResultDto,
 } from '../dto/card-response.dto';
 import { ArticlesService } from './articles.service';
+import { DetailReadOptions } from '../dto/detail-read-options';
 
 /**
  * DTO de navegación entre cartas
@@ -138,16 +139,22 @@ export class EncyclopediaService {
 
   /**
    * Retorna el detalle completo de una carta por su slug
-   * Incrementa el contador de vistas (fire-and-forget)
+   * Incrementa el contador de vistas (fire-and-forget), salvo que se pida lo
+   * contrario con `countView: false` — ver `DetailReadOptions`.
    * @throws NotFoundException si el slug no existe
    */
-  async findBySlug(slug: string): Promise<CardDetailDto> {
+  async findBySlug(
+    slug: string,
+    { countView = true }: DetailReadOptions = {},
+  ): Promise<CardDetailDto> {
     const card = await this.cardRepository.findOne({ where: { slug } });
     if (!card) {
       throw new NotFoundException(`Carta "${slug}" no encontrada`);
     }
 
-    this.incrementViewCount(card.id);
+    if (countView) {
+      this.incrementViewCount(card.id);
+    }
     return this.toDetailDto(card);
   }
 
