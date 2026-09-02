@@ -17,7 +17,9 @@ describe('ReadingsCacheInterceptor', () => {
   beforeEach(async () => {
     const mockCacheManager = {
       get: jest.fn(),
-      set: jest.fn(),
+      // `Cache.set` devuelve una promesa: un jest.fn() pelado da `undefined` y
+      // el fire-and-forget del interceptor le hace `.catch()` encima.
+      set: jest.fn().mockResolvedValue(undefined),
       del: jest.fn(),
       reset: jest.fn(),
     };

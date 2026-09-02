@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { E2EDatabaseHelper } from './helpers/e2e-database.helper';
 import * as bcrypt from 'bcryptjs';
+import { getTodayAppDateString } from '../src/common/utils';
 
 /**
  * E2E tests for Share Text endpoints
@@ -167,7 +168,15 @@ describe('Share Text (e2e)', () => {
     );
 
     // Create daily readings
-    const today = new Date().toISOString().split('T')[0];
+    //
+    // ⚠️ `getTodayAppDateString()` y NO `new Date().toISOString()`: el servicio
+    // busca la carta del día por la fecha en la zona de la app
+    // (America/Argentina/Buenos_Aires, `daily-reading.service.ts:56`), no en
+    // UTC. Con `toISOString()` las dos fechas coinciden 21 horas por día y
+    // difieren las otras 3 —entre las 21:00 y las 00:00 ART—, así que estos
+    // tests fallaban con 404 sólo de noche. Es la misma trampa que documenta
+    // la sección de fechas del CLAUDE.md de la raíz.
+    const today = getTodayAppDateString();
 
     // FREE daily reading (without interpretation)
     const freeDailyResult: Array<{ id: number }> = await dataSource.query(
@@ -339,7 +348,7 @@ describe('Share Text (e2e)', () => {
     it('should work for anonymous users with fingerprint', async () => {
       // Create anonymous daily reading manually
       const fingerprint = 'test-fingerprint-' + Date.now();
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayAppDateString();
 
       const anonDailyResult: Array<{ id: number }> = await dataSource.query(
         `INSERT INTO "daily_readings" ("user_id", "anonymous_fingerprint", "card_id", "is_reversed", "interpretation", "reading_date", "tarotista_id", "created_at", "updated_at")

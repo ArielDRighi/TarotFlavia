@@ -12,6 +12,7 @@ import {
 } from '../dto/card-response.dto';
 import { ArticlesService } from './articles.service';
 import { DetailReadOptions } from '../../../../common/interfaces/detail-read-options';
+import { fireAndForget } from '../../../../common/utils';
 
 /**
  * DTO de navegación entre cartas
@@ -265,13 +266,11 @@ export class EncyclopediaService {
    * Mismo patrón que `ArticlesService.incrementViewCount`.
    */
   private incrementViewCount(id: number): void {
-    this.cardRepository.increment({ id }, 'viewCount', 1).catch((error) => {
-      this.logger.warn(
-        `No se pudo incrementar view_count de la carta ${id}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    });
+    fireAndForget(
+      this.cardRepository.increment({ id }, 'viewCount', 1),
+      this.logger,
+      `No se pudo incrementar view_count de la carta ${id}`,
+    );
   }
 
   /**

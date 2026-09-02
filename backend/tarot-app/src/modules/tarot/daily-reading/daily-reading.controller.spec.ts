@@ -21,6 +21,7 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
   let dailyReadingService: DailyReadingService;
   let interceptor: IncrementUsageInterceptor;
   let usageLimitsService: UsageLimitsService;
+  let shareTextGenerator: ShareTextGeneratorService;
 
   const mockCard: Partial<TarotCard> = {
     id: 1,
@@ -54,6 +55,7 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
       getTodayCard: jest.fn(),
       getDailyHistory: jest.fn(),
       regenerateDailyCard: jest.fn(),
+      findOneByFingerprint: jest.fn(),
     };
 
     const mockUsageLimitsService = {
@@ -98,6 +100,9 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
       IncrementUsageInterceptor,
     );
     usageLimitsService = module.get<UsageLimitsService>(UsageLimitsService);
+    shareTextGenerator = module.get<ShareTextGeneratorService>(
+      ShareTextGeneratorService,
+    );
   });
 
   describe('IncrementUsageInterceptor configuration', () => {
@@ -162,6 +167,46 @@ describe('DailyReadingController - IncrementUsageInterceptor Integration', () =>
       expect(result).toBeDefined();
       expect(result.userId).toBe(2);
       expect(dailyReadingService.generateDailyCard).toHaveBeenCalledWith(2, 1);
+    });
+  });
+  // ==========================================================================
+  // getDailyShareText — fecha del usuario anónimo (T-DEPLOY-004)
+  // ==========================================================================
+
+  describe('getDailyShareText (anónimo por fingerprint)', () => {
+    /**
+     * El resto del módulo resuelve "hoy" con `getTodayAppDateString()`, que
+     * formatea en `America/Argentina/Buenos_Aires`. Este camino usaba
+     * `new Date().toISOString()`, o sea **UTC**.
+     *
+     * Las dos fechas coinciden 21 horas por día y difieren las otras 3 —entre
+     * las 21:00 y las 00:00 ART—. En esa ventana, un usuario anónimo al que
+     * `generateAnonymousDailyCard` le acababa de guardar la carta con la fecha
+     * argentina no podía pedir su texto para compartir: 404.
+     *
+     * El reloj se fija dentro de la ventana a propósito. Sin eso el test pasa
+     * 21 de cada 24 horas y el bug vuelve sin que nadie se entere — que es
+     * exactamente cómo llegó hasta acá.
+     */
+    it('busca la carta con la fecha de la app, no con la de UTC', async () => {
+      jest.useFakeTimers();
+      // 2026-09-02T01:30Z = 2026-09-01 22:30 en Argentina: días distintos.
+      jest.setSystemTime(new Date('2026-09-02T01:30:00.000Z'));
+
+      try {
+        const buscar = jest
+          .spyOn(dailyReadingService, 'findOneByFingerprint')
+          .mockResolvedValue(mockDailyReading as DailyReading);
+        jest
+          .spyOn(shareTextGenerator, 'generateShareText')
+          .mockReturnValue('texto');
+
+        await controller.getDailyShareText({}, 'huella-123');
+
+        expect(buscar).toHaveBeenCalledWith('huella-123', '2026-09-01');
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 });

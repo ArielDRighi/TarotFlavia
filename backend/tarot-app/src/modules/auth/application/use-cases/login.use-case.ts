@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../../../users/users.service';
@@ -10,10 +15,12 @@ import { SecurityEventService } from '../../../security/security-event.service';
 import { SecurityEventType } from '../../../security/enums/security-event-type.enum';
 import { SecurityEventSeverity } from '../../../security/enums/security-event-severity.enum';
 import { UserRole } from '../../../../common/enums/user-role.enum';
-import { mapSubscriptionStatus } from '../../../../common/utils';
+import { fireAndForget, mapSubscriptionStatus } from '../../../../common/utils';
 
 @Injectable()
 export class LoginUseCase {
+  private readonly logger = new Logger(LoginUseCase.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -110,9 +117,18 @@ export class LoginUseCase {
       );
     }
 
-    // Update lastLogin timestamp
+    // Update lastLogin timestamp (fire-and-forget)
+    //
+    // No puede ir en el camino crítico: un timeout de este UPDATE convertía un
+    // login con credenciales válidas en un 500 (T-DEPLOY-004). No dejar entrar
+    // a alguien porque no se pudo anotar la fecha de su último ingreso es un
+    // mal negocio.
     user.lastLogin = new Date();
-    await this.usersService.update(user.id, { lastLogin: user.lastLogin });
+    fireAndForget(
+      this.usersService.update(user.id, { lastLogin: user.lastLogin }),
+      this.logger,
+      `No se pudo actualizar lastLogin del usuario ${user.id}`,
+    );
 
     // Log successful login
     try {

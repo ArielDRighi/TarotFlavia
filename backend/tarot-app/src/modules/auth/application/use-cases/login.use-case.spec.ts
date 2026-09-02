@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { LoginUseCase } from './login.use-case';
@@ -143,6 +143,53 @@ describe('LoginUseCase', () => {
         1,
         expect.objectContaining({ lastLogin: expect.any(Date) }),
       );
+    });
+
+    /**
+     * T-DEPLOY-004. `lastLogin` se escribía con `await` **antes** de generar
+     * los tokens, así que un timeout de ese UPDATE convertía un login con
+     * credenciales válidas en un 500. Es la misma forma de falla que tiró el
+     * deploy del 31-ago-2026 (T-DEPLOY-001), pero en el camino de
+     * autenticación: no dejar entrar a alguien porque no se pudo anotar la
+     * fecha de su último ingreso es un mal negocio.
+     *
+     * El precedente correcto ya estaba tres líneas más abajo, en el mismo
+     * método: el `logSecurityEvent` va envuelto en try/catch desde siempre.
+     */
+    it('debe devolver los tokens aunque falle el guardado de lastLogin', async () => {
+      usersService.findById.mockResolvedValue(mockUser);
+      usersService.update.mockRejectedValue(new Error('Query read timeout'));
+
+      const result = await useCase.execute(
+        1,
+        'test@example.com',
+        '127.0.0.1',
+        'Mozilla',
+      );
+
+      expect(result.access_token).toBe('access_token');
+      expect(result.refresh_token).toBe('refresh_token');
+    });
+
+    it('debe loguear el fallo de lastLogin sin propagarlo', async () => {
+      const warn = jest
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+      usersService.findById.mockResolvedValue(mockUser);
+      usersService.update.mockRejectedValue(new Error('Query read timeout'));
+
+      try {
+        await useCase.execute(1, 'test@example.com', '127.0.0.1', 'Mozilla');
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringContaining('Query read timeout'),
+        );
+      } finally {
+        // Sin el finally, una aserción fallida deja el spy montado sobre
+        // Logger.prototype para todo el resto del archivo.
+        warn.mockRestore();
+      }
     });
 
     it('should throw UnauthorizedException when userId is invalid', async () => {

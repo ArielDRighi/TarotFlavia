@@ -18,6 +18,7 @@ import { PaginatedReadingsResponseDto } from '../../dto/paginated-readings-respo
 import { TarotReading } from '../../entities/tarot-reading.entity';
 import { User, UserPlan } from '../../../../users/entities/user.entity';
 import { ReadingMapperService } from './reading-mapper.service';
+import { fireAndForget } from '../../../../../common/utils';
 
 /**
  * Orquestador principal para operaciones de readings.
@@ -202,13 +203,11 @@ export class ReadingsOrchestratorService {
    * la enciclopedia (T-DEPLOY-001).
    */
   private incrementViewCount(id: number): void {
-    this.readingRepo.incrementViewCount(id).catch((error) => {
-      this.logger.warn(
-        `No se pudo incrementar viewCount de la lectura ${id}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    });
+    fireAndForget(
+      this.readingRepo.incrementViewCount(id),
+      this.logger,
+      `No se pudo incrementar viewCount de la lectura ${id}`,
+    );
   }
 
   /**
@@ -216,13 +215,11 @@ export class ReadingsOrchestratorService {
    * Este método se invoca cuando el usuario obtiene el texto para compartir.
    */
   incrementShareCount(id: number): void {
-    this.readingRepo.incrementShareCount(id).catch((error) => {
-      this.logger.warn(
-        `No se pudo incrementar shareCount de la lectura ${id}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    });
+    fireAndForget(
+      this.readingRepo.incrementShareCount(id),
+      this.logger,
+      `No se pudo incrementar shareCount de la lectura ${id}`,
+    );
   }
 
   // ==================== Retention Policy Methods ====================

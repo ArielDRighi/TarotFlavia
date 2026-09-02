@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { EncyclopediaArticle } from '../../entities/encyclopedia-article.entity';
 import { ArticleCategory } from '../../enums/article.enums';
 import { DetailReadOptions } from '../../../../common/interfaces/detail-read-options';
+import { fireAndForget } from '../../../../common/utils';
 import {
   ArticleDetailDto,
   ArticleSnippetDto,
@@ -177,13 +178,11 @@ export class ArticlesService {
    * TypeORM corre con `logging: false` (`config/typeorm.ts:80`).
    */
   private incrementViewCount(id: number): void {
-    this.articleRepository.increment({ id }, 'viewCount', 1).catch((error) => {
-      this.logger.warn(
-        `No se pudo incrementar view_count del artículo ${id}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    });
+    fireAndForget(
+      this.articleRepository.increment({ id }, 'viewCount', 1),
+      this.logger,
+      `No se pudo incrementar view_count del artículo ${id}`,
+    );
   }
 
   /**

@@ -28,6 +28,7 @@ import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { UsersService } from '../../../users/users.service';
+import { fireAndForget } from '../../../../common/utils';
 
 /**
  * Controlador de endpoints REST para consultar horóscopos diarios
@@ -136,9 +137,11 @@ export class HoroscopeController {
     }
 
     // Incrementar viewCount de forma asíncrona (fire-and-forget)
-    this.horoscopeService.incrementViewCount(horoscope.id).catch(() => {
-      // Ignorar errores silenciosamente
-    });
+    fireAndForget(
+      this.horoscopeService.incrementViewCount(horoscope.id),
+      this.logger,
+      `No se pudo incrementar el contador del horóscopo ${horoscope.id}`,
+    );
 
     return this.toResponseDto(horoscope);
   }
@@ -196,9 +199,11 @@ export class HoroscopeController {
     }
 
     // Incrementar viewCount de forma asíncrona (fire-and-forget)
-    this.horoscopeService.incrementViewCount(horoscope.id).catch(() => {
-      // Ignorar errores silenciosamente
-    });
+    fireAndForget(
+      this.horoscopeService.incrementViewCount(horoscope.id),
+      this.logger,
+      `No se pudo incrementar el contador del horóscopo ${horoscope.id}`,
+    );
 
     return this.toResponseDto(horoscope);
   }
@@ -271,9 +276,11 @@ export class HoroscopeController {
     }
 
     // Incrementar viewCount de forma asíncrona (fire-and-forget)
-    this.horoscopeService.incrementViewCount(horoscope.id).catch(() => {
-      // Ignorar errores silenciosamente
-    });
+    fireAndForget(
+      this.horoscopeService.incrementViewCount(horoscope.id),
+      this.logger,
+      `No se pudo incrementar el contador del horóscopo ${horoscope.id}`,
+    );
 
     return this.toResponseDto(horoscope);
   }

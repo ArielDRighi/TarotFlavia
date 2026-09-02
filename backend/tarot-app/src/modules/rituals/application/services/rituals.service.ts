@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ritual } from '../../entities/ritual.entity';
@@ -7,6 +7,7 @@ import { RitualFiltersDto } from '../dto/ritual-filters.dto';
 import { RitualSummaryDto, RitualDetailDto } from '../dto/ritual-response.dto';
 import { MaterialType } from '../../domain/enums';
 import { DetailReadOptions } from '../../../../common/interfaces/detail-read-options';
+import { fireAndForget } from '../../../../common/utils';
 
 /**
  * Servicio para gestión de rituales
@@ -19,6 +20,8 @@ import { DetailReadOptions } from '../../../../common/interfaces/detail-read-opt
  */
 @Injectable()
 export class RitualsService {
+  private readonly logger = new Logger(RitualsService.name);
+
   constructor(
     @InjectRepository(Ritual)
     private readonly ritualRepository: Repository<Ritual>,
@@ -117,7 +120,11 @@ export class RitualsService {
 
     // Incrementar vistas (fire-and-forget), salvo que sea un prerender
     if (countView) {
-      this.incrementViewCount(ritual.id).catch(() => {});
+      fireAndForget(
+        this.incrementViewCount(ritual.id),
+        this.logger,
+        `No se pudo incrementar view_count del ritual ${ritual.id}`,
+      );
     }
 
     return this.toDetailDto(ritual);
