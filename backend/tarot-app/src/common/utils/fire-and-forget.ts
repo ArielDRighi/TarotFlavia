@@ -36,8 +36,17 @@ export function fireAndForget(
   queFallo: string,
 ): void {
   void operacion.catch((error: unknown) => {
-    logger.warn(
-      `${queFallo}: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    // El `try` no es paranoia: sin él, un logger que tira —un transport roto—
+    // dejaría rechazada la promesa que devuelve este `.catch()`, y esa sí no
+    // tiene a nadie atrás. Sería una unhandled rejection, o sea el proceso, que
+    // es la moraleja entera de este backlog. Los `.catch(() => {})` que este
+    // helper reemplaza no podían fallar; esto empata esa garantía.
+    try {
+      logger.warn(
+        `${queFallo}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    } catch {
+      // Si ni siquiera se puede loguear, no queda nada útil por hacer acá.
+    }
   });
 }

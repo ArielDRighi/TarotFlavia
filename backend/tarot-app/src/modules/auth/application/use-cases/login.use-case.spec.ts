@@ -178,13 +178,18 @@ describe('LoginUseCase', () => {
       usersService.findById.mockResolvedValue(mockUser);
       usersService.update.mockRejectedValue(new Error('Query read timeout'));
 
-      await useCase.execute(1, 'test@example.com', '127.0.0.1', 'Mozilla');
-      await new Promise((resolve) => setImmediate(resolve));
+      try {
+        await useCase.execute(1, 'test@example.com', '127.0.0.1', 'Mozilla');
+        await new Promise((resolve) => setImmediate(resolve));
 
-      expect(warn).toHaveBeenCalledWith(
-        expect.stringContaining('Query read timeout'),
-      );
-      warn.mockRestore();
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringContaining('Query read timeout'),
+        );
+      } finally {
+        // Sin el finally, una aserción fallida deja el spy montado sobre
+        // Logger.prototype para todo el resto del archivo.
+        warn.mockRestore();
+      }
     });
 
     it('should throw UnauthorizedException when userId is invalid', async () => {

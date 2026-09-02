@@ -26,18 +26,6 @@ describe('fireAndForget (T-DEPLOY-004)', () => {
     expect(resultado).toBeUndefined();
   });
 
-  it('no propaga el rechazo', async () => {
-    expect(() =>
-      fireAndForget(
-        Promise.reject(new Error('Query read timeout')),
-        logger,
-        'No se pudo hacer algo',
-      ),
-    ).not.toThrow();
-
-    await siguienteTick();
-  });
-
   it('loguea el contexto y el mensaje del error', async () => {
     fireAndForget(
       Promise.reject(new Error('Query read timeout')),
@@ -90,7 +78,11 @@ describe('fireAndForget (T-DEPLOY-004)', () => {
 
   /**
    * Lo que justifica que el helper exista: la respuesta no espera a la
-   * operación. Si `fireAndForget` awaiteara adentro, este test tardaría 50ms.
+   * operación.
+   *
+   * Es un test débil y conviene saberlo: quien realmente impide que alguien lo
+   * vuelva `async` es el compilador —la firma dice `void`— y el test de
+   * `toBeUndefined()` de arriba. Éste documenta la intención, no la garantiza.
    */
   it('devuelve antes de que la operación termine', async () => {
     let termino = false;

@@ -1,6 +1,6 @@
 # Backlog — Incidente de deploy del 31-ago-2026 (el contador de vistas tiró el build)
 
-> **Estado:** ✅ **Cerrado** — 001, 002, 003 y 004 completadas.
+> **Estado:** 🟡 Abierto — 001 a 004 completadas; T-DEPLOY-005 quedó abierta al barrer las fechas.
 > **Fecha del diagnóstico:** 31-ago-2026
 > **Rama:** `fix/encyclopedia-view-count-fire-and-forget`
 
@@ -127,7 +127,8 @@ ver *[Sobre el log del error](#sobre-el-log-del-error)*.)
 | T-DEPLOY-001 | Hacer fire-and-forget el contador de vistas de las fichas | Backend | 🔴 Crítica | 0,5 pts | ✅ Completada (31-ago-2026) |
 | T-DEPLOY-002 | Que el export estático no escriba en la base | Backend/Frontend | 🟡 Media | 1 pt | ✅ Completada (31-ago-2026) |
 | T-DEPLOY-003 | Sacar las escrituras de telemetría de los otros tres caminos de lectura | Backend | 🟠 Alta | 1 pt | ✅ Completada (31-ago-2026) |
-| T-DEPLOY-004 | Los rezagados: `lastLogin` en el login, catches mudos y el e2e de `share-text` | Backend | 🟡 Media | 1 pt | ✅ Completada (31-ago-2026) |
+| T-DEPLOY-004 | Los rezagados: `lastLogin` en el login, catches mudos y el e2e de `share-text` | Backend | 🟡 Media | 1 pt | ✅ Completada (01-sep-2026) |
+| T-DEPLOY-005 | El resto del desfasaje UTC vs zona de la app | Backend | 🟠 Alta | 1,5 pts | ⬜ Pendiente |
 
 ---
 
@@ -585,7 +586,7 @@ tiene que ser exacto, no se arregla con `await`: se arregla con un buffer y un f
 ## T-DEPLOY-004: Los Rezagados
 
 **Prioridad:** 🟡 Media · **Estimación:** 1 pt · **Dependencias:** ninguna
-**Estado:** ✅ COMPLETADA (31-ago-2026) — y destapó un **bug de producción** que nadie buscaba
+**Estado:** ✅ COMPLETADA (01-sep-2026) — y destapó un **bug de producción** que nadie buscaba
 
 Tres cosas que salieron de la revisión de T-DEPLOY-003 y quedaron fuera de su alcance. Ninguna era
 urgente; las tres son de la misma familia. La tercera resultó ser otra cosa: ver
@@ -631,10 +632,20 @@ con `.catch(() => {})`:
 Eran preexistentes y estructuralmente correctos —no bloquean la respuesta—, pero mudos.
 
 - [x] Los seis pasan por `fireAndForget`.
-- [x] **Y los que ya logueaban también.** El objetivo del ítem era "un solo patrón", y quedaban
-      cinco copias del mismo `.catch()` con el mismo armado de mensaje: enciclopedia, artículos,
-      las dos del orquestador de lecturas y la del caché. Todas usan ahora el helper, con los
-      mismos mensajes de antes —así que sus tests siguen valiendo—.
+- [x] **Y los que ya logueaban también.** Quedaban cinco copias del mismo `.catch()` con el mismo
+      armado de mensaje: enciclopedia, artículos, las dos del orquestador de lecturas y la del
+      caché. Todas usan ahora el helper, con los mismos mensajes de antes —así que sus tests siguen
+      valiendo—.
+- [x] `readings-cache.interceptor.ts` era el único fire-and-forget del repo **sin ningún catch**.
+      Hoy es inofensivo porque el store es en memoria y no rechaza; el día que entre Redis sería una
+      unhandled rejection, o sea el proceso.
+
+**Alcance de "un solo patrón", dicho con precisión:** el helper cubre la **telemetría de lectura**,
+que es de lo que trata este backlog. Quedan siete fire-and-forget artesanales
+(`horoscope.controller.ts:77`, `chinese-horoscope.controller.ts:313,444`,
+`ip-blocking.service.ts:169,190`, `forgot-password.use-case.ts:41`, `cache-warming.service.ts:87`,
+`increment-usage.interceptor.ts:54`) que usan `logger.error` con el stack como segundo argumento —
+algo que el helper, con un `warn` de un solo string, no expresa. No son deuda: son otro caso.
 
 ### El helper: `common/utils/fire-and-forget.ts`
 
@@ -657,10 +668,10 @@ fireAndForget(
 
 ### 3. El e2e de `share-text` no era un fixture faltante
 
-`test/share-text.e2e-spec.ts` tenía **2 tests en rojo**, los dos con 404 en
-`/daily-reading/share-text`. El diagnóstico anotado acá decía que faltaba el fixture. **Era falso:
-el fixture existe** —el `beforeAll` inserta los `daily_readings` de los usuarios free y premium
-desde siempre—.
+`test/share-text.e2e-spec.ts` tenía **2 tests en rojo cuando se los miraba de noche**, los dos con
+404 en `/daily-reading/share-text`. El diagnóstico anotado acá decía que faltaba el fixture. **Era
+falso: el fixture existe** —el `beforeAll` inserta los `daily_readings` de los usuarios free y
+premium desde siempre—.
 
 Lo que pasaba es más interesante, y es la trampa que el CLAUDE.md de la raíz documenta entera:
 
@@ -697,7 +708,9 @@ texto para compartirla: 404.** Tres horas por día, todos los días.
 - [x] Test de regresión con el reloj fijado dentro de la ventana
       (`2026-09-02T01:30Z` = 22:30 ART del día anterior). Fijarlo no es decorativo: sin eso el test
       pasa 21 de cada 24 horas, que es exactamente cómo el bug llegó hasta acá.
-- [x] Los 9 tests de `share-text.e2e-spec.ts` pasan por primera vez.
+- [x] Los 9 tests de `share-text.e2e-spec.ts` pasan **a cualquier hora**. Ojo con decir "pasan
+      por primera vez": en `develop` pasaban las 21 horas del día en que los dos calendarios
+      coinciden. Lo que cambia —y es más fuerte— es que ahora no dependen de la hora.
 
 **La lección, que es la misma de siempre en este backlog:** un test en rojo que "siempre estuvo en
 rojo" no es ruido de fondo. Y un test que pasa puede estar pasando por dos errores que se anulan.
@@ -714,5 +727,95 @@ independiente. Si alguna vez el endpoint importa por volumen, ahí está el marg
 - [x] No queda ningún `.catch(() => {})` mudo en el repo: todos los fire-and-forget pasan por el
       mismo helper.
 - [x] `share-text.e2e-spec.ts` pasa completo (9/9).
-- [x] `npm run format`, `npm run lint`, `npm run test:cov` (4828 tests, 85,95% statements),
+- [x] `npm run format`, `npm run lint`, `npm run test:cov` (4827 tests, 85,95% statements),
       `npm run build` y `node scripts/validate-architecture.js` en verde.
+
+---
+
+## T-DEPLOY-005: El Resto del Desfasaje UTC vs Zona de la App
+
+**Prioridad:** 🟠 Alta · **Estimación:** 1,5 pts · **Dependencias:** ninguna
+**Estado:** ⬜ Pendiente
+
+### De dónde sale
+
+T-DEPLOY-004 arregló **el** desfasaje que un test señaló
+(`daily-reading.controller.ts:301`). La revisión preguntó lo obvio —*"¿arreglaste el que el test te
+mostró o todos?"*— y barrió el repo. La respuesta es: uno vivo más, uno latente y dos de
+agendamiento.
+
+**La ventana es siempre la misma:** entre las **21:00 y las 00:00 ART**, `new Date().toISOString()`
+ya está en el día siguiente y `getTodayAppDateString()` todavía no. Tres horas por día, todos los
+días. Argentina no tiene horario de verano, así que el desfase es fijo (`date.utils.ts:127` lo
+asume explícito).
+
+### 1. 🔴 El widget del número del día muestra el número de mañana
+
+`numerology.controller.ts:246-249` + `common/utils/numerology.utils.ts:247-250`
+
+`GET /numerology/day-number` resuelve "hoy" en UTC **por partida doble**: el campo `date` con
+`toISOString()` y el cálculo con `getUTCFullYear/getUTCMonth/getUTCDate`. Reproducido el
+01-sep-2026 a las 21:50 ART:
+
+```
+fecha app (ART): 2026-09-01   dayNumber ART: 2
+fecha UTC      : 2026-09-02   dayNumber UTC: 3   ← lo que devuelve el endpoint
+```
+
+Y se muestra: `NumerologyWidget.tsx:17,111` renderiza `dayNumber.dayNumber`.
+
+- [ ] `getTodayAppDateString()` para el campo `date`.
+- [ ] Una variante de `calculateDayNumber` que tome el `YYYY-MM-DD` de la app en vez de leer los
+      getters UTC de un `Date`. **Es un cambio de semántica del producto**, no sólo un bug: hay que
+      decidir explícitamente que el número del día de un usuario argentino cambia a medianoche de
+      Argentina. Por eso va en su propia tarea y no se coló en T-DEPLOY-004.
+- [ ] Test con el reloj fijado dentro de la ventana, como el de
+      `daily-reading.controller.spec.ts`.
+
+### 2. 🟡 La cuota mensual se resetea 3 horas antes, el último día del mes
+
+`usage-limits.service.ts:110-115` abre el mes con `Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)`,
+pero `usage.date` se escribe con `getTodayAppDateString()` (línea 137). El último día de cada mes,
+en la ventana, `getUTCMonth()` ya es el mes siguiente → el `>= startDate` no matchea nada → la suma
+da 0.
+
+**Hoy es latente, no vivo:** los tres planes tienen `birth_chart_monthly_limit = -1` y
+`getPendulumLimit` nunca devuelve `period: 'monthly'`. Pero se activa con un `UPDATE plans SET
+birth_chart_monthly_limit = 3`, **sin deploy**.
+
+- [ ] `getStartOfMonthAppString()` en `date.utils.ts`, hermano de `getDateDaysAgoAppString`.
+
+### 3. 🟡 Agendamiento
+
+- `availability.service.ts:164` y `typeorm-exception.repository.ts:77` usan
+  `Between(today.toISOString().split('T')[0], '2099-12-31')` para las excepciones "futuras", pero
+  `exception_date` lo carga la tarotista desde su calendario en ART. En la ventana, **la excepción
+  de hoy desaparece del listado**.
+- `book-session.use-case.ts:44` hace `new Date(\`${dto.sessionDate}T${dto.sessionTime}\`)` sin
+  offset, que se parsea en la zona del servidor — y el contenedor corre con `TZ=UTC`
+  (`Dockerfile:59`). El chequeo de "mínimo 2 horas de anticipación" corre 3 horas corrido respecto
+  del horario real de la tarotista.
+
+- [ ] Los tres, con la misma receta.
+
+### Lo que se revisó y está bien
+
+No todo `toISOString()` es un bug: lo que importa es que **el que escribe y el que lee usen el mismo
+calendario**.
+
+| Columna | Estado |
+| --- | --- |
+| `reading_date` | ✅ los 9 sitios usan la fecha de la app tras T-DEPLOY-004 |
+| `anonymous_usage.date` | ✅ los 3 usan la fecha de la app |
+| `usage_limit.date` (diario) | ✅ guard, servicio y capabilities, todos app |
+| `horoscope_date` | ✅ UTC en escritura **y** en lectura: autoconsistente, y es el desfase intencional del cron de las 01:00 UTC |
+| `sacred-event-notification-cron.service.ts:76` | ✅ el `dateStr` es sólo para el log |
+| `daily-reading-cleanup.service.ts:73,88` | ✅ el cutoff cae en el día anterior en los dos calendarios |
+
+### Nota aparte: `login.use-case.ts:46` arrastra un `eslint-disable`
+
+Preexistente, en un archivo que T-DEPLOY-004 tocó. La Regla 0 del `CLAUDE.md` no admite excepciones,
+así que vale sacarlo — pero **no alcanza con renombrar a `_password`**: se probó y la config de
+ESLint de este repo tampoco lo ignora (`users.service.ts:121` tiene el mismo disable, ya con el
+guión bajo). Hace falta poner `ignoreRestSiblings: true` en la regla, que es un cambio de config
+del proyecto y se lleva puestos los dos disables de una.
