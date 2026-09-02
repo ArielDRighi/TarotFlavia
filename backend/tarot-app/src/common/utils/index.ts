@@ -7,3 +7,4 @@ export * from './zodiac.utils';
 export * from './chinese-zodiac.utils';
 export * from './numerology.utils';
 export * from './subscription.utils';
+export * from './fire-and-forget';

@@ -32,6 +32,7 @@ import { DailyReadingHistoryDto } from './dto/daily-reading-history.dto';
 import { CreateAnonymousDailyReadingDto } from './dto/create-anonymous-daily-reading.dto';
 import { GenerateShareTextResponseDto } from '../readings/dto/generate-share-text-response.dto';
 import { AllowAnonymous } from '../../usage-limits/decorators/allow-anonymous.decorator';
+import { getTodayAppDateString } from '../../../common/utils';
 import {
   CheckUsageLimitGuard,
   IncrementUsageInterceptor,
@@ -298,7 +299,11 @@ export class DailyReadingController {
     } else if (fingerprint) {
       // Usuario anónimo - buscar por fingerprint
       userPlan = 'anonymous';
-      const todayStr = new Date().toISOString().split('T')[0];
+      // `getTodayAppDateString()` y NO `toISOString()`: la carta se guarda con
+      // la fecha en la zona de la app (`generateAnonymousDailyCard`), así que
+      // buscarla en UTC devolvía 404 entre las 21:00 y las 00:00 ART, cuando
+      // los dos calendarios difieren (T-DEPLOY-004).
+      const todayStr = getTodayAppDateString();
       dailyReading = await this.dailyReadingService.findOneByFingerprint(
         fingerprint,
         todayStr,

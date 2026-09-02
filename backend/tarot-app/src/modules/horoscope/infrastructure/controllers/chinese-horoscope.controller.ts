@@ -45,6 +45,7 @@ import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard
 import { AdminGuard } from '../../../auth/infrastructure/guards/admin.guard';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { UsersService } from '../../../users/users.service';
+import { fireAndForget } from '../../../../common/utils';
 
 /**
  * Controlador de endpoints REST para consultar horóscopos chinos
@@ -183,9 +184,11 @@ export class ChineseHoroscopeController {
     }
 
     // Incrementar viewCount de forma asíncrona (fire-and-forget)
-    this.chineseService.incrementViewCount(horoscope.id).catch(() => {
-      // Ignorar errores silenciosamente
-    });
+    fireAndForget(
+      this.chineseService.incrementViewCount(horoscope.id),
+      this.logger,
+      `No se pudo incrementar el contador del horóscopo chino ${horoscope.id}`,
+    );
 
     // Calcular campos Wu Xing basados en la fecha de nacimiento del usuario
     const birthElement = getElementByBirthDate(birthDate);
@@ -386,9 +389,11 @@ export class ChineseHoroscopeController {
     }
 
     // Incrementar viewCount de forma asíncrona (fire-and-forget)
-    this.chineseService.incrementViewCount(horoscope.id).catch(() => {
-      // Ignorar errores silenciosamente
-    });
+    fireAndForget(
+      this.chineseService.incrementViewCount(horoscope.id),
+      this.logger,
+      `No se pudo incrementar el contador del horóscopo chino ${horoscope.id}`,
+    );
 
     return this.toResponseDto(horoscope);
   }

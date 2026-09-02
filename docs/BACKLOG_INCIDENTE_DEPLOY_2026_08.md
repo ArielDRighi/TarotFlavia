@@ -1,6 +1,6 @@
 # Backlog — Incidente de deploy del 31-ago-2026 (el contador de vistas tiró el build)
 
-> **Estado:** 🟡 Abierto — 001, 002 y 003 completadas; queda T-DEPLOY-004.
+> **Estado:** ✅ **Cerrado** — 001, 002, 003 y 004 completadas.
 > **Fecha del diagnóstico:** 31-ago-2026
 > **Rama:** `fix/encyclopedia-view-count-fire-and-forget`
 
@@ -127,7 +127,7 @@ ver *[Sobre el log del error](#sobre-el-log-del-error)*.)
 | T-DEPLOY-001 | Hacer fire-and-forget el contador de vistas de las fichas | Backend | 🔴 Crítica | 0,5 pts | ✅ Completada (31-ago-2026) |
 | T-DEPLOY-002 | Que el export estático no escriba en la base | Backend/Frontend | 🟡 Media | 1 pt | ✅ Completada (31-ago-2026) |
 | T-DEPLOY-003 | Sacar las escrituras de telemetría de los otros tres caminos de lectura | Backend | 🟠 Alta | 1 pt | ✅ Completada (31-ago-2026) |
-| T-DEPLOY-004 | Los rezagados: `lastLogin` en el login, catches mudos y el fixture del e2e | Backend | 🟡 Media | 1 pt | ⬜ Pendiente |
+| T-DEPLOY-004 | Los rezagados: `lastLogin` en el login, catches mudos y el e2e de `share-text` | Backend | 🟡 Media | 1 pt | ✅ Completada (31-ago-2026) |
 
 ---
 
@@ -585,10 +585,11 @@ tiene que ser exacto, no se arregla con `await`: se arregla con un buffer y un f
 ## T-DEPLOY-004: Los Rezagados
 
 **Prioridad:** 🟡 Media · **Estimación:** 1 pt · **Dependencias:** ninguna
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (31-ago-2026) — y destapó un **bug de producción** que nadie buscaba
 
-Tres cosas que salieron de la revisión de T-DEPLOY-003 y quedaron fuera de su alcance. Ninguna es
-urgente; las tres son de la misma familia.
+Tres cosas que salieron de la revisión de T-DEPLOY-003 y quedaron fuera de su alcance. Ninguna era
+urgente; las tres son de la misma familia. La tercera resultó ser otra cosa: ver
+*[El e2e no era un fixture faltante](#3-el-e2e-de-share-text-no-era-un-fixture-faltante)*.
 
 ### 1. `lastLogin` bloquea el login
 
@@ -607,11 +608,13 @@ frente a la posibilidad de no dejar entrar a alguien.
 El precedente correcto está **tres líneas más abajo**, en el mismo método: el `logSecurityEvent` ya
 va envuelto en try/catch.
 
-- [ ] Sacar el `await` del camino crítico, con log.
-- [ ] Test de regresión con la mutación verificada.
+- [x] Sacar el `await` del camino crítico, con log.
+- [x] Test de regresión: el login devuelve los tokens aunque el `update` rechace, y el fallo se
+      loguea.
 
-⚠️ Va con más cuidado que las tres de T-DEPLOY-003: es el camino de autenticación. Merece su propia
-tarea y no colarse en otra.
+Va con `fireAndForget` como todo el resto. Se dejó el `console.error` del `logSecurityEvent` como
+estaba: cambiarlo a `this.logger` es una mejora legítima pero hay un test que lo espía, y no es
+parte de esta tarea.
 
 ### 2. Catches mudos: el patrón quedó a medias
 
@@ -625,29 +628,91 @@ con `.catch(() => {})`:
 | `horoscope/infrastructure/controllers/horoscope.controller.ts` | 139, 199, 274 |
 | `horoscope/infrastructure/controllers/chinese-horoscope.controller.ts` | 186, 389 |
 
-Son preexistentes y estructuralmente correctos —no bloquean la respuesta—, pero mudos. Con esto
-cerrado, el repo tiene un solo patrón de fire-and-forget.
+Eran preexistentes y estructuralmente correctos —no bloquean la respuesta—, pero mudos.
 
-- [ ] Agregar el `logger.warn` a los seis.
+- [x] Los seis pasan por `fireAndForget`.
+- [x] **Y los que ya logueaban también.** El objetivo del ítem era "un solo patrón", y quedaban
+      cinco copias del mismo `.catch()` con el mismo armado de mensaje: enciclopedia, artículos,
+      las dos del orquestador de lecturas y la del caché. Todas usan ahora el helper, con los
+      mismos mensajes de antes —así que sus tests siguen valiendo—.
 
-### 3. El fixture que le falta al e2e de `share-text`
+### El helper: `common/utils/fire-and-forget.ts`
 
-`test/share-text.e2e-spec.ts` tiene **2 tests en rojo** desde antes de todo esto, los dos con 404 en
-`/daily-reading/share-text`.
+Diez líneas que concentran lo que este backlog fue aprendiendo:
 
-**No es un endpoint roto.** La ruta se mapea bien (`Mapped {/api/v1/daily-reading/share-text, GET}`)
-y el 404 es la respuesta documentada del handler: *"No existe carta del día para hoy"*. Lo que falta
-es el dato: el setup del e2e siembra lecturas de tarot pero **nunca crea la carta del día** —no hay
-`POST /daily-reading` ni insert en `daily_readings`—, y después los tests esperan `'El Loco'` y una
-interpretación de IA.
+```ts
+fireAndForget(
+  this.cardRepository.increment({ id }, 'viewCount', 1),
+  this.logger,
+  `No se pudo incrementar view_count de la carta ${id}`,
+);
+```
 
-- [ ] Crear la carta del día en el setup del e2e.
+- **Devuelve `void`**, para que no se pueda esperar por accidente. El tipo es la mitad de la
+  garantía; la otra mitad es el `.catch()`.
+- **Loguea, no silencia** — la lección de T-DEPLOY-001: en producción TypeORM corre con
+  `logging: false`, así que un `.catch()` vacío deja el fallo sin ningún rastro.
+- **Aguanta rechazos que no son `Error`** (un string, un `undefined`), que es donde un formateo
+  ingenuo volvería a dejar el fallo invisible. Tiene test.
 
-Queda escrito para que el próximo que vea esos dos rojos no salga a arreglar el endpoint, que está
-bien.
+### 3. El e2e de `share-text` no era un fixture faltante
+
+`test/share-text.e2e-spec.ts` tenía **2 tests en rojo**, los dos con 404 en
+`/daily-reading/share-text`. El diagnóstico anotado acá decía que faltaba el fixture. **Era falso:
+el fixture existe** —el `beforeAll` inserta los `daily_readings` de los usuarios free y premium
+desde siempre—.
+
+Lo que pasaba es más interesante, y es la trampa que el CLAUDE.md de la raíz documenta entera:
+
+| Quién | Cómo resuelve "hoy" |
+| --- | --- |
+| El fixture del e2e | `new Date().toISOString().split('T')[0]` → **UTC** |
+| `daily-reading.service.ts:56` | `getTodayAppDateString()` → **America/Argentina/Buenos_Aires** |
+
+Las dos fechas coinciden 21 horas por día y difieren las otras 3, entre las 21:00 y las 00:00 ART.
+O sea que **los tests fallaban sólo de noche**. No estaban rotos: eran flaky por zona horaria, y por
+eso "fallaban idénticos en `develop`" cuando se los miró de noche.
+
+- [x] El fixture usa `getTodayAppDateString()`, la misma función que el servicio.
+
+### 🔴 Y al arreglar el test apareció un bug de producción
+
+Con el fixture corregido, los dos tests pasaron **y el tercero —el del usuario anónimo— se puso en
+rojo**. Ese venía pasando por casualidad: el fixture usaba UTC y el endpoint **también**, así que
+dos errores se cancelaban.
+
+`daily-reading.controller.ts:301`, el único lugar del módulo que no usaba la fecha de la app:
+
+```ts
+// ❌ antes
+const todayStr = new Date().toISOString().split('T')[0];
+dailyReading = await this.dailyReadingService.findOneByFingerprint(fingerprint, todayStr);
+```
+
+Pero `generateAnonymousDailyCard` guarda la carta con `getTodayAppDateString()`. **Entre las 21:00 y
+las 00:00 ART, un usuario anónimo al que se le acababa de dar su carta del día no podía pedir el
+texto para compartirla: 404.** Tres horas por día, todos los días.
+
+- [x] El controller usa `getTodayAppDateString()`.
+- [x] Test de regresión con el reloj fijado dentro de la ventana
+      (`2026-09-02T01:30Z` = 22:30 ART del día anterior). Fijarlo no es decorativo: sin eso el test
+      pasa 21 de cada 24 horas, que es exactamente cómo el bug llegó hasta acá.
+- [x] Los 9 tests de `share-text.e2e-spec.ts` pasan por primera vez.
+
+**La lección, que es la misma de siempre en este backlog:** un test en rojo que "siempre estuvo en
+rojo" no es ruido de fondo. Y un test que pasa puede estar pasando por dos errores que se anulan.
 
 ### Nota: `share-text` hace 3 SELECT por request
 
 Preexistente, no lo introdujo T-DEPLOY-003 y no es parte de esta tarea. El `findOne` con relations
 del orquestador cuesta 2 queries por el patrón de distinct-id de TypeORM, más un fetch
 independiente. Si alguna vez el endpoint importa por volumen, ahí está el margen.
+
+### Criterios de aceptación
+
+- [x] El login devuelve los tokens aunque falle el guardado de `lastLogin`, y el fallo se loguea.
+- [x] No queda ningún `.catch(() => {})` mudo en el repo: todos los fire-and-forget pasan por el
+      mismo helper.
+- [x] `share-text.e2e-spec.ts` pasa completo (9/9).
+- [x] `npm run format`, `npm run lint`, `npm run test:cov` (4828 tests, 85,95% statements),
+      `npm run build` y `node scripts/validate-architecture.js` en verde.

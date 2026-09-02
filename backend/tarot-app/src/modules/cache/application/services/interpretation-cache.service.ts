@@ -8,6 +8,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { CachedInterpretation } from '../../infrastructure/entities/cached-interpretation.entity';
 import { TarotistaConfig } from '../../../tarotistas/entities/tarotista-config.entity';
 import { TarotistaCardMeaning } from '../../../tarotistas/entities/tarotista-card-meaning.entity';
+import { fireAndForget } from '../../../../common/utils';
 
 interface CardCombination {
   card_id: string;
@@ -127,19 +128,16 @@ export class InterpretationCacheService {
    * dos columnas de la misma fila y no hay razón para pagar dos round-trips.
    */
   private touchCacheEntry(id: string): void {
-    this.cacheRepository
-      .createQueryBuilder()
-      .update(CachedInterpretation)
-      .set({ hit_count: () => 'hit_count + 1', last_used_at: new Date() })
-      .where('id = :id', { id })
-      .execute()
-      .catch((error) => {
-        this.logger.warn(
-          `No se pudo actualizar el contador de hits del caché ${id}: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      });
+    fireAndForget(
+      this.cacheRepository
+        .createQueryBuilder()
+        .update(CachedInterpretation)
+        .set({ hit_count: () => 'hit_count + 1', last_used_at: new Date() })
+        .where('id = :id', { id })
+        .execute(),
+      this.logger,
+      `No se pudo actualizar el contador de hits del caché ${id}`,
+    );
   }
 
   /**
