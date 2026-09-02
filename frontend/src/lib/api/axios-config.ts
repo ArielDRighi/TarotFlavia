@@ -5,6 +5,8 @@
  */
 import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
+import { PRERENDER_HEADER, isPrerenderBuild } from './prerender';
+
 // ============================================================================
 // Custom Error Classes
 // ============================================================================
@@ -95,6 +97,12 @@ export const apiClient = axios.create({
 
 /**
  * Request interceptor to add JWT token to outgoing requests
+ *
+ * Durante `npm run build` marca además la request como prerender, para que la
+ * API no la cuente como visita (T-DEPLOY-002). Va acá y no en cada llamada de
+ * `encyclopedia-api` / `encyclopedia-articles-api` porque el criterio es del
+ * transporte, no de cada endpoint: nada de lo que pasa durante el build es la
+ * acción de una persona.
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -105,6 +113,11 @@ apiClient.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
+
+    if (isPrerenderBuild() && config.headers) {
+      config.headers[PRERENDER_HEADER] = '1';
+    }
+
     return config;
   },
   (error: AxiosError) => {

@@ -6,6 +6,7 @@ import { LunarPhaseService } from './lunar-phase.service';
 import { RitualFiltersDto } from '../dto/ritual-filters.dto';
 import { RitualSummaryDto, RitualDetailDto } from '../dto/ritual-response.dto';
 import { MaterialType } from '../../domain/enums';
+import { DetailReadOptions } from '../../../../common/interfaces/detail-read-options';
 
 /**
  * Servicio para gestión de rituales
@@ -101,7 +102,10 @@ export class RitualsService {
   /**
    * Obtiene un ritual por su slug
    */
-  async findBySlug(slug: string): Promise<RitualDetailDto> {
+  async findBySlug(
+    slug: string,
+    { countView = true }: DetailReadOptions = {},
+  ): Promise<RitualDetailDto> {
     const ritual = await this.ritualRepository.findOne({
       where: { slug, isActive: true },
       relations: ['materials', 'steps'],
@@ -111,8 +115,10 @@ export class RitualsService {
       throw new NotFoundException(`Ritual "${slug}" no encontrado`);
     }
 
-    // Incrementar vistas (fire-and-forget)
-    this.incrementViewCount(ritual.id).catch(() => {});
+    // Incrementar vistas (fire-and-forget), salvo que sea un prerender
+    if (countView) {
+      this.incrementViewCount(ritual.id).catch(() => {});
+    }
 
     return this.toDetailDto(ritual);
   }

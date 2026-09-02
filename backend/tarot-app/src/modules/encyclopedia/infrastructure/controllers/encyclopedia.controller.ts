@@ -1,11 +1,16 @@
 import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common';
 import {
+  ApiHeader,
   ApiOperation,
   ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import {
+  IsPrerender,
+  PRERENDER_HEADER,
+} from '../../../../common/decorators/is-prerender.decorator';
 import { EncyclopediaService } from '../../application/services/encyclopedia.service';
 import { CardFiltersDto } from '../../application/dto/card-filters.dto';
 import {
@@ -179,8 +184,19 @@ export class EncyclopediaController {
     status: 404,
     description: 'Carta no encontrada',
   })
-  async getCardBySlug(@Param('slug') slug: string): Promise<CardDetailDto> {
-    return this.encyclopediaService.findBySlug(slug);
+  @ApiHeader({
+    name: PRERENDER_HEADER,
+    required: false,
+    description:
+      'Lo manda el build del frontend para que el prerender no cuente como vista (T-DEPLOY-002).',
+  })
+  async getCardBySlug(
+    @Param('slug') slug: string,
+    @IsPrerender() isPrerender: boolean,
+  ): Promise<CardDetailDto> {
+    return this.encyclopediaService.findBySlug(slug, {
+      countView: !isPrerender,
+    });
   }
 
   // ── GET /encyclopedia/cards/:slug/related ────────────────────────────────

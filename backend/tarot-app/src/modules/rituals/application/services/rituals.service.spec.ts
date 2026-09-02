@@ -227,6 +227,32 @@ describe('RitualsService', () => {
       });
     });
 
+    /**
+     * T-DEPLOY-002. `rituales/[slug]` también se prerenderiza: los 4 rituales
+     * sumaban una vista falsa por deploy. La revisión encontró que este módulo
+     * había quedado fuera del alcance original de la tarea, que sólo cubría
+     * fichas y artículos.
+     */
+    it('no debe contar la vista cuando countView es false', async () => {
+      ritualRepository.findOne = jest
+        .fn()
+        .mockResolvedValue(mockRitual as Ritual);
+
+      await service.findBySlug('ritual-luna-nueva', { countView: false });
+
+      expect(ritualRepository.createQueryBuilder).not.toHaveBeenCalled();
+    });
+
+    it('debe contar la vista por defecto, sin opciones', async () => {
+      ritualRepository.findOne = jest
+        .fn()
+        .mockResolvedValue(mockRitual as Ritual);
+
+      await service.findBySlug('ritual-luna-nueva');
+
+      expect(ritualRepository.createQueryBuilder).toHaveBeenCalled();
+    });
+
     it('should throw NotFoundException when ritual not found', async () => {
       ritualRepository.findOne = jest.fn().mockResolvedValue(null);
 

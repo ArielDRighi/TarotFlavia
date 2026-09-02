@@ -230,9 +230,11 @@ describe('ArticlesController', () => {
     it('GET /articles/aries debe retornar artículo completo con content', async () => {
       articlesService.findBySlug.mockResolvedValue(mockDetailAries);
 
-      const result = await controller.getArticle('aries');
+      const result = await controller.getArticle('aries', false);
 
-      expect(articlesService.findBySlug).toHaveBeenCalledWith('aries');
+      expect(articlesService.findBySlug).toHaveBeenCalledWith('aries', {
+        countView: true,
+      });
       expect(result).toEqual(mockDetailAries);
       expect(result.content).toBeDefined();
       expect(result.content).toContain('# Aries');
@@ -241,9 +243,24 @@ describe('ArticlesController', () => {
     it('GET /articles/aries debe incluir relatedArticles como array', async () => {
       articlesService.findBySlug.mockResolvedValue(mockDetailAries);
 
-      const result = await controller.getArticle('aries');
+      const result = await controller.getArticle('aries', false);
 
       expect(result.relatedArticles).toBeInstanceOf(Array);
+    });
+
+    /**
+     * T-DEPLOY-002. Las rutas de artículos también se prerenderizan
+     * (`elementos`, `guias`, `astrologia/*`): son 48 incrementos falsos por
+     * deploy además de los 78 de las fichas.
+     */
+    it('no debe contar la vista cuando la request es un prerender', async () => {
+      articlesService.findBySlug.mockResolvedValue(mockDetailAries);
+
+      await controller.getArticle('aries', true);
+
+      expect(articlesService.findBySlug).toHaveBeenCalledWith('aries', {
+        countView: false,
+      });
     });
 
     it('GET /articles/nonexistent debe propagar NotFoundException (404)', async () => {
@@ -251,7 +268,7 @@ describe('ArticlesController', () => {
         new NotFoundException('Artículo "nonexistent" no encontrado'),
       );
 
-      await expect(controller.getArticle('nonexistent')).rejects.toThrow(
+      await expect(controller.getArticle('nonexistent', false)).rejects.toThrow(
         NotFoundException,
       );
     });

@@ -911,6 +911,28 @@ describe('EncyclopediaService', () => {
       warn.mockRestore();
     });
 
+    /**
+     * T-DEPLOY-002. El export estático del frontend prerenderiza las 78 fichas
+     * en cada build, y cada prerender contaba como visita: ~78 vistas falsas
+     * por deploy, mezcladas con las reales en la misma columna.
+     */
+    it('no debe contar la vista cuando countView es false', async () => {
+      repository.findOne.mockResolvedValue(mockCard);
+
+      const result = await service.findBySlug('the-fool', { countView: false });
+
+      expect(result.slug).toBe('the-fool');
+      expect(repository.increment).not.toHaveBeenCalled();
+    });
+
+    it('debe contar la vista por defecto, sin opciones', async () => {
+      repository.findOne.mockResolvedValue(mockCard);
+
+      await service.findBySlug('the-fool');
+
+      expect(repository.increment).toHaveBeenCalledTimes(1);
+    });
+
     it('no debe incrementar el contador si el slug no existe', async () => {
       repository.findOne.mockResolvedValue(null);
 

@@ -232,12 +232,28 @@ describe('EncyclopediaController', () => {
       const detail = buildDetail();
       mockEncyclopediaService.findBySlug.mockResolvedValue(detail);
 
-      const result = await controller.getCardBySlug('the-fool');
+      const result = await controller.getCardBySlug('the-fool', false);
 
       expect(mockEncyclopediaService.findBySlug).toHaveBeenCalledWith(
         'the-fool',
+        { countView: true },
       );
       expect(result).toEqual(detail);
+    });
+
+    /**
+     * T-DEPLOY-002. El header lo manda el build del frontend; el controller
+     * traduce "es un prerender" a "no cuentes la vista".
+     */
+    it('no debe contar la vista cuando la request es un prerender', async () => {
+      mockEncyclopediaService.findBySlug.mockResolvedValue(buildDetail());
+
+      await controller.getCardBySlug('the-fool', true);
+
+      expect(mockEncyclopediaService.findBySlug).toHaveBeenCalledWith(
+        'the-fool',
+        { countView: false },
+      );
     });
 
     it('debe propagar NotFoundException cuando el slug no existe', async () => {
@@ -245,9 +261,9 @@ describe('EncyclopediaController', () => {
         new NotFoundException('Carta "invalid-slug" no encontrada'),
       );
 
-      await expect(controller.getCardBySlug('invalid-slug')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        controller.getCardBySlug('invalid-slug', false),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
