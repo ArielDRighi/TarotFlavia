@@ -1078,6 +1078,12 @@ cd frontend && npm run check:indexable -- --base-url https://auguriatarot.com
 
 ## 🚪 Puerta de salida: cuándo pedir la tercera revisión
 
+> **⚠️ Cerrada el 11-sep-2026.** Se cumplió entera (179/179, fichas en 780+ palabras) y la tercera
+> revisión **fue rechazada igual**. El diagnóstico y el plan siguen en
+> **[BACKLOG_SEO_PORTAL_2026_09.md](./BACKLOG_SEO_PORTAL_2026_09.md)** (fase 3): el problema ya
+> no es volumen, es que el sitio se lee como app con login. **No usar esta puerta para el cuarto
+> pedido.**
+
 Un tercer rechazo cuesta más que dos semanas de trabajo. **Todo esto tiene que estar hecho y
 verificado en producción antes de tocar el botón:**
 
@@ -1105,4 +1111,4 @@ npm run check:indexable -- --base-url https://auguriatarot.com
 
 ---
 
-**Última actualización:** 26-ago-2026
+**Última actualización:** 11-sep-2026
