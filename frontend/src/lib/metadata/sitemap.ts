@@ -59,9 +59,15 @@ async function safeSlugs<T extends { slug: string }>(
   }
 }
 
+/**
+ * Sin `lastModified` a propósito (T-SEO-019). Antes se estampaba `new Date()`
+ * del request en todas las URLs: como el sitemap se regenera cada hora, las 179
+ * "cambiaban" al mismo segundo. Google descarta un lastmod así y encima se lee
+ * como generado sin criterio. Los tipos que alimentan el sitemap (`CardSummary`,
+ * rituales, servicios) no traen fecha de edición; el día que la traigan, va acá.
+ */
 export async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl();
-  const lastModified = new Date();
 
   const entry = (
     path: string,
@@ -69,7 +75,6 @@ export async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: ChangeFrequency
   ): MetadataRoute.Sitemap[number] => ({
     url: `${baseUrl}${path}`,
-    lastModified,
     changeFrequency,
     priority,
   });

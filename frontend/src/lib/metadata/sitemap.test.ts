@@ -186,6 +186,17 @@ describe('buildSitemap', () => {
     });
   });
 
+  it('no emite lastModified: no hay fecha real de edición y una falsa es peor que ninguna (T-SEO-019)', async () => {
+    mockGetCards.mockResolvedValue([{ slug: 'the-fool' }] as Awaited<ReturnType<typeof getCards>>);
+
+    const entries = await buildSitemap();
+
+    // Antes se estampaba `new Date()` del request en las 179 URLs: Google lo
+    // ignora cuando todas cambian "al segundo" y se lee como generado sin criterio.
+    expect(entries.length).toBeGreaterThan(0);
+    expect(entries.every((entry) => entry.lastModified === undefined)).toBe(true);
+  });
+
   it('no emite URLs duplicadas', async () => {
     mockGetCards.mockResolvedValue([{ slug: 'the-fool' }] as Awaited<ReturnType<typeof getCards>>);
 
