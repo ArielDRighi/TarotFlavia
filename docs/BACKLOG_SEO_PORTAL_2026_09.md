@@ -447,6 +447,15 @@ en el footer.
   grupo, el sitio sigue cerrado entero.
 - Los tests de `robots.test.ts` dejaron de asumir `rules[0]` y buscan el grupo por `userAgent`.
 
+### Lo que encontró la revisión local (y se corrigió)
+
+- El test de staging seguía usando `rules[0]`; pasó al helper `getGenericRule()`.
+- Un test repetía lo que ya cubría el siguiente; se reemplazó por uno que fija que en producción
+  existen **exactamente** dos grupos (`*` y `Mediapartners-Google`) y que el genérico conserva su
+  lista de bloqueos.
+- El helper de tipos `ElementOf` (con su comentario sobre condicionales distributivos) se
+  reemplazó por `[rules].flat()`, que normaliza objeto-o-array sin tipos manuales.
+
 ---
 
 ## T-SEO-020: Arcanos Mayores — Romper la Plantilla (diferida)

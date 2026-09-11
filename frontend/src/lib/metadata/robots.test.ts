@@ -21,14 +21,12 @@ function isBlocked(path: string, disallow: string[]): boolean {
   });
 }
 
-/** Un condicional solo distribuye sobre una unión si el chequeado es un parámetro genérico. */
-type ElementOf<T> = T extends readonly (infer U)[] ? U : T;
-type RobotsRule = ElementOf<ReturnType<typeof buildRobots>['rules']>;
-
-function getRules(): RobotsRule[] {
-  const { rules } = buildRobots();
-  return Array.isArray(rules) ? rules : [rules];
+/** `rules` puede ser un grupo o un array de grupos; `.flat()` normaliza las dos formas. */
+function getRules() {
+  return [buildRobots().rules].flat();
 }
+
+type RobotsRule = ReturnType<typeof getRules>[number];
 
 /** El grupo genérico (`User-agent: *`), que es el que bloquea las rutas privadas. */
 function getGenericRule(): RobotsRule {
@@ -53,8 +51,7 @@ describe('buildRobots', () => {
     it('bloquea el sitio entero en staging', () => {
       vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://staging.auguriatarot.com');
 
-      const robots = buildRobots();
-      const rule = Array.isArray(robots.rules) ? robots.rules[0] : robots.rules;
+      const rule = getGenericRule();
 
       expect(rule.disallow).toBe('/');
       expect(rule.allow).toBeUndefined();
@@ -99,8 +96,9 @@ describe('buildRobots', () => {
       expect(rule?.disallow).toBeUndefined();
     });
 
-    it('el grupo de Mediapartners no reemplaza al genérico: las privadas siguen bloqueadas para Googlebot', () => {
-      expect(isBlocked('/admin/usuarios', getDisallowRules())).toBe(true);
+    it('en producción hay exactamente dos grupos, y el genérico conserva su lista de bloqueos', () => {
+      expect(getRules().map((rule) => rule.userAgent)).toEqual(['*', 'Mediapartners-Google']);
+      expect(getDisallowRules().length).toBeGreaterThan(0);
     });
 
     it('bloquea las rutas privadas (Googlebot solo vería un esqueleto vacío)', () => {
