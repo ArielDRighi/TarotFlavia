@@ -55,7 +55,15 @@ export function buildRobots(): MetadataRoute.Robots {
   }
 
   return {
-    rules: [{ userAgent: '*', allow: '/', disallow: DISALLOWED_PATHS }],
+    rules: [
+      { userAgent: '*', allow: '/', disallow: DISALLOWED_PATHS },
+      // El rastreador de anuncios de AdSense entra a todo (T-SEO-019). En
+      // robots.txt gana el grupo más específico, así que sin este bloque los
+      // Disallow de `*` también se lo cerraban, y Google pide que el bot de
+      // anuncios pueda acceder a cualquier página que muestre anuncios. No
+      // indexa nada: solo lee la página para elegir qué anuncio servir.
+      { userAgent: 'Mediapartners-Google', allow: '/' },
+    ],
     sitemap: `${baseUrl}/sitemap.xml`,
     host: baseUrl,
   };

@@ -92,7 +92,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | T-SEO-016 | Horóscopo del día en el HTML servido (SSR/ISR) | Frontend | 🟠 Alta | 2 pts | ⬜ Pendiente |
 | T-SEO-017 | Persona editorial responsable, bylines y `/politica-editorial` | Frontend + decisión | 🟠 Alta | 2 pts | ⬜ Pendiente |
 | T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ⬜ Pendiente |
-| T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap con `lastmod` real | Frontend | 🟢 Baja | 0,5 pts | ⬜ Pendiente |
+| T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap sin `lastmod` falso | Frontend | 🟢 Baja | 0,5 pts | ✅ Completada |
 | T-SEO-020 | Arcanos Mayores: romper la plantilla (invertida, caso de tirada, iconografía) | Contenido + Front | 🟢 Baja | 3 pts | ⬜ Diferida |
 | T-SEO-021 | Péndulo: el cristal no contrasta con el fondo | Frontend (UI) | 🟡 Media | 0,5 pts | ⬜ Pendiente |
 
@@ -106,7 +106,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 
 | # | Tarea | Est. | Por qué va ahí |
 | --- | --- | --- | --- |
-| 1 | **T-SEO-019** | 0,5 pts | Media hora, sin dependencias, y destraba una duda (¿el bot de anuncios puede entrar?) antes de tocar nada grande |
+| 1 | ~~**T-SEO-019**~~ ✅ | 0,5 pts | Cerrada 11-sep-2026: grupo `Mediapartners-Google` en robots y sitemap sin `lastmod` |
 | 2 | **T-SEO-016** | 2 pts | Va **antes** que la home porque la home nueva **consume** el horóscopo del día en SSR (sección "Horóscopo de hoy, 12 signos"). Sin esto, 014 no tiene con qué llenar la portada |
 | 3 | **T-SEO-014** | 3 pts | La causa n.º 1. Es la pantalla que decide |
 | 4 | **T-SEO-015** | 4 pts | La causa n.º 2. Va después de 014 porque las secciones que la home deja de mostrar (precios, "3 pasos") aterrizan en `/premium`, que es una de las URLs que 015 reescribe |
@@ -414,9 +414,9 @@ en el footer.
 
 ---
 
-## T-SEO-019: `robots.ts` — `Mediapartners-Google`; Sitemap con `lastmod` Real
+## T-SEO-019: `robots.ts` — `Mediapartners-Google`; Sitemap sin `lastmod` Falso
 
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (11-sep-2026)
 **Prioridad:** 🟢 Baja · **Estimación:** 0,5 pts · **Tipo:** Frontend
 
 ### Alcance
@@ -431,9 +431,21 @@ en el footer.
 
 ### Criterios de aceptación
 
-- [ ] `curl https://auguriatarot.com/robots.txt` muestra el bloque de `Mediapartners-Google`.
-- [ ] El sitemap no tiene 179 URLs con el mismo `lastmod` al segundo.
-- [ ] Tests de `buildRobots` y del sitemap actualizados.
+- [x] `robots.txt` de producción tiene un grupo `User-agent: Mediapartners-Google` / `Allow: /`
+      (verificar tras el deploy con `curl https://auguriatarot.com/robots.txt`).
+- [x] El sitemap no emite `lastmod` (no hay 179 URLs con la misma fecha al segundo).
+- [x] Tests de `buildRobots` y del sitemap actualizados (22 tests en verde).
+
+### Decisiones de implementación
+
+- **`lastmod` omitido, no calculado.** Ninguno de los tipos que alimentan el sitemap (`CardSummary`,
+  rituales, servicios) trae fecha de edición, y las estáticas no tienen otra fuente que el deploy.
+  Inventar una fecha era el problema original. Queda documentado en `buildSitemap` que, el día que
+  la API exponga `updatedAt`, va ahí.
+- **Grupo propio para `Mediapartners-Google`, sin `disallow`.** En robots.txt gana el grupo más
+  específico, así que las reglas de `*` no le aplican: entra a todo. En staging no se emite el
+  grupo, el sitio sigue cerrado entero.
+- Los tests de `robots.test.ts` dejaron de asumir `rules[0]` y buscan el grupo por `userAgent`.
 
 ---
 

@@ -21,10 +21,24 @@ function isBlocked(path: string, disallow: string[]): boolean {
   });
 }
 
-function getDisallowRules(): string[] {
+/** Un condicional solo distribuye sobre una unión si el chequeado es un parámetro genérico. */
+type ElementOf<T> = T extends readonly (infer U)[] ? U : T;
+type RobotsRule = ElementOf<ReturnType<typeof buildRobots>['rules']>;
+
+function getRules(): RobotsRule[] {
   const { rules } = buildRobots();
-  const rule = Array.isArray(rules) ? rules[0] : rules;
-  const { disallow } = rule;
+  return Array.isArray(rules) ? rules : [rules];
+}
+
+/** El grupo genérico (`User-agent: *`), que es el que bloquea las rutas privadas. */
+function getGenericRule(): RobotsRule {
+  const rule = getRules().find((candidate) => candidate.userAgent === '*');
+  if (!rule) throw new Error('robots.txt sin grupo User-agent: *');
+  return rule;
+}
+
+function getDisallowRules(): string[] {
+  const { disallow } = getGenericRule();
 
   if (!disallow) return [];
   return Array.isArray(disallow) ? disallow : [disallow];
@@ -51,6 +65,14 @@ describe('buildRobots', () => {
 
       expect(buildRobots().sitemap).toBeUndefined();
     });
+
+    it('tampoco abre la puerta al rastreador de anuncios en staging', () => {
+      vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://staging.auguriatarot.com');
+
+      const agents = getRules().map((rule) => rule.userAgent);
+
+      expect(agents).toEqual(['*']);
+    });
   });
 
   describe('en el dominio productivo', () => {
@@ -60,10 +82,25 @@ describe('buildRobots', () => {
 
     it('permite el rastreo y publica el sitemap', () => {
       const robots = buildRobots();
-      const rule = Array.isArray(robots.rules) ? robots.rules[0] : robots.rules;
 
-      expect(rule.allow).toBe('/');
+      expect(getGenericRule().allow).toBe('/');
       expect(robots.sitemap).toBe('https://auguriatarot.com/sitemap.xml');
+    });
+
+    it('deja pasar al rastreador de anuncios (Mediapartners-Google) a todo el sitio (T-SEO-019)', () => {
+      // En robots.txt gana el grupo más específico: si Mediapartners-Google tiene
+      // el suyo, las reglas de `*` no le aplican. Sin este grupo, los Disallow
+      // genéricos también le cerraban las rutas, y AdSense pide que el bot de
+      // anuncios pueda entrar a todo lo que muestre anuncios.
+      const rule = getRules().find((candidate) => candidate.userAgent === 'Mediapartners-Google');
+
+      expect(rule).toBeDefined();
+      expect(rule?.allow).toBe('/');
+      expect(rule?.disallow).toBeUndefined();
+    });
+
+    it('el grupo de Mediapartners no reemplaza al genérico: las privadas siguen bloqueadas para Googlebot', () => {
+      expect(isBlocked('/admin/usuarios', getDisallowRules())).toBe(true);
     });
 
     it('bloquea las rutas privadas (Googlebot solo vería un esqueleto vacío)', () => {
