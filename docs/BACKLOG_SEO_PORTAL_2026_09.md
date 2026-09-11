@@ -32,7 +32,7 @@ Se pidió cada URL con `curl`, User-Agent de Googlebot, sin JavaScript, y se con
 
 | # | Hallazgo | Evidencia |
 | --- | --- | --- |
-| **A** | **El menú principal lleva a páginas "herramienta + folleto", indexables y fuera del sitemap.** El guardarraíl solo mide las URLs del sitemap, así que nunca las vio. Las herramientas **son gratuitas y funcionan sin registro** (péndulo 1 consulta, carta del día 1 por día, carta astral, numerología): eso es un activo. Lo fino es el **texto editorial** que las acompaña. | `/carta-del-dia` 220 · `/pendulo` 215 · `/rituales` 223 · `/horoscopo` 217 · `/contacto` ~180 · `/premium` ~280 palabras propias. Ninguna tiene `noindex`. Las cuatro primeras usan **la misma plantilla**: emoji + 3 bullets + "Nota:" + "Ver más en la Enciclopedia". Para el revisor es el patrón "sitio de herramientas": un widget y 200 palabras. |
+| **A** | **El menú principal lleva a páginas "herramienta + folleto".** Están en el sitemap y el guardarraíl las da por buenas porque **superan el umbral de 120 palabras** (tienen 215–260): el umbral sirve para detectar páginas vacías, no folletos. Las herramientas **son gratuitas y funcionan sin registro** (péndulo 1 consulta, carta del día 1 por día, carta astral, numerología): eso es un activo. Lo fino es el **texto editorial** que las acompaña. | `/carta-del-dia` 220 · `/pendulo` 215 · `/rituales` 223 · `/horoscopo` 217 · `/contacto` ~180 · `/premium` ~280 palabras propias. Todas indexables y en el sitemap. Las cuatro primeras usan **la misma plantilla**: emoji + 3 bullets + "Nota:" + "Ver más en la Enciclopedia". Para el revisor es el patrón "sitio de herramientas": un widget y 200 palabras. |
 | **B** | **La home es una landing de SaaS.** | Hero "Crear cuenta gratis", tabla de precios Visitante / Free / **Premium $7.000 por mes** con lista de features, "Cómo funciona en 3 pasos". 651 palabras, casi todas de producto. |
 | **C** | **`/horoscopo/[signo]` promete "Horóscopo de X Hoy" y el HTML no trae la predicción.** | El `<title>` dice "Hoy"; el HTML servido tiene solo el perfil estático del signo (551 palabras). La predicción la trae `HoroscopeSignPanel` por JS, a propósito (día local del visitante). |
 | **D** | **Las 78 fichas tienen los mismos 10 `h2` en el mismo orden.** | `Información · Significado · En el amor · En el trabajo · En la energía y el bienestar · Simbolismo · Consejo · ¿Sí o no? · Palabras clave · Combinaciones`. Señal de "producido en volumen". |
@@ -129,9 +129,9 @@ empieza a contar el plazo.
 
 ## ⚠️ Regla transversal: lo que está en el menú vale; lo que no vale, no está en el menú
 
-**Nunca dejar en la navegación de un visitante sin login una URL que merezca `noindex`.** La
-combinación actual —en el menú + indexable + fuera del sitemap + 200 palabras— es la peor de las
-posibles: para el revisor es un sitio incompleto; para Google, una inconsistencia.
+**Nunca dejar en la navegación de un visitante sin login una URL que merezca `noindex`.** Y al
+revés: lo que está en el menú es lo primero que el revisor abre, así que tiene que ser lo más sólido
+del sitio, no lo más fino.
 
 Las herramientas gratuitas **se quedan en el menú**: son lo mejor que tiene el sitio para mostrar
 sin registro. Lo que cambia es que cada una lleva debajo una nota editorial de verdad. La regla de
@@ -251,11 +251,17 @@ pasa a ser un botón junto a "Iniciar sesión".
 
 ### Guardarraíl
 
-Extender `frontend/scripts/check-indexable-content.mjs` para que, además del sitemap, **rastree
-todos los `href` internos de nav y footer de la home** y aplique la regla transversal: cada URL
-alcanzable desde el menú tiene que (a) estar en el sitemap y superar el umbral, o (b) tener
-`noindex`. Cualquier otra combinación → exit 1 con la lista. Tests en
-`check-indexable-content.test.mjs`.
+`frontend/scripts/check-indexable-content.mjs` hoy exige 120 palabras propias a toda URL del
+sitemap: detecta páginas vacías, no folletos. Extenderlo en dos sentidos:
+
+1. **Umbral alto para el menú.** Las URLs enlazadas desde el header y el footer de la home (se
+   rastrean los `href` internos) exigen **500 palabras propias**, no 120. Son las que el revisor
+   abre primero. Cualquier URL del menú que esté bajo ese umbral y no tenga `noindex` → exit 1 con
+   la lista.
+2. **Coherencia `noindex` ↔ sitemap.** Una URL con `noindex` no puede estar en el sitemap, y una del
+   sitemap no puede tener `noindex`. Cualquier cruce → exit 1.
+
+Tests en `check-indexable-content.test.mjs`.
 
 ### Criterios de aceptación
 
