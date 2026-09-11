@@ -94,6 +94,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ⬜ Pendiente |
 | T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap con `lastmod` real | Frontend | 🟢 Baja | 0,5 pts | ⬜ Pendiente |
 | T-SEO-020 | Arcanos Mayores: romper la plantilla (invertida, caso de tirada, iconografía) | Contenido + Front | 🟢 Baja | 3 pts | ⬜ Diferida |
+| T-SEO-021 | Péndulo: el cristal no contrasta con el fondo | Frontend (UI) | 🟡 Media | 0,5 pts | ⬜ Pendiente |
 
 **⛔ No pedir la cuarta revisión hasta tener 014, 015, 016, 017 y 018 en producción en un deploy
 único, más 14–21 días de rastreo.** Ver *Puerta de salida* al final. T-SEO-020 no entra en la puerta:
@@ -112,9 +113,10 @@ es para después, o para la ventana de espera si sobra tiempo.
 | 5 | **T-SEO-017** | 2 pts | Necesita una **decisión de negocio** (quién firma) que se puede tomar mientras se desarrollan 014–016. El código es chico |
 | 6 | **T-SEO-018** | 1,5 pts | Cierra el lenguaje después de que 014/015/017 escribieron texto nuevo, así el guardarraíl los cubre |
 | 7 | **Deploy único + Search Console + espera de 14–21 días** | — | No es código. Ver *Puerta de salida* |
+| 4b | **T-SEO-021** | 0,5 pts | Va pegada a T-SEO-015: es la misma página y el revisor va a mirar el widget. Puede ir en la misma rama o en una propia, pero antes del deploy único |
 | 8 | T-SEO-020 | 3 pts | Durante la espera, si sobra tiempo. No demora el pedido |
 
-**Total hasta la puerta de salida: 13 pts.**
+**Total hasta la puerta de salida: 13,5 pts.**
 
 ### Por qué un deploy único y no incremental
 
@@ -445,6 +447,38 @@ Solo los 22 Arcanos Mayores, que son los que traen tráfico. **No** las 78.
 - **Media original**: el mazo es CC0; un diagrama propio por carta con los símbolos señalados es la
   prueba de originalidad más barata y más fuerte.
 - Los 56 Arcanos Menores quedan como están.
+
+---
+
+## T-SEO-021: Péndulo — el Cristal no Contrasta con el Fondo
+
+**Estado:** ⬜ Pendiente
+**Prioridad:** 🟡 Media · **Estimación:** 0,5 pts · **Tipo:** Frontend (UI)
+
+### Problema
+
+En `/pendulo` el cristal de la punta es casi invisible: el cono usa el gradiente
+`from-white/90 via-purple-100/80 to-purple-200/70` (`frontend/src/components/features/pendulum/Pendulum.tsx`,
+línea ~50) sobre el fondo casi blanco de la sección. En la captura del 11-sep-2026 se ve el soporte
+gris y el hilo, y una mancha lila apenas perceptible donde debería estar el cristal. Es la
+herramienta que el revisor va a mirar en `/pendulo` (T-SEO-015): tiene que verse.
+
+### Alcance
+
+- Rediseñar el cristal con contraste real contra el fondo: gradiente más saturado (violeta/amatista
+  medio a oscuro, o cuarzo con borde definido), sombra proyectada y, si hace falta, un halo sutil.
+  Mantener el estilo del sitio (paleta púrpura de la marca).
+- Verificar contraste en los estados de animación (reposo, oscilación, respuesta sí/no/quizás) y en
+  móvil.
+- El soporte y el hilo pueden quedar; si se cambia el fondo de la sección en vez del cristal,
+  documentar por qué.
+
+### Criterios de aceptación
+
+- [ ] El cristal se distingue a simple vista sobre el fondo en desktop y móvil, en reposo y en
+      movimiento.
+- [ ] Sin cambios en la lógica de `PendulumConsultation`; solo presentación.
+- [ ] Tests de `Pendulum.tsx` actualizados si cambian clases o `data-testid`.
 
 ---
 
