@@ -253,6 +253,13 @@ export const STATIC_PAGE_METADATA = {
       'Quiénes escribimos Auguria, con qué trayectoria, cómo se produce el contenido de la enciclopedia y qué límites tiene lo que ofrecemos.',
     canonical: ROUTES.SOBRE_NOSOTROS,
   }),
+
+  politicaEditorial: buildPageMetadata({
+    title: 'Política Editorial',
+    description:
+      'Cómo se produce el contenido de Auguria: las fuentes, quién escribe y revisa, cómo se corrige un error y qué papel tienen las herramientas de lenguaje.',
+    canonical: ROUTES.POLITICA_EDITORIAL,
+  }),
 } satisfies Record<string, Metadata>;
 
 // ─── Rutas públicas dinámicas ─────────────────────────────────────────────────

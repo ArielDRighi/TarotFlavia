@@ -59,6 +59,35 @@ describe('DailyHoroscopeList (T-SEO-015)', () => {
     expect(screen.getByTestId('x-previous-day')).toBeInTheDocument();
   });
 
+  /**
+   * T-SEO-017: el pie con la fórmula editorial va debajo de los 12 extractos,
+   * con la fecha del horóscopo servido (si es el de ayer, la de ayer).
+   */
+  it('cierra con la nota editorial del día servido', () => {
+    render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    const note = screen.getByTestId('hub-horoscope-editorial-note');
+    expect(note).toHaveTextContent(/revisión editorial/i);
+    expect(note).toHaveTextContent(/12 de septiembre de 2026/i);
+  });
+
+  it('la nota editorial sigue a la fecha del horóscopo que se muestra, no a la de hoy', () => {
+    const previous: CanonicalDailyHoroscopes = {
+      ...DAILY,
+      horoscopes: DAILY.horoscopes.map((item) => ({ ...item, horoscopeDate: '2026-09-11' })),
+      isShowingPreviousDay: true,
+    };
+    render(<DailyHoroscopeList daily={previous} testIdPrefix="x" emptyState="Nada" />);
+
+    expect(screen.getByTestId('x-editorial-note')).toHaveTextContent(/11 de septiembre/i);
+  });
+
+  it('sin horóscopo no hay nota editorial que firmar', () => {
+    render(<DailyHoroscopeList daily={undefined} testIdPrefix="x" emptyState="Nada" />);
+
+    expect(screen.queryByTestId('x-editorial-note')).not.toBeInTheDocument();
+  });
+
   it('muestra el estado vacío cuando no hay horóscopo', () => {
     render(<DailyHoroscopeList daily={undefined} testIdPrefix="x" emptyState="Sin horóscopo" />);
 

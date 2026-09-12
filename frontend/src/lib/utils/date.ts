@@ -332,3 +332,39 @@ export function shiftDateString(dateString: string, days: number): string {
   date.setDate(date.getDate() + days);
   return getLocalDateString(date);
 }
+
+// ─── Fecha de revisión editorial ──────────────────────────────────────────────
+
+/** Nombres de mes en español, para no depender del locale del runtime. */
+const REVIEW_MONTH_NAMES = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+];
+
+/**
+ * Formatea un `YYYY-MM` de revisión editorial como "agosto de 2026".
+ *
+ * Lo usan `/sobre-nosotros` y `/politica-editorial` (T-SEO-011 / T-SEO-017).
+ * Sin construir un `Date`: un `new Date('2026-08')` es medianoche UTC y en
+ * UTC-3 retrocede al mes anterior — el mismo bug de zona horaria que ya mordió
+ * dos veces con las fechas de nacimiento.
+ *
+ * @example
+ * formatReviewMonth('2026-08') // → "agosto de 2026"
+ */
+export function formatReviewMonth(isoMonth: string): string {
+  const [year, month] = isoMonth.split('-');
+  const monthName = REVIEW_MONTH_NAMES[Number(month) - 1];
+
+  return monthName ? `${monthName} de ${year}` : year;
+}

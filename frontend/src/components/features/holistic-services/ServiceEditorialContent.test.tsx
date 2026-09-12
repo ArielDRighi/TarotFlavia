@@ -48,6 +48,13 @@ describe('ServiceEditorialContent', () => {
     );
   });
 
+  // T-SEO-017: el bloque editorial de la ficha de servicio también va firmado.
+  it('cierra con la firma editorial', () => {
+    render(<ServiceEditorialContent content={contenidoMinimo} />);
+
+    expect(screen.getByTestId('author-byline')).toBeInTheDocument();
+  });
+
   it('renderiza las preguntas frecuentes con su respuesta', () => {
     render(<ServiceEditorialContent content={contenidoMinimo} />);
 

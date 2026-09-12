@@ -58,6 +58,17 @@ describe('structured-data', () => {
       expect(JSON.stringify(buildOrganizationJsonLd())).not.toMatch(/"Person"|Flavia/i);
     });
 
+    /**
+     * T-SEO-017: `publishingPrinciples` es la propiedad que schema.org reserva
+     * para la política editorial de quien publica. Es la forma de declarar el
+     * proceso sin `Person`: el sitio sigue presentándose como equipo.
+     */
+    it('declara la política editorial como publishingPrinciples, con URL absoluta', () => {
+      const jsonLd = buildOrganizationJsonLd();
+
+      expect(jsonLd.publishingPrinciples).toBe(`${BASE_URL}/politica-editorial`);
+    });
+
     it('expone contacto verificable, que es de lo que AdSense mira', () => {
       const jsonLd = buildOrganizationJsonLd();
 

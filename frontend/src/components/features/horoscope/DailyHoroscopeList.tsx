@@ -1,5 +1,7 @@
 // 1. React & Next.js
 import Link from 'next/link';
+// 5. Components
+import { HoroscopeEditorialNote } from './HoroscopeEditorialNote';
 // 6. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
 import { formatDateFullWithYear } from '@/lib/utils/date';
@@ -123,6 +125,12 @@ export function DailyHoroscopeList({
           />
         ))}
       </ul>
+      {/* Cómo se produjeron los doce, con la fecha servida (T-SEO-017). */}
+      <HoroscopeEditorialNote
+        horoscopeDate={servedDate}
+        testIdPrefix={testIdPrefix}
+        className="mt-6"
+      />
     </>
   );
 }

@@ -69,6 +69,12 @@ describe('buildSitemap', () => {
       expect(paths).toContain('/sobre-nosotros');
     });
 
+    it('incluye /politica-editorial (T-SEO-017)', async () => {
+      const paths = pathsOf(await buildSitemap());
+
+      expect(paths).toContain('/politica-editorial');
+    });
+
     it('NO incluye rutas privadas ni sin valor de búsqueda', async () => {
       const paths = pathsOf(await buildSitemap());
 

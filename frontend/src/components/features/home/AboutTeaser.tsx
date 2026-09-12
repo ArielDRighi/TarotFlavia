@@ -6,10 +6,10 @@ import { HOME_EDITORIAL } from '@/lib/constants/home-editorial.data';
 /**
  * "Quiénes somos" en la portada (T-SEO-014).
  *
- * Tres líneas y el enlace a `/sobre-nosotros`. La foto y el nombre de la
- * persona responsable llegan con T-SEO-017, que es donde se decide quién
- * firma: poner acá una ilustración o una foto de stock sería peor que no poner
- * nada.
+ * Tres líneas y el enlace a `/sobre-nosotros`. Sin foto ni nombre: T-SEO-017
+ * resolvió, por decisión de negocio (12-sep-2026), que el sitio se sigue
+ * presentando como equipo. Poner acá una ilustración o una foto de stock sería
+ * peor que no poner nada.
  */
 export function AboutTeaser() {
   const copy = HOME_EDITORIAL.about;

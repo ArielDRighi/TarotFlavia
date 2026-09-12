@@ -22,6 +22,7 @@ export const ROUTES = {
   PRIVACIDAD: '/privacidad',
   TERMINOS: '/terminos',
   SOBRE_NOSOTROS: '/sobre-nosotros',
+  POLITICA_EDITORIAL: '/politica-editorial',
 
   // Dashboard (authenticated)
   DASHBOARD: '/dashboard',

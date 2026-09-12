@@ -584,7 +584,7 @@ describe('ArticleDetailView', () => {
    * datos de referencia, no piezas de autor.
    */
   describe('Author byline (T-SEO-011)', () => {
-    it('firma las guías y enlaza a /sobre-nosotros', () => {
+    it('firma las guías y enlaza a /sobre-nosotros y /politica-editorial', () => {
       render(
         <ArticleDetailView article={createTestArticle({ category: ArticleCategory.GUIDE_TAROT })} />
       );
@@ -593,7 +593,14 @@ describe('ArticleDetailView', () => {
 
       expect(byline).toBeInTheDocument();
       expect(byline).toHaveTextContent(/equipo editorial de auguria/i);
-      expect(within(byline).getByRole('link')).toHaveAttribute('href', '/sobre-nosotros');
+      expect(
+        within(byline).getByRole('link', { name: /equipo editorial de auguria/i })
+      ).toHaveAttribute('href', '/sobre-nosotros');
+      // T-SEO-017: la firma también lleva a la política editorial.
+      expect(within(byline).getByRole('link', { name: /política editorial/i })).toHaveAttribute(
+        'href',
+        '/politica-editorial'
+      );
     });
 
     it.each([

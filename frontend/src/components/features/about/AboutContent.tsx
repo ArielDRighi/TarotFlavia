@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ABOUT_PAGE } from '@/lib/constants/about-page.data';
 import { LOGO } from '@/lib/constants/branding';
 import { cn } from '@/lib/utils';
+import { formatReviewMonth } from '@/lib/utils/date';
 
 /**
  * AboutContent
@@ -34,38 +35,6 @@ import { cn } from '@/lib/utils';
  * código sugería.
  */
 const LOGO_ALT = 'Auguria';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Nombres de mes en español, para no depender del locale del runtime. */
-const MONTH_NAMES = [
-  'enero',
-  'febrero',
-  'marzo',
-  'abril',
-  'mayo',
-  'junio',
-  'julio',
-  'agosto',
-  'septiembre',
-  'octubre',
-  'noviembre',
-  'diciembre',
-];
-
-/**
- * Formatea `YYYY-MM` como "agosto de 2026".
- *
- * Sin construir un `Date`: un `new Date('2026-08')` es medianoche UTC y en
- * UTC-3 retrocede al mes anterior — el mismo bug de zona horaria que ya mordió
- * dos veces con las fechas de nacimiento.
- */
-function formatReviewDate(isoMonth: string): string {
-  const [year, month] = isoMonth.split('-');
-  const monthName = MONTH_NAMES[Number(month) - 1];
-
-  return monthName ? `${monthName} de ${year}` : year;
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,7 +105,7 @@ export function AboutContent({ className }: AboutContentProps) {
         {/* La página afirma que el contenido se revisa periódicamente; sin una
             fecha a la vista, eso no lo puede verificar nadie. */}
         <p data-testid="about-last-reviewed" className="text-muted-foreground mt-6 text-sm">
-          Última revisión editorial: {formatReviewDate(ABOUT_PAGE.lastReviewed)}
+          Última revisión editorial: {formatReviewMonth(ABOUT_PAGE.lastReviewed)}
         </p>
 
         {/* Enlaces internos: el crawler sigue recorriendo desde acá */}

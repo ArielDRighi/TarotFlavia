@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { AuthorByline } from '@/components/common/AuthorByline';
 import {
   RitualHeader,
   RitualMaterials,
@@ -156,6 +157,10 @@ export function RitualDetailPage({ slug, initialRitual }: RitualDetailPageProps)
               <p className="text-muted-foreground">{ritual.closing}</p>
             </div>
           )}
+
+          {/* Firma editorial (T-SEO-017): el ritual es contenido, y va firmado
+              como las fichas y las guías. */}
+          <AuthorByline />
         </div>
 
         {/* Sidebar */}

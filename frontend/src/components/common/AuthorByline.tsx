@@ -8,18 +8,23 @@ import { cn } from '@/lib/utils';
 /**
  * AuthorByline
  *
- * Firma de autoría del contenido editorial (T-SEO-011).
+ * Firma de autoría del contenido editorial (T-SEO-011 / T-SEO-017).
  *
  * Las guías de la enciclopedia son las piezas más extensas del sitio y llegaban
  * sin dueño: para las guías de calidad de Google, contenido de consejo personal
  * sin autor identificable es una señal negativa (E-E-A-T). La firma no nombra
- * personas —el sitio se presenta como equipo— pero enlaza a `/sobre-nosotros`,
- * donde se explica quién escribe y con qué criterio.
+ * personas —el sitio se presenta como equipo, decisión de negocio del
+ * 12-sep-2026— pero enlaza a `/sobre-nosotros`, donde se explica quién escribe,
+ * y a `/politica-editorial`, donde se explica cómo se produce y revisa.
  *
- * Sin `'use client'` propio: no tiene estado ni handlers. Hoy sus consumidores
- * (`ArticleDetailView`, `CardDetailView`) sí son client components, así que la
- * firma viaja en su bundle — llega igual al HTML inicial porque Next SSR-ea los
- * client components, pero el componente no depende de eso.
+ * Desde T-SEO-017 la llevan también los rituales y las fichas de servicio,
+ * además de las cartas y las guías.
+ *
+ * Sin `'use client'` propio: no tiene estado ni handlers. Varios consumidores
+ * (`ArticleDetailView`, `CardDetailView`, `RitualDetailPage`) son client
+ * components, así que la firma viaja en su bundle — llega igual al HTML inicial
+ * porque Next SSR-ea los client components, pero el componente no depende de
+ * eso; `ServiceEditorialContent` la renderiza en el servidor.
  *
  * @example
  * ```tsx
@@ -46,7 +51,14 @@ export function AuthorByline({ className }: AuthorBylineProps) {
           equipo editorial de Auguria
         </Link>
         , con más de una década de práctica acumulada en tarot, astrología, numerología y péndulo.
-        El contenido se revisa de forma periódica y se corrige cuando hace falta.
+        El contenido se revisa de forma periódica y se corrige cuando hace falta, según nuestra{' '}
+        <Link
+          href={ROUTES.POLITICA_EDITORIAL}
+          className="text-secondary focus-visible:ring-secondary rounded-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+        >
+          política editorial
+        </Link>
+        .
       </p>
     </aside>
   );

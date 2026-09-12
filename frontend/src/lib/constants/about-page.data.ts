@@ -199,6 +199,7 @@ export const ABOUT_PAGE: AboutPageData = {
   lastReviewed: '2026-08',
 
   links: [
+    { label: 'Política editorial', href: ROUTES.POLITICA_EDITORIAL },
     { label: 'Explorar la Enciclopedia', href: ROUTES.ENCICLOPEDIA },
     { label: 'Guías prácticas', href: ROUTES.ENCICLOPEDIA_GUIAS },
     { label: 'Servicios y sesiones', href: ROUTES.SERVICIOS },

@@ -13,6 +13,7 @@ import {
   getLocalDateString,
   getCanonicalDateString,
   shiftDateString,
+  formatReviewMonth,
 } from './date';
 
 describe('date utilities', () => {
@@ -363,6 +364,28 @@ describe('date utilities', () => {
     it('handles leap years (2028 is a leap year)', () => {
       expect(shiftDateString('2028-02-28', 1)).toBe('2028-02-29');
       expect(shiftDateString('2028-03-01', -1)).toBe('2028-02-29');
+    });
+  });
+
+  /**
+   * `YYYY-MM` de revisión editorial (T-SEO-011 / T-SEO-017). Sin construir un
+   * `Date`: `new Date('2026-08')` es medianoche UTC y en UTC-3 retrocede al mes
+   * anterior — el mismo bug que ya mordió dos veces con fechas de nacimiento.
+   */
+  describe('formatReviewMonth', () => {
+    it('formatea YYYY-MM como "mes de año" en español', () => {
+      expect(formatReviewMonth('2026-08')).toBe('agosto de 2026');
+      expect(formatReviewMonth('2026-01')).toBe('enero de 2026');
+      expect(formatReviewMonth('2025-12')).toBe('diciembre de 2025');
+    });
+
+    it('no depende de la zona horaria: el mes es el declarado, nunca el anterior', () => {
+      expect(formatReviewMonth('2026-09')).toBe('septiembre de 2026');
+    });
+
+    it('cae al año si el mes no es válido', () => {
+      expect(formatReviewMonth('2026-13')).toBe('2026');
+      expect(formatReviewMonth('2026')).toBe('2026');
     });
   });
 });

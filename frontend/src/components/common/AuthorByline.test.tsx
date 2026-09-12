@@ -34,6 +34,17 @@ describe('AuthorByline', () => {
     );
   });
 
+  // T-SEO-017: la firma lleva a la política editorial, que es donde se explica
+  // cómo se produce, revisa y corrige lo que se firma.
+  it('enlaza a /politica-editorial con un <a href> real', () => {
+    render(<AuthorByline />);
+
+    expect(screen.getByRole('link', { name: /política editorial/i })).toHaveAttribute(
+      'href',
+      ROUTES.POLITICA_EDITORIAL
+    );
+  });
+
   it('declara la revisión editorial del contenido', () => {
     render(<AuthorByline />);
 
