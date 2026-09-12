@@ -1,5 +1,6 @@
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
+import { getSessionFingerprint } from '@/lib/utils/fingerprint';
 import type {
   PendulumQueryRequest,
   PendulumQueryResponse,
@@ -11,12 +12,21 @@ import type {
 /**
  * Consultar el péndulo
  * Acepta pregunta opcional (solo Premium)
+ *
+ * Envía el mismo fingerprint de sesión que `GET /users/capabilities` para que el
+ * backend registre el consumo anónimo bajo una única clave (TASK-515). Sin él, el
+ * guard usa IP + User-Agent y capabilities nunca ve la consulta consumida.
+ *
+ * Nota: NO transforma errores. Re-lanza el AxiosError original (o el RateLimitError
+ * del interceptor en 429) para que el componente pueda leer `response.status` y
+ * `response.data.message` / `code` (BLOCKED_CONTENT).
  */
 export async function queryPendulum(request: PendulumQueryRequest): Promise<PendulumQueryResponse> {
-  const response = await apiClient.post<PendulumQueryResponse>(
-    API_ENDPOINTS.PENDULUM.QUERY,
-    request
-  );
+  const fingerprint = request.fingerprint ?? (await getSessionFingerprint());
+  const response = await apiClient.post<PendulumQueryResponse>(API_ENDPOINTS.PENDULUM.QUERY, {
+    ...request,
+    fingerprint,
+  });
   return response.data;
 }
 

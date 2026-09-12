@@ -27,6 +27,12 @@ vi.mock('./axios-config', () => ({
   },
 }));
 
+// TASK-515: el fingerprint de sesión viaja en el body de la consulta
+const MOCK_FINGERPRINT = 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456';
+vi.mock('@/lib/utils/fingerprint', () => ({
+  getSessionFingerprint: vi.fn(async () => MOCK_FINGERPRINT),
+}));
+
 describe('pendulum API functions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -52,7 +58,9 @@ describe('pendulum API functions', () => {
 
       const result = await queryPendulum(request);
 
-      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.PENDULUM.QUERY, request);
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.PENDULUM.QUERY, {
+        fingerprint: MOCK_FINGERPRINT,
+      });
       expect(result).toEqual(mockQueryResponse);
       expect(result.response).toBe('yes');
     });
@@ -65,9 +73,40 @@ describe('pendulum API functions', () => {
 
       const result = await queryPendulum(request);
 
-      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.PENDULUM.QUERY, request);
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.PENDULUM.QUERY, {
+        question: '¿Debo tomar esta decisión?',
+        fingerprint: MOCK_FINGERPRINT,
+      });
       expect(result).toEqual(mockQueryResponse);
       expect(result.responseText).toBe('Sí');
+    });
+
+    it('TASK-515: envía el fingerprint de sesión en el body (igual que la carta del día)', async () => {
+      const { getSessionFingerprint } = await import('@/lib/utils/fingerprint');
+      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockQueryResponse });
+
+      await queryPendulum({});
+
+      expect(getSessionFingerprint).toHaveBeenCalledTimes(1);
+      const [, body] = vi.mocked(apiClient.post).mock.calls[0];
+      expect(body).toEqual({ fingerprint: MOCK_FINGERPRINT });
+    });
+
+    it('TASK-515: no pisa un fingerprint explícito del request', async () => {
+      vi.mocked(apiClient.post).mockResolvedValueOnce({ data: mockQueryResponse });
+
+      await queryPendulum({ fingerprint: 'b'.repeat(64) });
+
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.PENDULUM.QUERY, {
+        fingerprint: 'b'.repeat(64),
+      });
+    });
+
+    it('TASK-515: no transforma el error para preservar response.status (403/429)', async () => {
+      const axiosLikeError = { response: { status: 403, data: { message: 'Ya has usado' } } };
+      vi.mocked(apiClient.post).mockRejectedValueOnce(axiosLikeError);
+
+      await expect(queryPendulum({})).rejects.toBe(axiosLikeError);
     });
 
     it('should handle different pendulum responses', async () => {

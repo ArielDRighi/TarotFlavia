@@ -22,8 +22,37 @@ import {
   PendulumBlockedContent,
 } from '@/components/features/pendulum';
 import { usePendulumQuery, usePendulumCapabilities } from '@/hooks/api/usePendulum';
+import { toast } from '@/hooks/utils/useToast';
 import { useAuthStore } from '@/stores/authStore';
+import { RateLimitError } from '@/lib/api/axios-config';
 import type { PendulumMovement, PendulumQueryResponse } from '@/types/pendulum.types';
+
+// Constants
+const LIMIT_REACHED_FALLBACK_MESSAGE =
+  'Ya usaste tus consultas disponibles del Péndulo. Regístrate o actualiza tu plan para seguir consultando.';
+const GENERIC_ERROR_MESSAGE =
+  'No pudimos consultar al Péndulo. Intenta nuevamente en unos instantes.';
+
+// Helpers
+
+/**
+ * Traduce el error de la consulta a un mensaje para el usuario (TASK-515).
+ * - 403 (límite anónimo/Free/Premium): mensaje del backend o fallback en español.
+ * - 429: el interceptor de axios ya lo convierte en RateLimitError con mensaje en español.
+ * - Cualquier otro error: mensaje genérico.
+ */
+function getQueryErrorMessage(error: unknown): string {
+  if (error instanceof RateLimitError) {
+    return error.message;
+  }
+  if (isAxiosError(error) && error.response?.status === 403) {
+    const backendMessage: unknown = error.response.data?.message;
+    return typeof backendMessage === 'string' && backendMessage.trim()
+      ? backendMessage
+      : LIMIT_REACHED_FALLBACK_MESSAGE;
+  }
+  return GENERIC_ERROR_MESSAGE;
+}
 
 export function PendulumConsultation() {
   const { user } = useAuthStore();
@@ -96,7 +125,13 @@ export function PendulumConsultation() {
           open: true,
           category: error.response.data.category,
         });
+        return;
       }
+
+      // TASK-515: 403/429 (cupo agotado) y cualquier otro error se muestran al usuario.
+      // La invalidación de capabilities (banner + botón deshabilitado) la hace
+      // usePendulumQuery.onError, así que acá solo informamos.
+      toast.error(getQueryErrorMessage(error));
     }
   };
 
