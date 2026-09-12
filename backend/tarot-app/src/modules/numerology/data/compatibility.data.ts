@@ -403,11 +403,11 @@ export const COMPATIBILITY_DATA: Compatibility[] = [
     numbers: [6, 33],
     level: 'high',
     description:
-      'El cuidador y el maestro sanador se unen en el servicio amoroso',
+      'El cuidador y el maestro compasivo se unen en el servicio amoroso',
     strengths: [
       'Compasión y cuidado supremos',
       'Valores de servicio compartidos',
-      'Capacidad de sanar a otros',
+      'Capacidad de cuidar a otros',
     ],
     challenges: [
       'Sacrificio excesivo conjunto',
@@ -467,7 +467,7 @@ export const COMPATIBILITY_DATA: Compatibility[] = [
     numbers: [11, 33],
     level: 'high',
     description:
-      'El visionario y el maestro sanador crean una unión espiritualmente suprema',
+      'El visionario y el maestro compasivo crean una unión espiritualmente suprema',
     strengths: [
       'Conexión espiritual máxima',
       'Capacidad de elevar consciencias',
@@ -483,7 +483,7 @@ export const COMPATIBILITY_DATA: Compatibility[] = [
     numbers: [22, 33],
     level: 'high',
     description:
-      'El constructor maestro y el maestro sanador unen poder material con amor supremo',
+      'El constructor maestro y el maestro compasivo unen poder material con amor supremo',
     strengths: [
       'Manifestación con propósito elevado',
       'Capacidad de crear cambio masivo',
@@ -499,11 +499,11 @@ export const COMPATIBILITY_DATA: Compatibility[] = [
     numbers: [33, 33],
     level: 'high',
     description:
-      'Dos maestros sanadores crean una unión de amor y servicio supremos',
+      'Dos maestros compasivos crean una unión de amor y servicio supremos',
     strengths: [
       'Amor incondicional mutuo',
       'Compasión y comprensión máximas',
-      'Capacidad de sanar al mundo juntos',
+      'Capacidad de cuidar al mundo juntos',
     ],
     challenges: [
       'Sacrificio excesivo extremo',

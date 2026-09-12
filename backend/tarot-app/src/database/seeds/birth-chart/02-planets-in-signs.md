@@ -18,7 +18,7 @@
 {
 "planet": "sun",
 "sign": "cancer",
-"content": "Con el Sol en Cáncer, tu luz se filtra a través de la sensibilidad, la intuición y el cuidado. Eres el guardián de las emociones y la memoria, con una capacidad natural para nutrir y proteger lo que amas. Tu identidad está profundamente ligada a tus raíces, tu familia (de sangre o elegida) y tu sentido de pertenencia. Brillas cuando creas espacios seguros donde otros pueden ser vulnerables. Tu fortaleza es tu empatía profunda, pero tu desafío es aprender a establecer límites emocionales para no absorber energías ajenas ni tomarte todo de manera personal. Al reconocer que tu sensibilidad es una fuerza y no una debilidad, te conviertes en un líder compasivo capaz de sanar y guiar desde el corazón."
+"content": "Con el Sol en Cáncer, tu luz se filtra a través de la sensibilidad, la intuición y el cuidado. Eres el guardián de las emociones y la memoria, con una capacidad natural para nutrir y proteger lo que amas. Tu identidad está profundamente ligada a tus raíces, tu familia (de sangre o elegida) y tu sentido de pertenencia. Brillas cuando creas espacios seguros donde otros pueden ser vulnerables. Tu fortaleza es tu empatía profunda, pero tu desafío es aprender a establecer límites emocionales para no absorber energías ajenas ni tomarte todo de manera personal. Al reconocer que tu sensibilidad es una fuerza y no una debilidad, te conviertes en un líder compasivo capaz de contener y guiar desde el corazón."
 },
 {
 "planet": "sun",
@@ -28,7 +28,7 @@
 {
 "planet": "sun",
 "sign": "virgo",
-"content": "Con el Sol en Virgo, tu esencia se define por el servicio, el análisis y la búsqueda de la excelencia. Eres quien nota los detalles que otros pasan por alto, buscando siempre optimizar, sanar y ordenar el caos. Tu energía es humilde, práctica y profundamente eficiente; brillas cuando sientes que estás siendo útil y que tu entorno funciona armoniosamente. Tu superpoder es tu discernimiento y tu capacidad para mejorar cualquier sistema o situación. El desafío es silenciar al crítico interior y evitar el perfeccionismo paralizante. Recuerda que eres valioso por quien eres, no solo por lo que haces o arreglas. Tu claridad mental y tu dedicación son regalos indispensables para el mundo."
+"content": "Con el Sol en Virgo, tu esencia se define por el servicio, el análisis y la búsqueda de la excelencia. Eres quien nota los detalles que otros pasan por alto, buscando siempre optimizar, reparar y ordenar el caos. Tu energía es humilde, práctica y profundamente eficiente; brillas cuando sientes que estás siendo útil y que tu entorno funciona armoniosamente. Tu superpoder es tu discernimiento y tu capacidad para mejorar cualquier sistema o situación. El desafío es silenciar al crítico interior y evitar el perfeccionismo paralizante. Recuerda que eres valioso por quien eres, no solo por lo que haces o arreglas. Tu claridad mental y tu dedicación son regalos indispensables para el mundo."
 },
 {
 "planet": "sun",
@@ -38,7 +38,7 @@
 {
 "planet": "sun",
 "sign": "scorpio",
-"content": "Con el Sol en Escorpio, tu energía vital es intensa, magnética y transformadora. Eres el alquimista del zodiaco, capaz de navegar las profundidades emocionales y renacer de tus propias cenizas una y otra vez. Te atraen los misterios, la psicología profunda y todo lo que yace bajo la superficie. Tu fortaleza es tu inmensa resiliencia y tu capacidad de penetrar en la verdad de las cosas. El desafío es aprender a soltar el control y confiar, evitando caer en luchas de poder o resentimientos. Cuando canalizas tu intensidad hacia la sanación y la transformación personal, posees un poder inigualable para cambiar tu realidad y la de quienes te rodean."
+"content": "Con el Sol en Escorpio, tu energía vital es intensa, magnética y transformadora. Eres el alquimista del zodiaco, capaz de navegar las profundidades emocionales y renacer de tus propias cenizas una y otra vez. Te atraen los misterios, la psicología profunda y todo lo que yace bajo la superficie. Tu fortaleza es tu inmensa resiliencia y tu capacidad de penetrar en la verdad de las cosas. El desafío es aprender a soltar el control y confiar, evitando caer en luchas de poder o resentimientos. Cuando canalizas tu intensidad hacia el autoconocimiento y la transformación personal, posees un poder inigualable para cambiar tu realidad y la de quienes te rodean."
 },
 {
 "planet": "sun",
@@ -58,7 +58,7 @@
 {
 "planet": "sun",
 "sign": "pisces",
-"content": "Con el Sol en Piscis, tu identidad es fluida, compasiva y espiritual. Eres el soñador del zodiaco, conectado con las corrientes invisibles de la emoción y la imaginación. Tu sensibilidad es tu brújula; sientes el dolor y la alegría del mundo como propios. Brillas a través de la expresión artística, la ayuda desinteresada o la conexión mística. Tu fortaleza es tu empatía sin límites y tu creatividad. El desafío radica en mantener los pies en la tierra y establecer límites claros para no disolverte en los problemas ajenos o escapar de la realidad. Cuando anclas tu magia en el mundo real, eres un canal de amor universal y sanación."
+"content": "Con el Sol en Piscis, tu identidad es fluida, compasiva y espiritual. Eres el soñador del zodiaco, conectado con las corrientes invisibles de la emoción y la imaginación. Tu sensibilidad es tu brújula; sientes el dolor y la alegría del mundo como propios. Brillas a través de la expresión artística, la ayuda desinteresada o la conexión mística. Tu fortaleza es tu empatía sin límites y tu creatividad. El desafío radica en mantener los pies en la tierra y establecer límites claros para no disolverte en los problemas ajenos o escapar de la realidad. Cuando anclas tu magia en el mundo real, eres un canal de amor universal y consuelo."
 },
 {
 "planet": "moon",
@@ -73,7 +73,7 @@
 {
 "planet": "moon",
 "sign": "gemini",
-"content": "Con la Luna en Géminis, necesitas entender y verbalizar tus emociones para poder gestionarlas. Para ti, hablar es sanar. Tu mundo interior es cambiante, curioso y mental; puedes sentir una cosa por la mañana y otra por la tarde. Te sientes seguro cuando tienes información y comunicación fluida. Tu fortaleza es tu capacidad para analizar tus sentimientos con objetividad y no ahogarte en el drama. El desafío es no racionalizar tanto que te desconectes de la experiencia visceral de sentir, o usar las palabras como distracción. Tu don es la inteligencia emocional articulada: puedes poner nombre a lo que otros solo sienten como caos."
+"content": "Con la Luna en Géminis, necesitas entender y verbalizar tus emociones para poder gestionarlas. Para ti, hablar es ordenar lo que sientes. Tu mundo interior es cambiante, curioso y mental; puedes sentir una cosa por la mañana y otra por la tarde. Te sientes seguro cuando tienes información y comunicación fluida. Tu fortaleza es tu capacidad para analizar tus sentimientos con objetividad y no ahogarte en el drama. El desafío es no racionalizar tanto que te desconectes de la experiencia visceral de sentir, o usar las palabras como distracción. Tu don es la inteligencia emocional articulada: puedes poner nombre a lo que otros solo sienten como caos."
 },
 {
 "planet": "moon",
@@ -98,7 +98,7 @@
 {
 "planet": "moon",
 "sign": "scorpio",
-"content": "Con la Luna en Escorpio, tus emociones son oceánicas, intensas y privadas. Buscas una fusión profunda y transformadora con el otro; la superficialidad no te nutre. Tienes un radar innato para detectar secretos y verdades ocultas. Tu lealtad es absoluta una vez que entregas tu confianza. Tu fortaleza es tu poder de regeneración y tu capacidad para acompañar a otros en sus momentos más oscuros. El desafío es gestionar los celos, la desconfianza y el miedo a la traición, que pueden llevarte a comportamientos destructivos. Cuando aprendes a soltar y perdonar, tu intensidad emocional se convierte en una fuerza sanadora de un poder incalculable."
+"content": "Con la Luna en Escorpio, tus emociones son oceánicas, intensas y privadas. Buscas una fusión profunda y transformadora con el otro; la superficialidad no te nutre. Tienes un radar innato para detectar secretos y verdades ocultas. Tu lealtad es absoluta una vez que entregas tu confianza. Tu fortaleza es tu poder de regeneración y tu capacidad para acompañar a otros en sus momentos más oscuros. El desafío es gestionar los celos, la desconfianza y el miedo a la traición, que pueden llevarte a comportamientos destructivos. Cuando aprendes a soltar y perdonar, tu intensidad emocional se convierte en una fuerza restauradora de un poder incalculable."
 },
 {
 "planet": "moon",
@@ -158,7 +158,7 @@
 {
 "planet": "mercury",
 "sign": "scorpio",
-"content": "Con Mercurio en Escorpio, tu mente es investigadora, penetrante y profunda. No te interesan las charlas superficiales; quieres descubrir el 'porqué' y los secretos ocultos detrás de las apariencias. Tu comunicación es intensa, directa y a veces cortante, pero siempre transformadora. Tienes una intuición psicológica afilada. Tu fortaleza es tu capacidad de concentración y tu valentía para hablar de tabúes. El desafío es evitar la obsesión, la sospecha paranoica o el uso de palabras hirientes como defensa. Tienes el poder de sanar o destruir con la palabra; usa tu agudeza mental para empoderar y revelar verdades que liberan."
+"content": "Con Mercurio en Escorpio, tu mente es investigadora, penetrante y profunda. No te interesan las charlas superficiales; quieres descubrir el 'porqué' y los secretos ocultos detrás de las apariencias. Tu comunicación es intensa, directa y a veces cortante, pero siempre transformadora. Tienes una intuición psicológica afilada. Tu fortaleza es tu capacidad de concentración y tu valentía para hablar de tabúes. El desafío es evitar la obsesión, la sospecha paranoica o el uso de palabras hirientes como defensa. Tienes el poder de reparar o destruir con la palabra; usa tu agudeza mental para empoderar y revelar verdades que liberan."
 },
 {
 "planet": "mercury",
@@ -198,7 +198,7 @@
 {
 "planet": "venus",
 "sign": "cancer",
-"content": "Con Venus en Cáncer, tu corazón es tierno, protector y profundamente sentimental. Buscas una conexión emocional que te haga sentir en casa; el amor para ti es sinónimo de cuidado y pertenencia. Eres cauteloso al entregar tu corazón, pero una vez que lo haces, tu lealtad es absoluta y maternal. Valoras la intimidad, la familia y la historia compartida. Tienes un talento natural para crear ambientes acogedores y bellos. El desafío radica en tu vulnerabilidad ante el rechazo, lo que puede llevarte a levantar muros defensivos o a aferrarte al pasado. Tu poder reside en tu inmensa capacidad de nutrir: amas de una forma que sana y hace crecer a quienes tienen la suerte de estar cerca de ti."
+"content": "Con Venus en Cáncer, tu corazón es tierno, protector y profundamente sentimental. Buscas una conexión emocional que te haga sentir en casa; el amor para ti es sinónimo de cuidado y pertenencia. Eres cauteloso al entregar tu corazón, pero una vez que lo haces, tu lealtad es absoluta y maternal. Valoras la intimidad, la familia y la historia compartida. Tienes un talento natural para crear ambientes acogedores y bellos. El desafío radica en tu vulnerabilidad ante el rechazo, lo que puede llevarte a levantar muros defensivos o a aferrarte al pasado. Tu poder reside en tu inmensa capacidad de nutrir: amas de una forma que repara y hace crecer a quienes tienen la suerte de estar cerca de ti."
 },
 {
 "planet": "venus",
@@ -218,7 +218,7 @@
 {
 "planet": "venus",
 "sign": "scorpio",
-"content": "Venus en Escorpio ama con una intensidad visceral, profunda y transformadora. No te interesan los coqueteos superficiales; buscas la fusión de almas, conocer los secretos más oscuros de tu pareja y ser amado en tu totalidad. Eres magnético, misterioso y posees una lealtad inquebrantable, casi \"hasta que la muerte nos separe\". Valoras la honestidad brutal y la pasión sexual. El desafío radica en gestionar los celos, la posesividad y el miedo a la traición, que pueden volverse destructivos. Sin embargo, cuando amas desde la confianza, tienes el poder de sanar heridas profundas. Tu amor es una fuerza de la naturaleza que cambia la vida de quien tocas para siempre."
+"content": "Venus en Escorpio ama con una intensidad visceral, profunda y transformadora. No te interesan los coqueteos superficiales; buscas la fusión de almas, conocer los secretos más oscuros de tu pareja y ser amado en tu totalidad. Eres magnético, misterioso y posees una lealtad inquebrantable, casi \"hasta que la muerte nos separe\". Valoras la honestidad brutal y la pasión sexual. El desafío radica en gestionar los celos, la posesividad y el miedo a la traición, que pueden volverse destructivos. Sin embargo, cuando amas desde la confianza, tienes el poder de reparar heridas profundas. Tu amor es una fuerza de la naturaleza que cambia la vida de quien tocas para siempre."
 },
 {
 "planet": "venus",
@@ -328,7 +328,7 @@
 {
 "planet": "jupiter",
 "sign": "virgo",
-"content": "Con Júpiter en Virgo, encuentras expansión en el servicio, el orden y el detalle. Creces mejorando tus habilidades, cuidando tu cuerpo y siendo útil a la comunidad. Tu suerte viene del trabajo bien hecho y del discernimiento práctico. No buscas dogmas abstractos, sino una espiritualidad que funcione en el día a día. El desafío es el perfeccionismo que impide ver el panorama completo; a veces 'el árbol no te deja ver el bosque'. Puedes caer en la crítica excesiva. Tu fortaleza es la humildad y la ética de trabajo; tienes el don de sanar y mejorar la realidad material, encontrando lo sagrado en las pequeñas rutinas."
+"content": "Con Júpiter en Virgo, encuentras expansión en el servicio, el orden y el detalle. Creces mejorando tus habilidades, cuidando tu cuerpo y siendo útil a la comunidad. Tu suerte viene del trabajo bien hecho y del discernimiento práctico. No buscas dogmas abstractos, sino una espiritualidad que funcione en el día a día. El desafío es el perfeccionismo que impide ver el panorama completo; a veces 'el árbol no te deja ver el bosque'. Puedes caer en la crítica excesiva. Tu fortaleza es la humildad y la ética de trabajo; tienes el don de reparar y mejorar la realidad material, encontrando lo sagrado en las pequeñas rutinas."
 },
 {
 "planet": "jupiter",
@@ -358,7 +358,7 @@
 {
 "planet": "jupiter",
 "sign": "pisces",
-"content": "Júpiter en Piscis está en su domicilio clásico, otorgando una expansión espiritual, intuitiva y compasiva ilimitada. Creces cuando te entregas, sueñas y conectas con el todo. Tienes una fe mística y una suerte que parece mágica, apareciendo ayuda justo cuando la necesitas. Eres empático y artístico. El desafío es el escapismo, la falta de límites claros o ser demasiado confiado e ingenuo en un mundo materialista. Necesitas anclarte. Tu don es la compasión universal; eres un canal de esperanza y sanación, capaz de disolver barreras y recordarnos que, en última instancia, todos somos uno en el océano del espíritu."
+"content": "Júpiter en Piscis está en su domicilio clásico, otorgando una expansión espiritual, intuitiva y compasiva ilimitada. Creces cuando te entregas, sueñas y conectas con el todo. Tienes una fe mística y una suerte que parece mágica, apareciendo ayuda justo cuando la necesitas. Eres empático y artístico. El desafío es el escapismo, la falta de límites claros o ser demasiado confiado e ingenuo en un mundo materialista. Necesitas anclarte. Tu don es la compasión universal; eres un canal de esperanza y consuelo, capaz de disolver barreras y recordarnos que, en última instancia, todos somos uno en el océano del espíritu."
 },
 {
 "planet": "saturn",
@@ -418,7 +418,7 @@
 {
 "planet": "saturn",
 "sign": "pisces",
-"content": "Con Saturno en Piscis, el desafío es dar estructura a lo intangible: sueños, espiritualidad y empatía. Puedes sentir miedo al caos emocional o tener dificultades para establecer límites, oscilando entre el sacrificio total y la rigidez defensiva. Saturno te pide que 'materialices tus sueños' trabajando en ellos con disciplina, en lugar de solo fantasear. La lección es aprender a ser compasivo sin ser una víctima. Tu maestría reside en traer el cielo a la tierra; tienes la capacidad de trabajar en instituciones de ayuda, arte o sanación, aplicando orden y responsabilidad al vasto mundo del inconsciente y la fe."
+"content": "Con Saturno en Piscis, el desafío es dar estructura a lo intangible: sueños, espiritualidad y empatía. Puedes sentir miedo al caos emocional o tener dificultades para establecer límites, oscilando entre el sacrificio total y la rigidez defensiva. Saturno te pide que 'materialices tus sueños' trabajando en ellos con disciplina, en lugar de solo fantasear. La lección es aprender a ser compasivo sin ser una víctima. Tu maestría reside en traer el cielo a la tierra; tienes la capacidad de trabajar en instituciones de ayuda, arte o acompañamiento, aplicando orden y responsabilidad al vasto mundo del inconsciente y la fe."
 },
 {
 "planet": "uranus",
@@ -458,7 +458,7 @@
 {
 "planet": "uranus",
 "sign": "scorpio",
-"content": "Urano en Escorpio (exaltado) trae una revolución psicológica, sexual y financiera profunda. Tu generación rompe tabúes, investiga lo oculto y transforma la visión de la muerte y el renacimiento. Eres intenso, radical y buscas la liberación a través de la catarsis. Tienes un poder regenerativo inmenso. El desafío es el extremismo emocional o el caos en situaciones de poder compartido. Tu aporte al mundo es la capacidad de sanar traumas colectivos sacándolos a la luz y demostrar que la verdadera libertad se encuentra al atravesar y transformar nuestras sombras más profundas."
+"content": "Urano en Escorpio (exaltado) trae una revolución psicológica, sexual y financiera profunda. Tu generación rompe tabúes, investiga lo oculto y transforma la visión de la muerte y el renacimiento. Eres intenso, radical y buscas la liberación a través de la catarsis. Tienes un poder regenerativo inmenso. El desafío es el extremismo emocional o el caos en situaciones de poder compartido. Tu aporte al mundo es la capacidad de transformar heridas colectivas sacándolas a la luz y demostrar que la verdadera libertad se encuentra al atravesar y transformar nuestras sombras más profundas."
 },
 {
 "planet": "uranus",
@@ -483,7 +483,7 @@
 {
 "planet": "neptune",
 "sign": "aries",
-"content": "Neptuno en Aries inspira a una generación de 'guerreros espirituales'. Aquí, la ilusión y el idealismo se proyectan sobre la acción individual y el coraje. Buscas disolver el ego a través de la lucha por una causa noble. Tienes una imaginación ardiente y pionera. El desafío es el fanatismo, la confusión sobre la propia identidad o actuar basándote en ilusiones peligrosas. Tu potencial es iniciar un nuevo ciclo espiritual con valentía, abriendo caminos de compasión activa y demostrando que la fe puede mover montañas cuando se combina con la acción decidida."
+"content": "Neptuno en Aries inspira a una generación de 'guerreros espirituales'. Aquí, la ilusión y el idealismo se proyectan sobre la acción individual y el coraje. Buscas disolver el ego a través de la lucha por una causa noble. Tienes una imaginación ardiente y pionera. El desafío es el fanatismo, la confusión sobre la propia identidad o actuar basándote en ilusiones que te desorientan. Tu potencial es iniciar un nuevo ciclo espiritual con valentía, abriendo caminos de compasión activa y demostrando que la fe puede mover montañas cuando se combina con la acción decidida."
 },
 {
 "planet": "neptune",
@@ -498,7 +498,7 @@
 {
 "planet": "neptune",
 "sign": "cancer",
-"content": "Neptuno en Cáncer idealiza el hogar, la patria y la familia. Tu generación posee una sensibilidad emocional psíquica y un profundo anhelo de pertenencia espiritual. Buscas el 'amor de madre' universal. El desafío es el apego emocional excesivo, la nostalgia paralizante o idealizar el pasado familiar ignorando la realidad. Tu don es la empatía profunda; tienes la capacidad de sanar el alma colectiva a través del cuidado y la nutrición, creando refugios donde la vulnerabilidad es bienvenida y protegida."
+"content": "Neptuno en Cáncer idealiza el hogar, la patria y la familia. Tu generación posee una sensibilidad emocional psíquica y un profundo anhelo de pertenencia espiritual. Buscas el 'amor de madre' universal. El desafío es el apego emocional excesivo, la nostalgia paralizante o idealizar el pasado familiar ignorando la realidad. Tu don es la empatía profunda; tienes la capacidad de reconfortar el alma colectiva a través del cuidado y la nutrición, creando refugios donde la vulnerabilidad es bienvenida y protegida."
 },
 {
 "planet": "neptune",
@@ -508,7 +508,7 @@
 {
 "planet": "neptune",
 "sign": "virgo",
-"content": "Neptuno en Virgo busca la espiritualidad en el detalle, el servicio y el cuidado. Esta generación tiende a disolver los límites entre la medicina y lo holístico. Idealizas la pureza y el orden perfecto. El desafío es la hipocondría, la obsesión con dietas o rutinas 'mágicas', y la desilusión cuando el trabajo cotidiano no es perfecto. Tu aporte es traer la compasión al servicio diario, entendiendo que curar el cuerpo es también curar el alma. Tienes el don de encontrar a Dios en las pequeñas cosas y de servir con una devoción práctica y sanadora."
+"content": "Neptuno en Virgo busca la espiritualidad en el detalle, el servicio y el cuidado. Esta generación tiende a disolver los límites entre la medicina y lo holístico. Idealizas la pureza y el orden perfecto. El desafío es la hipocondría, la obsesión con dietas o rutinas 'mágicas', y la desilusión cuando el trabajo cotidiano no es perfecto. Tu aporte es traer la compasión al servicio diario, entendiendo que cuidar el cuerpo es también cuidar el alma. Tienes el don de encontrar a Dios en las pequeñas cosas y de servir con una devoción práctica y reparadora."
 },
 {
 "planet": "neptune",
@@ -518,7 +518,7 @@
 {
 "planet": "neptune",
 "sign": "scorpio",
-"content": "Neptuno en Escorpio explora las profundidades del inconsciente, el sexo y el misterio. Tu generación se siente atraída por lo oculto y la transformación espiritual intensa. Tienes una capacidad de regeneración casi mística. El desafío es la confusión en temas sexuales o financieros, el abuso de sustancias o perderse en la oscuridad emocional. Tu don es la capacidad de bucear en las sombras colectivas y transmutarlas en luz. Eres un sanador profundo que entiende que la verdadera espiritualidad incluye la aceptación de la muerte y el renacimiento constante."
+"content": "Neptuno en Escorpio explora las profundidades del inconsciente, el sexo y el misterio. Tu generación se siente atraída por lo oculto y la transformación espiritual intensa. Tienes una capacidad de regeneración casi mística. El desafío es la confusión en temas sexuales o financieros, el abuso de sustancias o perderse en la oscuridad emocional. Tu don es la capacidad de bucear en las sombras colectivas y transmutarlas en luz. Eres un guía profundo que entiende que la verdadera espiritualidad incluye la aceptación de la muerte y el renacimiento constante."
 },
 {
 "planet": "neptune",
@@ -533,7 +533,7 @@
 {
 "planet": "neptune",
 "sign": "aquarius",
-"content": "Neptuno en Acuario idealiza la sociedad, la amistad y la tecnología. Tu generación sueña con una utopía humanitaria donde todos somos iguales y estamos conectados. Tienes una visión espiritual de la ciencia y la comunidad. El desafío es confundir la realidad virtual con la real, o perder la identidad individual en el colectivo. Tu misión es utilizar la intuición y la tecnología para sanar a la sociedad, promoviendo ideales de fraternidad universal y demostrando que la verdadera evolución humana es un despertar de la conciencia colectiva."
+"content": "Neptuno en Acuario idealiza la sociedad, la amistad y la tecnología. Tu generación sueña con una utopía humanitaria donde todos somos iguales y estamos conectados. Tienes una visión espiritual de la ciencia y la comunidad. El desafío es confundir la realidad virtual con la real, o perder la identidad individual en el colectivo. Tu misión es utilizar la intuición y la tecnología para transformar a la sociedad, promoviendo ideales de fraternidad universal y demostrando que la verdadera evolución humana es un despertar de la conciencia colectiva."
 },
 {
 "planet": "neptune",
@@ -578,7 +578,7 @@
 {
 "planet": "pluto",
 "sign": "scorpio",
-"content": "Plutón en Escorpio (1984-1995) está en su domicilio, lo que hace a esta generación (Millennials) intensamente transformadora. Vienen a regenerar temas de sexualidad, muerte, deuda y psicología profunda. Tienen un radar innato para la crisis y la verdad oculta. El poder es emocional y psíquico. El desafío es el nihilismo, la autodestrucción o la obsesión con el control. Su inmenso legado es la capacidad de sanar traumas ancestrales, destruir tabúes sociales y renacer constantemente, empoderando a la humanidad para mirar a la oscuridad a los ojos sin miedo."
+"content": "Plutón en Escorpio (1984-1995) está en su domicilio, lo que hace a esta generación (Millennials) intensamente transformadora. Vienen a regenerar temas de sexualidad, muerte, deuda y psicología profunda. Tienen un radar innato para la crisis y la verdad oculta. El poder es emocional y psíquico. El desafío es el nihilismo, la autodestrucción o la obsesión con el control. Su inmenso legado es la capacidad de transformar heridas ancestrales, destruir tabúes sociales y renacer constantemente, empoderando a la humanidad para mirar a la oscuridad a los ojos sin miedo."
 },
 {
 "planet": "pluto",
@@ -598,7 +598,7 @@
 {
 "planet": "pluto",
 "sign": "pisces",
-"content": "Plutón en Piscis (futuro: 2044-2068) transformará la espiritualidad, el arte y el inconsciente colectivo. Será una época de disolución de fronteras y regeneración de la compasión. El poder será sutil, invisible y espiritual. El desafío será el caos masivo, pandemias o la pérdida total de contacto con la realidad. El legado será una purificación espiritual profunda, cerrando un ciclo zodiacal completo para preparar a la humanidad para un nuevo comienzo, sanando las heridas del alma a un nivel global y profundo."
+"content": "Plutón en Piscis (futuro: 2044-2068) transformará la espiritualidad, el arte y el inconsciente colectivo. Será una época de disolución de fronteras y regeneración de la compasión. El poder será sutil, invisible y espiritual. El desafío será el caos masivo, pandemias o la pérdida total de contacto con la realidad. El legado será una purificación espiritual profunda, cerrando un ciclo zodiacal completo para preparar a la humanidad para un nuevo comienzo, reparando las heridas del alma a un nivel global y profundo."
 }
 ]
 }

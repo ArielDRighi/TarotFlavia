@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 // DropdownMenu removed - only text sharing allowed
 import { cn } from '@/lib/utils';
 import type { Interpretation } from '@/types/reading.types';
@@ -438,6 +439,9 @@ export function ReadingDetail({ readingId }: ReadingDetailProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Aviso legal al pie de la lectura (T-SEO-018) */}
+          <ContentDisclaimer className="mt-4" />
         </section>
 
         {/* Actions */}

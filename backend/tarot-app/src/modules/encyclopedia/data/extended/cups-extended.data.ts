@@ -29,7 +29,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'the-star',
         reading:
-          'Después de una etapa dura, vuelve la fe y con ella la capacidad de sentir. La combinación anuncia una sanación emocional genuina y un período en el que la esperanza deja de ser un esfuerzo.',
+          'Después de una etapa dura, vuelve la fe y con ella la capacidad de sentir. La combinación anuncia una recuperación emocional genuina y un período en el que la esperanza deja de ser un esfuerzo.',
       },
       {
         cardSlug: 'the-empress',
@@ -47,7 +47,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Es la carta del encuentro entre iguales: dos personas que se eligen y se lo dicen. Marca noviazgos que se formalizan, reconciliaciones sinceras y esa química donde la atracción viene acompañada de respeto. No hay jerarquía, no hay uno que quiere más: hay reciprocidad. Para una pareja establecida indica una etapa de reencuentro y acuerdos que se renuevan. Si estás sin pareja, anuncia un vínculo que empieza de manera pareja, con las dos partes poniendo lo mismo desde el primer día.',
     meaningWork:
-      'Sociedades, alianzas y acuerdos que benefician a los dos lados. Aparece cuando una colaboración funciona porque hay confianza real, no solo conveniencia. Es una carta muy favorable para firmar contratos entre pares, asociarse con un colega o resolver un conflicto laboral con una conversación honesta. Para las finanzas, indica sociedades rentables y acuerdos equilibrados. La advertencia es no confundir buena onda con contrato: la afinidad es real, escríbanla igual.',
+      'Sociedades, alianzas y acuerdos que benefician a los dos lados. Aparece cuando una colaboración funciona porque hay confianza real, no solo conveniencia. Es una carta muy favorable para firmar contratos entre pares, asociarse con un colega o resolver un conflicto laboral con una conversación honesta. Para las finanzas, indica sociedades rentables y acuerdos equilibrados. La salvedad es no confundir buena onda con contrato: la afinidad es real, escríbanla igual.',
     meaningWellbeing:
       'El bienestar mejora cuando dejas de resolver todo solo. Es un momento de reconciliación con el propio cuerpo y también con alguien cercano: los vínculos sostienen la energía y bajan la tensión acumulada. Buenas señales para actividades compartidas, espacios de diálogo en pareja, conversaciones que descargan. El ánimo se estabiliza en la compañía. Si andas cansado, revisa cuánto de ese cansancio viene de una distancia afectiva que se puede acortar hablando.',
     symbolism:
@@ -81,7 +81,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
   },
   'three-of-cups': {
     meaningLove:
-      'Alegría compartida: festejos, reencuentros, amistades que se vuelven fundamentales. En el amor marca un tiempo liviano y sociable, donde el vínculo se disfruta con otros alrededor. Suele anunciar noticias felices en el círculo cercano —nacimientos, casamientos, mudanzas— y también el amor que aparece en una reunión. En una pareja indica que el entorno acompaña. La advertencia es leve: cuidado con que todo se comparta con todos, porque hay conversaciones que necesitan intimidad y no público.',
+      'Alegría compartida: festejos, reencuentros, amistades que se vuelven fundamentales. En el amor marca un tiempo liviano y sociable, donde el vínculo se disfruta con otros alrededor. Suele anunciar noticias felices en el círculo cercano —nacimientos, casamientos, mudanzas— y también el amor que aparece en una reunión. En una pareja indica que el entorno acompaña. El reparo es leve: cuidado con que todo se comparta con todos, porque hay conversaciones que necesitan intimidad y no público.',
     meaningWork:
       'Un equipo que funciona y se reconoce entre sí. Aparece cuando el logro es colectivo: el proyecto que salió bien porque cada uno puso lo suyo, la colaboración que da gusto. Buen momento para trabajos en red, actividades sociales, eventos y todo lo que requiera coordinar personas de buen humor. En el dinero, un ingreso que se celebra o que llega gracias a un contacto. Lo que esta carta pide es agradecer en público: el mérito compartido vuelve en oportunidades.',
     meaningWellbeing:
@@ -132,7 +132,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'ace-of-cups',
         reading:
-          'La oferta que estás ignorando es genuina y viene con el corazón abierto. Es la advertencia más clara del mazo: si sigues con los brazos cruzados, la copa se va a otra mesa.',
+          'La oferta que estás ignorando es genuina y viene con el corazón abierto. Es el aviso más claro del mazo: si sigues con los brazos cruzados, la copa se va a otra mesa.',
       },
       {
         cardSlug: 'the-hermit',
@@ -231,7 +231,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningWellbeing:
       'La energía se dispersa entre demasiados estímulos y el descanso se resiente: la cabeza sigue funcionando aunque el cuerpo esté quieto. Suele venir con sueño irregular y sueños vívidos. Ayuda mucho reducir el consumo de pantallas antes de dormir y elegir una sola actividad en lugar de rotar entre cinco. El ánimo mejora cuando bajas la cantidad de opciones abiertas: la libertad infinita cansa más de lo que entusiasma.',
     symbolism:
-      'Una silueta oscura de espaldas contempla siete copas suspendidas sobre una nube, cada una con una ofrenda distinta: un rostro, una figura velada por un manto rojo, una serpiente, un castillo, joyas, una corona de laurel y un dragón. La única que no muestra su contenido es la más atractiva, y es también la más peligrosa. Todo flota: nada de eso está apoyado en la tierra. La figura está en sombra porque todavía no eligió, y elegir es lo único que la volvería real en esta escena.',
+      'Una silueta oscura de espaldas contempla siete copas suspendidas sobre una nube, cada una con una ofrenda distinta: un rostro, una figura velada por un manto rojo, una serpiente, un castillo, joyas, una corona de laurel y un dragón. La única que no muestra su contenido es la más atractiva, y es también la más engañosa. Todo flota: nada de eso está apoyado en la tierra. La figura está en sombra porque todavía no eligió, y elegir es lo único que la volvería real en esta escena.',
     advice:
       'Elige una y cierra las otras seis. La carta no premia al que evalúa mejor sino al que se compromete. Escribe las opciones, tacha las que dependen de que otro haga algo, tacha las que no podrías empezar esta semana y quédate con lo que sobrevive. Y desconfía de la propuesta que no te deja ver lo que hay adentro.',
     yesNo:
@@ -297,7 +297,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
   },
   'nine-of-cups': {
     meaningLove:
-      'Es la carta del deseo cumplido: la relación que querías, la respuesta que esperabas, un momento de disfrute sin culpa. En pareja marca una etapa de satisfacción y placer compartido. Si estás sin pareja, indica que estás bien contigo y que eso resulta atractivo. La única advertencia es la autocomplacencia: el hombre de la carta está satisfecho, pero solo. Disfrutar lo que tienes está perfecto; conviene revisar que la comodidad no se haya convertido en distancia emocional.',
+      'Es la carta del deseo cumplido: la relación que querías, la respuesta que esperabas, un momento de disfrute sin culpa. En pareja marca una etapa de satisfacción y placer compartido. Si estás sin pareja, indica que estás bien contigo y que eso resulta atractivo. El único reparo es la autocomplacencia: el hombre de la carta está satisfecho, pero solo. Disfrutar lo que tienes está perfecto; conviene revisar que la comodidad no se haya convertido en distancia emocional.',
     meaningWork:
       'Se consigue lo que se pidió: el puesto, el aumento, el cliente que querías. La carta premia el deseo bien formulado y sostenido. Es un momento de disfrute profesional y de reconocimiento tangible, con dinero incluido. En lo económico marca abundancia concreta y buena administración del placer que ese dinero permite. El aviso es no confundir una buena racha con un logro definitivo: nueve copas son muchas, pero la décima —lo compartido— todavía no está en la mesa.',
     meaningWellbeing:
@@ -333,7 +333,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
   },
   'ten-of-cups': {
     meaningLove:
-      'Es la plenitud emocional: la familia que funciona, el amor que se sostiene en el tiempo, la sensación de estar en el lugar correcto con la gente correcta. Marca compromisos duraderos, convivencias felices y reconciliaciones profundas. No es la euforia del comienzo sino la alegría tranquila de lo construido. Si estás sin pareja, anuncia un vínculo con potencial de futuro real. La advertencia mínima: cuidado con exigirle a la vida cotidiana que se parezca todo el tiempo a la postal.',
+      'Es la plenitud emocional: la familia que funciona, el amor que se sostiene en el tiempo, la sensación de estar en el lugar correcto con la gente correcta. Marca compromisos duraderos, convivencias felices y reconciliaciones profundas. No es la euforia del comienzo sino la alegría tranquila de lo construido. Si estás sin pareja, anuncia un vínculo con potencial de futuro real. La única salvedad: cuidado con exigirle a la vida cotidiana que se parezca todo el tiempo a la postal.',
     meaningWork:
       'Armonía en el entorno laboral y trabajo que se integra bien con la vida personal. Aparece cuando el equipo se siente familia o cuando encontraste un lugar donde te tratan bien y no tienes que dejar la vida afuera. Es una carta más de satisfacción que de ambición. En el dinero indica estabilidad suficiente para sostener a los tuyos sin sobresaltos. Si estás decidiendo entre un puesto mejor pago y uno que te deja vivir, esta carta vota por el segundo.',
     meaningWellbeing:
@@ -407,7 +407,7 @@ export const CUPS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Es el romántico que llega con una propuesta en la mano: la invitación, la declaración, el gesto que parece salido de una película. Marca cortejo, seducción elegante y vínculos que se mueven al ritmo del sentimiento. Es hermoso y también inconstante: este Caballero avanza al paso, no galopa, y a veces la fantasía le importa más que la persona concreta. Si aparece describiendo a alguien, disfruta la propuesta y observa con calma si a la promesa la sigue una acción sostenida.',
     meaningWork:
-      'Una oferta atractiva llega de manera elegante: una propuesta creativa, una invitación a colaborar, un proyecto que te seduce por sentido más que por números. Es buena para trabajos artísticos, comunicación y todo lo que requiera encantar a alguien. La advertencia es práctica: revisa el contrato debajo del entusiasmo, porque esta carta promete mucho y no siempre calcula la logística. En lo económico, propuestas que suenan lindas y necesitan que alguien haga las cuentas.',
+      'Una oferta atractiva llega de manera elegante: una propuesta creativa, una invitación a colaborar, un proyecto que te seduce por sentido más que por números. Es buena para trabajos artísticos, comunicación y todo lo que requiera encantar a alguien. El aviso es práctico: revisa el contrato debajo del entusiasmo, porque esta carta promete mucho y no siempre calcula la logística. En lo económico, propuestas que suenan lindas y necesitan que alguien haga las cuentas.',
     meaningWellbeing:
       'El ánimo está sensible y romántico, con la energía flotando entre el entusiasmo y el ensueño. El cuerpo pide actividades que combinen movimiento y placer: nadar, bailar, caminar sin apuro. Es un buen momento para prácticas que integren la emoción con el cuerpo. El punto flojo es la constancia: arrancas motivado y abandonas cuando se vuelve rutina. Elige algo que te guste tanto que no necesites disciplina para sostenerlo.',
     symbolism:

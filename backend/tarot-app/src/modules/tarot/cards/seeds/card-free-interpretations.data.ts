@@ -825,14 +825,14 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'salud-bienestar',
     orientation: 'upright',
     content:
-      'Es un período de sanación y renovación. Tu cuerpo está respondiendo bien y hay motivos para confiar en que el bienestar está volviendo a vos.',
+      'Es un período de recuperación y renovación. Tu cuerpo está respondiendo bien y hay motivos para confiar en que el bienestar está volviendo a vos.',
   },
   {
     cardSlug: 'la-estrella',
     categorySlug: 'salud-bienestar',
     orientation: 'reversed',
     content:
-      'Puede haber desmotivación o pérdida de esperanza en el proceso de cuidado. Recuperá la fe en tu capacidad de sanar y buscá apoyo si lo necesitás.',
+      'Puede haber desmotivación o pérdida de esperanza en el proceso de cuidado. Recuperá la fe en tu capacidad de reponerte y buscá apoyo si lo necesitás.',
   },
   {
     cardSlug: 'la-estrella',
@@ -956,7 +956,7 @@ export const CARD_FREE_INTERPRETATIONS: CardFreeInterpretationData[] = [
     categorySlug: 'amor-relaciones',
     orientation: 'reversed',
     content:
-      'Puede haber culpa o resentimiento que impiden sanar la relación. La carta te pide que te liberes del juicio —hacia vos o hacia el otro— para avanzar.',
+      'Puede haber culpa o resentimiento que impiden recomponer la relación. La carta te pide que te liberes del juicio —hacia vos o hacia el otro— para avanzar.',
   },
   {
     cardSlug: 'el-juicio',

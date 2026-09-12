@@ -71,6 +71,12 @@ describe('DailyHoroscopeList (T-SEO-015)', () => {
     expect(note).toHaveTextContent(/12 de septiembre de 2026/i);
   });
 
+  it('cierra con el aviso legal (T-SEO-018)', () => {
+    render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    expect(screen.getByTestId('content-disclaimer')).toBeInTheDocument();
+  });
+
   it('la nota editorial sigue a la fecha del horóscopo que se muestra, no a la de hoy', () => {
     const previous: CanonicalDailyHoroscopes = {
       ...DAILY,

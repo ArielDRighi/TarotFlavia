@@ -64,7 +64,7 @@ export const NUMEROLOGY_NUMBERS_INFO: Record<
   9: { name: 'El Humanitario', emoji: '🕊️', color: 'text-teal-500' },
   11: { name: 'El Visionario', emoji: '✨', color: 'text-indigo-500' },
   22: { name: 'El Constructor Maestro', emoji: '🌟', color: 'text-cyan-500' },
-  33: { name: 'El Maestro Sanador', emoji: '💫', color: 'text-rose-500' },
+  33: { name: 'El Maestro Compasivo', emoji: '💫', color: 'text-rose-500' },
 };
 
 /**

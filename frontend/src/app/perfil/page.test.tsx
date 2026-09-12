@@ -233,7 +233,7 @@ describe('PerfilPage', () => {
       // Settings tab content should be visible
       expect(screen.getByText('Notificaciones')).toBeInTheDocument();
       expect(screen.getByText('Privacidad')).toBeInTheDocument();
-      expect(screen.getByText('Zona Peligrosa')).toBeInTheDocument();
+      expect(screen.getByText('Acciones irreversibles')).toBeInTheDocument();
     });
 
     it('should switch back to account tab when clicked', async () => {

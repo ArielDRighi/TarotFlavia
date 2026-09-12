@@ -401,7 +401,7 @@ export const MAJOR_ARCANA_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Un giro inesperado: alguien que reaparece, un encuentro fortuito, un cambio de etapa que nadie planeó. La Rueda indica que el vínculo entra en otra fase y que buena parte de lo que viene no depende de tu voluntad. En pareja marca el fin de un ciclo y el comienzo de otro, muchas veces mejor. Si estás sin pareja, avisa que el momento cambia solo. Lo que pide es soltar el control: lo que está girando no se detiene por más que lo empujes.',
     meaningWork:
-      'Un cambio de suerte que llega desde afuera: una oportunidad inesperada, un contexto que se mueve, un ciclo laboral que se cierra y otro que empieza. Es una carta favorable en general, con la advertencia de que la rueda sigue girando y ninguna posición es definitiva. En lo económico indica un giro en la situación económica, muchas veces a mejor. Aprovecha el momento alto sin creer que es permanente y guarda algo para cuando la rueda baje.',
+      'Un cambio de suerte que llega desde afuera: una oportunidad inesperada, un contexto que se mueve, un ciclo laboral que se cierra y otro que empieza. Es una carta favorable en general, con la salvedad de que la rueda sigue girando y ninguna posición es definitiva. En lo económico indica un giro en la situación económica, muchas veces a mejor. Aprovecha el momento alto sin creer que es permanente y guarda algo para cuando la rueda baje.',
     meaningWellbeing:
       'La energía cambia de ciclo y conviene acompañar el movimiento en vez de resistirlo. Es un buen momento para revisar qué hábitos corresponden a esta etapa y cuáles quedaron de una anterior. El cuerpo tiene ritmos propios que suben y bajan; forzar el mismo rendimiento todo el año no funciona. El ánimo es variable en esta etapa y eso es normal. Adapta la rutina al momento en lugar de exigirle al cuerpo que sea siempre el mismo.',
     symbolism:
@@ -579,7 +579,7 @@ export const MAJOR_ARCANA_EXTENDED_CONTENT: CardExtendedContentMap = {
   },
   'the-devil': {
     meaningLove:
-      'Un vínculo con cadenas: dependencia, celos, atracción intensa que no deja pensar, o una relación que se sostiene por costumbre y por miedo a estar solo. El Diablo también marca la pasión más carnal y el disfrute sin culpa, así que no siempre es una advertencia. La pregunta que hace es precisa: ¿te quedas porque quieres o porque no te animas a soltar? Las cadenas de la carta están flojas, y ese detalle es toda la lectura.',
+      'Un vínculo con cadenas: dependencia, celos, atracción intensa que no deja pensar, o una relación que se sostiene por costumbre y por miedo a estar solo. El Diablo también marca la pasión más carnal y el disfrute sin culpa, así que no siempre es una señal de alarma. La pregunta que hace es precisa: ¿te quedas porque quieres o porque no te animas a soltar? Las cadenas de la carta están flojas, y ese detalle es toda la lectura.',
     meaningWork:
       'Un trabajo que te ata: buen sueldo y ningún sentido, un contrato que no puedes dejar, una sociedad que te conviene y te desgasta. También indica ambiciones que se volvieron obsesión y decisiones tomadas por miedo a perder estatus. Para las finanzas, marca deudas, consumos que se escaparon de control y compromisos económicos que limitan tu libertad. Mira el número real de esa deuda: la mayor parte del peso viene de no querer mirarlo.',
     meaningWellbeing:
@@ -651,7 +651,7 @@ export const MAJOR_ARCANA_EXTENDED_CONTENT: CardExtendedContentMap = {
   },
   'the-star': {
     meaningLove:
-      'Vuelve la esperanza después de una etapa difícil. La Estrella marca reconciliaciones sinceras, vínculos que sanan y la capacidad de volver a confiar en alguien. No es una carta de pasión sino de calma verdadera: la sensación de estar en el lugar correcto, sin sobresaltos. En pareja indica un tiempo de transparencia y ternura. Si estás sin pareja, señala que estás en condiciones de recibir algo bueno, y que la desconfianza que traías empieza a aflojarse sola.',
+      'Vuelve la esperanza después de una etapa difícil. La Estrella marca reconciliaciones sinceras, vínculos que se recomponen y la capacidad de volver a confiar en alguien. No es una carta de pasión sino de calma verdadera: la sensación de estar en el lugar correcto, sin sobresaltos. En pareja indica un tiempo de transparencia y ternura. Si estás sin pareja, señala que estás en condiciones de recibir algo bueno, y que la desconfianza que traías empieza a aflojarse sola.',
     meaningWork:
       'Inspiración, vocación y un rumbo que por fin se ve claro. Es una carta excelente para proyectos creativos, para retomar algo que abandonaste y para trabajos que tienen sentido más allá del sueldo. Suele aparecer después de una crisis laboral, cuando empieza la recuperación. En materia de dinero, marca una mejora gradual y confiable, sin golpes de suerte. Lo que se siembra bajo esta carta crece despacio y con raíces: no es rápido, es sólido.',
     meaningWellbeing:
@@ -671,7 +671,7 @@ export const MAJOR_ARCANA_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'ace-of-cups',
         reading:
-          'El corazón se abre después de sanar. Es de las mejores duplas del mazo para volver a confiar en alguien: la etapa dura terminó de verdad.',
+          'El corazón se abre después de reponerse. Es de las mejores duplas del mazo para volver a confiar en alguien: la etapa dura terminó de verdad.',
       },
       {
         cardSlug: 'nine-of-wands',

@@ -104,7 +104,7 @@ Como la tierra física, los signos de tierra ofrecen sustento, estabilidad y la 
 ## Los Tres Signos de Tierra
 
 - **Tauro (Fijo):** La tierra fértil, el cultivador de la belleza
-- **Virgo (Mutable):** La tierra que se prepara, el artesano y el sanador
+- **Virgo (Mutable):** La tierra que se prepara, el artesano y el cuidador
 - **Capricornio (Cardinal):** La montaña, el constructor de imperios
 
 ## Tierra en Equilibrio
@@ -220,7 +220,7 @@ Como el agua física, los signos de agua pueden ser suaves y nutritivos como una
 - Empatía y sensibilidad
 - Conexión con el inconsciente y los sueños
 - Compasión y amor profundo
-- Capacidad de sanación
+- Capacidad de contención
 - Memoria emocional excepcional
 
 ## Los Tres Signos de Agua
@@ -241,7 +241,7 @@ En equilibrio, la energía de Agua da profundidad emocional, compasión y una po
 
 ## Agua en la Práctica Espiritual
 
-Trabajo con el agua: baños rituales, olas del mar, llanto consciente, trabajo con los sueños. El agua purifica emocionalmente y disuelve lo que ya no sirve. Las ceremonias con agua son poderosas para la sanación emocional, la clarividencia y la conexión con el mundo espiritual.
+Trabajo con el agua: baños rituales, olas del mar, llanto consciente, trabajo con los sueños. El agua purifica emocionalmente y disuelve lo que ya no sirve. Las ceremonias con agua son poderosas para el equilibrio emocional, la clarividencia y la conexión con el mundo espiritual.
 `,
     metadata: {
       signs: ['cancer', 'scorpio', 'pisces'],

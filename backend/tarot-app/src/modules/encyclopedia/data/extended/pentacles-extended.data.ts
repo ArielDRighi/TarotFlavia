@@ -132,7 +132,7 @@ export const PENTACLES_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'ace-of-pentacles',
         reading:
-          'Hay una oportunidad concreta y el miedo la está bloqueando. La combinación es una advertencia directa: si no aflojas el puño ahora, la propuesta se va a otra mesa.',
+          'Hay una oportunidad concreta y el miedo la está bloqueando. La combinación es un aviso directo: si no aflojas el puño ahora, la propuesta se va a otra mesa.',
       },
       {
         cardSlug: 'the-devil',
@@ -191,7 +191,7 @@ export const PENTACLES_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningLove:
       'Habla del equilibrio entre dar y recibir. Aparece cuando en la pareja uno pone mucho más que el otro —tiempo, dinero, cuidado— y esa balanza empieza a pesar. También marca vínculos generosos y de apoyo mutuo, donde ayudar no se cobra. La pregunta que trae es incómoda y útil: en esta relación, ¿quién sostiene la balanza? Si siempre eres el que da, revisa qué estás comprando con eso. Si siempre recibes, revisa qué estás postergando devolver.',
     meaningWork:
-      'Un apoyo económico que llega o que das: un préstamo, un adelanto, un cliente que paga bien, una beca. También indica relaciones laborales donde hay una diferencia clara de poder y conviene tenerla presente. Es una buena carta para negociar aumentos, cobrar deudas y ordenar acuerdos económicos entre partes desiguales. Para las finanzas, marca circulación sana: entra y sale, se comparte, se invierte. Guarda registro escrito de lo que se presta y de lo que se debe.',
+      'Un apoyo económico que llega o que das: un préstamo, un adelanto, un cliente que paga bien, una beca. También indica relaciones laborales donde hay una diferencia clara de poder y conviene tenerla presente. Es una buena carta para negociar aumentos, cobrar deudas y ordenar acuerdos económicos entre partes desiguales. Para las finanzas, marca circulación fluida: entra y sale, se comparte, se invierte. Guarda registro escrito de lo que se presta y de lo que se debe.',
     meaningWellbeing:
       'La energía se recupera cuando hay reciprocidad. Si te la pasas sosteniendo a los demás, el cansancio no es físico sino de balanza: estás dando más de lo que entra. Es un buen momento para aceptar ayuda concreta con la casa, los chicos o el trabajo. Y también para dar, si estás del lado con recursos, porque la generosidad hace bien de manera comprobable al ánimo. Revisa el reparto de tareas de tu semana con honestidad.',
     symbolism:
@@ -405,7 +405,7 @@ export const PENTACLES_EXTENDED_CONTENT: CardExtendedContentMap = {
   },
   'knight-of-pentacles': {
     meaningLove:
-      'Un vínculo confiable y sin sobresaltos: alguien que cumple lo que promete, aparece cuando dice y sostiene la relación con actos. Es la carta menos vertiginosa del mazo en el amor y una de las más seguras. En pareja indica una etapa de rutina estable, con la advertencia obvia: la previsibilidad, sin gestos nuevos, termina en aburrimiento. Si describe a una persona, es leal y algo lenta para las decisiones emocionales. Vale la pena esperarla; también vale la pena avisarle que a veces hay que acelerar.',
+      'Un vínculo confiable y sin sobresaltos: alguien que cumple lo que promete, aparece cuando dice y sostiene la relación con actos. Es la carta menos vertiginosa del mazo en el amor y una de las más seguras. En pareja indica una etapa de rutina estable, con el reparo obvio: la previsibilidad, sin gestos nuevos, termina en aburrimiento. Si describe a una persona, es leal y algo lenta para las decisiones emocionales. Vale la pena esperarla; también vale la pena avisarle que a veces hay que acelerar.',
     meaningWork:
       'Trabajo metódico, cumplimiento y avance lento pero seguro. Es la carta del empleado o del profesional que no falla: entrega a tiempo, respeta el procedimiento y sostiene el ritmo durante años. Excelente para proyectos que requieren disciplina y para trámites largos. La contra es la resistencia al cambio y la lentitud frente a las oportunidades que piden reflejos. En lo económico indica administración prudente, ahorro constante y crecimiento sostenido sin sobresaltos.',
     meaningWellbeing:

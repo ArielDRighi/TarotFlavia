@@ -39,7 +39,7 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
       {
         cardSlug: 'four-of-cups',
         reading:
-          'Aparece la oportunidad y tú estás mirando para otro lado. Es la advertencia clásica del mazo: la apatía te tiene distraído mientras algo valioso pasa por delante. Levanta la vista antes de que la chispa se apague sola.',
+          'Aparece la oportunidad y tú estás mirando para otro lado. Es el aviso clásico del mazo: la apatía te tiene distraído mientras algo valioso pasa por delante. Levanta la vista antes de que la chispa se apague sola.',
       },
     ],
   },
@@ -303,9 +303,9 @@ export const WANDS_EXTENDED_CONTENT: CardExtendedContentMap = {
     meaningWellbeing:
       'El cansancio es real y viene de lejos: no es de esta semana, es acumulado. El cuerpo está en alerta permanente y eso consume más energía que el trabajo en sí. Lo que pide la carta no es más esfuerzo sino descanso verdadero, del que corta la vigilancia. Dormir mejor, aflojar la guardia con gente de confianza y dejar de anticipar problemas que todavía no pasaron. El ánimo se recupera cuando el cuerpo confirma que ya no hay que estar defendiendo.',
     symbolism:
-      'Un hombre con la cabeza vendada se apoya en una vara y mira de reojo hacia un costado, atento a un peligro que quizás ya no está. Detrás de él, ocho varas se alzan formando una empalizada: son las batallas anteriores convertidas en defensa. La venda muestra que ya fue golpeado y sobrevivió. El gesto es de agotamiento, no de derrota: sigue de pie. El fondo muestra colinas áridas y un cielo pálido, un paisaje sin amenaza visible. La carta pregunta si la guardia todavía protege algo o si solo te está impidiendo descansar.',
+      'Un hombre con la cabeza vendada se apoya en una vara y mira de reojo hacia un costado, atento a una amenaza que quizás ya no está. Detrás de él, ocho varas se alzan formando una empalizada: son las batallas anteriores convertidas en defensa. La venda muestra que ya fue golpeado y sobrevivió. El gesto es de agotamiento, no de derrota: sigue de pie. El fondo muestra colinas áridas y un cielo pálido, un paisaje sin amenaza visible. La carta pregunta si la guardia todavía protege algo o si solo te está impidiendo descansar.',
     advice:
-      'Aguanta un poco más, pero deja de pelear con fantasmas. Distingue el peligro actual de la memoria del peligro anterior: no son lo mismo y solo uno merece tu energía. Pide ayuda aunque te cueste; esta carta insiste en la soledad y la soledad es justamente lo que la vuelve tan pesada. Estás más cerca del final de lo que crees.',
+      'Aguanta un poco más, pero deja de pelear con fantasmas. Distingue la amenaza actual de la memoria de la amenaza anterior: no son lo mismo y solo uno merece tu energía. Pide ayuda aunque te cueste; esta carta insiste en la soledad y la soledad es justamente lo que la vuelve tan pesada. Estás más cerca del final de lo que crees.',
     yesNo:
       'Sí, si resistes el último tramo. La carta anticipa una prueba de perseverancia antes del resultado favorable, y ese resultado depende de que no abandones ahora.',
     combinations: [

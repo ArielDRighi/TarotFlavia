@@ -13,6 +13,7 @@ import { CardMetadata } from './CardMetadata';
 import { CardNavigation } from './CardNavigation';
 import { RelatedCards } from './RelatedCards';
 import { AuthorByline } from '@/components/common/AuthorByline';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 
 export interface CardDetailViewProps {
   card: CardDetail;
@@ -71,6 +72,9 @@ export function CardDetailView({ card, combinationCardNames }: CardDetailViewPro
           texto de autor desde T-SEO-009, así que son contenido editorial y no
           datos de referencia: van firmadas, igual que las guías. */}
       <AuthorByline />
+
+      {/* Aviso legal al pie de la ficha (T-SEO-018) */}
+      <ContentDisclaimer />
 
       {/* Cartas relacionadas */}
       <RelatedCards slug={card.slug} />

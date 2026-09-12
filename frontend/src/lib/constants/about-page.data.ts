@@ -119,7 +119,7 @@ export const ABOUT_PAGE: AboutPageData = {
       heading: 'Cómo entendemos el tarot y la astrología',
       paragraphs: [
         'Trabajamos el tarot como una herramienta de reflexión, no como un mecanismo de predicción. Una tirada no informa un futuro fijo: ordena una situación, la mira desde ángulos que a uno solo no se le habían ocurrido y devuelve preguntas más precisas que las que uno traía. Ese es el valor real de la práctica, y es también su límite honesto.',
-        'Con la astrología pasa algo parecido. Una carta natal describe tendencias, tensiones y recursos; no dicta una biografía. Cuando leemos una casa o un aspecto, hablamos de disposiciones y de contextos, nunca de hechos garantizados. Por eso vas a notar que en todo el sitio evitamos el lenguaje de la certeza absoluta: no es prudencia legal, es lo que creemos que la práctica puede sostener.',
+        'Con la astrología pasa algo parecido. Una carta natal describe tendencias, tensiones y recursos; no dicta una biografía. Cuando leemos una casa o un aspecto, hablamos de disposiciones y de contextos, nunca de hechos cerrados. Por eso vas a notar que en todo el sitio evitamos el lenguaje de la certeza absoluta: no es prudencia legal, es lo que creemos que la práctica puede sostener.',
         'El mismo criterio vale para los rituales y el péndulo. Un ritual organiza una intención y le da un tiempo y un gesto; un péndulo ayuda a escuchar una respuesta que ya estaba dando vueltas. Nada de eso funciona como un botón que produce un resultado, y presentarlo así sería faltarle el respeto a quien consulta.',
       ],
     },

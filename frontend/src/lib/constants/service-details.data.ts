@@ -300,6 +300,6 @@ export const SERVICE_DETAILS: Record<ServiceDetailSlug, ServiceDetailContent> = 
       },
     ],
     disclaimer:
-      'La limpieza energética es una práctica simbólica de armonización de espacios y personas. No cura nada, no es un tratamiento médico ni psicológico y no reemplaza la consulta con un profesional de la medicina.',
+      'La limpieza energética es una práctica simbólica de armonización de espacios y personas. No es un tratamiento médico ni psicológico y no reemplaza la consulta con un profesional de la medicina.',
   },
 };

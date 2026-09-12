@@ -292,7 +292,7 @@ describe('RitualCard', () => {
           name: 'Abundancia',
         },
         { category: RitualCategory.LOVE, icon: '💕', name: 'Amor' },
-        { category: RitualCategory.HEALING, icon: '💚', name: 'Sanación' },
+        { category: RitualCategory.HEALING, icon: '💚', name: 'Bienestar' },
       ];
 
       categories.forEach(({ category, icon, name }) => {

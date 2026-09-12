@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import TerminosPage from './page';
+import { CONTENT_DISCLAIMER } from '@/lib/constants/legal';
 
 describe('TerminosPage', () => {
   it('should render without errors', () => {
@@ -13,6 +14,12 @@ describe('TerminosPage', () => {
     const heading = screen.getByRole('heading', { name: 'Términos y Condiciones', level: 1 });
     expect(heading).toBeInTheDocument();
     expect(heading).toHaveClass('font-serif');
+  });
+
+  it('incluye el mismo aviso legal que el footer y las fichas (T-SEO-018)', () => {
+    render(<TerminosPage />);
+
+    expect(screen.getByText(CONTENT_DISCLAIMER, { exact: false })).toBeInTheDocument();
   });
 
   it('should display last updated date', () => {
@@ -68,9 +75,7 @@ describe('TerminosPage', () => {
 
   it('should display service description', () => {
     render(<TerminosPage />);
-    expect(
-      screen.getByText(/Auguria proporciona servicios de lectura de tarot/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Auguria proporciona lecturas de tarot/i)).toBeInTheDocument();
   });
 
   it('should render the disclaimer banner', () => {

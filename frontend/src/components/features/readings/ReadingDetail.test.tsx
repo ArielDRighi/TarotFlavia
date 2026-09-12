@@ -209,6 +209,12 @@ describe('ReadingDetail', () => {
       expect(screen.getByText(mockReadingDetail.question)).toBeInTheDocument();
     });
 
+    it('lleva el aviso legal al pie de la lectura (T-SEO-018)', () => {
+      render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
+
+      expect(screen.getByTestId('content-disclaimer')).toBeInTheDocument();
+    });
+
     it('should display all cards', () => {
       render(<ReadingDetail readingId={1} />, { wrapper: createWrapper() });
 

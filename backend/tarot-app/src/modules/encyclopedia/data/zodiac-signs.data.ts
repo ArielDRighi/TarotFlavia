@@ -408,7 +408,7 @@ El arcano mayor asociado a Leo es **La Fuerza (VIII/XI)**, símbolo de valor int
 
 ## Carácter y Personalidad
 
-Virgo es el sexto signo del zodíaco y el arquetipo del artesano y el sanador. Regido por Mercurio, aplica la inteligencia y la comunicación con una precisión meticulosa. Las personas Virgo son analíticas, trabajadoras y tienen una capacidad innata para detectar detalles que otros pasan por alto.
+Virgo es el sexto signo del zodíaco y el arquetipo del artesano y el cuidador. Regido por Mercurio, aplica la inteligencia y la comunicación con una precisión meticulosa. Las personas Virgo son analíticas, trabajadoras y tienen una capacidad innata para detectar detalles que otros pasan por alto.
 
 A diferencia de Géminis (también regido por Mercurio), Virgo aplica esa energía mercurial en el plano material y práctico, perfeccionando procesos y sirviendo a los demás.
 
@@ -418,7 +418,7 @@ A diferencia de Géminis (también regido por Mercurio), Virgo aplica esa energ�
 - Habilidad de organización excepcional
 - Dedicación y ética de trabajo
 - Humildad y servicio genuino
-- Habilidades sanadoras y de cuidado
+- Habilidades de cuidado y de servicio
 
 ## Desafíos
 

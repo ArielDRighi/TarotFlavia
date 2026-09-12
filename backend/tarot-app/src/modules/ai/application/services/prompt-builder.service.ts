@@ -5,6 +5,7 @@ import { TarotistaConfig } from '../../../tarotistas/entities/tarotista-config.e
 import { TarotCard } from '../../../tarot/cards/entities/tarot-card.entity';
 import { TarotistaCardMeaning } from '../../../tarotistas/entities/tarotista-card-meaning.entity';
 import { Tarotista } from '../../../tarotistas/entities/tarotista.entity';
+import { YMYL_LANGUAGE_RULES } from '../../../../common/prompts/ymyl-language.prompt';
 
 interface CardMeaning {
   meaning: string;
@@ -363,6 +364,11 @@ export class PromptBuilderService {
     // Conclusion - brief
     instructions += `## ✨ Cierre\n`;
     instructions += `(2-3 oraciones finales con mensaje esperanzador)\n\n`;
+
+    // Regla de lenguaje YMYL (T-SEO-018). Va acá y no solo en el prompt de
+    // sistema porque ése viene de la base (config editable de la tarotista) y
+    // puede ser anterior a la regla: las instrucciones finales llegan siempre.
+    instructions += `${YMYL_LANGUAGE_RULES}\n\n`;
 
     // Final reminder
     instructions += `**RECUERDA:** Sé directo y evita repeticiones. Cada sección debe aportar valor único.`;

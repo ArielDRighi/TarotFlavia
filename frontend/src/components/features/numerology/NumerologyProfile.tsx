@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 import { NumberCard } from './NumberCard';
 import { NUMEROLOGY_NUMBERS_INFO, getPersonalYearMeaning } from '@/lib/utils/numerology';
 import { cn } from '@/lib/utils';
@@ -204,6 +205,9 @@ export function NumerologyProfile({ profile, className }: Props) {
           </Card>
         </div>
       </div>
+
+      {/* Aviso legal al pie del análisis (T-SEO-018) */}
+      <ContentDisclaimer className="mt-6" />
     </div>
   );
 }

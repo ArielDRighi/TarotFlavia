@@ -5,6 +5,8 @@
  * el prompt del usuario basado en los números calculados.
  */
 
+import { YMYL_LANGUAGE_RULES } from '../../../common/prompts/ymyl-language.prompt';
+
 const MASTER_NUMBERS = [11, 22, 33];
 
 /**
@@ -20,7 +22,9 @@ REGLAS:
 - Incluye consejos prácticos basados en los números
 - La interpretación debe ser de 400-600 palabras
 - Usa formato markdown con encabezados para organizar la respuesta
-- NO inventes números ni datos que no se te proporcionaron`;
+- NO inventes números ni datos que no se te proporcionaron
+
+${YMYL_LANGUAGE_RULES}`;
 
 /**
  * Verifica si un número es maestro

@@ -99,6 +99,15 @@ describe('HoroscopeSignPanel', () => {
     expect(screen.getByText('Hoy es un buen día para Aries...')).toBeInTheDocument();
   });
 
+  it('cierra con el aviso legal al pie del horóscopo (T-SEO-018)', () => {
+    mockUseAuthStore.mockReturnValue({ user: null });
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: mockHoroscope });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
+
+    expect(screen.getByTestId('content-disclaimer')).toBeInTheDocument();
+  });
+
   it('consulta el horóscopo del signo que recibe por props', () => {
     mockUseAuthStore.mockReturnValue({ user: null });
     mockUseTodayHoroscope.mockReturnValue({

@@ -2,6 +2,7 @@ import {
   ChineseZodiacInfo,
   CHINESE_ELEMENTS_MAP_ES,
 } from '../../../../common/utils/chinese-zodiac.utils';
+import { YMYL_LANGUAGE_RULES } from '../../../../common/prompts/ymyl-language.prompt';
 
 /**
  * System prompt para generación de horóscopos chinos anuales
@@ -64,6 +65,8 @@ REGLAS FUNDAMENTALES:
    - Usa lenguaje claro y accesible
    - Sé específico pero no alarmista
    - Balance entre predicciones positivas y áreas de crecimiento
+
+${YMYL_LANGUAGE_RULES}
 
 FORMATO DE RESPUESTA (JSON estricto):
 {

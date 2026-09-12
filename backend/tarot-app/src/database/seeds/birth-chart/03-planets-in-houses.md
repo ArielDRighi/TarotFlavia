@@ -28,7 +28,7 @@
 {
 "planet": "sun",
 "house": 6,
-"content": "Con el Sol en la Casa 6, encuentras tu propósito a través del servicio, el trabajo diario y la mejora de tus rutinas. No buscas el brillo por ego, sino la satisfacción de ser útil y eficiente. Tu identidad se define por lo bien que haces tu trabajo y cómo ayudas a resolver problemas prácticos. Eres perfeccionista y detallista. Tu camino es encontrar lo sagrado en la rutina y entender que el cuerpo es el templo de tu espíritu. Brillas cuando organizas, sanas o perfeccionas sistemas. Ejemplo práctico: adoptar un estilo de vida ejemplarmente ordenado o destacar en tu trabajo por tu impecable organización."
+"content": "Con el Sol en la Casa 6, encuentras tu propósito a través del servicio, el trabajo diario y la mejora de tus rutinas. No buscas el brillo por ego, sino la satisfacción de ser útil y eficiente. Tu identidad se define por lo bien que haces tu trabajo y cómo ayudas a resolver problemas prácticos. Eres perfeccionista y detallista. Tu camino es encontrar lo sagrado en la rutina y entender que el cuerpo es el templo de tu espíritu. Brillas cuando organizas, reparas o perfeccionas sistemas. Ejemplo práctico: adoptar un estilo de vida ejemplarmente ordenado o destacar en tu trabajo por tu impecable organización."
 },
 {
 "planet": "sun",
@@ -38,7 +38,7 @@
 {
 "planet": "sun",
 "house": 8,
-"content": "Con el Sol en la Casa 8, tu esencia es intensa, profunda y transformadora. Te atraen los misterios de la vida, la psicología y lo oculto. Tu identidad se forja en las crisis y en la capacidad de renacer; eres como el Ave Fénix. Brillas cuando exploras temas tabú o gestionas recursos compartidos e inversiones. No te interesa lo superficial. Tu propósito es iluminar la oscuridad, sanando tus propias sombras y ayudando a otros a transformar sus vidas. Ejemplo práctico: trabajar en terapia, gestión financiera de terceros o investigación profunda."
+"content": "Con el Sol en la Casa 8, tu esencia es intensa, profunda y transformadora. Te atraen los misterios de la vida, la psicología y lo oculto. Tu identidad se forja en las crisis y en la capacidad de renacer; eres como el Ave Fénix. Brillas cuando exploras temas tabú o gestionas recursos compartidos e inversiones. No te interesa lo superficial. Tu propósito es iluminar la oscuridad, integrando tus propias sombras y ayudando a otros a transformar sus vidas. Ejemplo práctico: trabajar en terapia, gestión financiera de terceros o investigación profunda."
 },
 {
 "planet": "sun",
@@ -98,7 +98,7 @@
 {
 "planet": "moon",
 "house": 8,
-"content": "La Luna en la Casa 8 indica una vida emocional intensa, profunda y privada. Tienes una intuición psíquica para detectar mentiras y secretos. Necesitas una intimidad profunda y transformadora para sentirte seguro; las relaciones superficiales no te bastan. Puedes experimentar crisis emocionales que te llevan a renacer. Tienes un talento natural para la psicología y para acompañar a otros en el dolor. Ejemplo práctico: te sientes atraído por investigar misterios o tienes la capacidad de sanar traumas profundos propios y ajenos."
+"content": "La Luna en la Casa 8 indica una vida emocional intensa, profunda y privada. Tienes una intuición psíquica para detectar mentiras y secretos. Necesitas una intimidad profunda y transformadora para sentirte seguro; las relaciones superficiales no te bastan. Puedes experimentar crisis emocionales que te llevan a renacer. Tienes un talento natural para la psicología y para acompañar a otros en el dolor. Ejemplo práctico: te sientes atraído por investigar misterios o tienes la capacidad de transformar heridas profundas propias y ajenas."
 },
 {
 "planet": "moon",
@@ -118,7 +118,7 @@
 {
 "planet": "moon",
 "house": 12,
-"content": "La Luna en la Casa 12 sugiere una vida emocional muy privada, sensible y a veces oculta incluso para ti mismo. Eres una esponja psíquica que absorbe el ambiente, por lo que necesitas periodos de aislamiento para purgarte. Encuentras consuelo en lo espiritual, los sueños y el arte. Puedes tener una conexión mística con el inconsciente colectivo. Tu madre pudo haber sido una figura lejana o idealizada. Ejemplo práctico: retirarte a meditar o dormir para sanar emociones, o canalizar tus sentimientos a través de la música o la poesía."
+"content": "La Luna en la Casa 12 sugiere una vida emocional muy privada, sensible y a veces oculta incluso para ti mismo. Eres una esponja psíquica que absorbe el ambiente, por lo que necesitas periodos de aislamiento para purgarte. Encuentras consuelo en lo espiritual, los sueños y el arte. Puedes tener una conexión mística con el inconsciente colectivo. Tu madre pudo haber sido una figura lejana o idealizada. Ejemplo práctico: retirarte a meditar o dormir para ordenar emociones, o canalizar tus sentimientos a través de la música o la poesía."
 },
 {
 "planet": "mercury",
@@ -198,7 +198,7 @@
 {
 "planet": "venus",
 "house": 4,
-"content": "Venus en la Casa 4 indica que tu hogar es tu santuario de belleza y paz. Necesitas vivir en un entorno estéticamente agradable y armonioso para sentirte bien emocionalmente. Te encanta decorar, recibir gente en casa y crear un ambiente acogedor. La relación con tus padres suele ser cariñosa o buscas sanarla a través del amor. Tu felicidad reside en la intimidad y la vida doméstica. Ejemplo práctico: organizar cenas elegantes en casa, renovar la decoración con buen gusto o ser el pegamento amoroso que une a tu familia."
+"content": "Venus en la Casa 4 indica que tu hogar es tu santuario de belleza y paz. Necesitas vivir en un entorno estéticamente agradable y armonioso para sentirte bien emocionalmente. Te encanta decorar, recibir gente en casa y crear un ambiente acogedor. La relación con tus padres suele ser cariñosa o buscas repararla a través del amor. Tu felicidad reside en la intimidad y la vida doméstica. Ejemplo práctico: organizar cenas elegantes en casa, renovar la decoración con buen gusto o ser el pegamento amoroso que une a tu familia."
 },
 {
 "planet": "venus",
@@ -218,7 +218,7 @@
 {
 "planet": "venus",
 "house": 8,
-"content": "Venus en la Casa 8 intensifica el amor y lo lleva a niveles profundos y transformadores. Buscas una fusión total con el otro, tanto emocional como sexualmente. Puedes beneficiarte económicamente a través de parejas o herencias (dinero compartido). Te atraen los misterios y la psicología del amor. Tus relaciones te cambian por dentro. El desafío es evitar los celos o la posesividad. Tienes el poder de sanar a través de la intimidad. Ejemplo práctico: vivir romances apasionados que marcan un antes y un después, o gestionar inversiones conjuntas con éxito."
+"content": "Venus en la Casa 8 intensifica el amor y lo lleva a niveles profundos y transformadores. Buscas una fusión total con el otro, tanto emocional como sexualmente. Puedes beneficiarte económicamente a través de parejas o herencias (dinero compartido). Te atraen los misterios y la psicología del amor. Tus relaciones te cambian por dentro. El desafío es evitar los celos o la posesividad. Tienes el poder de transformar a través de la intimidad. Ejemplo práctico: vivir romances apasionados que marcan un antes y un después, o gestionar inversiones conjuntas con éxito."
 },
 {
 "planet": "venus",
@@ -273,7 +273,7 @@
 {
 "planet": "mars",
 "house": 7,
-"content": "Marte en la Casa 7 indica que atraes parejas energéticas, dominantes o conflictivas. El área de las relaciones es tu campo de entrenamiento; a menudo discutes para estimular la pasión. Puedes tener enemigos abiertos o competidores claros. Buscas a alguien que te desafíe y te mantenga alerta. El aprendizaje es transformar la lucha en colaboración activa. El desafío es evitar la agresividad en la pareja. Ejemplo práctico: casarte con alguien de carácter fuerte, tener socios comerciales con los que compites sanamente o trabajar resolviendo conflictos."
+"content": "Marte en la Casa 7 indica que atraes parejas energéticas, dominantes o conflictivas. El área de las relaciones es tu campo de entrenamiento; a menudo discutes para estimular la pasión. Puedes tener enemigos abiertos o competidores claros. Buscas a alguien que te desafíe y te mantenga alerta. El aprendizaje es transformar la lucha en colaboración activa. El desafío es evitar la agresividad en la pareja. Ejemplo práctico: casarte con alguien de carácter fuerte, tener socios comerciales con los que compites con lealtad o trabajar resolviendo conflictos."
 },
 {
 "planet": "mars",
@@ -283,7 +283,7 @@
 {
 "planet": "mars",
 "house": 9,
-"content": "Marte en la Casa 9 te impulsa a luchar por tus creencias, ideales y libertad. Eres un cruzado filosófico o religioso; defiendes tu visión del mundo con pasión. Te encanta la aventura, los viajes y los desafíos físicos al aire libre. Puedes ser fanático o dogmático si no tienes cuidado. Buscas expandir tus horizontes activamente. El desafío es no imponer tu verdad a los demás. Tu don es inspirar a otros a actuar por una causa mayor. Ejemplo práctico: viajar de mochilero a lugares peligrosos, luchar por justicia social o debatir filosofía con ardor."
+"content": "Marte en la Casa 9 te impulsa a luchar por tus creencias, ideales y libertad. Eres un cruzado filosófico o religioso; defiendes tu visión del mundo con pasión. Te encanta la aventura, los viajes y los desafíos físicos al aire libre. Puedes ser fanático o dogmático si no tienes cuidado. Buscas expandir tus horizontes activamente. El desafío es no imponer tu verdad a los demás. Tu don es inspirar a otros a actuar por una causa mayor. Ejemplo práctico: viajar de mochilero a lugares remotos, luchar por justicia social o debatir filosofía con ardor."
 },
 {
 "planet": "mars",
@@ -298,7 +298,7 @@
 {
 "planet": "mars",
 "house": 12,
-"content": "Con Marte en la Casa 12, tu energía y tu ira pueden estar reprimidas o dirigidas hacia adentro. Te cuesta expresar tu autoafirmación directamente, lo que puede causar resentimiento o enemigos ocultos. Trabajas mejor en soledad o detrás de escena. Tienes una fuerza espiritual o psicológica oculta que emerge en momentos de crisis. El desafío es dejar de sabotearte a ti mismo y aprender a expresar tu enojo de forma sana. Ejemplo práctico: trabajar en investigación secreta, hospitales o prisiones, o canalizar tu energía en deportes solitarios como la natación."
+"content": "Con Marte en la Casa 12, tu energía y tu ira pueden estar reprimidas o dirigidas hacia adentro. Te cuesta expresar tu autoafirmación directamente, lo que puede causar resentimiento o enemigos ocultos. Trabajas mejor en soledad o detrás de escena. Tienes una fuerza espiritual o psicológica oculta que emerge en momentos de crisis. El desafío es dejar de sabotearte a ti mismo y aprender a expresar tu enojo de forma constructiva. Ejemplo práctico: trabajar en investigación secreta, hospitales o prisiones, o canalizar tu energía en deportes solitarios como la natación."
 },
 {
 "planet": "jupiter",
@@ -328,7 +328,7 @@
 {
 "planet": "jupiter",
 "house": 6,
-"content": "Con Júpiter en la Casa 6, encuentras sentido y crecimiento a través del trabajo y el servicio. Sueles tener buenas relaciones laborales y suerte encontrando empleo. Tienes una vitalidad robusta, aunque debes cuidarte de los excesos (comida, bebida) que afecten al hígado o peso. Disfrutas ayudando a otros y mejorando tu entorno. El desafío es comprometerte con más trabajo del que puedes manejar por no saber decir 'no'. Tu don es sanar y servir con alegría. Ejemplo práctico: trabajar en ONGs, en tareas de cuidado o en educación, y ser querido por tus compañeros de trabajo."
+"content": "Con Júpiter en la Casa 6, encuentras sentido y crecimiento a través del trabajo y el servicio. Sueles tener buenas relaciones laborales y suerte encontrando empleo. Tienes una vitalidad robusta, aunque debes cuidarte de los excesos (comida, bebida) que afecten al hígado o peso. Disfrutas ayudando a otros y mejorando tu entorno. El desafío es comprometerte con más trabajo del que puedes manejar por no saber decir 'no'. Tu don es cuidar y servir con alegría. Ejemplo práctico: trabajar en ONGs, en tareas de cuidado o en educación, y ser querido por tus compañeros de trabajo."
 },
 {
 "planet": "jupiter",
@@ -338,7 +338,7 @@
 {
 "planet": "jupiter",
 "house": 8,
-"content": "Con Júpiter en la Casa 8, tienes suerte con el dinero de otros: herencias, inversiones, impuestos o parejas ricas. Tienes una protección espiritual en momentos de crisis; siempre caes de pie. Te fascinan los misterios de la vida, el sexo y la transformación espiritual. Posees una gran intuición y sabiduría psicológica. El desafío es gastar dinero que no es tuyo o confiar demasiado en la suerte financiera. Tu don es la capacidad de renacer y transformar recursos. Ejemplo práctico: recibir una herencia inesperada, sanar traumas profundos con facilidad o tener una vida sexual plena y espiritual."
+"content": "Con Júpiter en la Casa 8, tienes suerte con el dinero de otros: herencias, inversiones, impuestos o parejas ricas. Tienes una protección espiritual en momentos de crisis; siempre caes de pie. Te fascinan los misterios de la vida, el sexo y la transformación espiritual. Posees una gran intuición y sabiduría psicológica. El desafío es gastar dinero que no es tuyo o confiar demasiado en la suerte financiera. Tu don es la capacidad de renacer y transformar recursos. Ejemplo práctico: recibir una herencia inesperada, transformar heridas profundas con facilidad o tener una vida sexual plena y espiritual."
 },
 {
 "planet": "jupiter",
@@ -358,7 +358,7 @@
 {
 "planet": "jupiter",
 "house": 12,
-"content": "Con Júpiter en la Casa 12, tienes un 'ángel de la guarda' invisible que te protege en los peores momentos. Tu suerte es espiritual y oculta. Disfrutas de la soledad y la meditación; tu mundo interior es rico y expansivo. Eres compasivo y ayudas a otros de forma anónima. Tienes una gran intuición y conexión con lo divino. El desafío es el escapismo o sentirte desconectado de la realidad material. Tu don es la fe inquebrantable en lo invisible y la capacidad de sanación espiritual. Ejemplo práctico: salvarte milagrosamente de accidentes, encontrar paz en retiros espirituales o trabajar ayudando a marginados."
+"content": "Con Júpiter en la Casa 12, tienes un 'ángel de la guarda' invisible que te protege en los peores momentos. Tu suerte es espiritual y oculta. Disfrutas de la soledad y la meditación; tu mundo interior es rico y expansivo. Eres compasivo y ayudas a otros de forma anónima. Tienes una gran intuición y conexión con lo divino. El desafío es el escapismo o sentirte desconectado de la realidad material. Tu don es la fe inquebrantable en lo invisible y la capacidad de consuelo espiritual. Ejemplo práctico: salvarte milagrosamente de accidentes, encontrar paz en retiros espirituales o trabajar ayudando a marginados."
 },
 {
 "planet": "saturn",
@@ -378,7 +378,7 @@
 {
 "planet": "saturn",
 "house": 4,
-"content": "Con Saturno en la Casa 4, tu infancia pudo haber estado marcada por responsabilidades pesadas, normas estrictas o frialdad emocional. Sientes un deber profundo hacia tu familia y padres. Te cuesta relajarte en casa; siempre hay algo que arreglar o cuidar. Buscas construir un hogar que sea una fortaleza de seguridad. El desafío es sanar al niño interior y permitir que entre calidez en tu vida privada. Tu don es ser el pilar inquebrantable que sostiene a tu linaje. Ejemplo práctico: cuidar de padres ancianos con devoción o construir tu propia casa con tus manos."
+"content": "Con Saturno en la Casa 4, tu infancia pudo haber estado marcada por responsabilidades pesadas, normas estrictas o frialdad emocional. Sientes un deber profundo hacia tu familia y padres. Te cuesta relajarte en casa; siempre hay algo que arreglar o cuidar. Buscas construir un hogar que sea una fortaleza de seguridad. El desafío es reconciliarte con tu niño interior y permitir que entre calidez en tu vida privada. Tu don es ser el pilar inquebrantable que sostiene a tu linaje. Ejemplo práctico: cuidar de padres ancianos con devoción o construir tu propia casa con tus manos."
 },
 {
 "planet": "saturn",
@@ -508,7 +508,7 @@
 {
 "planet": "neptune",
 "house": 6,
-"content": "Con Neptuno en la Casa 6, buscas servir a los demás con devoción. El trabajo rutinario te agota; necesitas una labor con sentido espiritual o artístico. Eres muy sensible a medicamentos, toxinas y estrés ambiental; tu cuerpo responde a lo emocional. Te cuesta poner límites en el trabajo y a veces te sacrificas de más. El desafío es el caos en la rutina diaria y las señales confusas que te manda el cuerpo. Tu don es la sanación y la ayuda desinteresada. Ejemplo práctico: trabajar con animales, en hospitales, como terapeuta holístico o tener alergias extrañas."
+"content": "Con Neptuno en la Casa 6, buscas servir a los demás con devoción. El trabajo rutinario te agota; necesitas una labor con sentido espiritual o artístico. Eres muy sensible a medicamentos, toxinas y estrés ambiental; tu cuerpo responde a lo emocional. Te cuesta poner límites en el trabajo y a veces te sacrificas de más. El desafío es el caos en la rutina diaria y las señales confusas que te manda el cuerpo. Tu don es el cuidado y la ayuda desinteresada. Ejemplo práctico: trabajar con animales, en hospitales, como terapeuta holístico o tener alergias extrañas."
 },
 {
 "planet": "neptune",
@@ -558,7 +558,7 @@
 {
 "planet": "pluto",
 "house": 4,
-"content": "Con Plutón en la Casa 4, tu hogar y familia son el escenario de profundas transformaciones. Puede haber secretos familiares, traumas ancestrales o luchas de poder con los padres. Buscas seguridad emocional controlando tu entorno privado. Tienes la capacidad de romper patrones generacionales tóxicos. El desafío es sanar el resentimiento familiar y no ser un tirano en casa. Tu don es la resiliencia emocional y la capacidad de renacer desde tus raíces. Ejemplo práctico: renovar casas antiguas, hacer constelaciones familiares o ser el pilar que sostiene a la familia en crisis."
+"content": "Con Plutón en la Casa 4, tu hogar y familia son el escenario de profundas transformaciones. Puede haber secretos familiares, traumas ancestrales o luchas de poder con los padres. Buscas seguridad emocional controlando tu entorno privado. Tienes la capacidad de romper patrones generacionales tóxicos. El desafío es soltar el resentimiento familiar y no ser un tirano en casa. Tu don es la resiliencia emocional y la capacidad de renacer desde tus raíces. Ejemplo práctico: renovar casas antiguas, hacer constelaciones familiares o ser el pilar que sostiene a la familia en crisis."
 },
 {
 "planet": "pluto",
@@ -568,12 +568,12 @@
 {
 "planet": "pluto",
 "house": 6,
-"content": "Con Plutón en la Casa 6, eres un trabajador incansable, capaz de una concentración obsesiva. Buscas transformar tu entorno laboral o dedicarte a profesiones de sanación profunda y eliminación de residuos. Tu energía está ligada a tus emociones reprimidas; necesitas purgar toxinas regularmente. Eres perfeccionista al extremo. El desafío es el agotamiento por obsesión laboral y los conflictos de poder con compañeros. Tu don es la capacidad de sanar y resolver problemas complejos que nadie más puede. Ejemplo práctico: ser cirujano, investigador médico o experto en eficiencia."
+"content": "Con Plutón en la Casa 6, eres un trabajador incansable, capaz de una concentración obsesiva. Buscas transformar tu entorno laboral o dedicarte a profesiones de transformación profunda y eliminación de residuos. Tu energía está ligada a tus emociones reprimidas; necesitas purgar toxinas regularmente. Eres perfeccionista al extremo. El desafío es el agotamiento por obsesión laboral y los conflictos de poder con compañeros. Tu don es la capacidad de reparar y resolver problemas complejos que nadie más puede. Ejemplo práctico: ser cirujano, investigador médico o experto en eficiencia."
 },
 {
 "planet": "pluto",
 "house": 7,
-"content": "Plutón en la Casa 7 atrae relaciones intensas, transformadoras y kármicas. Buscas fusión total, pero a menudo atraes parejas dominantes, celosas o manipuladoras para que aprendas tu propio poder. Las relaciones son tu espejo de sombra. Experimentas 'muerte y renacimiento' a través del matrimonio. El desafío es dejar de proyectar tu poder en el otro y evitar juegos de manipulación. Tu don es la capacidad de transformar y sanar a través del compromiso profundo. Ejemplo práctico: tener una pareja que cambia tu vida radicalmente o ser terapeuta de parejas."
+"content": "Plutón en la Casa 7 atrae relaciones intensas, transformadoras y kármicas. Buscas fusión total, pero a menudo atraes parejas dominantes, celosas o manipuladoras para que aprendas tu propio poder. Las relaciones son tu espejo de sombra. Experimentas 'muerte y renacimiento' a través del matrimonio. El desafío es dejar de proyectar tu poder en el otro y evitar juegos de manipulación. Tu don es la capacidad de transformar y reparar a través del compromiso profundo. Ejemplo práctico: tener una pareja que cambia tu vida radicalmente o ser terapeuta de parejas."
 },
 {
 "planet": "pluto",
@@ -598,7 +598,7 @@
 {
 "planet": "pluto",
 "house": 12,
-"content": "Con Plutón en la Casa 12, tienes un poder psíquico y espiritual inmenso pero oculto. Tus transformaciones ocurren en la soledad y el secreto. Puedes tener miedos paranoicos o enemigos ocultos poderosos. Te fascina investigar el inconsciente y los misterios de la vida. A menudo eres el poder detrás del trono. El desafío es enfrentar tus propios demonios internos y no reprimirlos hasta que exploten. Tu don es la sanación psicológica profunda y la capacidad de regenerar el inconsciente colectivo. Ejemplo práctico: trabajar en espionaje, psiquiatría profunda o vivir una intensa transformación espiritual en aislamiento."
+"content": "Con Plutón en la Casa 12, tienes un poder psíquico y espiritual inmenso pero oculto. Tus transformaciones ocurren en la soledad y el secreto. Puedes tener miedos paranoicos o enemigos ocultos poderosos. Te fascina investigar el inconsciente y los misterios de la vida. A menudo eres el poder detrás del trono. El desafío es enfrentar tus propios demonios internos y no reprimirlos hasta que exploten. Tu don es la transformación interior profunda y la capacidad de regenerar el inconsciente colectivo. Ejemplo práctico: trabajar en espionaje, psiquiatría profunda o vivir una intensa transformación espiritual en aislamiento."
 }
 ]
 }

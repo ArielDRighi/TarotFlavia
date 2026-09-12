@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorDisplay } from '@/components/ui/error-display';
 import { Spinner } from '@/components/ui/spinner';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 import FreeReadingUpgradeBanner from './FreeReadingUpgradeBanner';
 import UpgradeModal from './UpgradeModal';
 import DailyLimitReachedModal from './DailyLimitReachedModal';
@@ -263,6 +264,9 @@ function InterpretationSection({
             </p>
           )}
         </div>
+
+        {/* Aviso legal al pie de la interpretación (T-SEO-018) */}
+        <ContentDisclaimer className="mt-6" />
       </CardContent>
     </Card>
   );
