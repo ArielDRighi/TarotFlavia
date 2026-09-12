@@ -60,8 +60,17 @@ export function HoroscopeSignPanel({ sign, initialHoroscope }: HoroscopeSignPane
   // puede diferir entre servidor y cliente. No importa: sólo habilita la query,
   // y lo que se renderiza depende de `localQuery.data`, que en ambos lados es
   // `undefined` hasta después de hidratar.
-  const localDayDiffers = !initialHoroscope || localToday !== initialHoroscope.canonicalDate;
-  const localQuery = useLocalHoroscope(localDayDiffers ? sign : null);
+  //
+  // También se consulta si el servidor sirvió el de ayer: ese HTML queda
+  // cacheado hasta 1 h por el ISR y, si el cron terminó en el medio, el
+  // visitante argentino (día local = canónico) se quedaría sin request y sin
+  // el de hoy hasta la próxima regeneración. Si aún no existe, el hook cae a
+  // ayer —el mismo horóscopo que ya se muestra— sin parpadeo.
+  const shouldQueryLocal =
+    !initialHoroscope ||
+    initialHoroscope.isShowingPreviousDay ||
+    localToday !== initialHoroscope.canonicalDate;
+  const localQuery = useLocalHoroscope(shouldQueryLocal ? sign : null);
 
   // El día local reemplaza al servido sólo cuando ya trajo datos; mientras
   // carga o si falla, se conserva lo que vino en el HTML.

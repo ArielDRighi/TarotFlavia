@@ -23,22 +23,18 @@ import { cache } from 'react';
 import { getHoroscopeByDate } from './horoscope-api';
 import { resolveListingData } from '@/lib/metadata/route-data';
 import { getCanonicalDateString, shiftDateString } from '@/lib/utils/date';
-import type { DailyHoroscope, ServedDailyHoroscope, ZodiacSign } from '@/types/horoscope.types';
-
-/** Los 12 horóscopos del día canónico, resueltos en el servidor. */
-export interface CanonicalDailyHoroscopes {
-  /** Día calendario canónico ('YYYY-MM-DD') contra el que se resolvió. */
-  canonicalDate: string;
-  /** Vacía si no hay horóscopos ni de hoy ni de ayer. */
-  horoscopes: DailyHoroscope[];
-  /** `true` si los de hoy no estaban y la lista es la del día anterior. */
-  isShowingPreviousDay: boolean;
-}
+import type {
+  CanonicalDailyHoroscopes,
+  ServedDailyHoroscope,
+  ZodiacSign,
+} from '@/types/horoscope.types';
 
 /**
  * Devuelve los 12 horóscopos del día canónico, con el mismo fallback que el
  * cliente (`useLocalDailyHoroscopes`): si el de hoy todavía no fue generado
  * —el backend responde `[]`, no 404—, se sirve el de ayer marcado como tal.
+ * La lista puede venir con menos de 12 si la generación fue parcial: quien
+ * itere no debe asumir que están todos los signos.
  *
  * Degrada a `undefined` si la API falla: la página tiene contenido propio (la
  * ficha del signo) y el cliente reintenta al montar, así que no vale la pena

@@ -339,6 +339,16 @@ en el backend como subtarea.
   (`useLocalHoroscope(null)` cuando coincide con el canónico → cero requests para el visitante
   argentino); el reemplazo ocurre recién cuando `localQuery.data` llega. Mientras carga o si falla,
   se conserva lo servido — nunca un skeleton sobre contenido que ya está.
+- **Excepción (revisión local):** si el servidor sirvió el de **ayer** (`isShowingPreviousDay`),
+  la query local se habilita igual aunque el día coincida. Ese HTML queda cacheado hasta 1 h y, si
+  el cron terminó en el medio, el visitante argentino se quedaba sin request y sin el de hoy hasta
+  la próxima regeneración. Si aún no existe, el hook cae a ayer (el mismo que ya se ve) sin
+  parpadeo.
+- **`viewCount` deja de crecer con las visitas reales.** Antes cada carga de `/horoscopo/[signo]`
+  pegaba a `BY_DATE_SIGN`, que incrementa el contador; ahora el visitante argentino no dispara
+  ninguna request. Hoy `viewCount` no se expone en ningún endpoint, así que nada visible cambia,
+  pero si algún día se quiere medir hay que instrumentarlo aparte (un beacon del cliente, o contar
+  en el servidor excluyendo el build por `X-Prerender`).
 - **Degradación:** si la API falla durante el render, `resolveListingData` devuelve `undefined`
   (con `console.warn`) y el panel cae al comportamiento cliente anterior. La ficha del signo se
   sirve igual. No se tira abajo el build ni se cachea un error por todo el ISR.
