@@ -18,12 +18,11 @@ vi.mock('@/hooks/api/useNumerology', () => ({
   useMyNumerologyProfile: () => mockUseMyNumerologyProfile(),
 }));
 
-// Mock NumerologyIntro and NumerologyProfile (children components)
+// Mock NumerologyProfile (child component)
 vi.mock('@/components/features/numerology', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/components/features/numerology')>();
   return {
     ...actual,
-    NumerologyIntro: () => <div data-testid="numerology-intro" />,
     NumerologyProfile: () => <div data-testid="numerology-profile" />,
   };
 });
@@ -58,19 +57,10 @@ describe('NumerologyPage', () => {
     });
   });
 
-  it('debe renderizar NumerologyIntro (que incluye link a enciclopedia)', () => {
+  it('T-SEO-015: la tarjeta informativa ya no vive acá (la nota de uso la renderiza la página)', () => {
     renderWithProviders(<NumerologyPage />);
 
-    expect(screen.getByTestId('numerology-intro')).toBeInTheDocument();
-  });
-
-  it('debe ubicar NumerologyIntro debajo de la actividad (calculadora)', () => {
-    renderWithProviders(<NumerologyPage />);
-
-    const activity = screen.getByTestId('calculate-button');
-    const intro = screen.getByTestId('numerology-intro');
-
-    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByTestId('numerology-intro')).not.toBeInTheDocument();
   });
 
   it('debe renderizar correctamente la página sin errores', () => {

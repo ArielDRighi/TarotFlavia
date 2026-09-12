@@ -46,6 +46,7 @@ npm run check:indexable -- --base-url http://localhost:3099 --min-words 150
 | ----------------------- | --------------------- | --------------------------------------------------- |
 | `--base-url <url>`      | `NEXT_PUBLIC_APP_URL` | Host a medir                                        |
 | `--min-words <n>`       | `120`                 | Umbral de palabras propias                          |
+| `--nav-min-words <n>`   | `500`                 | Umbral para las URLs del header y el footer         |
 | `--sample <n>`          | —                     | Hasta n URLs por sección (sin él, sitemap completo) |
 | `--full`                | ✔️                    | Modo completo explícito                             |
 | `--chrome-route <ruta>` | `/admin`              | Ruta vacía contra la que se mide el chrome          |
@@ -56,9 +57,30 @@ npm run check:indexable -- --base-url http://localhost:3099 --min-words 150
 | `--no-fail-on-soft-404` | —                     | Que los soft-404 NO cuenten para el exit code       |
 | `--json`                | —                     | Salida en JSON en vez de tabla                      |
 
-**Exit code 1** si alguna URL queda por debajo del umbral **o si aparece un soft-404**, así que sirve
-tal cual en un script. Los soft-404 empezaron fuera del exit code porque había 11 conocidos; T-SEO-006
-los cerró y desde entonces cuentan. `--no-fail-on-soft-404` vuelve al modo anterior.
+**Exit code 1** si alguna URL queda por debajo del umbral, si una URL del **menú** queda por debajo
+del umbral alto sin `noindex`, si una URL con `noindex` está en el sitemap, **o si aparece un
+soft-404**, así que sirve tal cual en un script. Los soft-404 empezaron fuera del exit code porque
+había 11 conocidos; T-SEO-006 los cerró y desde entonces cuentan. `--no-fail-on-soft-404` vuelve al
+modo anterior.
+
+**El menú se rastrea (T-SEO-015).** Los `href` internos del `<header>` y el `<footer>` del chrome
+route son las URLs que un revisor abre primero: exigen **500 palabras propias** (`--nav-min-words`)
+salvo que lleven `<meta name="robots" content="noindex">`, y se miden aunque no estén en el sitemap
+o el muestreo las deje fuera. Además se verifica la coherencia **`noindex` ↔ sitemap**: una URL con
+`noindex` no puede estar en el sitemap. En staging y local el root layout pone `noindex` en todas
+las páginas (`isIndexingAllowed()`), así que ahí la coherencia no es verificable y las del menú
+bajo el umbral se reportan como aviso sin tumbar la corrida. Para validar las dos reglas **antes**
+del deploy, se construye con el host productivo —`isIndexingAllowed()` lee `NEXT_PUBLIC_APP_URL`—
+y se mide contra el servidor local:
+
+```bash
+NEXT_PUBLIC_APP_URL=https://auguriatarot.com npm run build && npx next start -p 3099
+npm run check:indexable -- --base-url http://localhost:3099 --no-soft-404
+```
+
+Sin la API corriendo, lo que se mide es el **piso** de cada URL (el texto propio sin datos). Las
+dos páginas legales del footer (`/terminos`, `/privacidad`) están en `RUTAS_EXENTAS`: su extensión
+la fija legales, no el umbral editorial.
 
 Detalles que importan:
 

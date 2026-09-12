@@ -138,6 +138,10 @@ describe('SEO Metadata Configuration', () => {
     it('should have OpenGraph metadata', () => {
       expect(ritualMetadata.openGraph?.title).toContain('Tirada de Tarot');
     });
+
+    it('⚠️ T-SEO-015: /tarot y /ritual llevan noindex, follow (270 palabras y robots-disallow no frenan a un revisor)', () => {
+      expect(ritualMetadata.robots).toEqual({ index: false, follow: true });
+    });
   });
 
   describe('historialMetadata', () => {

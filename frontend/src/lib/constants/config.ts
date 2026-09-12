@@ -15,6 +15,15 @@ export const CONFIG = {
    * proyecto (`auguriatarot.com`); cualquier otro dominio rebota.
    */
   CONTACT_EMAIL: 'consultas@auguriatarot.com',
+  /**
+   * Dónde está el equipo, para la página de contacto (T-SEO-015): una página
+   * de confianza dice desde dónde responde. La ciudad/provincia concreta es una
+   * decisión de negocio ligada a quién firma (T-SEO-017); hasta entonces, el
+   * país y la zona horaria en la que se responde.
+   */
+  CONTACT_LOCATION: 'Argentina',
+  /** Ventana de respuesta que se promete en /contacto y en /premium. */
+  CONTACT_RESPONSE_WINDOW: '24-48 horas',
 
   // API
   API_TIMEOUT: 30000,

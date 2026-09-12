@@ -299,7 +299,7 @@ const user = useRequireAuth();
 #### G) ServicesStrip
 - Una línea: lecturas personalizadas → `/servicios` · carta astral → `/carta-astral`. Sin tabla.
 
-> Las secciones de venta que la landing anterior mostraba (`PlanComparison`, `PremiumBenefitsSection`, `HowItWorks`) se reubican en `/premium` (T-SEO-015). El upsell a Premium vive ahí y en `UserDashboard`.
+> Las secciones de venta que la landing anterior mostraba se reubicaron en `/premium` con T-SEO-015: `PremiumBenefitsSection` (con el precio real de la API) y `HowItWorks` viven en `features/premium`; `PlanComparison` se eliminó porque `/premium` ya tenía su comparativa. El upsell a Premium vive ahí y en `UserDashboard`. `/premium` lleva `noindex` y no está en el sitemap ni en el menú editorial: en el header es un botón junto a "Iniciar sesión" (visitante y usuario Free).
 
 ---
 

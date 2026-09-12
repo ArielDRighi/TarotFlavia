@@ -86,20 +86,10 @@ describe('PendulumConsultation', () => {
     });
   });
 
-  it('debe renderizar ServiceIntro del péndulo', () => {
+  it('T-SEO-015: la tarjeta informativa ya no vive acá (la nota de uso la renderiza la página)', () => {
     renderWithProviders(<PendulumConsultation />);
 
-    const widget = screen.getByTestId('pendulum-intro');
-    expect(widget).toBeInTheDocument();
-  });
-
-  it('debe ubicar ServiceIntro debajo de la actividad (péndulo)', () => {
-    renderWithProviders(<PendulumConsultation />);
-
-    const activity = screen.getByTestId('pendulum-animation');
-    const intro = screen.getByTestId('pendulum-intro');
-
-    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByTestId('pendulum-intro')).not.toBeInTheDocument();
   });
 
   it('debe renderizar correctamente la página con la tarjeta informativa', () => {

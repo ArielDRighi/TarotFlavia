@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
 import { CONFIG } from '@/lib/constants';
-import ContactoPage from './page';
+import ContactoPage, { metadata } from './page';
 
 // El formulario envía por TanStack Query (T-PROD-014): la página necesita el provider.
 vi.mock('@/lib/api/contact-api');
@@ -36,7 +36,7 @@ describe('ContactoPage', () => {
   it('should display the subtitle', () => {
     renderPage();
     expect(
-      screen.getByText('¿Tienes preguntas o sugerencias? Nos encantaría escucharte')
+      screen.getByText('¿Tenés preguntas o sugerencias? Nos encantaría escucharte')
     ).toBeInTheDocument();
   });
 
@@ -53,9 +53,33 @@ describe('ContactoPage', () => {
     renderPage();
     expect(screen.getByText('Otras formas de contacto')).toBeInTheDocument();
     expect(screen.getByText(CONFIG.CONTACT_EMAIL)).toBeInTheDocument();
-    expect(
-      screen.getByText('Respondemos todos los mensajes en un plazo de 24-48 horas.')
-    ).toBeInTheDocument();
+    expect(screen.getByText(/24.48 horas/)).toBeInTheDocument();
+  });
+
+  describe('T-SEO-015: página de confianza', () => {
+    it('publica correo, ubicación, horario de respuesta y quién responde', () => {
+      renderPage();
+
+      const details = screen.getByTestId('contact-details');
+      expect(details).toHaveTextContent(CONFIG.CONTACT_EMAIL);
+      expect(details).toHaveTextContent(CONFIG.CONTACT_LOCATION);
+      expect(details).toHaveTextContent(/hora de Argentina/i);
+      expect(details).toHaveTextContent(/24.48 horas/);
+      expect(details).toHaveTextContent(/quién responde/i);
+    });
+
+    it('la introducción editorial cubre cuentas y pagos, contenido y privacidad de lo que se escribe', () => {
+      renderPage();
+
+      const intro = screen.getByTestId('listing-intro');
+      expect(intro).toHaveTextContent(/arrepentimiento/i);
+      expect(intro).toHaveTextContent(/enciclopedia/i);
+      expect(intro).toHaveTextContent(/privacidad/i);
+    });
+
+    it('sigue indexable: sin noindex en la metadata', () => {
+      expect(metadata.robots).toBeUndefined();
+    });
   });
 
   it('should publish the real contact mailbox of the auguriatarot.com domain', () => {

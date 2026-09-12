@@ -229,6 +229,16 @@ describe('PenduloPage', () => {
 
       expect(screen.getByTestId('limit-banner')).toBeInTheDocument();
     });
+
+    it('T-SEO-015: la nota de uso va debajo del péndulo, y la herramienta sigue usable sin sesión', () => {
+      renderWithProviders(<PenduloPage />);
+
+      const tool = screen.getByTestId('pendulum');
+      const guide = screen.getByTestId('pendulum-usage-guide');
+      expect(tool.compareDocumentPosition(guide) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(screen.getByRole('button', { name: /consultar al péndulo/i })).toBeEnabled();
+      expect(screen.queryByTestId('service-intro')).not.toBeInTheDocument();
+    });
   });
 
   describe('Premium User - Question Input', () => {
@@ -670,12 +680,14 @@ describe('PenduloPage', () => {
     it('should display movement explanations', () => {
       renderWithProviders(<PenduloPage />);
 
+      // La nota de uso de abajo también nombra los movimientos (T-SEO-015):
+      // se acota al panel de información.
       expect(screen.getByText(/Vertical:/)).toBeInTheDocument();
-      expect(screen.getByText(/Sí/)).toBeInTheDocument();
       expect(screen.getByText(/Horizontal:/)).toBeInTheDocument();
-      expect(screen.getByText(/No/)).toBeInTheDocument();
       expect(screen.getByText(/Circular:/)).toBeInTheDocument();
-      expect(screen.getByText(/Quizás/)).toBeInTheDocument();
+      expect(screen.getByText(/Vertical:/).parentElement).toHaveTextContent(/Sí/);
+      expect(screen.getByText(/Horizontal:/).parentElement).toHaveTextContent(/No/);
+      expect(screen.getByText(/Circular:/).parentElement).toHaveTextContent(/Quizás/);
     });
 
     it('should display pendulum description', () => {

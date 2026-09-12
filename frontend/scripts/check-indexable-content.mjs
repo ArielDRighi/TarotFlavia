@@ -9,6 +9,14 @@
  * del umbral. También pide un slug inventado por cada ruta dinámica para
  * detectar soft-404 (páginas de "no encontrado" que responden 200).
  *
+ * Desde T-SEO-015 rastrea además el **menú** (los `href` internos del header y
+ * del footer que ve un visitante sin sesión): esas URLs son las primeras que
+ * abre un revisor, así que exigen un umbral más alto (500 palabras) salvo que
+ * lleven `noindex`. Y verifica la coherencia `noindex` ↔ sitemap: una URL con
+ * `noindex` no puede estar en el sitemap. El umbral de 120 detecta páginas
+ * vacías; el de 500 detecta folletos (widget + 200 palabras), que fue la causa
+ * n.º 2 del tercer rechazo de AdSense.
+ *
  * Existe porque la misma clase de bug —una página que trae su contenido por el
  * cliente y por lo tanto sirve un cascarón al crawler— se arregló cuatro veces
  * (tarot, artículos, rituales, servicios) y las cuatro se descubrieron midiendo
@@ -35,6 +43,14 @@ export const SLUG_INVENTADO = 'inventado-xyz';
 export const MIN_WORDS_DEFAULT = 120;
 
 /**
+ * Umbral para las URLs enlazadas desde el header y el footer (T-SEO-015). Son
+ * lo primero que abre el revisor: tienen que ser lo más sólido del sitio, no lo
+ * más fino. Una URL del menú que no llegue tiene dos salidas: contenido de
+ * verdad o `noindex` (y entonces tampoco puede estar en el sitemap).
+ */
+export const NAV_MIN_WORDS_DEFAULT = 500;
+
+/**
  * Ruta vacía contra la que se mide el chrome. `/admin` renderiza el header y el
  * footer del layout raíz y nada más para un visitante sin sesión (el layout de
  * admin devuelve `null` mientras redirige), así que su conteo ES el chrome.
@@ -53,13 +69,18 @@ export const MIN_CHILDREN_DEFAULT = 3;
  * el motivo y, si el motivo es "todavía no la arreglamos", usá el backlog en vez
  * de esta lista.
  *
- * Hoy está vacía a propósito: las 29 URLs delgadas medidas el 9-ago-2026
- * (horóscopo chino, signos, listados) tienen tarea asignada — T-SEO-002,
- * T-SEO-003 y T-SEO-004 — así que deben seguir fallando hasta que se arreglen.
+ * Estuvo vacía desde el 9-ago-2026 (las 29 URLs delgadas de entonces tenían
+ * tarea asignada: T-SEO-002, T-SEO-003 y T-SEO-004). Desde T-SEO-015 el menú
+ * exige 500 palabras y entran las dos páginas legales del footer: superan de
+ * sobra el umbral general, y su extensión la fija legales, no el criterio
+ * editorial. Siguen indexables y enlazadas porque tienen que estarlo.
  *
  * @type {Map<string, string>} pathname -> motivo
  */
-export const RUTAS_EXENTAS = new Map();
+export const RUTAS_EXENTAS = new Map([
+  ['/terminos', 'página legal del footer: el texto lo fija legales, no el umbral del menú'],
+  ['/privacidad', 'página legal del footer: el texto lo fija legales, no el umbral del menú'],
+]);
 
 const USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
 
@@ -205,6 +226,62 @@ export function countWords(html) {
 }
 
 // =============================================================================
+// MENÚ Y NOINDEX (T-SEO-015)
+// =============================================================================
+
+/**
+ * Rutas internas enlazadas desde el `<header>` y el `<footer>` del HTML, sin
+ * duplicados y normalizadas (sin query, hash ni barra final). Es el menú que ve
+ * un visitante sin sesión; el chrome route (`/admin`) lo sirve entero.
+ *
+ * Solo se miran esos dos bloques a propósito: si el chrome route algún día
+ * rindiera contenido, los links del cuerpo no son "menú".
+ *
+ * @param {string} html
+ * @returns {string[]}
+ */
+export function extractNavPaths(html) {
+  const texto = String(html ?? '');
+  const bloques = [...texto.matchAll(/<(header|footer)\b[^>]*>([\s\S]*?)<\/\1>/gi)].map(
+    (match) => match[2]
+  );
+
+  const rutas = new Set();
+  for (const bloque of bloques) {
+    for (const match of bloque.matchAll(/<a\b[^>]*?\shref\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)) {
+      const href = (match[1] ?? match[2] ?? '').trim();
+      // Internas absolutas de path: fuera externas, `mailto:`, `tel:` y anclas.
+      if (!href.startsWith('/') || href.startsWith('//')) continue;
+      rutas.add(toPathname(href, 'http://localhost'));
+    }
+  }
+
+  return [...rutas];
+}
+
+/**
+ * `true` si el HTML declara `<meta name="robots|googlebot" content="…noindex…">`,
+ * con los atributos en cualquier orden.
+ *
+ * @param {string} html
+ * @returns {boolean}
+ */
+export function hasNoindex(html) {
+  const texto = String(html ?? '');
+
+  for (const match of texto.matchAll(/<meta\b[^>]*>/gi)) {
+    const tag = match[0];
+    const name = /\sname\s*=\s*["']?\s*(robots|googlebot)\s*["']?/i.test(tag);
+    const content = /\scontent\s*=\s*["']([^"']*)["']/i.exec(tag);
+    if (name && content && /(^|[\s,])noindex([\s,]|$)/i.test(content[1])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// =============================================================================
 // SECCIONES Y MUESTREO
 // =============================================================================
 
@@ -329,6 +406,7 @@ function toNumber(valor, flag, minimo = 0) {
  * @typedef {object} Opciones
  * @property {string} baseUrl
  * @property {number} minWords
+ * @property {number} navMinWords Umbral para las URLs del header y el footer.
  * @property {number | undefined} sample
  * @property {string} chromeRoute
  * @property {number} concurrency
@@ -351,6 +429,7 @@ export function parseArgs(argv = [], env = process.env) {
   const opciones = {
     baseUrl: env.NEXT_PUBLIC_APP_URL ?? '',
     minWords: MIN_WORDS_DEFAULT,
+    navMinWords: NAV_MIN_WORDS_DEFAULT,
     sample: undefined,
     chromeRoute: CHROME_ROUTE_DEFAULT,
     concurrency: 6,
@@ -379,6 +458,9 @@ export function parseArgs(argv = [], env = process.env) {
         break;
       case '--min-words':
         opciones.minWords = toNumber(siguiente(), flag);
+        break;
+      case '--nav-min-words':
+        opciones.navMinWords = toNumber(siguiente(), flag);
         break;
       case '--sample':
         opciones.sample = toNumber(siguiente(), flag);
@@ -456,35 +538,114 @@ export function parseArgs(argv = [], env = process.env) {
  * @property {number} [totalWords]
  * @property {string} [error] Motivo cuando la request falló.
  * @property {string} [redirectedTo] Pathname final si hubo redirect.
+ * @property {boolean} [inSitemap] La URL viene del sitemap.
+ * @property {boolean} [inNav] La URL está enlazada desde el header o el footer.
+ * @property {boolean} [noindex] El HTML declara `noindex`.
  */
 
 /**
- * Clasifica las mediciones contra el umbral.
+ * Clasifica las mediciones contra los umbrales (T-SEO-001 + T-SEO-015).
+ *
+ * Tres listas de incumplimientos, que pueden solaparse:
+ * - `failures`: URLs del sitemap (o sin bandera, por compatibilidad) que no
+ *   responden 200 o quedan bajo `minWords`.
+ * - `navFailures`: URLs del menú sin `noindex` que no responden 200 o quedan
+ *   bajo `navMinWords`.
+ * - `crossFailures`: URLs con `noindex` que están en el sitemap.
+ *
+ * Las exentas (`exceptions`) no cuentan para ninguna de las dos primeras, pero
+ * sí para los cruces: un `noindex` en el sitemap nunca tiene motivo válido.
+ *
+ * Con `noindexKnown: false` (el host entero lleva `noindex`, como staging y
+ * local por `isIndexingAllowed()`), la meta no dice nada de la ruta: no se
+ * evalúan cruces y las del menú bajo el umbral van a `navUnverified`, que se
+ * reporta pero no cuenta para el exit code.
  *
  * @param {Medicion[]} mediciones
- * @param {{ minWords: number, exceptions?: Map<string, string> }} opciones
- * @returns {{ rows: Medicion[], failures: Medicion[], exempt: Medicion[], exitCode: 0 | 1 }}
+ * @param {{
+ *   minWords: number,
+ *   navMinWords?: number,
+ *   exceptions?: Map<string, string>,
+ *   noindexKnown?: boolean,
+ * }} opciones
+ * @returns {{
+ *   rows: Medicion[],
+ *   failures: Medicion[],
+ *   navFailures: Medicion[],
+ *   navUnverified: Medicion[],
+ *   crossFailures: Medicion[],
+ *   exempt: Medicion[],
+ *   exitCode: 0 | 1,
+ * }}
  */
-export function evaluate(mediciones, { minWords, exceptions = RUTAS_EXENTAS }) {
+export function evaluate(
+  mediciones,
+  { minWords, navMinWords = NAV_MIN_WORDS_DEFAULT, exceptions = RUTAS_EXENTAS, noindexKnown = true }
+) {
   const rows = [...mediciones].sort(
     (a, b) => a.ownWords - b.ownWords || a.pathname.localeCompare(b.pathname)
   );
 
+  /** @type {Medicion[]} */
   const failures = [];
+  /** @type {Medicion[]} */
+  const navFailures = [];
+  /** @type {Medicion[]} */
+  const navUnverified = [];
+  /** @type {Medicion[]} */
+  const crossFailures = [];
+  /** @type {Medicion[]} */
   const exempt = [];
 
   for (const medicion of rows) {
-    const incumple = medicion.status !== 200 || medicion.ownWords < minWords;
-    if (!incumple) continue;
+    const enSitemap = medicion.inSitemap ?? !medicion.inNav;
+    const incumpleGeneral = enSitemap && (medicion.status !== 200 || medicion.ownWords < minWords);
+    const incumpleMenu =
+      Boolean(medicion.inNav) &&
+      !(noindexKnown && medicion.noindex) &&
+      (medicion.status !== 200 || medicion.ownWords < navMinWords);
+
+    if (noindexKnown && medicion.noindex && enSitemap) {
+      crossFailures.push(medicion);
+    }
+
+    if (!incumpleGeneral && !incumpleMenu) continue;
 
     if (exceptions.has(medicion.pathname)) {
       exempt.push(medicion);
-    } else {
-      failures.push(medicion);
+      continue;
+    }
+    if (incumpleGeneral) failures.push(medicion);
+    if (incumpleMenu) {
+      if (noindexKnown) {
+        navFailures.push(medicion);
+      } else {
+        navUnverified.push(medicion);
+      }
     }
   }
 
-  return { rows, failures, exempt, exitCode: failures.length > 0 ? 1 : 0 };
+  const exitCode =
+    failures.length > 0 || navFailures.length > 0 || crossFailures.length > 0 ? 1 : 0;
+
+  return { rows, failures, navFailures, navUnverified, crossFailures, exempt, exitCode };
+}
+
+/**
+ * Una fila cumple si pasa el umbral que le corresponde (general si está en el
+ * sitemap, alto si está en el menú sin `noindex`) y no es un cruce.
+ *
+ * @param {Medicion} row
+ * @param {{ minWords: number, navMinWords: number, noindexKnown: boolean }} umbrales
+ * @returns {boolean}
+ */
+function rowPasses(row, { minWords, navMinWords, noindexKnown }) {
+  if (row.status !== 200) return false;
+  const enSitemap = row.inSitemap ?? !row.inNav;
+  if (noindexKnown && enSitemap && row.noindex) return false;
+  if (enSitemap && row.ownWords < minWords) return false;
+  if (row.inNav && !(noindexKnown && row.noindex) && row.ownWords < navMinWords) return false;
+  return true;
 }
 
 /**
@@ -502,8 +663,13 @@ function padRight(texto, ancho) {
  * @param {{
  *   rows: Medicion[],
  *   failures: Medicion[],
+ *   navFailures?: Medicion[],
+ *   navUnverified?: Medicion[],
+ *   crossFailures?: Medicion[],
  *   exempt: Medicion[],
  *   minWords: number,
+ *   navMinWords?: number,
+ *   noindexKnown?: boolean,
  *   chromeWords: number,
  *   softNotFound: Array<{ pathname: string, status: number }>,
  *   exceptions?: Map<string, string>,
@@ -515,8 +681,13 @@ function padRight(texto, ancho) {
 export function formatReport({
   rows,
   failures,
+  navFailures = [],
+  navUnverified = [],
+  crossFailures = [],
   exempt,
   minWords,
+  navMinWords = NAV_MIN_WORDS_DEFAULT,
+  noindexKnown = true,
   chromeWords,
   softNotFound,
   exceptions = RUTAS_EXENTAS,
@@ -525,17 +696,31 @@ export function formatReport({
 }) {
   const lineas = [];
   const anchoRuta = Math.max(20, ...rows.map((row) => row.pathname.length));
+  const umbrales = { minWords, navMinWords, noindexKnown };
+  const enMenu = rows.filter((row) => row.inNav).length;
 
   lineas.push('');
   lineas.push('🔎 Guardarraíl de contenido indexable');
   lineas.push(`   Umbral: ${minWords} palabras propias · Chrome medido: ${chromeWords} palabras`);
+  lineas.push(
+    `   Menú (header + footer): ${enMenu} rutas · umbral ${navMinWords} palabras salvo noindex`
+  );
+  if (!noindexKnown) {
+    lineas.push(
+      '   ⚠️  El host entero lleva noindex (staging/local): la coherencia noindex ↔ sitemap y la ' +
+        'exención del menú por noindex no son verificables acá; correr contra producción.'
+    );
+  }
   lineas.push('');
   lineas.push(`${padRight('RUTA', anchoRuta)}  ESTADO  PROPIAS  TOTAL`);
   lineas.push('-'.repeat(anchoRuta + 24));
 
   for (const row of rows) {
-    const cumple = row.status === 200 && row.ownWords >= minWords;
+    const cumple = rowPasses(row, umbrales);
     const icono = cumple ? '✅' : exceptions.has(row.pathname) ? '⚠️ ' : '❌';
+    const marcas = [row.inNav ? 'menú' : '', noindexKnown && row.noindex ? 'noindex' : '']
+      .filter(Boolean)
+      .join(' · ');
     const nota = row.error
       ? `  ⚠️ ${row.error}`
       : row.redirectedTo
@@ -543,15 +728,52 @@ export function formatReport({
         : '';
     lineas.push(
       `${padRight(row.pathname, anchoRuta)}  ${String(row.status).padStart(4)}  ` +
-        `${String(row.ownWords).padStart(7)}  ${String(row.totalWords ?? row.ownWords).padStart(5)}  ${icono}${nota}`
+        `${String(row.ownWords).padStart(7)}  ${String(row.totalWords ?? row.ownWords).padStart(5)}  ${icono}` +
+        `${marcas ? `  [${marcas}]` : ''}${nota}`
     );
   }
 
+  const incumplen = new Set(
+    [...failures, ...navFailures, ...crossFailures].map((row) => row.pathname)
+  ).size;
+
   lineas.push('');
   lineas.push(
-    `Resultado: ${rows.length - failures.length - exempt.length}/${rows.length} cumplen · ` +
-      `${failures.length} por debajo del umbral · ${exempt.length} exentas`
+    `Resultado: ${rows.length - incumplen - exempt.length}/${rows.length} cumplen · ` +
+      `${failures.length} por debajo del umbral · ${navFailures.length} del menú por debajo de ${navMinWords} · ` +
+      `${crossFailures.length} cruces noindex/sitemap · ${exempt.length} exentas`
   );
+
+  if (navFailures.length > 0) {
+    lineas.push('');
+    lineas.push(
+      `❌ Rutas del menú con menos de ${navMinWords} palabras propias y sin noindex (T-SEO-015):`
+    );
+    for (const row of navFailures) {
+      lineas.push(`   ${row.pathname} — ${row.ownWords} palabras`);
+    }
+    lineas.push(
+      '   Salidas: reescribir con contenido propio, o noindex + fuera del menú y del sitemap.'
+    );
+  }
+
+  if (navUnverified.length > 0) {
+    lineas.push('');
+    lineas.push(
+      `⚠️  Rutas del menú con menos de ${navMinWords} palabras propias (no verificable si llevan noindex en este host; NO cuentan para el exit code):`
+    );
+    for (const row of navUnverified) {
+      lineas.push(`   ${row.pathname} — ${row.ownWords} palabras`);
+    }
+  }
+
+  if (crossFailures.length > 0) {
+    lineas.push('');
+    lineas.push('❌ Cruces noindex ↔ sitemap: una URL con noindex no puede estar en el sitemap');
+    for (const row of crossFailures) {
+      lineas.push(`   ${row.pathname}`);
+    }
+  }
 
   if (exempt.length > 0) {
     lineas.push('');
@@ -623,8 +845,13 @@ async function mapWithConcurrency(items, concurrency, tarea) {
  * @returns {Promise<{
  *   rows: Medicion[],
  *   failures: Medicion[],
+ *   navFailures: Medicion[],
+ *   navUnverified: Medicion[],
+ *   crossFailures: Medicion[],
  *   exempt: Medicion[],
  *   softNotFound: Array<{ pathname: string, status: number }>,
+ *   navPaths: string[],
+ *   noindexKnown: boolean,
  *   chromeWords: number,
  *   exitCode: 0 | 1,
  * }>}
@@ -633,6 +860,7 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
   const {
     baseUrl,
     minWords = MIN_WORDS_DEFAULT,
+    navMinWords = NAV_MIN_WORDS_DEFAULT,
     sample,
     chromeRoute = CHROME_ROUTE_DEFAULT,
     concurrency = 6,
@@ -686,11 +914,24 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
   }
   const chromeWords = countWords(chrome.html);
 
-  const objetivo = stratifiedSample(pathnames, sample);
+  // El menú sale del mismo HTML que el chrome: header + footer de un visitante
+  // sin sesión. Sus rutas se miden siempre, estén o no en el sitemap y aunque
+  // el muestreo las dejara fuera (T-SEO-015).
+  const navPaths = extractNavPaths(chrome.html);
+  const enSitemap = new Set(pathnames);
+  const enMenu = new Set(navPaths);
+
+  // Si hasta la ruta vacía lleva noindex, es el root layout de un host no
+  // indexable (staging, local): la meta no distingue rutas y no se puede
+  // evaluar la coherencia con el sitemap ni la exención del menú.
+  const noindexKnown = !hasNoindex(chrome.html);
+
+  const objetivo = [...new Set([...stratifiedSample(pathnames, sample), ...navPaths])];
 
   // Una request que rechaza (timeout, DNS, socket) NO debe tumbar la corrida:
   // se reporta como fila fallida y las otras 177 URLs siguen midiéndose.
   const mediciones = await mapWithConcurrency(objetivo, concurrency, async (pathname) => {
+    const banderas = { inSitemap: enSitemap.has(pathname), inNav: enMenu.has(pathname) };
     try {
       const { status, html, finalPathname } = await pedir(pathname);
       const totalWords = countWords(html);
@@ -700,6 +941,8 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
         status,
         totalWords,
         ownWords: Math.max(0, totalWords - chromeWords),
+        noindex: hasNoindex(html),
+        ...banderas,
         ...(finalPathname && finalPathname !== pathname ? { redirectedTo: finalPathname } : {}),
       };
     } catch (error) {
@@ -708,6 +951,8 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
         status: 0,
         totalWords: 0,
         ownWords: 0,
+        noindex: false,
+        ...banderas,
         error: error instanceof Error ? error.message : String(error),
       };
     }
@@ -729,11 +974,18 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
     softNotFound.push(...respuestas.filter((probe) => probe.status !== 404));
   }
 
-  const evaluacion = evaluate(mediciones, { minWords, exceptions });
+  const evaluacion = evaluate(mediciones, { minWords, navMinWords, exceptions, noindexKnown });
   const exitCode = /** @type {0 | 1} */ (
     evaluacion.exitCode === 1 || (failOnSoft404 && softNotFound.length > 0) ? 1 : 0
   );
-  const resultado = { ...evaluacion, softNotFound, chromeWords, exitCode };
+  const resultado = {
+    ...evaluacion,
+    softNotFound,
+    navPaths,
+    noindexKnown,
+    chromeWords,
+    exitCode,
+  };
 
   log(
     json
@@ -741,6 +993,8 @@ export async function run(opciones, { fetchImpl = fetch, log = console.log } = {
       : formatReport({
           ...evaluacion,
           minWords,
+          navMinWords,
+          noindexKnown,
           chromeWords,
           softNotFound,
           exceptions,
@@ -763,6 +1017,7 @@ Uso: node scripts/check-indexable-content.mjs [opciones]
 
   --base-url <url>      Host a medir (default: NEXT_PUBLIC_APP_URL)
   --min-words <n>       Umbral de palabras propias (default: ${MIN_WORDS_DEFAULT})
+  --nav-min-words <n>   Umbral para las URLs del header y el footer (default: ${NAV_MIN_WORDS_DEFAULT})
   --sample <n>          Muestreo estratificado: hasta n URLs por sección
   --full                Modo completo: todas las URLs del sitemap (default)
   --chrome-route <ruta> Ruta vacía para medir el chrome (default: ${CHROME_ROUTE_DEFAULT})
@@ -774,8 +1029,10 @@ Uso: node scripts/check-indexable-content.mjs [opciones]
   --json                Salida en JSON en vez de tabla
   -h, --help            Esta ayuda
 
-Exit code 1 si alguna URL queda por debajo del umbral o si hay soft-404 (desde
-T-SEO-006 los soft-404 cuentan; --no-fail-on-soft-404 vuelve al modo anterior).
+Exit code 1 si alguna URL queda por debajo del umbral, si una URL del menú queda
+por debajo del umbral alto sin noindex, si una URL con noindex está en el sitemap
+(T-SEO-015), o si hay soft-404 (desde T-SEO-006 los soft-404 cuentan;
+--no-fail-on-soft-404 vuelve al modo anterior).
 `;
 
 async function main() {

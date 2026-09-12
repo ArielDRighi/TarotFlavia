@@ -1,28 +1,17 @@
-import { DailyCardExperience } from '@/components/features/daily-reading';
-import { ServiceIntro } from '@/components/features/encyclopedia';
-import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
+import { DailyCardPage } from '@/components/features/daily-reading/DailyCardPage';
+import { getDailyCardPageData } from '@/lib/api/daily-card-page-server';
 
 /**
- * Carta del Día Page
+ * Carta del Día (`/carta-del-dia`).
  *
- * Page wrapper that renders the daily card experience component.
- * All business logic is delegated to DailyCardExperience component.
+ * Server Component desde T-SEO-015: la carta canónica de hoy y el archivo de
+ * los últimos 30 días viajan en el HTML; la herramienta interactiva sigue
+ * siendo cliente. ISR de una hora: la carta cambia con el día canónico.
  */
-export default function CartaDelDiaPage() {
-  return (
-    <div className="from-bg-main to-primary/5 min-h-screen bg-gradient-to-b p-8">
-      <div className="mx-auto flex max-w-2xl flex-col items-center">
-        {/* Header */}
-        <h1 className="text-text-primary mb-8 text-center font-serif text-3xl md:text-4xl">
-          Tarot del Día
-        </h1>
+export const revalidate = 3600;
 
-        {/* Main Content - All logic delegated to feature component */}
-        <DailyCardExperience />
+export default async function CartaDelDiaPage() {
+  const data = await getDailyCardPageData();
 
-        {/* Encyclopedia Widget */}
-        <ServiceIntro data={SERVICE_INTROS['daily-card']} className="mt-8 w-full" />
-      </div>
-    </div>
-  );
+  return <DailyCardPage data={data} />;
 }

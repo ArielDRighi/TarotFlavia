@@ -54,10 +54,15 @@ describe('NumerologiaPage', () => {
       expect(screen.getByText('Descubre los números que rigen tu vida')).toBeInTheDocument();
     });
 
-    it('should render NumerologyIntro component', () => {
+    it('T-SEO-015: renderiza la nota de uso propia debajo de la calculadora', () => {
       render(<NumerologiaPage />);
 
-      expect(screen.getByText('¿Qué es la Numerología?')).toBeInTheDocument();
+      const calculator = screen.getByRole('button', { name: /calcular números/i });
+      const guide = screen.getByTestId('numerology-guide');
+      expect(
+        calculator.compareDocumentPosition(guide) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+      expect(screen.queryByText('¿Qué es la Numerología?')).not.toBeInTheDocument();
     });
 
     it('should render the calculator form', () => {

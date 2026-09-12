@@ -91,7 +91,7 @@ describe('HoroscopoChinoPage', () => {
     const currentYear = new Date().getFullYear();
     expect(screen.getByText(`Horóscopo Chino ${currentYear}`)).toBeInTheDocument();
     expect(
-      screen.getByText('Descubre las predicciones anuales según tu animal')
+      screen.getByText('Descubrí las predicciones anuales según tu animal')
     ).toBeInTheDocument();
   });
 

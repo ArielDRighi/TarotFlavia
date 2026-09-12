@@ -7,9 +7,13 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import ResultLayout from './layout';
+import ResultLayout, { metadata } from './layout';
 
 describe('ResultLayout', () => {
+  it('⚠️ T-SEO-015: el resultado (45 palabras, robots-disallow) lleva noindex, follow', () => {
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+  });
+
   it('should render children', () => {
     render(
       <ResultLayout>

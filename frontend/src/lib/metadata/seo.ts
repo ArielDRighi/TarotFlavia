@@ -151,6 +151,15 @@ export const ritualMetadata: Metadata = {
     description: 'Descubre las respuestas que buscas con una lectura de tarot personalizada',
     images: [DEFAULT_OG_IMAGE],
   },
+  // `/tarot` y `/ritual` son la app (270 palabras de pantalla). `robots.txt` ya
+  // las bloquea para Googlebot —que por eso nunca llega a leer esta meta—; el
+  // `noindex` es para el rastreador de anuncios (`Mediapartners-Google` entra a
+  // todo) y para cualquier revisor o herramienta que llegue por un link: que
+  // vea, en el HTML, que la página no pretende ser contenido (T-SEO-015).
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 /**
@@ -171,10 +180,13 @@ export const historialMetadata: Metadata = {
  */
 export const cartaDelDiaMetadata: Metadata = {
   title: 'Tarot del Día',
-  description: 'Descubre tu carta del día y recibe orientación espiritual para el día de hoy.',
+  // Descripción de publicación (T-SEO-015): la página trae la carta de hoy con
+  // su interpretación, la herramienta y una guía de uso, no sólo el widget.
+  description:
+    'La carta del tarot de hoy con su interpretación, la herramienta para sacar tu propia carta sin registro y una guía para leerla bien.',
   openGraph: {
     title: `Tarot del Día | ${SITE_NAME}`,
-    description: 'Descubre tu carta del día y recibe orientación espiritual',
+    description: 'La carta del tarot de hoy, tu propia carta del día y cómo leerla',
     images: [DEFAULT_OG_IMAGE],
   },
 };

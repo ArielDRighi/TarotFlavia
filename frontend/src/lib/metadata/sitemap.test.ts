@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ArticleCategory } from '@/types/encyclopedia-article.types';
 import { buildSitemap } from './sitemap';
+import { STATIC_PAGE_METADATA } from './page-metadata';
 
 vi.mock('@/lib/api/encyclopedia-api', () => ({
   getCards: vi.fn(),
@@ -56,7 +57,6 @@ describe('buildSitemap', () => {
       expect(paths).toContain('/enciclopedia');
       expect(paths).toContain('/horoscopo');
       expect(paths).toContain('/horoscopo-chino');
-      expect(paths).toContain('/premium');
       expect(paths).toContain('/servicios');
       expect(paths).toContain('/rituales');
       expect(paths).toContain('/contacto');
@@ -79,6 +79,28 @@ describe('buildSitemap', () => {
       expect(paths).not.toContain('/registro');
       expect(paths).not.toContain('/mis-servicios');
       expect(paths).not.toContain('/premium/activacion');
+    });
+
+    it('⚠️ T-SEO-015: /premium tiene noindex, así que no puede estar en el sitemap', async () => {
+      const paths = pathsOf(await buildSitemap());
+
+      expect(paths).not.toContain('/premium');
+    });
+
+    it('T-SEO-015: las siete páginas de herramientas y contacto están en el sitemap', async () => {
+      const paths = pathsOf(await buildSitemap());
+
+      for (const path of [
+        '/carta-del-dia',
+        '/horoscopo',
+        '/rituales',
+        '/pendulo',
+        '/numerologia',
+        '/carta-astral',
+        '/contacto',
+      ]) {
+        expect(paths).toContain(path);
+      }
     });
 
     it('usa el dominio de NEXT_PUBLIC_APP_URL como origen', async () => {
@@ -203,5 +225,37 @@ describe('buildSitemap', () => {
     const urls = (await buildSitemap()).map((entry) => entry.url);
 
     expect(new Set(urls).size).toBe(urls.length);
+  });
+});
+
+describe('coherencia noindex ↔ sitemap (T-SEO-015)', () => {
+  beforeEach(() => {
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://auguriatarot.com');
+    vi.mocked(getCards).mockResolvedValue([]);
+    vi.mocked(getArticlesByCategory).mockResolvedValue([]);
+    vi.mocked(getRituals).mockResolvedValue([]);
+    vi.mocked(getHolisticServices).mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('⚠️ ninguna ruta estática con robots.index = false está en el sitemap', async () => {
+    const paths = pathsOf(await buildSitemap());
+
+    const noindexCanonicals = Object.values(STATIC_PAGE_METADATA)
+      .filter((metadata) => {
+        const robots = metadata.robots;
+        return typeof robots === 'object' && robots !== null && robots.index === false;
+      })
+      .map((metadata) => metadata.alternates?.canonical)
+      .filter((canonical): canonical is string => typeof canonical === 'string');
+
+    // Si esta lista queda vacía el test no prueba nada: /premium tiene que estar.
+    expect(noindexCanonicals).toContain('/premium');
+    for (const canonical of noindexCanonicals) {
+      expect(paths).not.toContain(canonical);
+    }
   });
 });

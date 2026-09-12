@@ -4,7 +4,6 @@
  * Exporta todos los componentes del módulo de numerología
  */
 
-export { NumerologyIntro } from './NumerologyIntro';
 export { NumberCard } from './NumberCard';
 export { NumberGallery } from './NumberGallery';
 export { NumerologyCalculator } from './NumerologyCalculator';

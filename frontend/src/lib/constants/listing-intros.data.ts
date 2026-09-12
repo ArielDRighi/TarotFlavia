@@ -85,7 +85,15 @@ export const MIN_LISTING_INTRO_WORDS = 130;
  * bajo el umbral.
  */
 export const MIN_LISTING_INTRO_WORDS_BY_KEY: Partial<Record<ListingIntroKey, number>> = {
-  servicios: 360,
+  // `/servicios` y `/enciclopedia` están en el header: el guardarraíl les exige
+  // 500 palabras propias (T-SEO-015). Con la API caída, la introducción es lo
+  // único garantizado; con los listados sembrados suman bastante más.
+  servicios: 460,
+  enciclopedia: 440,
+  // `/contacto` está en el footer: el guardarraíl le exige 500 palabras propias
+  // a toda URL del menú (T-SEO-015). La página suma el bloque de datos de
+  // contacto (~80) y la cabecera; la introducción tiene que poner el resto.
+  contacto: 420,
 };
 
 /** Piso de palabras propias que le corresponde a una ruta. */
@@ -112,6 +120,22 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
       {
         heading: 'Para quien recién empieza',
         body: 'Conviene arrancar por la guía de tarot, seguir con los arcanos mayores y recién después mirar los menores, que son cuatro palos con lógica propia. En astrología el orden natural es signo, planeta y casa: el planeta dice qué función está en juego, el signo de qué manera se expresa y la casa en qué área de la vida se nota.',
+      },
+      {
+        heading: 'Qué hay en cada ficha de tarot',
+        body: 'Cada una de las 78 cartas tiene la misma columna vertebral —significado al derecho e invertido, palabras clave, la carta en el amor, en el trabajo y en la energía y el bienestar, simbolismo de la lámina, consejo y combinaciones frecuentes— para que se pueda comparar una carta con otra sin cambiar de esquema. Las combinaciones son enlaces a otras fichas: es la forma más rápida de recorrer el mazo siguiendo una tirada real.',
+      },
+      {
+        heading: 'Cómo se relaciona con las herramientas del sitio',
+        body: 'La enciclopedia es el "qué es"; las herramientas —carta del día, horóscopo, péndulo, numerología, carta astral— son el "hacer". Cada herramienta lleva debajo su propia nota de uso, con lo que hace falta para usarla ahí, y enlaza a la entrada de la enciclopedia que la explica. Cuando una ficha de tarot aparece como carta del día, el enlace lleva a esta misma ficha.',
+      },
+      {
+        heading: 'Cómo se escribe y se corrige',
+        body: 'Las fichas y las guías se redactan sobre la tradición Rider-Waite-Smith y las efemérides calculadas para astrología, y se revisan antes de publicarse. Si encontrás un dato equivocado o una frase que suena a promesa, la página de contacto explica cómo señalarlo; las correcciones se aplican con fecha. Es un material de consulta, no un oráculo: describe símbolos y tendencias, no decide nada por vos.',
+      },
+      {
+        heading: 'Cómo buscar',
+        body: 'El listado de tarot se filtra por arcano y por palo, y el buscador acepta el nombre en español o en inglés (Rider-Waite usa los originales). En astrología, cada signo enlaza a su planeta regente y a la casa que rige, así que se puede entrar por cualquiera de los tres y llegar a los otros dos. Las guías están ordenadas por herramienta; la primera de cada una es siempre la introducción.',
       },
     ],
     links: [
@@ -264,6 +288,10 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
         heading: 'Quién atiende y con qué criterio',
         body: 'Las sesiones no se derivan ni rotan: el turno que reservás es con quien va a estar del otro lado, y quien acompaña la sesión es también quien responde los mensajes que quedan pendientes. En la página Sobre nosotros está el criterio con el que se escribe y se revisa todo lo que se publica en el sitio, que es el mismo con el que se atiende acá.',
       },
+      {
+        heading: 'Después de reservar',
+        body: 'La reserva queda en la sección Mis servicios de la cuenta, con la fecha, el horario y el estado del turno; desde ahí se cancela si no vas a poder asistir, y conviene hacerlo con la mayor anticipación posible para que ese horario le sirva a otra persona. Las dudas sobre un cobro o sobre una reserva concreta —un turno que no aparece, un pago que se acreditó dos veces, un cambio de horario que necesitás pedir— se resuelven por la página de contacto, indicando el correo de la cuenta y la fecha del turno; la respuesta llega por correo dentro del plazo que figura ahí.',
+      },
     ],
     links: [
       { label: 'Sobre nosotros', href: ROUTES.SOBRE_NOSOTROS },
@@ -290,16 +318,37 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
 
   contacto: {
     title: 'Antes de escribirnos',
-    lead: 'El formulario llega directo al equipo de Auguria. Sirve para consultas sobre la cuenta, problemas con un pago o con una reserva, sugerencias sobre el sitio y pedidos de baja. La respuesta llega siempre por correo, a la casilla desde la que se escribió, dentro del plazo indicado más arriba.',
+    lead: 'El formulario llega directo al equipo de Auguria, a la casilla del dominio del sitio. Sirve para consultas sobre la cuenta, problemas con un pago o con una reserva, correcciones al contenido, sugerencias sobre el sitio y pedidos de baja. La respuesta llega siempre por correo, a la casilla desde la que se escribió, dentro del plazo indicado más arriba y en horario de Argentina. No hay atención telefónica ni por redes: este formulario y el correo son los dos únicos canales.',
     sections: [
       {
         heading: 'Qué conviene incluir',
-        body: 'Si el mensaje es por un pago o una reserva, ayuda mucho indicar el correo con el que está registrada la cuenta y la fecha de la operación. Con ese par de datos el caso se resuelve en un solo ida y vuelta en lugar de tres.',
+        body: 'Si el mensaje es por un pago o una reserva, ayuda mucho indicar el correo con el que está registrada la cuenta y la fecha de la operación. Con ese par de datos el caso se resuelve en un solo ida y vuelta en lugar de tres. Si es por una ficha o una guía, pegá la URL y citá la frase: así se corrige en el día y sin adivinar a qué página te referís.',
+      },
+      {
+        heading: 'Cuentas, pagos y suscripción',
+        body: 'La cancelación de Premium se hace desde el perfil, sin escribirnos, y corta la renovación siguiente. Lo que sí pasa por acá es el derecho de arrepentimiento —revocar una suscripción contratada hace menos de diez días corridos, con reintegro por el mismo medio de pago—, los cobros que no reconocés y los problemas para activar el plan después de pagar. En esos casos, mandá el correo de la cuenta y, si lo tenés, el número de operación de MercadoPago.',
+      },
+      {
+        heading: 'Correcciones y sugerencias sobre el contenido',
+        body: 'La enciclopedia, las guías y los horóscopos se revisan, pero un sitio con más de ciento setenta páginas tiene errores. Si encontrás un dato equivocado, una carta mal atribuida, una fecha astrológica incorrecta o una frase que suena a promesa donde debería haber una lectura, escribinos: las correcciones al contenido se responden con lo que se cambió y cuándo. También leemos propuestas de guías nuevas; las que se publican se avisan por correo a quien las sugirió.',
+      },
+      {
+        heading: 'Profesionales, prensa y colaboraciones',
+        body: 'Si sos tarotista o guía holístico y querés ofrecer sesiones en el sitio, usá este mismo formulario con el asunto "Profesionales" y contanos tu formación, tu experiencia y un perfil externo donde verte. Las consultas de prensa y las propuestas de colaboración editorial van por el mismo canal; no aceptamos publicaciones pagas ni enlaces patrocinados en el contenido.',
       },
       {
         heading: 'Lo que no se resuelve por acá',
-        body: 'Las consultas espirituales no se responden por el formulario: para eso están las lecturas del sitio y las sesiones con los guías. Tampoco pedimos ni recibimos datos de tarjeta por correo — ningún mensaje nuestro va a solicitarlos nunca.',
+        body: 'Las consultas espirituales no se responden por el formulario: para eso están las lecturas del sitio y las sesiones con los guías. Tampoco damos orientación médica, legal ni financiera por correo, ni pedimos o recibimos datos de tarjeta: ningún mensaje nuestro va a solicitarlos nunca.',
       },
+      {
+        heading: 'Privacidad de lo que nos escribís',
+        body: 'Lo que llega por el formulario se usa sólo para responderte y se conserva el tiempo necesario para resolver el caso, según la política de privacidad del sitio. No se comparte con terceros ni se usa para enviarte publicidad. Si querés que borremos un mensaje o tu cuenta entera, pedilo en el mismo hilo y lo confirmamos por correo.',
+      },
+    ],
+    links: [
+      { label: 'Política de privacidad', href: ROUTES.PRIVACIDAD },
+      { label: 'Términos y condiciones', href: ROUTES.TERMINOS },
+      { label: 'Quiénes somos', href: ROUTES.SOBRE_NOSOTROS },
     ],
   },
 };

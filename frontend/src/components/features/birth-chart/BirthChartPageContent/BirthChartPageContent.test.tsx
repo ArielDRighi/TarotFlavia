@@ -102,20 +102,10 @@ describe('BirthChartPageContent', () => {
     });
   });
 
-  it('debe renderizar ServiceIntro de la carta astral', () => {
+  it('T-SEO-015: la tarjeta informativa ya no vive acá (la nota de uso la renderiza la página)', () => {
     renderWithProviders(<BirthChartPageContent />);
 
-    const widget = screen.getByTestId('birth-chart-intro');
-    expect(widget).toBeInTheDocument();
-  });
-
-  it('debe ubicar ServiceIntro debajo de la actividad (formulario)', () => {
-    renderWithProviders(<BirthChartPageContent />);
-
-    const activity = screen.getByTestId('birth-data-form');
-    const intro = screen.getByTestId('birth-chart-intro');
-
-    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByTestId('birth-chart-intro')).not.toBeInTheDocument();
   });
 
   it('debe renderizar correctamente la página con la tarjeta informativa', () => {

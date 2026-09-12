@@ -141,6 +141,14 @@ describe('BirthChartPage', () => {
       expect(screen.getByText('¿Qué incluye?')).toBeInTheDocument();
       expect(screen.getByText('Importante')).toBeInTheDocument();
     });
+
+    it('T-SEO-015: la nota de uso va debajo del formulario', () => {
+      render(<BirthChartPage />);
+
+      const form = screen.getByTestId('birth-data-form');
+      const guide = screen.getByTestId('birth-chart-guide');
+      expect(form.compareDocumentPosition(guide) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
   });
 
   describe('Plan Badges - Anonymous User', () => {
@@ -279,11 +287,15 @@ describe('BirthChartPage', () => {
     it('should show basic features for anonymous users', () => {
       render(<BirthChartPage />);
 
-      expect(screen.getByText(/gráfico de tu carta natal/i)).toBeInTheDocument();
-      expect(screen.getByText(/posiciones planetarias/i)).toBeInTheDocument();
-      expect(screen.getByText(/big three/i)).toBeInTheDocument();
-      expect(screen.queryByText(/interpretaciones completas/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/síntesis personalizada/i)).not.toBeInTheDocument();
+      // Se acota a la tarjeta "¿Qué incluye?": la nota de uso de abajo también
+      // menciona el trío y las posiciones (T-SEO-015).
+      const includes =
+        screen.getByText('¿Qué incluye?').closest('[data-slot="card"]') ?? document.body;
+      expect(includes).toHaveTextContent(/gráfico de tu carta natal/i);
+      expect(includes).toHaveTextContent(/posiciones planetarias/i);
+      expect(includes).toHaveTextContent(/big three/i);
+      expect(includes).not.toHaveTextContent(/interpretaciones completas/i);
+      expect(includes).not.toHaveTextContent(/síntesis personalizada/i);
     });
 
     it('should show additional features for authenticated free users', () => {

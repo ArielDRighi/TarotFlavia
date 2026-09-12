@@ -1,223 +1,52 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import HoroscopoPage from './page';
+import HoroscopoPage, { revalidate } from './page';
+import type { CanonicalDailyHoroscopes } from '@/types/horoscope.types';
 
-// Mock ServiceIntro
-vi.mock('@/components/features/encyclopedia', () => ({
-  ServiceIntro: ({ data }: { data: { testId?: string } }) => (
-    <div data-testid="service-intro" data-key={data?.testId} />
-  ),
-}));
-// Mock next/navigation
-const mockPush = vi.fn();
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-    back: vi.fn(),
-  }),
+const mockGetCanonicalDailyHoroscopes = vi.fn();
+vi.mock('@/lib/api/horoscope-server', () => ({
+  getCanonicalDailyHoroscopes: () => mockGetCanonicalDailyHoroscopes(),
 }));
 
-// Mock hooks
-const mockUseTodayAllHoroscopes = vi.fn();
-const mockUseAuthStore = vi.fn();
-
-vi.mock('@/hooks/api/useHoroscope', () => ({
-  useLocalDailyHoroscopes: () => mockUseTodayAllHoroscopes(),
+// El hub en sí está cubierto por `HoroscopeHub.test.tsx`; acá interesa qué le pasa la ruta.
+const mockHub = vi.fn();
+vi.mock('@/components/features/horoscope/HoroscopeHub', () => ({
+  HoroscopeHub: (props: { daily?: CanonicalDailyHoroscopes }) => {
+    mockHub(props);
+    return <div data-testid="horoscope-hub">{props.daily?.horoscopes.length ?? 0}</div>;
+  },
 }));
 
-vi.mock('@/stores/authStore', () => ({
-  useAuthStore: () => mockUseAuthStore(),
-}));
+const DAILY = {
+  canonicalDate: '2026-09-12',
+  horoscopes: [],
+  isShowingPreviousDay: false,
+} as CanonicalDailyHoroscopes;
 
-// Test wrapper
-function createTestQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        gcTime: 0,
-      },
-    },
-  });
-}
-
-function renderWithProviders(ui: React.ReactElement) {
-  const queryClient = createTestQueryClient();
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
-}
-
-describe('HoroscopoPage', () => {
+describe('HoroscopoPage (/horoscopo, T-SEO-015)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockPush.mockClear();
+    mockGetCanonicalDailyHoroscopes.mockResolvedValue(DAILY);
   });
 
-  it('should render page title', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
+  it('resuelve los 12 horóscopos del día canónico en el servidor y se los pasa al hub', async () => {
+    render(await HoroscopoPage());
 
-    renderWithProviders(<HoroscopoPage />);
-
-    expect(screen.getByText('Horóscopo Diario')).toBeInTheDocument();
-    expect(screen.getByText('Selecciona tu signo para ver las predicciones')).toBeInTheDocument();
+    expect(mockGetCanonicalDailyHoroscopes).toHaveBeenCalledTimes(1);
+    expect(mockHub).toHaveBeenCalledWith({ daily: DAILY });
+    expect(screen.getByTestId('horoscope-hub')).toBeInTheDocument();
   });
 
-  it('should render zodiac selector when not loading', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
+  it('si el horóscopo no resolvió, igual renderiza el hub', async () => {
+    mockGetCanonicalDailyHoroscopes.mockResolvedValue(undefined);
 
-    renderWithProviders(<HoroscopoPage />);
+    render(await HoroscopoPage());
 
-    expect(screen.getByTestId('zodiac-selector')).toBeInTheDocument();
+    expect(mockHub).toHaveBeenCalledWith({ daily: undefined });
   });
 
-  it('should render skeleton when loading', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: true,
-      data: [],
-    });
-
-    renderWithProviders(<HoroscopoPage />);
-
-    expect(screen.getByTestId('horoscope-skeleton-grid')).toBeInTheDocument();
-  });
-
-  it('should show register message for anonymous users', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
-
-    renderWithProviders(<HoroscopoPage />);
-
-    expect(screen.getByText(/Regístrate/i)).toBeInTheDocument();
-    expect(screen.getByText(/para ver tu horóscopo automáticamente/i)).toBeInTheDocument();
-  });
-
-  it('should show birthDate config message for authenticated users without birthDate', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: { id: 1, email: 'test@test.com', birthDate: null },
-      isAuthenticated: true,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
-
-    renderWithProviders(<HoroscopoPage />);
-
-    expect(screen.getByText(/Configura tu fecha de nacimiento/i)).toBeInTheDocument();
-  });
-
-  it('should navigate to sign page when clicking on a zodiac card', async () => {
-    const user = userEvent.setup();
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
-
-    renderWithProviders(<HoroscopoPage />);
-
-    const ariesCard = screen.getByTestId('zodiac-card-aries');
-    await user.click(ariesCard);
-
-    expect(mockPush).toHaveBeenCalledWith('/horoscopo/aries');
-  });
-
-  it('should pass user zodiac sign to selector when authenticated with birthDate', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: { id: 1, email: 'test@test.com', birthDate: '1990-03-25' }, // Aries
-      isAuthenticated: true,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
-
-    renderWithProviders(<HoroscopoPage />);
-
-    const ariesCard = screen.getByTestId('zodiac-card-aries');
-    // La tarjeta de Aries debería tener una clase especial para "Tu signo"
-    expect(ariesCard).toHaveClass('border-accent');
-  });
-
-  it('debe renderizar ServiceIntro del horóscopo occidental', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
-
-    renderWithProviders(<HoroscopoPage />);
-
-    const widget = screen.getByTestId('service-intro');
-    expect(widget).toBeInTheDocument();
-    expect(widget).toHaveAttribute('data-key', 'western-horoscope-intro');
-  });
-
-  it('debe ubicar ServiceIntro debajo de la actividad (selector de signos)', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
-
-    renderWithProviders(<HoroscopoPage />);
-
-    const activity = screen.getByTestId('zodiac-selector');
-    const intro = screen.getByTestId('service-intro');
-
-    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
-
-  it('debe renderizar correctamente la página con la tarjeta informativa', () => {
-    mockUseAuthStore.mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-    });
-    mockUseTodayAllHoroscopes.mockReturnValue({
-      isLoading: false,
-      data: [],
-    });
-
-    renderWithProviders(<HoroscopoPage />);
-
-    // Page renders without errors (widget mock returns div, page is stable)
-    expect(screen.getByText('Horóscopo Diario')).toBeInTheDocument();
+  it('usa el mismo ISR que la portada y la ficha del signo: el horóscopo cambia a diario', () => {
+    expect(revalidate).toBe(3600);
   });
 });

@@ -73,4 +73,12 @@ describe('HowItWorks', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/registro');
   });
+
+  it('T-SEO-015: acepta un CTA distinto para el usuario con sesión', () => {
+    render(<HowItWorks cta={{ label: 'Hacer una tirada', href: '/tarot' }} />);
+
+    const link = screen.getByRole('link', { name: 'Hacer una tirada' });
+    expect(link).toHaveAttribute('href', '/tarot');
+    expect(screen.queryByRole('link', { name: /comienza tu viaje/i })).not.toBeInTheDocument();
+  });
 });

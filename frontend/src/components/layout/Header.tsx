@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { UserMenu } from './UserMenu';
 import { NotificationBell } from '@/components/features/notifications';
 import { HeaderNavLinks } from './HeaderNavLinks';
+import { PremiumHeaderButton } from './PremiumHeaderButton';
 
 /**
  * Header component
@@ -64,8 +65,9 @@ export function Header() {
         {/* Desktop navigation */}
         <HeaderNavLinks variant="desktop" user={user} />
 
-        {/* User menu and notifications - always visible on right */}
+        {/* Premium (botón, no ítem del menú), user menu and notifications - always visible on right */}
         <div className="flex items-center gap-2">
+          <PremiumHeaderButton />
           {user && isNotificationsEnabled && <NotificationBell />}
           <UserMenu />
         </div>

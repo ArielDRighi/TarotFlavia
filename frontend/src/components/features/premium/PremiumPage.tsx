@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Reveal } from '@/components/common/Reveal';
+import { HowItWorks } from './HowItWorks';
+import { PremiumBenefitsSection } from './PremiumBenefitsSection';
 import { PremiumHero } from './PremiumHero';
 // 4. Custom hooks
 import { usePublicPlans } from '@/hooks/api/usePublicPlans';
@@ -18,6 +20,7 @@ import { useCreatePreapproval } from '@/hooks/api/useSubscription';
 import { useAuthStore } from '@/stores/authStore';
 // 6. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
+import { CONFIG } from '@/lib/constants/config';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { PLAN_MATRIX, type PlanCell } from '@/lib/constants/premium-benefits';
 import { formatPriceArs } from '@/lib/utils/format';
@@ -57,16 +60,27 @@ const COMPARISON_FEATURES = PLAN_MATRIX.map((row) => ({
   premium: row.premium,
 }));
 
+/**
+ * FAQ de la página de venta (T-SEO-015): facturación, cancelación, reembolso y
+ * derecho de arrepentimiento, además de las dudas de producto que ya estaban.
+ * `/premium` lleva `noindex`: este texto es para quien va a pagar, no para el
+ * índice.
+ */
 const FAQ_ITEMS = [
+  {
+    question: '¿Cómo funciona el pago y la facturación?',
+    answer:
+      'El pago se procesa de forma segura a través de MercadoPago, con tarjeta de crédito, débito o saldo en cuenta. La suscripción se renueva automáticamente cada mes, el mismo día en que la activaste, y MercadoPago te envía el comprobante de cada cobro al correo asociado a tu cuenta. Auguria no almacena los datos de tu tarjeta.',
+  },
   {
     question: '¿Puedo cancelar en cualquier momento?',
     answer:
-      'Sí, podés cancelar tu suscripción en cualquier momento desde tu perfil. No hay contratos ni penalidades.',
+      'Sí, podés cancelar tu suscripción en cualquier momento desde tu perfil. No hay contratos ni penalidades: al cancelar, seguís con Premium hasta el final del período que ya pagaste y después la cuenta vuelve al plan Free sola.',
   },
   {
-    question: '¿Cómo funciona el pago?',
+    question: '¿Hay reembolso si me arrepiento?',
     answer:
-      'El pago se procesa de forma segura a través de MercadoPago. Se renueva automáticamente cada mes hasta que canceles.',
+      'Si contrataste Premium hace menos de 10 días corridos, podés revocar la compra sin dar motivos y te devolvemos el importe completo por el mismo medio de pago (derecho de arrepentimiento en compras a distancia). Pasado ese plazo, la cancelación corta la renovación pero no se reintegra el mes en curso.',
   },
   {
     question: '¿Qué pasa con mis lecturas si cancelo?',
@@ -79,6 +93,9 @@ const FAQ_ITEMS = [
       'Por el momento no ofrecemos período de prueba gratuito, pero podés probar las funciones básicas con la cuenta Free sin costo.',
   },
 ];
+
+/** Plazo del derecho de arrepentimiento en compras a distancia (Res. 424/2020, Argentina). */
+const REVOCATION_DAYS = 10;
 
 // ============================================================================
 // Sub-components
@@ -196,9 +213,15 @@ export interface PremiumPageProps {
 
 export function PremiumPage({ initialPlans }: PremiumPageProps = {}) {
   const { data: plans, isLoading } = usePublicPlans(initialPlans);
+  const { isAuthenticated } = useAuthStore();
 
   const freePlan = plans?.find((p) => p.planType === 'free');
   const premiumPlan = plans?.find((p) => p.planType === 'premium');
+
+  // Con sesión, "cómo funciona" lleva a la tirada; sin sesión, al registro.
+  const howItWorksCta = isAuthenticated
+    ? { label: 'Hacer una tirada', href: ROUTES.TAROT }
+    : undefined;
 
   const heroSubtitle = (
     <>
@@ -328,8 +351,29 @@ export function PremiumPage({ initialPlans }: PremiumPageProps = {}) {
         </section>
       </Reveal>
 
-      {/* Sin compromiso */}
+      {/* Beneficios (venía de la home, T-SEO-014 → T-SEO-015) */}
       <Reveal index={2}>
+        <div className="-mx-4 mb-14 overflow-hidden rounded-none sm:mx-0 sm:rounded-2xl">
+          <PremiumBenefitsSection
+            price={premiumPlan?.price}
+            cta={
+              <div className="mx-auto max-w-xs">
+                <PremiumCtaButton premiumPlan={premiumPlan} testId="cta-benefits" />
+              </div>
+            }
+          />
+        </div>
+      </Reveal>
+
+      {/* Cómo funciona una tirada (venía de la home) */}
+      <Reveal index={3}>
+        <div className="-mx-4 mb-14 sm:mx-0">
+          <HowItWorks cta={howItWorksCta} />
+        </div>
+      </Reveal>
+
+      {/* Sin compromiso */}
+      <Reveal index={4}>
         <section className="pb-14">
           <Card className="mx-auto max-w-xl p-8 text-center">
             <Shield className="text-secondary mx-auto mb-4 h-12 w-12" aria-hidden="true" />
@@ -345,7 +389,7 @@ export function PremiumPage({ initialPlans }: PremiumPageProps = {}) {
       </Reveal>
 
       {/* Preguntas frecuentes */}
-      <Reveal index={3}>
+      <Reveal index={5}>
         <section data-testid="faq-section" className="mx-auto max-w-2xl pb-14">
           <h2 className="text-foreground mb-10 text-center font-serif text-3xl font-bold">
             Preguntas frecuentes
@@ -367,8 +411,35 @@ export function PremiumPage({ initialPlans }: PremiumPageProps = {}) {
         </section>
       </Reveal>
 
+      {/* Botón de arrepentimiento (Res. 424/2020: ventas online en Argentina) */}
+      <Reveal index={6}>
+        <section
+          data-testid="revocation-section"
+          className="border-border bg-card mx-auto mb-14 max-w-2xl rounded-xl border p-6 text-center"
+        >
+          <h2 className="text-card-foreground mb-2 font-serif text-xl font-bold">
+            Derecho de arrepentimiento
+          </h2>
+          <p className="text-muted-foreground mb-4 text-sm">
+            Si contrataste Premium hace menos de {REVOCATION_DAYS} días corridos, podés revocar la
+            compra sin costo ni justificación y te reintegramos el importe por el mismo medio de
+            pago. Escribinos desde el formulario de contacto o a{' '}
+            <a
+              href={`mailto:${CONFIG.CONTACT_EMAIL}`}
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {CONFIG.CONTACT_EMAIL}
+            </a>{' '}
+            indicando el correo de tu cuenta.
+          </p>
+          <Button asChild variant="outline">
+            <Link href={ROUTES.CONTACTO}>Botón de arrepentimiento</Link>
+          </Button>
+        </section>
+      </Reveal>
+
       {/* CTA final */}
-      <Reveal index={4}>
+      <Reveal index={7}>
         <section className="mx-auto max-w-xl pb-8 text-center">
           <h2 className="text-foreground mb-4 font-serif text-2xl font-bold">
             ¿Listo para comenzar?
