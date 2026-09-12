@@ -8,6 +8,11 @@ export type PendulumPeriod = 'daily' | 'monthly' | 'lifetime';
 // Interfaces
 export interface PendulumQueryRequest {
   question?: string;
+  /**
+   * Fingerprint de sesión del navegador (anónimos). Lo inyecta `queryPendulum`
+   * automáticamente; solo hace falta pasarlo a mano para sobreescribirlo.
+   */
+  fingerprint?: string;
 }
 
 export interface PendulumQueryResponse {

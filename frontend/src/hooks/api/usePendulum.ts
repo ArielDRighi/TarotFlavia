@@ -39,7 +39,11 @@ export const pendulumKeys = {
 
 /**
  * Hook to query the pendulum
- * On success: invalidates all pendulum queries and user capabilities
+ * On success: invalidates all pendulum queries (history/stats changed)
+ * On settled (success OR error): invalidates user capabilities. On error this
+ * matters too (TASK-515): a 403/429 means the backend already knows the quota is
+ * exhausted, so the limit banner and the disabled button must reflect it right
+ * away instead of waiting for the next refetch.
  */
 export function usePendulumQuery() {
   const queryClient = useQueryClient();
@@ -48,6 +52,8 @@ export function usePendulumQuery() {
     mutationFn: (request: PendulumQueryRequest) => queryPendulum(request),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pendulumKeys.all });
+    },
+    onSettled: () => {
       // invalidateUserData refetches capabilities + profile even when inactive
       // (refetchType:'all'), so a pendulum-limit widget mounted elsewhere refreshes.
       void invalidateUserData(queryClient);

@@ -3548,10 +3548,10 @@ Agregar tests que verifiquen:
 
 #### TASK-515: El anónimo puede volver a "consultar" tras agotar su consulta gratuita y no recibe ninguna respuesta
 
-**Estado:** ⬜ PENDIENTE
+**Estado:** 🔄 EN REVISIÓN — PR #655 (12 de septiembre de 2026); pasa a ✅ COMPLETADA al cerrar la verificación manual en local
 **Prioridad:** 🔴 ALTA
 **Estimación:** 0.5 días
-**Tipo:** Frontend (bug)
+**Tipo:** Frontend (bug) + ajuste mínimo de DTO en backend
 **Reportado por:** Ariel, probando `/pendulo` sin iniciar sesión en local
 
 ##### Síntoma
@@ -3588,30 +3588,68 @@ realidad el backend está rechazando la consulta y el frontend no lo muestra.
 
 ##### Alcance
 
-- [ ] `queryPendulum` envía `fingerprint` en el body (`getSessionFingerprint()`), igual que la
+- [x] `queryPendulum` envía `fingerprint` en el body (`getSessionFingerprint()`), igual que la
       carta del día. Ampliar `PendulumQueryRequest` en `types/pendulum.types.ts`. El backend ya lo
       lee del body (`check-usage-limit.guard.ts:331`); verificar que `PendulumQueryDto` no lo
       rechace por `whitelist`/`forbidNonWhitelisted` (si lo rechaza, agregar el campo opcional al
       DTO con test).
-- [ ] En `PendulumConsultation`, en el `catch`: para 403/429 mostrar `toast.error` con el
+- [x] En `PendulumConsultation`, en el `catch`: para 403/429 mostrar `toast.error` con el
       `message` del backend (fallback en español si no viene) e invalidar capabilities
       (`invalidateUserData`) para que el banner "Ya usaste tu consulta gratuita" y el botón
       deshabilitado aparezcan al instante. Para cualquier otro error, toast genérico.
-- [ ] `usePendulumQuery`: `onError` también invalida capabilities (hoy solo `onSuccess`).
-- [ ] No tocar límites, guard ni `AnonymousTrackingService`.
+- [x] `usePendulumQuery`: `onError` también invalida capabilities (hoy solo `onSuccess`).
+- [x] No tocar límites, guard ni `AnonymousTrackingService`.
 
 ##### Criterios de aceptación
 
-- [ ] Anónimo: tras la primera consulta, el banner pasa a "Ya usaste tu consulta gratuita" con
+- [x] Anónimo: tras la primera consulta, el banner pasa a "Ya usaste tu consulta gratuita" con
       CTA "Registrarse" y el botón queda deshabilitado, sin recargar la página.
-- [ ] Si igual llega un 403/429 (pestaña vieja, cupo agotado en otra pestaña), se muestra el
+- [x] Si igual llega un 403/429 (pestaña vieja, cupo agotado en otra pestaña), se muestra el
       mensaje del backend en un toast y el péndulo vuelve a reposo.
-- [ ] Free con 3 consultas usadas y Premium con 1 usada: mismo comportamiento con su mensaje.
-- [ ] `BLOCKED_CONTENT` sigue abriendo `PendulumBlockedContent` como hoy.
-- [ ] Tests: `pendulum-api.test.ts` (envía fingerprint), `PendulumConsultation.test.tsx`
+- [x] Free con 3 consultas usadas y Premium con 1 usada: mismo comportamiento con su mensaje.
+- [x] `BLOCKED_CONTENT` sigue abriendo `PendulumBlockedContent` como hoy.
+- [x] Tests: `pendulum-api.test.ts` (envía fingerprint), `PendulumConsultation.test.tsx`
       (403 → toast + invalidación; 429 → toast; BLOCKED_CONTENT intacto),
       `usePendulum.test.ts` (`onError` invalida).
-- [ ] Verificación manual en local sin sesión: dos consultas seguidas.
+- [ ] Verificación manual en local sin sesión: dos consultas seguidas. *(Pendiente de Ariel:
+      requiere backend + DB levantados; no se automatizó.)*
+
+##### Notas de implementación
+
+- **El DTO sí rechazaba el campo.** `main.ts` registra el `ValidationPipe` global con
+  `whitelist + forbidNonWhitelisted`, así que mandar `fingerprint` sin declararlo devolvía
+  **400** — y como el guard corre *antes* del pipe y ya había llamado a `recordLifetimeUsage`,
+  el anónimo perdía su consulta gratuita con un 400. Se agregó `fingerprint?: string` opcional a
+  `PendulumQueryDto` con las mismas reglas que `CreateAnonymousDailyReadingDto` (hex, 32–64) y
+  spec `pendulum-query.dto.spec.ts`. El servicio solo lee `dto.question`; el fingerprint no se
+  persiste.
+- **Invalidación en un solo lugar.** `invalidateUserData` se llama desde
+  `usePendulumQuery.onSettled` (cubre éxito y error), no también desde el `catch` del
+  componente: `mutateAsync` dispara los callbacks de la mutación antes de rechazar la promesa,
+  así que hacerlo dos veces solo duplicaría el refetch de capabilities + perfil. El componente
+  se limita al toast. `pendulumKeys.all` (historial/stats) solo se invalida en `onSuccess`.
+- **429 llega como `RateLimitError`, no como `AxiosError`.** El interceptor de `axios-config.ts`
+  transforma todo 429 en `RateLimitError` con mensaje en español y descarta el body; el
+  componente lo detecta con `instanceof` y muestra `error.message`. Para el péndulo, en la
+  práctica, el guard responde **403** para todos los planes (Free/Premium también van por
+  `ForbiddenException` en `checkGenericFeatureLimit`); el 429 solo puede venir del throttler.
+- Mensajes nuevos (fallbacks en español, sin terminología YMYL): "Ya usaste tus consultas
+  disponibles del Péndulo. Regístrate o actualiza tu plan para seguir consultando." y "No
+  pudimos consultar al Péndulo. Intenta nuevamente en unos instantes."
+
+##### Hallazgos del revisor fuera de alcance (no se tocaron; decidir si abrir tarea)
+
+- El `Input` de pregunta Premium (`PendulumConsultation.tsx`) no tiene `maxLength={500}`: una
+  pregunta de 501 caracteres produce un 400 del `ValidationPipe` (array de mensajes) y el
+  usuario ve el toast genérico. Antes se tragaba en silencio; con `maxLength` el caso no llega
+  al backend.
+- `pendulum.controller.ts` documenta en Swagger `429` para "Límite de consultas alcanzado",
+  pero el guard responde `403` (`ForbiddenException`) en todos los planes; el 429 solo puede
+  venir del throttler global. Ajustar `@ApiResponse`.
+- `check-usage-limit.guard.ts:331` lee `request.body.fingerprint` crudo *antes* de que el
+  `ValidationPipe` lo valide: un fingerprint malformado consume la consulta bajo esa clave y
+  luego recibe 400. Preexistente; conviene validar formato en el guard o ignorar los que no
+  cumplan hex 32–64.
 
 ---
 

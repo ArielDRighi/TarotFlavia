@@ -10,6 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { type ReactNode } from 'react';
 import * as pendulumApi from '@/lib/api/pendulum-api';
+import * as invalidateUserDataUtil from '@/lib/utils/invalidate-user-data';
 import {
   usePendulumQuery,
   usePendulumHistory,
@@ -26,6 +27,7 @@ import type {
 
 // Mock the API functions
 vi.mock('@/lib/api/pendulum-api');
+vi.mock('@/lib/utils/invalidate-user-data');
 vi.mock('./useUserCapabilities', () => ({
   useUserCapabilities: vi.fn(() => ({
     data: {
@@ -47,6 +49,7 @@ const mockQueryPendulum = vi.mocked(pendulumApi.queryPendulum);
 const mockGetPendulumHistory = vi.mocked(pendulumApi.getPendulumHistory);
 const mockGetPendulumStats = vi.mocked(pendulumApi.getPendulumStats);
 const mockDeletePendulumQuery = vi.mocked(pendulumApi.deletePendulumQuery);
+const mockInvalidateUserData = vi.mocked(invalidateUserDataUtil.invalidateUserData);
 
 // Test wrapper with QueryClient
 function createWrapper() {
@@ -145,6 +148,44 @@ describe('usePendulum hooks', () => {
       });
 
       expect(result.current.error).toEqual(error);
+    });
+
+    it('invalida capabilities en onSuccess', async () => {
+      mockInvalidateUserData.mockResolvedValue(undefined);
+      mockQueryPendulum.mockResolvedValue({
+        response: 'yes',
+        movement: 'vertical',
+        responseText: 'Sí',
+        interpretation: 'El universo afirma tu camino.',
+        queryId: null,
+        lunarPhase: '🌕',
+        lunarPhaseName: 'Luna Llena',
+      });
+
+      const { result } = renderHook(() => usePendulumQuery(), {
+        wrapper: createWrapper(),
+      });
+
+      await result.current.mutateAsync({});
+
+      expect(mockInvalidateUserData).toHaveBeenCalledTimes(1);
+    });
+
+    it('TASK-515: invalida capabilities también en onError (403/429) para refrescar el banner', async () => {
+      mockInvalidateUserData.mockResolvedValue(undefined);
+      mockQueryPendulum.mockRejectedValue(new Error('Ya has usado tu consulta gratuita'));
+
+      const { result } = renderHook(() => usePendulumQuery(), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.mutate({});
+
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
+      expect(mockInvalidateUserData).toHaveBeenCalledTimes(1);
     });
   });
 
