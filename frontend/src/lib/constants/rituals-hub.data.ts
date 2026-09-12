@@ -97,7 +97,7 @@ export const RITUALS_HUB_GUIDE: RitualsHubGuideData = {
   categories: {
     heading: 'Por categoría: cuándo conviene cada una',
     intro:
-      'El filtro de categoría agrupa los rituales por propósito. Una orientación breve para cada grupo, pensada para elegir sin leer todo el catálogo:',
+      'El filtro de categoría agrupa los rituales por propósito. Una orientación breve para los grupos más consultados, pensada para elegir sin leer todo el catálogo; las categorías que no figuran acá se leen igual, por la ficha de cada ritual:',
     items: [
       {
         name: 'Lunar',

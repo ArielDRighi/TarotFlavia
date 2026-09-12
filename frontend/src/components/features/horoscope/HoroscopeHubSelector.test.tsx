@@ -32,7 +32,7 @@ describe('HoroscopeHubSelector (T-SEO-015)', () => {
   it('muestra el aviso de registro al visitante sin sesión', () => {
     render(<HoroscopeHubSelector />);
 
-    expect(screen.getByText(/Regístrate/i)).toBeInTheDocument();
+    expect(screen.getByText(/Registrate/i)).toBeInTheDocument();
     expect(screen.getByText(/para ver tu horóscopo automáticamente/i)).toBeInTheDocument();
   });
 
@@ -43,7 +43,7 @@ describe('HoroscopeHubSelector (T-SEO-015)', () => {
     });
     render(<HoroscopeHubSelector />);
 
-    expect(screen.getByText(/Configura tu fecha de nacimiento/i)).toBeInTheDocument();
+    expect(screen.getByText(/Configurá tu fecha de nacimiento/i)).toBeInTheDocument();
   });
 
   it('navega a la ficha del signo al elegirlo', async () => {

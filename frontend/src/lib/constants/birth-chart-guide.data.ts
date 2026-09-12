@@ -106,7 +106,7 @@ export const BIRTH_CHART_GUIDE: BirthChartGuideData = {
   example: {
     heading: 'Un ejemplo de lectura',
     paragraphs: [
-      'Supongamos Sol en Capricornio en Casa 6, Luna en Leo en Casa 1, Ascendente Leo, y una cuadratura entre el Sol y la Luna. Leído por capas: el propósito pasa por el trabajo y la disciplina, en un área de rutina y servicio (Sol en Capricornio en 6). La necesidad emocional es de reconocimiento y calidez, y está a la vista de todos (Luna en Leo en 1, sobre el Ascendente). La cuadratura entre ambos nombra la tensión: lo que esta persona quiere hacer —cumplir, rendir, sostener— y lo que necesita sentir —ser vista, jugar, brillar— no van en la misma dirección, y una parte de su vida es negociar entre las dos.',
+      'Supongamos Ascendente Aries, Luna en Aries en Casa 1, Sol en Capricornio en Casa 10, y una cuadratura entre el Sol y la Luna (Aries y Capricornio están a noventa grados). Leído por capas: el propósito pasa por el trabajo, la disciplina y el lugar que se ocupa en público (Sol en Capricornio en 10). La necesidad emocional es de arrancar, de independencia y de acción inmediata, y está a la vista de todos (Luna en Aries en 1, sobre el Ascendente). La cuadratura entre ambos nombra la tensión: lo que esta persona quiere construir —despacio, con método, sosteniendo— y lo que necesita sentir —moverse ya, decidir sola, no esperar— no van en la misma dirección, y una parte de su vida es negociar entre las dos.',
       'Fijate qué hizo la lectura: no describió un carácter, describió una dinámica. Eso es lo que la carta natal sabe hacer. Si el informe de arriba te da tus posiciones, probá escribir un párrafo así con tus tres primeros datos antes de seguir con el resto.',
     ],
   },

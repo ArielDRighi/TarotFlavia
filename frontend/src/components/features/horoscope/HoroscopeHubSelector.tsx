@@ -45,7 +45,7 @@ export function HoroscopeHubSelector() {
         <div className="bg-muted/50 mb-6 rounded-lg p-4 text-center">
           <p className="text-muted-foreground text-sm">
             <Link href={ROUTES.REGISTER} className="text-primary hover:underline">
-              Regístrate
+              Registrate
             </Link>{' '}
             para ver tu horóscopo automáticamente
           </p>
@@ -56,7 +56,7 @@ export function HoroscopeHubSelector() {
         <div className="bg-accent/20 mb-6 rounded-lg p-4 text-center">
           <p className="text-sm">
             <Link href={ROUTES.PERFIL} className="text-primary hover:underline">
-              Configura tu fecha de nacimiento
+              Configurá tu fecha de nacimiento
             </Link>
           </p>
         </div>

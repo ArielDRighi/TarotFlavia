@@ -152,8 +152,10 @@ export const ritualMetadata: Metadata = {
     images: [DEFAULT_OG_IMAGE],
   },
   // `/tarot` y `/ritual` son la app (270 palabras de pantalla). `robots.txt` ya
-  // las bloquea, pero un revisor que llega por un link las ve igual: `noindex`
-  // para que tampoco entren al índice por enlaces externos (T-SEO-015).
+  // las bloquea para Googlebot —que por eso nunca llega a leer esta meta—; el
+  // `noindex` es para el rastreador de anuncios (`Mediapartners-Google` entra a
+  // todo) y para cualquier revisor o herramienta que llegue por un link: que
+  // vea, en el HTML, que la página no pretende ser contenido (T-SEO-015).
   robots: {
     index: false,
     follow: true,

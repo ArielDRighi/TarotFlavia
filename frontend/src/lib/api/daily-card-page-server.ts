@@ -11,6 +11,12 @@
 import { getCanonicalDailyCard, getDailyCardArchive } from './daily-card-server';
 import type { DailyCardPageData } from '@/types/home.types';
 
+/**
+ * Doble red a propósito: los dos fetchers ya degradan a `undefined` vía
+ * `resolveListingData`, así que hoy este `catch` es inalcanzable salvo bug.
+ * Igual que en `home-server.ts`, la promesa del módulo —un bloque caído no
+ * tumba la página— no puede depender de que eso siga siendo cierto.
+ */
 async function settle<T>(label: string, promise: Promise<T | undefined>): Promise<T | undefined> {
   try {
     return await promise;

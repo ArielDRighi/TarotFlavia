@@ -159,7 +159,7 @@ export const PENDULUM_GUIDE: PendulumGuideData = {
     {
       heading: 'Cuántas veces consultar (y por qué hay un límite)',
       paragraphs: [
-        'Sin cuenta, la herramienta permite una consulta por día; con cuenta, el límite depende del plan y se muestra en la franja de arriba. El límite no es sólo comercial: consultar la misma pregunta diez veces seguidas anula la práctica, porque en algún intento va a salir lo que querías y te vas a quedar con ese. Una consulta, una respuesta, una nota. Si el tema es importante, volvé mañana con la pregunta afinada.',
+        'Sin cuenta hay una única consulta de prueba; con cuenta gratuita, una por día; con Premium, tres por día y la pregunta por escrito. La franja de arriba muestra cuántas te quedan. El límite no es sólo comercial: consultar la misma pregunta diez veces seguidas anula la práctica, porque en algún intento va a salir lo que querías y te vas a quedar con ese. Una consulta, una respuesta, una nota. Si el tema es importante, volvé con la pregunta afinada cuando el cupo se renueve.',
       ],
     },
     {

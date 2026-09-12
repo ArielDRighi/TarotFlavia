@@ -106,6 +106,20 @@ describe('RitualsPage (interacción)', () => {
     expect(vi.mocked(useRituals)).toHaveBeenCalledWith({}, { initialData: mockRituals });
   });
 
+  it('⚠️ T-SEO-015: con un filtro activo la siembra se apaga (es otra queryKey)', async () => {
+    const user = userEvent.setup();
+    render(<RitualesPage initialRituals={mockRituals} />);
+
+    await user.click(screen.getByRole('button', { name: /✨.*limpieza/i }));
+
+    await waitFor(() => {
+      expect(vi.mocked(useRituals)).toHaveBeenLastCalledWith(
+        expect.objectContaining({ category: RitualCategory.CLEANSING }),
+        { initialData: undefined }
+      );
+    });
+  });
+
   it('T-SEO-015: sin ServiceIntro; la guía editorial la renderiza la ruta', () => {
     render(<RitualesPage />);
 

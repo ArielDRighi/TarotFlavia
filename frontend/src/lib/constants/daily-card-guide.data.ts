@@ -75,8 +75,8 @@ export const DAILY_CARD_GUIDE: DailyCardGuideData = {
     {
       heading: 'Cómo leer la carta que salió',
       paragraphs: [
-        'Mirá primero la imagen antes que el texto. Qué figura hay, hacia dónde mira, qué está haciendo con las manos, si el paisaje es abierto o cerrado. La lectura del tarot Rider-Waite se apoya en esos detalles, y el texto que aparece debajo de la carta —el significado al derecho y el consejo— es un resumen, no la única lectura posible.',
-        'Después, cruzá ese significado con tu día concreto. Si salió el Ocho de Oros y hoy tenés que terminar un trabajo tedioso, la carta habla de oficio y constancia; si salió el mismo Ocho de Oros y tenés el día libre, quizá te está hablando de una habilidad que venís posponiendo practicar. La carta no cambia; cambia el lugar de tu vida donde la apoyás. Si querés la ficha completa —amor, trabajo, simbolismo, combinaciones—, el enlace "Ver la ficha de la carta" te lleva a la enciclopedia.',
+        'Mirá primero la imagen antes que el texto. Qué figura hay, hacia dónde mira, qué está haciendo con las manos, si el paisaje es abierto o cerrado. La lectura del tarot Rider-Waite se apoya en esos detalles, y la interpretación que aparece debajo de tu carta es un resumen del significado, no la única lectura posible.',
+        'Después, cruzá ese significado con tu día concreto. Si salió el Ocho de Oros y hoy tenés que terminar un trabajo tedioso, la carta habla de oficio y constancia; si salió el mismo Ocho de Oros y tenés el día libre, quizá te está hablando de una habilidad que venís posponiendo practicar. La carta no cambia; cambia el lugar de tu vida donde la apoyás. Si querés la ficha completa —amor, trabajo, simbolismo, combinaciones—, buscá la carta por su nombre en la enciclopedia de tarot: las 78 tienen ficha propia.',
       ],
     },
     {
@@ -97,7 +97,7 @@ export const DAILY_CARD_GUIDE: DailyCardGuideData = {
       heading: 'Qué hacer con la carta durante el día',
       paragraphs: [
         'La carta del día se aprovecha cuando la volvés a mirar. Dejá una nota en el teléfono con el nombre de la carta y una palabra clave, y releela a la tarde. Muchas veces el significado que a la mañana te pareció abstracto se vuelve obvio después de una conversación, de una decisión chica o de un imprevisto. Ese "ah, era esto" es la parte formativa de la práctica: te enseña a reconocer el arquetipo en situaciones reales.',
-        'Si tenés cuenta, la carta queda guardada con la fecha y podés agregarle una nota. Escribí una línea a la noche: qué pasó, y si la carta te ayudó a leerlo. No hace falta más.',
+        'Si tenés cuenta, la carta queda guardada con la fecha en tu historial. Escribí una línea a la noche en tu propio cuaderno o en el teléfono: qué pasó, y si la carta te ayudó a leerlo. No hace falta más.',
       ],
     },
     {

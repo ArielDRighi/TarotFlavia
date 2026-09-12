@@ -80,7 +80,7 @@ export function PremiumBenefitsSection({ price, cta }: PremiumBenefitsSectionPro
             className="mx-auto mt-6 max-w-xl font-sans text-lg"
             style={{ color: 'rgba(249, 247, 242, 0.7)' }}
           >
-            Desbloquea todo el potencial del tarot con funcionalidades avanzadas
+            Desbloqueá todo el potencial del tarot con funcionalidades avanzadas
           </p>
         </div>
 

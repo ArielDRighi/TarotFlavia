@@ -2,11 +2,17 @@
 import Image from 'next/image';
 import Link from 'next/link';
 // 5. Components
+import {
+  GuideBlock,
+  GuideHeader,
+  GuideLinks,
+  GuideParagraphs,
+} from '@/components/common/EditorialGuide';
 import { DailyCardExperience } from './DailyCardExperience';
 // 6. Utils & types
 import { DAILY_CARD_GUIDE } from '@/lib/constants/daily-card-guide.data';
 import { ROUTES } from '@/lib/constants/routes';
-import { formatDateFullWithYear } from '@/lib/utils/date';
+import { formatDateFull, formatDateFullWithYear } from '@/lib/utils/date';
 import { splitParagraphs } from '@/lib/utils/text';
 import { ArcanaType, SUIT_INFO } from '@/types/encyclopedia.types';
 import type { CardDetail } from '@/types/encyclopedia.types';
@@ -51,16 +57,9 @@ function arcanaLabel(card: CardDetail): string {
   return `Arcano menor${card.suit ? ` · ${SUIT_INFO[card.suit].nameEs}` : ''}`;
 }
 
+/** Un campo de la ficha (puede traer varios párrafos separados por línea en blanco). */
 function Paragraphs({ text, className }: { text: string; className?: string }) {
-  return (
-    <>
-      {splitParagraphs(text).map((paragraph) => (
-        <p key={paragraph} className={className}>
-          {paragraph}
-        </p>
-      ))}
-    </>
-  );
+  return <GuideParagraphs paragraphs={splitParagraphs(text)} className={className} />;
 }
 
 function TodayCardSection({ today }: { today: CanonicalDailyCard | undefined }) {
@@ -181,41 +180,15 @@ function DailyCardGuide() {
 
   return (
     <section data-testid="daily-card-guide" className="mb-14">
-      <h2 className="text-text-primary mb-3 font-serif text-3xl font-light md:text-4xl">{title}</h2>
-      <div className="bg-secondary mb-5 h-px w-16 opacity-60" aria-hidden="true" />
-      <p className="text-text-muted mb-8 max-w-3xl font-sans leading-relaxed">{lead}</p>
+      <GuideHeader title={title} lead={lead} className="max-w-3xl" />
 
       <div className="max-w-3xl space-y-8">
         {steps.map((step) => (
-          <div key={step.heading}>
-            <h3 className="text-text-primary mb-2 font-serif text-xl font-semibold">
-              {step.heading}
-            </h3>
-            <div className="space-y-3">
-              {step.paragraphs.map((paragraph) => (
-                <p key={paragraph} className="text-text-primary font-sans leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </div>
+          <GuideBlock key={step.heading} heading={step.heading} paragraphs={step.paragraphs} />
         ))}
       </div>
 
-      <nav
-        aria-label="Seguir leyendo"
-        className="border-border mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4"
-      >
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-secondary text-sm font-medium underline-offset-4 hover:underline"
-          >
-            {link.label}
-          </Link>
-        ))}
-      </nav>
+      <GuideLinks links={links} />
     </section>
   );
 }
@@ -238,7 +211,7 @@ function DailyCardArchive({ archive }: { archive: DailyCardArchiveEntry[] | unde
         {archive.map((entry) => (
           <li key={entry.date} className="flex items-baseline gap-2 font-sans text-sm">
             <time dateTime={entry.date} className="text-text-muted shrink-0 tabular-nums">
-              {formatDateFullWithYear(entry.date).replace(/ de \d{4}$/, '')}
+              {formatDateFull(entry.date)}
             </time>
             <span aria-hidden="true">·</span>
             <Link
@@ -262,7 +235,7 @@ export function DailyCardPage({ data }: DailyCardPageProps) {
       <div className="container mx-auto max-w-4xl px-4 py-8">
         <header className="mb-10">
           <h1 className="text-text-primary mb-3 font-serif text-4xl font-light md:text-5xl">
-            Carta del día
+            Tarot del día
           </h1>
           <p className="text-text-muted max-w-3xl font-sans leading-relaxed">
             Una carta del tarot para leer la jornada. Arriba, la carta de hoy del sitio con su

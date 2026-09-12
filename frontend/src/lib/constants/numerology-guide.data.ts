@@ -71,7 +71,7 @@ export const NUMEROLOGY_GUIDE: NumerologyGuideData = {
     heading: 'Cómo se calcula el número de vida (y por qué conviene hacerlo a mano una vez)',
     paragraphs: [
       'El camino de vida sale de la fecha de nacimiento completa. Se reduce cada parte —día, mes y año— a un solo dígito sumando sus cifras, y después se suman los tres resultados y se vuelve a reducir. Ejemplo con el 19 de octubre de 1979: el día 19 da 1 + 9 = 10, y 1 + 0 = 1; el mes 10 da 1 + 0 = 1; el año 1979 da 1 + 9 + 7 + 9 = 26, y 2 + 6 = 8. Se suman 1 + 1 + 8 = 10, que reduce a 1. Camino de vida 1.',
-      'Hay una excepción: si en algún paso aparece 11, 22 o 33, no se reduce. Son los números maestros, y la calculadora los conserva. Vale la pena hacer la cuenta a mano una sola vez, no por desconfiar de la herramienta sino porque entender de dónde sale el número cambia cómo se lee: el camino de vida no es un rasgo asignado, es una suma de fecha, y eso lo vuelve más una clave de lectura que una etiqueta.',
+      'Hay una excepción: si la suma final da 11, 22 o 33, no se reduce. Son los números maestros, y la calculadora los conserva; en los pasos intermedios —día, mes y año por separado— sí se reduce siempre, así que un día 11 se convierte en 2 antes de sumar. Vale la pena hacer la cuenta a mano una sola vez, no por desconfiar de la herramienta sino porque entender de dónde sale el número cambia cómo se lee: el camino de vida no es un rasgo asignado, es una suma de fecha, y eso lo vuelve más una clave de lectura que una etiqueta.',
     ],
   },
   numbers: {
@@ -161,7 +161,7 @@ export const NUMEROLOGY_GUIDE: NumerologyGuideData = {
       {
         question: '¿Por qué mi número de vida es 11 y en otro sitio me dio 2?',
         answer:
-          'Porque hay dos criterios: reducir siempre, o conservar los maestros. Auguria conserva 11, 22 y 33 cuando aparecen en la suma final. Ninguno de los dos es "el correcto"; conviene leer el 11 con su 2 de base.',
+          'Porque hay dos criterios: reducir siempre, o conservar los maestros. Auguria conserva 11, 22 y 33 sólo cuando aparecen en la suma final, no en los pasos intermedios. Ninguno de los dos es "el correcto"; conviene leer el 11 con su 2 de base.',
       },
       {
         question: '¿Puedo calcular la numerología de otra persona?',

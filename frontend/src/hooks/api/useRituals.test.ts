@@ -129,6 +129,16 @@ describe('useRituals', () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.data).toEqual([mockRitualSummary]);
   });
+
+  it('⚠️ T-SEO-015: con initialData el cliente refetchea igual al montar (el HTML puede tener hasta una hora)', async () => {
+    vi.mocked(ritualsApi.getRituals).mockResolvedValue([]);
+
+    renderHook(() => useRituals(undefined, { initialData: [mockRitualSummary] }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(ritualsApi.getRituals).toHaveBeenCalledTimes(1));
+  });
 });
 
 describe('useFeaturedRituals', () => {

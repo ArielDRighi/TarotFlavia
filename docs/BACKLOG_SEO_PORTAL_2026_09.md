@@ -361,6 +361,10 @@ Tests en `check-indexable-content.test.mjs`.
 - **Header**: Premium deja de ser ítem de `HeaderNavLinks` (ni desktop ni menú móvil) y pasa a
   `PremiumHeaderButton`, un botón junto a los de sesión, visible para el visitante y para el usuario
   Free (gating por capabilities, como antes). El menú editorial anónimo queda igual que antes.
+  **Decisión explícita:** esto revierte T-FE-04 ("sin link Premium para el visitante sin sesión").
+  Es a propósito y sigue el backlog ("botón junto a Iniciar sesión"): el modelo de negocio se
+  muda, no se saca, y un botón no es un ítem del menú editorial. Es distinto del CTA de registro de
+  T-SEO-014 (que ya era botón del header). No volver a moverlo sin cambiar esta nota.
 - **`/premium`**: recibe `PremiumBenefitsSection` y `HowItWorks`, movidos de `features/home` a
   `features/premium`. `PremiumBenefitsSection` tenía el precio hardcodeado ("$7.000"): ahora lo
   recibe por prop desde la ruta (la API) y sin precio no inventa uno; su CTA es el `PremiumCtaButton`
@@ -417,7 +421,30 @@ Tests en `check-indexable-content.test.mjs`.
   `/horoscopo-chino` servía 255 y es ítem del header y del footer, así que recibió su nota de uso
   (`ChineseHoroscopeGuide`: Año Nuevo chino, elemento, cómo leer la predicción anual, qué no dice;
   el hub cliente salió de `app/` a `features/chinese-horoscope/ChineseHoroscopeHub`). Y
-  `/enciclopedia` (267) y `/servicios` (429) ampliaron su `ListingIntro` (pisos 440 y 460).
+  `/enciclopedia` (267) y `/servicios` (429) ampliaron su `ListingIntro` (pisos 440 y 460). El
+  bloque nuevo de `/servicios` describe sólo lo que existe (cancelar desde "Mis servicios",
+  dudas por contacto): **no** promete reprogramación, reintegros ni videollamada, que el producto
+  no implementa. ⚠️ Si negocio quiere publicar una política de cambios y reembolsos, es una
+  decisión aparte (y una feature: hoy sólo hay cancelación).
+- **Revisión local aplicada (PR #650):** (1) el texto del péndulo decía "una consulta por día sin
+  cuenta"; el límite anónimo es **una única de por vida** (`getPendulumLimit`), y así quedó
+  escrito: sin cuenta una de prueba, Free una por día, Premium tres por día con pregunta. (2) La
+  guía de la carta del día prometía "agregarle una nota" (no existe) y describía el bloque de la
+  carta canónica como si fuera el widget (que no enlaza a la ficha): reescrito. (3) La regla de
+  los números maestros decía "en cualquier paso"; el cálculo real (`numerology.utils.ts`) reduce
+  día, mes y año y sólo conserva 11/22/33 en la suma final: corregido, con el mismo criterio en la
+  FAQ. (4) El ejemplo de carta natal tenía una cuadratura Capricornio–Leo (son 150°): ahora es
+  Sol en Capricornio / Luna y Ascendente en Aries, cuadratura real. (5) El cascarón de las notas
+  (`h2` + línea + bajada, párrafos, pie "Seguir leyendo") vivía repetido en seis componentes: ahora
+  es `components/common/EditorialGuide.tsx` (`GuideHeader`, `GuideBlock`, `GuideParagraphs`,
+  `GuideLinks`); las estructuras internas siguen distintas. (6) Voseo unificado en el copy pegado
+  al texto nuevo (contacto, selector del hub, horóscopo chino, beneficios Premium); `h1` de
+  `/carta-del-dia` = "Tarot del día", como el `<title>` y el menú. (7) `ContactDetails` salió de
+  `app/contacto/page.tsx` a `features/contact`. (8) Tests que faltaban: siembra apagada con filtro
+  en `RitualsPage`, refetch con `initialData` en `useRituals`, y un test estructural en
+  `sitemap.test.ts` que falla si cualquier ruta estática con `robots.index = false` entra al
+  sitemap. (9) README: cómo verificar las reglas nuevas del guardarraíl en local construyendo con
+  `NEXT_PUBLIC_APP_URL=https://auguriatarot.com`.
 - **`SERVICE_INTROS`** queda con tres entradas (`tarot`, `western-horoscope`, `chinese-horoscope`);
   las cinco de herramientas se borraron con sus consumidores.
 - **Verificación pendiente contra producción**, después del deploy único:

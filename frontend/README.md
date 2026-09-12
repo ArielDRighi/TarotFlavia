@@ -69,9 +69,18 @@ salvo que lleven `<meta name="robots" content="noindex">`, y se miden aunque no 
 o el muestreo las deje fuera. Además se verifica la coherencia **`noindex` ↔ sitemap**: una URL con
 `noindex` no puede estar en el sitemap. En staging y local el root layout pone `noindex` en todas
 las páginas (`isIndexingAllowed()`), así que ahí la coherencia no es verificable y las del menú
-bajo el umbral se reportan como aviso sin tumbar la corrida: esas dos reglas se validan contra
-producción. Las dos páginas legales del footer (`/terminos`, `/privacidad`) están en
-`RUTAS_EXENTAS`: su extensión la fija legales, no el umbral editorial.
+bajo el umbral se reportan como aviso sin tumbar la corrida. Para validar las dos reglas **antes**
+del deploy, se construye con el host productivo —`isIndexingAllowed()` lee `NEXT_PUBLIC_APP_URL`—
+y se mide contra el servidor local:
+
+```bash
+NEXT_PUBLIC_APP_URL=https://auguriatarot.com npm run build && npx next start -p 3099
+npm run check:indexable -- --base-url http://localhost:3099 --no-soft-404
+```
+
+Sin la API corriendo, lo que se mide es el **piso** de cada URL (el texto propio sin datos). Las
+dos páginas legales del footer (`/terminos`, `/privacidad`) están en `RUTAS_EXENTAS`: su extensión
+la fija legales, no el umbral editorial.
 
 Detalles que importan:
 

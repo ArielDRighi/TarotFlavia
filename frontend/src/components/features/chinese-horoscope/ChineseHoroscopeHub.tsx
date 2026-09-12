@@ -41,7 +41,7 @@ export function ChineseHoroscopeHub() {
     <div className="container mx-auto px-4 pt-8 pb-4">
       <div className="mb-8 text-center">
         <h1 className="mb-2 font-serif text-4xl">Horóscopo Chino {currentYear}</h1>
-        <p className="text-muted-foreground">Descubre las predicciones anuales según tu animal</p>
+        <p className="text-muted-foreground">Descubrí las predicciones anuales según tu animal</p>
       </div>
 
       {/* User's horoscope card (if authenticated and has birthDate) */}

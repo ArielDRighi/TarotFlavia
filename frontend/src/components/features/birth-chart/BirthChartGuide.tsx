@@ -1,5 +1,5 @@
-// 1. React & Next.js
-import Link from 'next/link';
+// 5. Components
+import { GuideBlock, GuideHeader, GuideLinks } from '@/components/common/EditorialGuide';
 // 6. Utils & types
 import { BIRTH_CHART_GUIDE } from '@/lib/constants/birth-chart-guide.data';
 
@@ -12,39 +12,16 @@ import { BIRTH_CHART_GUIDE } from '@/lib/constants/birth-chart-guide.data';
  * Reemplaza a la tarjeta `ServiceIntro` de plantilla; el enlace a la
  * enciclopedia apunta a la guía de la carta astral y a signos, planetas y casas.
  */
-function Paragraphs({ paragraphs }: { paragraphs: string[] }) {
-  return (
-    <div className="space-y-3">
-      {paragraphs.map((paragraph) => (
-        <p key={paragraph} className="text-text-primary font-sans leading-relaxed">
-          {paragraph}
-        </p>
-      ))}
-    </div>
-  );
-}
-
-function Block({ heading, paragraphs }: { heading: string; paragraphs: string[] }) {
-  return (
-    <div>
-      <h3 className="text-text-primary mb-2 font-serif text-xl font-semibold">{heading}</h3>
-      <Paragraphs paragraphs={paragraphs} />
-    </div>
-  );
-}
-
 export function BirthChartGuide() {
   const { title, lead, requirements, trio, order, example, mistakes, limits, links } =
     BIRTH_CHART_GUIDE;
 
   return (
     <section data-testid="birth-chart-guide" className="container mx-auto max-w-3xl px-4 pb-12">
-      <h2 className="text-text-primary mb-3 font-serif text-3xl font-light md:text-4xl">{title}</h2>
-      <div className="bg-secondary mb-5 h-px w-16 opacity-60" aria-hidden="true" />
-      <p className="text-text-muted mb-8 font-sans leading-relaxed">{lead}</p>
+      <GuideHeader title={title} lead={lead} />
 
       <div className="space-y-10">
-        <Block heading={requirements.heading} paragraphs={requirements.paragraphs} />
+        <GuideBlock heading={requirements.heading} paragraphs={requirements.paragraphs} />
 
         <div>
           <h3 className="text-text-primary mb-2 font-serif text-xl font-semibold">
@@ -68,10 +45,10 @@ export function BirthChartGuide() {
           </dl>
         </div>
 
-        <Block heading={order.heading} paragraphs={order.paragraphs} />
+        <GuideBlock heading={order.heading} paragraphs={order.paragraphs} />
 
         <div className="border-secondary/60 bg-bg-main rounded-lg border-l-4 p-5">
-          <Block heading={example.heading} paragraphs={example.paragraphs} />
+          <GuideBlock heading={example.heading} paragraphs={example.paragraphs} />
         </div>
 
         <div>
@@ -89,23 +66,10 @@ export function BirthChartGuide() {
           </ol>
         </div>
 
-        <Block heading={limits.heading} paragraphs={limits.paragraphs} />
+        <GuideBlock heading={limits.heading} paragraphs={limits.paragraphs} />
       </div>
 
-      <nav
-        aria-label="Seguir leyendo"
-        className="border-border mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4"
-      >
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-secondary text-sm font-medium underline-offset-4 hover:underline"
-          >
-            {link.label}
-          </Link>
-        ))}
-      </nav>
+      <GuideLinks links={links} />
     </section>
   );
 }

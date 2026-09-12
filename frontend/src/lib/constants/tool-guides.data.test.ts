@@ -119,8 +119,13 @@ describe('notas de uso de las herramientas (T-SEO-015)', () => {
     expect(new Set(all).size).toBe(all.length);
   });
 
-  it('⚠️ T-SEO-013 / T-SEO-018: sin "salud" ni lenguaje de promesa', () => {
-    const texto = [...PENDULUM_TEXT, ...NUMEROLOGY_TEXT, ...BIRTH_CHART_TEXT].join(' ');
+  it('⚠️ T-SEO-013 / T-SEO-018: sin "salud" ni lenguaje de promesa en las cuatro guías', () => {
+    const texto = [
+      ...PENDULUM_TEXT,
+      ...NUMEROLOGY_TEXT,
+      ...BIRTH_CHART_TEXT,
+      ...DAILY_CARD_TEXT,
+    ].join(' ');
     expect(texto).not.toMatch(/\bsalud\b/i);
     expect(texto).not.toMatch(/garantiza|100 ?%|predicción exacta|amarre/i);
   });

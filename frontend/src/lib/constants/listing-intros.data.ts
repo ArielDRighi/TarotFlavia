@@ -289,8 +289,8 @@ export const LISTING_INTROS: Record<ListingIntroKey, ListingIntroData> = {
         body: 'Las sesiones no se derivan ni rotan: el turno que reservás es con quien va a estar del otro lado, y quien acompaña la sesión es también quien responde los mensajes que quedan pendientes. En la página Sobre nosotros está el criterio con el que se escribe y se revisa todo lo que se publica en el sitio, que es el mismo con el que se atiende acá.',
       },
       {
-        heading: 'Cambios, cancelaciones y qué pasa si no podés asistir',
-        body: 'Un turno se puede reprogramar desde la cuenta con anticipación; si el aviso llega el mismo día, se reprograma una sola vez sin costo. Cuando la sesión no se puede realizar por causa nuestra, se reintegra el importe completo por el mismo medio de pago. Las dudas sobre un cobro o una reserva concreta se resuelven por la página de contacto, indicando el correo de la cuenta y la fecha del turno. Las sesiones a distancia se hacen por videollamada; el enlace llega por correo el mismo día del turno, y conviene probarlo con unos minutos de margen.',
+        heading: 'Después de reservar',
+        body: 'La reserva queda en la sección Mis servicios de la cuenta, con la fecha, el horario y el estado del turno; desde ahí se cancela si no vas a poder asistir, y conviene hacerlo con la mayor anticipación posible para que ese horario le sirva a otra persona. Las dudas sobre un cobro o sobre una reserva concreta —un turno que no aparece, un pago que se acreditó dos veces, un cambio de horario que necesitás pedir— se resuelven por la página de contacto, indicando el correo de la cuenta y la fecha del turno; la respuesta llega por correo dentro del plazo que figura ahí.',
       },
     ],
     links: [

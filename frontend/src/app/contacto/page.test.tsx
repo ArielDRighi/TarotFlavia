@@ -36,7 +36,7 @@ describe('ContactoPage', () => {
   it('should display the subtitle', () => {
     renderPage();
     expect(
-      screen.getByText('¿Tienes preguntas o sugerencias? Nos encantaría escucharte')
+      screen.getByText('¿Tenés preguntas o sugerencias? Nos encantaría escucharte')
     ).toBeInTheDocument();
   });
 
