@@ -763,10 +763,15 @@ en el footer.
   nuevo presente, viejo ausente, sin duplicados, cada par con señal YMYL, ningún par reincidente) y
   además **fija el SQL emitido** con un `QueryRunner` falso: un `UPDATE` por (columna, par),
   parametrizado, `::jsonb` donde corresponde, `AND "slug" = $3` en las keywords, y `down` como
-  espejo exacto de `up`. ⚠️ **No se pudo correr contra una base real desde el entorno de esta
-  tarea** (sin Docker ni Postgres accesibles): antes del deploy, correr `up` y `down` contra la base
-  de desarrollo como se hizo en T-SEO-013 y confirmar que `npx jest src/no-salud-user-facing.spec.ts`
-  y un `grep` sobre la API dan cero.
+  espejo exacto de `up`. **Verificado contra la base de desarrollo con datos reales** (476
+  interpretaciones de carta astral, 78 cartas × 2 tablas, 132 interpretaciones libres, 48 artículos,
+  3 servicios), sobre una copia (`tarot_verify`): `down` restaura el texto viejo con **hash idéntico**
+  al de partida (134 ocurrencias vuelven), `up` deja las 6 tablas en 0 y reproduce el mismo hash
+  las dos veces (idempotente), y los `jsonb` siguen válidos en las 78 cartas. Además, una base
+  **sembrada de cero** con los seeds de la rama (`tarot_fresh`) da el **mismo contenido, tabla por
+  tabla**, que la base migrada: la premisa "seed y migración dicen lo mismo" no es solo el spec.
+  ⚠️ Al correr `db:seed:all` con otra base hay que exportar **`TAROT_DB_NAME`** además de
+  `POSTGRES_DB`: `AppModule` prioriza la primera y el CLI de migraciones la segunda.
 - **Vocabulario de reemplazo**, para mantener una sola voz: *sanar* → reparar / transformar /
   cuidar / reconfortar / integrar / reponerse; *sanación* → recuperación / alivio / consuelo /
   acompañamiento / autoconocimiento; *sanador(a)* → cuidador(a) / guía / apoyo / alquimista (La
@@ -817,6 +822,10 @@ en el footer.
 - 💡 Un par de la migración era subcadena de otro de la misma tabla (*"el artesano y el sanador"*
   dentro de *"el arquetipo del artesano y el sanador."*): `up`/`down` seguían siendo correctos, pero
   el largo no hacía nada. Fuera.
+- **Residuo en la base de desarrollo local**: la migración ya había corrido ahí (arranque del backend
+  en la rama) con la primera versión de los pares de Los Enamorados y La Emperatriz; como TypeORM
+  no la reejecuta, esas dos cartas quedaron con el texto pre-revisión. Se alinearon con dos `UPDATE`
+  a mano. En producción no aplica: parte de una base sin migrar y recibe los pares finales.
 - **No aplicado, anotado**: con el seed nuevo de Flavia la regla viaja en el `systemPrompt` **y** en
   las instrucciones finales (~250 tokens repetidos por lectura) — es intencional, la configuración
   guardada es editable y puede ser anterior; `lunar-phase.service.ts` devuelve `isGoodFor:
