@@ -68,12 +68,16 @@ describe('PremiumBenefitsSection', () => {
     expect(text).not.toContain('año completo'); // tirada inexistente
   });
 
-  it('should display pricing information', () => {
-    render(<PremiumBenefitsSection />);
+  it('T-SEO-015: muestra el precio real que recibe por prop, formateado', () => {
+    render(<PremiumBenefitsSection price={7000} />);
 
-    const pricing = screen.getByText(/\$7\.000/);
+    expect(screen.getByText(/\$\s?7\.000/)).toBeInTheDocument();
+  });
 
-    expect(pricing).toBeInTheDocument();
+  it('T-SEO-015: sin precio no inventa uno (ningún "$" hardcodeado)', () => {
+    const { container } = render(<PremiumBenefitsSection />);
+
+    expect(container.textContent).not.toMatch(/\$/);
   });
 
   it('should render upgrade CTA button', () => {
@@ -83,6 +87,13 @@ describe('PremiumBenefitsSection', () => {
 
     expect(ctaButton).toBeInTheDocument();
     expect(ctaButton).toHaveAttribute('href', '/registro');
+  });
+
+  it('T-SEO-015: acepta un CTA propio para /premium, donde el botón depende de la sesión', () => {
+    render(<PremiumBenefitsSection cta={<button type="button">CTA propio</button>} />);
+
+    expect(screen.getByRole('button', { name: 'CTA propio' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /comenzar premium/i })).not.toBeInTheDocument();
   });
 
   it('should have proper semantic structure with section tag', () => {

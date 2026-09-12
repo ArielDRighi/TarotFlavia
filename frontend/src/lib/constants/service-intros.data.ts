@@ -46,82 +46,23 @@ export interface ServiceIntroData {
 /**
  * Claves de los servicios con tarjeta informativa rica.
  */
-export type ServiceIntroKey =
-  | 'numerology'
-  | 'tarot'
-  | 'daily-card'
-  | 'western-horoscope'
-  | 'chinese-horoscope'
-  | 'pendulum'
-  | 'birth-chart'
-  | 'rituals';
+export type ServiceIntroKey = 'tarot' | 'western-horoscope' | 'chinese-horoscope';
 
 /**
  * Contenido centralizado de las tarjetas informativas de cada servicio.
  *
- * Cada entrada replica el nivel de riqueza de la tarjeta de Numerología:
- * introducción + secciones con bullets explicativos + nota + enlace a la
- * enciclopedia. El contenido es específico y veraz por servicio.
+ * Cada entrada combina introducción + secciones con bullets explicativos +
+ * nota + enlace a la enciclopedia. El contenido es específico y veraz por
+ * servicio.
+ *
+ * Desde T-SEO-015 quedan sólo tres: la tirada (`/tarot`, `/ritual`, que llevan
+ * `noindex`), el horóscopo occidental (debajo de los 12 extractos del hub) y
+ * el chino. Las páginas de herramientas (`/carta-del-dia`, `/pendulo`,
+ * `/numerologia`, `/carta-astral`, `/rituales`) dejaron esta plantilla —era
+ * la misma en todas y un revisor la lee como "sitio de herramientas"— por una
+ * nota de uso propia por página, con estructura distinta entre sí.
  */
 export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
-  numerology: {
-    testId: 'numerology-intro',
-    title: '¿Qué es la Numerología?',
-    intro:
-      'La numerología es un sistema ancestral que revela tu propósito de vida, talentos y desafíos a través de los números derivados de tu fecha de nacimiento y nombre completo.',
-    sections: [
-      {
-        heading: '📅 Desde tu Fecha de Nacimiento',
-        accent: 'purple',
-        items: [
-          {
-            term: 'Camino de Vida',
-            description:
-              'El número más importante. Revela tu propósito de vida, las lecciones que debes aprender y el camino que seguirás para alcanzar tu máximo potencial.',
-          },
-          {
-            term: 'Número de Cumpleaños',
-            description:
-              'Derivado del día en que naciste, revela talentos específicos y habilidades naturales que puedes desarrollar a lo largo de tu vida.',
-          },
-          {
-            term: 'Año Personal',
-            description:
-              'Un ciclo de 9 años que indica las oportunidades y desafíos del año actual. Cada número (1-9) trae diferentes energías: inicios, relaciones, creatividad, trabajo, cambios, hogar, introspección, poder o culminación.',
-          },
-          {
-            term: 'Mes Personal',
-            description:
-              'Combina tu Año Personal con el mes actual, refinando las energías anuales para darte orientación más específica sobre las influencias y oportunidades de cada mes.',
-          },
-        ],
-      },
-      {
-        heading: '✍️ Desde tu Nombre Completo',
-        accent: 'indigo',
-        items: [
-          {
-            term: 'Número de Expresión',
-            description:
-              'Calculado con todas las letras de tu nombre. Representa tus talentos innatos, habilidades y el potencial que puedes desarrollar en esta vida.',
-          },
-          {
-            term: 'Número del Alma',
-            description:
-              'Derivado solo de las vocales de tu nombre. Revela tus deseos más profundos, lo que realmente te motiva y lo que tu corazón anhela.',
-          },
-          {
-            term: 'Personalidad',
-            description:
-              'Calculado con las consonantes. Muestra la imagen que proyectas al mundo y cómo te perciben los demás en un primer encuentro.',
-          },
-        ],
-      },
-    ],
-    note: 'Los números maestros (11, 22, 33) poseen una vibración especial y no se reducen a un solo dígito.',
-    href: ROUTES.ENCICLOPEDIA_GUIA('guia-numerologia'),
-  },
-
   tarot: {
     testId: 'tarot-intro',
     title: '¿Qué es la Tirada de Tarot?',
@@ -172,59 +113,6 @@ export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
       },
     ],
     note: 'La posición de cada carta y su orientación (derecha o invertida) matizan su significado: el tarot orienta, no determina; las decisiones siempre son tuyas.',
-    href: ROUTES.ENCICLOPEDIA_GUIA('guia-tarot'),
-  },
-
-  'daily-card': {
-    testId: 'daily-card-intro',
-    title: '¿Qué es el Tarot del Día?',
-    intro:
-      'El Tarot del Día te ofrece una sola carta como mensaje y guía para tu jornada. Es una práctica breve y poderosa para sintonizar con la energía del momento y cultivar una intención clara.',
-    sections: [
-      {
-        heading: '🌅 Una Carta para tu Día',
-        accent: 'purple',
-        items: [
-          {
-            term: 'Mensaje del Día',
-            description:
-              'La carta elegida resume la energía dominante de tu jornada y te invita a reflexionar sobre aquello a lo que conviene prestar atención.',
-          },
-          {
-            term: 'Enfoque y Atención',
-            description:
-              'Señala oportunidades, cuidados o actitudes recomendadas para aprovechar mejor las horas que tienes por delante.',
-          },
-          {
-            term: 'Ritual Sencillo',
-            description:
-              'Una práctica diaria que no requiere experiencia: una carta, una intención y un momento de pausa consciente.',
-          },
-        ],
-      },
-      {
-        heading: '🔮 Cómo Aprovecharla',
-        accent: 'indigo',
-        items: [
-          {
-            term: 'Lee con Calma',
-            description:
-              'Observa la imagen, los símbolos y la sensación que te transmite antes de leer el significado.',
-          },
-          {
-            term: 'Relaciónala con tu Día',
-            description:
-              'Pregúntate cómo se conecta el mensaje con lo que tienes entre manos hoy: trabajo, vínculos o decisiones.',
-          },
-          {
-            term: 'Vuelve al Anochecer',
-            description:
-              'Al final del día, revisa qué de la carta se hizo presente: así afinas tu intuición con el tiempo.',
-          },
-        ],
-      },
-    ],
-    note: 'La carta del día es una guía de reflexión, no una predicción cerrada: úsala para inspirarte y tomar mejores decisiones.',
     href: ROUTES.ENCICLOPEDIA_GUIA('guia-tarot'),
   },
 
@@ -332,164 +220,5 @@ export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
     ],
     note: 'El horóscopo chino ofrece una lectura de tu energía anual y de tu carácter: úsalo como brújula, no como sentencia.',
     href: ROUTES.ENCICLOPEDIA_GUIA('guia-horoscopo-chino'),
-  },
-
-  pendulum: {
-    testId: 'pendulum-intro',
-    title: '¿Qué es el Péndulo?',
-    intro:
-      'El péndulo es una herramienta de radiestesia que te ayuda a conectar con tu intuición. A través de sus movimientos, ofrece respuestas claras a preguntas concretas y favorece la reflexión y el autoconocimiento.',
-    sections: [
-      {
-        heading: '🔮 Radiestesia e Intuición',
-        accent: 'purple',
-        items: [
-          {
-            term: 'Respuestas Claras',
-            description:
-              'El péndulo responde con movimientos definidos —sí, no o quizás— a las preguntas cerradas que le planteas.',
-          },
-          {
-            term: 'Puente con el Inconsciente',
-            description:
-              'Sus oscilaciones reflejan impulsos sutiles que ayudan a sacar a la luz lo que ya intuyes en tu interior.',
-          },
-          {
-            term: 'Foco en la Pregunta',
-            description:
-              'Cuanto más precisa y honesta es tu pregunta, más útil y nítida será la guía que recibes.',
-          },
-        ],
-      },
-      {
-        heading: '✨ Cómo Consultarlo',
-        accent: 'indigo',
-        items: [
-          {
-            term: 'Formula tu Pregunta',
-            description:
-              'Plantea consultas concretas que puedan responderse de forma cerrada, evitando dobles sentidos.',
-          },
-          {
-            term: 'Serénate y Respira',
-            description:
-              'Un estado de calma y neutralidad permite que la respuesta fluya sin interferencias.',
-          },
-          {
-            term: 'Interpreta con Apertura',
-            description:
-              'Toma la respuesta como una guía para reflexionar, no como una orden a obedecer.',
-          },
-        ],
-      },
-    ],
-    note: 'El péndulo es una ayuda para escuchar tu intuición: las decisiones finales siempre dependen de ti.',
-    href: ROUTES.ENCICLOPEDIA_GUIA('guia-pendulo'),
-  },
-
-  'birth-chart': {
-    testId: 'birth-chart-intro',
-    title: '¿Qué es la Carta Astral?',
-    intro:
-      'La carta astral es un mapa del cielo en el instante exacto de tu nacimiento. Combina planetas, signos y casas para ofrecer un retrato profundo de tu personalidad, tus talentos y tus desafíos vitales.',
-    sections: [
-      {
-        heading: '🪐 Planetas y Signos',
-        accent: 'purple',
-        items: [
-          {
-            term: 'Sol, Luna y Ascendente',
-            description:
-              'El trío fundamental: tu esencia (Sol), tu mundo emocional (Luna) y la forma en que te muestras al mundo (Ascendente).',
-          },
-          {
-            term: 'Los Planetas',
-            description:
-              'Mercurio, Venus, Marte y los demás describen tu manera de pensar, amar, actuar y crecer.',
-          },
-          {
-            term: 'Los Signos',
-            description:
-              'Cada planeta se ubica en un signo que matiza su expresión con un color y un temperamento propios.',
-          },
-        ],
-      },
-      {
-        heading: '🏠 Casas y Aspectos',
-        accent: 'indigo',
-        items: [
-          {
-            term: 'Las 12 Casas',
-            description:
-              'Representan las áreas de la vida —identidad, recursos, vínculos, vocación— donde se manifiesta la energía de cada planeta.',
-          },
-          {
-            term: 'Los Aspectos',
-            description:
-              'Los ángulos entre planetas revelan tensiones y armonías que dan forma a tu dinámica interior.',
-          },
-          {
-            term: 'Una Imagen Integral',
-            description:
-              'La carta no juzga: describe tu potencial y te ayuda a comprender tu camino con mayor claridad.',
-          },
-        ],
-      },
-    ],
-    note: 'La carta astral muestra tendencias y potenciales: es una herramienta de autoconocimiento, no un destino escrito.',
-    href: ROUTES.ENCICLOPEDIA_GUIA('guia-carta-astral'),
-  },
-
-  rituals: {
-    testId: 'rituals-intro',
-    title: '¿Qué son los Rituales?',
-    intro:
-      'Los rituales son prácticas simbólicas que canalizan tu intención hacia un propósito: protección, prosperidad, amor o claridad. Combinan elementos, palabras y momentos para acompañar tu transformación personal.',
-    sections: [
-      {
-        heading: '🕯️ Elementos del Ritual',
-        accent: 'purple',
-        items: [
-          {
-            term: 'Intención',
-            description:
-              'El corazón de todo ritual: definir con claridad qué deseas atraer, soltar o transformar.',
-          },
-          {
-            term: 'Velas, Hierbas y Símbolos',
-            description:
-              'Los elementos materiales —colores, aromas y objetos— concentran y refuerzan el propósito de la práctica.',
-          },
-          {
-            term: 'Palabras y Gestos',
-            description:
-              'Afirmaciones, visualizaciones y movimientos conscientes dan forma a la energía que pones en marcha.',
-          },
-        ],
-      },
-      {
-        heading: '🌙 Fases y Momentos',
-        accent: 'indigo',
-        items: [
-          {
-            term: 'Las Fases Lunares',
-            description:
-              'Luna nueva para comenzar, creciente para hacer crecer, llena para culminar y menguante para soltar.',
-          },
-          {
-            term: 'El Momento Adecuado',
-            description:
-              'Elegir el día y la hora afines a tu intención potencia la coherencia y la fuerza del ritual.',
-          },
-          {
-            term: 'Constancia y Respeto',
-            description:
-              'Repetir la práctica con cuidado y presencia consolida el cambio que buscas cultivar.',
-          },
-        ],
-      },
-    ],
-    note: 'Los rituales ordenan y enfocan tu intención: son un apoyo simbólico para tu proceso, siempre desde el respeto y la responsabilidad.',
-    href: ROUTES.ENCICLOPEDIA_GUIA('guia-rituales'),
   },
 };

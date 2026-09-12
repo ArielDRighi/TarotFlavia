@@ -55,8 +55,12 @@ describe('LISTING_INTROS', () => {
   });
 
   it('una ruta sin piso propio cae en el general', () => {
-    expect(MIN_LISTING_INTRO_WORDS_BY_KEY.contacto).toBeUndefined();
-    expect(getMinListingIntroWords('contacto')).toBe(MIN_LISTING_INTRO_WORDS);
+    expect(MIN_LISTING_INTRO_WORDS_BY_KEY.explorar).toBeUndefined();
+    expect(getMinListingIntroWords('explorar')).toBe(MIN_LISTING_INTRO_WORDS);
+  });
+
+  it('⚠️ T-SEO-015: /contacto está en el footer, así que el guardarraíl le exige 500 palabras; su piso propio lo cubre', () => {
+    expect(getMinListingIntroWords('contacto')).toBeGreaterThanOrEqual(420);
   });
 
   it.each(RUTAS_ESPERADAS)('%s tiene título, lead y al menos dos secciones', (key) => {

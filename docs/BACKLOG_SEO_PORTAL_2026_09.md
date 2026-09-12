@@ -88,7 +88,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | ID | Tarea | Tipo | Prioridad | Estimación | Estado |
 | --- | --- | --- | --- | --- | --- |
 | T-SEO-014 | Home editorial: de landing SaaS a portada de portal | Frontend | 🔴 Crítica | 3 pts | ✅ Completada |
-| T-SEO-015 | Páginas de herramientas: nota editorial debajo de cada widget; `noindex` a ventas/internas; guardarraíl sobre el nav | Frontend + contenido | 🔴 Crítica | 4 pts | ⬜ Pendiente |
+| T-SEO-015 | Páginas de herramientas: nota editorial debajo de cada widget; `noindex` a ventas/internas; guardarraíl sobre el nav | Frontend + contenido | 🔴 Crítica | 4 pts | ✅ Completada |
 | T-SEO-016 | Horóscopo del día en el HTML servido (SSR/ISR) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
 | T-SEO-017 | Persona editorial responsable, bylines y `/politica-editorial` | Frontend + decisión | 🟠 Alta | 2 pts | ⬜ Pendiente |
 | T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ⬜ Pendiente |
@@ -109,7 +109,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 | 1 | ~~**T-SEO-019**~~ ✅ | 0,5 pts | Cerrada 11-sep-2026: grupo `Mediapartners-Google` en robots y sitemap sin `lastmod` |
 | 2 | ~~**T-SEO-016**~~ ✅ | 2 pts | Cerrada 11-sep-2026: `getCanonicalDailyHoroscopes()` en `lib/api/horoscope-server.ts` devuelve los 12 del día canónico (ART) para que 014 y 015 los consuman en SSR |
 | 3 | ~~**T-SEO-014**~~ ✅ | 3 pts | Cerrada 11-sep-2026: portada editorial con horóscopo de hoy (12 extractos), carta del día canónica y guías en el HTML; `LandingPage` eliminada |
-| 4 | **T-SEO-015** | 4 pts | La causa n.º 2. Va después de 014 porque las secciones que la home deja de mostrar (precios, "3 pasos") aterrizan en `/premium`, que es una de las URLs que 015 reescribe |
+| 4 | ~~**T-SEO-015**~~ ✅ | 4 pts | Cerrada 12-sep-2026: siete páginas de herramientas con nota propia (800+ c/u, estructuras distintas), `/horoscopo` y `/carta-del-dia` con el día en el HTML, `/premium` con `noindex` y fuera del sitemap/menú, guardarraíl sobre el nav (500 palabras) y coherencia `noindex` ↔ sitemap |
 | 5 | **T-SEO-017** | 2 pts | Necesita una **decisión de negocio** (quién firma) que se puede tomar mientras se desarrollan 014–016. El código es chico |
 | 6 | **T-SEO-018** | 1,5 pts | Cierra el lenguaje después de que 014/015/017 escribieron texto nuevo, así el guardarraíl los cubre |
 | 7 | **Deploy único + Search Console + espera de 14–21 días** | — | No es código. Ver *Puerta de salida* |
@@ -267,7 +267,7 @@ Rediseño visual del resto del sitio; cambios en `UserDashboard`.
 
 ## T-SEO-015: Páginas de Herramientas — Nota Editorial Debajo de Cada Widget; Guardarraíl sobre el Nav
 
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (12-sep-2026) — verificación en producción pendiente del deploy único
 **Prioridad:** 🔴 Crítica · **Estimación:** 4 pts · **Tipo:** Frontend + contenido
 **Depende de:** T-SEO-014 (recibe los componentes de precios en `/premium`)
 
@@ -324,16 +324,107 @@ Tests en `check-indexable-content.test.mjs`.
 
 ### Criterios de aceptación
 
-- [ ] Ninguna URL del header/footer anónimo sirve menos de 500 palabras propias sin `noindex`, y
+- [x] Ninguna URL del header/footer anónimo sirve menos de 500 palabras propias sin `noindex`, y
       ninguna herramienta gratuita perdió su acceso sin registro (test de cada widget en anónimo).
-- [ ] `/premium`, `/tarot`, `/ritual`, `/carta-astral/resultado` con `noindex, follow` verificable
-      en el HTML.
-- [ ] `/carta-del-dia`, `/horoscopo`, `/rituales`, `/pendulo`, `/numerologia`, `/carta-astral` y
+      *(Medido contra el build local sin API —el piso—: `/servicios` 536 · `/enciclopedia` 565 ·
+      `/horoscopo` 578 · `/premium` 594 (noindex) · `/contacto` 630 · `/horoscopo-chino` 665 ·
+      `/rituales` 824 · `/pendulo` 1.008 · `/numerologia` 1.085 · `/carta-del-dia` 1.164 ·
+      `/carta-astral` 1.243. `/login` y `/registro` llevan `noindex`; `/terminos` y `/privacidad`
+      están exentas por ser legales. Verificar contra producción tras el deploy único.)*
+- [x] `/premium`, `/tarot`, `/ritual`, `/carta-astral/resultado` con `noindex, follow` verificable
+      en el HTML. *(Tests de metadata; el HTML se verifica en producción: en local/staging el root
+      layout ya pone `noindex` en todo.)*
+- [x] `/carta-del-dia`, `/horoscopo`, `/rituales`, `/pendulo`, `/numerologia`, `/carta-astral` y
       `/contacto` en el sitemap, con estructura de encabezados **distinta entre sí** (no la plantilla
       emoji + 3 bullets).
-- [ ] El guardarraíl rastrea nav/footer y falla ante la combinación prohibida; tests del script en
-      verde.
-- [ ] `Header.test.tsx` y `Footer` tests actualizados al menú nuevo.
+- [x] El guardarraíl rastrea nav/footer y falla ante la combinación prohibida; tests del script en
+      verde (107).
+- [x] `Header.test.tsx` y `Footer` tests actualizados al menú nuevo.
+
+### Decisiones de implementación
+
+- **Guardarraíl** (`check-indexable-content.mjs`): `extractNavPaths()` saca los `href` internos del
+  `<header>` y el `<footer>` del chrome route (`/admin`, que ya se pedía para medir el chrome) y
+  esas rutas se miden siempre, estén o no en el sitemap y aunque `--sample` las dejara fuera.
+  `--nav-min-words` (500) salvo `noindex` (`hasNoindex()`, meta `robots`/`googlebot` en cualquier
+  orden de atributos). Coherencia: `noindex` en el sitemap → `crossFailures` → exit 1. **En staging
+  y local el root layout pone `noindex` en todas las páginas** (`isIndexingAllowed()`), así que la
+  meta no distingue rutas: el script lo detecta (el chrome route lleva `noindex`), no evalúa cruces
+  y reporta el menú bajo el umbral como aviso (`navUnverified`) sin tumbar la corrida. Las dos
+  reglas nuevas se validan de verdad contra producción. `RUTAS_EXENTAS` deja de estar vacía:
+  `/terminos` y `/privacidad` (339 / 449 palabras) están en el footer por obligación y su extensión
+  la fija legales, no el umbral editorial; siguen indexables.
+- **`noindex`**: `buildPageMetadata({ noindex: true })` → `robots: { index: false, follow: true }`.
+  `/premium` lo usa y sale del sitemap. `/tarot` y `/ritual` comparten `ritualMetadata` (ahora con
+  `robots`). `/carta-astral/resultado` lo declara en su layout (y se le sacó el " | Auguria"
+  duplicado del título, el bug de T-PROD-020).
+- **Header**: Premium deja de ser ítem de `HeaderNavLinks` (ni desktop ni menú móvil) y pasa a
+  `PremiumHeaderButton`, un botón junto a los de sesión, visible para el visitante y para el usuario
+  Free (gating por capabilities, como antes). El menú editorial anónimo queda igual que antes.
+- **`/premium`**: recibe `PremiumBenefitsSection` y `HowItWorks`, movidos de `features/home` a
+  `features/premium`. `PremiumBenefitsSection` tenía el precio hardcodeado ("$7.000"): ahora lo
+  recibe por prop desde la ruta (la API) y sin precio no inventa uno; su CTA es el `PremiumCtaButton`
+  de la página (registro / MercadoPago / "ya tenés Premium"). `HowItWorks` manda al usuario con
+  sesión a la tirada, no al registro. **`PlanComparison` se eliminó** con sus tests: `/premium` ya
+  tenía su comparativa Free/Premium con el precio real, y una segunda tabla —con tres columnas y
+  precio fijo— duplicaba y podía divergir (justo lo que T-FBK-005 cerró). FAQ ampliada (facturación
+  por MercadoPago, cancelación, reembolso) y sección **"Derecho de arrepentimiento"** con el botón
+  que lleva a `/contacto` y el correo, con el plazo de 10 días corridos. ⚠️ **Confirmar con legales**
+  el texto y el mecanismo (Res. 424/2020 pide el botón en la home del sitio de venta; acá está en la
+  página de venta).
+- **`/horoscopo`**: Server Component (`revalidate = 3600`, igual que la portada y la ficha del
+  signo). `HoroscopeHub` renderiza `h1` + los 12 extractos con fecha (`DailyHoroscopeList`, extraído
+  de `DailyHoroscopeDigest` de la portada y compartido: las dos rutas no pueden mostrar días
+  distintos) + la consulta puntual (`HoroscopeHubSelector`, la única parte cliente) + un bloque
+  propio "Cómo leer el horóscopo diario" (`horoscope-hub.data.ts`, piso de 200 palabras para que el
+  hub supere las 500 aunque la API no responda) + el `ServiceIntro` de siempre. Sin swap por día
+  local, igual que la portada. La página vieja pedía los 12 horóscopos a la API sólo para mostrar
+  un esqueleto: ya no hay ninguna request desde el cliente.
+- **`/carta-del-dia`**: Server Component (`revalidate = 3600`). `DailyCardPage` = h1 + **la carta
+  de hoy** (`getCanonicalDailyCard()` de T-SEO-014, la misma de la portada, con descripción,
+  significado, amor, trabajo y consejo, ~400–600 palabras cuando la ficha trae el contenido
+  extendido) + **la herramienta** (`DailyCardExperience`, sin cambios, usable sin registro) + **guía
+  permanente** "Cómo usar la carta del día" (`daily-card-guide.data.ts`, 7 pasos, 1.100 palabras) +
+  **archivo de 30 días** (`getDailyCardArchive()`: misma regla determinista, sólo el listado del
+  mazo —cacheado por render junto con la carta de hoy—, sin pedir fichas). `getDailyCardPageData()`
+  resuelve los dos bloques en paralelo y degrada por separado. El test de la ruta que cubría el
+  widget pasó a ser un test de ruta fino; el widget ya tenía sus propios tests (incluido el flujo
+  anónimo).
+- **`/pendulo`, `/numerologia`, `/carta-astral`**: la herramienta no cambia; se le saca el
+  `ServiceIntro` y la ruta renderiza debajo la nota de uso como Server Component. Estructuras
+  distintas a propósito: **péndulo** = preguntas que sirven / que no (con el porqué) + tabla de los
+  tres movimientos + quizás, límite y qué no puede decirte (906 palabras); **numerología** = cómo se
+  calcula el número de vida con un ejemplo a mano + tabla de los 9 números y los 3 maestros + lectura
+  en tres capas + FAQ + límites (970); **carta astral** = qué hace falta y qué pasa si falta la hora +
+  el trío Sol/Luna/Ascendente como glosario + orden de lectura + un ejemplo de lectura + errores
+  frecuentes numerados + límites (999). Cada una enlaza a su entrada específica de la enciclopedia,
+  no al índice. `NumerologyIntro` se eliminó (era un alias del `ServiceIntro`).
+- **`/rituales`**: la ruta resuelve el catálogo (`resolveListingData(getRituals)`, `revalidate =
+  3600`) y lo siembra en `RitualsPage` vía `useRituals(filters, { initialData })` —sólo para la
+  query sin filtros; `initialDataUpdatedAt: 0` para que el cliente refetchee igual—, así los
+  rituales con extracto, categoría, duración y fase viajan en el HTML. Debajo,
+  `RitualsEditorialGuide`: las cuatro fases de la Luna y qué ritual va con cada una, las categorías
+  y cuándo conviene cada una, qué preparar y qué esperar (`rituals-hub.data.ts`, 600+). El test de
+  interacción que vivía en `app/rituales/page.test.tsx` pasó a `RitualsPage.interaction.test.tsx`
+  (y se le sacaron los `as any` / `eslint-disable` que tenía).
+- **`/contacto`**: sigue indexable. `dl` de datos de contacto (correo del dominio, dónde estamos,
+  horario de respuesta, quién responde) y `LISTING_INTROS.contacto` ampliada a seis bloques
+  (cuentas y pagos con el arrepentimiento, correcciones al contenido, profesionales y prensa, qué no
+  se resuelve, privacidad) con piso propio de 420. `CONFIG.CONTACT_LOCATION` = "Argentina":
+  ⚠️ **la ciudad/provincia es una decisión de negocio** ligada a quién firma (T-SEO-017); cuando se
+  decida, se cambia ahí y en `/sobre-nosotros`.
+- **Fuera del alcance original pero exigido por el criterio n.º 1** (toda URL del menú ≥ 500):
+  `/horoscopo-chino` servía 255 y es ítem del header y del footer, así que recibió su nota de uso
+  (`ChineseHoroscopeGuide`: Año Nuevo chino, elemento, cómo leer la predicción anual, qué no dice;
+  el hub cliente salió de `app/` a `features/chinese-horoscope/ChineseHoroscopeHub`). Y
+  `/enciclopedia` (267) y `/servicios` (429) ampliaron su `ListingIntro` (pisos 440 y 460).
+- **`SERVICE_INTROS`** queda con tres entradas (`tarot`, `western-horoscope`, `chinese-horoscope`);
+  las cinco de herramientas se borraron con sus consumidores.
+- **Verificación pendiente contra producción**, después del deploy único:
+  `npm run check:indexable -- --base-url https://auguriatarot.com` tiene que dar verde incluido el
+  menú (17 rutas), `curl -sA Googlebot https://auguriatarot.com/premium | grep -c noindex` ≥ 1,
+  `curl -sA Googlebot https://auguriatarot.com/horoscopo | grep -c 'horoscope-hub-sign-'` = 12 y
+  `curl -sA Googlebot https://auguriatarot.com/carta-del-dia | grep -c 'daily-card-today-date'` = 1.
 
 ---
 
@@ -639,4 +730,4 @@ Un cuarto rechazo es peor que tres. **Todo esto, en este orden:**
 
 ---
 
-**Última actualización:** 11-sep-2026
+**Última actualización:** 12-sep-2026

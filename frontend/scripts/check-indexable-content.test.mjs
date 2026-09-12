@@ -13,7 +13,10 @@ import {
   evaluate,
   formatReport,
   run,
+  extractNavPaths,
+  hasNoindex,
   SLUG_INVENTADO,
+  RUTAS_EXENTAS,
 } from './check-indexable-content.mjs';
 
 // =============================================================================
@@ -749,5 +752,386 @@ describe('run', () => {
     const resultado = await run(opcionesBase, { fetchImpl: fakeFetch(rutas), log: vi.fn() });
 
     expect(resultado.rows.every((r) => r.ownWords >= 0)).toBe(true);
+  });
+});
+
+// =============================================================================
+// T-SEO-015: menú (header + footer) y coherencia noindex ↔ sitemap
+// =============================================================================
+
+/**
+ * Chrome con links en el header y el footer, como el que sirve `/admin` para un
+ * visitante sin sesión. Los `href` externos y los `mailto:` no son rutas.
+ */
+function chromeConMenu() {
+  return (
+    '<header><a href="/">Auguria</a><nav><a href="/carta-del-dia">Carta</a>' +
+    '<a href="/premium?ref=header#planes">Premium</a><a href="https://x.com/a">X</a>' +
+    '<a href="mailto:hola@auguriatarot.com">Mail</a></nav></header>' +
+    '<footer><a href="/contacto/">Contacto</a><a href="/carta-del-dia">Carta</a></footer>'
+  );
+}
+
+function pageConChrome(chrome, palabrasPropias, { noindex = false } = {}) {
+  const cuerpo = Array.from({ length: palabrasPropias }, (_, i) => `palabra${i}`).join(' ');
+  const meta = noindex ? '<meta name="robots" content="noindex, follow"/>' : '';
+  return `<html><head>${meta}</head><body>${chrome}<main>${cuerpo}</main></body></html>`;
+}
+
+describe('extractNavPaths', () => {
+  it('devuelve las rutas internas del header y del footer, sin duplicar', () => {
+    expect(extractNavPaths(chromeConMenu())).toEqual([
+      '/',
+      '/carta-del-dia',
+      '/premium',
+      '/contacto',
+    ]);
+  });
+
+  it('ignora los links de fuera del header y del footer', () => {
+    const html = '<header><a href="/a">a</a></header><main><a href="/b">b</a></main>';
+
+    expect(extractNavPaths(html)).toEqual(['/a']);
+  });
+
+  it('descarta externos, mailto y anclas', () => {
+    const html =
+      '<footer><a href="https://auguriatarot.com/x">x</a><a href="mailto:a@b.c">m</a>' +
+      '<a href="#top">t</a><a href="/ok">ok</a></footer>';
+
+    expect(extractNavPaths(html)).toEqual(['/ok']);
+  });
+
+  it('acepta atributos con comillas simples y el href en cualquier posición', () => {
+    const html = "<header><a class='x' href='/uno'>1</a><a href=\"/dos\" id='y'>2</a></header>";
+
+    expect(extractNavPaths(html)).toEqual(['/uno', '/dos']);
+  });
+
+  it('devuelve vacío si no hay header ni footer', () => {
+    expect(extractNavPaths('<main><a href="/a">a</a></main>')).toEqual([]);
+  });
+});
+
+describe('hasNoindex', () => {
+  it('detecta la meta robots con noindex, en cualquier orden de atributos', () => {
+    expect(hasNoindex('<meta name="robots" content="noindex, follow"/>')).toBe(true);
+    expect(hasNoindex('<meta content="noindex" name="robots">')).toBe(true);
+    expect(hasNoindex('<META NAME="ROBOTS" CONTENT="NOINDEX">')).toBe(true);
+  });
+
+  it('no confunde index con noindex ni otras metas', () => {
+    expect(hasNoindex('<meta name="robots" content="index, follow"/>')).toBe(false);
+    expect(hasNoindex('<meta name="description" content="noindex"/>')).toBe(false);
+    expect(hasNoindex('')).toBe(false);
+  });
+
+  it('acepta googlebot como nombre de la meta', () => {
+    expect(hasNoindex('<meta name="googlebot" content="noindex"/>')).toBe(true);
+  });
+});
+
+describe('evaluate — menú y noindex (T-SEO-015)', () => {
+  const opciones = {
+    minWords: 120,
+    navMinWords: 500,
+    exceptions: new Map(),
+  };
+
+  it('una ruta del menú sin noindex y bajo el umbral alto falla aunque supere el general', () => {
+    const resultado = evaluate(
+      [{ pathname: '/pendulo', status: 200, ownWords: 215, inSitemap: true, inNav: true }],
+      opciones
+    );
+
+    expect(resultado.failures).toEqual([]);
+    expect(resultado.navFailures.map((m) => m.pathname)).toEqual(['/pendulo']);
+    expect(resultado.exitCode).toBe(1);
+  });
+
+  it('una ruta del menú con noindex y fuera del sitemap no falla por el umbral alto', () => {
+    const resultado = evaluate(
+      [{ pathname: '/premium', status: 200, ownWords: 280, inNav: true, noindex: true }],
+      opciones
+    );
+
+    expect(resultado.navFailures).toEqual([]);
+    expect(resultado.crossFailures).toEqual([]);
+    expect(resultado.exitCode).toBe(0);
+  });
+
+  it('una ruta del menú que supera el umbral alto cumple', () => {
+    const resultado = evaluate(
+      [{ pathname: '/horoscopo', status: 200, ownWords: 640, inSitemap: true, inNav: true }],
+      opciones
+    );
+
+    expect(resultado.navFailures).toEqual([]);
+    expect(resultado.exitCode).toBe(0);
+  });
+
+  it('⚠️ una URL con noindex dentro del sitemap es un cruce prohibido', () => {
+    const resultado = evaluate(
+      [{ pathname: '/premium', status: 200, ownWords: 900, inSitemap: true, noindex: true }],
+      opciones
+    );
+
+    expect(resultado.crossFailures.map((m) => m.pathname)).toEqual(['/premium']);
+    expect(resultado.exitCode).toBe(1);
+  });
+
+  it('una ruta del menú que no responde 200 falla', () => {
+    const resultado = evaluate([{ pathname: '/roto', status: 500, ownWords: 0, inNav: true }], {
+      ...opciones,
+    });
+
+    expect(resultado.navFailures.map((m) => m.pathname)).toEqual(['/roto']);
+  });
+
+  it('las rutas exentas tampoco tumban la corrida por el umbral del menú', () => {
+    const resultado = evaluate(
+      [{ pathname: '/pendulo', status: 200, ownWords: 215, inSitemap: true, inNav: true }],
+      { ...opciones, exceptions: new Map([['/pendulo', 'motivo']]) }
+    );
+
+    expect(resultado.navFailures).toEqual([]);
+    expect(resultado.exempt.map((m) => m.pathname)).toEqual(['/pendulo']);
+    expect(resultado.exitCode).toBe(0);
+  });
+
+  it('sin navMinWords ni banderas, se comporta como antes', () => {
+    const resultado = evaluate([{ pathname: '/x', status: 200, ownWords: 130 }], {
+      minWords: 120,
+      exceptions: new Map(),
+    });
+
+    expect(resultado.failures).toEqual([]);
+    expect(resultado.navFailures).toEqual([]);
+    expect(resultado.crossFailures).toEqual([]);
+    expect(resultado.exitCode).toBe(0);
+  });
+});
+
+describe('parseArgs — --nav-min-words', () => {
+  it('usa 500 por defecto', () => {
+    expect(parseArgs(['--base-url', 'https://x.com'], {}).navMinWords).toBe(500);
+  });
+
+  it('acepta --nav-min-words', () => {
+    expect(parseArgs(['--base-url', 'https://x.com', '--nav-min-words=700'], {}).navMinWords).toBe(
+      700
+    );
+  });
+
+  it('rechaza un --nav-min-words que apagaría el guardarraíl', () => {
+    expect(() => parseArgs(['--base-url', 'https://x.com', '--nav-min-words', '-1'], {})).toThrow();
+  });
+});
+
+describe('formatReport — menú y cruces', () => {
+  const base = {
+    exempt: [],
+    minWords: 120,
+    navMinWords: 500,
+    chromeWords: 5,
+    softNotFound: [],
+  };
+
+  it('lista las rutas del menú por debajo del umbral alto', () => {
+    const fila = { pathname: '/pendulo', status: 200, ownWords: 215, inSitemap: true, inNav: true };
+    const texto = formatReport({
+      ...base,
+      rows: [fila],
+      failures: [],
+      navFailures: [fila],
+      crossFailures: [],
+    });
+
+    expect(texto).toMatch(/menú/i);
+    expect(texto).toMatch(/500/);
+    expect(texto).toMatch(/\/pendulo/);
+  });
+
+  it('lista los cruces noindex ↔ sitemap', () => {
+    const fila = {
+      pathname: '/premium',
+      status: 200,
+      ownWords: 900,
+      inSitemap: true,
+      noindex: true,
+    };
+    const texto = formatReport({
+      ...base,
+      rows: [fila],
+      failures: [],
+      navFailures: [],
+      crossFailures: [fila],
+    });
+
+    expect(texto).toMatch(/noindex/);
+    expect(texto).toMatch(/\/premium/);
+  });
+
+  it('marca en la tabla qué rutas son del menú y cuáles tienen noindex', () => {
+    const texto = formatReport({
+      ...base,
+      rows: [
+        { pathname: '/premium', status: 200, ownWords: 280, inNav: true, noindex: true },
+        { pathname: '/horoscopo', status: 200, ownWords: 640, inSitemap: true, inNav: true },
+      ],
+      failures: [],
+      navFailures: [],
+      crossFailures: [],
+    });
+
+    const lineaPremium = texto.split('\n').find((l) => l.startsWith('/premium'));
+    expect(lineaPremium).toMatch(/noindex/);
+    expect(lineaPremium).toMatch(/menú/);
+    expect(lineaPremium).toMatch(/✅/);
+  });
+});
+
+describe('run — rastrea el menú (T-SEO-015)', () => {
+  const BASE = 'https://auguriatarot.com';
+  const chrome = chromeConMenu();
+
+  const rutas = {
+    '/sitemap.xml': { html: sitemapXml([`${BASE}/`, `${BASE}/carta-del-dia`, `${BASE}/contacto`]) },
+    '/admin': { html: pageConChrome(chrome, 0) },
+    '/': { html: pageConChrome(chrome, 900) },
+    '/carta-del-dia': { html: pageConChrome(chrome, 220) },
+    '/contacto': { html: pageConChrome(chrome, 600) },
+    '/premium': { html: pageConChrome(chrome, 280, { noindex: true }) },
+  };
+
+  const opciones = {
+    baseUrl: BASE,
+    minWords: 120,
+    navMinWords: 500,
+    chromeRoute: '/admin',
+    concurrency: 4,
+    checkSoft404: false,
+    exceptions: new Map(),
+  };
+
+  it('mide también las rutas del menú que no están en el sitemap', async () => {
+    const pedidas = [];
+    const resultado = await run(opciones, {
+      fetchImpl: fakeFetch(rutas, { pedidas }),
+      log: vi.fn(),
+    });
+
+    expect(pedidas.some((url) => new URL(url).pathname === '/premium')).toBe(true);
+    const premium = resultado.rows.find((r) => r.pathname === '/premium');
+    expect(premium).toMatchObject({ inNav: true, inSitemap: false, noindex: true });
+  });
+
+  it('falla por una ruta del menú con 220 palabras aunque pase el umbral general', async () => {
+    const resultado = await run(opciones, { fetchImpl: fakeFetch(rutas), log: vi.fn() });
+
+    expect(resultado.failures).toEqual([]);
+    expect(resultado.navFailures.map((m) => m.pathname)).toEqual(['/carta-del-dia']);
+    expect(resultado.exitCode).toBe(1);
+  });
+
+  it('no falla por /premium: tiene noindex y no está en el sitemap', async () => {
+    const resultado = await run(opciones, { fetchImpl: fakeFetch(rutas), log: vi.fn() });
+
+    expect(resultado.navFailures.map((m) => m.pathname)).not.toContain('/premium');
+    expect(resultado.crossFailures).toEqual([]);
+  });
+
+  it('⚠️ falla si una URL del sitemap sirve noindex', async () => {
+    const conCruce = {
+      ...rutas,
+      '/sitemap.xml': { html: sitemapXml([`${BASE}/`, `${BASE}/contacto`, `${BASE}/premium`]) },
+    };
+    const resultado = await run(opciones, { fetchImpl: fakeFetch(conCruce), log: vi.fn() });
+
+    expect(resultado.crossFailures.map((m) => m.pathname)).toEqual(['/premium']);
+    expect(resultado.exitCode).toBe(1);
+  });
+
+  it('pasa cuando todo el menú supera el umbral alto', async () => {
+    const sano = { ...rutas, '/carta-del-dia': { html: pageConChrome(chrome, 800) } };
+    const resultado = await run(opciones, { fetchImpl: fakeFetch(sano), log: vi.fn() });
+
+    expect(resultado.exitCode).toBe(0);
+    expect(resultado.navPaths).toEqual(['/', '/carta-del-dia', '/premium', '/contacto']);
+  });
+
+  it('el muestreo no deja fuera a las rutas del menú', async () => {
+    const resultado = await run(
+      { ...opciones, sample: 1 },
+      { fetchImpl: fakeFetch(rutas), log: vi.fn() }
+    );
+
+    expect(resultado.rows.map((r) => r.pathname).sort()).toEqual(
+      ['/', '/carta-del-dia', '/contacto', '/premium'].sort()
+    );
+  });
+});
+
+describe('run — host entero con noindex (staging / local)', () => {
+  const BASE = 'http://localhost:3099';
+  const chrome = chromeConMenu();
+  // En staging y local el root layout pone `noindex` en TODAS las páginas
+  // (`isIndexingAllowed()` es fail-closed): la meta no dice nada de la ruta.
+  const rutas = {
+    '/sitemap.xml': { html: sitemapXml([`${BASE}/`, `${BASE}/carta-del-dia`, `${BASE}/contacto`]) },
+    '/admin': { html: pageConChrome(chrome, 0, { noindex: true }) },
+    '/': { html: pageConChrome(chrome, 900, { noindex: true }) },
+    '/carta-del-dia': { html: pageConChrome(chrome, 220, { noindex: true }) },
+    '/contacto': { html: pageConChrome(chrome, 600, { noindex: true }) },
+    '/premium': { html: pageConChrome(chrome, 280, { noindex: true }) },
+  };
+
+  const opciones = {
+    baseUrl: BASE,
+    minWords: 120,
+    navMinWords: 500,
+    chromeRoute: '/admin',
+    concurrency: 4,
+    checkSoft404: false,
+    exceptions: new Map(),
+  };
+
+  it('no reporta cruces noindex ↔ sitemap: la meta es del entorno, no de la ruta', async () => {
+    const resultado = await run(opciones, { fetchImpl: fakeFetch(rutas), log: vi.fn() });
+
+    expect(resultado.noindexKnown).toBe(false);
+    expect(resultado.crossFailures).toEqual([]);
+  });
+
+  it('el menú bajo el umbral se reporta pero no tumba la corrida: no se puede saber si lleva noindex', async () => {
+    const log = vi.fn();
+    const resultado = await run(opciones, { fetchImpl: fakeFetch(rutas), log });
+
+    expect(resultado.navUnverified.map((m) => m.pathname).sort()).toEqual(
+      ['/carta-del-dia', '/premium'].sort()
+    );
+    expect(resultado.navFailures).toEqual([]);
+    expect(resultado.exitCode).toBe(0);
+    expect(log.mock.calls[0][0]).toMatch(/no verificable/i);
+  });
+
+  it('el umbral general sigue aplicando igual', async () => {
+    const delgada = {
+      ...rutas,
+      '/contacto': { html: pageConChrome(chrome, 50, { noindex: true }) },
+    };
+    const resultado = await run(opciones, { fetchImpl: fakeFetch(delgada), log: vi.fn() });
+
+    expect(resultado.failures.map((m) => m.pathname)).toEqual(['/contacto']);
+    expect(resultado.exitCode).toBe(1);
+  });
+});
+
+describe('RUTAS_EXENTAS (T-SEO-015)', () => {
+  it('exime sólo a las dos páginas legales del footer, con motivo escrito', () => {
+    expect([...RUTAS_EXENTAS.keys()].sort()).toEqual(['/privacidad', '/terminos']);
+    for (const motivo of RUTAS_EXENTAS.values()) {
+      expect(motivo).toMatch(/legal/i);
+    }
   });
 });

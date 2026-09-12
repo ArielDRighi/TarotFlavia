@@ -35,7 +35,8 @@ const STATIC_ROUTES: ReadonlyArray<{
   { path: ROUTES.RITUALES, priority: 0.8, changeFrequency: 'weekly' },
   { path: ROUTES.SERVICIOS, priority: 0.8, changeFrequency: 'weekly' },
   { path: ROUTES.EXPLORAR, priority: 0.7, changeFrequency: 'weekly' },
-  { path: ROUTES.PREMIUM, priority: 0.7, changeFrequency: 'monthly' },
+  // `/premium` no va: es página de venta con `noindex` (T-SEO-015), y el
+  // guardarraíl falla ante una URL con noindex dentro del sitemap.
   // Señal de autoría del sitio (T-SEO-011): de las que más queremos indexar.
   { path: ROUTES.SOBRE_NOSOTROS, priority: 0.7, changeFrequency: 'monthly' },
   { path: ROUTES.CONTACTO, priority: 0.5, changeFrequency: 'yearly' },

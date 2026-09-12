@@ -34,7 +34,18 @@ const steps: Step[] = [
   },
 ];
 
-export function HowItWorks() {
+/**
+ * "Tu lectura de tarot en 3 simples pasos". Salió de la home (T-SEO-014) y vive
+ * en `/premium` desde T-SEO-015. El CTA por defecto manda al registro; con
+ * sesión, `/premium` lo apunta a la tirada.
+ */
+export interface HowItWorksProps {
+  cta?: { label: string; href: string };
+}
+
+const DEFAULT_CTA = { label: 'Comienza tu viaje', href: ROUTES.REGISTER };
+
+export function HowItWorks({ cta = DEFAULT_CTA }: HowItWorksProps = {}) {
   return (
     <section className="bg-bg-main px-4 py-16 md:py-24">
       <div className="container mx-auto">
@@ -106,7 +117,7 @@ export function HowItWorks() {
             size="lg"
             className="bg-primary hover:bg-primary/90 px-8 font-medium text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
           >
-            <Link href={ROUTES.REGISTER}>Comienza tu viaje</Link>
+            <Link href={cta.href}>{cta.label}</Link>
           </Button>
         </div>
       </div>

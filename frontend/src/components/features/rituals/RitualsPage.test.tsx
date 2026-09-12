@@ -84,23 +84,10 @@ describe('RitualsPage', () => {
     });
   });
 
-  it('debe renderizar ServiceIntro de rituales', () => {
+  it('T-SEO-015: la tarjeta informativa ya no vive acá (la guía editorial la renderiza la ruta)', () => {
     renderWithProviders(<RitualsPage />);
 
-    const widget = screen.getByTestId('rituals-intro');
-    expect(widget).toBeInTheDocument();
-  });
-
-  it('debe ubicar ServiceIntro debajo de la actividad (lista de rituales)', () => {
-    renderWithProviders(<RitualsPage />);
-
-    // Anclamos en la última grilla (la de "Todos los Rituales"); si un test
-    // futuro renderiza destacados habría más de un 'ritual-grid'.
-    const grids = screen.getAllByTestId('ritual-grid');
-    const activity = grids[grids.length - 1];
-    const intro = screen.getByTestId('rituals-intro');
-
-    expect(activity.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByTestId('rituals-intro')).not.toBeInTheDocument();
   });
 
   it('debe renderizar correctamente la página con la tarjeta informativa', () => {

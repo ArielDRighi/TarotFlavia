@@ -331,7 +331,7 @@ describe('Header', () => {
       expect(screen.getAllByRole('link', { name: /tirada de tarot/i }).length).toBeGreaterThan(0);
     });
 
-    it('should show "Premium" link in mobile menu for free authenticated users', async () => {
+    it('T-SEO-015: "Premium" no es ítem del menú móvil; es un botón del header', async () => {
       mockUseAuthStore.mockReturnValue({
         user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'free' },
       });
@@ -340,8 +340,9 @@ describe('Header', () => {
 
       await user.click(screen.getByRole('button', { name: /menú/i }));
 
-      const premiumLinks = screen.getAllByRole('link', { name: /premium/i });
-      expect(premiumLinks.length).toBeGreaterThan(0);
+      const mobileNav = screen.getByTestId('nav-links-mobile');
+      expect(mobileNav.querySelector('a[href="/premium"]')).toBeNull();
+      expect(screen.getByTestId('premium-header-button')).toHaveAttribute('href', '/premium');
     });
 
     it('should NOT show "Premium" link in mobile menu for premium users', async () => {
@@ -466,8 +467,8 @@ describe('Header', () => {
     });
   });
 
-  describe('Premium Badge - T-FE-04', () => {
-    it('should show "Premium" link for authenticated free users', () => {
+  describe('Premium Badge - T-FE-04 / botón del header T-SEO-015', () => {
+    it('should show "Premium" button for authenticated free users', () => {
       mockUseAuthStore.mockReturnValue({
         user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'free' },
       });
@@ -477,6 +478,7 @@ describe('Header', () => {
       const premiumLink = screen.getByRole('link', { name: /premium/i });
       expect(premiumLink).toBeInTheDocument();
       expect(premiumLink).toHaveAttribute('href', '/premium');
+      expect(premiumLink).toHaveAttribute('data-testid', 'premium-header-button');
     });
 
     it('should NOT show "Premium" link for authenticated premium users', () => {
@@ -488,17 +490,23 @@ describe('Header', () => {
 
       // The UserMenu dropdown trigger (avatar) is visible, but no "Premium" nav link
       expect(screen.queryByRole('link', { name: /^premium$/i })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('premium-header-button')).not.toBeInTheDocument();
     });
 
-    it('should NOT show "Premium" link for unauthenticated users', () => {
+    it('⚠️ T-SEO-015: para el visitante sin sesión, Premium es un botón junto a "Iniciar sesión", no un ítem del menú', () => {
       mockUseAuthStore.mockReturnValue({ user: null });
 
       render(<Header />);
 
-      expect(screen.queryByRole('link', { name: /^premium$/i })).not.toBeInTheDocument();
+      const premiumButton = screen.getByTestId('premium-header-button');
+      expect(premiumButton).toHaveAttribute('href', '/premium');
+      // Fuera de la navegación editorial: el menú anónimo queda igual que antes.
+      const desktopNav = screen.getByTestId('nav-links-desktop');
+      expect(desktopNav.querySelector('a[href="/premium"]')).toBeNull();
+      expect(screen.getByRole('link', { name: CTA_AUTH.LOGIN })).toBeInTheDocument();
     });
 
-    it('should render "Premium" link with a star icon', () => {
+    it('should render "Premium" button with a star icon', () => {
       mockUseAuthStore.mockReturnValue({
         user: { id: 1, name: 'María', email: 'maria@test.com', plan: 'free' },
       });

@@ -11,7 +11,12 @@ import {
   getRitualHistory,
   getRitualStats,
 } from '@/lib/api/rituals-api';
-import type { RitualFilters, CompleteRitualRequest, RitualDetail } from '@/types/ritual.types';
+import type {
+  RitualSummary,
+  RitualFilters,
+  CompleteRitualRequest,
+  RitualDetail,
+} from '@/types/ritual.types';
 
 /**
  * Query keys for ritual-related queries
@@ -40,11 +45,20 @@ export const ritualKeys = {
  * const { data: rituals, isLoading } = useRituals({ category: 'lunar' });
  * ```
  */
-export function useRituals(filters?: RitualFilters) {
+export function useRituals(
+  filters?: RitualFilters,
+  { initialData }: { initialData?: RitualSummary[] } = {}
+) {
   return useQuery({
     queryKey: ritualKeys.list(filters),
     queryFn: () => getRituals(filters),
     staleTime: 1000 * 60 * 30, // 30 minutos
+    // Siembra desde el servidor (T-SEO-015): el hub `/rituales` resuelve el
+    // catálogo en la ruta para que la grilla viaje en el HTML. Con
+    // `initialDataUpdatedAt: 0` el cliente igual refetchea al montar (mismo
+    // criterio que `usePublicPlans`): el HTML puede tener hasta una hora.
+    initialData,
+    initialDataUpdatedAt: initialData ? 0 : undefined,
   });
 }
 

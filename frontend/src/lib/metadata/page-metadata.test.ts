@@ -77,6 +77,21 @@ describe('buildPageMetadata', () => {
   });
 });
 
+describe('buildPageMetadata — noindex (T-SEO-015)', () => {
+  const base = { title: 'Título', description: 'Descripción.', canonical: '/ruta' };
+
+  it('por defecto no declara robots: hereda el index/follow del root layout', () => {
+    expect(buildPageMetadata(base).robots).toBeUndefined();
+  });
+
+  it('con noindex declara noindex, follow', () => {
+    expect(buildPageMetadata({ ...base, noindex: true }).robots).toEqual({
+      index: false,
+      follow: true,
+    });
+  });
+});
+
 describe('STATIC_PAGE_METADATA', () => {
   const entries = Object.entries(STATIC_PAGE_METADATA);
 
@@ -105,6 +120,23 @@ describe('STATIC_PAGE_METADATA', () => {
         ROUTES.SOBRE_NOSOTROS,
       ])
     );
+  });
+
+  it('⚠️ T-SEO-015: /premium es página de venta → noindex, follow', () => {
+    expect(STATIC_PAGE_METADATA.premium.robots).toEqual({ index: false, follow: true });
+  });
+
+  it('las páginas de herramientas y de contacto siguen indexables', () => {
+    for (const key of [
+      'cartaAstral',
+      'numerologia',
+      'pendulo',
+      'rituales',
+      'horoscopo',
+      'contacto',
+    ] as const) {
+      expect(STATIC_PAGE_METADATA[key].robots).toBeUndefined();
+    }
   });
 
   it('⚠️ REGRESIÓN T-PROD-020: ningún título se repite entre rutas', () => {

@@ -13,16 +13,21 @@
  * regeneración. Se elige de forma determinista a partir del día canónico del
  * sitio (Buenos Aires), así el HTML es estable dentro del día y cambia solo.
  *
- * T-SEO-015 reutiliza esta misma función para el bloque "Carta de hoy" de
- * `/carta-del-dia`: las dos rutas no pueden mostrar cartas distintas.
+ * `/carta-del-dia` (T-SEO-015) reutiliza esta misma función para su bloque
+ * "La carta de hoy" —las dos rutas no pueden mostrar cartas distintas— y suma
+ * `getDailyCardArchive`, que aplica la misma regla a los días anteriores.
  */
 
 import { cache } from 'react';
 
 import { getCardBySlug, getCards } from './encyclopedia-api';
 import { resolveListingData } from '@/lib/metadata/route-data';
-import { getCanonicalDateString } from '@/lib/utils/date';
-import type { CanonicalDailyCard } from '@/types/home.types';
+import { getCanonicalDateString, shiftDateString } from '@/lib/utils/date';
+import type { CardSummary } from '@/types/encyclopedia.types';
+import type { CanonicalDailyCard, DailyCardArchiveEntry } from '@/types/home.types';
+
+/** Cuántos días hacia atrás lista el archivo de `/carta-del-dia`. */
+export const DAILY_CARD_ARCHIVE_DAYS = 30;
 
 /**
  * Índice determinista del mazo para una fecha.
@@ -49,22 +54,28 @@ export function pickDailyCardIndex(dateString: string, deckSize: number): number
 }
 
 /**
+ * El mazo ordenado por `id`, para que el orden en que la API devuelve las
+ * cartas no cambie cuál toca cada día. Cacheado por render: la carta de hoy y
+ * el archivo de `/carta-del-dia` comparten la misma request.
+ */
+const getOrderedDeck = cache(async (): Promise<CardSummary[]> => {
+  const deck = [...(await getCards())].sort((a, b) => a.id - b.id);
+  if (deck.length === 0) {
+    throw new Error('[T-SEO-014] el listado de cartas vino vacío');
+  }
+  return deck;
+});
+
+/**
  * La carta del día canónico con su ficha completa, o `undefined` si la API
  * falló o el mazo vino vacío. Degrada igual que `resolveListingData`: la
  * portada tiene texto propio y las otras secciones siguen sirviéndose.
- *
- * El mazo se ordena por `id` antes de elegir para que el orden en que la API
- * devuelve las cartas no cambie cuál toca hoy.
  */
 export const getCanonicalDailyCard = cache(async (): Promise<CanonicalDailyCard | undefined> => {
   const canonicalDate = getCanonicalDateString();
 
   return resolveListingData(async () => {
-    const deck = [...(await getCards())].sort((a, b) => a.id - b.id);
-    if (deck.length === 0) {
-      throw new Error('[T-SEO-014] el listado de cartas vino vacío');
-    }
-
+    const deck = await getOrderedDeck();
     const chosen = deck[pickDailyCardIndex(canonicalDate, deck.length)];
     // Sin contar la vista: `GET /encyclopedia/cards/:slug` incrementa
     // `viewCount`, y una regeneración de ISR de la portada no es una persona
@@ -75,3 +86,25 @@ export const getCanonicalDailyCard = cache(async (): Promise<CanonicalDailyCard 
     return { canonicalDate, card };
   });
 });
+
+/**
+ * Las cartas de los `days` días anteriores al canónico, de ayer hacia atrás,
+ * con la misma regla determinista que la carta de hoy: el archivo de
+ * `/carta-del-dia` (T-SEO-015) dice exactamente lo que la portada mostró cada
+ * día. Sólo usa el listado del mazo —sin pedir las fichas— porque cada entrada
+ * es un enlace a la ficha, no su contenido. `undefined` si la API falló.
+ */
+export const getDailyCardArchive = cache(
+  async (days: number = DAILY_CARD_ARCHIVE_DAYS): Promise<DailyCardArchiveEntry[] | undefined> => {
+    const canonicalDate = getCanonicalDateString();
+
+    return resolveListingData(async () => {
+      const deck = await getOrderedDeck();
+
+      return Array.from({ length: days }, (_, offset) => {
+        const date = shiftDateString(canonicalDate, -(offset + 1));
+        return { date, card: deck[pickDailyCardIndex(date, deck.length)] };
+      });
+    });
+  }
+);

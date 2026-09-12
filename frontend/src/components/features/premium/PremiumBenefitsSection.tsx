@@ -1,9 +1,10 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/constants/routes';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { PREMIUM_HOME_BENEFITS } from '@/lib/constants/premium-benefits';
+import { formatPriceArs } from '@/lib/utils/format';
 import {
   Sparkles,
   Layers,
@@ -28,7 +29,23 @@ const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
   TrendingUp,
 };
 
-export function PremiumBenefitsSection() {
+/**
+ * Sección "¿Por qué elegir Premium?".
+ *
+ * Nació en la landing (T-SEO-014 la sacó de la home) y vive en `/premium`
+ * desde T-SEO-015. Antes tenía el precio hardcodeado ("$7.000"): ahora lo
+ * recibe de la ruta, que lo resuelve de la API, y si no llega no inventa uno.
+ * El CTA por defecto manda al registro; `/premium` pasa el suyo, que depende
+ * de la sesión (registro / MercadoPago / "ya tenés Premium").
+ */
+export interface PremiumBenefitsSectionProps {
+  /** Precio mensual en ARS, resuelto de la API. Sin él no se muestra precio. */
+  price?: number;
+  /** CTA propio; por defecto, enlace al registro. */
+  cta?: ReactNode;
+}
+
+export function PremiumBenefitsSection({ price, cta }: PremiumBenefitsSectionProps = {}) {
   return (
     <section
       className="px-4 py-16 md:py-24"
@@ -103,31 +120,35 @@ export function PremiumBenefitsSection() {
 
         {/* Price & CTA */}
         <div className="text-center">
-          <div className="mb-2 flex items-baseline justify-center gap-1">
-            <span className="font-serif text-5xl font-bold" style={{ color: '#d69e2e' }}>
-              $7.000
-            </span>
-            <span className="font-sans text-lg" style={{ color: 'rgba(249, 247, 242, 0.55)' }}>
-              / mes
-            </span>
-          </div>
+          {price !== undefined && (
+            <div className="mb-2 flex items-baseline justify-center gap-1">
+              <span className="font-serif text-5xl font-bold" style={{ color: '#d69e2e' }}>
+                {formatPriceArs(price)}
+              </span>
+              <span className="font-sans text-lg" style={{ color: 'rgba(249, 247, 242, 0.55)' }}>
+                / mes
+              </span>
+            </div>
+          )}
           <p className="mb-8 font-sans text-sm" style={{ color: 'rgba(249, 247, 242, 0.4)' }}>
             Cancelá cuando quieras. Sin compromisos.
           </p>
-          <Button
-            asChild
-            size="lg"
-            className="min-w-[220px] border-0 px-8 font-semibold shadow-xl transition-all hover:scale-105"
-            style={{
-              background: 'linear-gradient(135deg, #d69e2e 0%, #f6d860 50%, #b7791f 100%)',
-              color: '#1a0a2e',
-            }}
-          >
-            <Link href={ROUTES.REGISTER}>
-              <Crown className="mr-2 h-4 w-4" />
-              {CTA_PREMIUM.PURCHASE}
-            </Link>
-          </Button>
+          {cta ?? (
+            <Button
+              asChild
+              size="lg"
+              className="min-w-[220px] border-0 px-8 font-semibold shadow-xl transition-all hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #d69e2e 0%, #f6d860 50%, #b7791f 100%)',
+                color: '#1a0a2e',
+              }}
+            >
+              <Link href={ROUTES.REGISTER}>
+                <Crown className="mr-2 h-4 w-4" />
+                {CTA_PREMIUM.PURCHASE}
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </section>

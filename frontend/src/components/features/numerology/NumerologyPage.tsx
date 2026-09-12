@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { NumerologyIntro, NumerologyProfile } from '@/components/features/numerology';
+import { NumerologyProfile } from '@/components/features/numerology';
 import { useAuthStore } from '@/stores/authStore';
 import { useCalculateNumerology, useMyNumerologyProfile } from '@/hooks/api/useNumerology';
 import { ROUTES } from '@/lib/constants/routes';
@@ -24,6 +24,7 @@ import type { NumerologyResponseDto } from '@/types/numerology.types';
  * - Si faltan datos (nombre o fecha), muestra alerta para completar perfil
  * - Siempre muestra calculadora para consultas de terceros
  * - Los resultados de la calculadora se muestran inline (sin navegar a otra página)
+ * - La nota de uso (`NumerologyGuide`) la renderiza la ruta debajo, en el servidor (T-SEO-015)
  */
 export function NumerologyPage() {
   const { user, isAuthenticated } = useAuthStore();
@@ -210,8 +211,6 @@ export function NumerologyPage() {
             <NumerologyProfile profile={calculatedResult} />
           </div>
         )}
-
-        <NumerologyIntro className="mt-8" />
       </div>
     </div>
   );

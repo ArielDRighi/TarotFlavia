@@ -207,12 +207,56 @@ describe('PremiumPage', () => {
       expect(screen.getByTestId('faq-section')).toBeInTheDocument();
     });
 
+    it('⚠️ T-SEO-015: recibe las secciones de venta que la home dejó de mostrar', () => {
+      renderWithProviders(<PremiumPage />);
+
+      expect(
+        screen.getByRole('heading', { name: /¿por qué elegir premium\?/i })
+      ).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /¿cómo funciona\?/i })).toBeInTheDocument();
+      // El precio de la sección de beneficios es el de la API, no uno hardcodeado.
+      expect(screen.getAllByText(/\$\s?7\.000/).length).toBeGreaterThan(0);
+    });
+
+    it('T-SEO-015: "Cómo funciona" manda al usuario con sesión a la tirada, no al registro', () => {
+      mockAuthStore.mockReturnValue({
+        user: { id: 1, email: 'free@test.com', plan: 'free' },
+        isAuthenticated: true,
+      });
+      renderWithProviders(<PremiumPage />);
+
+      expect(screen.getByRole('link', { name: /hacer una tirada/i })).toHaveAttribute(
+        'href',
+        '/tarot'
+      );
+      expect(screen.queryByRole('link', { name: /comienza tu viaje/i })).not.toBeInTheDocument();
+    });
+
+    it('⚠️ T-SEO-015: FAQ de facturación, cancelación y reembolso', () => {
+      renderWithProviders(<PremiumPage />);
+
+      const faq = screen.getByTestId('faq-section');
+      expect(faq.textContent).toMatch(/factur/i);
+      expect(faq.textContent).toMatch(/cancelar/i);
+      expect(faq.textContent).toMatch(/reembolso/i);
+      expect(faq.textContent).toMatch(/arrepentimiento/i);
+    });
+
+    it('⚠️ T-SEO-015: botón de arrepentimiento (Res. 424/2020) visible y enlazado a contacto', () => {
+      renderWithProviders(<PremiumPage />);
+
+      const revocation = screen.getByRole('link', { name: /botón de arrepentimiento/i });
+      expect(revocation).toHaveAttribute('href', '/contacto');
+      expect(screen.getByTestId('revocation-section').textContent).toMatch(/10 días/);
+    });
+
     it('should render guarantee section', () => {
       mockAuthStore.mockReturnValue({ user: null, isAuthenticated: false });
 
       renderWithProviders(<PremiumPage />);
 
-      expect(screen.getByText(/cancelá cuando quieras/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /sin compromiso/i })).toBeInTheDocument();
+      expect(screen.getAllByText(/cancelá cuando quieras/i).length).toBeGreaterThan(0);
     });
 
     // Canon visual (T-PREM-002 / PREM-002)

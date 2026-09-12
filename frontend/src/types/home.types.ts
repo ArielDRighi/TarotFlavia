@@ -6,7 +6,7 @@
  * component— pueda tiparlos sin importar el módulo server.
  */
 
-import type { CardDetail } from './encyclopedia.types';
+import type { CardDetail, CardSummary } from './encyclopedia.types';
 import type { ArticleSummary } from './encyclopedia-article.types';
 import type { CanonicalDailyHoroscopes } from './horoscope.types';
 
@@ -22,6 +22,25 @@ export interface CanonicalDailyCard {
   /** Día calendario canónico ('YYYY-MM-DD') para el que se eligió la carta. */
   canonicalDate: string;
   card: CardDetail;
+}
+
+/**
+ * Una entrada del archivo de `/carta-del-dia` (T-SEO-015): la carta canónica de
+ * un día anterior, elegida con la misma regla que la de hoy.
+ */
+export interface DailyCardArchiveEntry {
+  /** Día calendario canónico ('YYYY-MM-DD'). */
+  date: string;
+  card: CardSummary;
+}
+
+/**
+ * Todo lo que `/carta-del-dia` resuelve en el servidor (T-SEO-015). Cada bloque
+ * degrada por separado; la guía de uso y la herramienta se sirven siempre.
+ */
+export interface DailyCardPageData {
+  today: CanonicalDailyCard | undefined;
+  archive: DailyCardArchiveEntry[] | undefined;
 }
 
 /**

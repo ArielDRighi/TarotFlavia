@@ -115,6 +115,20 @@ describe('useRituals', () => {
 
     expect(result.current.error).toEqual(error);
   });
+
+  it('⚠️ T-SEO-015: con initialData el listado está disponible en el primer render (SSR)', () => {
+    vi.mocked(ritualsApi.getRituals).mockResolvedValue([]);
+
+    const { result } = renderHook(
+      () => useRituals(undefined, { initialData: [mockRitualSummary] }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.data).toEqual([mockRitualSummary]);
+  });
 });
 
 describe('useFeaturedRituals', () => {

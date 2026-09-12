@@ -9,7 +9,11 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { getCanonicalDailyCard, pickDailyCardIndex } from './daily-card-server';
+import {
+  getCanonicalDailyCard,
+  getDailyCardArchive,
+  pickDailyCardIndex,
+} from './daily-card-server';
 import { ArcanaType } from '@/types/encyclopedia.types';
 import type { CardDetail, CardSummary } from '@/types/encyclopedia.types';
 
@@ -146,5 +150,49 @@ describe('getCanonicalDailyCard', () => {
 
     await expect(getCanonicalDailyCard()).resolves.toBeUndefined();
     expect(mockGetCardBySlug).not.toHaveBeenCalled();
+  });
+});
+
+describe('getDailyCardArchive (T-SEO-015)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    mockGetCards.mockReset();
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('devuelve las cartas de los últimos N días anteriores a hoy, de ayer hacia atrás', async () => {
+    const deck = [buildSummary(3), buildSummary(1), buildSummary(2)];
+    mockGetCards.mockResolvedValue(deck);
+
+    const archive = await getDailyCardArchive(3);
+
+    expect(archive?.map((entry) => entry.date)).toEqual(['2026-09-11', '2026-09-10', '2026-09-09']);
+    // La misma regla determinista que la carta de hoy: el archivo no puede
+    // decir otra carta que la que la portada mostró ese día.
+    const sorted = [1, 2, 3];
+    expect(archive?.[0].card.id).toBe(sorted[pickDailyCardIndex('2026-09-11', 3)]);
+  });
+
+  it('usa 30 días por defecto y sólo el listado del mazo (sin pedir fichas)', async () => {
+    mockGetCards.mockResolvedValue([buildSummary(1), buildSummary(2)]);
+
+    const archive = await getDailyCardArchive();
+
+    expect(archive).toHaveLength(30);
+    expect(mockGetCardBySlug).not.toHaveBeenCalled();
+  });
+
+  it('degrada a undefined si el listado falla o viene vacío', async () => {
+    mockGetCards.mockRejectedValue(new Error('API caída'));
+    await expect(getDailyCardArchive()).resolves.toBeUndefined();
+
+    mockGetCards.mockResolvedValue([]);
+    await expect(getDailyCardArchive()).resolves.toBeUndefined();
   });
 });

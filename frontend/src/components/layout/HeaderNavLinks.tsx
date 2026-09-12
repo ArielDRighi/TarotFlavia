@@ -2,9 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { useUserPlanFeatures } from '@/hooks/utils/useUserPlanFeatures';
 import { ROUTES } from '@/lib/constants/routes';
 import type { AuthUser } from '@/types';
 
@@ -18,9 +16,7 @@ interface NavLink {
   href: string;
   label: string;
   requiresAuth?: boolean;
-  requiresNonPremium?: boolean;
   isActive?: (pathname: string) => boolean;
-  isPremiumLink?: boolean;
 }
 
 const PUBLIC_NAV_LINKS: NavLink[] = [
@@ -39,22 +35,17 @@ const PUBLIC_NAV_LINKS: NavLink[] = [
   },
 ];
 
+/**
+ * Premium ya no es ítem del menú (T-SEO-015): es una página de venta con
+ * `noindex`, y lo que está en el menú editorial es lo primero que abre un
+ * revisor. Vive como botón junto a los de sesión (`PremiumHeaderButton`).
+ */
 const AUTH_NAV_LINKS: NavLink[] = [
   { href: ROUTES.TAROT, label: 'Tirada de Tarot', requiresAuth: true },
-  {
-    href: ROUTES.PREMIUM,
-    label: 'Premium',
-    requiresAuth: true,
-    requiresNonPremium: true,
-    isPremiumLink: true,
-  },
 ];
 
 export function HeaderNavLinks({ variant, user, onNavigate }: HeaderNavLinksProps) {
   const pathname = usePathname();
-  // Premium gating from capabilities (fresh), not the persisted authStore plan,
-  // so premium/non-premium nav links update right after an upgrade/expiry.
-  const { isPremium } = useUserPlanFeatures();
 
   const isMobile = variant === 'mobile';
 
@@ -66,35 +57,13 @@ export function HeaderNavLinks({ variant, user, onNavigate }: HeaderNavLinksProp
 
   const allLinks: NavLink[] = [
     ...PUBLIC_NAV_LINKS,
-    ...AUTH_NAV_LINKS.filter((link) => {
-      if (link.requiresAuth && !user) return false;
-      if (link.requiresNonPremium && isPremium) return false;
-      return true;
-    }),
+    ...AUTH_NAV_LINKS.filter((link) => !link.requiresAuth || Boolean(user)),
   ];
 
   return (
     <div className={containerClass} data-testid={`nav-links-${variant}`}>
       {allLinks.map((link) => {
         const isActive = link.isActive ? link.isActive(pathname) : false;
-
-        if (link.isPremiumLink) {
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={onNavigate}
-              className={cn(
-                baseLinkClass,
-                'text-secondary hover:text-secondary/80 flex items-center gap-1'
-              )}
-              data-testid="premium-nav-link"
-            >
-              <Star className="size-4 fill-current" aria-hidden="true" />
-              {link.label}
-            </Link>
-          );
-        }
 
         return (
           <Link

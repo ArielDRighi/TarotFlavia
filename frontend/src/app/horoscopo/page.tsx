@@ -1,62 +1,17 @@
-'use client';
+import { HoroscopeHub } from '@/components/features/horoscope/HoroscopeHub';
+import { getCanonicalDailyHoroscopes } from '@/lib/api/horoscope-server';
 
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ZodiacSignSelector, HoroscopeSkeleton } from '@/components/features/horoscope';
-import { ServiceIntro } from '@/components/features/encyclopedia';
-import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
-import { useLocalDailyHoroscopes } from '@/hooks/api/useHoroscope';
-import { useAuthStore } from '@/stores/authStore';
-import { getZodiacSignFromDate } from '@/lib/utils/zodiac';
-import { ROUTES } from '@/lib/constants/routes';
-import type { ZodiacSign } from '@/types/horoscope.types';
+/**
+ * Hub del horóscopo (`/horoscopo`).
+ *
+ * Server Component desde T-SEO-015: los 12 extractos del día viajan en el HTML.
+ * Mismo ISR que la portada y que `/horoscopo/[sign]`: el horóscopo cambia a
+ * diario y la ventana de generación es de una hora.
+ */
+export const revalidate = 3600;
 
-export default function HoroscopoPage() {
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
-  const { isLoading } = useLocalDailyHoroscopes();
+export default async function HoroscopoPage() {
+  const daily = await getCanonicalDailyHoroscopes();
 
-  const userSign = user?.birthDate ? getZodiacSignFromDate(new Date(user.birthDate)) : null;
-
-  const handleSignSelect = (sign: ZodiacSign) => {
-    router.push(ROUTES.HOROSCOPO_SIGN(sign));
-  };
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 font-serif text-4xl">Horóscopo Diario</h1>
-        <p className="text-muted-foreground">Selecciona tu signo para ver las predicciones</p>
-      </div>
-
-      {!isAuthenticated && (
-        <div className="bg-muted/50 mb-8 rounded-lg p-4 text-center">
-          <p className="text-muted-foreground text-sm">
-            <Link href={ROUTES.REGISTER} className="text-primary hover:underline">
-              Regístrate
-            </Link>{' '}
-            para ver tu horóscopo automáticamente
-          </p>
-        </div>
-      )}
-
-      {isAuthenticated && !userSign && (
-        <div className="bg-accent/20 mb-8 rounded-lg p-4 text-center">
-          <p className="text-sm">
-            <Link href={ROUTES.PERFIL} className="text-primary hover:underline">
-              Configura tu fecha de nacimiento
-            </Link>
-          </p>
-        </div>
-      )}
-
-      {isLoading ? (
-        <HoroscopeSkeleton variant="grid" />
-      ) : (
-        <ZodiacSignSelector userSign={userSign} onSelect={handleSignSelect} />
-      )}
-
-      <ServiceIntro data={SERVICE_INTROS['western-horoscope']} className="mt-6" />
-    </div>
-  );
+  return <HoroscopeHub daily={daily} />;
 }

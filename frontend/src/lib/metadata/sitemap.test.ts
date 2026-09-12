@@ -56,7 +56,6 @@ describe('buildSitemap', () => {
       expect(paths).toContain('/enciclopedia');
       expect(paths).toContain('/horoscopo');
       expect(paths).toContain('/horoscopo-chino');
-      expect(paths).toContain('/premium');
       expect(paths).toContain('/servicios');
       expect(paths).toContain('/rituales');
       expect(paths).toContain('/contacto');
@@ -79,6 +78,28 @@ describe('buildSitemap', () => {
       expect(paths).not.toContain('/registro');
       expect(paths).not.toContain('/mis-servicios');
       expect(paths).not.toContain('/premium/activacion');
+    });
+
+    it('⚠️ T-SEO-015: /premium tiene noindex, así que no puede estar en el sitemap', async () => {
+      const paths = pathsOf(await buildSitemap());
+
+      expect(paths).not.toContain('/premium');
+    });
+
+    it('T-SEO-015: las siete páginas de herramientas y contacto están en el sitemap', async () => {
+      const paths = pathsOf(await buildSitemap());
+
+      for (const path of [
+        '/carta-del-dia',
+        '/horoscopo',
+        '/rituales',
+        '/pendulo',
+        '/numerologia',
+        '/carta-astral',
+        '/contacto',
+      ]) {
+        expect(paths).toContain(path);
+      }
     });
 
     it('usa el dominio de NEXT_PUBLIC_APP_URL como origen', async () => {

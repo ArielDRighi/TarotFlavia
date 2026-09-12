@@ -47,6 +47,12 @@ interface PageMetadataInput {
   description: string;
   /** Path absoluto de la ruta (`/rituales`), nunca relativo. */
   canonical: string;
+  /**
+   * `noindex, follow` (T-SEO-015). Para páginas de venta o internas que un
+   * revisor puede abrir por un link aunque `robots.txt` las bloquee. Una ruta
+   * con `noindex` no va en el sitemap ni en el menú editorial.
+   */
+  noindex?: boolean;
 }
 
 /**
@@ -81,12 +87,18 @@ function clampTitle(text: string): string {
   return clampText(text, MAX_TITLE_LENGTH - TITLE_SUFFIX.length);
 }
 
-export function buildPageMetadata({ title, description, canonical }: PageMetadataInput): Metadata {
+export function buildPageMetadata({
+  title,
+  description,
+  canonical,
+  noindex = false,
+}: PageMetadataInput): Metadata {
   const clampedTitle = clampTitle(title);
 
   return {
     title: clampedTitle,
     description,
+    ...(noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       type: 'website',
       locale: 'es_ES',
@@ -209,6 +221,9 @@ export const STATIC_PAGE_METADATA = {
     description:
       'Tiradas ilimitadas, interpretaciones personalizadas y navegación sin publicidad. Conocé los beneficios del plan Premium.',
     canonical: ROUTES.PREMIUM,
+    // Página de venta (T-SEO-015): fuera del índice, del sitemap y del menú
+    // editorial. Sigue enlazada como botón del header para quien la busque.
+    noindex: true,
   }),
 
   contacto: buildPageMetadata({

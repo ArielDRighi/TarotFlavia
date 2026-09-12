@@ -14,25 +14,43 @@ import { Button } from '@/components/ui/button';
 import { History } from 'lucide-react';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants/routes';
-import { ServiceIntro } from '@/components/features/encyclopedia';
-import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
-import type { RitualCategory, RitualDifficulty, RitualFilters } from '@/types/ritual.types';
+import type {
+  RitualCategory,
+  RitualDifficulty,
+  RitualFilters,
+  RitualSummary,
+} from '@/types/ritual.types';
 
-export function RitualsPage() {
+/**
+ * Hub de rituales: destacados por fase lunar, filtros y catálogo completo.
+ *
+ * `initialRituals` viene resuelto por la ruta en el servidor (T-SEO-015) y
+ * siembra la query sin filtros, así la grilla viaja en el HTML. La nota
+ * editorial (`RitualsEditorialGuide`) la renderiza la ruta debajo.
+ */
+export interface RitualsPageProps {
+  initialRituals?: RitualSummary[];
+}
+
+export function RitualsPage({ initialRituals }: RitualsPageProps = {}) {
   const { isAuthenticated } = useAuthStore();
   const [filters, setFilters] = useState<RitualFilters>({});
 
+  const hasFilters = filters.category || filters.difficulty || filters.search;
+
   const { data: categoriesRaw } = useRitualCategories();
   const { data: featured, isLoading: loadingFeatured } = useFeaturedRituals();
-  const { data: rituals, isLoading: loadingRituals } = useRituals(filters);
+  // La siembra sólo vale para la query sin filtros: cualquier filtro es otra
+  // queryKey y se resuelve en el cliente como siempre.
+  const { data: rituals, isLoading: loadingRituals } = useRituals(filters, {
+    initialData: hasFilters ? undefined : initialRituals,
+  });
 
   // Cast categories to correct type
   const categories = categoriesRaw?.map((c) => ({
     category: c.category as RitualCategory,
     count: c.count,
   }));
-
-  const hasFilters = filters.category || filters.difficulty || filters.search;
 
   const handleCategoryChange = (category: RitualCategory | undefined) => {
     setFilters((prev) => ({ ...prev, category }));
@@ -108,8 +126,6 @@ export function RitualsPage() {
           />
         )}
       </section>
-
-      <ServiceIntro data={SERVICE_INTROS.rituals} className="mt-6" />
     </div>
   );
 }

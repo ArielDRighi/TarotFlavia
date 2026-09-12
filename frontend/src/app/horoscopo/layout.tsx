@@ -3,8 +3,10 @@ import type { Metadata } from 'next';
 import { STATIC_PAGE_METADATA } from '@/lib/metadata/page-metadata';
 
 /**
- * La metadata vive en el layout porque `page.tsx` es un client component y
- * Next no admite `export const metadata` en uno (T-PROD-020).
+ * La metadata vive en el layout desde T-PROD-020 (cuando `page.tsx` era un
+ * client component y Next no admitía `export const metadata` en uno). La página
+ * es Server Component desde T-SEO-015; se deja acá para no mover lo que
+ * funciona.
  *
  * `/horoscopo/[sign]` la sobrescribe con su propia `generateMetadata`: un layout
  * padre solo aporta lo que el hijo no declara.
