@@ -94,7 +94,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ✅ Completada |
 | T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap sin `lastmod` falso | Frontend | 🟢 Baja | 0,5 pts | ✅ Completada |
 | T-SEO-020 | Arcanos Mayores: romper la plantilla (invertida, caso de tirada, iconografía) | Contenido + Front | 🟢 Baja | 3 pts | ⬜ Diferida |
-| T-SEO-021 | Péndulo: el cristal no contrasta con el fondo | Frontend (UI) | 🟡 Media | 0,5 pts | ⬜ Pendiente |
+| T-SEO-021 | Péndulo: el cristal no contrasta con el fondo | Frontend (UI) | 🟡 Media | 0,5 pts | ✅ Completada |
 
 **⛔ No pedir la cuarta revisión hasta tener 014, 015, 016, 017 y 018 en producción en un deploy
 único, más 14–21 días de rastreo.** Ver *Puerta de salida* al final. T-SEO-020 no entra en la puerta:
@@ -113,7 +113,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 | 5 | ~~**T-SEO-017**~~ ✅ | 2 pts | Cerrada 12-sep-2026: `/politica-editorial` (1.000+ palabras, footer, sitemap, `publishingPrinciples` en el `Organization`), pie editorial en el horóscopo diario (signo, hub y portada), firma extendida a rituales y servicios. **Decisión de negocio: se sigue sin nombrar personas** (ver la tarea) |
 | 6 | ~~**T-SEO-018**~~ ✅ | 1,5 pts | Cerrada 12-sep-2026: disclaimer en footer, fichas, lecturas y `/terminos`; 151 reescrituras en el corpus con migración de datos; guardarraíl de cuatro familias en los dos lados; regla de lenguaje en todos los prompts de IA |
 | 7 | **Deploy único + Search Console + espera de 14–21 días** | — | No es código. Ver *Puerta de salida* |
-| 4b | **T-SEO-021** | 0,5 pts | Va pegada a T-SEO-015: es la misma página y el revisor va a mirar el widget. Puede ir en la misma rama o en una propia, pero antes del deploy único |
+| 4b | ~~**T-SEO-021**~~ ✅ | 0,5 pts | Cerrada 12-sep-2026: cristal de amatista saturado con engarce, brillo, sombra proyectada (`drop-shadow` en el wrapper, porque el `clip-path` recortaba el `box-shadow`) y halo solo con respuesta. Verificado en desktop y móvil, reposo/oscilación/respuesta |
 | 8 | T-SEO-020 | 3 pts | Durante la espera, si sobra tiempo. No demora el pedido |
 
 **Total hasta la puerta de salida: 13,5 pts.**
@@ -900,7 +900,7 @@ Solo los 22 Arcanos Mayores, que son los que traen tráfico. **No** las 78.
 
 ## T-SEO-021: Péndulo — el Cristal no Contrasta con el Fondo
 
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (12-sep-2026)
 **Prioridad:** 🟡 Media · **Estimación:** 0,5 pts · **Tipo:** Frontend (UI)
 
 ### Problema
@@ -923,10 +923,28 @@ herramienta que el revisor va a mirar en `/pendulo` (T-SEO-015): tiene que verse
 
 ### Criterios de aceptación
 
-- [ ] El cristal se distingue a simple vista sobre el fondo en desktop y móvil, en reposo y en
+- [x] El cristal se distingue a simple vista sobre el fondo en desktop y móvil, en reposo y en
       movimiento.
-- [ ] Sin cambios en la lógica de `PendulumConsultation`; solo presentación.
-- [ ] Tests de `Pendulum.tsx` actualizados si cambian clases o `data-testid`.
+- [x] Sin cambios en la lógica de `PendulumConsultation`; solo presentación.
+- [x] Tests de `Pendulum.tsx` actualizados si cambian clases o `data-testid`.
+
+### Resolución (12-sep-2026)
+
+Solo se tocó `Pendulum.tsx` (presentación) y su test. Se mantuvo el fondo blanco de la tarjeta,
+el soporte y el hilo; lo que cambió es el cristal:
+
+- **Gradiente saturado** `from-violet-400 via-purple-600 to-purple-900` (amatista, dentro de la
+  paleta púrpura de la marca) en lugar de `white/90 → purple-100/80 → purple-200/70`.
+- **Sombra proyectada real.** El `shadow-lg` anterior nunca se veía: el `clip-path` del cono
+  recorta el `box-shadow` del mismo elemento. Ahora el cono recortado (`pendulum-crystal-facet`)
+  vive dentro de un wrapper (`pendulum-crystal`) con `drop-shadow`, que sí sigue la silueta.
+- **Engarce metálico** (`pendulum-crystal-cap`) entre el hilo y el cristal, y un brillo blanco
+  translúcido en la cara iluminada para que lea como cuarzo y no como un triángulo plano.
+- **Halo** (`pendulum-crystal-halo`, `blur-md`, `aria-hidden`) solo cuando hay respuesta
+  (`isGlowing`), acompañando al `animate-pulse` que ya existía.
+
+Verificado con Playwright en 1280×900 y 390×844 en reposo, oscilación (`searching`) y respuesta.
+Tests de `Pendulum.tsx`: 13 (4 nuevos para contraste, sombra, engarce y halo).
 
 ---
 

@@ -3,6 +3,10 @@
 import { cn } from '@/lib/utils';
 import type { PendulumMovement } from '@/types/pendulum.types';
 
+const CRYSTAL_CLIP_PATH = 'polygon(20% 0%, 80% 0%, 100% 30%, 50% 100%, 0% 30%)';
+// Sombra violeta (accent-foreground #553c9a) para que el cristal despegue del fondo blanco
+const CRYSTAL_DROP_SHADOW = 'drop-shadow-[0_6px_6px_rgba(85,60,154,0.45)]';
+
 interface PendulumProps {
   movement: PendulumMovement | 'idle' | 'searching';
   isGlowing?: boolean;
@@ -43,20 +47,38 @@ export function Pendulum({ movement, isGlowing = false, className }: PendulumPro
         {/* Cadena */}
         <div className="mx-auto h-32 w-0.5 bg-gradient-to-b from-zinc-400 to-zinc-500" />
 
-        {/* Cristal de cuarzo */}
+        {/* Engarce metálico entre la cadena y el cristal */}
         <div
-          className={cn(
-            'mx-auto -mt-1 h-12 w-8',
-            'bg-gradient-to-b from-white/90 via-purple-100/80 to-purple-200/70',
-            'rounded-b-full shadow-lg',
-            'border border-white/50',
-            isGlowing && 'animate-pulse shadow-xl shadow-purple-400/50'
-          )}
-          style={{
-            clipPath: 'polygon(20% 0%, 80% 0%, 100% 30%, 50% 100%, 0% 30%)',
-          }}
-          data-testid="pendulum-crystal"
+          className="mx-auto h-1.5 w-5 rounded-sm bg-gradient-to-b from-zinc-400 to-zinc-600"
+          data-testid="pendulum-crystal-cap"
         />
+
+        {/*
+          Cristal de amatista. El wrapper lleva la sombra proyectada y el halo: un
+          `box-shadow` sobre el elemento recortado con clip-path quedaría cortado,
+          mientras que `drop-shadow` en el padre sigue la silueta del cristal.
+        */}
+        <div
+          className={cn('relative mx-auto w-10', CRYSTAL_DROP_SHADOW, isGlowing && 'animate-pulse')}
+          data-testid="pendulum-crystal"
+        >
+          {isGlowing && (
+            <div
+              className="absolute -inset-3 rounded-full bg-purple-400/50 blur-md"
+              aria-hidden="true"
+              data-testid="pendulum-crystal-halo"
+            />
+          )}
+
+          <div
+            className="relative h-14 w-10 bg-gradient-to-b from-violet-400 via-purple-600 to-purple-900"
+            style={{ clipPath: CRYSTAL_CLIP_PATH }}
+            data-testid="pendulum-crystal-facet"
+          >
+            {/* Brillo de la cara iluminada */}
+            <div className="absolute top-2 left-2.5 h-7 w-1.5 rounded-full bg-white/45" />
+          </div>
+        </div>
       </div>
     </div>
   );
