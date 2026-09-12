@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 import { CardDetailPageContent } from '@/components/features/encyclopedia/CardDetailPageContent';
 import { getCardBySlug, getCards, getCombinationCardNames } from '@/lib/api/encyclopedia-api';
+import { getMajorArcanaExtras } from '@/lib/constants/major-arcana-extras.data';
 import { getCardDetailMetadata } from '@/lib/metadata/page-metadata';
 import {
   resolveListingData,
@@ -85,6 +86,10 @@ export default async function CardDetailRoute({ params }: PageProps) {
       slug={slug}
       initialCard={card}
       combinationCardNames={combinationCardNames}
+      // T-SEO-020: contenido estático de los 22 mayores. Se resuelve acá y no
+      // en el client component para que el módulo con las 22 fichas no viaje
+      // en el bundle de las 78 páginas; los menores reciben `undefined`.
+      majorArcanaExtras={getMajorArcanaExtras(card.slug)}
     />
   );
 }

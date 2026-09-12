@@ -1,19 +1,25 @@
 'use client';
 
 import { CARD_TEXT_SECTIONS } from '@/lib/constants/card-content-sections.data';
+import { DEFAULT_CARD_SECTION_ORDER } from '@/lib/constants/major-arcana-extras.data';
+import type { CardSectionKey, MajorArcanaExtras } from '@/lib/constants/major-arcana-extras.data';
 import { splitParagraphs } from '@/lib/utils/text';
 import type { CardDetail } from '@/types/encyclopedia.types';
 
 import { CardCombinations } from './CardCombinations';
 import { CardContentSection } from './CardContentSection';
 import { CardDetailHero } from './CardDetailHero';
+import { CardIconography } from './CardIconography';
 import { CardKeywords } from './CardKeywords';
 import { CardMeaning } from './CardMeaning';
 import { CardMetadata } from './CardMetadata';
 import { CardNavigation } from './CardNavigation';
+import { CardReadingCase } from './CardReadingCase';
 import { RelatedCards } from './RelatedCards';
 import { AuthorByline } from '@/components/common/AuthorByline';
 import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface CardDetailViewProps {
   card: CardDetail;
@@ -23,10 +29,65 @@ export interface CardDetailViewProps {
    * cross-links no viajaría en el HTML que ve el crawler.
    */
   combinationCardNames?: Record<string, string>;
+  /**
+   * Contenido extra de los 22 Arcanos Mayores (T-SEO-020): sección Invertida,
+   * mini-caso de tirada, nota iconográfica y el orden propio de secciones.
+   * `undefined` para los 56 menores, que conservan el orden base.
+   */
+  majorArcanaExtras?: MajorArcanaExtras;
 }
 
-export function CardDetailView({ card, combinationCardNames }: CardDetailViewProps) {
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function CardDetailView({
+  card,
+  combinationCardNames,
+  majorArcanaExtras,
+}: CardDetailViewProps) {
   const descriptionParagraphs = splitParagraphs(card.description);
+  const sectionOrder = majorArcanaExtras?.sectionOrder ?? DEFAULT_CARD_SECTION_ORDER;
+
+  /**
+   * Una sección del cuerpo, por clave. Las tres nuevas solo existen si hay
+   * extras; las de texto degradan solas si el campo no vino en la respuesta.
+   */
+  function renderSection(key: CardSectionKey) {
+    switch (key) {
+      case 'reversed':
+        return majorArcanaExtras ? (
+          <CardContentSection
+            key={key}
+            heading={majorArcanaExtras.reversed.heading}
+            text={majorArcanaExtras.reversed.paragraphs.join('\n\n')}
+            testId="card-section-reversed"
+          />
+        ) : null;
+      case 'readingCase':
+        return majorArcanaExtras ? (
+          <CardReadingCase key={key} readingCase={majorArcanaExtras.readingCase} />
+        ) : null;
+      case 'iconography':
+        return majorArcanaExtras ? (
+          <CardIconography
+            key={key}
+            imageUrl={card.imageUrl}
+            cardName={card.nameEs}
+            iconography={majorArcanaExtras.iconography}
+          />
+        ) : null;
+      default: {
+        const section = CARD_TEXT_SECTIONS.find((candidate) => candidate.key === key);
+        return section ? (
+          <CardContentSection
+            key={key}
+            heading={section.heading}
+            text={card[section.key]}
+            testId={section.testId}
+          />
+        ) : null;
+      }
+    }
+  }
 
   return (
     <div data-testid="card-detail-view" className="mx-auto max-w-3xl space-y-8">
@@ -52,15 +113,12 @@ export function CardDetailView({ card, combinationCardNames }: CardDetailViewPro
 
       {/* Secciones temáticas (T-SEO-010). Cada una degrada sola si su campo no
           vino en la respuesta: la ficha se puede cargar de a tandas sin dejar
-          encabezados vacíos. */}
-      {CARD_TEXT_SECTIONS.map((section) => (
-        <CardContentSection
-          key={section.key}
-          heading={section.heading}
-          text={card[section.key]}
-          testId={section.testId}
-        />
-      ))}
+          encabezados vacíos.
+
+          El orden lo decide la carta (T-SEO-020): los 22 mayores traen el suyo,
+          con las tres secciones nuevas intercaladas y, en algunas, sin
+          "¿Sí o no?"; los 56 menores usan el orden base. */}
+      {sectionOrder.map(renderSection)}
 
       {/* Palabras clave */}
       <CardKeywords keywords={card.keywords} />

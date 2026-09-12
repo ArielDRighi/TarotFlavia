@@ -10,6 +10,7 @@ import { CardDetailView } from './CardDetailView';
 import { EncyclopediaSkeleton } from './EncyclopediaSkeleton';
 // 4. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
+import type { MajorArcanaExtras } from '@/lib/constants/major-arcana-extras.data';
 import type { CardDetail } from '@/types/encyclopedia.types';
 
 /**
@@ -29,12 +30,15 @@ interface CardDetailPageContentProps {
   initialCard: CardDetail;
   /** Nombres de las cartas de las combinaciones, resueltos en el servidor (T-SEO-010). */
   combinationCardNames?: Record<string, string>;
+  /** Contenido extra de los Arcanos Mayores, resuelto en el servidor (T-SEO-020). */
+  majorArcanaExtras?: MajorArcanaExtras;
 }
 
 export function CardDetailPageContent({
   slug,
   initialCard,
   combinationCardNames,
+  majorArcanaExtras,
 }: CardDetailPageContentProps) {
   const { data: card, isLoading } = useCard(slug, initialCard);
 
@@ -63,7 +67,11 @@ export function CardDetailPageContent({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <CardDetailView card={card} combinationCardNames={combinationCardNames} />
+      <CardDetailView
+        card={card}
+        combinationCardNames={combinationCardNames}
+        majorArcanaExtras={majorArcanaExtras}
+      />
     </div>
   );
 }

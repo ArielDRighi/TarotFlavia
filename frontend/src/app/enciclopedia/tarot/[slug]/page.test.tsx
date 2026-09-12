@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AxiosError, AxiosHeaders } from 'axios';
 
 import CardDetailRoute, { generateMetadata, generateStaticParams } from './page';
+import { MAJOR_ARCANA_EXTRAS } from '@/lib/constants/major-arcana-extras.data';
 import type { CardDetail, CardSummary } from '@/types/encyclopedia.types';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -151,5 +152,33 @@ describe('/enciclopedia/tarot/[slug] — combinaciones (T-SEO-010)', () => {
     const element = await CardDetailRoute({ params: Promise.resolve({ slug: 'el-loco' }) });
 
     expect(element.props.combinationCardNames).toEqual({});
+  });
+});
+
+/**
+ * T-SEO-020: el contenido extra de los 22 mayores es estático y vive en el
+ * frontend. Se resuelve en la ruta —no en el client component— para que el
+ * módulo con las 22 fichas no viaje en el bundle de las 78 páginas.
+ */
+describe('/enciclopedia/tarot/[slug] — Arcanos Mayores (T-SEO-020)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetCombinationCardNames.mockResolvedValue({});
+  });
+
+  it('pasa al render el contenido extra de un Arcano Mayor', async () => {
+    mockGetCardBySlug.mockResolvedValue({ ...card, slug: 'the-fool' });
+
+    const element = await CardDetailRoute({ params: Promise.resolve({ slug: 'the-fool' }) });
+
+    expect(element.props.majorArcanaExtras).toBe(MAJOR_ARCANA_EXTRAS['the-fool']);
+  });
+
+  it('no pasa contenido extra para un Arcano Menor', async () => {
+    mockGetCardBySlug.mockResolvedValue({ ...card, slug: 'five-of-swords' });
+
+    const element = await CardDetailRoute({ params: Promise.resolve({ slug: 'five-of-swords' }) });
+
+    expect(element.props.majorArcanaExtras).toBeUndefined();
   });
 });

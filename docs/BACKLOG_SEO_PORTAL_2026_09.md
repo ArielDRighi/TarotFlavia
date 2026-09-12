@@ -93,7 +93,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | T-SEO-017 | Persona editorial responsable, bylines y `/politica-editorial` | Frontend + decisión | 🟠 Alta | 2 pts | ✅ Completada (alcance reducido por decisión de negocio) |
 | T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ✅ Completada |
 | T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap sin `lastmod` falso | Frontend | 🟢 Baja | 0,5 pts | ✅ Completada |
-| T-SEO-020 | Arcanos Mayores: romper la plantilla (invertida, caso de tirada, iconografía) | Contenido + Front | 🟢 Baja | 3 pts | ⬜ Diferida |
+| T-SEO-020 | Arcanos Mayores: romper la plantilla (invertida, caso de tirada, iconografía) | Contenido + Front | 🟢 Baja | 3 pts | ✅ Completada |
 | T-SEO-021 | Péndulo: el cristal no contrasta con el fondo | Frontend (UI) | 🟡 Media | 0,5 pts | ✅ Completada |
 
 **⛔ No pedir la cuarta revisión hasta tener 014, 015, 016, 017 y 018 en producción en un deploy
@@ -114,7 +114,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 | 6 | ~~**T-SEO-018**~~ ✅ | 1,5 pts | Cerrada 12-sep-2026: disclaimer en footer, fichas, lecturas y `/terminos`; 151 reescrituras en el corpus con migración de datos; guardarraíl de cuatro familias en los dos lados; regla de lenguaje en todos los prompts de IA |
 | 7 | **Deploy único + Search Console + espera de 14–21 días** | — | No es código. Ver *Puerta de salida* |
 | 4b | ~~**T-SEO-021**~~ ✅ | 0,5 pts | Cerrada 12-sep-2026: cristal de amatista saturado con engarce, brillo, sombra proyectada (`drop-shadow` en el wrapper, porque el `clip-path` recortaba el `box-shadow`) y halo solo con respuesta. Verificado en desktop y móvil, reposo/oscilación/respuesta |
-| 8 | T-SEO-020 | 3 pts | Durante la espera, si sobra tiempo. No demora el pedido |
+| 8 | ~~**T-SEO-020**~~ ✅ | 3 pts | Cerrada 12-sep-2026, dentro de la ventana de espera: los 22 mayores con sección Invertida propia, mini-caso de tirada, nota iconográfica con diagrama de símbolos sobre la lámina y orden de secciones distinto por carta (5 sin "¿Sí o no?"). Los 56 menores no se tocaron |
 
 **Total hasta la puerta de salida: 13,5 pts.**
 
@@ -879,9 +879,9 @@ en el footer.
 
 ---
 
-## T-SEO-020: Arcanos Mayores — Romper la Plantilla (diferida)
+## T-SEO-020: Arcanos Mayores — Romper la Plantilla
 
-**Estado:** ⬜ Diferida (no entra en la puerta de salida)
+**Estado:** ✅ COMPLETADA (12-sep-2026)
 **Prioridad:** 🟢 Baja · **Estimación:** 3 pts · **Tipo:** Contenido + Front
 
 Solo los 22 Arcanos Mayores, que son los que traen tráfico. **No** las 78.
@@ -895,6 +895,51 @@ Solo los 22 Arcanos Mayores, que son los que traen tráfico. **No** las 78.
 - **Media original**: el mazo es CC0; un diagrama propio por carta con los símbolos señalados es la
   prueba de originalidad más barata y más fuerte.
 - Los 56 Arcanos Menores quedan como están.
+
+### Criterios de aceptación
+
+- [x] Cada uno de los 22 mayores tiene sección "Invertida" con encabezado propio, mini-caso de
+      tirada y nota iconográfica, y todo llega al HTML servido.
+- [x] Diagrama propio por carta: la lámina con los símbolos señalados y su leyenda.
+- [x] Orden de secciones distinto por carta; "¿Sí o no?" omitida donde no aplica.
+- [x] Los 56 menores renderizan igual que antes (mismo orden, sin secciones nuevas).
+- [x] Sin "salud" ni lenguaje determinista en el texto nuevo (pasa el guardarraíl de T-SEO-018).
+
+### Resolución (12-sep-2026)
+
+**Dónde vive el contenido.** En el frontend, no en el backend: `frontend/src/lib/constants/major-arcana-extras.data.ts`,
+con el patrón de `zodiac-sign-profiles.data.ts`. Dos motivos: es contenido estático de 22 cartas
+que no cambian, y el corpus extendido de T-SEO-009 vive en un seeder que acopla el deploy (si el
+frontend se construye antes de que corra el seeder, sirve fichas vacías un día). La ruta
+`app/enciclopedia/tarot/[slug]/page.tsx` resuelve `getMajorArcanaExtras(slug)` en el servidor y lo
+pasa por props, así el módulo con las 22 fichas **no viaja en el bundle** de las 78 páginas. La
+consulta sigue siendo puntual por carta: no hay una página que agrupe los 22.
+
+**Qué tiene cada mayor** (450–551 palabras propias más por ficha, promedio 485):
+
+- **Invertida** — `h2` propio por carta ("El Loco invertido", "El Ermitaño con el farol apagado",
+  "El Diablo invertido: las cadenas flojas"…), dos párrafos: cómo se manifiesta y qué pide. Antes,
+  el texto invertido solo existía en la pestaña oculta de `CardMeaning`, que no llega al HTML.
+- **Mini-caso de tirada** — `CardReadingCase`: la pregunta como `blockquote`, tirada / posición /
+  orientación en un `dl`, y dos párrafos de cómo se leyó con las cartas vecinas. Ocho tiradas y
+  posiciones distintas (tres cartas, Cruz Celta, decisión, relación, herradura, carta del día,
+  sí/no) y casos con la carta derecha e invertida. Nunca una predicción: es un ejemplo de lectura.
+- **Nota iconográfica** — `CardIconography`: qué tiene de particular la lámina de Pamela Colman
+  Smith y de 4 a 5 símbolos concretos con su significado. Va un nivel más abajo que "El simbolismo
+  de la carta", que ya describe la escena.
+- **Diagrama** — `CardSymbolDiagram`: `<figure>` con la lámina, marcadores numerados en coordenadas
+  `%` medidas sobre cada imagen (`aria-hidden`) y la leyenda como `<ol>` en el `figcaption`. Sin
+  assets nuevos: la media original es la anotación, y el crawler la lee como texto.
+- **Orden propio** — `sectionOrder` por carta mezcla las seis secciones base con las tres nuevas.
+  22 órdenes distintos. Cinco cartas omiten "¿Sí o no?" porque su respuesta es indecidible por
+  naturaleza: Rueda de la Fortuna, Justicia, Colgado, Luna y Juicio. `CardDetailView` itera
+  `sectionOrder` (o el orden base si no hay extras) en vez de la lista fija.
+
+**Guardarraíles** (`major-arcana-extras.data.test.ts`, 167 tests): 22 entradas exactas, párrafos y
+encabezados únicos entre cartas, ≥ 300 palabras por ficha, ≥ 18 órdenes distintos, la única omisión
+permitida es "¿Sí o no?", coordenadas dentro de la lámina, y `getMajorArcanaExtras('five-of-swords')`
+→ `undefined`. Verificado en el build: `the-fool.html` sirve los `h2` nuevos en su orden y 5
+marcadores; `wheel-of-fortune.html` sin "¿Sí o no?"; `five-of-swords.html` idéntico al de antes.
 
 ---
 
@@ -980,4 +1025,4 @@ Un cuarto rechazo es peor que tres. **Todo esto, en este orden:**
 
 ---
 
-**Última actualización:** 12-sep-2026
+**Última actualización:** 12-sep-2026 (T-SEO-020 cerrada)
