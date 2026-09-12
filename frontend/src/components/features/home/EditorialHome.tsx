@@ -28,8 +28,12 @@ import type { EditorialHomeData } from '@/types/home.types';
  * no cambia: ahí y en `/premium` vive el upsell.
  *
  * Los datos llegan resueltos del servidor (`getEditorialHomeData`); este
- * componente no hace fetch ni tiene estado, así el HTML inicial y la
- * hidratación son idénticos.
+ * componente no hace fetch ni tiene estado. Es un Server Component: la ruta lo
+ * renderiza y se lo pasa como `children` a `HomePageContent` (client), así las
+ * secciones no viajan en el bundle ni duplican sus datos en el payload RSC.
+ *
+ * Envuelve en `<div>` (no `<main>`): el landmark `main` ya lo aporta el root
+ * layout.
  */
 export interface EditorialHomeProps {
   data: EditorialHomeData;
@@ -37,7 +41,7 @@ export interface EditorialHomeProps {
 
 export function EditorialHome({ data }: EditorialHomeProps) {
   return (
-    <main data-testid="editorial-home" className="min-h-screen">
+    <div data-testid="editorial-home" className="min-h-screen">
       <EditorialHero />
       <DailyHoroscopeDigest daily={data.dailyHoroscopes} />
       <DailyCardSpotlight dailyCard={data.dailyCard} />
@@ -45,6 +49,6 @@ export function EditorialHome({ data }: EditorialHomeProps) {
       <EncyclopediaShowcase />
       <AboutTeaser />
       <ServicesStrip />
-    </main>
+    </div>
   );
 }

@@ -28,9 +28,11 @@ import type { CanonicalDailyCard } from '@/types/home.types';
  * Índice determinista del mazo para una fecha.
  *
  * Hash FNV-1a del string `YYYY-MM-DD`: barato, sin dependencias, y con una
- * distribución suficiente para que días consecutivos no repitan carta (el test
- * lo verifica). No hace falta que sea criptográfico: es una carta del día, no
- * un secreto.
+ * distribución suficiente para que la carta no se repita día tras día. No lo
+ * garantiza por construcción —es un hash, no una permutación—; el test mide la
+ * dispersión en un mes y la ausencia de repeticiones consecutivas en un año
+ * concreto. No hace falta que sea criptográfico: es una carta del día, no un
+ * secreto.
  */
 export function pickDailyCardIndex(dateString: string, deckSize: number): number {
   if (deckSize <= 0) {
@@ -64,7 +66,11 @@ export const getCanonicalDailyCard = cache(async (): Promise<CanonicalDailyCard 
     }
 
     const chosen = deck[pickDailyCardIndex(canonicalDate, deck.length)];
-    const card = await getCardBySlug(chosen.slug);
+    // Sin contar la vista: `GET /encyclopedia/cards/:slug` incrementa
+    // `viewCount`, y una regeneración de ISR de la portada no es una persona
+    // abriendo la ficha (el mismo criterio por el que T-SEO-016 no usa
+    // `BY_DATE_SIGN`). El interceptor sólo manda el header durante el build.
+    const card = await getCardBySlug(chosen.slug, { countView: false });
 
     return { canonicalDate, card };
   });

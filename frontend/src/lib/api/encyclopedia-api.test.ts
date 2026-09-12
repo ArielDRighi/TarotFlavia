@@ -16,6 +16,7 @@ import {
 } from './encyclopedia-api';
 import { ArcanaType, Suit, Element, Planet, ZodiacAssociation } from '@/types/encyclopedia.types';
 import { API_ENDPOINTS } from './endpoints';
+import { PRERENDER_HEADER } from './prerender';
 
 // Mock apiClient
 vi.mock('./axios-config', () => ({
@@ -186,6 +187,19 @@ describe('encyclopedia API functions', () => {
   });
 
   describe('getCardBySlug', () => {
+    it('T-SEO-014: con countView=false manda el header de prerender para no sumar una vista', async () => {
+      vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockCardDetail });
+
+      await getCardBySlug('the-fool', { countView: false });
+
+      expect(apiClient.get).toHaveBeenCalledWith(
+        API_ENDPOINTS.ENCYCLOPEDIA.CARD_DETAIL('the-fool'),
+        {
+          headers: { [PRERENDER_HEADER]: '1' },
+        }
+      );
+    });
+
     it('should call correct endpoint with slug and return card detail', async () => {
       vi.mocked(apiClient.get).mockResolvedValueOnce({ data: mockCardDetail });
 

@@ -43,13 +43,14 @@ const EMPTY: EditorialHomeData = {
 };
 
 describe('EditorialHome (T-SEO-014)', () => {
-  it('compone las siete secciones en el orden acordado dentro de <main>', () => {
+  it('compone las siete secciones en el orden acordado, sin <main> propio', () => {
     const { container } = render(<EditorialHome data={EMPTY} />);
 
-    const main = container.querySelector('main');
-    expect(main).toBeInTheDocument();
+    // El landmark `main` lo aporta el root layout: acá no puede haber otro.
+    expect(container.querySelector('main')).toBeNull();
 
-    const order = Array.from(main?.querySelectorAll('[data-testid^="home-"]') ?? []).map((node) =>
+    const root = screen.getByTestId('editorial-home');
+    const order = Array.from(root.querySelectorAll('[data-testid^="home-"]')).map((node) =>
       node.getAttribute('data-testid')
     );
     expect(order).toEqual([

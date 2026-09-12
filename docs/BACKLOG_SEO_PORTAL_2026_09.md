@@ -147,7 +147,7 @@ las tres salidas aplica a lo que no sea herramienta ni contenido (páginas de ve
 
 ## T-SEO-014: Home Editorial — de Landing SaaS a Portada de Portal
 
-**Estado:** ✅ COMPLETADA (11-sep-2026)
+**Estado:** ✅ COMPLETADA (11-sep-2026) — verificación en producción pendiente del deploy único
 **Prioridad:** 🔴 Crítica · **Estimación:** 3 pts · **Tipo:** Frontend
 **Depende de:** T-SEO-016 (la portada muestra el horóscopo del día en SSR)
 
@@ -241,10 +241,22 @@ Rediseño visual del resto del sitio; cambios en `UserDashboard`.
   tarotistas" a título y descripción de publicación (horóscopo de hoy, carta del día, enciclopedia,
   guías). El tagline de la imagen OG no cambia.
 - **Componentes eliminados con sus tests:** `LandingPage`, `HeroSection`,
-  `TryWithoutRegisterSection`, `WhatIsTarotSection`. **Conservados y exportados para T-SEO-015**
+  `TryWithoutRegisterSection`, `WhatIsTarotSection`, y con ellos los assets que sólo ellos usaban
+  (`incense-bg.webp`, `tarot-cards.webp`). **Conservados y exportados para T-SEO-015**
   (`/premium`): `PlanComparison`, `PremiumBenefitsSection`, `HowItWorks`; el `index.ts` lo
   documenta. `BirthChartPromo` no se usa más en la home pero es de `features/birth-chart` y tiene
   otros consumidores.
+- **Revisión local aplicada (PR #649):** (1) `EditorialHome` envuelve en `<div>`, no `<main>`: el
+  landmark lo aporta el root layout. (2) `EditorialHome` se renderiza en `app/page.tsx` como Server
+  Component y va como `children` de `HomePageContent` (client sólo por el store de sesión); antes
+  toda la portada cruzaba el límite `'use client'` y sus datos viajaban dos veces. (3)
+  `getCardBySlug(slug, { countView: false })` manda `X-Prerender` para que la regeneración de ISR
+  de la home no sume vistas a la ficha de la carta (mismo criterio que T-SEO-016 con
+  `BY_DATE_SIGN`). (4) Guías intercaladas por categoría (round-robin) para que una categoría con
+  muchos artículos no se lleve los seis cupos. (5) Cada bloque de `getEditorialHomeData` se
+  envuelve en un `settle()` que convierte un rechazo en `undefined` con aviso: la garantía de
+  "degrada por bloque" ya no depende de que los fetchers no rechacen. (6) Test de integración
+  `EditorialHome.integration.test.tsx` sin mocks: `h1` único, 12 extractos, sin precios.
 - **Verificación pendiente contra el stack real:** en esta sesión no había Docker sin sudo, así que
   la cuenta de palabras se midió con `renderToStaticMarkup` y datos realistas. Después del deploy
   único: `curl -A Googlebot https://auguriatarot.com/ | grep -c 'home-horoscope-sign-'` debe dar 12

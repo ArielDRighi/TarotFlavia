@@ -18,7 +18,8 @@ const mockGetCardBySlug = vi.fn();
 
 vi.mock('./encyclopedia-api', () => ({
   getCards: () => mockGetCards(),
-  getCardBySlug: (slug: string) => mockGetCardBySlug(slug),
+  getCardBySlug: (slug: string, options?: { countView?: boolean }) =>
+    mockGetCardBySlug(slug, options),
 }));
 
 // 12:00 UTC del 12 = 09:00 en Buenos Aires: día canónico 2026-09-12.
@@ -77,6 +78,19 @@ describe('pickDailyCardIndex', () => {
     expect(indexes.size).toBeGreaterThan(20);
   });
 
+  it('no repite la carta dos días seguidos a lo largo de un año', () => {
+    // Un año concreto a partir de la fecha de cierre de la tarea: el hash es
+    // determinista, así que la aserción es estable.
+    const start = new Date(Date.UTC(2026, 8, 11));
+    let previous = -1;
+    for (let day = 0; day < 365; day += 1) {
+      const date = new Date(start.getTime() + day * 86_400_000).toISOString().slice(0, 10);
+      const index = pickDailyCardIndex(date, 78);
+      expect(index).not.toBe(previous);
+      previous = index;
+    }
+  });
+
   it('devuelve 0 con un mazo vacío en vez de NaN', () => {
     expect(pickDailyCardIndex('2026-09-12', 0)).toBe(0);
   });
@@ -109,7 +123,8 @@ describe('getCanonicalDailyCard', () => {
     // El mazo se ordena por id antes de elegir: el orden de la API no cambia la carta.
     const expectedId = [1, 2, 3][pickDailyCardIndex(TODAY, 3)];
     expect(result?.card.id).toBe(expectedId);
-    expect(mockGetCardBySlug).toHaveBeenCalledWith(`carta-${expectedId}`);
+    // Sin contar la vista: la regeneración de ISR no es una persona en la ficha.
+    expect(mockGetCardBySlug).toHaveBeenCalledWith(`carta-${expectedId}`, { countView: false });
   });
 
   it('degrada a undefined si el listado falla, sin tirar el render', async () => {

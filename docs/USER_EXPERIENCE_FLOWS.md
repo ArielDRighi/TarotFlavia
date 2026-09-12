@@ -271,39 +271,35 @@ const user = useRequireAuth();
 
 **URL:** `/` (Home)
 
-**Componente:** [frontend/src/components/features/home/LandingPage.tsx](d:\Personal\tarot\frontend\src\components\features\home\LandingPage.tsx)
+**Componente:** `frontend/src/components/features/home/EditorialHome.tsx` (T-SEO-014; antes `LandingPage.tsx`)
 
-**Lo que ve el usuario:**
+**Lo que ve el usuario (portada editorial, sin precios ni planes):**
 
-#### A) HeroSection
-- **Título:** "Descubre tu destino con Tarot personalizado"
-- **Descripción:** Texto explicativo sobre la plataforma
-- **Imagen:** Hero visual atractivo
-- **CTAs:**
-  - **Botón primario (púrpura):** "Comenzar Gratis" → `/registro`
-  - **Botón secundario (outline):** "Probar sin registro" → `/carta-del-dia`
+#### A) EditorialHero
+- **`h1`:** "Tarot y astrología en español: enciclopedia, horóscopos y guías"
+- **Bajada:** dos líneas sobre qué es el sitio. Sin CTA de registro: el botón "Crear cuenta" vive en el header.
 
-#### B) TryWithoutRegisterSection
-- **Badge:** "Sin compromiso"
-- **Título:** "Prueba sin compromiso"
-- **Descripción:** "1 carta aleatoria sin necesidad de registrarte"
-- **Ícono:** Cartas de tarot ilustradas
-- **CTA:** "Carta del Día Gratis" → `/carta-del-dia`
+#### B) DailyHoroscopeDigest — Horóscopo de hoy
+- **Fecha visible** (día canónico, Buenos Aires) y los **12 signos** con su extracto de 2–3 líneas, en el HTML servido.
+- Cada signo enlaza a `/horoscopo/[signo]` (consulta puntual con la predicción completa).
 
-#### C) PremiumBenefitsSection
-- **Título:** "Desbloquea todo el potencial del Tarot"
-- **Precio:** "$9.99/mes"
-- **Grid de beneficios (5 ítems):**
-  1. ✨ Interpretaciones con IA personalizadas
-  2. 🃏 Todas las tiradas disponibles
-  3. 💬 Preguntas personalizadas
-  4. 📊 Estadísticas avanzadas
-  5. 🚫 Sin publicidad
-- **CTA:** "Actualizar a Premium" → `/registro`
+#### C) DailyCardSpotlight — La carta del día
+- Imagen + nombre + significado al derecho + consejo (~150 palabras). Es la carta canónica del sitio (una por día, la misma para todos).
+- **Links:** "Leer la ficha completa" → `/enciclopedia/tarot/[slug]` · "Sacar mi propia carta" → `/carta-del-dia`
 
-#### D) WhatIsTarotSection
-- Contenido educativo sobre qué es el tarot
-- Explicación de cómo funciona
+#### D) LatestGuides — Guías para consultar mejor
+- Hasta 6 tarjetas (`ArticleCard`) → `/enciclopedia/guias/[slug]`
+
+#### E) EncyclopediaShowcase — Explorá la enciclopedia
+- 78 cartas · 12 signos · 12 casas · 10 planetas · 12 signos chinos, cada cifra enlazada a su índice.
+
+#### F) AboutTeaser — Quiénes somos
+- Tres líneas + "Conocer al equipo" → `/sobre-nosotros`
+
+#### G) ServicesStrip
+- Una línea: lecturas personalizadas → `/servicios` · carta astral → `/carta-astral`. Sin tabla.
+
+> Las secciones de venta que la landing anterior mostraba (`PlanComparison`, `PremiumBenefitsSection`, `HowItWorks`) se reubican en `/premium` (T-SEO-015). El upsell a Premium vive ahí y en `UserDashboard`.
 
 ---
 
@@ -2172,27 +2168,17 @@ if (getDismissalCount('daily-card-post-reading') >= 3) {
 
 ---
 
-#### B) TryWithoutRegisterSection (en Landing)
+#### B) DailyCardSpotlight (en la portada)
 
-**Ubicación:** [frontend/src/components/features/home/TryWithoutRegisterSection.tsx](d:\Personal\tarot\frontend\src\components\features\home\TryWithoutRegisterSection.tsx)
+**Ubicación:** `frontend/src/components/features/home/DailyCardSpotlight.tsx` (T-SEO-014; reemplaza a `TryWithoutRegisterSection`)
 
 **Trigger:** Siempre visible en Home para usuarios no autenticados
 
 **Diseño:**
-- Sección destacada con fondo sutil
-- Ícono de cartas illustrado
-- Badge "Sin compromiso"
+- La carta canónica del día con su interpretación, leída sin registro.
+- Enlace "Sacar mi propia carta" → `/carta-del-dia` (sorteo por visitante, sin registro).
 
-**Mensaje:**
-```
-🎴 Prueba sin compromiso
-
-1 carta aleatoria sin necesidad de registrarte
-
-[Carta del Día Gratis →]
-```
-
-**Objetivo:** Reducir fricción inicial, atraer usuarios a probar
+**Objetivo:** Lo gratis se demuestra (la carta se lee), no se anuncia: sin badge "sin compromiso" ni CTA de venta.
 
 ---
 
@@ -2525,7 +2511,7 @@ lectura   lecturas   lecturas
 #### Rutas Públicas (sin autenticación requerida)
 
 ```
-/                           → LandingPage (ANONYMOUS) | UserDashboard (AUTH)
+/                           → EditorialHome (ANONYMOUS) | UserDashboard (AUTH)
 /login                      → LoginForm
 /registro                   → RegisterForm
 /recuperar-password         → ForgotPasswordForm
@@ -2713,8 +2699,8 @@ redirect('/perfil');
 - [frontend/src/components/layout/UserMenu.tsx](d:\Personal\tarot\frontend\src\components\layout\UserMenu.tsx) - Menú de usuario
 
 #### Componentes de Home
-- [frontend/src/components/features/home/LandingPage.tsx](d:\Personal\tarot\frontend\src\components\features\home\LandingPage.tsx) - Landing para ANONYMOUS
-- [frontend/src/components/features/home/TryWithoutRegisterSection.tsx](d:\Personal\tarot\frontend\src\components\features\home\TryWithoutRegisterSection.tsx) - CTA carta gratis
+- `frontend/src/components/features/home/EditorialHome.tsx` - Portada editorial para ANONYMOUS (T-SEO-014)
+- `frontend/src/components/features/home/DailyCardSpotlight.tsx` - Carta del día en la portada
 
 #### Componentes de Dashboard
 - [frontend/src/components/features/dashboard/UserDashboard.tsx](d:\Personal\tarot\frontend\src\components\features\dashboard\UserDashboard.tsx) - Dashboard autenticado

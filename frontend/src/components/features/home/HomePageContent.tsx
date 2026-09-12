@@ -1,9 +1,9 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 import { UserDashboard } from '@/components/features/dashboard';
 import { useAuthStore } from '@/stores/authStore';
-import { EditorialHome } from './EditorialHome';
-import type { EditorialHomeData } from '@/types/home.types';
 
 /**
  * Home Page with Dual Logic
@@ -18,8 +18,11 @@ import type { EditorialHomeData } from '@/types/home.types';
  * - UserDashboard en cuanto hay sesión validada
  *
  * Desde T-SEO-014 la portada anónima es `EditorialHome` (antes `LandingPage`)
- * y recibe por props los datos del día que la ruta resolvió en el servidor.
- * Este componente sigue siendo client sólo por el store de sesión.
+ * y llega como `children`, ya renderizada por la ruta como Server Component.
+ * Este componente sigue siendo client sólo por el store de sesión: si importara
+ * la portada, todas sus secciones cruzarían el límite `'use client'` y los 12
+ * extractos, la carta y las guías viajarían dos veces (HTML + payload RSC) más
+ * el JS de siete secciones que no tienen interacción.
  *
  * ## Por qué ya no hay skeleton de carga (T-PROD-022)
  *
@@ -33,11 +36,11 @@ import type { EditorialHomeData } from '@/types/home.types';
  * ahorraba ese flash a costa de vaciar la página para todos los buscadores.
  */
 export interface HomePageContentProps {
-  /** Datos de la portada resueltos en el servidor (`getEditorialHomeData`). */
-  home: EditorialHomeData;
+  /** La portada anónima (`EditorialHome`), renderizada por la ruta en el servidor. */
+  children: ReactNode;
 }
 
-export function HomePageContent({ home }: HomePageContentProps) {
+export function HomePageContent({ children }: HomePageContentProps) {
   const { user, isAuthenticated } = useAuthStore();
 
   // Show UserDashboard for authenticated users (all plans)
@@ -49,5 +52,5 @@ export function HomePageContent({ home }: HomePageContentProps) {
   // un skeleton mientras `isLoading` —que arranca en `true`—, así que `/` le
   // servía a Googlebot 4 palabras de contenido propio: la home, la URL más
   // importante del sitio, era una pantalla de carga (T-PROD-022).
-  return <EditorialHome data={home} />;
+  return <>{children}</>;
 }

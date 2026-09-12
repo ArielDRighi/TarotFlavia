@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { EditorialHome } from '@/components/features/home/EditorialHome';
 import { HomePageContent } from '@/components/features/home/HomePageContent';
 import { getEditorialHomeData } from '@/lib/api/home-server';
 import { homeMetadata } from '@/lib/metadata/seo';
@@ -16,7 +17,9 @@ import { homeMetadata } from '@/lib/metadata/seo';
  *
  * Desde T-SEO-014 la portada anónima es editorial y trae datos del día
  * resueltos acá, en el servidor: los 12 extractos del horóscopo, la carta del
- * día y las guías viajan en el HTML que ve el crawler.
+ * día y las guías viajan en el HTML que ve el crawler. `EditorialHome` se
+ * renderiza acá (Server Component) y va como `children` de `HomePageContent`,
+ * que es client sólo por el store de sesión.
  */
 export const metadata: Metadata = homeMetadata;
 
@@ -29,5 +32,9 @@ export const revalidate = 3600;
 export default async function Home() {
   const home = await getEditorialHomeData();
 
-  return <HomePageContent home={home} />;
+  return (
+    <HomePageContent>
+      <EditorialHome data={home} />
+    </HomePageContent>
+  );
 }

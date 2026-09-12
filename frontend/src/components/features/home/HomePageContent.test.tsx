@@ -1,17 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { HomePageContent } from './HomePageContent';
-import type { EditorialHomeData } from '@/types/home.types';
 
 // Mock child components
-vi.mock('./EditorialHome', () => ({
-  EditorialHome: ({ data }: { data: EditorialHomeData }) => (
-    <div data-testid="landing-page">
-      EditorialHome Component · {data.dailyHoroscopes ? 'con horóscopo' : 'sin horóscopo'}
-    </div>
-  ),
-}));
-
 vi.mock('@/components/features/dashboard', () => ({
   UserDashboard: () => <div data-testid="user-dashboard">UserDashboard Component</div>,
 }));
@@ -32,14 +23,11 @@ vi.mock('@/stores/authStore', () => ({
  * - Authenticated users → UserDashboard (all plans)
  * - Auth state transitions
  *
- * El `data-testid="landing-page"` del mock se conserva: es el nombre histórico
- * del render anónimo en estos tests.
+ * La portada llega como `children` ya renderizada por la ruta (Server
+ * Component); acá se representa con un `div` cuyo `data-testid="landing-page"`
+ * conserva el nombre histórico del render anónimo en estos tests.
  */
-const HOME: EditorialHomeData = {
-  dailyHoroscopes: { canonicalDate: '2026-09-12', horoscopes: [], isShowingPreviousDay: false },
-  dailyCard: undefined,
-  latestGuides: undefined,
-};
+const HOME = <div data-testid="landing-page">EditorialHome Component</div>;
 
 describe('HomePageContent (Root Page)', () => {
   beforeEach(() => {
@@ -57,7 +45,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      render(<HomePageContent home={HOME} />);
+      render(<HomePageContent>{HOME}</HomePageContent>);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
       expect(screen.queryByTestId('user-dashboard')).not.toBeInTheDocument();
@@ -70,7 +58,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      render(<HomePageContent home={HOME} />);
+      render(<HomePageContent>{HOME}</HomePageContent>);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
     });
@@ -84,7 +72,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<HomePageContent home={HOME} />);
+      render(<HomePageContent>{HOME}</HomePageContent>);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
       expect(screen.queryByTestId('user-dashboard')).not.toBeInTheDocument();
@@ -99,7 +87,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<HomePageContent home={HOME} />);
+      render(<HomePageContent>{HOME}</HomePageContent>);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -112,7 +100,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<HomePageContent home={HOME} />);
+      render(<HomePageContent>{HOME}</HomePageContent>);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -125,7 +113,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<HomePageContent home={HOME} />);
+      render(<HomePageContent>{HOME}</HomePageContent>);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -140,7 +128,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      const { rerender } = render(<HomePageContent home={HOME} />);
+      const { rerender } = render(<HomePageContent>{HOME}</HomePageContent>);
       // Antes de resolver la sesión ya se ve la landing (T-PROD-022).
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
 
@@ -151,7 +139,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      rerender(<HomePageContent home={HOME} />);
+      rerender(<HomePageContent>{HOME}</HomePageContent>);
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
     });
 
@@ -162,7 +150,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      const { rerender } = render(<HomePageContent home={HOME} />);
+      const { rerender } = render(<HomePageContent>{HOME}</HomePageContent>);
       // Antes de resolver la sesión ya se ve la landing (T-PROD-022).
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
 
@@ -173,18 +161,31 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      rerender(<HomePageContent home={HOME} />);
+      rerender(<HomePageContent>{HOME}</HomePageContent>);
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
     });
   });
 
-  describe('Datos de la portada (T-SEO-014)', () => {
-    it('reenvía a EditorialHome los datos resueltos en el servidor', () => {
+  describe('Portada como children (T-SEO-014)', () => {
+    it('renderiza los children tal cual para el visitante anónimo', () => {
       mockUseAuthStore.mockReturnValue({ user: null, isAuthenticated: false, isLoading: false });
 
-      render(<HomePageContent home={HOME} />);
+      render(<HomePageContent>{HOME}</HomePageContent>);
 
-      expect(screen.getByTestId('landing-page')).toHaveTextContent('con horóscopo');
+      expect(screen.getByTestId('landing-page')).toHaveTextContent('EditorialHome Component');
+    });
+
+    it('no renderiza los children cuando hay sesión: sólo el dashboard', () => {
+      mockUseAuthStore.mockReturnValue({
+        user: { id: 1, name: 'Test User', plan: 'free' },
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      render(<HomePageContent>{HOME}</HomePageContent>);
+
+      expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
+      expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
     });
   });
 
@@ -202,7 +203,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      render(<HomePageContent home={HOME} />);
+      render(<HomePageContent>{HOME}</HomePageContent>);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
     });
