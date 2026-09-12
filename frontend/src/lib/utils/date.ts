@@ -214,6 +214,18 @@ export function formatDateFullWithYear(dateString: string): string {
 }
 
 /**
+ * Same as `formatDateFullWithYear` but starting in lowercase, for use in the
+ * middle of a sentence ("…para el sábado 12 de septiembre de 2026, con…").
+ *
+ * @example
+ * formatDateFullWithYearInline('2026-09-12') // → "sábado 12 de septiembre de 2026"
+ */
+export function formatDateFullWithYearInline(dateString: string): string {
+  const formatted = formatDateFullWithYear(dateString);
+  return formatted.charAt(0).toLowerCase() + formatted.slice(1);
+}
+
+/**
  * Formats a date to short numeric format.
  * e.g., "15/01/2025"
  *

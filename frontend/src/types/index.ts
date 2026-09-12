@@ -333,3 +333,6 @@ export type { ContactMessageResponse } from './contact.types';
 
 // Home Types (T-SEO-014)
 export type { CanonicalDailyCard, EditorialHomeData } from './home.types';
+
+// Editorial pages (sobre-nosotros, politica-editorial)
+export type { EditorialSection, EditorialLink } from './editorial-page.types';

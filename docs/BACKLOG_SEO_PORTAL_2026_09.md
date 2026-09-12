@@ -657,6 +657,24 @@ expectativas). La prohibición de lenguaje determinista es de T-SEO-018 y se agr
   palabras; el piso propio de 600 lo cubre. Verificar tras el deploy con
   `npm run check:indexable -- --base-url https://auguriatarot.com`.
 
+### Lo que encontró la revisión local (y se corrigió)
+
+- 🟠 La política decía que el horóscopo diario era *"el único lugar donde intervienen herramientas
+  de lenguaje"*: falso. El horóscopo chino anual (`chinese-horoscope.service.ts`, público), las
+  interpretaciones premium y la síntesis de la carta astral también las usan. Reescrito y fijado
+  con test.
+- 🟡 *"Las consultas que rozan ese terreno se responden con una lectura simbólica"*: el péndulo no
+  responde, **rechaza** (`BadRequestException`). Reescrito y fijado con test.
+- 🟡 La política prometía firma en *"cada ficha"* pero `/horoscopo-chino/[animal]` no la tenía:
+  `AuthorByline` montada en `AnimalProfile`, con test.
+- 🟡 Faltaba el caso "sirve el de ayer" en los tests de la nota dentro de `HoroscopeSignPanel`.
+- 🟡 `formatDateFullWithYear` capitaliza el día ("…para el **S**ábado 12…"): nueva
+  `formatDateFullWithYearInline` (minúscula) para uso a mitad de oración.
+- 🟡 Tipos y pie duplicados con `/sobre-nosotros`: `EditorialSection`/`EditorialLink` en
+  `types/editorial-page.types.ts` (reemplazan a `AboutSection`/`AboutLink`) y `EditorialPageFooter`
+  en `components/common/` (fecha de revisión + enlaces), que consumen las dos páginas.
+- 💡 `aria-label="Nota editorial"` en el `<aside>` de `HoroscopeEditorialNote`.
+
 
 ---
 

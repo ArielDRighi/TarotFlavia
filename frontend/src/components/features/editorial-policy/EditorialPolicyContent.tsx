@@ -1,10 +1,8 @@
-// 1. React & Next.js
-import Link from 'next/link';
-
+// 5. Components
+import { EditorialPageFooter } from '@/components/common/EditorialPageFooter';
 // 6. Utils & types
 import { EDITORIAL_POLICY } from '@/lib/constants/editorial-policy.data';
 import { cn } from '@/lib/utils';
-import { formatReviewMonth } from '@/lib/utils/date';
 
 /**
  * EditorialPolicyContent
@@ -18,7 +16,8 @@ import { formatReviewMonth } from '@/lib/utils/date';
  * El texto vive en `editorial-policy.data.ts`, no acá: así el guardarraíl de
  * palabras puede medirlo sin renderizar nada. Este componente solo decide la
  * jerarquía (`h1` → `h2`, sin saltos) y el ritmo de lectura, con la misma
- * maqueta que `AboutContent` para que las dos páginas se lean como un par.
+ * maqueta que `AboutContent` para que las dos páginas se lean como un par; el
+ * pie (fecha de revisión + enlaces) es `EditorialPageFooter`, compartido.
  */
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -66,30 +65,11 @@ export function EditorialPolicyContent({ className }: EditorialPolicyContentProp
           {closing}
         </p>
 
-        {/* La política afirma que el contenido se revisa; sin una fecha a la
-            vista, eso no lo puede verificar nadie. */}
-        <p
-          data-testid="editorial-policy-last-reviewed"
-          className="text-muted-foreground mt-6 text-sm"
-        >
-          Última revisión editorial: {formatReviewMonth(lastReviewed)}
-        </p>
-
-        {/* Enlaces internos: el crawler sigue recorriendo desde acá */}
-        <nav
-          aria-label="Enlaces relacionados"
-          className="border-border mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t pt-6"
-        >
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-secondary focus-visible:ring-secondary rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <EditorialPageFooter
+          lastReviewed={lastReviewed}
+          links={links}
+          testIdPrefix="editorial-policy"
+        />
       </div>
     </article>
   );

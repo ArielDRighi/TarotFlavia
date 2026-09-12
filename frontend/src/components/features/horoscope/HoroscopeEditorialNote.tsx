@@ -8,7 +8,7 @@ import {
 } from '@/lib/constants/editorial-policy.data';
 import { ROUTES } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
-import { formatDateFullWithYear } from '@/lib/utils/date';
+import { formatDateFullWithYearInline } from '@/lib/utils/date';
 
 /**
  * HoroscopeEditorialNote
@@ -46,12 +46,13 @@ export function HoroscopeEditorialNote({
 }: HoroscopeEditorialNoteProps) {
   return (
     <aside
+      aria-label="Nota editorial"
       data-testid={`${testIdPrefix}-editorial-note`}
       className={cn('border-border text-muted-foreground border-t pt-4 text-xs', className)}
     >
       <p className="leading-relaxed">
         Redactado {DAILY_HOROSCOPE_BASIS} para el{' '}
-        <time dateTime={horoscopeDate}>{formatDateFullWithYear(horoscopeDate)}</time>,{' '}
+        <time dateTime={horoscopeDate}>{formatDateFullWithYearInline(horoscopeDate)}</time>,{' '}
         {DAILY_HOROSCOPE_METHOD}.{' '}
         <Link
           href={ROUTES.POLITICA_EDITORIAL}

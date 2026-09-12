@@ -1,12 +1,12 @@
 // 1. React & Next.js
 import Image from 'next/image';
-import Link from 'next/link';
 
+// 5. Components
+import { EditorialPageFooter } from '@/components/common/EditorialPageFooter';
 // 6. Utils & types
 import { ABOUT_PAGE } from '@/lib/constants/about-page.data';
 import { LOGO } from '@/lib/constants/branding';
 import { cn } from '@/lib/utils';
-import { formatReviewMonth } from '@/lib/utils/date';
 
 /**
  * AboutContent
@@ -102,27 +102,11 @@ export function AboutContent({ className }: AboutContentProps) {
         {/* Cierre */}
         <p className="text-muted-foreground mt-10 leading-relaxed">{closing}</p>
 
-        {/* La página afirma que el contenido se revisa periódicamente; sin una
-            fecha a la vista, eso no lo puede verificar nadie. */}
-        <p data-testid="about-last-reviewed" className="text-muted-foreground mt-6 text-sm">
-          Última revisión editorial: {formatReviewMonth(ABOUT_PAGE.lastReviewed)}
-        </p>
-
-        {/* Enlaces internos: el crawler sigue recorriendo desde acá */}
-        <nav
-          aria-label="Enlaces relacionados"
-          className="border-border mt-8 flex flex-wrap gap-x-6 gap-y-2 border-t pt-6"
-        >
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-secondary focus-visible:ring-secondary rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <EditorialPageFooter
+          lastReviewed={ABOUT_PAGE.lastReviewed}
+          links={links}
+          testIdPrefix="about"
+        />
       </div>
     </article>
   );

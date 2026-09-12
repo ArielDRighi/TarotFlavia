@@ -14,6 +14,7 @@ import {
   getCanonicalDateString,
   shiftDateString,
   formatReviewMonth,
+  formatDateFullWithYearInline,
 } from './date';
 
 describe('date utilities', () => {
@@ -88,6 +89,17 @@ describe('date utilities', () => {
       expect(result).toContain('2025');
       // Using unicode letter class to support accented characters
       expect(result).toMatch(/^[\p{L}]+\s+\d+\s+de\s+[\p{L}]+\s+de\s+\d{4}$/u);
+    });
+  });
+
+  /** Variante para usar a mitad de oración: sin la mayúscula inicial. */
+  describe('formatDateFullWithYearInline', () => {
+    it('is the same as formatDateFullWithYear but starting in lowercase', () => {
+      expect(formatDateFullWithYearInline('2026-09-12')).toBe('sábado 12 de septiembre de 2026');
+      expect(formatDateFullWithYearInline('2026-09-12')).toBe(
+        formatDateFullWithYear('2026-09-12').charAt(0).toLowerCase() +
+          formatDateFullWithYear('2026-09-12').slice(1)
+      );
     });
   });
 

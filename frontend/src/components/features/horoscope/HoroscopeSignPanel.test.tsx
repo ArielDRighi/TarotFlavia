@@ -467,6 +467,24 @@ describe('HoroscopeSignPanel — nota editorial (T-SEO-017)', () => {
     );
   });
 
+  it('cuando se sirve el de ayer, la nota lleva la fecha de ayer', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
+    const previousDay: ServedDailyHoroscope = {
+      canonicalDate: '2026-01-17',
+      horoscope: { ...mockHoroscope, horoscopeDate: '2026-01-16' },
+      isShowingPreviousDay: true,
+    };
+
+    renderWithProviders(
+      <HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={previousDay} />
+    );
+
+    expect(screen.getByTestId('showing-previous-day-notice')).toBeInTheDocument();
+    expect(screen.getByTestId('horoscope-editorial-note')).toHaveTextContent(
+      /16 de enero de 2026/i
+    );
+  });
+
   it('sin horóscopo no hay nota editorial', () => {
     mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
 

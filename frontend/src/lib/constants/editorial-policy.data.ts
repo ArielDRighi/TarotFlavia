@@ -32,25 +32,10 @@
  */
 
 import { countWords } from '@/lib/utils/text';
+import type { EditorialLink, EditorialSection } from '@/types/editorial-page.types';
 import { ROUTES } from './routes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-/** Una sección de la política (se renderiza como `h2` + párrafos). */
-export interface EditorialPolicySection {
-  /** Encabezado de la sección. */
-  heading: string;
-  /** Párrafos del cuerpo, en orden. */
-  paragraphs: string[];
-}
-
-/** Enlace interno al pie de la página. */
-export interface EditorialPolicyLink {
-  /** Texto del enlace. */
-  label: string;
-  /** Ruta interna (siempre empieza con `/`). */
-  href: string;
-}
 
 /** Contenido completo de `/politica-editorial`. */
 export interface EditorialPolicyData {
@@ -59,11 +44,11 @@ export interface EditorialPolicyData {
   /** Bajada que abre la página. */
   lead: string;
   /** Secciones, en orden de lectura. */
-  sections: EditorialPolicySection[];
+  sections: EditorialSection[];
   /** Párrafo de cierre. */
   closing: string;
   /** Enlaces internos, para que el crawler siga recorriendo. */
-  links: EditorialPolicyLink[];
+  links: EditorialLink[];
   /**
    * Fecha de la última revisión de esta política, en formato ISO (`YYYY-MM`).
    *
@@ -150,8 +135,8 @@ export const EDITORIAL_POLICY: EditorialPolicyData = {
     {
       heading: 'Horóscopos diarios y herramientas de lenguaje',
       paragraphs: [
-        `Los horóscopos diarios son la única parte del sitio que se produce todos los días, para los doce signos, y el único lugar donde intervienen herramientas de lenguaje. El proceso es siempre el mismo: cada horóscopo se redacta ${DAILY_HOROSCOPE_BASIS} para el día que corresponde, ${DAILY_HOROSCOPE_METHOD}. No es un cálculo sobre el cielo de esa fecha —eso lo hace la carta astral— sino una lectura del clima del día para el signo, escrita con las reglas que fija el equipo.`,
-        'Esa línea aparece al pie de cada horóscopo, con la fecha a la que corresponde, para que quede claro cómo se produjo lo que estás leyendo. El equipo escribe las instrucciones con las que se redacta —qué tono, qué áreas, qué no puede decir—, revisa de forma periódica lo que se publica y ajusta esas instrucciones cuando un texto no cumple con esta política. Hoy esas instrucciones prohíben diagnósticos y consejo médico de cualquier tipo, piden no anunciar hechos concretos que no puedan cumplirse y no crear falsas expectativas. Las fichas de la enciclopedia, las guías, los rituales y las notas de las herramientas no se producen así: son texto escrito por el equipo.',
+        `Los horóscopos diarios son la única parte del sitio que se produce todos los días, para los doce signos. El proceso es siempre el mismo: cada horóscopo se redacta ${DAILY_HOROSCOPE_BASIS} para el día que corresponde, ${DAILY_HOROSCOPE_METHOD}. No es un cálculo sobre el cielo de esa fecha —eso lo hace la carta astral— sino una lectura del clima del día para el signo, escrita con las reglas que fija el equipo.`,
+        'Esa línea aparece al pie de cada horóscopo, con la fecha a la que corresponde, para que quede claro cómo se produjo lo que estás leyendo. El equipo escribe las instrucciones con las que se redacta —qué tono, qué áreas, qué no puede decir—, revisa de forma periódica lo que se publica y ajusta esas instrucciones cuando un texto no cumple con esta política. Hoy esas instrucciones prohíben diagnósticos y consejo médico de cualquier tipo, piden no anunciar hechos concretos que no puedan cumplirse y no crear falsas expectativas. Las herramientas de lenguaje intervienen también, con el mismo criterio, en el horóscopo chino anual y en las interpretaciones personalizadas del plan premium (lecturas y síntesis de la carta astral). Las fichas de la enciclopedia, las guías, los rituales y las notas de las herramientas no se producen así: son texto escrito por el equipo.',
       ],
     },
     {
@@ -164,7 +149,7 @@ export const EDITORIAL_POLICY: EditorialPolicyData = {
     {
       heading: 'Lo que no publicamos',
       paragraphs: [
-        'No se publican diagnósticos, indicaciones sobre tratamientos ni recomendaciones de medicación, y las consultas que rozan ese terreno se responden con una lectura simbólica y la recomendación de acudir a un profesional. No se publica consejo legal ni financiero accionable. No se venden resultados: ninguna página promete que alguien vuelva, que un negocio prospere o que una situación se resuelva en un plazo, y no hay trabajos pagos que comprometan un desenlace.',
+        'No se publican diagnósticos, indicaciones sobre tratamientos ni recomendaciones de medicación: el péndulo rechaza las preguntas de ese terreno antes de responder, con la recomendación de consultar a un profesional, y el horóscopo tiene prohibido dar consejo médico. No se publica consejo legal ni financiero accionable. No se venden resultados: ninguna página promete que alguien vuelva, que un negocio prospere o que una situación se resuelva en un plazo, y no hay trabajos pagos que comprometan un desenlace.',
         'Tampoco se publica contenido construido sobre el miedo. Las cartas difíciles se explican por lo que aportan, no como presagios de los que haya que salvarse pagando algo, y ninguna herramienta del sitio anuncia una desgracia para después ofrecer el remedio. Este criterio vale para las fichas, para las guías, para los rituales, para los horóscopos y para las lecturas personalizadas del plan premium.',
       ],
     },

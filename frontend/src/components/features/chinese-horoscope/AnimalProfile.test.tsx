@@ -109,6 +109,14 @@ describe('AnimalProfile', () => {
     expect(screen.getByText(new RegExp(profile.luck.numbers.join(', ')))).toBeInTheDocument();
   });
 
+  // T-SEO-017: la ficha del animal es contenido editorial como las demás fichas
+  // y lleva la misma firma.
+  it('firma la ficha con la firma editorial', () => {
+    render(<AnimalProfile animal={ChineseZodiacAnimal.DRAGON} />);
+
+    expect(screen.getByTestId('author-byline')).toBeInTheDocument();
+  });
+
   it('advierte que el año chino empieza con el Año Nuevo Chino', () => {
     render(<AnimalProfile animal={ChineseZodiacAnimal.PIG} />);
 

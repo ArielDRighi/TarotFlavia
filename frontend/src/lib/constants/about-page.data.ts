@@ -31,17 +31,10 @@
  */
 
 import { countWords } from '@/lib/utils/text';
+import type { EditorialLink, EditorialSection } from '@/types/editorial-page.types';
 import { ROUTES } from './routes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-/** Una sección temática de la página (se renderiza como `h2` + párrafos). */
-export interface AboutSection {
-  /** Encabezado de la sección. */
-  heading: string;
-  /** Párrafos del cuerpo, en orden. */
-  paragraphs: string[];
-}
 
 /** Un principio editorial: el compromiso destacado y su explicación. */
 export interface AboutPrinciple {
@@ -51,14 +44,6 @@ export interface AboutPrinciple {
   description: string;
 }
 
-/** Enlace interno al pie de la página. */
-export interface AboutLink {
-  /** Texto del enlace. */
-  label: string;
-  /** Ruta interna (siempre empieza con `/`). */
-  href: string;
-}
-
 /** Contenido completo de `/sobre-nosotros`. */
 export interface AboutPageData {
   /** Título de la página (se renderiza como el `h1`). */
@@ -66,7 +51,7 @@ export interface AboutPageData {
   /** Bajada que abre la página. */
   lead: string;
   /** Secciones temáticas, en orden de lectura. */
-  sections: AboutSection[];
+  sections: EditorialSection[];
   /** Encabezado del bloque de compromisos editoriales. */
   principlesHeading: string;
   /** Compromisos editoriales, en una lista aparte. */
@@ -74,7 +59,7 @@ export interface AboutPageData {
   /** Párrafo de cierre. */
   closing: string;
   /** Enlaces internos, para que el crawler siga recorriendo. */
-  links: AboutLink[];
+  links: EditorialLink[];
   /**
    * Fecha de la última revisión editorial, en formato ISO (`YYYY-MM`).
    *

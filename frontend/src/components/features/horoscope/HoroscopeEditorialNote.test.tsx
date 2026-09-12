@@ -38,6 +38,20 @@ describe('HoroscopeEditorialNote', () => {
     expect(note).not.toHaveTextContent(/11 de septiembre/);
   });
 
+  it('la fecha va en minúscula porque queda a mitad de oración', () => {
+    render(<HoroscopeEditorialNote horoscopeDate="2026-09-12" />);
+
+    expect(screen.getByTestId('horoscope-editorial-note')).toHaveTextContent(
+      /para el sábado 12 de septiembre de 2026,/
+    );
+  });
+
+  it('tiene nombre accesible como nota complementaria', () => {
+    render(<HoroscopeEditorialNote horoscopeDate="2026-09-12" />);
+
+    expect(screen.getByRole('complementary', { name: /nota editorial/i })).toBeInTheDocument();
+  });
+
   it('marca la fecha con <time dateTime> legible por máquina', () => {
     render(<HoroscopeEditorialNote horoscopeDate="2026-09-12" />);
 

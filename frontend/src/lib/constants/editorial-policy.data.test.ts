@@ -105,6 +105,26 @@ describe('EDITORIAL_POLICY', () => {
     expect(DAILY_HOROSCOPE_BASIS).not.toMatch(/posiciones planetarias/);
   });
 
+  /**
+   * ⚠️ Revisión local: el horóscopo chino anual, las interpretaciones premium y
+   * la síntesis de la carta astral también usan herramientas de lenguaje. La
+   * política no puede decir que el diario es "el único lugar".
+   */
+  it('no dice que el horóscopo diario sea el único lugar con herramientas de lenguaje', () => {
+    const fullText = allParagraphs().join(' ').toLowerCase();
+
+    expect(fullText).not.toMatch(/único lugar donde intervienen/);
+    expect(fullText).toMatch(/horóscopo chino/);
+    expect(fullText).toMatch(/premium/);
+  });
+
+  /** El péndulo rechaza las preguntas médicas; no las responde. */
+  it('describe el péndulo como lo que hace: rechaza, no responde', () => {
+    const fullText = allParagraphs().join(' ').toLowerCase();
+
+    expect(fullText).toMatch(/péndulo[^.]*rechaz/);
+  });
+
   it('no atribuye el horóscopo diario a posiciones planetarias del día', () => {
     const horoscopeSection = EDITORIAL_POLICY.sections.find((section) =>
       /horóscopos diarios/i.test(section.heading)
