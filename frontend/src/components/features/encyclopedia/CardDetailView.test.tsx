@@ -11,6 +11,7 @@ import { countWords } from '@/lib/utils/text';
 import { createMockCardDetail, MOCK_COMBINATION_CARD_NAMES } from '@/test/factories';
 import { ArcanaType, Element } from '@/types/encyclopedia.types';
 import type { CardDetail } from '@/types/encyclopedia.types';
+import type { MajorArcanaExtras } from '@/lib/constants/major-arcana-extras.data';
 
 // Mock sub-components that rely on hooks
 vi.mock('./CardNavigation', () => ({
@@ -347,5 +348,181 @@ describe('CardDetailView · secciones extendidas (T-SEO-010)', () => {
         expect(countWords([cuerpo]) - encabezado).toBeGreaterThanOrEqual(15);
       });
     });
+  });
+});
+
+/**
+ * T-SEO-020: los 22 Arcanos Mayores rompen la plantilla. Tres secciones que el
+ * resto del mazo no tiene (Invertida, mini-caso de tirada, nota iconográfica
+ * con diagrama) y un orden de secciones propio por carta, que además puede
+ * omitir "¿Sí o no?". Los 56 menores siguen con el orden de siempre.
+ */
+describe('CardDetailView · Arcanos Mayores (T-SEO-020)', () => {
+  const MAJOR_EXTRAS: MajorArcanaExtras = {
+    reversed: {
+      heading: 'El Loco invertido',
+      paragraphs: [
+        'Invertido, el salto se vuelve huida: el mismo impulso sin la mirada al cielo.',
+        'Pide revisar si lo que empuja es el deseo de empezar o el de no quedarse.',
+      ],
+    },
+    readingCase: {
+      heading: 'El Loco en una consulta sobre cambio de trabajo',
+      question: '¿Me conviene aceptar la propuesta de irme a otra ciudad?',
+      spread: 'Tirada de tres cartas',
+      position: 'Futuro',
+      orientation: 'upright',
+      reading: [
+        'Salió en la tercera posición, después del Ocho de Oros y el Dos de Bastos.',
+        'Se leyó como un comienzo con el equipaje justo: la propuesta valía el salto.',
+      ],
+    },
+    iconography: {
+      heading: 'La lámina del Loco: qué mirar',
+      intro: 'Pamela Colman Smith dibujó al Loco con la cara vuelta al cielo.',
+      symbols: [
+        { label: 'La pluma roja', meaning: 'La vida que atraviesa el mazo.', x: 63, y: 12 },
+        { label: 'El hatillo', meaning: 'Todo el equipaje cabe en un pañuelo.', x: 73, y: 19 },
+        { label: 'El perro blanco', meaning: 'El instinto que avisa.', x: 80, y: 75 },
+      ],
+    },
+    sectionOrder: [
+      'reversed',
+      'meaningLove',
+      'readingCase',
+      'meaningWork',
+      'symbolism',
+      'iconography',
+      'meaningWellbeing',
+      'advice',
+    ],
+  };
+
+  function createMajorCard(overrides?: Partial<CardDetail>): CardDetail {
+    return createMockCardDetail({
+      slug: 'the-fool',
+      nameEs: 'El Loco',
+      nameEn: 'The Fool',
+      arcanaType: ArcanaType.MAJOR,
+      number: 0,
+      romanNumeral: '0',
+      suit: null,
+      imageUrl: '/images/tarot/the-fool.webp',
+      ...overrides,
+    });
+  }
+
+  function renderedH2Names(): string[] {
+    return screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent ?? '');
+  }
+
+  it('renderiza las tres secciones nuevas con su h2 propio', () => {
+    render(<CardDetailView card={createMajorCard()} majorArcanaExtras={MAJOR_EXTRAS} />);
+
+    expect(screen.getByTestId('card-section-reversed')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'El Loco invertido' })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('card-section-reading-case')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        level: 2,
+        name: 'El Loco en una consulta sobre cambio de trabajo',
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('card-section-iconography')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'La lámina del Loco: qué mirar' })
+    ).toBeInTheDocument();
+  });
+
+  it('el diagrama de símbolos usa la lámina de la carta', () => {
+    render(<CardDetailView card={createMajorCard()} majorArcanaExtras={MAJOR_EXTRAS} />);
+
+    const diagram = screen.getByTestId('card-symbol-diagram');
+    expect(within(diagram).getByRole('img')).toHaveAttribute('src', '/images/tarot/the-fool.webp');
+    expect(within(diagram).getAllByTestId('card-symbol-marker')).toHaveLength(3);
+  });
+
+  it('la sección Invertida renderiza sus dos párrafos', () => {
+    render(<CardDetailView card={createMajorCard()} majorArcanaExtras={MAJOR_EXTRAS} />);
+
+    const reversed = screen.getByTestId('card-section-reversed');
+    expect(reversed).toHaveTextContent('Invertido, el salto se vuelve huida');
+    expect(reversed).toHaveTextContent('Pide revisar si lo que empuja');
+  });
+
+  it('respeta el orden de secciones propio de la carta', () => {
+    render(<CardDetailView card={createMajorCard()} majorArcanaExtras={MAJOR_EXTRAS} />);
+
+    const names = renderedH2Names();
+    const indexOf = (name: string) => names.findIndex((n) => n === name);
+
+    expect(indexOf('El Loco invertido')).toBeLessThan(indexOf('En el amor'));
+    expect(indexOf('En el amor')).toBeLessThan(
+      indexOf('El Loco en una consulta sobre cambio de trabajo')
+    );
+    expect(indexOf('El Loco en una consulta sobre cambio de trabajo')).toBeLessThan(
+      indexOf('En el trabajo')
+    );
+    expect(indexOf('El simbolismo de la carta')).toBeLessThan(
+      indexOf('La lámina del Loco: qué mirar')
+    );
+    expect(indexOf('La lámina del Loco: qué mirar')).toBeLessThan(
+      indexOf('En la energía y el bienestar')
+    );
+  });
+
+  it('omite "¿Sí o no?" cuando el orden de la carta no la incluye, aunque la API la mande', () => {
+    const card = createMajorCard();
+    expect(card.yesNo).toBeDefined();
+
+    render(<CardDetailView card={card} majorArcanaExtras={MAJOR_EXTRAS} />);
+
+    expect(screen.queryByTestId('card-section-yes-no')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 2, name: '¿Sí o no?' })).not.toBeInTheDocument();
+  });
+
+  it('sin extras (Arcanos Menores) no renderiza ninguna sección nueva y conserva el orden base', () => {
+    render(<CardDetailView card={createMockCardDetail()} />);
+
+    expect(screen.queryByTestId('card-section-reversed')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('card-section-reading-case')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('card-section-iconography')).not.toBeInTheDocument();
+
+    const names = renderedH2Names();
+    const baseHeadings = CARD_TEXT_SECTIONS.map((section) => section.heading);
+    const rendered = names.filter((name) => baseHeadings.includes(name));
+
+    expect(rendered).toEqual(baseHeadings);
+  });
+
+  it('mantiene la jerarquía h1 → h2 con las secciones nuevas', () => {
+    const { container } = render(
+      <CardDetailView card={createMajorCard()} majorArcanaExtras={MAJOR_EXTRAS} />
+    );
+
+    const niveles = [...container.querySelectorAll('h1, h2, h3, h4, h5, h6')].map((heading) =>
+      Number(heading.tagName[1])
+    );
+
+    expect(container.querySelectorAll('h1')).toHaveLength(1);
+    niveles.slice(1).forEach((nivel, i) => {
+      expect(nivel).toBeLessThanOrEqual(niveles[i] + 1);
+    });
+  });
+
+  it('las secciones nuevas van antes de la firma y del aviso legal', () => {
+    render(<CardDetailView card={createMajorCard()} majorArcanaExtras={MAJOR_EXTRAS} />);
+
+    const byline = screen.getByTestId('author-byline');
+    ['card-section-reversed', 'card-section-reading-case', 'card-section-iconography'].forEach(
+      (testId) => {
+        const section = screen.getByTestId(testId);
+        expect(
+          section.compareDocumentPosition(byline) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy();
+      }
+    );
   });
 });

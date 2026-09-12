@@ -18,6 +18,9 @@
  * - CardMeaning: Upright/reversed meanings with tabs
  * - CardContentSection: Sección temática con h2 propio (amor, trabajo, etc.)
  * - CardCombinations: Combinaciones frecuentes como enlaces internos
+ * - CardReadingCase: Mini-caso de tirada de un Arcano Mayor (T-SEO-020)
+ * - CardIconography: Nota iconográfica de la lámina RWS con diagrama (T-SEO-020)
+ * - CardSymbolDiagram: Lámina con marcadores numerados y leyenda (T-SEO-020)
  * - CardKeywords: Keyword badges grouped by orientation
  * - CardMetadata: Card metadata (arcana, element, suit, etc.)
  * - CardNavigation: Previous/next card navigation
@@ -59,6 +62,9 @@ export { CardImage } from './CardImage';
 export { CardMeaning } from './CardMeaning';
 export { CardContentSection } from './CardContentSection';
 export { CardCombinations } from './CardCombinations';
+export { CardReadingCase } from './CardReadingCase';
+export { CardIconography } from './CardIconography';
+export { CardSymbolDiagram } from './CardSymbolDiagram';
 export { CardKeywords } from './CardKeywords';
 export { CardMetadata } from './CardMetadata';
 export { CardNavigation } from './CardNavigation';
@@ -80,6 +86,9 @@ export type { CardImageProps } from './CardImage';
 export type { CardMeaningProps } from './CardMeaning';
 export type { CardContentSectionProps } from './CardContentSection';
 export type { CardCombinationsProps } from './CardCombinations';
+export type { CardReadingCaseProps } from './CardReadingCase';
+export type { CardIconographyProps } from './CardIconography';
+export type { CardSymbolDiagramProps } from './CardSymbolDiagram';
 export type { CardKeywordsProps } from './CardKeywords';
 export type { CardMetadataProps } from './CardMetadata';
 export type { CardNavigationProps } from './CardNavigation';

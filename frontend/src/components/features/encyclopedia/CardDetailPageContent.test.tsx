@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
 import { CardDetailPageContent } from './CardDetailPageContent';
+import { MAJOR_ARCANA_EXTRAS } from '@/lib/constants/major-arcana-extras.data';
 import type { CardDetail } from '@/types/encyclopedia.types';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -33,13 +34,16 @@ vi.mock('./CardDetailView', () => ({
   CardDetailView: ({
     card,
     combinationCardNames,
+    majorArcanaExtras,
   }: {
     card: { nameEs: string };
     combinationCardNames?: Record<string, string>;
+    majorArcanaExtras?: { reversed: { heading: string } };
   }) => (
     <div
       data-testid="card-detail-view"
       data-combination-names={JSON.stringify(combinationCardNames)}
+      data-reversed-heading={majorArcanaExtras?.reversed.heading}
     >
       {card.nameEs}
     </div>
@@ -86,6 +90,23 @@ describe('CardDetailPageContent', () => {
     expect(screen.getByTestId('card-detail-view')).toHaveAttribute(
       'data-combination-names',
       JSON.stringify({ 'el-mago': 'El Mago' })
+    );
+  });
+
+  it('T-SEO-020: pasa al render el contenido extra de los Arcanos Mayores', () => {
+    mockUseCard.mockReturnValue({ data: card, isLoading: false, error: null });
+
+    render(
+      <CardDetailPageContent
+        slug="the-fool"
+        initialCard={card}
+        majorArcanaExtras={MAJOR_ARCANA_EXTRAS['the-fool']}
+      />
+    );
+
+    expect(screen.getByTestId('card-detail-view')).toHaveAttribute(
+      'data-reversed-heading',
+      MAJOR_ARCANA_EXTRAS['the-fool'].reversed.heading
     );
   });
 
