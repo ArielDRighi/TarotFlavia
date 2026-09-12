@@ -330,3 +330,6 @@ export type { AdsByGoogleConfig, AdsByGoogleQueue } from './adsense.types';
 
 // Contact Types (T-PROD-014)
 export type { ContactMessageResponse } from './contact.types';
+
+// Home Types (T-SEO-014)
+export type { CanonicalDailyCard, EditorialHomeData } from './home.types';

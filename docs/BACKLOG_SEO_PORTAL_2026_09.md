@@ -87,7 +87,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 
 | ID | Tarea | Tipo | Prioridad | Estimación | Estado |
 | --- | --- | --- | --- | --- | --- |
-| T-SEO-014 | Home editorial: de landing SaaS a portada de portal | Frontend | 🔴 Crítica | 3 pts | ⬜ Pendiente |
+| T-SEO-014 | Home editorial: de landing SaaS a portada de portal | Frontend | 🔴 Crítica | 3 pts | ✅ Completada |
 | T-SEO-015 | Páginas de herramientas: nota editorial debajo de cada widget; `noindex` a ventas/internas; guardarraíl sobre el nav | Frontend + contenido | 🔴 Crítica | 4 pts | ⬜ Pendiente |
 | T-SEO-016 | Horóscopo del día en el HTML servido (SSR/ISR) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
 | T-SEO-017 | Persona editorial responsable, bylines y `/politica-editorial` | Frontend + decisión | 🟠 Alta | 2 pts | ⬜ Pendiente |
@@ -108,7 +108,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 | --- | --- | --- | --- |
 | 1 | ~~**T-SEO-019**~~ ✅ | 0,5 pts | Cerrada 11-sep-2026: grupo `Mediapartners-Google` en robots y sitemap sin `lastmod` |
 | 2 | ~~**T-SEO-016**~~ ✅ | 2 pts | Cerrada 11-sep-2026: `getCanonicalDailyHoroscopes()` en `lib/api/horoscope-server.ts` devuelve los 12 del día canónico (ART) para que 014 y 015 los consuman en SSR |
-| 3 | **T-SEO-014** | 3 pts | La causa n.º 1. Es la pantalla que decide |
+| 3 | ~~**T-SEO-014**~~ ✅ | 3 pts | Cerrada 11-sep-2026: portada editorial con horóscopo de hoy (12 extractos), carta del día canónica y guías en el HTML; `LandingPage` eliminada |
 | 4 | **T-SEO-015** | 4 pts | La causa n.º 2. Va después de 014 porque las secciones que la home deja de mostrar (precios, "3 pasos") aterrizan en `/premium`, que es una de las URLs que 015 reescribe |
 | 5 | **T-SEO-017** | 2 pts | Necesita una **decisión de negocio** (quién firma) que se puede tomar mientras se desarrollan 014–016. El código es chico |
 | 6 | **T-SEO-018** | 1,5 pts | Cierra el lenguaje después de que 014/015/017 escribieron texto nuevo, así el guardarraíl los cubre |
@@ -147,7 +147,7 @@ las tres salidas aplica a lo que no sea herramienta ni contenido (páginas de ve
 
 ## T-SEO-014: Home Editorial — de Landing SaaS a Portada de Portal
 
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (11-sep-2026)
 **Prioridad:** 🔴 Crítica · **Estimación:** 3 pts · **Tipo:** Frontend
 **Depende de:** T-SEO-016 (la portada muestra el horóscopo del día en SSR)
 
@@ -191,18 +191,65 @@ precio sigue siendo un folleto.
 
 ### Criterios de aceptación
 
-- [ ] La home anónima no contiene precios, tabla de planes ni "Cómo funciona en 3 pasos".
-- [ ] El HTML servido sin JS (`curl -A Googlebot`) trae los 12 extractos del horóscopo de hoy con la
-      fecha, la carta del día y ≥ 900 palabras sin nav/footer.
-- [ ] `h1` único, de publicación.
-- [ ] Los componentes de landing que se dejan de usar en la home se reubican (T-SEO-015) o se borran
+- [x] La home anónima no contiene precios, tabla de planes ni "Cómo funciona en 3 pasos".
+- [x] El HTML servido sin JS (`curl -A Googlebot`) trae los 12 extractos del horóscopo de hoy con la
+      fecha, la carta del día y ≥ 900 palabras sin nav/footer. *(Medido con render estático y datos
+      realistas: ~1.400 palabras con API; 638 de piso propio sin API. Verificar contra producción
+      tras el deploy único — ver nota abajo.)*
+- [x] `h1` único, de publicación.
+- [x] Los componentes de landing que se dejan de usar en la home se reubican (T-SEO-015) o se borran
       con sus tests; nada queda huérfano.
-- [ ] `check:indexable` sigue en verde y la home sube su cuenta respecto de hoy (651).
-- [ ] Tests: cada sección nueva con `data-testid`, y `HomePageContent.test.tsx` actualizado.
+- [ ] `check:indexable` sigue en verde y la home sube su cuenta respecto de hoy (651). *(Se corre
+      contra el host desplegado; pendiente del deploy único.)*
+- [x] Tests: cada sección nueva con `data-testid`, y `HomePageContent.test.tsx` actualizado.
 
 ### Fuera de alcance
 
 Rediseño visual del resto del sitio; cambios en `UserDashboard`.
+
+### Decisiones de implementación
+
+- **Ruta:** `app/page.tsx` sigue sin lógica: llama a `getEditorialHomeData()`
+  (`lib/api/home-server.ts`) y le pasa el resultado a `HomePageContent`, que conserva la lógica
+  dual (portada anónima / `UserDashboard`). `revalidate = 3600`, el mismo ISR que
+  `/horoscopo/[sign]`: antes `/` era estática hasta el próximo deploy y el horóscopo cambia a
+  diario.
+- **Tres bloques de datos, en paralelo y degradando por separado** (`resolveListingData`): si la
+  API del horóscopo falla, la carta y las guías igual se sirven, y el texto propio de
+  `lib/constants/home-editorial.data.ts` se sirve siempre. Ese archivo es el piso garantizado
+  (`MIN_HOME_EDITORIAL_WORDS = 380`, medido por test, mismo criterio que `listing-intros.data.ts`).
+- **Horóscopo (12 extractos):** consume `getCanonicalDailyHoroscopes()` de T-SEO-016. El extracto
+  es `generalContent`, que el prompt del backend ya genera como "resumen en 2–3 oraciones": no se
+  trunca. Fecha visible con `<time>`; si se sirvió el de ayer, la fecha es la del horóscopo servido
+  y se avisa. **Sin query en el cliente a propósito:** la portada muestra el día canónico con su
+  fecha, así que no hay promesa de "tu día local" que cumplir y el visitante no dispara requests. La
+  consulta puntual por signo (con swap por día local) sigue en `/horoscopo/[signo]`.
+- **Carta del día canónica** (`lib/api/daily-card-server.ts`, `getCanonicalDailyCard()`): **no**
+  usa el sorteo por visitante de `/carta-del-dia` (`POST /public/daily-reading` con fingerprint
+  consume el cupo anónimo y crea un registro por llamada; un ISR no es una persona). Se elige de
+  forma determinista con un hash FNV-1a del día canónico sobre el mazo ordenado por `id`, y se trae
+  la ficha completa con `getCardBySlug`. La interpretación mostrada es `meaningUpright` + `advice`
+  (~150 palabras). **T-SEO-015 debe reutilizar esta función** para el bloque "Carta de hoy" de
+  `/carta-del-dia`: las dos rutas no pueden mostrar cartas distintas.
+- **Guías:** hasta 6 (`LATEST_GUIDES_LIMIT`), en el orden editorial de `GUIDE_CATEGORIES`, con
+  `ArticleCard` reutilizado. La API no expone fecha de publicación de los artículos: **la fecha
+  real y el byline quedan para T-SEO-017** (mostrar `new Date()` sería inventarla, que es justo lo
+  que ese ítem prohíbe).
+- **Quiénes somos:** tres líneas + link. Sin foto: T-SEO-017 decide quién firma; una ilustración
+  o foto de stock sería peor que nada.
+- **Metadata:** `homeMetadata` pasa de "Tu guía espiritual / lecturas personalizadas y sesiones con
+  tarotistas" a título y descripción de publicación (horóscopo de hoy, carta del día, enciclopedia,
+  guías). El tagline de la imagen OG no cambia.
+- **Componentes eliminados con sus tests:** `LandingPage`, `HeroSection`,
+  `TryWithoutRegisterSection`, `WhatIsTarotSection`. **Conservados y exportados para T-SEO-015**
+  (`/premium`): `PlanComparison`, `PremiumBenefitsSection`, `HowItWorks`; el `index.ts` lo
+  documenta. `BirthChartPromo` no se usa más en la home pero es de `features/birth-chart` y tiene
+  otros consumidores.
+- **Verificación pendiente contra el stack real:** en esta sesión no había Docker sin sudo, así que
+  la cuenta de palabras se midió con `renderToStaticMarkup` y datos realistas. Después del deploy
+  único: `curl -A Googlebot https://auguriatarot.com/ | grep -c 'home-horoscope-sign-'` debe dar 12
+  y `npm run check:indexable -- --base-url https://auguriatarot.com` debe mostrar `/` por encima
+  de 651.
 
 ---
 

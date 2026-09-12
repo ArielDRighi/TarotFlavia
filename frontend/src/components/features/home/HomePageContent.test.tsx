@@ -1,10 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { HomePageContent } from './HomePageContent';
+import type { EditorialHomeData } from '@/types/home.types';
 
 // Mock child components
-vi.mock('./LandingPage', () => ({
-  LandingPage: () => <div data-testid="landing-page">LandingPage Component</div>,
+vi.mock('./EditorialHome', () => ({
+  EditorialHome: ({ data }: { data: EditorialHomeData }) => (
+    <div data-testid="landing-page">
+      EditorialHome Component · {data.dailyHoroscopes ? 'con horóscopo' : 'sin horóscopo'}
+    </div>
+  ),
 }));
 
 vi.mock('@/components/features/dashboard', () => ({
@@ -23,10 +28,19 @@ vi.mock('@/stores/authStore', () => ({
  *
  * Tests cover:
  * - Loading state (prevent FOUC)
- * - Unauthenticated users → LandingPage
+ * - Unauthenticated users → EditorialHome (T-SEO-014; antes LandingPage)
  * - Authenticated users → UserDashboard (all plans)
  * - Auth state transitions
+ *
+ * El `data-testid="landing-page"` del mock se conserva: es el nombre histórico
+ * del render anónimo en estos tests.
  */
+const HOME: EditorialHomeData = {
+  dailyHoroscopes: { canonicalDate: '2026-09-12', horoscopes: [], isShowingPreviousDay: false },
+  dailyCard: undefined,
+  latestGuides: undefined,
+};
+
 describe('HomePageContent (Root Page)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -43,7 +57,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      render(<HomePageContent />);
+      render(<HomePageContent home={HOME} />);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
       expect(screen.queryByTestId('user-dashboard')).not.toBeInTheDocument();
@@ -56,7 +70,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      render(<HomePageContent />);
+      render(<HomePageContent home={HOME} />);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
     });
@@ -70,7 +84,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<HomePageContent />);
+      render(<HomePageContent home={HOME} />);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
       expect(screen.queryByTestId('user-dashboard')).not.toBeInTheDocument();
@@ -85,7 +99,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<HomePageContent />);
+      render(<HomePageContent home={HOME} />);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -98,7 +112,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<HomePageContent />);
+      render(<HomePageContent home={HOME} />);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -111,7 +125,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      render(<HomePageContent />);
+      render(<HomePageContent home={HOME} />);
 
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
       expect(screen.queryByTestId('landing-page')).not.toBeInTheDocument();
@@ -126,7 +140,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      const { rerender } = render(<HomePageContent />);
+      const { rerender } = render(<HomePageContent home={HOME} />);
       // Antes de resolver la sesión ya se ve la landing (T-PROD-022).
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
 
@@ -137,7 +151,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      rerender(<HomePageContent />);
+      rerender(<HomePageContent home={HOME} />);
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
     });
 
@@ -148,7 +162,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      const { rerender } = render(<HomePageContent />);
+      const { rerender } = render(<HomePageContent home={HOME} />);
       // Antes de resolver la sesión ya se ve la landing (T-PROD-022).
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
 
@@ -159,8 +173,18 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: false,
       });
 
-      rerender(<HomePageContent />);
+      rerender(<HomePageContent home={HOME} />);
       expect(screen.getByTestId('user-dashboard')).toBeInTheDocument();
+    });
+  });
+
+  describe('Datos de la portada (T-SEO-014)', () => {
+    it('reenvía a EditorialHome los datos resueltos en el servidor', () => {
+      mockUseAuthStore.mockReturnValue({ user: null, isAuthenticated: false, isLoading: false });
+
+      render(<HomePageContent home={HOME} />);
+
+      expect(screen.getByTestId('landing-page')).toHaveTextContent('con horóscopo');
     });
   });
 
@@ -178,7 +202,7 @@ describe('HomePageContent (Root Page)', () => {
         isLoading: true,
       });
 
-      render(<HomePageContent />);
+      render(<HomePageContent home={HOME} />);
 
       expect(screen.getByTestId('landing-page')).toBeInTheDocument();
     });

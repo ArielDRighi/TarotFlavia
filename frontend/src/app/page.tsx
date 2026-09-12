@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { HomePageContent } from '@/components/features/home/HomePageContent';
+import { getEditorialHomeData } from '@/lib/api/home-server';
 import { homeMetadata } from '@/lib/metadata/seo';
 
 /**
@@ -11,10 +12,22 @@ import { homeMetadata } from '@/lib/metadata/seo';
  * `homeMetadata` existía en `seo.ts` desde siempre pero **nadie la importaba**:
  * la home era un client component y Next no admite `export const metadata` en
  * uno, así que servía el título genérico "Auguria" igual que el resto del sitio
- * (T-PROD-020). La lógica dual landing/dashboard vive en `HomePageContent`.
+ * (T-PROD-020). La lógica dual portada/dashboard vive en `HomePageContent`.
+ *
+ * Desde T-SEO-014 la portada anónima es editorial y trae datos del día
+ * resueltos acá, en el servidor: los 12 extractos del horóscopo, la carta del
+ * día y las guías viajan en el HTML que ve el crawler.
  */
 export const metadata: Metadata = homeMetadata;
 
-export default function Home() {
-  return <HomePageContent />;
+/**
+ * Una hora de ISR, el mismo criterio que `/horoscopo/[sign]` (T-SEO-016): el
+ * horóscopo y la carta cambian una vez por día y el cron puede atrasarse.
+ */
+export const revalidate = 3600;
+
+export default async function Home() {
+  const home = await getEditorialHomeData();
+
+  return <HomePageContent home={home} />;
 }
