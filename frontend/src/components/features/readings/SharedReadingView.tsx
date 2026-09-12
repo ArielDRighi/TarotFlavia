@@ -12,6 +12,7 @@ import { TarotCard } from '@/components/features/readings/TarotCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 import type { SharedReading, ReadingCard } from '@/types';
 import { CTA_AUTH } from '@/lib/constants/cta-copy';
 
@@ -137,6 +138,9 @@ export function SharedReadingView({ reading, spreadName }: SharedReadingViewProp
               </CardContent>
             </Card>
           )}
+
+          {/* Aviso legal al pie de la lectura compartida (T-SEO-018) */}
+          <ContentDisclaimer />
         </div>
       </main>
 

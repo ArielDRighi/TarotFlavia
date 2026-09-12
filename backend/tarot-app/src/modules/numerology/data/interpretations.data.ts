@@ -340,7 +340,7 @@ export const LIFE_PATH_INTERPRETATIONS: Record<number, LifePathInterpretation> =
         'Activista social',
         'Filántropo',
         'Artista',
-        'Sanador',
+        'Cuidador',
         'Maestro',
         'Trabajador humanitario',
       ],
@@ -377,7 +377,7 @@ export const LIFE_PATH_INTERPRETATIONS: Record<number, LifePathInterpretation> =
         'Líder espiritual',
         'Artista visionario',
         'Inventor',
-        'Sanador energético',
+        'Guía energético',
         'Motivador',
         'Consejero espiritual',
       ],
@@ -429,13 +429,13 @@ export const LIFE_PATH_INTERPRETATIONS: Record<number, LifePathInterpretation> =
     },
     33: {
       number: 33,
-      name: 'El Maestro Sanador',
+      name: 'El Maestro Compasivo',
       keywords: ['Compasión', 'Servicio', 'Amor incondicional'],
       description:
-        'El 33 es el más elevado de los números maestros, representando el amor y la compasión en su máxima expresión. Las personas con este camino de vida son sanadores del mundo, con una capacidad extraordinaria para nutrir, enseñar y elevar a otros a través del amor incondicional. Combinan las cualidades del 11 y el 22 con un propósito de servicio puro.',
+        'El 33 es el más elevado de los números maestros, representando el amor y la compasión en su máxima expresión. Las personas con este camino de vida son cuidadores del mundo, con una capacidad extraordinaria para nutrir, enseñar y elevar a otros a través del amor incondicional. Combinan las cualidades del 11 y el 22 con un propósito de servicio puro.',
       strengths: [
         'Compasión ilimitada y amor incondicional',
-        'Capacidad extraordinaria de sanar',
+        'Capacidad extraordinaria de cuidar',
         'Devoción total al servicio',
         'Maestros naturales y guías',
         'Sacrificio inspirador',
@@ -448,7 +448,7 @@ export const LIFE_PATH_INTERPRETATIONS: Record<number, LifePathInterpretation> =
         'Desilusión cuando otros no corresponden',
       ],
       careers: [
-        'Sanador holístico',
+        'Guía holístico',
         'Maestro espiritual',
         'Humanitario',
         'Artista que eleva consciencias',
@@ -456,7 +456,7 @@ export const LIFE_PATH_INTERPRETATIONS: Record<number, LifePathInterpretation> =
         'Consejero',
       ],
       lifePurpose:
-        'Elevar a la humanidad a través del amor incondicional, enseñando y sanando con compasión suprema',
+        'Elevar a la humanidad a través del amor incondicional, enseñando y acompañando con compasión suprema',
       lessonsToLearn: [
         'Autocuidado como prioridad',
         'Establecer límites claros',

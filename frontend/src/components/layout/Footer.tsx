@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 import { ROUTES } from '@/lib/constants/routes';
 
 /**
@@ -101,6 +102,10 @@ export function Footer() {
             </li>
           </ul>
         </nav>
+
+        {/* Aviso legal (T-SEO-018): llega en toda URL, incluidas las que no
+            montan el aviso al pie del contenido. */}
+        <ContentDisclaimer className="mx-auto max-w-2xl text-center" />
 
         {/* Copyright */}
         <p className="text-center text-sm">© 2025 Auguria</p>

@@ -1,4 +1,5 @@
 import { ZodiacSignInfo } from '../../../../common/utils/zodiac.utils';
+import { YMYL_LANGUAGE_RULES } from '../../../../common/prompts/ymyl-language.prompt';
 
 /**
  * Prompt de sistema para la generación de horóscopos diarios
@@ -24,6 +25,8 @@ IMPORTANTE SOBRE BIENESTAR (wellness):
   manejo del estrés, prácticas de meditación, autocuidado, equilibrio emocional y vitalidad general
 - Usa términos como: "energía vital", "armonía interior", "momento de pausa", 
   "autocuidado", "equilibrio emocional", "vitalidad", "conexión contigo mismo/a"
+
+${YMYL_LANGUAGE_RULES}
 
 ESTRUCTURA DEL CONTENIDO:
 - General Content: Resumen del día en 2-3 oraciones que capture la energía general del signo

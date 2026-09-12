@@ -94,7 +94,7 @@
 "planet1": "sun",
 "planet2": "pluto",
 "aspect": "opposition",
-"content": "Te enfrentas a luchas de poder intensas con los demás. A menudo atraes personas controladoras o situaciones manipuladoras que te obligan a encontrar tu propia fuerza. Sientes que debes luchar por tu supervivencia o identidad. El aprendizaje es soltar el control y transformar el miedo en empoderamiento. Tienes la capacidad de ver la verdad oculta en las relaciones y sanar patrones profundos a través del conflicto."
+"content": "Te enfrentas a luchas de poder intensas con los demás. A menudo atraes personas controladoras o situaciones manipuladoras que te obligan a encontrar tu propia fuerza. Sientes que debes luchar por tu supervivencia o identidad. El aprendizaje es soltar el control y transformar el miedo en empoderamiento. Tienes la capacidad de ver la verdad oculta en las relaciones y transformar patrones profundos a través del conflicto."
 },
 {
 "planet1": "moon",
@@ -172,7 +172,7 @@
 "planet1": "moon",
 "planet2": "neptune",
 "aspect": "conjunction",
-"content": "Eres una esponja psíquica con una sensibilidad ilimitada. Te cuesta distinguir tus emociones de las de los demás. Tienes una imaginación vívida y un corazón compasivo y espiritual. El riesgo es el escapismo, la confusión emocional o el victimismo. Necesitas soledad para limpiarte energéticamente. Tu don es la empatía profunda y la capacidad artística o sanadora que toca el alma de la gente."
+"content": "Eres una esponja psíquica con una sensibilidad ilimitada. Te cuesta distinguir tus emociones de las de los demás. Tienes una imaginación vívida y un corazón compasivo y espiritual. El riesgo es el escapismo, la confusión emocional o el victimismo. Necesitas soledad para limpiarte energéticamente. Tu don es la empatía profunda y la capacidad artística o consoladora que toca el alma de la gente."
 },
 {
 "planet1": "moon",
@@ -190,7 +190,7 @@
 "planet1": "moon",
 "planet2": "pluto",
 "aspect": "opposition",
-"content": "Experimentas luchas de poder emocional intensas. Atraes relaciones que te obligan a enfrentar tus miedos al abandono o a la traición. Sientes que tus emociones pueden destruirte si las sueltas. El aprendizaje es confiar y soltar el control, permitiendo la transformación sin resistencia. Eres un sanador emocional potente una vez que has navegado tus propias profundidades."
+"content": "Experimentas luchas de poder emocional intensas. Atraes relaciones que te obligan a enfrentar tus miedos al abandono o a la traición. Sientes que tus emociones pueden destruirte si las sueltas. El aprendizaje es confiar y soltar el control, permitiendo la transformación sin resistencia. Eres un apoyo emocional potente una vez que has navegado tus propias profundidades."
 },
 {
 "planet1": "mercury",
@@ -268,7 +268,7 @@
 "planet1": "mercury",
 "planet2": "pluto",
 "aspect": "opposition",
-"content": "Entras en luchas de poder verbales. Sientes que otros intentan controlarte mentalmente o tú intentas imponer tu verdad. Puedes ser obsesivo con ciertas ideas o sospechoso por naturaleza. El aprendizaje es usar tu agudeza mental para sanar y empoderar, no para dominar. Tienes la capacidad de ver lo que nadie más ve y decir lo que nadie se atreve."
+"content": "Entras en luchas de poder verbales. Sientes que otros intentan controlarte mentalmente o tú intentas imponer tu verdad. Puedes ser obsesivo con ciertas ideas o sospechoso por naturaleza. El aprendizaje es usar tu agudeza mental para reparar y empoderar, no para dominar. Tienes la capacidad de ver lo que nadie más ve y decir lo que nadie se atreve."
 },
 {
 "planet1": "venus",
@@ -592,7 +592,7 @@
 "planet1": "sun",
 "planet2": "neptune",
 "aspect": "trine",
-"content": "Tienes un alma sensible, artística y compasiva. El trígono Sol-Neptuno te conecta naturalmente con lo espiritual y lo sutil. Tienes una intuición psíquica y una capacidad innata para la música, la poesía o la sanación. Tu ego no es rígido, lo que te permite empatizar profundamente con los demás. Tu talento es traer magia y belleza al mundo sin esfuerzo. Brillas cuando ayudas desinteresadamente o cuando expresas tu rica imaginación creativa."
+"content": "Tienes un alma sensible, artística y compasiva. El trígono Sol-Neptuno te conecta naturalmente con lo espiritual y lo sutil. Tienes una intuición psíquica y una capacidad innata para la música, la poesía o el acompañamiento. Tu ego no es rígido, lo que te permite empatizar profundamente con los demás. Tu talento es traer magia y belleza al mundo sin esfuerzo. Brillas cuando ayudas desinteresadamente o cuando expresas tu rica imaginación creativa."
 },
 {
 "planet1": "sun",
@@ -688,7 +688,7 @@
 "planet1": "moon",
 "planet2": "neptune",
 "aspect": "trine",
-"content": "Eres psíquico, soñador y profundamente empático. El trígono Luna-Neptuno te conecta con los sentimientos de los demás sin necesidad de palabras. Tienes un talento artístico y espiritual innato. Tu imaginación es una fuente inagotable de creatividad. Eres compasivo por naturaleza y encuentras paz en la meditación o el arte. Tu don es la capacidad de sanar y consolar a nivel del alma, fluyendo con las corrientes sutiles de la vida."
+"content": "Eres psíquico, soñador y profundamente empático. El trígono Luna-Neptuno te conecta con los sentimientos de los demás sin necesidad de palabras. Tienes un talento artístico y espiritual innato. Tu imaginación es una fuente inagotable de creatividad. Eres compasivo por naturaleza y encuentras paz en la meditación o el arte. Tu don es la capacidad de reconfortar y consolar a nivel del alma, fluyendo con las corrientes sutiles de la vida."
 },
 {
 "planet1": "moon",
@@ -700,7 +700,7 @@
 "planet1": "moon",
 "planet2": "pluto",
 "aspect": "trine",
-"content": "Tienes una profundidad emocional y un poder de regeneración asombrosos. El trígono Luna-Plutón te permite navegar crisis emocionales con valentía y salir fortalecido. Tienes instintos psicológicos agudos y nada se te escapa. Tu talento es la transformación: puedes purgar viejas emociones y renovarte completamente. Eres intensamente leal y protector. Tienes la capacidad natural de sanar traumas profundos propios y ajenos sin miedo."
+"content": "Tienes una profundidad emocional y un poder de regeneración asombrosos. El trígono Luna-Plutón te permite navegar crisis emocionales con valentía y salir fortalecido. Tienes instintos psicológicos agudos y nada se te escapa. Tu talento es la transformación: puedes purgar viejas emociones y renovarte completamente. Eres intensamente leal y protector. Tienes la capacidad natural de transformar heridas profundas propias y ajenas sin miedo."
 },
 {
 "planet1": "moon",
@@ -760,7 +760,7 @@
 "planet1": "mercury",
 "planet2": "neptune",
 "aspect": "trine",
-"content": "Tienes una mente poética, visual e intuitiva. El trígono Mercurio-Neptuno te permite captar lo sutil y comunicarte a través de imágenes o música. Tienes una imaginación fértil y talento para la ficción. Entiendes lo que no se dice. Tu don innato es la inspiración artística y la capacidad de conectar con la mente inconsciente. Tus palabras tienen un efecto sanador y encantador."
+"content": "Tienes una mente poética, visual e intuitiva. El trígono Mercurio-Neptuno te permite captar lo sutil y comunicarte a través de imágenes o música. Tienes una imaginación fértil y talento para la ficción. Entiendes lo que no se dice. Tu don innato es la inspiración artística y la capacidad de conectar con la mente inconsciente. Tus palabras tienen un efecto reparador y encantador."
 },
 {
 "planet1": "mercury",
@@ -832,7 +832,7 @@
 "planet1": "venus",
 "planet2": "neptune",
 "aspect": "trine",
-"content": "Eres el romántico definitivo. El trígono Venus-Neptuno te dota de una sensibilidad sublime, compasión y talento artístico refinado. Idealizas la belleza y buscas el amor espiritual. Tienes un encanto mágico que seduce sin esfuerzo. Tu talento innato es la inspiración: puedes canalizar el amor universal a través del arte o la ayuda desinteresada. Vives el amor como una experiencia mística y sanadora."
+"content": "Eres el romántico definitivo. El trígono Venus-Neptuno te dota de una sensibilidad sublime, compasión y talento artístico refinado. Idealizas la belleza y buscas el amor espiritual. Tienes un encanto mágico que seduce sin esfuerzo. Tu talento innato es la inspiración: puedes canalizar el amor universal a través del arte o la ayuda desinteresada. Vives el amor como una experiencia mística y reparadora."
 },
 {
 "planet1": "venus",
@@ -856,7 +856,7 @@
 "planet1": "mars",
 "planet2": "jupiter",
 "aspect": "trine",
-"content": "Eres un emprendedor nato con energía ilimitada. El trígono Marte-Júpiter combina acción con confianza, garantizando éxito en tus iniciativas. Tienes 'suerte' porque actúas con fe y entusiasmo. Eres honesto, deportivo y aventurero. Tu talento innato es la expansión: todo lo que emprendes tiende a crecer. Tienes una capacidad natural para motivar a otros y liderar grandes proyectos con alegría."
+"content": "Eres un emprendedor nato con energía ilimitada. El trígono Marte-Júpiter combina acción con confianza, y eso suele favorecer tus iniciativas. Tienes 'suerte' porque actúas con fe y entusiasmo. Eres honesto, deportivo y aventurero. Tu talento innato es la expansión: todo lo que emprendes tiende a crecer. Tienes una capacidad natural para motivar a otros y liderar grandes proyectos con alegría."
 },
 {
 "planet1": "mars",
@@ -940,7 +940,7 @@
 "planet1": "jupiter",
 "planet2": "neptune",
 "aspect": "trine",
-"content": "Eres profundamente espiritual, compasivo y soñador. El trígono Júpiter-Neptuno te conecta con el amor universal y la abundancia mística. Tienes una fe que mueve montañas y una imaginación fértil. Eres generoso y altruista. Tu don innato es la inspiración: vives en un mundo de posibilidades mágicas y tienes la capacidad de sanar a otros con tu sola presencia."
+"content": "Eres profundamente espiritual, compasivo y soñador. El trígono Júpiter-Neptuno te conecta con el amor universal y la abundancia mística. Tienes una fe que mueve montañas y una imaginación fértil. Eres generoso y altruista. Tu don innato es la inspiración: vives en un mundo de posibilidades mágicas y tienes la capacidad de calmar a otros con tu sola presencia."
 },
 {
 "planet1": "jupiter",
@@ -1072,7 +1072,7 @@
 "planet1": "sun",
 "planet2": "pluto",
 "aspect": "square",
-"content": "Tu vida está marcada por ciclos intensos de crisis y transformación. La cuadratura Sol-Plutón genera una lucha interna por el poder y el control. Sientes que debes 'matar' viejas versiones de ti mismo constantemente. Puedes atraer luchas de poder con figuras de autoridad. No es un camino fácil, pero es el camino del fénix. Tu inmenso potencial se desbloquea cuando dejas de resistirte al cambio y usas tu intensidad para empoderarte y sanar, en lugar de dominar o manipular."
+"content": "Tu vida está marcada por ciclos intensos de crisis y transformación. La cuadratura Sol-Plutón genera una lucha interna por el poder y el control. Sientes que debes 'matar' viejas versiones de ti mismo constantemente. Puedes atraer luchas de poder con figuras de autoridad. No es un camino fácil, pero es el camino del fénix. Tu inmenso potencial se desbloquea cuando dejas de resistirte al cambio y usas tu intensidad para empoderarte y reparar, en lugar de dominar o manipular."
 },
 {
 "planet1": "moon",
@@ -1114,13 +1114,13 @@
 "planet1": "moon",
 "planet2": "neptune",
 "aspect": "square",
-"content": "Te cuesta ver la realidad emocional con claridad. La cuadratura Luna-Neptuno te hace hipersensible, propenso a idealizar a las personas o a caer en el victimismo. Absorbes las emociones ajenas hasta enfermarte o confundirte. El conflicto es entre la verdad y la fantasía. Tu camino de crecimiento implica establecer límites energéticos firmes y usar tu inmensa imaginación para el arte o la sanación consciente, en lugar de usarla para escapar de una realidad que te duele."
+"content": "Te cuesta ver la realidad emocional con claridad. La cuadratura Luna-Neptuno te hace hipersensible, propenso a idealizar a las personas o a caer en el victimismo. Absorbes las emociones ajenas hasta enfermarte o confundirte. El conflicto es entre la verdad y la fantasía. Tu camino de crecimiento implica establecer límites energéticos firmes y usar tu inmensa imaginación para el arte o el autoconocimiento consciente, en lugar de usarla para escapar de una realidad que te duele."
 },
 {
 "planet1": "moon",
 "planet2": "pluto",
 "aspect": "square",
-"content": "Tus emociones son intensas, profundas y a veces obsesivas. La cuadratura Luna-Plutón indica una lucha interna por el control emocional. Tienes miedo a la pérdida o a la traición, lo que te lleva a ser posesivo o manipulador inconscientemente. Sientes todo a vida o muerte. El desafío es soltar y confiar. Tu inmenso poder reside en tu capacidad de regeneración: al enfrentar tus sombras y miedos más profundos, te transformas en un sanador emocional indestructible."
+"content": "Tus emociones son intensas, profundas y a veces obsesivas. La cuadratura Luna-Plutón indica una lucha interna por el control emocional. Tienes miedo a la pérdida o a la traición, lo que te lleva a ser posesivo o manipulador inconscientemente. Sientes todo a vida o muerte. El desafío es soltar y confiar. Tu inmenso poder reside en tu capacidad de regeneración: al enfrentar tus sombras y miedos más profundos, te transformas en un apoyo emocional indestructible."
 },
 {
 "planet1": "mercury",
@@ -1156,7 +1156,7 @@
 "planet1": "mercury",
 "planet2": "pluto",
 "aspect": "square",
-"content": "Tu mente es obsesiva, penetrante y a veces paranoica. La cuadratura Mercurio-Plutón te impulsa a buscar verdades ocultas, pero puedes caer en la sospecha constante o intentar controlar a otros con tus palabras. Sientes que la información es poder. El desafío es usar tu agudeza mental para sanar y transformar, no para manipular. Tu crecimiento llega cuando sueltas la necesidad de tener siempre la razón y usas tu profundidad psicológica para empoderar tu comunicación."
+"content": "Tu mente es obsesiva, penetrante y a veces paranoica. La cuadratura Mercurio-Plutón te impulsa a buscar verdades ocultas, pero puedes caer en la sospecha constante o intentar controlar a otros con tus palabras. Sientes que la información es poder. El desafío es usar tu agudeza mental para reparar y transformar, no para manipular. Tu crecimiento llega cuando sueltas la necesidad de tener siempre la razón y usas tu profundidad psicológica para empoderar tu comunicación."
 },
 {
 "planet1": "venus",
@@ -1192,7 +1192,7 @@
 "planet1": "venus",
 "planet2": "pluto",
 "aspect": "square",
-"content": "El amor para ti es una transformación intensa y a veces dolorosa. La cuadratura Venus-Plutón atrae relaciones marcadas por celos, control, manipulación o fatalidad. Buscas una fusión total que te da miedo. El conflicto es entre el amor y el poder. Esta tensión te empuja a sanar tu propia sombra. Tu crecimiento llega cuando aprendes que el amor no es posesión ni dolor, transformando tus pasiones obsesivas en una capacidad de amar profunda y regeneradora."
+"content": "El amor para ti es una transformación intensa y a veces dolorosa. La cuadratura Venus-Plutón atrae relaciones marcadas por celos, control, manipulación o fatalidad. Buscas una fusión total que te da miedo. El conflicto es entre el amor y el poder. Esta tensión te empuja a integrar tu propia sombra. Tu crecimiento llega cuando aprendes que el amor no es posesión ni dolor, transformando tus pasiones obsesivas en una capacidad de amar profunda y regeneradora."
 },
 {
 "planet1": "mars",

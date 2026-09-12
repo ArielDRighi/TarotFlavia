@@ -185,7 +185,7 @@ export const CATEGORY_INFO: Record<
   },
   [RitualCategory.LOVE]: { name: 'Amor', icon: '💕', color: 'text-pink-500' },
   [RitualCategory.HEALING]: {
-    name: 'Sanación',
+    name: 'Bienestar',
     icon: '💚',
     color: 'text-emerald-500',
   },

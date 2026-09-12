@@ -1,6 +1,7 @@
 'use client';
 
 import { DisclaimerBanner } from '@/components/ui/disclaimer-banner';
+import { CONTENT_DISCLAIMER } from '@/lib/constants/legal';
 
 /**
  * Página de Términos y Condiciones
@@ -37,9 +38,8 @@ export default function TerminosPage() {
             <section>
               <h2 className="font-serif text-2xl font-semibold">2. Descripción del Servicio</h2>
               <p className="text-text-secondary">
-                Auguria proporciona servicios de lectura de tarot, horóscopo, rituales y otras
-                prácticas esotéricas con fines de entretenimiento y orientación personal. Nuestros
-                servicios no sustituyen el asesoramiento profesional médico, legal o financiero.
+                Auguria proporciona lecturas de tarot, horóscopos, rituales, numerología y otras
+                prácticas esotéricas. {CONTENT_DISCLAIMER}
               </p>
             </section>
 

@@ -447,7 +447,7 @@ export const CHINESE_ZODIAC_PROFILES: Record<ChineseZodiacAnimal, ChineseZodiacP
   [ChineseZodiacAnimal.DOG]: {
     tagline: 'La lealtad que no se negocia',
     intro: [
-      'El Perro es el signo de la fidelidad y de la justicia. Elige un bando por convicción moral y se queda ahí, aun cuando conviene lo contrario. La tradición china lo asocia al guardián: escucha en la noche, avisa del peligro y pone el cuerpo por quienes están de su lado.',
+      'El Perro es el signo de la fidelidad y de la justicia. Elige un bando por convicción moral y se queda ahí, aun cuando conviene lo contrario. La tradición china lo asocia al guardián: escucha en la noche, avisa de lo que se acerca y pone el cuerpo por quienes están de su lado.',
       'Tiene un sentido agudo de lo que está bien y lo que no, y le cuesta mirar hacia otro lado frente a un abuso. Esa vigilancia lo vuelve un compañero seguro y, hacia adentro, algo ansioso: se preocupa por adelantado y necesita señales de que el vínculo sigue firme.',
     ],
     personality: [
@@ -464,7 +464,7 @@ export const CHINESE_ZODIAC_PROFILES: Record<ChineseZodiacAnimal, ChineseZodiacP
       {
         term: 'Cautela ansiosa',
         description:
-          'Anticipa el peligro más de lo necesario. Esa alarma temprana protege al grupo y le cobra tranquilidad a él.',
+          'Anticipa la amenaza más de lo necesario. Esa alarma temprana protege al grupo y le cobra tranquilidad a él.',
       },
     ],
     strengths: ['Honestidad', 'Solidaridad', 'Responsabilidad', 'Coraje moral'],

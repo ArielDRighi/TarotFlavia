@@ -110,7 +110,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     meaningUpright:
       'Necesidad de realizar una decisión crucial en nuestras vidas, buen augurio en las relaciones afectivas. Etapas de conciliación, armonía y dicha. Se anuncia la llegada de un nuevo amor. En lo económico, momento de ganancia moderada.',
     meaningReversed:
-      'Falta de equilibrio en las relaciones, periodo de dudas, advertencia, momento de realizar cambios. Los sentimientos pueden no estar correspondidos, sin reciprocidad. Encuentros fugaces y ocasionales. Oportunidad de conectarse con el amor propio. En lo financiero, descuido por centrarse en lo amoroso.',
+      'Falta de equilibrio en las relaciones, periodo de dudas, señal de alerta, momento de realizar cambios. Los sentimientos pueden no estar correspondidos, sin reciprocidad. Encuentros fugaces y ocasionales. Oportunidad de conectarse con el amor propio. En lo financiero, descuido por centrarse en lo amoroso.',
     description:
       'Carta del amor y del romance, habla de la unión armónica para lograr un todo. También representa la elección y la necesidad de orientación sobre alguna decisión en nuestra vida.',
     keywords: 'Amor, unión, elecciones, armonía, relaciones, valores',
@@ -265,7 +265,7 @@ export const ARCANOS_MAYORES: TarotCardData[] = [
     category: 'arcanos_mayores',
     imageUrl: '/images/tarot/the-moon.webp',
     meaningUpright:
-      'Tiempo de confusión donde algo no es lo que parece o nos rehusamos a aceptar la realidad. Algo importante se oculta, peligros o enemigos ocultos, chismes, habladurías enturbian la situación. En el amor, relaciones de poco compromiso o de idas y vueltas cargadas de emociones y sensualidad. Momento de cuidarse en las finanzas y de ofertas tentadoras que no lo son, invita a estar atentos.',
+      'Tiempo de confusión donde algo no es lo que parece o nos rehusamos a aceptar la realidad. Algo importante se oculta, riesgos o enemigos ocultos, chismes, habladurías enturbian la situación. En el amor, relaciones de poco compromiso o de idas y vueltas cargadas de emociones y sensualidad. Momento de cuidarse en las finanzas y de ofertas tentadoras que no lo son, invita a estar atentos.',
     meaningReversed:
       'Los momentos negativos y de confusión se van disipando. Hay mayor claridad, lo oculto sale a la luz. Confusión en los sentimientos, inseguridad en las relaciones. En el trabajo indica un cambio, seguir la vocación. En las finanzas recomienda cuidar el dinero.',
     description:
@@ -429,7 +429,7 @@ export const ARCANOS_MENORES_BASTOS: TarotCardData[] = [
     category: 'bastos',
     imageUrl: '/images/tarot/nine-of-wands.webp',
     meaningUpright:
-      'La energía se asienta y se estructura sobre bases sólidas. Después de la tormenta llega la calma. Fortaleza, resistencia y decisión. Fortaleza interior, ambición, logros, dedicación, la fuerza espiritual del guerrero. Curación de las viejas heridas, armonía entre lo consciente y lo inconsciente, defensa de nuestros recursos. Esta carta nos indica precaución. Si seguimos en el camino actual o si ponemos un freno. El cambio es estabilidad y la estabilidad es fortaleza. En el amor: se afirma la relación, la pareja está consolidada y unida por objetivos en común, floreciendo su crecimiento y maduración. La relación podrá ser fogosa pero falta de expresión de cariño.',
+      'La energía se asienta y se estructura sobre bases sólidas. Después de la tormenta llega la calma. Fortaleza, resistencia y decisión. Fortaleza interior, ambición, logros, dedicación, la fuerza espiritual del guerrero. Reparación de las viejas heridas, armonía entre lo consciente y lo inconsciente, defensa de nuestros recursos. Esta carta nos indica precaución. Si seguimos en el camino actual o si ponemos un freno. El cambio es estabilidad y la estabilidad es fortaleza. En el amor: se afirma la relación, la pareja está consolidada y unida por objetivos en común, floreciendo su crecimiento y maduración. La relación podrá ser fogosa pero falta de expresión de cariño.',
     meaningReversed:
       'Oposición, privación, debilidad, ineficiencia, impotencia o incapacidad, rendición, falta de energía, descuido, bloqueos, miedos internos, heridas psicológicas, paranoia. A veces luchar nos trae un gran riesgo.',
     description:
@@ -672,12 +672,12 @@ export const ARCANOS_MENORES_COPAS: TarotCardData[] = [
     category: 'copas',
     imageUrl: '/images/tarot/queen-of-cups.webp',
     meaningUpright:
-      'Intuición profunda, compasión, amor maternal, empatía, sanación emocional, espiritualidad.',
+      'Intuición profunda, compasión, amor maternal, empatía, reparación emocional, espiritualidad.',
     meaningReversed:
       'Codependencia, inestabilidad emocional, manipulación, inseguridad, ahogarse en emociones.',
     description:
       'Maestra de las emociones. Profundamente intuitiva y compasiva.',
-    keywords: 'Intuición, compasión, empatía, amor maternal, sanación',
+    keywords: 'Intuición, compasión, empatía, amor maternal, cuidado',
   },
   {
     name: 'Rey de Copas',
@@ -732,7 +732,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     meaningUpright:
       'Dolor emocional, traición, ruptura, tristeza profunda, corazón roto, sufrimiento.',
     meaningReversed:
-      'Sanación, perdón, recuperación del dolor, liberar el sufrimiento.',
+      'Alivio, perdón, recuperación del dolor, liberar el sufrimiento.',
     description: 'Dolor del corazón herido. Traición o pérdida dolorosa.',
     keywords: 'Dolor, traición, ruptura, tristeza, corazón roto',
   },
@@ -742,7 +742,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     category: 'espadas',
     imageUrl: '/images/tarot/four-of-swords.webp',
     meaningUpright:
-      'Descanso, recuperación, meditación, pausa necesaria, retiro, contemplación, sanación.',
+      'Descanso, recuperación, meditación, pausa necesaria, retiro, contemplación, recuperación.',
     meaningReversed:
       'Agotamiento, necesidad urgente de descanso, insomnio, inquietud mental.',
     description: 'Momento de descanso y recuperación mental. Pausa necesaria.',
@@ -807,7 +807,7 @@ export const ARCANOS_MENORES_ESPADAS: TarotCardData[] = [
     meaningUpright:
       'Ansiedad, pesadillas, preocupación extrema, miedo, culpa, tormento mental, insomnio.',
     meaningReversed:
-      'Esperanza, liberación de ansiedad, buscar ayuda, sanación mental.',
+      'Esperanza, liberación de ansiedad, buscar ayuda, alivio mental.',
     description:
       'Tormento mental y preocupaciones nocturnas. Ansiedad extrema.',
     keywords: 'Ansiedad, pesadillas, preocupación, miedo, tormento mental',

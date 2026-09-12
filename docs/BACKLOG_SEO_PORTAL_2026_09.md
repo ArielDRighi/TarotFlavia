@@ -91,7 +91,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | T-SEO-015 | Páginas de herramientas: nota editorial debajo de cada widget; `noindex` a ventas/internas; guardarraíl sobre el nav | Frontend + contenido | 🔴 Crítica | 4 pts | ✅ Completada |
 | T-SEO-016 | Horóscopo del día en el HTML servido (SSR/ISR) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
 | T-SEO-017 | Persona editorial responsable, bylines y `/politica-editorial` | Frontend + decisión | 🟠 Alta | 2 pts | ✅ Completada (alcance reducido por decisión de negocio) |
-| T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ⬜ Pendiente |
+| T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ✅ Completada |
 | T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap sin `lastmod` falso | Frontend | 🟢 Baja | 0,5 pts | ✅ Completada |
 | T-SEO-020 | Arcanos Mayores: romper la plantilla (invertida, caso de tirada, iconografía) | Contenido + Front | 🟢 Baja | 3 pts | ⬜ Diferida |
 | T-SEO-021 | Péndulo: el cristal no contrasta con el fondo | Frontend (UI) | 🟡 Media | 0,5 pts | ⬜ Pendiente |
@@ -111,7 +111,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 | 3 | ~~**T-SEO-014**~~ ✅ | 3 pts | Cerrada 11-sep-2026: portada editorial con horóscopo de hoy (12 extractos), carta del día canónica y guías en el HTML; `LandingPage` eliminada |
 | 4 | ~~**T-SEO-015**~~ ✅ | 4 pts | Cerrada 12-sep-2026: siete páginas de herramientas con nota propia (800+ c/u, estructuras distintas), `/horoscopo` y `/carta-del-dia` con el día en el HTML, `/premium` con `noindex` y fuera del sitemap/menú, guardarraíl sobre el nav (500 palabras) y coherencia `noindex` ↔ sitemap |
 | 5 | ~~**T-SEO-017**~~ ✅ | 2 pts | Cerrada 12-sep-2026: `/politica-editorial` (1.000+ palabras, footer, sitemap, `publishingPrinciples` en el `Organization`), pie editorial en el horóscopo diario (signo, hub y portada), firma extendida a rituales y servicios. **Decisión de negocio: se sigue sin nombrar personas** (ver la tarea) |
-| 6 | **T-SEO-018** | 1,5 pts | Cierra el lenguaje después de que 014/015/017 escribieron texto nuevo, así el guardarraíl los cubre |
+| 6 | ~~**T-SEO-018**~~ ✅ | 1,5 pts | Cerrada 12-sep-2026: disclaimer en footer, fichas, lecturas y `/terminos`; 151 reescrituras en el corpus con migración de datos; guardarraíl de cuatro familias en los dos lados; regla de lenguaje en todos los prompts de IA |
 | 7 | **Deploy único + Search Console + espera de 14–21 días** | — | No es código. Ver *Puerta de salida* |
 | 4b | **T-SEO-021** | 0,5 pts | Va pegada a T-SEO-015: es la misma página y el revisor va a mirar el widget. Puede ir en la misma rama o en una propia, pero antes del deploy único |
 | 8 | T-SEO-020 | 3 pts | Durante la espera, si sobra tiempo. No demora el pedido |
@@ -680,7 +680,7 @@ expectativas). La prohibición de lenguaje determinista es de T-SEO-018 y se agr
 
 ## T-SEO-018: Disclaimer Global y Guardarraíl de Lenguaje Determinista (YMYL)
 
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (12-sep-2026) — verificación en producción pendiente del deploy único
 **Prioridad:** 🟡 Media · **Estimación:** 1,5 pts · **Tipo:** Front + datos
 
 ### Problema
@@ -711,10 +711,89 @@ en el footer.
 
 ### Criterios de aceptación
 
-- [ ] Disclaimer en el HTML servido del footer y de una ficha, y en `/terminos`.
-- [ ] El guardarraíl de terminología falla ante cualquiera de los términos nuevos; corpus en verde.
-- [ ] Prompts de IA (horóscopo, lecturas) con la instrucción explícita de no usar lenguaje
-      determinista ni de salud.
+- [x] Disclaimer en el HTML servido del footer y de una ficha, y en `/terminos`. *(`ContentDisclaimer`
+      en el footer —toda URL—, al pie de las 78 fichas, de la lectura, del historial y de la lectura
+      compartida; `/terminos` usa la misma constante. Verificar contra producción tras el deploy
+      único con `curl -A Googlebot`.)*
+- [x] El guardarraíl de terminología falla ante cualquiera de los términos nuevos; corpus en verde.
+      *(Cuatro familias, 12 patrones, con test positivo por familia y test de falsos positivos
+      conocidos; 151 ocurrencias reescritas en 21 archivos.)*
+- [x] Prompts de IA (horóscopo, lecturas) con la instrucción explícita de no usar lenguaje
+      determinista ni de salud. *(`YMYL_LANGUAGE_RULES`, un solo bloque, en los seis generadores.)*
+
+### Decisiones de implementación
+
+- **Un solo texto, una sola constante.** `CONTENT_DISCLAIMER` (`lib/constants/legal.ts`) es el
+  texto acordado arriba, letra por letra, y `legal.test.ts` lo fija. `ContentDisclaimer`
+  (`components/common/`, sin `'use client'`, `<aside aria-label="Aviso legal">`) lo monta en el
+  `Footer` —así llega en toda URL—, en `CardDetailView` (después de `AuthorByline`), en
+  `ReadingExperience` (pie de la interpretación), `ReadingDetail` y `SharedReadingView`.
+  `/terminos` deja de tener su propia versión del aviso y usa la constante.
+- **Guardarraíl: tokens y frases hechas, nunca un verbo suelto.** Cuatro familias en
+  `TERMINOS_PROHIBIDOS`, **la misma lista** en `backend/tarot-app/src/no-salud-user-facing.spec.ts`
+  (corpus: seeds, datos, prompts, plantillas) y en `frontend/src/no-salud-user-facing.test.ts`
+  (todo `src/` menos admin y tests). Se conservan los nombres de archivo de T-SEO-013 —son los que
+  citan la memoria del proyecto y las notas de tareas anteriores— y se extienden con un `describe`
+  propio:
+  1. *Promesa*: `amarre*`, `endulzamiento*`, `garanti*`, `infalible*`, "100 % preciso/exacto/…",
+     "predicción exacta/precisa/…", "te devuelve a tu ex/pareja".
+  2. *Salud*: `\bsana\w*`, `\bcura\w*`. `sana` entra también como adjetivo ("competencia sana"):
+     el criterio de aceptación es un grep sobre el HTML y no distingue.
+  3. *Dinero/legal accionable*: "cuándo invertir/comprar/vender", "vas a ganar el juicio",
+     "ganarás el pleito". El cruce `garanti*`/`augur*` × vocabulario económico de T-SEO-013 sigue.
+  4. *Miedo/urgencia*: `advertencia*`, `peligro*`, "tu destino está en riesgo", "lo que nadie te
+     dice".
+  Quedan **fuera a propósito**, por falsos positivos medidos sobre el corpus: `inevitable` (La
+  Muerte, La Torre: 12 usos legítimos), `promete` (13 usos, casi todos negados), `sano`/`sanea`,
+  `curiosidad`/`curso`/`curva`, "en riesgo" a secas ("pongan en riesgo tu economía"). Cada
+  archivo tiene un test que lo documenta: si alguien amplía la lista y uno de esos vuelve a
+  marcar, se entera en el acto.
+- **El corpus sembrado se corrige con migración, no con re-seed** (mismo motivo que T-SEO-013:
+  los seeders son skip-if-exists o backfill). `1789171200000-ReplaceDeterministicWordingInSeededCorpus`:
+  **129 pares** `[viejo, nuevo]` sobre **7 tablas** (`birth_chart_interpretations`, `tarot_card`
+  —incluidas `dailyFreeUpright/Reversed`—, `card_free_interpretation`, `holistic_services`,
+  `encyclopedia_articles`, `encyclopedia_tarot_cards`). Novedad: columnas **`jsonb`**
+  (`keywords`, `combinations` de la enciclopedia) se reemplazan sobre `col::text` y se recastean;
+  las palabras clave, que son tokens de una palabra, van **ancladas por `slug`** (cuatro cartas,
+  cuatro reemplazos distintos). `deterministic-wording-sync.spec.ts` ata migración y seeds (texto
+  nuevo presente, viejo ausente, sin duplicados, cada par con señal YMYL, ningún par reincidente) y
+  además **fija el SQL emitido** con un `QueryRunner` falso: un `UPDATE` por (columna, par),
+  parametrizado, `::jsonb` donde corresponde, `AND "slug" = $3` en las keywords, y `down` como
+  espejo exacto de `up`. ⚠️ **No se pudo correr contra una base real desde el entorno de esta
+  tarea** (sin Docker ni Postgres accesibles): antes del deploy, correr `up` y `down` contra la base
+  de desarrollo como se hizo en T-SEO-013 y confirmar que `npx jest src/no-salud-user-facing.spec.ts`
+  y un `grep` sobre la API dan cero.
+- **Vocabulario de reemplazo**, para mantener una sola voz: *sanar* → reparar / transformar /
+  cuidar / reconfortar / integrar / reponerse; *sanación* → recuperación / alivio / consuelo /
+  acompañamiento / autoconocimiento; *sanador(a)* → cuidador(a) / guía / apoyo / alquimista (La
+  Templanza); *curación* → reparación; *advertencia* → aviso / salvedad / reparo / señal de alerta;
+  *peligro* → amenaza / riesgo / remoto; *garantizando éxito* → "suele favorecer". De paso salieron
+  `traumas` (→ heridas) y `psicológica` en las mismas frases: mismo riesgo, mismo párrafo.
+- **Nombres visibles que cambiaron**: categoría de rituales `HEALING` → *Bienestar* (el valor
+  `'healing'` no se toca, igual que `salud-bienestar`); número maestro 33 → *El Maestro Compasivo*
+  (backend `interpretations.data.ts`, guía de numerología y `lib/utils/numerology.ts` del frontend, a
+  la vez); *Zona Peligrosa* en ajustes → *Acciones irreversibles*; el servicio de péndulo hebreo pasa
+  de "Sanación y transformación energética" a "Armonización y transformación energética" (seed +
+  migración); el email de cuota al 80 % pasa de "Advertencia" a "Aviso".
+- **`/sobre-nosotros` decía "nunca de hechos garantizados"** y el disclaimer de limpiezas
+  energéticas "No cura nada": las dos eran negaciones honestas, pero el criterio es un grep, y
+  reescribirlas ("nunca de hechos cerrados", "No es un tratamiento médico ni psicológico") cuesta
+  menos que sostener una allowlist. La única allowlist nueva es la del bloque de prompts.
+- **Prompts de IA: un bloque compartido, `YMYL_LANGUAGE_RULES`** (`common/prompts/ymyl-language.prompt.ts`),
+  con las cinco reglas (promesa, amarres, salud, dinero/legal, miedo) y la alternativa en cada una
+  ("sugiere", "invita a", "acompañamiento, reflexión y autoconocimiento", "tensión o desafío").
+  Va en el prompt de sistema del horóscopo diario, del chino anual, de la carta del día, de la
+  numerología, de la síntesis de carta natal y en el seed de la configuración de Flavia. **El de las
+  lecturas viene de la base** (`tarotista_config.systemPrompt`, editable), así que además se inyecta
+  en las instrucciones finales que arma `PromptBuilderService.getAdaptiveInstructions()`: llega
+  aunque la configuración guardada sea anterior. `ymyl-language-coverage.spec.ts` verifica el bloque
+  **entero** en los seis generadores, con un caso de configuración vieja sin la regla. Como es una
+  instrucción negativa que nombra las palabras, el guardarraíl la exime por fragmento
+  (`ALLOWLIST_DETERMINISTA`), igual que la del horóscopo chino en T-SEO-013.
+- **No se migra `tarotista_config.systemPrompt`** en la base: la regla llega por código en cada
+  lectura, y la columna la edita la tarotista.
+- `card-extended-content.data.spec.ts` (T-SEO-009) dejaba `sanar`/`sanación` fuera de su lista
+  médica para no desentonar con el corpus publicado; ahora que el corpus no los usa, entran.
 
 ---
 

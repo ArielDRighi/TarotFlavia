@@ -218,14 +218,14 @@ describe('NumberCard', () => {
     it('should render correctly for master number 33', () => {
       const number = createMockNumber({
         value: 33,
-        name: 'El Maestro Sanador',
+        name: 'El Maestro Compasivo',
         isMaster: true,
         keywords: ['Compasión'],
       });
       render(<NumberCard number={number} />);
 
       expect(screen.getByText('33')).toBeInTheDocument();
-      expect(screen.getByText('El Maestro Sanador')).toBeInTheDocument();
+      expect(screen.getByText('El Maestro Compasivo')).toBeInTheDocument();
       expect(screen.getByText('💫')).toBeInTheDocument();
       expect(screen.getByText(/número maestro/i)).toBeInTheDocument();
     });

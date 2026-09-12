@@ -121,7 +121,7 @@ Cuando en un cálculo numerológico obtienes un 11, 22 o 33, **no los reduces a 
 
 - **Maestro 11 (El Iluminado):** Intuición a nivel psíquico. Es un canal directo entre el subconsciente y el mundo material. Su reto es no abrumarse por su extrema sensibilidad.
 - **Maestro 22 (El Constructor Maestro):** Tiene la capacidad de convertir los sueños más ambiciosos en realidades tangibles (es un 4 potenciado). Organiza grandes proyectos a escala global.
-- **Maestro 33 (El Maestro Sanador):** Enfocado en la sanación y elevación de la conciencia humana (un 6 potenciado). Es el arquetipo del amor incondicional.
+- **Maestro 33 (El Maestro Compasivo):** Enfocado en el cuidado y la elevación de la conciencia humana (un 6 potenciado). Es el arquetipo del amor incondicional.
 
 ## 4. Cómo Calcular tu Perfil Numerológico
 
@@ -213,7 +213,7 @@ La palabra _radiestesia_ proviene del latín _radius_ (radiación) y del griego 
 
 No necesitas una herramienta costosa. Cualquier objeto de peso suspendido de una cadena o cuerda puede funcionar (incluso un anillo atado a un hilo). Sin embargo, los materiales tienen propiedades únicas:
 
-- **Cristal y Piedras (Cuarzo, Amatista, Obsidiana):** Excelentes para la sanación espiritual. El cristal de cuarzo transparente es el más versátil. Requieren limpieza frecuente ya que absorben energía.
+- **Cristal y Piedras (Cuarzo, Amatista, Obsidiana):** Excelentes para el trabajo espiritual. El cristal de cuarzo transparente es el más versátil. Requieren limpieza frecuente ya que absorben energía.
 - **Metal (Cobre, Latón, Oro, Plata):** Son conductores puros. Los péndulos de metal son muy precisos, no absorben tanta energía residual y son ideales para principiantes.
 - **Madera:** Tienen una vibración muy neutral y terrenal. Son excelentes para usar sobre gráficos de radiestesia o mapas.
 
@@ -364,7 +364,7 @@ La Luna rige las aguas de la Tierra y, por correspondencia esotérica, nuestro c
 
 - **Velas (Elemento Fuego):** El color es vital. Blanco (purificación, comodín), Rojo (pasión, acción), Verde (dinero, fertilidad), Negro (protección, absorción de negatividad), Rosa (amor propio).
 - **Cristales (Elemento Tierra):** Cuarzo rosa (amor), Citrino (abundancia), Turmalina negra o Amatista (protección psíquica).
-- **Hierbas e Incienso (Elemento Aire):** Llevan tu intención al universo. Romero (protección), Canela (éxito rápido), Lavanda (paz y sanación).
+- **Hierbas e Incienso (Elemento Aire):** Llevan tu intención al universo. Romero (protección), Canela (éxito rápido), Lavanda (paz y calma).
 - **Agua (Elemento Agua):** El agua de luna, aceites esenciales o pociones rituales.
 
 ## 4. Estructura de un Ritual Efectivo
@@ -424,7 +424,7 @@ El esqueleto de la astrología se construye combinando dos factores: de qué est
 3.  **Géminis (21 May - 20 Jun) | Aire Mutable | Regente: Mercurio.** El comunicador curioso, adaptable, ingenioso y, a veces, inconstante.
 4.  **Cáncer (21 Jun - 22 Jul) | Agua Cardinal | Regente: La Luna.** El protector nutricio, profundo, familiar y altamente sensible.
 5.  **Leo (23 Jul - 22 Ago) | Fuego Fijo | Regente: El Sol.** El rey carismático, generoso, dramático y centrado en el corazón.
-6.  **Virgo (23 Ago - 22 Sep) | Tierra Mutable | Regente: Mercurio.** El sanador analítico, perfeccionista, servicial y detallista.
+6.  **Virgo (23 Ago - 22 Sep) | Tierra Mutable | Regente: Mercurio.** El artesano analítico, perfeccionista, servicial y detallista.
 7.  **Libra (23 Sep - 22 Oct) | Aire Cardinal | Regente: Venus.** El diplomático armónico, justiciero, romántico e indeciso.
 8.  **Escorpio (23 Oct - 21 Nov) | Agua Fija | Regente: Plutón/Marte.** El transformador intenso, magnético, investigador y rencoroso.
 9.  **Sagitario (22 Nov - 21 Dic) | Fuego Mutable | Regente: Júpiter.** El explorador filosófico, optimista, sincero al extremo y amante de la libertad.

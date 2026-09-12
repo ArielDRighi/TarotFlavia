@@ -157,7 +157,7 @@ const WANDS_CARDS: CardSeedData[] = [
     meaningReversed:
       'Conflictos evitados, fin de las disputas, acuerdo alcanzado y energía competitiva redirigida de forma constructiva.',
     description:
-      'Cinco jóvenes se enfrentan entre sí blandiendo sus varas en aparente batalla o competición. La escena es caótica pero no hay heridos. Representa la energía del conflicto, la competencia sana, el debate de ideas y el caos creativo que puede conducir al crecimiento.',
+      'Cinco jóvenes se enfrentan entre sí blandiendo sus varas en aparente batalla o competición. La escena es caótica pero no hay heridos. Representa la energía del conflicto, la competencia leal, el debate de ideas y el caos creativo que puede conducir al crecimiento.',
     keywords: {
       upright: [
         'conflicto',
@@ -530,7 +530,7 @@ const CUPS_CARDS: CardSeedData[] = [
     meaningUpright:
       'Esta carta encarna la alquimia de dos almas que se encuentran en perfecto equilibrio y respeto mutuo. Trasciende el romance superficial para hablar de asociaciones sagradas, contratos anímicos y la profunda armonía que surge cuando dos individuos sanos deciden unir sus fuerzas y compartir sus copas sin perder su propia individualidad.',
     meaningReversed:
-      'La distorsión del Dos de Copas revela asimetría en los vínculos. Apunta a la codependencia, la falta de comunicación o la pérdida de respeto dentro de una relación. Señala la desconexión emocional, la proyección de heridas no sanadas en la pareja, o alianzas donde uno entrega su energía mientras el otro simplemente la consume sin reciprocidad.',
+      'La distorsión del Dos de Copas revela asimetría en los vínculos. Apunta a la codependencia, la falta de comunicación o la pérdida de respeto dentro de una relación. Señala la desconexión emocional, la proyección de heridas no resueltas en la pareja, o alianzas donde uno entrega su energía mientras el otro simplemente la consume sin reciprocidad.',
     description:
       'Un hombre y una mujer se miran a los ojos mientras intercambian cálidamente sus copas. Sobre ellos se alza el Caduceo de Hermes coronado por la cabeza de un león rojo con alas, simbolizando la pasión terrenal purificada y elevada al plano espiritual mediante la comunicación honesta. Al fondo, una casa representa el hogar y la estabilidad que brinda esta unión.',
     keywords: {
@@ -629,7 +629,7 @@ const CUPS_CARDS: CardSeedData[] = [
     meaningUpright:
       'El Cinco de Copas es el arquetipo del luto, el arrepentimiento y el enfoque en lo que se ha perdido. Es un estado emocional de dolor profundo donde la mente se queda anclada en el trauma o el error pasado. Sin embargo, encierra una lección crucial: la tristeza es válida, pero la ceguera al amor y a las posibilidades que aún quedan en pie perpetúa el sufrimiento.',
     meaningReversed:
-      'El perdón, la sanación y la capacidad de dejar el pasado atrás. La persona atraviesa la noche oscura del alma y, al voltearse, descubre las copas que aún siguen en pie. Es la integración dolorosa pero necesaria de una pérdida, permitiendo que la energía emocional vuelva a fluir hacia la reconstrucción y la aceptación del presente.',
+      'El perdón, la recuperación y la capacidad de dejar el pasado atrás. La persona atraviesa la noche oscura del alma y, al voltearse, descubre las copas que aún siguen en pie. Es la integración dolorosa pero necesaria de una pérdida, permitiendo que la energía emocional vuelva a fluir hacia la reconstrucción y la aceptación del presente.',
     description:
       'Una figura vestida con una pesada y oscura capa negra se encorva en señal de luto profundo, mirando hacia tres copas derramadas en el suelo (cuya agua se filtra en la tierra). A sus espaldas, y fuera de su campo de visión, dos copas permanecen de pie e intactas. A lo lejos fluye un río con un puente que conduce a un castillo, símbolo de un futuro que aún puede cruzarse.',
     keywords: {
@@ -642,7 +642,7 @@ const CUPS_CARDS: CardSeedData[] = [
         'enfoque negativo',
       ],
       reversed: [
-        'sanación',
+        'recuperación',
         'aceptación',
         'perdón',
         'reconstrucción',
@@ -660,7 +660,7 @@ const CUPS_CARDS: CardSeedData[] = [
     suit: Suit.CUPS,
     element: Element.WATER,
     meaningUpright:
-      'El retorno a la inocencia original del alma. Representa los vínculos kármicos, las raíces familiares y la pureza de las emociones sin condiciones. Esotéricamente, alude al "niño interior" y a la curación que proviene de recordar quiénes éramos antes de ser condicionados por el mundo. Momentos de profunda nostalgia que nutren el alma.',
+      'El retorno a la inocencia original del alma. Representa los vínculos kármicos, las raíces familiares y la pureza de las emociones sin condiciones. Esotéricamente, alude al "niño interior" y a la reparación que proviene de recordar quiénes éramos antes de ser condicionados por el mundo. Momentos de profunda nostalgia que nutren el alma.',
     meaningReversed:
       'Aferramiento patológico al pasado. El individuo se niega a crecer o asumir responsabilidades adultas, viviendo en una ilusión melancólica ("cualquier tiempo pasado fue mejor"). Puede indicar traumas infantiles no resueltos, una idealización tóxica de viejos amores, o el estancamiento evolutivo por miedo a enfrentar el presente y el futuro.',
     description:
@@ -894,7 +894,7 @@ const CUPS_CARDS: CardSeedData[] = [
     courtRank: CourtRank.QUEEN,
     element: Element.WATER,
     meaningUpright:
-      'La suma sacerdotisa del mundo cotidiano y el dominio del elemento agua. Ella es la empatía encarnada, capaz de comprender las profundidades del dolor humano sin hundirse en ellas. Arquetipo de la sanadora, canalizadora y madre espiritual, rige mediante la contención amorosa y la sabiduría intuitiva profunda. Confía en lo invisible con absoluta certeza.',
+      'La suma sacerdotisa del mundo cotidiano y el dominio del elemento agua. Ella es la empatía encarnada, capaz de comprender las profundidades del dolor humano sin hundirse en ellas. Arquetipo de la cuidadora, canalizadora y madre espiritual, rige mediante la contención amorosa y la sabiduría intuitiva profunda. Confía en lo invisible con absoluta certeza.',
     meaningReversed:
       'La esponja emocional saturada. La Reina invertida sufre de agotamiento por empatía, adoptando el rol de mártir. Al carecer de límites energéticos, absorbe los problemas ajenos hasta perderse a sí misma. Puede volverse codependiente, manipuladora emocional pasivo-agresiva, utilizando el chantaje afectivo y la victimización para mantener el control sobre los demás.',
     description:
@@ -902,7 +902,7 @@ const CUPS_CARDS: CardSeedData[] = [
     keywords: {
       upright: [
         'empatía profunda',
-        'sanación',
+        'cuidado',
         'sabiduría intuitiva',
         'contención',
         'amor maternal',
@@ -1036,7 +1036,7 @@ const SWORDS_CARDS: CardSeedData[] = [
     meaningUpright:
       'Dolor emocional, traición, pérdida, separación y el sufrimiento que viene cuando la verdad lastima el corazón.',
     meaningReversed:
-      'Recuperación del dolor, sanar heridas del pasado, perdonar la traición y encontrar alivio después de una tormenta emocional.',
+      'Recuperación del dolor, cerrar heridas del pasado, perdonar la traición y encontrar alivio después de una tormenta emocional.',
     description:
       'Un corazón rojo atravesado por tres espadas flota bajo nubes tormentosas y lluvia. La imagen es directa y sin ambigüedades: representa el dolor del corazón roto, la traición, la pérdida de un ser querido o la verdad dolorosa que no puede evitarse.',
     keywords: {
@@ -1050,7 +1050,7 @@ const SWORDS_CARDS: CardSeedData[] = [
       ],
       reversed: [
         'recuperación',
-        'sanación',
+        'reparación',
         'perdón',
         'alivio',
         'superación del dolor',
@@ -1071,7 +1071,7 @@ const SWORDS_CARDS: CardSeedData[] = [
     meaningReversed:
       'Inquietud, incapacidad de descansar y la necesidad de volver a la acción antes de haber recuperado las fuerzas.',
     description:
-      'Una figura yace en posición horizontal sobre un sarcófago de piedra en una iglesia. Una espada está debajo de él y tres espadas cuelgan encima. Una vidriera ilumina la escena. Representa la necesidad de pausar, el descanso reparador, la meditación y el retiro estratégico para sanar y recuperar fuerzas.',
+      'Una figura yace en posición horizontal sobre un sarcófago de piedra en una iglesia. Una espada está debajo de él y tres espadas cuelgan encima. Una vidriera ilumina la escena. Representa la necesidad de pausar, el descanso reparador, la meditación y el retiro estratégico para reponerse y recuperar fuerzas.',
     keywords: {
       upright: [
         'descanso',
@@ -1137,7 +1137,7 @@ const SWORDS_CARDS: CardSeedData[] = [
     meaningReversed:
       'Resistencia al movimiento necesario, quedarse atrapado en las dificultades y dificultad para soltar el pasado difícil.',
     description:
-      'Una figura con capucha y un niño son transportados en barca por un barquero a través de aguas que cambian de turbulentas a tranquilas. Seis espadas están clavadas en la proa de la barca. Representa el movimiento necesario para alejarse de las dificultades, la transición hacia tiempos mejores y el viaje que sana.',
+      'Una figura con capucha y un niño son transportados en barca por un barquero a través de aguas que cambian de turbulentas a tranquilas. Seis espadas están clavadas en la proa de la barca. Representa el movimiento necesario para alejarse de las dificultades, la transición hacia tiempos mejores y el viaje que alivia.',
     keywords: {
       upright: [
         'transición',
@@ -1145,7 +1145,7 @@ const SWORDS_CARDS: CardSeedData[] = [
         'aguas más calmas',
         'alejarse',
         'movimiento',
-        'sanación',
+        'alivio',
       ],
       reversed: [
         'resistencia',
@@ -1606,7 +1606,7 @@ const PENTACLES_CARDS: CardSeedData[] = [
     suit: Suit.PENTACLES,
     element: Element.EARTH,
     meaningUpright:
-      'Generosidad, dar y recibir con equilibrio, caridad y la circulación sana de la abundancia en la comunidad.',
+      'Generosidad, dar y recibir con equilibrio, caridad y la circulación equilibrada de la abundancia en la comunidad.',
     meaningReversed:
       'Dar con condiciones, caridad con expectativas ocultas y desequilibrio en el flujo de dar y recibir.',
     description:

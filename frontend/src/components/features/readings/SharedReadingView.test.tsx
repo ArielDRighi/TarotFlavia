@@ -81,6 +81,12 @@ El Loco y el Mago juntos indican un nuevo comienzo lleno de potencial.`,
     expect(questionHeading).toBeInTheDocument();
   });
 
+  it('lleva el aviso legal al pie de la lectura compartida (T-SEO-018)', () => {
+    render(<SharedReadingView {...defaultProps} />);
+
+    expect(screen.getByTestId('content-disclaimer')).toBeInTheDocument();
+  });
+
   it('should render spread name badge', () => {
     render(<SharedReadingView {...defaultProps} />);
 

@@ -583,7 +583,7 @@ El arcano mayor asociado a Neptuno es **El Colgado (XII)**, símbolo de la rendi
 
 Plutón es el planeta más lejano del sistema solar (planeta enano desde 2006), descubierto en 1930. En astrología, representa el principio de la transformación más profunda: la muerte y el renacimiento simbólico, el poder, las sombras y la regeneración.
 
-Su influencia es intensa y lenta, operando principalmente a nivel generacional. En la carta personal, sus aspectos revelan las áreas de transformación radical, los patrones de poder y las heridas ancestrales que deben sanarse.
+Su influencia es intensa y lenta, operando principalmente a nivel generacional. En la carta personal, sus aspectos revelan las áreas de transformación radical, los patrones de poder y las heridas ancestrales que piden ser integradas.
 
 ## Palabras Clave
 

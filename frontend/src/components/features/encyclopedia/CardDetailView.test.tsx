@@ -87,6 +87,17 @@ describe('CardDetailView', () => {
       expect(screen.getByTestId('card-detail-view')).toBeInTheDocument();
     });
 
+    it('lleva el aviso legal al pie de la ficha, después de la firma (T-SEO-018)', () => {
+      render(<CardDetailView card={createTestCard()} />);
+
+      const byline = screen.getByTestId('author-byline');
+      const disclaimer = screen.getByTestId('content-disclaimer');
+      expect(disclaimer).toBeInTheDocument();
+      expect(
+        byline.compareDocumentPosition(disclaimer) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
     it('should render card name in Spanish as heading', () => {
       render(<CardDetailView card={createTestCard()} />);
 

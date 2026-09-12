@@ -211,7 +211,7 @@ export const DAILY_FREE_INTERPRETATIONS: DailyFreeInterpretationData[] = [
     dailyUpright:
       'Hoy la Estrella ilumina tu camino con esperanza y renovación. En el amor, es un día lleno de ternura y posibilidad — abrite a recibir y a dar con el corazón sin defensas. Tu bienestar se restaura con belleza, agua, naturaleza y momentos de gratitud sincera. En lo económico, las oportunidades que vienen traen buena energía — confiá en que el esfuerzo pasado está por dar sus frutos.',
     dailyReversed:
-      'Hoy la Estrella invertida te encuentra en un momento de duda o desilusión. En el amor, es difícil conectar desde el miedo o la desconfianza — date tiempo para sanar antes de abrirte. Tu bienestar pide que nutras tu fe interior aunque hoy no la sientas fuerte. En las finanzas, el pesimismo puede hacerte perder de vista las oportunidades reales que existen.',
+      'Hoy la Estrella invertida te encuentra en un momento de duda o desilusión. En el amor, es difícil conectar desde el miedo o la desconfianza — date tiempo para reponerte antes de abrirte. Tu bienestar pide que nutras tu fe interior aunque hoy no la sientas fuerte. En las finanzas, el pesimismo puede hacerte perder de vista las oportunidades reales que existen.',
   },
 
   // ==========================================================================

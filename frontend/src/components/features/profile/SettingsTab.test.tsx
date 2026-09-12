@@ -72,7 +72,7 @@ describe('SettingsTab', () => {
     it('should render danger zone section', () => {
       render(<SettingsTab />, { wrapper: createWrapper() });
 
-      expect(screen.getByText('Zona Peligrosa')).toBeInTheDocument();
+      expect(screen.getByText('Acciones irreversibles')).toBeInTheDocument();
     });
 
     it('should render delete account button', () => {

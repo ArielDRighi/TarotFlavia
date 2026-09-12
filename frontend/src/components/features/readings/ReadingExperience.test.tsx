@@ -582,6 +582,21 @@ describe('ReadingExperience', () => {
       });
     });
 
+    it('lleva el aviso legal al pie de la interpretación (T-SEO-018)', async () => {
+      renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
+
+      const cards = screen.getAllByTestId('selectable-card');
+      fireEvent.click(cards[0]);
+      fireEvent.click(cards[1]);
+      fireEvent.click(cards[2]);
+      fireEvent.click(screen.getByRole('button', { name: /Revelar mi destino/i }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('interpretation-content')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('content-disclaimer')).toBeInTheDocument();
+    });
+
     it('should show action buttons in result state', async () => {
       renderWithProviders(<ReadingExperience spreadId={2} questionId={1} customQuestion={null} />);
 

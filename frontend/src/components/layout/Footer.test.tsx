@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Footer } from './Footer';
+import { CONTENT_DISCLAIMER } from '@/lib/constants/legal';
 
 describe('Footer', () => {
   describe('Rendering', () => {
@@ -8,6 +9,12 @@ describe('Footer', () => {
       render(<Footer />);
 
       expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    });
+
+    it('renderiza el aviso legal global (T-SEO-018)', () => {
+      render(<Footer />);
+
+      expect(screen.getByTestId('content-disclaimer')).toHaveTextContent(CONTENT_DISCLAIMER);
     });
 
     it('should render copyright text', () => {

@@ -77,7 +77,7 @@ export function SettingsTab() {
       {/* Danger Zone */}
       <Card className="border-destructive">
         <CardHeader>
-          <CardTitle className="text-destructive">Zona Peligrosa</CardTitle>
+          <CardTitle className="text-destructive">Acciones irreversibles</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">

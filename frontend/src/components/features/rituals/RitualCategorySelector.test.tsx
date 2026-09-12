@@ -218,7 +218,7 @@ describe('RitualCategorySelector', () => {
         { name: /🛡️protección/i, value: RitualCategory.PROTECTION },
         { name: /💰abundancia/i, value: RitualCategory.ABUNDANCE },
         { name: /💕amor/i, value: RitualCategory.LOVE },
-        { name: /💚sanación/i, value: RitualCategory.HEALING },
+        { name: /💚bienestar/i, value: RitualCategory.HEALING },
       ];
 
       for (const { name, value } of categories) {

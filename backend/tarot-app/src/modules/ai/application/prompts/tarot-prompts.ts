@@ -1,3 +1,5 @@
+import { YMYL_LANGUAGE_RULES } from '../../../../common/prompts/ymyl-language.prompt';
+
 /**
  * Optimized System and User Prompts for Tarot Interpretations
  * Designed for open-source models (Llama 3.1 70B, Mixtral) with explicit structure
@@ -27,6 +29,8 @@ Eres Flavia, una tarotista profesional con 20 años de experiencia en la interpr
 - USA lenguaje de posibilidades ("podría", "sugiere", "indica una tendencia hacia")
 - ENFÓCATE en el libre albedrío y el poder del consultante para tomar decisiones
 - CONSIDERA las cartas invertidas con matices (no solo opuestos negativos)
+
+${YMYL_LANGUAGE_RULES}
 
 # RESPONSE FORMAT
 
@@ -168,6 +172,8 @@ Eres ${tarotistaName}, una tarotista profesional. Tu tarea es interpretar la CAR
 - ENFÓCATE en la energía presente y cómo aprovecharla
 - OFRECE consejos prácticos y accionables para hoy
 - CONSIDERA cartas invertidas como desafíos manejables del día
+
+${YMYL_LANGUAGE_RULES}
 
 # RESPONSE FORMAT
 

@@ -103,7 +103,7 @@ Más allá del dinero, la Casa 2 habla de la autoestima y de cómo nos valoramos
 
 ## Temas de Desarrollo
 
-El eje Casa 2-8 representa la tensión entre los recursos propios y los compartidos. El trabajo de la Casa 2 implica desarrollar una sana autoestima, clarificar los propios valores y construir una base material sólida desde los propios talentos.
+El eje Casa 2-8 representa la tensión entre los recursos propios y los compartidos. El trabajo de la Casa 2 implica desarrollar una autoestima sólida, clarificar los propios valores y construir una base material sólida desde los propios talentos.
 `,
     metadata: {
       houseNumber: 2,
@@ -210,7 +210,7 @@ Es la casa más privada e íntima. Aquí reside lo que llevamos de la infancia y
 
 ## Temas de Desarrollo
 
-El eje Casa 4-10 es el eje del hogar y la carrera. El trabajo de la Casa 4 implica sanar las heridas del hogar de origen, construir raíces propias y desarrollar una base emocional sólida desde la que lanzarse al mundo.
+El eje Casa 4-10 es el eje del hogar y la carrera. El trabajo de la Casa 4 implica reparar las heridas del hogar de origen, construir raíces propias y desarrollar una base emocional sólida desde la que lanzarse al mundo.
 `,
     metadata: {
       houseNumber: 4,
@@ -312,7 +312,7 @@ A diferencia de la Casa 10 (carrera y ambición), la Casa 6 habla del trabajo en
 - **Marte:** Trabajo activo y enérgico, posible desgaste por exceso de exigencia
 - **Saturno:** Disciplina laboral excepcional, aprendizajes a través de la constancia
 - **Júpiter:** Trabajo abundante y expansivo, gran capacidad de recuperación
-- **Neptuno:** Trabajo en campos de sanación, sensibilidad a los ambientes, límites difusos
+- **Neptuno:** Trabajo en campos de acompañamiento, sensibilidad a los ambientes, límites difusos
 
 ## Temas de Desarrollo
 
@@ -636,7 +636,7 @@ También rige los lugares de confinamiento y retiro: hospitales, monasterios, pr
 
 ## Temas de Desarrollo
 
-El eje Casa 6-12 es el eje del servicio: el servicio cotidiano y práctico (Casa 6) versus el servicio espiritual y anónimo (Casa 12). El trabajo de la Casa 12 implica integrar el inconsciente, sanar el karma, desarrollar la compasión y aprender el valor del silencio y el retiro.
+El eje Casa 6-12 es el eje del servicio: el servicio cotidiano y práctico (Casa 6) versus el servicio espiritual y anónimo (Casa 12). El trabajo de la Casa 12 implica integrar el inconsciente, resolver el karma, desarrollar la compasión y aprender el valor del silencio y el retiro.
 `,
     metadata: {
       houseNumber: 12,

@@ -24,7 +24,7 @@ import type { EditorialHomeData } from '@/types/home.types';
  * 6. Quiénes somos
  * 7. Franja discreta de servicios
  *
- * El disclaimer del footer es de T-SEO-018. `UserDashboard` (usuario logueado)
+ * El disclaimer del footer lo montó T-SEO-018 (`ContentDisclaimer`). `UserDashboard` (usuario logueado)
  * no cambia: ahí y en `/premium` vive el upsell.
  *
  * Los datos llegan resueltos del servidor (`getEditorialHomeData`); este

@@ -15,7 +15,7 @@ const holisticServicesData = [
       '¿Qué heredamos del árbol familiar? (y qué hacer con ello)',
     longDescription: `¿Qué hereda tu alma de tu árbol familiar? Nuestra alma hereda más de lo que imaginamos, además de rasgos, color de piel, enfermedades también emociones, lealtades y destinos no vividos.
 
-Cada uno de nosotros somos la continuación de nuestro árbol, y por ello viven las historias no resultas de quienes vinieron antes. Sanar no es romper con la familia, es liberar tu línea y tu propósito.
+Cada uno de nosotros somos la continuación de nuestro árbol, y por ello viven las historias no resultas de quienes vinieron antes. Reparar no es romper con la familia, es liberar tu línea y tu propósito.
 
 Atrás de cada síntoma, miedo o bloqueo, puede haber un antepasado no reconocido, una historia de dolor, exilio, silencio o pérdida que tu alma intenta integrar.
 
@@ -24,7 +24,7 @@ Al mirar tu árbol con amor y conciencia, dejás de cargar su peso: comenzás a 
 Te ayudo a:
 - Identificar lealtades invisibles y cargas heredadas.
 - Detectar repeticiones, secretos y dinámicas ocultas.
-- Entre muchas otras para poder integrar una nueva mirada y empezar un verdadero camino de sanación.`,
+- Entre muchas otras para poder integrar una nueva mirada y empezar un verdadero camino de transformación.`,
     priceArs: 0,
     durationMinutes: 60,
     sessionType: SessionType.FAMILY_TREE,
@@ -37,8 +37,9 @@ Te ayudo a:
   {
     slug: 'pendulo-hebreo',
     name: 'Péndulo Hebreo',
-    shortDescription: 'Sanación y transformación energética con letras hebreas',
-    longDescription: `Tiene por objeto tratar, sanar y transformar la energía, en todos los niveles y manifestaciones, llevando armonía y sanación allí donde son necesarias.
+    shortDescription:
+      'Armonización y transformación energética con letras hebreas',
+    longDescription: `Tiene por objeto trabajar, armonizar y transformar la energía, en todos los niveles y manifestaciones, llevando armonía y equilibrio allí donde son necesarios.
 
 No se sabe a ciencia cierta el origen del Péndulo Hebreo. Fuentes indican que fue transmitido en Europa por los soldados templarios, quienes incorporaron este conocimiento de los más destacados kabalistas hebreos mientras cohabitaron en los tiempos de las Cruzadas.
 

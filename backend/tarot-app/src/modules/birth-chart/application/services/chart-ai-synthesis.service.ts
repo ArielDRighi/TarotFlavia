@@ -14,6 +14,7 @@ import {
   AspectTypeMetadata,
 } from '../../domain/enums';
 import { FullChartInterpretation } from './chart-interpretation.service';
+import { YMYL_LANGUAGE_RULES } from '../../../../common/prompts/ymyl-language.prompt';
 
 export interface AISynthesisInput {
   chartData: ChartData;
@@ -190,6 +191,8 @@ INSTRUCCIONES:
     enfermedades, diagnósticos, síntomas ni tratamientos. Cuando la carta hable
     de la Casa 6 o del cuerpo, escribe sobre energía, descanso, hábitos y
     bienestar. Es territorio YMYL y el sitio no puede acreditar credenciales.
+
+${YMYL_LANGUAGE_RULES}
 
 ESTRUCTURA SUGERIDA:
 - Párrafo 1: Tema central o hilo conductor de la carta

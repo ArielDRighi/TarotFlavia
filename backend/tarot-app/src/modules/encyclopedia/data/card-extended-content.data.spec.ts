@@ -334,15 +334,15 @@ describe('CARD_EXTENDED_CONTENT (T-SEO-009)', () => {
      * `trauma`, `terapia`, `lesión`—, que es por donde se filtró el problema en
      * la primera pasada de T-SEO-009.
      *
-     * ⚠️ `sanar` y `sanación` quedan deliberadamente FUERA de la lista: son el
-     * vocabulario del corpus ya publicado (32 apariciones en `major-arcana` y
-     * `minor-arcana`) y de los insumos de `docs/prompts_enciclopedia/`, donde
-     * "sanación emocional" es la lección del Cinco de Copas. Prohibirlas acá
-     * haría que la ficha nueva suene a otro autor, que es justo lo que el
-     * alcance de la tarea pide evitar.
+     * `sanar`, `sanación` y `curar` estaban deliberadamente fuera de la lista
+     * en T-SEO-009 (eran el vocabulario del corpus ya publicado). T-SEO-018 los
+     * sacó de TODO el corpus —también de `major-arcana` y `minor-arcana`, con
+     * migración de datos— y los agregó al guardarraíl global
+     * (`no-salud-user-facing.spec.ts`); acá entran para que la ficha nueva no
+     * los reintroduzca.
      */
     const VOCABULARIO_MEDICO =
-      /\b(enfermedad|enfermedades|diagn[oó]stic\w*|tratamiento\w*|s[ií]ntoma\w*|medicament\w*|m[eé]dic\w*|dolencia\w*|patolog[ií]a\w*|remedio\w*|receta\w*|ansiedad\w*|depresi[oó]n\w*|depresiv\w*|insomnio\w*|trauma\w*|terapia\w*|terap[eé]utic\w*|lesi[oó]n\w*|lesiones|adicci[oó]n\w*)\b/i;
+      /\b(enfermedad|enfermedades|diagn[oó]stic\w*|tratamiento\w*|s[ií]ntoma\w*|medicament\w*|m[eé]dic\w*|dolencia\w*|patolog[ií]a\w*|remedio\w*|receta\w*|ansiedad\w*|depresi[oó]n\w*|depresiv\w*|insomnio\w*|trauma\w*|terapia\w*|terap[eé]utic\w*|lesi[oó]n\w*|lesiones|adicci[oó]n\w*|sana\w*|cura\w*)\b/i;
 
     function todosLosTextos(content: CardExtendedContent): string[] {
       return [
