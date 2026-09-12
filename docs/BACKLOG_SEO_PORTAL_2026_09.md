@@ -937,7 +937,9 @@ el soporte y el hilo; lo que cambió es el cristal:
   paleta púrpura de la marca) en lugar de `white/90 → purple-100/80 → purple-200/70`.
 - **Sombra proyectada real.** El `shadow-lg` anterior nunca se veía: el `clip-path` del cono
   recorta el `box-shadow` del mismo elemento. Ahora el cono recortado (`pendulum-crystal-facet`)
-  vive dentro de un wrapper (`pendulum-crystal`) con `drop-shadow`, que sí sigue la silueta.
+  vive dentro de un cuerpo (`pendulum-crystal-body`) con `drop-shadow`, que sí sigue la silueta.
+  El halo es hermano de ese cuerpo, no hijo, para que la sombra no lo alcance (hallazgo del
+  revisor local).
 - **Engarce metálico** (`pendulum-crystal-cap`) entre el hilo y el cristal, y un brillo blanco
   translúcido en la cara iluminada para que lea como cuarzo y no como un triángulo plano.
 - **Halo** (`pendulum-crystal-halo`, `blur-md`, `aria-hidden`) solo cuando hay respuesta

@@ -53,15 +53,12 @@ export function Pendulum({ movement, isGlowing = false, className }: PendulumPro
           data-testid="pendulum-crystal-cap"
         />
 
-        {/*
-          Cristal de amatista. El wrapper lleva la sombra proyectada y el halo: un
-          `box-shadow` sobre el elemento recortado con clip-path quedaría cortado,
-          mientras que `drop-shadow` en el padre sigue la silueta del cristal.
-        */}
+        {/* Cristal de amatista */}
         <div
-          className={cn('relative mx-auto w-10', CRYSTAL_DROP_SHADOW, isGlowing && 'animate-pulse')}
+          className={cn('relative mx-auto w-10', isGlowing && 'animate-pulse')}
           data-testid="pendulum-crystal"
         >
+          {/* Halo: hermano del cuerpo, no hijo, para que la sombra proyectada no lo alcance */}
           {isGlowing && (
             <div
               className="absolute -inset-3 rounded-full bg-purple-400/50 blur-md"
@@ -70,13 +67,20 @@ export function Pendulum({ movement, isGlowing = false, className }: PendulumPro
             />
           )}
 
-          <div
-            className="relative h-14 w-10 bg-gradient-to-b from-violet-400 via-purple-600 to-purple-900"
-            style={{ clipPath: CRYSTAL_CLIP_PATH }}
-            data-testid="pendulum-crystal-facet"
-          >
-            {/* Brillo de la cara iluminada */}
-            <div className="absolute top-2 left-2.5 h-7 w-1.5 rounded-full bg-white/45" />
+          {/*
+            La sombra va en el cuerpo, no en la faceta: un `box-shadow` sobre el
+            elemento recortado con clip-path quedaría cortado, mientras que
+            `drop-shadow` en el padre sigue la silueta del cristal.
+          */}
+          <div className={cn('relative', CRYSTAL_DROP_SHADOW)} data-testid="pendulum-crystal-body">
+            <div
+              className="relative h-14 w-10 bg-gradient-to-b from-violet-400 via-purple-600 to-purple-900"
+              style={{ clipPath: CRYSTAL_CLIP_PATH }}
+              data-testid="pendulum-crystal-facet"
+            >
+              {/* Brillo de la cara iluminada */}
+              <div className="absolute top-2 left-2.5 h-7 w-1.5 rounded-full bg-white/45" />
+            </div>
           </div>
         </div>
       </div>
