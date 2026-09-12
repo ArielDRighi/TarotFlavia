@@ -1,8 +1,9 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 import { UserDashboard } from '@/components/features/dashboard';
 import { useAuthStore } from '@/stores/authStore';
-import { LandingPage } from './LandingPage';
 
 /**
  * Home Page with Dual Logic
@@ -13,8 +14,15 @@ import { LandingPage } from './LandingPage';
  * servía el `<title>` genérico "Auguria" — el mismo que el resto del sitio.
  *
  * Behavior:
- * - LandingPage por defecto (incluido el render del servidor)
+ * - EditorialHome por defecto (incluido el render del servidor)
  * - UserDashboard en cuanto hay sesión validada
+ *
+ * Desde T-SEO-014 la portada anónima es `EditorialHome` (antes `LandingPage`)
+ * y llega como `children`, ya renderizada por la ruta como Server Component.
+ * Este componente sigue siendo client sólo por el store de sesión: si importara
+ * la portada, todas sus secciones cruzarían el límite `'use client'` y los 12
+ * extractos, la carta y las guías viajarían dos veces (HTML + payload RSC) más
+ * el JS de siete secciones que no tienen interacción.
  *
  * ## Por qué ya no hay skeleton de carga (T-PROD-022)
  *
@@ -23,11 +31,16 @@ import { LandingPage } from './LandingPage';
  * servía a Googlebot 4 palabras de contenido propio. La home es la URL más
  * importante del sitio y era una pantalla de carga.
  *
- * El costo asumido es un parpadeo de la landing antes del dashboard para un
+ * El costo asumido es un parpadeo de la portada antes del dashboard para un
  * usuario ya logueado. Es preferible a no tener home indexable: el skeleton
  * ahorraba ese flash a costa de vaciar la página para todos los buscadores.
  */
-export function HomePageContent() {
+export interface HomePageContentProps {
+  /** La portada anónima (`EditorialHome`), renderizada por la ruta en el servidor. */
+  children: ReactNode;
+}
+
+export function HomePageContent({ children }: HomePageContentProps) {
   const { user, isAuthenticated } = useAuthStore();
 
   // Show UserDashboard for authenticated users (all plans)
@@ -35,9 +48,9 @@ export function HomePageContent() {
     return <UserDashboard />;
   }
 
-  // La landing es el default, incluido el render del servidor. Antes se devolvía
+  // La portada es el default, incluido el render del servidor. Antes se devolvía
   // un skeleton mientras `isLoading` —que arranca en `true`—, así que `/` le
   // servía a Googlebot 4 palabras de contenido propio: la home, la URL más
   // importante del sitio, era una pantalla de carga (T-PROD-022).
-  return <LandingPage />;
+  return <>{children}</>;
 }

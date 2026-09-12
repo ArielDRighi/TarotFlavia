@@ -91,9 +91,11 @@ export const homeMetadata: Metadata = {
   // Con la marca adentro a propósito: el `title.template` del root layout NO se
   // aplica al segmento que lo define, y `/` es ese segmento. Sin esto la home
   // renderizaba `<title>Tu guía espiritual</title>`, sin "Auguria" por ningún lado.
-  title: `${SITE_NAME} — Tu guía espiritual`,
+  title: `${SITE_NAME} — Tarot y astrología en español`,
+  // Descripción de publicación, no de producto (T-SEO-014): el snippet en
+  // Google es lo primero que lee un revisor antes de entrar.
   description:
-    'Lecturas de tarot personalizadas y sesiones con tarotistas profesionales. Descubre tu destino y conecta con guías espirituales.',
+    'Horóscopo de hoy para los doce signos, carta del día, enciclopedia de tarot y astrología, y guías para consultar mejor. Contenido propio, en español.',
   openGraph: {
     // Next NO hace merge profundo: declarar `openGraph` acá pisa el del root
     // layout entero, así que hay que repetir type/locale/siteName o la home
@@ -101,9 +103,9 @@ export const homeMetadata: Metadata = {
     type: 'website',
     locale: 'es_ES',
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Tu guía espiritual`,
+    title: `${SITE_NAME} — Tarot y astrología en español`,
     description:
-      'Descubre tu destino con lecturas de tarot y sesiones con tarotistas profesionales',
+      'Horóscopo de hoy, carta del día, enciclopedia de tarot y astrología y guías prácticas.',
     images: [DEFAULT_OG_IMAGE],
   },
   alternates: {

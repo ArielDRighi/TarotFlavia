@@ -14,7 +14,7 @@ import type { EditorialImage } from '@/lib/data/encyclopedia-editorial.data';
 
 /**
  * Brand-night gradient used as the hero band background and as the image overlay
- * (kept in sync with `HeroSection` and the `--color-bg-hero` tokens).
+ * (kept in sync with the home `EditorialHero` and the `--color-bg-hero` tokens).
  */
 const HERO_GRADIENT = 'linear-gradient(160deg, #1a0a2e 0%, #2d1b69 55%, #1a0a2e 100%)';
 const IMAGE_OVERLAY =

@@ -6,6 +6,7 @@
 
 import { apiClient } from './axios-config';
 import { API_ENDPOINTS } from './endpoints';
+import { PRERENDER_HEADER } from './prerender';
 import type {
   CardSummary,
   CardCombination,
@@ -58,8 +59,28 @@ export async function searchCards(query: string): Promise<CardSummary[]> {
   return response.data;
 }
 
-export async function getCardBySlug(slug: string): Promise<CardDetail> {
-  const response = await apiClient.get<CardDetail>(API_ENDPOINTS.ENCYCLOPEDIA.CARD_DETAIL(slug));
+/** Opciones de `getCardBySlug`. */
+export interface GetCardBySlugOptions {
+  /**
+   * `false` para que la API **no** cuente la request como una vista de la
+   * ficha. El interceptor ya manda el header durante `next build`; esto es
+   * para las lecturas server-side que tampoco son una persona mirando la
+   * ficha, como la carta del día de la portada, que se resuelve en cada
+   * regeneración de ISR de `/` (T-SEO-014). Default `true`.
+   */
+  countView?: boolean;
+}
+
+export async function getCardBySlug(
+  slug: string,
+  { countView = true }: GetCardBySlugOptions = {}
+): Promise<CardDetail> {
+  const url = API_ENDPOINTS.ENCYCLOPEDIA.CARD_DETAIL(slug);
+  // El backend decide por presencia del header (`@IsPrerender()`), así que
+  // sólo se manda cuando hay que suprimir la vista.
+  const response = countView
+    ? await apiClient.get<CardDetail>(url)
+    : await apiClient.get<CardDetail>(url, { headers: { [PRERENDER_HEADER]: '1' } });
   return response.data;
 }
 

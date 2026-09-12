@@ -87,8 +87,10 @@ describe('SEO Metadata Configuration', () => {
     it('should have specific title and description', () => {
       // La marca va en el título de la home porque el `title.template` del root
       // layout no aplica al segmento que lo define (T-PROD-020).
-      expect(homeMetadata.title).toBe('Auguria — Tu guía espiritual');
-      expect(homeMetadata.description).toContain('Lecturas de tarot');
+      expect(homeMetadata.title).toBe('Auguria — Tarot y astrología en español');
+      // De publicación, no de producto (T-SEO-014).
+      expect(homeMetadata.description).toContain('Horóscopo de hoy');
+      expect(homeMetadata.description).not.toMatch(/premium|cuenta/i);
     });
 
     it('⚠️ T-PROD-020: la home declara su canonical', () => {
