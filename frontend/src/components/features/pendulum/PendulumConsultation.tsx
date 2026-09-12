@@ -130,7 +130,7 @@ export function PendulumConsultation() {
 
       // TASK-515: 403/429 (cupo agotado) y cualquier otro error se muestran al usuario.
       // La invalidación de capabilities (banner + botón deshabilitado) la hace
-      // usePendulumQuery.onError, así que acá solo informamos.
+      // usePendulumQuery.onSettled, así que acá solo informamos.
       toast.error(getQueryErrorMessage(error));
     }
   };

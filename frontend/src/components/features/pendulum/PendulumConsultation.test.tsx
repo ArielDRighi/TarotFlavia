@@ -214,15 +214,13 @@ describe('PendulumConsultation', () => {
     });
 
     it('BLOCKED_CONTENT sigue abriendo PendulumBlockedContent sin toast', async () => {
-      const mutateAsync = vi
-        .fn()
-        .mockRejectedValue(
-          createAxiosError(400, {
-            code: 'BLOCKED_CONTENT',
-            category: 'salud',
-            message: 'Bloqueado',
-          })
-        );
+      const mutateAsync = vi.fn().mockRejectedValue(
+        createAxiosError(400, {
+          code: 'BLOCKED_CONTENT',
+          category: 'salud',
+          message: 'Bloqueado',
+        })
+      );
       mockUsePendulumQuery.mockReturnValue({ mutateAsync, isPending: false });
 
       renderWithProviders(<PendulumConsultation />);

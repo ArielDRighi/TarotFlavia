@@ -3548,7 +3548,7 @@ Agregar tests que verifiquen:
 
 #### TASK-515: El anónimo puede volver a "consultar" tras agotar su consulta gratuita y no recibe ninguna respuesta
 
-**Estado:** ✅ COMPLETADA (12 de septiembre de 2026)
+**Estado:** 🔄 EN REVISIÓN — PR #655 (12 de septiembre de 2026); pasa a ✅ COMPLETADA al cerrar la verificación manual en local
 **Prioridad:** 🔴 ALTA
 **Estimación:** 0.5 días
 **Tipo:** Frontend (bug) + ajuste mínimo de DTO en backend
@@ -3624,9 +3624,10 @@ realidad el backend está rechazando la consulta y el frontend no lo muestra.
   spec `pendulum-query.dto.spec.ts`. El servicio solo lee `dto.question`; el fingerprint no se
   persiste.
 - **Invalidación en un solo lugar.** `invalidateUserData` se llama desde
-  `usePendulumQuery.onError` (mismo sitio que `onSuccess`), no también desde el `catch` del
-  componente: `mutateAsync` dispara `onError` antes de rechazar la promesa, así que hacerlo dos
-  veces solo duplicaría el refetch de capabilities + perfil. El componente se limita al toast.
+  `usePendulumQuery.onSettled` (cubre éxito y error), no también desde el `catch` del
+  componente: `mutateAsync` dispara los callbacks de la mutación antes de rechazar la promesa,
+  así que hacerlo dos veces solo duplicaría el refetch de capabilities + perfil. El componente
+  se limita al toast. `pendulumKeys.all` (historial/stats) solo se invalida en `onSuccess`.
 - **429 llega como `RateLimitError`, no como `AxiosError`.** El interceptor de `axios-config.ts`
   transforma todo 429 en `RateLimitError` con mensaje en español y descarta el body; el
   componente lo detecta con `instanceof` y muestra `error.message`. Para el péndulo, en la
@@ -3635,6 +3636,20 @@ realidad el backend está rechazando la consulta y el frontend no lo muestra.
 - Mensajes nuevos (fallbacks en español, sin terminología YMYL): "Ya usaste tus consultas
   disponibles del Péndulo. Regístrate o actualiza tu plan para seguir consultando." y "No
   pudimos consultar al Péndulo. Intenta nuevamente en unos instantes."
+
+##### Hallazgos del revisor fuera de alcance (no se tocaron; decidir si abrir tarea)
+
+- El `Input` de pregunta Premium (`PendulumConsultation.tsx`) no tiene `maxLength={500}`: una
+  pregunta de 501 caracteres produce un 400 del `ValidationPipe` (array de mensajes) y el
+  usuario ve el toast genérico. Antes se tragaba en silencio; con `maxLength` el caso no llega
+  al backend.
+- `pendulum.controller.ts` documenta en Swagger `429` para "Límite de consultas alcanzado",
+  pero el guard responde `403` (`ForbiddenException`) en todos los planes; el 429 solo puede
+  venir del throttler global. Ajustar `@ApiResponse`.
+- `check-usage-limit.guard.ts:331` lee `request.body.fingerprint` crudo *antes* de que el
+  `ValidationPipe` lo valide: un fingerprint malformado consume la consulta bajo esa clave y
+  luego recibe 400. Preexistente; conviene validar formato en el guard o ignorar los que no
+  cumplan hex 32–64.
 
 ---
 
