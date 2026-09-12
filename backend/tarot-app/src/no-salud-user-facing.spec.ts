@@ -32,7 +32,9 @@ import * as path from 'path';
  *  - Los fixtures de los `.spec.ts`.
  *
  * ⚠️ Alcance: se escanean las carpetas donde vive el **corpus** (`database/seeds/`
- * y los `data/`, `seeds/`, `prompts/` y `templates/` de los módulos). Un prompt
+ * y los `data/`, `seeds/`, `prompts/`, `templates/` y `enums/` de los módulos;
+ * `enums/` entró en T-SEO-018 porque `reading-patterns.enums.ts` guarda mensajes
+ * que el dashboard renderiza tal cual). Un prompt
  * que viva fuera de `prompts/` —hoy `chart-ai-synthesis.service.ts`, que tiene
  * la instrucción negativa en `application/services/`— NO pasa por acá. Si se
  * mueve un prompt a una carpeta escaneada, va a necesitar su entrada en la
@@ -116,7 +118,7 @@ const isCorpusFile = (p: string): boolean => {
   const rel = path.relative(SRC, p);
   return (
     rel.startsWith(`database${path.sep}seeds${path.sep}`) ||
-    /(^|[\\/])(data|seeds|prompts|templates)[\\/]/.test(rel)
+    /(^|[\\/])(data|seeds|prompts|templates|enums)[\\/]/.test(rel)
   );
 };
 

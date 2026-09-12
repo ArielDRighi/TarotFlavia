@@ -63,7 +63,7 @@ export const PATTERN_MESSAGES: Record<EmotionalPattern, string> = {
   [EmotionalPattern.SEEKING_CLARITY]:
     'Cuando buscamos claridad, un ritual de conexión con La Sacerdotisa puede iluminar el camino.',
   [EmotionalPattern.HEALING_NEEDED]:
-    'Tu energía pide sanación. Considera un ritual de limpieza y autocuidado.',
+    'Tu energía pide una pausa. Considera un ritual de limpieza y autocuidado.',
   [EmotionalPattern.PROTECTION_NEEDED]:
     'Las cartas sugieren que es momento de fortalecer tus defensas energéticas.',
 };

@@ -172,6 +172,12 @@ describe('SavedChartPageContent', () => {
       mockUseSavedChart.mockReturnValue(savedChartReturn);
     });
 
+    it('cierra con el aviso legal al pie del análisis (T-SEO-018)', () => {
+      render(<SavedChartPageContent />);
+
+      expect(screen.getByTestId('content-disclaimer')).toBeInTheDocument();
+    });
+
     it('debe mostrar la fecha de nacimiento formateada en el subtítulo', () => {
       render(<SavedChartPageContent />);
 

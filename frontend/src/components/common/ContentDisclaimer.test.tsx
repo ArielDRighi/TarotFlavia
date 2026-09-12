@@ -7,15 +7,15 @@ describe('ContentDisclaimer (T-SEO-018)', () => {
   it('renderiza el texto acordado, sin variaciones', () => {
     render(<ContentDisclaimer />);
 
-    const aside = screen.getByTestId('content-disclaimer');
-    expect(aside.tagName).toBe('ASIDE');
-    expect(aside).toHaveTextContent(CONTENT_DISCLAIMER);
+    const note = screen.getByTestId('content-disclaimer');
+    expect(note).toHaveTextContent(CONTENT_DISCLAIMER);
   });
 
-  it('es accesible como región complementaria etiquetada en español', () => {
+  it('es una nota accesible etiquetada en español, no un landmark (puede repetirse por página)', () => {
     render(<ContentDisclaimer />);
 
-    expect(screen.getByRole('complementary', { name: 'Aviso legal' })).toBeInTheDocument();
+    expect(screen.getByRole('note', { name: 'Aviso legal' })).toBeInTheDocument();
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
   });
 
   it('acepta clases adicionales para adaptarse al contenedor', () => {

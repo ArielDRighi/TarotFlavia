@@ -63,6 +63,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 
 export function SavedChartPageContent() {
   const router = useRouter();
@@ -368,6 +369,9 @@ export function SavedChartPageContent() {
             </div>
           </section>
         )}
+
+        {/* Aviso legal al pie del análisis (T-SEO-018) */}
+        <ContentDisclaimer className="mt-8" />
       </main>
 
       {/* Dialog de confirmación para eliminar */}

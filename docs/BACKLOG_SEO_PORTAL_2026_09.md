@@ -727,8 +727,12 @@ en el footer.
   texto acordado arriba, letra por letra, y `legal.test.ts` lo fija. `ContentDisclaimer`
   (`components/common/`, sin `'use client'`, `<aside aria-label="Aviso legal">`) lo monta en el
   `Footer` —así llega en toda URL—, en `CardDetailView` (después de `AuthorByline`), en
-  `ReadingExperience` (pie de la interpretación), `ReadingDetail` y `SharedReadingView`.
-  `/terminos` deja de tener su propia versión del aviso y usa la constante.
+  `ReadingExperience` (pie de la interpretación), `ReadingDetail` y `SharedReadingView`, y —tras la
+  revisión local— también en el horóscopo del signo y el listado diario (debajo de
+  `HoroscopeEditorialNote`), en el resultado y la carta guardada de la carta astral y en el perfil
+  numerológico: son "lecturas y análisis" en los términos del propio aviso. `/terminos` deja de
+  tener su propia versión y usa la constante. Es `role="note"`, no `<aside>`: dos landmarks
+  `complementary` con el mismo nombre en una página violan `landmark-unique`.
 - **Guardarraíl: tokens y frases hechas, nunca un verbo suelto.** Cuatro familias en
   `TERMINOS_PROHIBIDOS`, **la misma lista** en `backend/tarot-app/src/no-salud-user-facing.spec.ts`
   (corpus: seeds, datos, prompts, plantillas) y en `frontend/src/no-salud-user-facing.test.ts`
@@ -750,7 +754,7 @@ en el footer.
   marcar, se entera en el acto.
 - **El corpus sembrado se corrige con migración, no con re-seed** (mismo motivo que T-SEO-013:
   los seeders son skip-if-exists o backfill). `1789171200000-ReplaceDeterministicWordingInSeededCorpus`:
-  **129 pares** `[viejo, nuevo]` sobre **7 tablas** (`birth_chart_interpretations`, `tarot_card`
+  **128 pares** `[viejo, nuevo]` sobre **6 tablas** (`birth_chart_interpretations`, `tarot_card`
   —incluidas `dailyFreeUpright/Reversed`—, `card_free_interpretation`, `holistic_services`,
   `encyclopedia_articles`, `encyclopedia_tarot_cards`). Novedad: columnas **`jsonb`**
   (`keywords`, `combinations` de la enciclopedia) se reemplazan sobre `col::text` y se recastean;
@@ -794,6 +798,31 @@ en el footer.
   lectura, y la columna la edita la tarotista.
 - `card-extended-content.data.spec.ts` (T-SEO-009) dejaba `sanar`/`sanación` fuera de su lista
   médica para no desentonar con el corpus publicado; ahora que el corpus no los usa, entran.
+
+### Lo que encontró la revisión local (y se corrigió)
+
+- 🟠 **Texto de UI fuera del alcance del escaneo**: `reading-patterns.enums.ts` guarda *"Tu energía
+  pide sanación"*, que el dashboard renderiza tal cual (`PersonalizedRitualsWidget`). Reescrito
+  (*"pide una pausa"*) y `enums/` sumado a las carpetas que barre el guardarraíl del backend.
+- 🟡 La regla de lenguaje en la síntesis de carta natal solo la cubría el diff: caso nuevo en
+  `chart-ai-synthesis.service.spec.ts` (el sexto generador; los otros cinco en
+  `ymyl-language-coverage.spec.ts`).
+- 🟡 `ContentDisclaimer` era un `<aside aria-label="Aviso legal">` y convivía con el del footer en la
+  misma página (`landmark-unique`). Pasó a `<p role="note">`.
+- 🟡 **Dos reescrituras que decían algo falso o sin sentido**: Los Enamorados —*"Rafael (mensajero
+  divino)"*: el mensajero es Gabriel; Rafael es el ángel del aire en la lámina RWS, y así quedó— y La
+  Emperatriz invertida —*"reconciliarte con tu imagen corporal y los complejos de inferioridad"*:
+  ahora *"…y soltar los complejos…"*. Corregidas en seed **y** migración.
+- 🟡 Alcance del aviso ampliado a horóscopo, carta astral y numerología (ver arriba).
+- 💡 Un par de la migración era subcadena de otro de la misma tabla (*"el artesano y el sanador"*
+  dentro de *"el arquetipo del artesano y el sanador."*): `up`/`down` seguían siendo correctos, pero
+  el largo no hacía nada. Fuera.
+- **No aplicado, anotado**: con el seed nuevo de Flavia la regla viaja en el `systemPrompt` **y** en
+  las instrucciones finales (~250 tokens repetidos por lectura) — es intencional, la configuración
+  guardada es editable y puede ser anterior; `lunar-phase.service.ts` devuelve `isGoodFor:
+  ['Descanso', 'Reflexión', 'Sanación']` por la API pero el frontend no lo renderiza (solo declara el
+  tipo) — si algún día se muestra, entra al alcance; `garanti\w*` va a marcar *"garantía"* en textos
+  legales legítimos si alguna vez entran a `/terminos`: en ese caso, allowlist por fragmento.
 
 ---
 

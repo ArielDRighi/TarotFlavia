@@ -10,6 +10,7 @@ import { HoroscopeDetail } from './HoroscopeDetail';
 import { HoroscopeEditorialNote } from './HoroscopeEditorialNote';
 import { HoroscopeSkeleton } from './HoroscopeSkeleton';
 import { ZodiacSignSelector } from './ZodiacSignSelector';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 // 4. Stores, utils & types
 import { useAuthStore } from '@/stores/authStore';
 import { getZodiacSignFromDate } from '@/lib/utils/zodiac';
@@ -126,6 +127,8 @@ export function HoroscopeSignPanel({ sign, initialHoroscope }: HoroscopeSignPane
           <HoroscopeDetail horoscope={data} />
           {/* Cómo se produjo lo que se muestra, con SU fecha (T-SEO-017). */}
           <HoroscopeEditorialNote horoscopeDate={data.horoscopeDate} />
+          {/* Aviso legal al pie de la lectura (T-SEO-018) */}
+          <ContentDisclaimer className="mt-4" />
         </>
       )}
     </section>

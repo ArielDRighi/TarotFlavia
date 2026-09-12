@@ -8,6 +8,7 @@ import {
   BigThreeInterpretation,
 } from './chart-interpretation.service';
 import { AIProviderType } from '../../../ai/domain/interfaces/ai-provider.interface';
+import { YMYL_LANGUAGE_RULES } from '../../../../common/prompts/ymyl-language.prompt';
 
 describe('ChartAISynthesisService', () => {
   let service: ChartAISynthesisService;
@@ -225,6 +226,26 @@ Los aspectos en tu carta sugieren una tensión creativa que te impulsa constante
       expect(userPrompt).toContain('Leo');
       expect(userPrompt).toContain('Escorpio');
       expect(userPrompt).toContain('Aries');
+    });
+
+    it('lleva la regla de lenguaje YMYL completa en el prompt de sistema (T-SEO-018)', async () => {
+      mockAIProvider.generateCompletion.mockResolvedValue({
+        content: 'Síntesis',
+        provider: AIProviderType.GROQ,
+        model: 'llama-3.1-70b',
+        tokensUsed: { prompt: 500, completion: 300, total: 800 },
+        durationMs: 1200,
+      });
+
+      await service.generateSynthesis({
+        chartData: mockChartData,
+        interpretation: mockInterpretation,
+        userName: 'María',
+        birthDate: new Date('1985-03-20'),
+      });
+
+      const [messages] = mockAIProvider.generateCompletion.mock.calls[0];
+      expect(messages[0].content).toContain(YMYL_LANGUAGE_RULES);
     });
 
     it('should use fallback when AI service fails', async () => {

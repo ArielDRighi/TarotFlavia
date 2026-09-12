@@ -23,6 +23,12 @@ describe('NumerologyProfile', () => {
     expect(screen.getByText('Tu Perfil Numerológico')).toBeInTheDocument();
   });
 
+  it('cierra con el aviso legal al pie del análisis (T-SEO-018)', () => {
+    render(<NumerologyProfile profile={mockProfile} />);
+
+    expect(screen.getByTestId('content-disclaimer')).toBeInTheDocument();
+  });
+
   it('should display birth date', () => {
     render(<NumerologyProfile profile={mockProfile} />);
 

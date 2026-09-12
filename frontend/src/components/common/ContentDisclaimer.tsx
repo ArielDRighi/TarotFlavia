@@ -10,6 +10,10 @@ import { cn } from '@/lib/utils';
  * financiero. Va en el footer global (toda URL) y, además, al pie de cada ficha
  * y de cada lectura, cerca del texto al que aplica.
  *
+ * Es `role="note"` y no `<aside>`: convive con el del footer en la misma
+ * página, y dos landmarks `complementary` con el mismo nombre violan
+ * `landmark-unique`. Una nota no es landmark, así que puede repetirse.
+ *
  * Sin `'use client'` propio, igual que `AuthorByline`: no tiene estado ni
  * handlers, así que el footer y las rutas de servidor lo renderizan en el HTML
  * inicial, y los client components que lo montan lo llevan en su bundle sin
@@ -27,12 +31,13 @@ export interface ContentDisclaimerProps {
 
 export function ContentDisclaimer({ className }: ContentDisclaimerProps) {
   return (
-    <aside
+    <p
+      role="note"
       data-testid="content-disclaimer"
       aria-label="Aviso legal"
       className={cn('text-muted-foreground text-xs leading-relaxed', className)}
     >
-      <p>{CONTENT_DISCLAIMER}</p>
-    </aside>
+      {CONTENT_DISCLAIMER}
+    </p>
   );
 }

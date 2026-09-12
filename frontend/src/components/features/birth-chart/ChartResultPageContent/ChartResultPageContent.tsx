@@ -35,6 +35,7 @@ import {
 
 // UI Components
 import { Button } from '@/components/ui/button';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -274,6 +275,9 @@ export function ChartResultPageContent() {
 
         {/* Upsell para Free → Premium (síntesis IA) */}
         {isFull && !isPremium && <AISynthesisPlaceholder className="mb-8" />}
+
+        {/* Aviso legal al pie del análisis (T-SEO-018) */}
+        <ContentDisclaimer className="mb-8" />
 
         {/* Footer de acciones */}
         <div className="flex flex-col justify-center gap-4 border-t pt-8 sm:flex-row">

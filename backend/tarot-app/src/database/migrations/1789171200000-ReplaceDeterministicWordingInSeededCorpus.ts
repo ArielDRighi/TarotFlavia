@@ -404,10 +404,6 @@ export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
         'las heridas ancestrales que piden ser integradas.',
       ],
       [
-        'el arquetipo del artesano y el sanador.',
-        'el arquetipo del artesano y el cuidador.',
-      ],
-      [
         '- Habilidades sanadoras y de cuidado',
         '- Habilidades de cuidado y de servicio',
       ],
@@ -500,11 +496,11 @@ export const CORPUS_REPLACEMENTS: CorpusReplacement[] = [
       ['Para sanarlo, debes', 'Para superarlo, debes'],
       [
         'para sanar problemas de imagen corporal o complejos de inferioridad',
-        'para reconciliarte con tu imagen corporal y los complejos de inferioridad',
+        'para reconciliarte con tu imagen corporal y soltar los complejos de inferioridad',
       ],
       [
         'el arcángel Rafael (sanador divino)',
-        'el arcángel Rafael (mensajero divino)',
+        'el arcángel Rafael (ángel del aire)',
       ],
       [
         'Para sanar esto, debes dejar de pelear',

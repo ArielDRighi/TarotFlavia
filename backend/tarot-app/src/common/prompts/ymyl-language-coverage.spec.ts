@@ -20,6 +20,10 @@ import { Tarotista } from '../../modules/tarotistas/entities/tarotista.entity';
  * Cada generador de texto del sitio tiene que llevar `YMYL_LANGUAGE_RULES`
  * completo. Se verifica el bloque entero (y no una frase) para que nadie lo
  * recorte a mano en un prompt y deje ese generador sin cobertura.
+ *
+ * El sexto generador —la síntesis de carta natal— arma su prompt de sistema en
+ * un método privado y necesita el `AIProviderService` mockeado: su caso vive en
+ * `chart-ai-synthesis.service.spec.ts`, junto a los mocks que ya existen.
  */
 describe('Cobertura de YMYL_LANGUAGE_RULES en los prompts de IA (T-SEO-018)', () => {
   it('horóscopo diario (occidental)', () => {

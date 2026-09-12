@@ -8,6 +8,7 @@ import { formatDateFullWithYear } from '@/lib/utils/date';
 import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
 import { ZodiacSign } from '@/types/horoscope.types';
 import type { CanonicalDailyHoroscopes, DailyHoroscope } from '@/types/horoscope.types';
+import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 
 /**
  * Los 12 signos del día con su extracto, fecha visible y enlace a la
@@ -131,6 +132,8 @@ export function DailyHoroscopeList({
         testIdPrefix={testIdPrefix}
         className="mt-6"
       />
+      {/* Aviso legal al pie de los doce (T-SEO-018) */}
+      <ContentDisclaimer className="mt-4" />
     </>
   );
 }
