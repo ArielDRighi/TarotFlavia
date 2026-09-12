@@ -118,6 +118,7 @@ describe('STATIC_PAGE_METADATA', () => {
         ROUTES.PRIVACIDAD,
         ROUTES.TERMINOS,
         ROUTES.SOBRE_NOSOTROS,
+        ROUTES.POLITICA_EDITORIAL,
       ])
     );
   });

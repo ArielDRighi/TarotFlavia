@@ -423,3 +423,73 @@ describe('HoroscopeSignPanel — horóscopo servido (T-SEO-016)', () => {
     expect(screen.getByTestId('horoscope-skeleton-detail')).toBeInTheDocument();
   });
 });
+
+/**
+ * T-SEO-017: la fórmula editorial va al pie de la predicción, con la fecha del
+ * horóscopo que se está mostrando (servido, local o el de ayer).
+ */
+describe('HoroscopeSignPanel — nota editorial (T-SEO-017)', () => {
+  const served: ServedDailyHoroscope = {
+    canonicalDate: '2026-01-17',
+    horoscope: mockHoroscope,
+    isShowingPreviousDay: false,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseAuthStore.mockReturnValue({ user: null });
+    mockUseLocalToday.mockReturnValue('2026-01-17');
+  });
+
+  it('muestra la nota editorial con la fecha de la predicción servida', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    const note = screen.getByTestId('horoscope-editorial-note');
+    expect(note).toHaveTextContent(/revisión editorial/i);
+    expect(note).toHaveTextContent(/17 de enero de 2026/i);
+  });
+
+  it('la nota sigue a la predicción del día local cuando la reemplaza', () => {
+    mockUseLocalToday.mockReturnValue('2026-01-18');
+    mockUseTodayHoroscope.mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: { ...mockHoroscope, id: 2, horoscopeDate: '2026-01-18' },
+      isShowingPreviousDay: false,
+    });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    expect(screen.getByTestId('horoscope-editorial-note')).toHaveTextContent(
+      /18 de enero de 2026/i
+    );
+  });
+
+  it('cuando se sirve el de ayer, la nota lleva la fecha de ayer', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
+    const previousDay: ServedDailyHoroscope = {
+      canonicalDate: '2026-01-17',
+      horoscope: { ...mockHoroscope, horoscopeDate: '2026-01-16' },
+      isShowingPreviousDay: true,
+    };
+
+    renderWithProviders(
+      <HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={previousDay} />
+    );
+
+    expect(screen.getByTestId('showing-previous-day-notice')).toBeInTheDocument();
+    expect(screen.getByTestId('horoscope-editorial-note')).toHaveTextContent(
+      /16 de enero de 2026/i
+    );
+  });
+
+  it('sin horóscopo no hay nota editorial', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
+
+    expect(screen.queryByTestId('horoscope-editorial-note')).not.toBeInTheDocument();
+  });
+});

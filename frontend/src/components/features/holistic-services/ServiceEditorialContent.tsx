@@ -1,4 +1,5 @@
 // 5. Components
+import { AuthorByline } from '@/components/common/AuthorByline';
 import { EditorialCard } from '@/components/common/EditorialCard';
 // 6. Utils & types
 import { cn } from '@/lib/utils';
@@ -71,6 +72,9 @@ export function ServiceEditorialContent({ content, className }: ServiceEditorial
       >
         {disclaimer}
       </p>
+
+      {/* Firma editorial (T-SEO-017), en el servidor como el resto del bloque. */}
+      <AuthorByline className="mt-6" />
     </EditorialCard>
   );
 }

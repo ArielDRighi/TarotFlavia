@@ -109,6 +109,15 @@ describe('Footer', () => {
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/sobre-nosotros');
     });
+
+    // T-SEO-017: la política editorial se alcanza desde cualquier página.
+    it('should render "Política editorial" link', () => {
+      render(<Footer />);
+
+      const link = screen.getByRole('link', { name: /política editorial/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/politica-editorial');
+    });
   });
 
   describe('Styling', () => {

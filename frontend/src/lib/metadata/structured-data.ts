@@ -71,6 +71,12 @@ export type OrganizationSchema = {
    */
   email: string;
   contactPoint: SchemaContactPoint;
+  /**
+   * URL de la política editorial (T-SEO-017). Es la propiedad que schema.org
+   * define para "cómo produce contenido quien publica": declara el proceso sin
+   * necesidad de un `Person`, que es la decisión de negocio vigente.
+   */
+  publishingPrinciples: string;
 };
 
 /** `AboutPage`: el tipo que schema.org reserva para la página institucional. */
@@ -153,6 +159,7 @@ export function buildOrganizationJsonLd(): OrganizationSchema {
       email: CONFIG.CONTACT_EMAIL,
       availableLanguage: LANGUAGE,
     },
+    publishingPrinciples: `${baseUrl}${ROUTES.POLITICA_EDITORIAL}`,
   };
 }
 

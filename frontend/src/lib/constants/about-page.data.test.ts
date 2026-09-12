@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
+import { ROUTES } from '@/lib/constants/routes';
 import {
   ABOUT_PAGE,
   MIN_ABOUT_PAGE_WORDS,
@@ -68,6 +69,10 @@ describe('ABOUT_PAGE', () => {
       expect(link.label.trim().length).toBeGreaterThan(0);
       expect(link.href.startsWith('/')).toBe(true);
     });
+  });
+
+  it('enlaza a /politica-editorial (T-SEO-017)', () => {
+    expect(ABOUT_PAGE.links.map((link) => link.href)).toContain(ROUTES.POLITICA_EDITORIAL);
   });
 
   it('⚠️ no repite ningún párrafo dentro de la página', () => {

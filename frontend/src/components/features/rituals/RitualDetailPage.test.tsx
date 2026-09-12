@@ -169,6 +169,14 @@ describe('RitualDetailPage', () => {
     expect(screen.getByText('Preparar espacio tranquilo')).toBeInTheDocument();
   });
 
+  // T-SEO-017: los rituales son contenido editorial y llevan la misma firma
+  // que las fichas de tarot y las guías.
+  it('firma el ritual con la firma editorial', () => {
+    render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
+
+    expect(screen.getByTestId('author-byline')).toBeInTheDocument();
+  });
+
   it('renders materials section', () => {
     render(<RitualDetailPage slug="ritual-luna-nueva" initialRitual={mockRitual} />);
 

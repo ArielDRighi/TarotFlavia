@@ -13,6 +13,7 @@
 import Link from 'next/link';
 import { Calculator } from 'lucide-react';
 
+import { AuthorByline } from '@/components/common/AuthorByline';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -189,6 +190,9 @@ export function AnimalProfile({ animal }: AnimalProfileProps) {
           </dl>
         </Card>
       </section>
+
+      {/* Firma editorial (T-SEO-017): misma firma que el resto de las fichas. */}
+      <AuthorByline />
     </article>
   );
 }

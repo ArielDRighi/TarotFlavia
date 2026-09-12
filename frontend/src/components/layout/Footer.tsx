@@ -90,6 +90,15 @@ export function Footer() {
                 Sobre Nosotros
               </Link>
             </li>
+            {/* Cómo se produce el contenido (T-SEO-017): misma visibilidad. */}
+            <li>
+              <Link
+                href={ROUTES.POLITICA_EDITORIAL}
+                className="hover:text-primary py-1.5 transition-colors"
+              >
+                Política editorial
+              </Link>
+            </li>
           </ul>
         </nav>
 

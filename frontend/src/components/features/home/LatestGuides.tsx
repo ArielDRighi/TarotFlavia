@@ -9,8 +9,8 @@ import type { ArticleSummary } from '@/types/encyclopedia-article.types';
  * Últimas guías de la portada (T-SEO-014).
  *
  * Reutiliza `ArticleCard` de la enciclopedia: título, categoría y extracto con
- * enlace a la guía. La fecha real y el byline se agregan cuando exista el campo
- * (T-SEO-017): mostrar `new Date()` como fecha sería inventarla.
+ * enlace a la guía. Sin fecha ni byline: la API no expone fecha de edición de
+ * las guías (T-SEO-017 lo confirmó) y mostrar `new Date()` sería inventarla.
  */
 export interface LatestGuidesProps {
   guides: ArticleSummary[] | undefined;

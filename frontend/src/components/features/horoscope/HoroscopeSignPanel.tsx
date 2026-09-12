@@ -7,6 +7,7 @@ import { useLocalHoroscope } from '@/hooks/api/useHoroscope';
 import { useLocalToday } from '@/hooks/utils/useLocalToday';
 // 3. Components (ui → features)
 import { HoroscopeDetail } from './HoroscopeDetail';
+import { HoroscopeEditorialNote } from './HoroscopeEditorialNote';
 import { HoroscopeSkeleton } from './HoroscopeSkeleton';
 import { ZodiacSignSelector } from './ZodiacSignSelector';
 // 4. Stores, utils & types
@@ -123,6 +124,8 @@ export function HoroscopeSignPanel({ sign, initialHoroscope }: HoroscopeSignPane
             </p>
           )}
           <HoroscopeDetail horoscope={data} />
+          {/* Cómo se produjo lo que se muestra, con SU fecha (T-SEO-017). */}
+          <HoroscopeEditorialNote horoscopeDate={data.horoscopeDate} />
         </>
       )}
     </section>

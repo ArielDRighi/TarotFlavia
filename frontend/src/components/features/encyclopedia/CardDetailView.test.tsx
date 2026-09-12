@@ -149,14 +149,21 @@ describe('CardDetailView', () => {
    * referencia como las fichas de signos o planetas.
    */
   describe('Author byline (T-SEO-011)', () => {
-    it('firma la ficha y enlaza a /sobre-nosotros', () => {
+    it('firma la ficha y enlaza a /sobre-nosotros y /politica-editorial', () => {
       render(<CardDetailView card={createTestCard()} />);
 
       const byline = screen.getByTestId('author-byline');
 
       expect(byline).toBeInTheDocument();
       expect(byline).toHaveTextContent(/equipo editorial de auguria/i);
-      expect(within(byline).getByRole('link')).toHaveAttribute('href', '/sobre-nosotros');
+      expect(
+        within(byline).getByRole('link', { name: /equipo editorial de auguria/i })
+      ).toHaveAttribute('href', '/sobre-nosotros');
+      // T-SEO-017: la firma también lleva a la política editorial.
+      expect(within(byline).getByRole('link', { name: /política editorial/i })).toHaveAttribute(
+        'href',
+        '/politica-editorial'
+      );
     });
   });
 });

@@ -90,7 +90,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | T-SEO-014 | Home editorial: de landing SaaS a portada de portal | Frontend | 🔴 Crítica | 3 pts | ✅ Completada |
 | T-SEO-015 | Páginas de herramientas: nota editorial debajo de cada widget; `noindex` a ventas/internas; guardarraíl sobre el nav | Frontend + contenido | 🔴 Crítica | 4 pts | ✅ Completada |
 | T-SEO-016 | Horóscopo del día en el HTML servido (SSR/ISR) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
-| T-SEO-017 | Persona editorial responsable, bylines y `/politica-editorial` | Frontend + decisión | 🟠 Alta | 2 pts | ⬜ Pendiente |
+| T-SEO-017 | Persona editorial responsable, bylines y `/politica-editorial` | Frontend + decisión | 🟠 Alta | 2 pts | ✅ Completada (alcance reducido por decisión de negocio) |
 | T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ⬜ Pendiente |
 | T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap sin `lastmod` falso | Frontend | 🟢 Baja | 0,5 pts | ✅ Completada |
 | T-SEO-020 | Arcanos Mayores: romper la plantilla (invertida, caso de tirada, iconografía) | Contenido + Front | 🟢 Baja | 3 pts | ⬜ Diferida |
@@ -110,7 +110,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 | 2 | ~~**T-SEO-016**~~ ✅ | 2 pts | Cerrada 11-sep-2026: `getCanonicalDailyHoroscopes()` en `lib/api/horoscope-server.ts` devuelve los 12 del día canónico (ART) para que 014 y 015 los consuman en SSR |
 | 3 | ~~**T-SEO-014**~~ ✅ | 3 pts | Cerrada 11-sep-2026: portada editorial con horóscopo de hoy (12 extractos), carta del día canónica y guías en el HTML; `LandingPage` eliminada |
 | 4 | ~~**T-SEO-015**~~ ✅ | 4 pts | Cerrada 12-sep-2026: siete páginas de herramientas con nota propia (800+ c/u, estructuras distintas), `/horoscopo` y `/carta-del-dia` con el día en el HTML, `/premium` con `noindex` y fuera del sitemap/menú, guardarraíl sobre el nav (500 palabras) y coherencia `noindex` ↔ sitemap |
-| 5 | **T-SEO-017** | 2 pts | Necesita una **decisión de negocio** (quién firma) que se puede tomar mientras se desarrollan 014–016. El código es chico |
+| 5 | ~~**T-SEO-017**~~ ✅ | 2 pts | Cerrada 12-sep-2026: `/politica-editorial` (1.000+ palabras, footer, sitemap, `publishingPrinciples` en el `Organization`), pie editorial en el horóscopo diario (signo, hub y portada), firma extendida a rituales y servicios. **Decisión de negocio: se sigue sin nombrar personas** (ver la tarea) |
 | 6 | **T-SEO-018** | 1,5 pts | Cierra el lenguaje después de que 014/015/017 escribieron texto nuevo, así el guardarraíl los cubre |
 | 7 | **Deploy único + Search Console + espera de 14–21 días** | — | No es código. Ver *Puerta de salida* |
 | 4b | **T-SEO-021** | 0,5 pts | Va pegada a T-SEO-015: es la misma página y el revisor va a mirar el widget. Puede ir en la misma rama o en una propia, pero antes del deploy único |
@@ -541,7 +541,7 @@ en el backend como subtarea.
 
 ## T-SEO-017: Persona Editorial Responsable, Bylines y `/politica-editorial`
 
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (12-sep-2026) — **alcance reducido por decisión de negocio**
 **Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Tipo:** Frontend + decisión de negocio
 
 ### Problema
@@ -585,10 +585,96 @@ Quién firma. Mínimo viable innegociable, según las tres fuentes:
 
 ### Criterios de aceptación
 
-- [ ] `/sobre-nosotros` nombra a una persona real con foto y link externo.
-- [ ] Byline visible en el HTML servido de toda ficha y guía; JSON-LD con `author`.
-- [ ] `/politica-editorial` en el sitemap, 600+ palabras, linkeada desde el footer.
-- [ ] Ninguna página dice "generado por IA" como badge; la mención va en la política y el pie.
+- [ ] ~~`/sobre-nosotros` nombra a una persona real con foto y link externo.~~ **No aplica por
+      decisión de negocio** (ver abajo).
+- [x] Byline visible en el HTML servido de toda ficha y guía (ya la tenían), y desde esta tarea
+      también en rituales y fichas de servicio; enlaza a `/sobre-nosotros` y a
+      `/politica-editorial`. JSON-LD: `publishingPrinciples` en el `Organization` (no hay
+      `Article` en las fichas, así que no había `author` que rellenar).
+- [x] `/politica-editorial` en el sitemap, 1.000+ palabras (piso declarado 600), linkeada desde el
+      footer y desde `/sobre-nosotros`.
+- [x] Ninguna página dice "generado por IA" como badge; la mención va en la política y en el pie
+      del horóscopo diario, como "herramientas de lenguaje". El guardarraíl de `no-ia-user-facing`
+      sigue en verde.
+
+### ⚠️ Decisión de negocio (12-sep-2026)
+
+**Se sigue sin nombrar personas.** Consultado quién firma (tarotista como autora, dueño como editor
+responsable o seudónimo), la respuesta fue dejarlo como está por ahora: sitios del nicho con
+publicidad, como Los Arcanos, tampoco firman con una persona. En consecuencia **no entran** en esta
+tarea, y quedan documentados como deuda abierta si el cuarto pedido vuelve a rechazarse:
+
+- Nombre, apellido, foto real y perfil externo verificable en `/sobre-nosotros`.
+- `/autores/[slug]`.
+- `Person` en JSON-LD.
+- *"Por [Nombre] · Revisado el [fecha]"* por ficha: además de no haber nombre, **ningún tipo de la
+  API trae fecha de edición** (`CardDetail`, `ArticleDetail`, `RitualDetail`), y estamparla con
+  `new Date()` es justo lo que el backlog prohíbe. Las únicas fechas reales a la vista son las de
+  `/sobre-nosotros` y `/politica-editorial` (`lastReviewed`, `YYYY-MM`).
+
+Los tests que fijaban la postura "sin personas" (`about-page.data.test.ts`, `AuthorByline.test.tsx`,
+`structured-data.test.ts`) se mantienen y la política nueva la hereda.
+
+### ⚠️ Corrección a la fórmula del backlog
+
+La fórmula propuesta arriba —*"a partir de las posiciones planetarias del día"*— **no describe lo
+que hace el backend**: `horoscope.prompts.ts` redacta cada signo a partir de su **elemento, cualidad
+y planeta regente**; las efemérides (Swiss Ephemeris) las usa la carta astral, no el horóscopo.
+Afirmarlo en una página de confianza sería falso, así que la fórmula publicada es:
+
+> *"Redactado a partir del elemento, la cualidad y el planeta regente de cada signo para el
+> [fecha], con asistencia de herramientas de lenguaje y revisión editorial del equipo de Auguria."*
+
+Las dos piezas viven en `editorial-policy.data.ts` (`DAILY_HOROSCOPE_BASIS`,
+`DAILY_HOROSCOPE_METHOD`) y las consumen la política y `HoroscopeEditorialNote`, así que no pueden
+divergir. Un test fija que la sección de horóscopos no atribuya el diario a posiciones planetarias.
+
+La política también dice, sobre las instrucciones del horóscopo, solo lo que el prompt hace **hoy**
+(prohíbe diagnósticos y consejo médico, pide no anunciar hechos concretos ni crear falsas
+expectativas). La prohibición de lenguaje determinista es de T-SEO-018 y se agrega ahí.
+
+### Decisiones de implementación
+
+- **`/politica-editorial`** sigue la misma maqueta que `/sobre-nosotros`: datos tipados en
+  `editorial-policy.data.ts` con `MIN_EDITORIAL_POLICY_WORDS` y `getEditorialPolicyWordCount()`,
+  componente `EditorialPolicyContent` sin `'use client'`, `STATIC_PAGE_METADATA.politicaEditorial`,
+  entrada en `STATIC_ROUTES` del sitemap y `ROUTES.POLITICA_EDITORIAL`. Siete secciones: quién
+  escribe y revisa, fuentes (RWS + Waite/Pollack/Jung; Swiss Ephemeris para cartas natales;
+  pitagórica; calendario lunar), cómo se produce una ficha, horóscopos y herramientas de lenguaje,
+  correcciones y actualizaciones, lo que no se publica, publicidad e independencia editorial.
+- **`publishingPrinciples`** en el `Organization` del layout raíz, apuntando a la política: es la
+  propiedad de schema.org para esto y llega en toda URL.
+- **`HoroscopeEditorialNote`**: `<aside>` con `<time dateTime>` de la fecha del horóscopo
+  **mostrado** (si se sirve el de ayer, dice ayer). Montado en `HoroscopeSignPanel` (después de
+  `HoroscopeDetail`, sigue al swap por día local) y en `DailyHoroscopeList` (después de la grilla,
+  así lo comparten portada y hub).
+- **`AuthorByline`** enlaza ahora también a la política y se monta en `RitualDetailPage` (fin de la
+  columna principal) y en `ServiceEditorialContent` (después del disclaimer, en el servidor).
+- `formatReviewDate` (privada de `AboutContent`) pasó a `formatReviewMonth` en `lib/utils/date.ts`
+  para compartirla con la política; conserva el enfoque sin `Date` (evita el corrimiento de mes en
+  UTC-3).
+- Guardarraíl de nav: la política está en el footer, así que `check:indexable` le exige 500
+  palabras; el piso propio de 600 lo cubre. Verificar tras el deploy con
+  `npm run check:indexable -- --base-url https://auguriatarot.com`.
+
+### Lo que encontró la revisión local (y se corrigió)
+
+- 🟠 La política decía que el horóscopo diario era *"el único lugar donde intervienen herramientas
+  de lenguaje"*: falso. El horóscopo chino anual (`chinese-horoscope.service.ts`, público), las
+  interpretaciones premium y la síntesis de la carta astral también las usan. Reescrito y fijado
+  con test.
+- 🟡 *"Las consultas que rozan ese terreno se responden con una lectura simbólica"*: el péndulo no
+  responde, **rechaza** (`BadRequestException`). Reescrito y fijado con test.
+- 🟡 La política prometía firma en *"cada ficha"* pero `/horoscopo-chino/[animal]` no la tenía:
+  `AuthorByline` montada en `AnimalProfile`, con test.
+- 🟡 Faltaba el caso "sirve el de ayer" en los tests de la nota dentro de `HoroscopeSignPanel`.
+- 🟡 `formatDateFullWithYear` capitaliza el día ("…para el **S**ábado 12…"): nueva
+  `formatDateFullWithYearInline` (minúscula) para uso a mitad de oración.
+- 🟡 Tipos y pie duplicados con `/sobre-nosotros`: `EditorialSection`/`EditorialLink` en
+  `types/editorial-page.types.ts` (reemplazan a `AboutSection`/`AboutLink`) y `EditorialPageFooter`
+  en `components/common/` (fecha de revisión + enlaces), que consumen las dos páginas.
+- 💡 `aria-label="Nota editorial"` en el `<aside>` de `HoroscopeEditorialNote`.
+
 
 ---
 
