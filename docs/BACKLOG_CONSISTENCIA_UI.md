@@ -778,6 +778,277 @@ Por tamaño, conviene dividir en **2-3 PRs**:
 
 ---
 
+### T-UI-12: Iconografía de marca — reemplazar emojis y glifos ad hoc por assets de la línea de diseño
+
+**Prioridad:** 🟡 ALTA
+**Estimación:** 3 días de integración + generación de assets (Ariel, con los prompts de abajo)
+**Dependencias:** ninguna
+**Estado:** ⬜ PENDIENTE
+**Reportado por:** Ariel (12 de septiembre de 2026): "hay iconos que no tienen nada que ver con el diseño de la página"
+
+#### 📋 Descripción
+
+El sitio tiene una línea visual definida (`DESIGN_HAND-OFF.md` + las 60 ilustraciones de
+`public/images/enciclopedia|premium|dashboard`): **line-art dorado (`#D69E2E`) con brillo suave,
+lavanda místico (`#805AD5`) como color de marca, fondo cósmico violeta cuando es ilustración, y
+tarjetas crema/blancas (`#F9F7F2` / `#FFFFFF`) cuando es UI**. Pero la iconografía de dominio la
+resuelven **emojis del sistema** (multicolor, distintos en cada SO/navegador) y dos parches:
+
+- **208 emojis en 41 archivos** de `src/` (fuera de tests): signos ♈–♓, animales 🐀–🐖,
+  elementos 🔥💧💨🌿, áreas ❤️💼✨💰, fases lunares 🌑–🌘, categorías de rituales, arquetipos
+  numerológicos 👑🤝🎨…, hubs/guías 🔮🪐🏠🔢⚖️🕯️🐉, notificaciones 🔔🎁⚙️, calendario sagrado.
+- `ZodiacSymbol.tsx`: fuerza el glifo Unicode a monocromo con `U+FE0E` (depende de la fuente
+  del sistema; en algunos SO sigue saliendo emoji).
+- `ChineseAnimalSymbol.tsx`: 12 SVG de trazo **dibujados a mano en código** (24×24), sin relación
+  con las ilustraciones del sitio (ver `horoscopo-chino-animales.webp`, donde los animales son
+  line-art dorado con brillo).
+
+La tarea reemplaza todo eso por un **set de iconos de marca** generado con Gemini (Nano Banana)
+siguiendo la línea establecida, servido como imágenes locales, y deja un guardarraíl para que no
+vuelvan a entrar emojis en texto de cara al usuario.
+
+#### 🎯 Reglas de decisión (qué va con qué)
+
+| Tipo de icono | Solución | Ejemplos |
+| --- | --- | --- |
+| **Iconografía de dominio** (signos, animales, elementos, palos, fases, áreas, arquetipos, hubs) | **Asset de marca** generado (`public/images/icons/…webp`) vía `<BrandIcon>` | ♈, 🐉, 🔥, 🌕, ❤️, 👑, 🔮 |
+| **Iconografía de UI genérica** (acciones, estados, avisos) | **`lucide-react`**, que ya es la librería del sitio | ✓, ⚠️, 🔔, ⚙️, 🔎, 🎁, 💡, 🎉 |
+| **Notación astrológica en la carta natal** (`birth-chart.enums.ts`: ☉ ☽ ☿ ♀ ♂ … ☌ ☍ ⚹) | **Se mantiene como texto** con `ZodiacSymbol`/U+FE0E: es notación estándar de la disciplina, no decoración. ⚠️ Decisión a confirmar con Ariel antes de arrancar | ☉ ☽ ♃ |
+| **Emojis en encabezados de texto** (`service-intros.data.ts`: "🗂️ Los Arcanos Menores") | **Se quitan** del string; el icono va como `<BrandIcon>` al lado si hace falta | 🗂️ ♈ 🌗 🐉 🌳 |
+| Panel de admin | Fuera de alcance (solo lo ven administradores) | `ChineseHoroscopeAdminPanel.tsx`, `AIUsageAlerts.tsx` |
+
+#### 📦 Inventario de assets a generar
+
+Todos en **1024×1024 con fondo blanco puro**, post-procesados a **WebP con alfa, 512×512** (y
+128×128 para badges) en `public/images/icons/<familia>/<slug>.webp`. Nombres = slugs que ya usa
+el código (`aries`, `rat`, `fire`, `new_moon`…).
+
+| Familia | Cantidad | Slugs | Reemplaza |
+| --- | --- | --- | --- |
+| `zodiac/` | 12 | aries … pisces | `ZodiacSymbol` + `♈–♓` en `zodiac.ts`, `ArticleCard`, `GuidesSection`, `AstrologySection`, `service-intros` |
+| `chinese/` | 12 | rat, ox, tiger, rabbit, dragon, snake, horse, goat, monkey, rooster, dog, pig | `ChineseAnimalSymbol` + `emoji` en `chinese-zodiac.ts`, `app/horoscopo-chino/page.tsx` |
+| `elements/` | 5 (+5 chinos) | fire, water, air, earth, spirit · wood, fire-cn, earth-cn, metal, water-cn | `SUIT_INFO`/`ELEMENT_INFO` en `encyclopedia.types.ts`, `ElementSelectorModal`, `chinese-zodiac.ts` (🔴🔵🟢🟤⚪) |
+| `suits/` | 4 | wands, cups, swords, pentacles | `SUIT_INFO.symbol` (🔥💧💨🌿) |
+| `areas/` | 4 | love, work, wellbeing, money | `HoroscopeWidget`, `ChineseHoroscopeWidget`, `ChineseHoroscopeDetail` (❤️ 💼 ✨ 💰) |
+| `moon/` | 8 | new_moon … waning_crescent | `LUNAR_PHASE_INFO` en `ritual.types.ts` |
+| `rituals/` | 8 | tarot, lunar, energy, meditation, protection, abundance, love, wellbeing | `RITUAL_CATEGORY_INFO` en `ritual.types.ts` |
+| `numerology/` | 12 | 1–9, 11, 22, 33 | `NUMEROLOGY_NUMBERS_INFO.emoji` en `numerology.ts`, `NumberCard`, `NumberGallery`, `NumerologyWidget` |
+| `hubs/` | 9 | tarot, horoscope, chinese, numerology, pendulum, birth-chart, rituals, planets, houses | `ArticleCard`, `GuidesSection`, `AstrologySection`, `EncyclopediaHome`, `sacred-calendar.types.ts` |
+| **Total** | **~79** | | |
+
+#### ✅ Tareas específicas
+
+**Fase 0 — Assets (Ariel + Nano Banana):**
+
+- [ ] Generar los ~79 assets con los prompts de abajo. Generar **de a familia completa en una
+      misma sesión/chat** (los 12 signos seguidos, los 12 animales seguidos…) para que el modelo
+      mantenga el trazo; si un asset se desvía, regenerar pasando uno bueno como referencia.
+- [ ] Post-proceso (script `frontend/scripts/process-brand-icons.mjs` con `sharp`): quitar el
+      fondo blanco → alfa, recortar al contenido con margen 8 %, exportar 512 y 128 en WebP.
+- [ ] Revisar los 79 en una hoja de contacto (`scripts/` genera `icons-contact-sheet.html`) y
+      descartar los que no lean bien a 32 px.
+
+**Fase 1 — Componente y registro:**
+
+- [ ] `lib/constants/brand-icons.ts`: registro tipado `BRAND_ICONS[familia][slug] = { src, alt }`
+      con `alt` en español. Un test verifica que cada entrada tiene su archivo en `public/`.
+- [ ] `components/ui/brand-icon.tsx`: `<BrandIcon family="zodiac" name="aries" size="sm|md|lg" />`
+      sobre `next/image`, `role="img"`, `aria-label` desde el registro, `decorative` para ocultar.
+      Misma API de tamaño que hoy (`text-4xl` → `size="lg"`).
+
+**Fase 2 — Migración por dominio** (un PR por familia o por dos familias; grep sobre TODO
+`src/`, incluido `src/app/`, no solo `components/features/`):
+
+- [ ] Signos occidentales: `ZodiacSymbol` pasa a envolver `<BrandIcon family="zodiac">` (misma
+      firma, así los 20+ consumidores no cambian), y se borra `TEXT_PRESENTATION_SELECTOR`.
+- [ ] Animales chinos: `ChineseAnimalSymbol` pasa a envolver `<BrandIcon family="chinese">`; se
+      borra `ANIMAL_GLYPHS`. Incluye `app/horoscopo-chino/page.tsx:46`.
+- [ ] Elementos y palos (`encyclopedia.types.ts`, `chinese-zodiac.ts`, `ElementSelectorModal`).
+- [ ] Áreas del horóscopo (`HoroscopeWidget`, `ChineseHoroscopeWidget`, `ChineseHoroscopeDetail`).
+- [ ] Fases lunares y categorías de rituales (`ritual.types.ts` + consumidores).
+- [ ] Numerología (`numerology.ts`, `NumberCard`, `NumberGallery`, `NumerologyWidget`,
+      `NumerologyProfile`, `NumerologyPage`).
+- [ ] Hubs y guías (`ArticleCard`, `GuidesSection`, `AstrologySection`, `EncyclopediaHome`,
+      `GuiasContent`, `MarkdownArticle` ✦, `service-intros.data.ts`, `sacred-calendar.types.ts`).
+- [ ] UI genérica → `lucide-react`: `notification.types.ts` (🔔🎁⚙️🔎 → `Bell`, `Gift`,
+      `Settings`, `Search`…), ✓ en `*LimitReached`, `SubscriptionTab`, `BirthChartPageContent`,
+      `TarotistaProfilePage` (→ `Check`), 💡 (→ `Lightbulb`), 🎉 (→ `PartyPopper`), ⭐ Maestro
+      (→ `Star`), ★ (→ `Star`), 💎 (→ `Gem`), ✨ (→ `Sparkles`).
+
+**Fase 3 — Guardarraíl:**
+
+- [ ] `src/no-emoji-user-facing.test.ts` (mismo patrón que `no-ia-user-facing.test.ts`): falla si
+      aparece un carácter de los bloques emoji / Misc Symbols en `src/` fuera de comentarios,
+      tests y `admin/`. Allowlist mínima y justificada (p. ej. `birth-chart.enums.ts` si se
+      confirma que la notación astrológica se queda).
+- [ ] `DESIGN_HAND-OFF.md`: sección "Iconografía" con la regla de decisión de arriba.
+
+#### 🎨 Prompts para Gemini (Nano Banana)
+
+En inglés a propósito: el modelo sigue mejor la especificación de estilo. Usar siempre el
+**prompt base** y, debajo, el bloque del asset. Pedir **una imagen por prompt** (no grillas).
+
+**Prompt base (pegar completo antes de cada asset):**
+
+```
+Icon for a premium tarot & astrology web app. STYLE: elegant mystical line-art drawn in fine
+metallic gold (#D69E2E) strokes with a soft warm glow, delicate ornamental filigree details,
+a few tiny 4-point sparkles and faint star dust around the subject. Single centered subject,
+symmetrical, balanced composition with generous margins (subject fills ~70% of the canvas).
+Clean, crisp, readable when scaled down to 48 px: no tiny clutter, no more than 3 levels of
+detail. BACKGROUND: pure flat white (#FFFFFF), completely empty — no gradient, no vignette,
+no frame, no circle, no shadow, no texture. NO text, NO letters, NO numbers, NO watermark.
+Square 1:1, 1024×1024, high resolution, sharp edges. Consistent with the other icons of the
+same set: same stroke weight, same glow, same level of detail.
+
+SUBJECT:
+```
+
+**Variante "ilustración"** (solo si más adelante se quieren heros por signo, no para iconos):
+reemplazar la línea de BACKGROUND por
+`BACKGROUND: deep violet-indigo cosmic night sky (#2D1B69 to #1A0A2E) with faint constellation lines, a thin crescent moon and golden bokeh particles, like a painted mystical illustration.`
+
+**Signos occidentales (`zodiac/`)** — glifo + motivo del signo integrado, para que lea a 32 px:
+
+| Slug | SUBJECT |
+| --- | --- |
+| aries | The astrological glyph of Aries (♈) whose two curves end in stylized curling ram horns; a small spark at the base. |
+| taurus | The glyph of Taurus (♉): a circle with crescent horns on top, the circle drawn as a delicate ring with a tiny star inside. |
+| gemini | The glyph of Gemini (♊): two vertical pillars joined by arcs, with a faint mirrored twin flourish; subtle symmetry. |
+| cancer | The glyph of Cancer (♋): two mirrored spirals with claw-like ends, drawn like a moon-tide swirl. |
+| leo | The glyph of Leo (♌): a flowing loop ending in a mane-like curl, with a small sun ray burst at the top. |
+| virgo | The glyph of Virgo (♍): three vertical strokes ending in an inward loop, with a small wheat spike woven in. |
+| libra | The glyph of Libra (♎): a horizontal line under a raised arc, drawn like a balanced scale beam with a tiny plumb sparkle. |
+| scorpio | The glyph of Scorpio (♏): three strokes ending in an upward arrow-tail, like a scorpion sting, with a small star at the tip. |
+| sagittarius | The glyph of Sagittarius (♐): a diagonal arrow crossed near the tail, feathered fletching, with a comet-like sparkle trail. |
+| capricorn | The glyph of Capricorn (♑): the sea-goat curve with a horn stroke and a fish-tail loop, elegant and ornamental. |
+| aquarius | The glyph of Aquarius (♒): two parallel wavy lines like flowing water, with three tiny droplets of light above. |
+| pisces | The glyph of Pisces (♓): two opposing arcs joined by a bar, the arcs ending in fish-tail flourishes. |
+
+**Animales chinos (`chinese/`)** — animal completo de perfil, mismo trazo que los de
+`horoscopo-chino-animales.webp`:
+
+| Slug | SUBJECT |
+| --- | --- |
+| rat | A rat in elegant side profile, long tail curling into a flourish, alert ears, sitting upright. |
+| ox | An ox in side profile, sturdy body, curved horns, calm posture, one hoof slightly forward. |
+| tiger | A tiger in side profile, mid-stride, stripes suggested with a few strokes, tail raised in a curve. |
+| rabbit | A rabbit sitting in side profile, long upright ears, soft rounded body, tiny tail. |
+| dragon | A Chinese dragon in an S-shaped serpentine pose, flowing whiskers and mane, small clawed feet, a pearl of light near its mouth. |
+| snake | A snake coiled in a graceful figure-eight, head raised, subtle scale pattern, tongue as a tiny spark. |
+| horse | A horse in side profile, mid-gallop, flowing mane and tail. |
+| goat | A goat in side profile, curved ridged horns, small beard, standing on a tiny rock. |
+| monkey | A monkey sitting in side profile, long curling tail, one hand raised. |
+| rooster | A rooster in side profile, proud chest, ornate tail feathers, crest and wattle. |
+| dog | A dog sitting in side profile, alert ears, tail curled upward, loyal posture. |
+| pig | A pig in side profile, round body, curly tail, small ears, gentle expression. |
+
+**Elementos y palos (`elements/`, `suits/`):**
+
+| Slug | SUBJECT |
+| --- | --- |
+| fire | A single upright flame with three tongues, inner flame suggested by a thinner stroke. |
+| water | A single droplet with two concentric ripples beneath it. |
+| air | Three flowing horizontal wind curls of increasing length, like a breeze. |
+| earth | A mountain silhouette with a small sprout growing from its base. |
+| spirit | A five-petal lotus with a small spark of light at its center. |
+| wood | A young tree with a straight trunk and a symmetrical round canopy of a few leaves. |
+| fire-cn | Same flame as `fire` but with a small red-gold ember base (keep gold line-art). |
+| earth-cn | A layered hill with a small square field pattern (the Chinese earth character motif, no text). |
+| metal | A ring/coin shape with a square hole in the center (Chinese coin), no characters. |
+| water-cn | A wave with a curling crest, no droplet. |
+| wands | A single upright wooden wand with small leaves sprouting from its top. |
+| cups | A chalice seen from the front, with a small rising drop of light above it. |
+| swords | A single upright sword, blade pointing up, simple crossguard, thin glow along the blade. |
+| pentacles | A coin with a five-pointed star (pentacle) inscribed inside a circle. |
+
+**Áreas del horóscopo (`areas/`):**
+
+| Slug | SUBJECT |
+| --- | --- |
+| love | Two overlapping hearts drawn as a single continuous filigree line. |
+| work | A laurel branch curved around a small rising star (achievement), no briefcase. |
+| wellbeing | A lotus flower with a small sun rising behind it. |
+| money | Three stacked coins with a small four-point sparkle, no currency symbols. |
+
+**Fases lunares (`moon/`)** — mismo círculo de referencia en las 8, solo cambia la parte iluminada:
+
+| Slug | SUBJECT |
+| --- | --- |
+| new_moon | A moon disc outlined in gold, fully dark inside (thin outline only), with a faint halo. |
+| waxing_crescent | A moon disc with a thin crescent lit on the RIGHT side, the rest as thin outline. |
+| first_quarter | A moon disc with the RIGHT half lit. |
+| waxing_gibbous | A moon disc with about three quarters lit on the RIGHT, a thin dark sliver on the left. |
+| full_moon | A full moon disc softly lit with subtle crater texture and a glow halo. |
+| waning_gibbous | A moon disc with about three quarters lit on the LEFT, a thin dark sliver on the right. |
+| last_quarter | A moon disc with the LEFT half lit. |
+| waning_crescent | A moon disc with a thin crescent lit on the LEFT side. |
+
+**Categorías de rituales (`rituals/`):**
+
+| Slug | SUBJECT |
+| --- | --- |
+| tarot | A single tarot card seen from the front with an ornamental back pattern and a small star. |
+| lunar | A crescent moon cradling a small star. |
+| energy | A candle flame with radiating light lines. |
+| meditation | A seated figure in lotus pose, minimal line, a small halo above the head. |
+| protection | A shield with a small star in the center and a laurel outline. |
+| abundance | A cornucopia or a bowl overflowing with small stars (choose the clearest). |
+| love | A single heart wrapped by a thin ribbon flourish. |
+| wellbeing | A sprig with three leaves inside a soft circle of light. |
+
+**Numerología (`numerology/`)** — arquetipos, sin el número dibujado:
+
+| Slug | SUBJECT |
+| --- | --- |
+| 1 | An ornate crown (leader). |
+| 2 | Two hands meeting, clasped gently (diplomat). |
+| 3 | A painter's palette with three small stars instead of paint dots (creative). |
+| 4 | A stone arch with a keystone (builder). |
+| 5 | A compass rose with a small comet (adventurer). |
+| 6 | A heart sheltered under a small roof line (protector). |
+| 7 | A crystal ball on a small stand with a star inside (seeker). |
+| 8 | A faceted gem (achiever). |
+| 9 | A dove in flight carrying a small branch (humanitarian). |
+| 11 | An open eye with a star as the pupil (visionary). |
+| 22 | A stepped temple/pyramid outline with a star above (master builder). |
+| 33 | Two open hands releasing a small star upward (compassionate master). |
+
+**Hubs y guías (`hubs/`):**
+
+| Slug | SUBJECT |
+| --- | --- |
+| tarot | Three fanned tarot cards with ornamental backs. |
+| horoscope | A zodiac wheel: a ring with twelve small tick marks and a star at the center. |
+| chinese | A Chinese lantern with a small tassel and a star glow. |
+| numerology | A sacred-geometry circle with a triangle inside and small nodes at the vertices (no digits). |
+| pendulum | A pendulum: a chain ending in a faceted crystal point, slight swing arc. |
+| birth-chart | A natal chart wheel: a ring with inner spokes and small planet dots on the rim. |
+| rituals | A candle with a crescent moon behind it. |
+| planets | A ringed planet with two small orbiting stars. |
+| houses | A twelve-segment wheel with one segment highlighted, like an astrological houses chart. |
+
+#### 🧪 Criterios de aceptación
+
+- [ ] Cero emojis en texto de cara al usuario fuera de `admin/` (guardarraíl en verde).
+- [ ] Los 24 signos (12 + 12) se ven idénticos en Linux/Windows/macOS/iOS/Android: son
+      imágenes, no glifos de fuente.
+- [ ] `ZodiacSymbol` y `ChineseAnimalSymbol` conservan su firma pública; sus consumidores no
+      cambian de props.
+- [ ] Cada asset tiene `alt` en español y `role="img"`; los decorativos, `aria-hidden`.
+- [ ] Lighthouse: sin regresión de LCP en `/horoscopo` y `/horoscopo-chino` (assets 512 WebP
+      < 15 KB cada uno, `sizes` correcto, `priority` solo above-the-fold).
+- [ ] Ciclo de calidad completo por PR.
+
+#### 📁 Archivos involucrados
+
+Nuevos: `public/images/icons/**`, `lib/constants/brand-icons.ts`, `components/ui/brand-icon.tsx`,
+`scripts/process-brand-icons.mjs`, `src/no-emoji-user-facing.test.ts`.
+Modificados: los 41 archivos del inventario (lista exacta con
+`python3` + regex de bloques emoji sobre `src/` sin tests, ver descripción).
+
+---
+
 ## ORDEN DE IMPLEMENTACIÓN RECOMENDADO
 
 ```

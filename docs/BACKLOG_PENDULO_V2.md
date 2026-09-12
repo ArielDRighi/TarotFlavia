@@ -1,7 +1,7 @@
 # BACKLOG AUGURIA 2.0 - PÉNDULO DIGITAL V2
 
 **Fecha de creación:** 18 de enero de 2026
-**Última actualización:** 4 de febrero de 2026
+**Última actualización:** 12 de septiembre de 2026
 **Módulo:** Péndulo Digital
 **Prioridad Global:** MEDIA
 **Estimación Total:** 4-5 días
@@ -3541,6 +3541,77 @@ Agregar tests que verifiquen:
 1. Implementar endpoint admin para reset de límites durante desarrollo/testing
 2. Agregar logging más detallado en guards y servicios
 3. Considerar crear tests de integración E2E automatizados para estos flujos
+
+---
+
+## 10. BUG REPORTADO EN LOCAL (12 de septiembre de 2026)
+
+#### TASK-515: El anónimo puede volver a "consultar" tras agotar su consulta gratuita y no recibe ninguna respuesta
+
+**Estado:** ⬜ PENDIENTE
+**Prioridad:** 🔴 ALTA
+**Estimación:** 0.5 días
+**Tipo:** Frontend (bug)
+**Reportado por:** Ariel, probando `/pendulo` sin iniciar sesión en local
+
+##### Síntoma
+
+La primera consulta anónima funciona. Al tocar "Nueva consulta", el banner sigue diciendo
+"Tienes **1 consulta gratuita** disponible", el botón queda habilitado y, al consultar, el
+péndulo oscila y vuelve a reposo **sin respuesta ni mensaje**. Parece que "no funciona"; en
+realidad el backend está rechazando la consulta y el frontend no lo muestra.
+
+##### Límites vigentes (por diseño, no cambiar)
+
+`PendulumController.query` (`pendulum.controller.ts:62-64`) con `CheckUsageLimitGuard`:
+
+| Usuario | Límite | Período | Respuesta al agotar |
+| --- | --- | --- | --- |
+| Anónimo | 1 consulta | de por vida (fingerprint) | `403 "Ya has usado tu consulta gratuita del Péndulo…"` |
+| Free | 3 consultas | mensual | `429` |
+| Premium | 1 consulta | diaria | `429` |
+
+##### Causa raíz (dos, combinadas)
+
+1. **Fingerprints desencontrados.** `GET /users/capabilities` manda el fingerprint de sesión
+   del navegador (`useUserCapabilities.ts:93-99`, `getSessionFingerprint()`), pero
+   `POST /pendulum/query` **no lo manda** (`lib/api/pendulum-api.ts:15-21`). El guard entonces
+   registra el consumo bajo el fingerprint de fallback IP + User-Agent
+   (`check-usage-limit.guard.ts:321-337`), y al refrescar capabilities se busca por el de sesión
+   → no encuentra uso → `canUse: true`, banner "1 consulta disponible", botón habilitado.
+   TASK-511 arregló el guard pero el frontend nunca empezó a mandar el fingerprint en la
+   consulta (la carta del día sí lo hace: `daily-reading-api.ts`).
+2. **El error se traga en silencio.** El `catch` de `PendulumConsultation.tsx:88-98` solo trata
+   `BLOCKED_CONTENT`; cualquier otro error (403 anónimo, 429 Free/Premium) vuelve el péndulo a
+   `idle` sin toast ni banner. Un registrado con cupo agotado sufre lo mismo si el 429 llega
+   antes del refetch de capabilities.
+
+##### Alcance
+
+- [ ] `queryPendulum` envía `fingerprint` en el body (`getSessionFingerprint()`), igual que la
+      carta del día. Ampliar `PendulumQueryRequest` en `types/pendulum.types.ts`. El backend ya lo
+      lee del body (`check-usage-limit.guard.ts:331`); verificar que `PendulumQueryDto` no lo
+      rechace por `whitelist`/`forbidNonWhitelisted` (si lo rechaza, agregar el campo opcional al
+      DTO con test).
+- [ ] En `PendulumConsultation`, en el `catch`: para 403/429 mostrar `toast.error` con el
+      `message` del backend (fallback en español si no viene) e invalidar capabilities
+      (`invalidateUserData`) para que el banner "Ya usaste tu consulta gratuita" y el botón
+      deshabilitado aparezcan al instante. Para cualquier otro error, toast genérico.
+- [ ] `usePendulumQuery`: `onError` también invalida capabilities (hoy solo `onSuccess`).
+- [ ] No tocar límites, guard ni `AnonymousTrackingService`.
+
+##### Criterios de aceptación
+
+- [ ] Anónimo: tras la primera consulta, el banner pasa a "Ya usaste tu consulta gratuita" con
+      CTA "Registrarse" y el botón queda deshabilitado, sin recargar la página.
+- [ ] Si igual llega un 403/429 (pestaña vieja, cupo agotado en otra pestaña), se muestra el
+      mensaje del backend en un toast y el péndulo vuelve a reposo.
+- [ ] Free con 3 consultas usadas y Premium con 1 usada: mismo comportamiento con su mensaje.
+- [ ] `BLOCKED_CONTENT` sigue abriendo `PendulumBlockedContent` como hoy.
+- [ ] Tests: `pendulum-api.test.ts` (envía fingerprint), `PendulumConsultation.test.tsx`
+      (403 → toast + invalidación; 429 → toast; BLOCKED_CONTENT intacto),
+      `usePendulum.test.ts` (`onError` invalida).
+- [ ] Verificación manual en local sin sesión: dos consultas seguidas.
 
 ---
 
