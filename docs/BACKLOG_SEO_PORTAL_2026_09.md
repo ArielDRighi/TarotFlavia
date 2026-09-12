@@ -941,6 +941,14 @@ permitida es "¿Sí o no?", coordenadas dentro de la lámina, y `getMajorArcanaE
 → `undefined`. Verificado en el build: `the-fool.html` sirve los `h2` nuevos en su orden y 5
 marcadores; `wheel-of-fortune.html` sin "¿Sí o no?"; `five-of-swords.html` idéntico al de antes.
 
+**Revisión local (aplicada en commit aparte).** Ocho correcciones de contenido —dos errores de
+hecho sobre la lámina (las llaves del Hierofante son las dos doradas; la Estrella apoya la rodilla
+izquierda y el pie derecho), una contradicción entre el Loco y el Mundo, una errata y voz narrativa
+unificada en impersonal (el sitio no firma con persona)— y una estructural: las claves de sección y
+`DEFAULT_CARD_SECTION_ORDER` pasaron a `card-content-sections.data.ts`, así `CardDetailView` toma
+de `major-arcana-extras.data.ts` **solo tipos** y la exclusión del bundle es por construcción, no
+por tree-shaking (verificado: ninguna cadena de las fichas en `.next/static/chunks`).
+
 ---
 
 ## T-SEO-021: Péndulo — el Cristal no Contrasta con el Fondo

@@ -46,17 +46,25 @@
  *   la lámina (300×527). Se midieron sobre las imágenes de `public/images/tarot/`.
  */
 
-import { CARD_TEXT_SECTIONS } from '@/lib/constants/card-content-sections.data';
-import type { CardTextSectionKey } from '@/lib/constants/card-content-sections.data';
+import type { CardSectionKey } from '@/lib/constants/card-content-sections.data';
 import { countWords } from '@/lib/utils/text';
 
+/**
+ * Las claves de sección y el orden base viven en `card-content-sections.data.ts`
+ * y se re-exportan acá por comodidad. `CardDetailView` las importa de allá y de
+ * este módulo solo toma tipos: así el contenido de las 22 fichas no puede
+ * entrar al bundle del cliente por construcción, sin depender del tree-shaking.
+ */
+export {
+  DEFAULT_CARD_SECTION_ORDER,
+  MAJOR_ARCANA_EXTRA_SECTION_KEYS,
+} from '@/lib/constants/card-content-sections.data';
+export type {
+  CardSectionKey,
+  MajorArcanaExtraSectionKey,
+} from '@/lib/constants/card-content-sections.data';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-/** Las tres secciones que solo tienen los Arcanos Mayores. */
-export type MajorArcanaExtraSectionKey = 'reversed' | 'readingCase' | 'iconography';
-
-/** Cualquier sección que pueda aparecer en el cuerpo de una ficha. */
-export type CardSectionKey = CardTextSectionKey | MajorArcanaExtraSectionKey;
 
 /** Un símbolo concreto de la lámina, ubicado sobre la imagen. */
 export interface CardSymbolMarker {
@@ -147,18 +155,6 @@ export const MAJOR_ARCANA_SLUGS = [
 
 export type MajorArcanaSlug = (typeof MAJOR_ARCANA_SLUGS)[number];
 
-/** Claves de las tres secciones nuevas, para iterar y validar. */
-export const MAJOR_ARCANA_EXTRA_SECTION_KEYS: readonly MajorArcanaExtraSectionKey[] = [
-  'reversed',
-  'readingCase',
-  'iconography',
-];
-
-/** Orden base de las secciones de texto: el de los Arcanos Menores. */
-export const DEFAULT_CARD_SECTION_ORDER: readonly CardSectionKey[] = CARD_TEXT_SECTIONS.map(
-  (section) => section.key
-);
-
 /**
  * Mínimo de palabras propias que cada carta tiene que sumar con las tres
  * secciones nuevas. Es el criterio de "romper la plantilla": si el extra fuera
@@ -199,7 +195,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
     iconography: {
       heading: 'La lámina del Loco: qué mirar',
       intro:
-        'Pamela Colman Smith dibujó al Loco de espaldas al sol y con la cara vuelta al cielo: no ve el borde y tampoco ve la luz que lo alumbra. Es la única lámina de los mayores donde la figura está en pleno movimiento y nada la sostiene. Casi todos los detalles que siguen se repiten más adelante en el mazo.',
+        'Pamela Colman Smith dibujó al Loco de espaldas al sol y con la cara vuelta al cielo: no ve el borde y tampoco ve la luz que lo alumbra. Es la única lámina de los mayores donde la figura está a punto de perder el apoyo. Casi todos los detalles que siguen se repiten más adelante en el mazo.',
       symbols: [
         {
           label: 'La pluma roja',
@@ -268,7 +264,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
       orientation: 'upright',
       reading: [
         'El camino A trajo el Diez de Oros y el B, el Mago derecho. La lectura no fue "elegí el B": el Diez de Oros es una carta excelente y describe algo real, la seguridad de una estructura armada. Lo que hizo el Mago fue mostrar el tipo de energía que pedía el estudio propio: no dinero ni contactos, sino la capacidad de poner en marcha con lo que ya estaba sobre la mesa.',
-        'La carta de consejo, el Ocho de Bastos, apuró la lectura: si iba a hacerlo, era ahora y no dentro de dos años. Se le señaló que en la lámina el Mago no tiene nada que no haya traído; le preguntamos qué cuatro recursos concretos tenía hoy. Los nombró sin dudar, y esa fue la respuesta que se llevó.',
+        'La carta de consejo, el Ocho de Bastos, apuró la lectura: si iba a hacerlo, era ahora y no dentro de dos años. Se le señaló que en la lámina el Mago no tiene nada que no haya traído; se le preguntó qué cuatro recursos concretos tenía hoy. Los nombró sin dudar, y esa fue la respuesta que se llevó.',
       ],
     },
     iconography: {
@@ -368,7 +364,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
         {
           label: 'Las columnas B y J',
           meaning:
-            'Boaz negra a la izquierda y Jachin blanca a la derecha, con los colores invertidos respecto de la tradición: la carta cambia la polaridad.',
+            'Boaz negra a la izquierda y Jachin blanca a la derecha: la carta se sienta exactamente entre las dos polaridades.',
           x: 9,
           y: 44,
         },
@@ -607,7 +603,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
         {
           label: 'Las llaves cruzadas',
           meaning:
-            'Una de oro y otra de plata, en el suelo entre los discípulos. El acceso está ahí, a la vista, pero hay que agacharse.',
+            'Dos llaves doradas, cruzadas en el suelo entre los discípulos. El acceso está ahí, a la vista, pero hay que agacharse.',
           x: 50,
           y: 90,
         },
@@ -724,7 +720,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
     iconography: {
       heading: 'Símbolos del Carro, lámina VII',
       intro:
-        'La lámina está armada en tres franjas: la ciudad atrás, el guerrero al centro, las esfinges adelante, y las tres son de piedra. Smith dibujó al auriga sin riendas y sin asiento visible, de pie dentro de un cubo. Lo que se mueve en esta carta es lo que menos parece capaz de moverse.',
+        'La lámina está armada en tres franjas: la ciudad atrás, el guerrero al centro, las esfinges adelante, y dos de las tres son de piedra: lo único vivo es el que no tiene riendas. Smith dibujó al auriga sin riendas y sin asiento visible, de pie dentro de un cubo. Lo que se mueve en esta carta es lo que menos parece capaz de moverse.',
       symbols: [
         {
           label: 'La estrella de la corona',
@@ -929,7 +925,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
       orientation: 'upright',
       reading: [
         'La Rueda derecha en el presente, entre el Diez de Oros invertido y el Paje de Bastos, contó una historia clara: una estructura que se desarmó, un giro que ya está ocurriendo y, adelante, alguien joven con un basto que brota. La lectura no decidió por el consultante si repetir o cambiar; lo que hizo fue ubicarlo en la rueda: no estaba abajo, estaba en el punto exacto en que el giro ya empezó y todavía no se ve adónde lleva.',
-        'Se le señalaron las cuatro figuras de las esquinas, que leen libros mientras la rueda gira: lo estable en medio del cambio es lo que se sabe. Le preguntamos qué de los quince años no dependía del rubro, y armó una lista de cosas que se llevaba a cualquier lado. La Rueda derecha pedía moverse con el giro, no elegir el destino desde el vértigo; el Paje sugería que el destino apareciera haciendo, no planeando.',
+        'Se le señalaron las cuatro figuras de las esquinas, que leen libros mientras la rueda gira: lo estable en medio del cambio es lo que se sabe. Se le preguntó qué de los quince años no dependía del rubro, y armó una lista de cosas que se llevaba a cualquier lado. La Rueda derecha pedía moverse con el giro, no elegir el destino desde el vértigo; el Paje sugería que el destino apareciera haciendo, no planeando.',
       ],
     },
     iconography: {
@@ -956,7 +952,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
           meaning:
             'T-A-R-O alternadas con las cuatro letras hebreas del nombre divino. Leídas en círculo dicen TARO, ROTA, TORA y ORAT: la rueda se lee como se quiera.',
           x: 50,
-          y: 45,
+          y: 34,
         },
         {
           label: 'La serpiente que baja',
@@ -1003,7 +999,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
       orientation: 'upright',
       reading: [
         'La Justicia derecha en la posición del Resultado se leyó con cuidado, porque la tentación es prometer que "se hace justicia". No es lo que dice la carta: describe un cierre en el que las dos partes se pesan con la misma balanza, y ese cierre depende de que las dos se sienten a pesar. El presente era el Dos de Oros —malabares para sostener dos cosas— y lo que cruzaba, el Cinco de Copas: las tres copas volcadas del duelo por la sociedad que fue.',
-        'Se le señaló la simetría de la lámina: espada arriba en una mano, balanza en la otra, y ninguna inclinada. La consultante estaba llegando a la negociación con la espada sola. Lo que trabajamos fue armar la balanza: una lista de lo que cada una había puesto, incluida la parte que no era dinero. No se prometió un reparto favorable; se propuso una forma de llegar a la mesa que hiciera posible el Resultado que la carta describía.',
+        'Se le señaló la simetría de la lámina: espada arriba en una mano, balanza en la otra, y ninguna inclinada. La consultante estaba llegando a la negociación con la espada sola. Lo que se trabajó fue armar la balanza: una lista de lo que cada una había puesto, incluida la parte que no era dinero. No se prometió un reparto favorable; se propuso una forma de llegar a la mesa que hiciera posible el Resultado que la carta describía.',
       ],
     },
     iconography: {
@@ -1070,7 +1066,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
       orientation: 'upright',
       reading: [
         'El Colgado derecho en la situación describía la espera con exactitud y sin juicio: colgado de un solo pie, atado por decisión propia, con la cabeza rodeada de luz. La lectura empezó por ahí: la consultante había elegido esa suspensión y no era una víctima de la editorial. El obstáculo, el Cuatro de Oros, mostró lo que la espera protegía —no soltar el control sobre el libro— y el consejo, el Ocho de Bastos, dijo que el movimiento venía rápido cuando viniera.',
-        'Se leyó la posición del Colgado como un tiempo con sentido, no como un castigo, pero se le señaló la viga: es madera viva, con hojas, y sigue creciendo mientras él cuelga. Le preguntamos qué había crecido en esos ocho meses. Había escrito otra cosa. Esa era la iluminación de la carta; la respuesta sobre la editorial se resolvía sola en cuanto dejaba de ser la única rama.',
+        'Se leyó la posición del Colgado como un tiempo con sentido, no como un castigo, pero se le señaló la viga: es madera viva, con hojas, y sigue creciendo mientras él cuelga. Se le preguntó qué había crecido en esos ocho meses. Había escrito otra cosa. Esa era la iluminación de la carta; la respuesta sobre la editorial se resolvía sola en cuanto dejaba de ser la única rama.',
       ],
     },
     iconography: {
@@ -1137,7 +1133,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
       orientation: 'upright',
       reading: [
         'La Muerte derecha en el presente, entre el Diez de Copas y el Seis de Copas, armó una lectura sin sorpresas y por eso mismo útil. Atrás, la familia completa bajo el arcoíris; adelante, la nostalgia de la infancia; en el medio, el caballo blanco pasando por encima de lo que fue. El consultante venía a preguntar por qué le costaba, y la carta le dijo que lo que estaba cerrando no era una habitación sino la versión de la familia que vivía en ella.',
-        'Se le señaló la rosa blanca del estandarte, y las cuatro figuras que reciben al caballo de maneras distintas: el rey que cae, el obispo que reza, la mujer que gira la cara, el niño que ofrece flores. Le preguntamos cuál era él en el vaciado de la habitación. Dijo que la mujer. La tirada no le ahorró el duelo; le dio permiso de hacerlo como el niño, con algo en la mano para dar.',
+        'Se le señaló la rosa blanca del estandarte, y las cuatro figuras que reciben al caballo de maneras distintas: el rey que cae, el obispo que reza, la mujer que gira la cara, el niño que ofrece flores. Se le preguntó cuál era él en el vaciado de la habitación. Dijo que la mujer. La tirada no le ahorró el duelo; le dio permiso de hacerlo como el niño, con algo en la mano para dar.',
       ],
     },
     iconography: {
@@ -1281,13 +1277,13 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
     readingCase: {
       heading: 'El Diablo en una consulta sobre un trabajo que no se puede dejar',
       question:
-        'Odio mi trabajo, pago bien y hace tres años que digo que renuncio. ¿Qué me tiene atado?',
+        'Odio mi trabajo, paga bien y hace tres años que digo que renuncio. ¿Qué me tiene atado?',
       spread: 'Tirada de tres cartas (situación, obstáculo, consejo)',
       position: 'Obstáculo',
       orientation: 'upright',
       reading: [
         'La situación salió con el Ocho de Oros —el oficio que se hace bien, repetido— y el obstáculo con el Diablo derecho. La primera lectura era obvia y se descartó rápido: el dinero como cadena. Las cadenas de la lámina cuelgan flojas, y cuando se le preguntó al consultante cuánto necesitaba para vivir, la cifra era la mitad de lo que ganaba. El Diablo no era el sueldo; era la identidad que el sueldo le daba en su familia.',
-        'El consejo trajo la Estrella, y se leyó por contraste con el Diablo: donde uno tiene fondo negro y figuras encadenadas, la otra tiene cielo abierto y una figura desnuda que vierte agua sin miedo. La Estrella pedía la desnudez: contarle a la familia que iba a ganar menos. La consultante no renunció esa semana ni la siguiente; lo que se llevó fue que el aro se sacaba por la cabeza, no rompiendo la cadena.',
+        'El consejo trajo la Estrella, y se leyó por contraste con el Diablo: donde uno tiene fondo negro y figuras encadenadas, la otra tiene cielo abierto y una figura desnuda que vierte agua sin miedo. La Estrella pedía la desnudez: contarle a la familia que iba a ganar menos. El consultante no renunció esa semana ni la siguiente; lo que se llevó fue que el aro se sacaba por la cabeza, no rompiendo la cadena.',
       ],
     },
     iconography: {
@@ -1437,7 +1433,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
       orientation: 'upright',
       reading: [
         'La situación salió con la Torre —sin sorpresa para nadie— y el obstáculo con el Nueve de Bastos, la guardia levantada de quien ya recibió golpes. La Estrella derecha como consejo se leyó, sobre todo, contra el Nueve de Bastos: la figura de la lámina está desnuda y arrodillada junto al agua, sin ninguna defensa, y no le pasa nada. El consejo no era "tener esperanza" sino bajar la guardia lo suficiente como para poder arrodillarse.',
-        'Se le señalaron los dos cántaros y los cinco arroyos que salen del que se vierte en la tierra: lo que se da vuelve por más caminos de los que se ve. Le preguntamos qué había estado sosteniendo con la guardia alta y qué podía verter. Habló de una amistad que había descuidado durante la crisis. La Estrella no prometía el trabajo ni la relación siguientes; proponía un gesto pequeño, con las manos, que devolviera el agua a su lugar.',
+        'Se le señalaron los dos cántaros y los cinco arroyos que salen del que se vierte en la tierra: lo que se da vuelve por más caminos de los que se ve. Se le preguntó qué había estado sosteniendo con la guardia alta y qué podía verter. Habló de una amistad que había descuidado durante la crisis. La Estrella no prometía el trabajo ni la relación siguientes; proponía un gesto pequeño, con las manos, que devolviera el agua a su lugar.',
       ],
     },
     iconography: {
@@ -1476,7 +1472,7 @@ export const MAJOR_ARCANA_EXTRAS: Record<MajorArcanaSlug, MajorArcanaExtras> = {
         {
           label: 'La rodilla en tierra y el pie en el agua',
           meaning:
-            'Apoya la rodilla derecha sobre la hierba y el pie izquierdo sobre el agua, sin hundirse. La calma sostiene.',
+            'Apoya la rodilla izquierda sobre la hierba y el pie derecho sobre el agua, sin hundirse. La calma sostiene.',
           x: 48,
           y: 77,
         },

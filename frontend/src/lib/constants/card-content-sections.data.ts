@@ -65,6 +65,29 @@ export const CARD_TEXT_SECTIONS: readonly CardTextSection[] = [
   { key: 'yesNo', heading: '¿Sí o no?', testId: 'card-section-yes-no' },
 ];
 
+// ─── Orden de secciones (T-SEO-020) ──────────────────────────────────────────
+
+/** Las tres secciones que solo tienen los Arcanos Mayores (T-SEO-020). */
+export type MajorArcanaExtraSectionKey = 'reversed' | 'readingCase' | 'iconography';
+
+/** Cualquier sección que pueda aparecer en el cuerpo de una ficha. */
+export type CardSectionKey = CardTextSectionKey | MajorArcanaExtraSectionKey;
+
+/** Claves de las tres secciones de los mayores, para iterar y validar. */
+export const MAJOR_ARCANA_EXTRA_SECTION_KEYS: readonly MajorArcanaExtraSectionKey[] = [
+  'reversed',
+  'readingCase',
+  'iconography',
+];
+
+/**
+ * Orden base de las secciones de texto: el de los 56 Arcanos Menores. Los 22
+ * mayores traen el suyo en `major-arcana-extras.data.ts`.
+ */
+export const DEFAULT_CARD_SECTION_ORDER: readonly CardSectionKey[] = CARD_TEXT_SECTIONS.map(
+  (section) => section.key
+);
+
 /**
  * La séptima sección. Va aparte porque su cuerpo no es texto sino enlaces
  * internos a otras fichas: son los cross-links que el crawler recorre.

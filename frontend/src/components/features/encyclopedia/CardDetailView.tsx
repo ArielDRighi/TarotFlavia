@@ -1,8 +1,13 @@
 'use client';
 
-import { CARD_TEXT_SECTIONS } from '@/lib/constants/card-content-sections.data';
-import { DEFAULT_CARD_SECTION_ORDER } from '@/lib/constants/major-arcana-extras.data';
-import type { CardSectionKey, MajorArcanaExtras } from '@/lib/constants/major-arcana-extras.data';
+import {
+  CARD_TEXT_SECTIONS,
+  DEFAULT_CARD_SECTION_ORDER,
+} from '@/lib/constants/card-content-sections.data';
+import type { CardSectionKey } from '@/lib/constants/card-content-sections.data';
+// Solo tipos: el módulo con el contenido de las 22 fichas no debe entrar al
+// bundle del cliente (T-SEO-020). La ruta lo resuelve en el servidor.
+import type { MajorArcanaExtras } from '@/lib/constants/major-arcana-extras.data';
 import { splitParagraphs } from '@/lib/utils/text';
 import type { CardDetail } from '@/types/encyclopedia.types';
 
