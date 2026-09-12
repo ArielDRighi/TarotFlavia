@@ -284,6 +284,42 @@ export function getLocalDateString(base: Date = new Date()): string {
 }
 
 /**
+ * Zona horaria canónica del sitio (T-SEO-016).
+ *
+ * El horóscopo se genera a las 01:00 UTC (22:00 ART) para que esté listo antes
+ * de la medianoche argentina; el "día" que el servidor pone en el HTML es el de
+ * esta zona, no el UTC del proceso ni el local de cada visitante.
+ */
+export const CANONICAL_TIME_ZONE = 'America/Argentina/Buenos_Aires';
+
+/**
+ * Formatea un instante como 'YYYY-MM-DD' en la zona canónica del sitio.
+ *
+ * Complementa a `getLocalDateString` (día LOCAL del visitante, para el cliente):
+ * ésta es la que usa el servidor, donde "local" sería la zona del proceso — que
+ * en producción es UTC y cruzaría de día a las 21:00 de Argentina.
+ *
+ * `en-CA` es el único locale cuyo formato numérico por defecto es `YYYY-MM-DD`,
+ * y `formatToParts` evita depender del separador de todos modos.
+ *
+ * @param base - Instante a leer (por defecto, ahora)
+ * @returns Día calendario en Buenos Aires, ej. '2026-09-12'
+ */
+export function getCanonicalDateString(base: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: CANONICAL_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(base);
+
+  const read = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((part) => part.type === type)?.value ?? '';
+
+  return `${read('year')}-${read('month')}-${read('day')}`;
+}
+
+/**
  * Shifts a 'YYYY-MM-DD' calendar date by `days` (can be negative), staying in
  * the local calendar. Handles month/year rollovers via the Date arithmetic.
  *

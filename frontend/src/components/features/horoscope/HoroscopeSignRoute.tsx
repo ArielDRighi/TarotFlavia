@@ -5,10 +5,10 @@
  *
  * Sin `'use client'`: valida el segmento y sirve la ficha estática del signo en
  * el servidor, que es el contenido que ve el crawler (antes eran 31 palabras).
- * El horóscopo del día queda en `HoroscopeSignPanel`, que es cliente **a
- * propósito**: se resuelve contra el día calendario local del visitante
- * (T-PROD-020), así que renderizarlo en el servidor mostraría el día del
- * servidor.
+ * Desde T-SEO-016 también llega servido el horóscopo del día (`initialHoroscope`,
+ * resuelto por la página contra el día canónico del sitio); `HoroscopeSignPanel`
+ * lo pinta tal cual y sólo lo reemplaza en el cliente si el día local del
+ * visitante difiere (T-PROD-020).
  */
 
 import Link from 'next/link';
@@ -18,6 +18,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/lib/constants/routes';
 import { isZodiacSign } from '@/lib/utils/zodiac';
+import type { ServedDailyHoroscope } from '@/types/horoscope.types';
 
 import { HoroscopeSignPanel } from './HoroscopeSignPanel';
 import { ZodiacSignProfile } from './ZodiacSignProfile';
@@ -25,9 +26,11 @@ import { ZodiacSignProfile } from './ZodiacSignProfile';
 export interface HoroscopeSignRouteProps {
   /** Segmento `[sign]` de la URL, todavía sin validar. */
   sign: string;
+  /** Horóscopo del día resuelto en el servidor; ausente si la API falló. */
+  initialHoroscope?: ServedDailyHoroscope;
 }
 
-export function HoroscopeSignRoute({ sign }: HoroscopeSignRouteProps) {
+export function HoroscopeSignRoute({ sign, initialHoroscope }: HoroscopeSignRouteProps) {
   // `notFound()` y no una ficha de "signo no válido": esa página respondía 200 y
   // Google la indexaba como una URL válida y vacía (soft-404, T-SEO-006).
   if (!isZodiacSign(sign)) {
@@ -48,7 +51,7 @@ export function HoroscopeSignRoute({ sign }: HoroscopeSignRouteProps) {
           resto del contenido: es lo que el visitante viene a buscar, y dejarlo
           al final del artículo lo escondería debajo de 300 palabras. */}
       <ZodiacSignProfile sign={sign}>
-        <HoroscopeSignPanel sign={sign} />
+        <HoroscopeSignPanel sign={sign} initialHoroscope={initialHoroscope} />
       </ZodiacSignProfile>
     </div>
   );

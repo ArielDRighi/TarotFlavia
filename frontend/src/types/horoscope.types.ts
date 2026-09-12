@@ -59,6 +59,22 @@ export interface DailyHoroscope {
 }
 
 /**
+ * Horóscopo del día resuelto en el servidor (T-SEO-016).
+ *
+ * El servidor lo resuelve contra el día calendario canónico del sitio (Buenos
+ * Aires) para que la predicción viaje en el HTML. `canonicalDate` es ese día,
+ * no necesariamente `horoscope.horoscopeDate`: cuando el del día canónico
+ * todavía no fue generado se sirve el anterior con `isShowingPreviousDay`.
+ */
+export interface ServedDailyHoroscope {
+  /** Día calendario canónico ('YYYY-MM-DD') contra el que se resolvió. */
+  canonicalDate: string;
+  horoscope: DailyHoroscope;
+  /** `true` si el del día canónico no estaba y se sirvió el del día anterior. */
+  isShowingPreviousDay: boolean;
+}
+
+/**
  * Información completa de un signo zodiacal
  */
 export interface ZodiacSignInfo {

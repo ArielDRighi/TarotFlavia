@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import Page, { generateMetadata, generateStaticParams } from './page';
+import Page, { generateMetadata, generateStaticParams, revalidate } from './page';
 import { ZODIAC_SIGN_PROFILES } from '@/lib/constants/zodiac-sign-profiles.data';
 import { ZodiacSign } from '@/types/horoscope.types';
+import type { ServedDailyHoroscope } from '@/types/horoscope.types';
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -24,12 +25,42 @@ vi.mock('@/stores/authStore', () => ({
   useAuthStore: () => ({ user: null }),
 }));
 
-// El horóscopo del día es lo único que se mockea: depende de la API y del día
-// local del visitante. La ficha estática se renderiza de verdad, que es
-// justamente lo que mide el crawler.
-vi.mock('@/hooks/api/useHoroscope', () => ({
-  useLocalHoroscope: () => ({ data: null, isLoading: false, error: null }),
+// La ficha estática se renderiza de verdad, que es justamente lo que mide el
+// crawler. Lo que se mockea es la API: el horóscopo del día resuelto en el
+// servidor (T-SEO-016) y el hook cliente que lo reemplaza por el día local.
+const mockGetCanonicalHoroscopeForSign =
+  vi.fn<(sign: ZodiacSign) => Promise<ServedDailyHoroscope | undefined>>();
+
+vi.mock('@/lib/api/horoscope-server', () => ({
+  getCanonicalHoroscopeForSign: (sign: ZodiacSign) => mockGetCanonicalHoroscopeForSign(sign),
 }));
+
+vi.mock('@/hooks/api/useHoroscope', () => ({
+  useLocalHoroscope: () => ({ data: undefined, isLoading: false, error: null }),
+}));
+
+vi.mock('@/hooks/utils/useLocalToday', () => ({
+  useLocalToday: () => '2026-09-12',
+}));
+
+const SERVED_LIBRA: ServedDailyHoroscope = {
+  canonicalDate: '2026-09-12',
+  isShowingPreviousDay: false,
+  horoscope: {
+    id: 7,
+    zodiacSign: ZodiacSign.LIBRA,
+    horoscopeDate: '2026-09-12',
+    generalContent: 'Libra: hoy el equilibrio llega por donde menos lo esperás.',
+    areas: {
+      love: { content: 'Una charla pendiente encuentra su momento.', score: 8 },
+      wellness: { content: 'Bajá el ritmo a la tarde.', score: 6 },
+      money: { content: 'Revisá un gasto fijo.', score: 5 },
+    },
+    luckyNumber: 4,
+    luckyColor: 'Verde',
+    luckyTime: 'Tarde',
+  },
+};
 
 /** Renderiza el server component ya resuelto, con los providers de cliente. */
 async function renderPage(sign: string) {
@@ -89,7 +120,43 @@ describe('/horoscopo/[sign] — generateStaticParams', () => {
   });
 });
 
+describe('/horoscopo/[sign] — horóscopo del día en el HTML (T-SEO-016)', () => {
+  beforeEach(() => {
+    mockGetCanonicalHoroscopeForSign.mockReset();
+  });
+
+  it('revalida cada hora: el horóscopo cambia una vez por día y el cron puede atrasarse', () => {
+    expect(revalidate).toBe(3600);
+  });
+
+  it('resuelve la predicción del signo en el servidor y la pone en el HTML', async () => {
+    mockGetCanonicalHoroscopeForSign.mockResolvedValue(SERVED_LIBRA);
+
+    await renderPage(ZodiacSign.LIBRA);
+
+    expect(mockGetCanonicalHoroscopeForSign).toHaveBeenCalledWith(ZodiacSign.LIBRA);
+    expect(screen.getByTestId('horoscope-detail')).toBeInTheDocument();
+    expect(
+      screen.getByText('Libra: hoy el equilibrio llega por donde menos lo esperás.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('2026-09-12')).toBeInTheDocument();
+  });
+
+  it('sirve la ficha igual si la API no tiene horóscopo (el cliente reintenta)', async () => {
+    mockGetCanonicalHoroscopeForSign.mockResolvedValue(undefined);
+
+    await renderPage(ZodiacSign.LIBRA);
+
+    expect(screen.getByRole('heading', { level: 1, name: /Libra/ })).toBeInTheDocument();
+    expect(screen.queryByTestId('horoscope-detail')).not.toBeInTheDocument();
+  });
+});
+
 describe('/horoscopo/[sign] — contenido servido (T-SEO-004)', () => {
+  beforeEach(() => {
+    mockGetCanonicalHoroscopeForSign.mockResolvedValue(undefined);
+  });
+
   it('sirve la ficha del signo sin depender de la API del horóscopo', async () => {
     const profile = ZODIAC_SIGN_PROFILES[ZodiacSign.LIBRA];
     await renderPage(ZodiacSign.LIBRA);
