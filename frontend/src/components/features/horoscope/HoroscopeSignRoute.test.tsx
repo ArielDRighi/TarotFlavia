@@ -11,6 +11,7 @@ import { render, screen } from '@testing-library/react';
 
 import { HoroscopeSignRoute } from './HoroscopeSignRoute';
 import { ZodiacSign } from '@/types/horoscope.types';
+import type { ServedDailyHoroscope } from '@/types/horoscope.types';
 
 /** `notFound()` corta el render lanzando; el mock reproduce ese contrato. */
 const notFoundMock = vi.fn(() => {
@@ -22,10 +23,40 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('./HoroscopeSignPanel', () => ({
-  HoroscopeSignPanel: ({ sign }: { sign: ZodiacSign }) => (
-    <div data-testid="horoscope-sign-panel">{sign}</div>
+  HoroscopeSignPanel: ({
+    sign,
+    initialHoroscope,
+  }: {
+    sign: ZodiacSign;
+    initialHoroscope?: ServedDailyHoroscope;
+  }) => (
+    <div
+      data-testid="horoscope-sign-panel"
+      data-initial-date={initialHoroscope?.horoscope.horoscopeDate ?? ''}
+    >
+      {sign}
+    </div>
   ),
 }));
+
+const SERVED: ServedDailyHoroscope = {
+  canonicalDate: '2026-09-12',
+  isShowingPreviousDay: false,
+  horoscope: {
+    id: 1,
+    zodiacSign: ZodiacSign.TAURUS,
+    horoscopeDate: '2026-09-12',
+    generalContent: 'Predicción servida',
+    areas: {
+      love: { content: 'Amor', score: 7 },
+      wellness: { content: 'Bienestar', score: 6 },
+      money: { content: 'Dinero', score: 5 },
+    },
+    luckyNumber: null,
+    luckyColor: null,
+    luckyTime: null,
+  },
+};
 
 describe('HoroscopeSignRoute', () => {
   describe('signo válido', () => {
@@ -40,6 +71,21 @@ describe('HoroscopeSignRoute', () => {
       render(<HoroscopeSignRoute sign={ZodiacSign.TAURUS} />);
 
       expect(screen.getByTestId('horoscope-sign-panel')).toHaveTextContent(ZodiacSign.TAURUS);
+    });
+
+    it('⚠️ T-SEO-016: le pasa al panel el horóscopo resuelto en el servidor', () => {
+      render(<HoroscopeSignRoute sign={ZodiacSign.TAURUS} initialHoroscope={SERVED} />);
+
+      expect(screen.getByTestId('horoscope-sign-panel')).toHaveAttribute(
+        'data-initial-date',
+        '2026-09-12'
+      );
+    });
+
+    it('sigue funcionando sin horóscopo servido (API caída en el render)', () => {
+      render(<HoroscopeSignRoute sign={ZodiacSign.TAURUS} />);
+
+      expect(screen.getByTestId('horoscope-sign-panel')).toHaveAttribute('data-initial-date', '');
     });
 
     it('vuelve al hub con un enlace real, para que el crawler lo recorra', () => {

@@ -11,6 +11,7 @@ import {
   formatDateCompact,
   formatDateLocalized,
   getLocalDateString,
+  getCanonicalDateString,
   shiftDateString,
 } from './date';
 
@@ -318,6 +319,28 @@ describe('date utilities', () => {
 
     it('zero-pads month and day', () => {
       expect(getLocalDateString(new Date(2026, 0, 5))).toBe('2026-01-05');
+    });
+  });
+
+  describe('getCanonicalDateString (T-SEO-016)', () => {
+    // La zona canónica del sitio es Buenos Aires (UTC-3, sin horario de
+    // verano): el cron genera el horóscopo pensando en ese día calendario.
+    it('devuelve el día calendario de Buenos Aires, no el UTC', () => {
+      // 01:30 UTC del 12 → todavía 22:30 del 11 en Argentina.
+      expect(getCanonicalDateString(new Date('2026-09-12T01:30:00.000Z'))).toBe('2026-09-11');
+    });
+
+    it('cruza a la fecha nueva a las 03:00 UTC (medianoche argentina)', () => {
+      expect(getCanonicalDateString(new Date('2026-09-12T03:00:00.000Z'))).toBe('2026-09-12');
+      expect(getCanonicalDateString(new Date('2026-09-12T02:59:59.000Z'))).toBe('2026-09-11');
+    });
+
+    it('rellena mes y día con cero', () => {
+      expect(getCanonicalDateString(new Date('2026-01-05T12:00:00.000Z'))).toBe('2026-01-05');
+    });
+
+    it('cruza año y mes según el calendario argentino', () => {
+      expect(getCanonicalDateString(new Date('2027-01-01T01:00:00.000Z'))).toBe('2026-12-31');
     });
   });
 

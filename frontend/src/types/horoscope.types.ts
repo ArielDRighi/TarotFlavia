@@ -59,6 +59,42 @@ export interface DailyHoroscope {
 }
 
 /**
+ * Horóscopo del día resuelto en el servidor (T-SEO-016).
+ *
+ * El servidor lo resuelve contra el día calendario canónico del sitio (Buenos
+ * Aires) para que la predicción viaje en el HTML. `canonicalDate` es ese día,
+ * no necesariamente `horoscope.horoscopeDate`: cuando el del día canónico
+ * todavía no fue generado se sirve el anterior con `isShowingPreviousDay`.
+ */
+export interface ServedDailyHoroscope {
+  /** Día calendario canónico ('YYYY-MM-DD') contra el que se resolvió. */
+  canonicalDate: string;
+  horoscope: DailyHoroscope;
+  /** `true` si el del día canónico no estaba y se sirvió el del día anterior. */
+  isShowingPreviousDay: boolean;
+}
+
+/**
+ * Los 12 horóscopos del día canónico, resueltos en el servidor (T-SEO-016).
+ *
+ * Es lo que devuelve `getCanonicalDailyHoroscopes()` (`lib/api/horoscope-server`)
+ * y lo que la portada (T-SEO-014) y el hub `/horoscopo` (T-SEO-015) reciben
+ * como prop inicial. Vive acá y no en el módulo server para que un client
+ * component pueda tiparlo sin importar ese módulo.
+ */
+export interface CanonicalDailyHoroscopes {
+  /** Día calendario canónico ('YYYY-MM-DD') contra el que se resolvió. */
+  canonicalDate: string;
+  /**
+   * Normalmente 12. Puede traer menos si la generación fue parcial (el cron
+   * falló a mitad de camino), y está vacía si no hay ni de hoy ni de ayer.
+   */
+  horoscopes: DailyHoroscope[];
+  /** `true` si los de hoy no estaban y la lista es la del día anterior. */
+  isShowingPreviousDay: boolean;
+}
+
+/**
  * Información completa de un signo zodiacal
  */
 export interface ZodiacSignInfo {

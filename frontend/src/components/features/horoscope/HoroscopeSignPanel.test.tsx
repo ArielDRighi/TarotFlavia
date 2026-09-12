@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { HoroscopeSignPanel } from './HoroscopeSignPanel';
 import { ZodiacSign } from '@/types/horoscope.types';
+import type { ServedDailyHoroscope } from '@/types/horoscope.types';
 
 // Mock next/navigation
 const mockPush = vi.fn();
@@ -29,9 +30,14 @@ vi.mock('next/navigation', () => ({
 // Mock hooks
 const mockUseTodayHoroscope = vi.fn();
 const mockUseAuthStore = vi.fn();
+const mockUseLocalToday = vi.fn<() => string>(() => '2026-01-17');
 
 vi.mock('@/hooks/api/useHoroscope', () => ({
   useLocalHoroscope: (sign: ZodiacSign | null) => mockUseTodayHoroscope(sign),
+}));
+
+vi.mock('@/hooks/utils/useLocalToday', () => ({
+  useLocalToday: () => mockUseLocalToday(),
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -225,5 +231,195 @@ describe('HoroscopeSignPanel', () => {
 
     const ariesCard = screen.getByTestId('zodiac-card-aries');
     expect(ariesCard).toHaveClass('border-accent');
+  });
+});
+
+/**
+ * T-SEO-016: el primer render sale del servidor (día canónico de Buenos Aires)
+ * y el cliente solo lo reemplaza cuando el día local del visitante difiere.
+ */
+describe('HoroscopeSignPanel — horóscopo servido (T-SEO-016)', () => {
+  const served: ServedDailyHoroscope = {
+    canonicalDate: '2026-01-17',
+    horoscope: mockHoroscope,
+    isShowingPreviousDay: false,
+  };
+
+  const localHoroscope = {
+    ...mockHoroscope,
+    id: 2,
+    horoscopeDate: '2026-01-18',
+    generalContent: 'Predicción del día local del visitante',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseAuthStore.mockReturnValue({ user: null });
+    mockUseLocalToday.mockReturnValue('2026-01-17');
+  });
+
+  it('renderiza la predicción servida sin esperar al hook', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    expect(screen.getByTestId('horoscope-detail')).toBeInTheDocument();
+    expect(screen.getByText('Hoy es un buen día para Aries...')).toBeInTheDocument();
+    expect(screen.queryByTestId('horoscope-skeleton-detail')).not.toBeInTheDocument();
+  });
+
+  it('no consulta la API cuando el día local coincide con el canónico', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    // `null` deshabilita la query en `useLocalHoroscope`.
+    expect(mockUseTodayHoroscope).toHaveBeenCalledWith(null);
+  });
+
+  it('consulta el día local cuando difiere del canónico', () => {
+    mockUseLocalToday.mockReturnValue('2026-01-18');
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: true, error: null, data: undefined });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    expect(mockUseTodayHoroscope).toHaveBeenCalledWith(ZodiacSign.ARIES);
+  });
+
+  it('mantiene la predicción servida mientras carga la del día local (sin skeleton)', () => {
+    // Es lo que evita el hydration mismatch: el HTML inicial es el del servidor
+    // tanto en el servidor como en la hidratación, y el reemplazo llega después.
+    mockUseLocalToday.mockReturnValue('2026-01-18');
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: true, error: null, data: undefined });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    expect(screen.getByText('Hoy es un buen día para Aries...')).toBeInTheDocument();
+    expect(screen.queryByTestId('horoscope-skeleton-detail')).not.toBeInTheDocument();
+  });
+
+  it('reemplaza la predicción servida por la del día local cuando llega', () => {
+    mockUseLocalToday.mockReturnValue('2026-01-18');
+    mockUseTodayHoroscope.mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: localHoroscope,
+      isShowingPreviousDay: false,
+    });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    expect(screen.getByText('Predicción del día local del visitante')).toBeInTheDocument();
+    expect(screen.queryByText('Hoy es un buen día para Aries...')).not.toBeInTheDocument();
+  });
+
+  it('conserva la predicción servida si la consulta del día local falla', () => {
+    mockUseLocalToday.mockReturnValue('2026-01-18');
+    mockUseTodayHoroscope.mockReturnValue({
+      isLoading: false,
+      error: new Error('Not found'),
+      data: undefined,
+    });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    expect(screen.getByText('Hoy es un buen día para Aries...')).toBeInTheDocument();
+    expect(screen.queryByText('Horóscopo no disponible')).not.toBeInTheDocument();
+  });
+
+  it('muestra la leyenda de "día anterior" que viene del servidor', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
+
+    renderWithProviders(
+      <HoroscopeSignPanel
+        sign={ZodiacSign.ARIES}
+        initialHoroscope={{ ...served, isShowingPreviousDay: true }}
+      />
+    );
+
+    expect(screen.getByTestId('showing-previous-day-notice')).toBeInTheDocument();
+  });
+
+  it('la leyenda de "día anterior" sigue a la predicción que se muestra', () => {
+    // Servido con leyenda, pero el día local trajo el suyo completo: sin leyenda.
+    mockUseLocalToday.mockReturnValue('2026-01-18');
+    mockUseTodayHoroscope.mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: localHoroscope,
+      isShowingPreviousDay: false,
+    });
+
+    renderWithProviders(
+      <HoroscopeSignPanel
+        sign={ZodiacSign.ARIES}
+        initialHoroscope={{ ...served, isShowingPreviousDay: true }}
+      />
+    );
+
+    expect(screen.queryByTestId('showing-previous-day-notice')).not.toBeInTheDocument();
+  });
+
+  it('consulta igual cuando el servidor sirvió el de ayer, aunque el día local coincida', () => {
+    // El HTML con "ayer" queda cacheado hasta 1 h: si el cron terminó en el
+    // medio, sin esta request el visitante argentino no vería el de hoy.
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: true, error: null, data: undefined });
+
+    renderWithProviders(
+      <HoroscopeSignPanel
+        sign={ZodiacSign.ARIES}
+        initialHoroscope={{ ...served, isShowingPreviousDay: true }}
+      />
+    );
+
+    expect(mockUseTodayHoroscope).toHaveBeenCalledWith(ZodiacSign.ARIES);
+    // Mientras tanto sigue mostrando lo servido, con su leyenda.
+    expect(screen.getByText('Hoy es un buen día para Aries...')).toBeInTheDocument();
+    expect(screen.getByTestId('showing-previous-day-notice')).toBeInTheDocument();
+  });
+
+  it('reemplaza el de ayer servido por el de hoy cuando el cron lo genera', () => {
+    mockUseTodayHoroscope.mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: { ...mockHoroscope, id: 3, generalContent: 'El de hoy ya está listo' },
+      isShowingPreviousDay: false,
+    });
+
+    renderWithProviders(
+      <HoroscopeSignPanel
+        sign={ZodiacSign.ARIES}
+        initialHoroscope={{ ...served, isShowingPreviousDay: true }}
+      />
+    );
+
+    expect(screen.getByText('El de hoy ya está listo')).toBeInTheDocument();
+    expect(screen.queryByTestId('showing-previous-day-notice')).not.toBeInTheDocument();
+  });
+
+  it('habilita la consulta al cruzar la medianoche local con la página abierta', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: false, error: null, data: undefined });
+
+    const { rerender } = renderWithProviders(
+      <HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />
+    );
+    expect(mockUseTodayHoroscope).toHaveBeenLastCalledWith(null);
+
+    // `useLocalToday` re-renderiza al consumidor cuando cambia el día local.
+    mockUseLocalToday.mockReturnValue('2026-01-18');
+    rerender(<HoroscopeSignPanel sign={ZodiacSign.ARIES} initialHoroscope={served} />);
+
+    expect(mockUseTodayHoroscope).toHaveBeenLastCalledWith(ZodiacSign.ARIES);
+    // Hasta que llegue el nuevo, se sigue mostrando el servido.
+    expect(screen.getByText('Hoy es un buen día para Aries...')).toBeInTheDocument();
+  });
+
+  it('sin predicción servida se comporta como antes: consulta el día local y muestra skeleton', () => {
+    mockUseTodayHoroscope.mockReturnValue({ isLoading: true, error: null, data: undefined });
+
+    renderWithProviders(<HoroscopeSignPanel sign={ZodiacSign.ARIES} />);
+
+    expect(mockUseTodayHoroscope).toHaveBeenCalledWith(ZodiacSign.ARIES);
+    expect(screen.getByTestId('horoscope-skeleton-detail')).toBeInTheDocument();
   });
 });

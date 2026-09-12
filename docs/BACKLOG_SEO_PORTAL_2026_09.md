@@ -89,7 +89,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | --- | --- | --- | --- | --- | --- |
 | T-SEO-014 | Home editorial: de landing SaaS a portada de portal | Frontend | 🔴 Crítica | 3 pts | ⬜ Pendiente |
 | T-SEO-015 | Páginas de herramientas: nota editorial debajo de cada widget; `noindex` a ventas/internas; guardarraíl sobre el nav | Frontend + contenido | 🔴 Crítica | 4 pts | ⬜ Pendiente |
-| T-SEO-016 | Horóscopo del día en el HTML servido (SSR/ISR) | Frontend | 🟠 Alta | 2 pts | ⬜ Pendiente |
+| T-SEO-016 | Horóscopo del día en el HTML servido (SSR/ISR) | Frontend | 🟠 Alta | 2 pts | ✅ Completada |
 | T-SEO-017 | Persona editorial responsable, bylines y `/politica-editorial` | Frontend + decisión | 🟠 Alta | 2 pts | ⬜ Pendiente |
 | T-SEO-018 | Disclaimer global y guardarraíl de lenguaje determinista (YMYL) | Front + datos | 🟡 Media | 1,5 pts | ⬜ Pendiente |
 | T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap sin `lastmod` falso | Frontend | 🟢 Baja | 0,5 pts | ✅ Completada |
@@ -107,7 +107,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 | # | Tarea | Est. | Por qué va ahí |
 | --- | --- | --- | --- |
 | 1 | ~~**T-SEO-019**~~ ✅ | 0,5 pts | Cerrada 11-sep-2026: grupo `Mediapartners-Google` en robots y sitemap sin `lastmod` |
-| 2 | **T-SEO-016** | 2 pts | Va **antes** que la home porque la home nueva **consume** el horóscopo del día en SSR (sección "Horóscopo de hoy, 12 signos"). Sin esto, 014 no tiene con qué llenar la portada |
+| 2 | ~~**T-SEO-016**~~ ✅ | 2 pts | Cerrada 11-sep-2026: `getCanonicalDailyHoroscopes()` en `lib/api/horoscope-server.ts` devuelve los 12 del día canónico (ART) para que 014 y 015 los consuman en SSR |
 | 3 | **T-SEO-014** | 3 pts | La causa n.º 1. Es la pantalla que decide |
 | 4 | **T-SEO-015** | 4 pts | La causa n.º 2. Va después de 014 porque las secciones que la home deja de mostrar (precios, "3 pasos") aterrizan en `/premium`, que es una de las URLs que 015 reescribe |
 | 5 | **T-SEO-017** | 2 pts | Necesita una **decisión de negocio** (quién firma) que se puede tomar mientras se desarrollan 014–016. El código es chico |
@@ -280,7 +280,7 @@ Tests en `check-indexable-content.test.mjs`.
 
 ## T-SEO-016: Horóscopo del Día en el HTML Servido (SSR/ISR)
 
-**Estado:** ⬜ Pendiente
+**Estado:** ✅ COMPLETADA (11-sep-2026)
 **Prioridad:** 🟠 Alta · **Estimación:** 2 pts · **Tipo:** Frontend
 
 ### Problema
@@ -311,13 +311,54 @@ en el backend como subtarea.
 
 ### Criterios de aceptación
 
-- [ ] `curl -A Googlebot https://auguriatarot.com/horoscopo/aries` trae la predicción del día
+- [x] `curl -A Googlebot https://auguriatarot.com/horoscopo/aries` trae la predicción del día
       (texto completo) y la fecha en el HTML.
-- [ ] Existe una función server-side reutilizable que devuelve los 12 horóscopos del día (la usan
+- [x] Existe una función server-side reutilizable que devuelve los 12 horóscopos del día (la usan
       014 y 015).
-- [ ] Sin hydration mismatch en consola en dev ni en tests.
-- [ ] Un visitante cuyo día local difiere ve su día tras hidratar; test unitario del swap.
-- [ ] `HoroscopeSignPanel.test.tsx` y `page.test.tsx` actualizados.
+- [x] Sin hydration mismatch en consola en dev ni en tests.
+- [x] Un visitante cuyo día local difiere ve su día tras hidratar; test unitario del swap.
+- [x] `HoroscopeSignPanel.test.tsx` y `page.test.tsx` actualizados.
+
+### Decisiones de implementación
+
+- **Alcance de la ruta:** `/horoscopo/[signo]` sigue siendo la consulta puntual (elegís tu signo y
+  ves su predicción). Lo que cambia es que la predicción viaja en el HTML. Mostrar los 12 extractos
+  juntos es de 014 (portada) y 015 (hub `/horoscopo`); acá sólo queda la función que los provee.
+- **`lib/api/horoscope-server.ts`** (sólo Server Components): `getCanonicalDailyHoroscopes()`
+  devuelve `{ canonicalDate, horoscopes, isShowingPreviousDay }` con el mismo fallback que el
+  cliente (si hoy viene `[]`, se pide ayer). Envuelta en `cache()` de React para dedupear dentro
+  del render. `getCanonicalHoroscopeForSign(sign)` saca el signo **de esa lista** y no de
+  `BY_DATE_SIGN` a propósito: ese endpoint incrementa `viewCount`, y una regeneración de ISR no es
+  una persona mirando.
+- **Día canónico:** `getCanonicalDateString()` (`lib/utils/date.ts`) formatea en
+  `America/Argentina/Buenos_Aires` vía `Intl.DateTimeFormat`. En producción el proceso corre en
+  UTC y cruza de día a las 21:00 ART: verificado en local a las 21:06 ART (00:06 UTC), con el
+  horóscopo del 12 ya generado, el HTML servido siguió siendo el del 11.
+- **Sin hydration mismatch:** `HoroscopeSignPanel` pinta `initialHoroscope` tanto en el servidor
+  como en la hidratación. `useLocalToday()` sólo decide si **habilitar** la query del día local
+  (`useLocalHoroscope(null)` cuando coincide con el canónico → cero requests para el visitante
+  argentino); el reemplazo ocurre recién cuando `localQuery.data` llega. Mientras carga o si falla,
+  se conserva lo servido — nunca un skeleton sobre contenido que ya está.
+- **Excepción (revisión local):** si el servidor sirvió el de **ayer** (`isShowingPreviousDay`),
+  la query local se habilita igual aunque el día coincida. Ese HTML queda cacheado hasta 1 h y, si
+  el cron terminó en el medio, el visitante argentino se quedaba sin request y sin el de hoy hasta
+  la próxima regeneración. Si aún no existe, el hook cae a ayer (el mismo que ya se ve) sin
+  parpadeo.
+- **`viewCount` deja de crecer con las visitas reales.** Antes cada carga de `/horoscopo/[signo]`
+  pegaba a `BY_DATE_SIGN`, que incrementa el contador; ahora el visitante argentino no dispara
+  ninguna request. Hoy `viewCount` no se expone en ningún endpoint, así que nada visible cambia,
+  pero si algún día se quiere medir hay que instrumentarlo aparte (un beacon del cliente, o contar
+  en el servidor excluyendo el build por `X-Prerender`).
+- **Degradación:** si la API falla durante el render, `resolveListingData` devuelve `undefined`
+  (con `console.warn`) y el panel cae al comportamiento cliente anterior. La ficha del signo se
+  sirve igual. No se tira abajo el build ni se cachea un error por todo el ISR.
+- **`revalidate = 3600`** en `app/horoscopo/[sign]/page.tsx` (antes sin `revalidate`: HTML
+  estático hasta el próximo deploy). No se implementó revalidación on-demand desde el cron: el
+  backlog la dejaba como opcional y 1 h alcanza para la ventana de generación.
+- **Verificado contra el stack real** (Postgres + NestJS + `next dev`, Playwright con
+  `timezoneId`): Buenos Aires → 0 llamadas a la API desde el cliente, 0 avisos de hidratación;
+  Tokio (ya 12-sep local) → una llamada `BY_DATE_SIGN(2026-09-12)` y el bloque pasa del 11 al 12
+  sin skeleton; con el 12 inexistente, 404 → fallback al 11 con la leyenda "de ayer".
 
 ---
 
