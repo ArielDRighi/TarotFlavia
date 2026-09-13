@@ -110,7 +110,7 @@ export function HoroscopeWidget() {
     <Card data-testid="horoscope-widget" className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-3xl" />
+          <ZodiacSymbol sign={signInfo.sign} label={signInfo.nameEs} size="md" frame="medallion" />
           <h2 className="font-serif text-xl">{signInfo.nameEs}</h2>
         </div>
         <Button asChild variant="ghost" size="sm">

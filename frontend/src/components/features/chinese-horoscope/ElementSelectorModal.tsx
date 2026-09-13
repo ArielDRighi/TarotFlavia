@@ -101,7 +101,7 @@ export function ElementSelectorModal({
       <DialogContent data-testid="element-selector-modal" className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ChineseAnimalSymbol animal={animal} label={animalNameEs} className="text-2xl" />
+            <ChineseAnimalSymbol animal={animal} label={animalNameEs} size="md" frame="medallion" />
             <span>{animalNameEs}</span>
           </DialogTitle>
           <DialogDescription>Selecciona tu elemento Wu Xing</DialogDescription>
@@ -126,7 +126,13 @@ export function ElementSelectorModal({
                   >
                     <span className="flex items-center gap-2">
                       {elementIcon && (
-                        <BrandIcon family="elements" name={elementIcon} size="md" decorative />
+                        <BrandIcon
+                          family="elements"
+                          name={elementIcon}
+                          size="md"
+                          frame="medallion"
+                          decorative
+                        />
                       )}
                       <span className="font-medium">{elementNameEs}</span>
                     </span>

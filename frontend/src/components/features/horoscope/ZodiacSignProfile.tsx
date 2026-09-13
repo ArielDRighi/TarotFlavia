@@ -93,7 +93,7 @@ export function ZodiacSignProfile({ sign, children }: ZodiacSignProfileProps) {
     // artículo lo empujaba abajo de 300 palabras de ficha.
     <article className="space-y-6" data-testid="zodiac-sign-profile">
       <header className="text-center">
-        <ZodiacSymbol sign={sign} label={nameEs} size="2xl" />
+        <ZodiacSymbol sign={sign} label={nameEs} size="2xl" frame="medallion" />
         <h1 className="mt-2 font-serif text-3xl">Horóscopo de {nameEs}</h1>
         <p className="text-muted-foreground mt-2 text-lg">{profile.tagline}</p>
         {/* Los datos del signo van solo acá, y cada etiqueta se explica sola:

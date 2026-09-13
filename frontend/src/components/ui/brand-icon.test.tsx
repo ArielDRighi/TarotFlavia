@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import { BrandIcon, BRAND_ICON_SIZES } from './brand-icon';
+import { BrandIcon, BRAND_ICON_SIZES, BRAND_ICON_MEDALLION_SIZES } from './brand-icon';
 
 describe('BrandIcon', () => {
   it('renderiza la imagen del registro con role="img" y el alt en español', () => {
@@ -55,6 +55,32 @@ describe('BrandIcon', () => {
 
     rerender(<BrandIcon family="hubs" name="tarot" priority />);
     expect(screen.getByRole('img')).not.toHaveAttribute('loading', 'lazy');
+  });
+
+  it('con frame="medallion" envuelve el icono en un disco cósmico y aviva el dorado', () => {
+    render(<BrandIcon family="zodiac" name="aries" size="lg" frame="medallion" />);
+
+    const img = screen.getByRole('img', { name: 'Aries' });
+    const medallion = img.parentElement;
+    expect(medallion).toHaveClass('brand-icon-medallion');
+    expect(medallion).toHaveStyle({
+      width: `${BRAND_ICON_MEDALLION_SIZES.lg}px`,
+      height: `${BRAND_ICON_MEDALLION_SIZES.lg}px`,
+    });
+    expect(img).toHaveClass('brightness-125');
+    // el icono ocupa ~78 % del disco
+    expect(Number(img.getAttribute('width'))).toBeLessThan(BRAND_ICON_MEDALLION_SIZES.lg);
+    expect(Number(img.getAttribute('width'))).toBeGreaterThan(BRAND_ICON_MEDALLION_SIZES.lg * 0.7);
+  });
+
+  it('el medallón es decorativo cuando el icono lo es', () => {
+    const { container } = render(
+      <BrandIcon family="zodiac" name="aries" frame="medallion" decorative data-testid="x" />
+    );
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(container.querySelector('.brand-icon-medallion')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByTestId('x')).toHaveClass('brand-icon-medallion');
   });
 
   it('acepta className y data-testid', () => {

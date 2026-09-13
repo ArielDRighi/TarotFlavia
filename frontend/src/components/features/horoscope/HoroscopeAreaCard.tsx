@@ -83,7 +83,13 @@ export function HoroscopeAreaCard({ area, data, className }: HoroscopeAreaCardPr
   return (
     <Card data-testid={`horoscope-area-${area}`} className={cn('p-4', config.bgColor, className)}>
       <div className="mb-3 flex items-center gap-2">
-        <BrandIcon family="areas" name={HOROSCOPE_AREA_ICON[area]} size="md" decorative />
+        <BrandIcon
+          family="areas"
+          name={HOROSCOPE_AREA_ICON[area]}
+          size="md"
+          frame="medallion"
+          decorative
+        />
         <h3 className="font-serif text-lg">{config.title}</h3>
       </div>
 

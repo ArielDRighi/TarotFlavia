@@ -69,7 +69,8 @@ describe('HoroscopeAreaCard', () => {
       const { container } = render(<HoroscopeAreaCard area="love" data={mockArea} />);
 
       // Score es 8, así que debería haber 8 dots con color y 2 grises
-      const dots = container.querySelectorAll('.rounded-full');
+      // (el medallón del icono también es rounded-full; los puntos son los h-2)
+      const dots = container.querySelectorAll('.rounded-full.h-2');
       expect(dots).toHaveLength(10); // Total de 10 dots
     });
 

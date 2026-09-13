@@ -52,7 +52,8 @@ export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeD
         <ChineseAnimalSymbol
           animal={animalInfo.animal}
           label={animalInfo.nameEs}
-          className="text-6xl"
+          size="xl"
+          frame="medallion"
         />
         {/* h2, no h1: el h1 de `/horoscopo-chino/[animal]` es el de `AnimalProfile`. */}
         <h2 className="mt-2 font-serif text-3xl">{displayName}</h2>
@@ -77,6 +78,7 @@ export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeD
                   family="areas"
                   name={HOROSCOPE_AREA_ICON[areaKey]}
                   size="md"
+                  frame="medallion"
                   decorative
                 />
                 <h3 className="font-medium">{AREA_LABELS[areaKey]}</h3>

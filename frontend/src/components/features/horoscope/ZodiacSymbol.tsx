@@ -2,6 +2,7 @@
 import {
   BrandIcon,
   brandIconSizeFromClassName,
+  type BrandIconFrame,
   type BrandIconSize,
 } from '@/components/ui/brand-icon';
 // 6. Utils & types
@@ -27,6 +28,8 @@ export interface ZodiacSymbolProps {
   size?: BrandIconSize;
   /** Oculto a lectores de pantalla (cuando el nombre del signo ya está al lado). */
   decorative?: boolean;
+  /** `medallion`: disco violeta cósmico detrás del icono (ver `BrandIcon`). */
+  frame?: BrandIconFrame;
   /** Clases CSS adicionales (layout). Las clases `text-*` sólo se usan para derivar el tamaño. */
   className?: string;
 }
@@ -53,6 +56,7 @@ export function ZodiacSymbol({
   label,
   size,
   decorative,
+  frame,
   className,
 }: ZodiacSymbolProps) {
   const resolved = sign ?? (symbol ? SIGN_BY_SYMBOL.get(symbol) : undefined);
@@ -64,6 +68,7 @@ export function ZodiacSymbol({
       name={resolved}
       label={label}
       size={size ?? brandIconSizeFromClassName(className)}
+      frame={frame}
       decorative={decorative}
       className={className}
     />

@@ -23,6 +23,24 @@ export const BRAND_ICON_SIZES = {
 
 export type BrandIconSize = keyof typeof BRAND_ICON_SIZES;
 
+/**
+ * Diámetro del medallón por tamaño. El icono ocupa ~78 % del disco: un line-art
+ * ornamental de trazo fino no lee sobre blanco a estos tamaños (feedback de
+ * Ariel, 12-sep); sobre violeta cósmico con el dorado avivado sí.
+ */
+export const BRAND_ICON_MEDALLION_SIZES = {
+  sm: 28,
+  md: 44,
+  lg: 64,
+  xl: 96,
+  '2xl': 144,
+} as const;
+
+/** Lado del icono dentro del medallón. */
+const MEDALLION_ICON_RATIO = 0.78;
+
+export type BrandIconFrame = 'none' | 'medallion';
+
 const SIZE_ORDER: readonly BrandIconSize[] = ['sm', 'md', 'lg', 'xl', '2xl'];
 
 /** Clase `text-*` con la que los consumidores dimensionaban el glifo → tamaño del icono. */
@@ -64,6 +82,12 @@ export interface BrandIconProps<F extends BrandIconFamily = BrandIconFamily> {
   label?: string;
   /** Solo para iconos above-the-fold (LCP); por defecto es lazy. */
   priority?: boolean;
+  /**
+   * `medallion`: disco violeta cósmico con borde dorado detrás del icono, y el
+   * dorado avivado. Es el tratamiento por defecto para grillas, encabezados y
+   * tarjetas; `none` para iconos chicos en línea con texto.
+   */
+  frame?: BrandIconFrame;
   /** Clases CSS adicionales. */
   className?: string;
   'data-testid'?: string;
@@ -93,13 +117,17 @@ export function BrandIcon<F extends BrandIconFamily>({
   decorative = false,
   label,
   priority = false,
+  frame = 'none',
   className,
   'data-testid': testId,
 }: BrandIconProps<F>) {
   const { src, alt } = getBrandIcon(family, name);
-  const px = BRAND_ICON_SIZES[size];
+  const medallion = frame === 'medallion';
+  const px = medallion
+    ? Math.round(BRAND_ICON_MEDALLION_SIZES[size] * MEDALLION_ICON_RATIO)
+    : BRAND_ICON_SIZES[size];
 
-  return (
+  const image = (
     <Image
       src={src}
       alt={decorative ? '' : (label ?? alt)}
@@ -109,8 +137,28 @@ export function BrandIcon<F extends BrandIconFamily>({
       role={decorative ? undefined : 'img'}
       aria-hidden={decorative || undefined}
       draggable={false}
-      className={cn('inline-block shrink-0 select-none', className)}
-      data-testid={testId}
+      className={cn(
+        'inline-block shrink-0 select-none',
+        medallion ? 'brightness-125 saturate-[1.1]' : className
+      )}
+      data-testid={medallion ? undefined : testId}
     />
+  );
+
+  if (!medallion) return image;
+
+  const diameter = BRAND_ICON_MEDALLION_SIZES[size];
+  return (
+    <span
+      className={cn(
+        'brand-icon-medallion inline-flex shrink-0 items-center justify-center rounded-full',
+        className
+      )}
+      style={{ width: diameter, height: diameter }}
+      aria-hidden={decorative || undefined}
+      data-testid={testId}
+    >
+      {image}
+    </span>
   );
 }

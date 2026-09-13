@@ -107,7 +107,8 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
           <ChineseAnimalSymbol
             animal={data.animal}
             label={CHINESE_ZODIAC_INFO[data.animal].nameEs}
-            className="text-5xl"
+            size="lg"
+            frame="medallion"
           />
           <p className="mt-2 font-serif text-xl" data-testid="full-zodiac-type">
             Eres {data.fullZodiacType || data.animalInfo.nameEs}

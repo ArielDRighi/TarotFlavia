@@ -474,7 +474,12 @@ blanca y sobre fondo cósmico violeta. Los prompts completos, familia por famili
 ```
 
 Tamaños: `sm` 20 px (≈ `text-xl`), `md` 32 px (≈ `text-2xl`/`3xl`), `lg` 48 px (≈ `text-4xl`/`5xl`),
-`xl` 72 px (hero). `priority` sólo above-the-fold; por defecto es lazy. El máster de 512 px pesa
+`xl` 72 px, `2xl` 112 px (encabezado de ficha).
+
+**`frame="medallion"` es el tratamiento por defecto en grillas, encabezados y tarjetas:** disco
+violeta cósmico (`#4C2A85 → #22114F`) con borde dorado fino y el icono avivado. Un line-art de trazo
+fino no lee sobre blanco/crema a estos tamaños; sobre el violeta de marca sí. Diámetros 28/44/64/96/144.
+Sin medallón sólo para iconos chicos en línea con texto (filas de puntaje, chips, selectores). `priority` sólo above-the-fold; por defecto es lazy. El máster de 512 px pesa
 27–48 KB por el halo (degradé de alfa); lo que se sirve a 48–128 px son 1,5–6 KB, que es lo que
 cuenta para LCP en `/horoscopo` y `/horoscopo-chino`.
 

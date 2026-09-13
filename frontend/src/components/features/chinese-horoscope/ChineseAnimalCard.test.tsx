@@ -43,10 +43,10 @@ describe('ChineseAnimalCard', () => {
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
-      // El <svg> es display:block por el preflight de Tailwind, así que `text-center`
-      // no lo centra: se fuerza `block mx-auto` para alinearlo igual que el occidental.
+      // El Card es flex-column, así que `text-center` no centra el medallón:
+      // se fuerza `mx-auto`, igual que en la tarjeta occidental (T-UI-12).
       const symbol = screen.getByRole('img', { name: 'Rata' });
-      expect(symbol).toHaveClass('mx-auto');
+      expect(symbol.parentElement).toHaveClass('brand-icon-medallion', 'mx-auto');
     });
 
     it('should render animal name in Spanish', () => {

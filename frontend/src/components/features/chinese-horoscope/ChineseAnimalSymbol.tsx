@@ -2,6 +2,7 @@
 import {
   BrandIcon,
   brandIconSizeFromClassName,
+  type BrandIconFrame,
   type BrandIconSize,
 } from '@/components/ui/brand-icon';
 // 6. Utils & types
@@ -17,6 +18,8 @@ export interface ChineseAnimalSymbolProps {
   label: string;
   /** Tamaño; si se omite se deriva de la clase `text-*` de `className` (default `md`). */
   size?: BrandIconSize;
+  /** `medallion`: disco violeta cósmico detrás del icono (ver `BrandIcon`). */
+  frame?: BrandIconFrame;
   /** Clases CSS adicionales (layout). Las clases `text-*` sólo se usan para derivar el tamaño. */
   className?: string;
 }
@@ -38,13 +41,20 @@ export interface ChineseAnimalSymbolProps {
  * <ChineseAnimalSymbol animal={info.animal} label={info.nameEs} className="text-4xl" />
  * ```
  */
-export function ChineseAnimalSymbol({ animal, label, size, className }: ChineseAnimalSymbolProps) {
+export function ChineseAnimalSymbol({
+  animal,
+  label,
+  size,
+  frame,
+  className,
+}: ChineseAnimalSymbolProps) {
   return (
     <BrandIcon
       family="chinese"
       name={animal}
       label={label}
       size={size ?? brandIconSizeFromClassName(className)}
+      frame={frame}
       className={className}
     />
   );

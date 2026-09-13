@@ -46,7 +46,7 @@ export function HoroscopeDetail({ horoscope, className }: HoroscopeDetailProps) 
     <div data-testid="horoscope-detail" className={cn('space-y-6', className)}>
       {/* Header */}
       <div className="text-center">
-        <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-6xl" />
+        <ZodiacSymbol sign={signInfo.sign} label={signInfo.nameEs} size="xl" frame="medallion" />
         {/* h2 y no h1 (T-SEO-004): el h1 de la página es el de la ficha del
             signo, que se renderiza en el servidor arriba de este bloque. */}
         <h2 className="mt-2 font-serif text-3xl">{signInfo.nameEs}</h2>

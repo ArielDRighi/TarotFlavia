@@ -823,6 +823,18 @@ Por tamaño, conviene dividir en **2-3 PRs**:
   0,25 % del lado ≈ 5 px) más un dorado un 15 % más profundo (`--tone 0.85`, acerca el dorado del
   modelo al `#B7791F` de la marca sin cambiar el matiz). Se comparó a 48/72 px: `r3`, `r5`, `r8`, con y
   sin tono; `r5 + 0.85` es la que mejor lee sin cerrar el detalle interior.
+- **Medallón (segundo feedback de Ariel, 13-sep: "sigue siendo muy mala la lectura en todas las
+  pantallas"):** engrosar y oscurecer no alcanzó. Un line-art ornamental de trazo fino **no lee sobre
+  blanco a 48–112 px**, le falta masa. Lo que sí funciona es la propia regla del `DESIGN_HAND-OFF`:
+  dorado sobre **violeta cósmico**. `BrandIcon` suma `frame="medallion"`: disco con degradé radial
+  (`#4C2A85 → #22114F`), borde dorado fino (`.brand-icon-medallion` en `globals.css`) y el icono al
+  78 % del disco con `brightness-125 saturate-[1.1]` (el dorado entonado para fondo claro quedaba
+  apagado sobre violeta). Diámetros `BRAND_ICON_MEDALLION_SIZES`: 28/44/64/96/144. Se comparó a 1x
+  contra el icono suelto a 72 y 104 px y contra el medallón sin avivar. Aplicado en grillas de signos
+  y animales (`xl`), encabezados de ficha (`2xl`), encabezados de detalle y widgets (`xl`/`md`),
+  digest de la home y del hub (`md`), modal de elemento (`md`), tarjetas de área (`md`) y resultado
+  de la calculadora (`lg`). Sin medallón: filas de puntaje `text-xs`, chips de compatibilidad,
+  selector de palos y ficha de carta (iconos chicos en línea con texto).
 
 #### 📋 Descripción
 

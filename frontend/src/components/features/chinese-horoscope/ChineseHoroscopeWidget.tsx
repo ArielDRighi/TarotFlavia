@@ -85,7 +85,8 @@ export function ChineseHoroscopeWidget() {
           <ChineseAnimalSymbol
             animal={animalInfo.animal}
             label={animalInfo.nameEs}
-            className="text-3xl"
+            size="md"
+            frame="medallion"
           />
           <div>
             <h2 className="font-serif text-xl">{displayName}</h2>

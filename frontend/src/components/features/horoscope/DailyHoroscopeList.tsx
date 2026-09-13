@@ -64,7 +64,13 @@ function SignExcerpt({
     >
       <Heading className="text-text-primary flex items-center gap-2 font-serif text-lg font-semibold">
         {/* Decorativo: el nombre del signo va al lado (T-UI-12, familia zodiac/). */}
-        <ZodiacSymbol sign={horoscope.zodiacSign} label={info.nameEs} size="md" decorative />
+        <ZodiacSymbol
+          sign={horoscope.zodiacSign}
+          label={info.nameEs}
+          size="md"
+          frame="medallion"
+          decorative
+        />
         <Link
           href={ROUTES.HOROSCOPO_SIGN(horoscope.zodiacSign)}
           className="underline-offset-4 hover:underline"
