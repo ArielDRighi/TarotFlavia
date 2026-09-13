@@ -120,7 +120,9 @@ describe('EditorialHome — árbol completo (T-SEO-014)', () => {
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByTestId('home-horoscope-empty')).toBeInTheDocument();
     expect(screen.getByTestId('home-daily-card-empty')).toBeInTheDocument();
-    expect(screen.getByTestId('home-guides-empty')).toBeInTheDocument();
+    // Las guías no tienen estado vacío: caen al catálogo estático (T-SEO-022).
+    expect(screen.getByTestId('home-guides-fallback')).toBeInTheDocument();
+    expect(screen.getAllByTestId('article-card')).toHaveLength(7);
     expect(screen.getByTestId('home-encyclopedia')).toBeInTheDocument();
     expect(screen.getByTestId('home-about')).toBeInTheDocument();
     expect(screen.getByTestId('home-services')).toBeInTheDocument();

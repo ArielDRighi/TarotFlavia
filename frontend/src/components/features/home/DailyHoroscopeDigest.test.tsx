@@ -102,4 +102,14 @@ describe('DailyHoroscopeDigest (T-SEO-014)', () => {
 
     expect(screen.getByTestId('home-horoscope-empty')).toBeInTheDocument();
   });
+
+  it('es el ancla del CTA del hero (T-SEO-022)', () => {
+    render(<DailyHoroscopeDigest daily={DAILY} />);
+
+    expect(HOME_EDITORIAL.horoscope.anchorId).toBe('horoscopo-de-hoy');
+    expect(screen.getByTestId('home-horoscope')).toHaveAttribute(
+      'id',
+      HOME_EDITORIAL.horoscope.anchorId
+    );
+  });
 });

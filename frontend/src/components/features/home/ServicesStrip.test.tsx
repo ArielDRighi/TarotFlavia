@@ -21,4 +21,14 @@ describe('ServicesStrip (T-SEO-014)', () => {
     expect(strip.querySelector('table')).toBeNull();
     expect(strip).not.toHaveTextContent(/\$/);
   });
+
+  it('lleva una miniatura de la carta astral a la izquierda y sigue siendo una línea (T-SEO-022)', () => {
+    render(<ServicesStrip />);
+
+    const thumbnail = screen.getByTestId('home-services-thumbnail');
+    expect(thumbnail).toHaveAttribute('src', expect.stringContaining('birth-chart-promo.webp'));
+    expect(thumbnail).toHaveAttribute('alt', '');
+    expect(thumbnail).toHaveAttribute('loading', 'lazy');
+    expect(screen.getByTestId('home-services').querySelector('table')).toBeNull();
+  });
 });

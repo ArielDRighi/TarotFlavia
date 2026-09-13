@@ -119,4 +119,10 @@ describe('DailyHoroscopeList (T-SEO-015)', () => {
 
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(12);
   });
+
+  it('el estado vacío es un aviso plano, no una caja punteada (T-SEO-022)', () => {
+    render(<DailyHoroscopeList daily={undefined} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    expect(screen.getByTestId('hub-horoscope-empty')).not.toHaveClass('border-dashed');
+  });
 });

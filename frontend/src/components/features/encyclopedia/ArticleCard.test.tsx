@@ -187,3 +187,52 @@ describe('ArticleCard', () => {
     });
   });
 });
+
+describe('ArticleCard — miniatura opcional (T-SEO-022)', () => {
+  const guide = createArticle({
+    category: ArticleCategory.GUIDE_TAROT,
+    slug: 'guia-tarot',
+    nameEs: 'Guía del Tarot',
+    snippet: 'Cómo formular una pregunta.',
+  });
+
+  it('sin miniatura conserva la tarjeta de siempre (icono de categoría)', () => {
+    render(<ArticleCard article={guide} />);
+
+    expect(screen.queryByTestId('article-card-thumbnail')).not.toBeInTheDocument();
+    expect(screen.getByTestId('article-card-icon')).toBeInTheDocument();
+  });
+
+  it('con miniatura la muestra en lugar del icono, decorativa y con carga diferida', () => {
+    render(
+      <ArticleCard article={guide} thumbnailSrc="/images/enciclopedia/guia-tarot-hero.webp" />
+    );
+
+    const thumbnail = screen.getByTestId('article-card-thumbnail');
+    expect(thumbnail).toHaveAttribute('src', expect.stringContaining('guia-tarot-hero.webp'));
+    expect(thumbnail).toHaveAttribute('alt', '');
+    expect(thumbnail).toHaveAttribute('loading', 'lazy');
+    expect(thumbnail).toHaveAttribute('sizes');
+    expect(screen.queryByTestId('article-card-icon')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Guía del Tarot');
+    expect(screen.getByText('Cómo formular una pregunta.')).toBeInTheDocument();
+  });
+
+  it('acepta una entrada sin id (catálogo estático) y enlaza por slug', () => {
+    render(
+      <ArticleCard
+        article={{
+          slug: 'guia-pendulo',
+          nameEs: 'Guía del Péndulo',
+          category: ArticleCategory.GUIDE_PENDULUM,
+          snippet: 'Cómo preguntar con un péndulo.',
+        }}
+      />
+    );
+
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      expect.stringContaining('guia-pendulo')
+    );
+  });
+});
