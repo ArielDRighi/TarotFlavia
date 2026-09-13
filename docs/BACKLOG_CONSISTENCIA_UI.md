@@ -1049,6 +1049,106 @@ Modificados: los 41 archivos del inventario (lista exacta con
 
 ---
 
+### T-UI-13: Encabezado de sección unificado — banda de marca centrada en las 9 secciones del menú
+
+**Prioridad:** 🟡 ALTA
+**Estimación:** 2 días
+**Dependencias:** T-UI-12 (los iconos `hubs/` para el medallón del encabezado). Coordinar con
+T-SEO-022 (la portada tiene su propio hero y no entra acá).
+**Estado:** ⬜ PENDIENTE
+**Reportado por:** Ariel (13 de septiembre de 2026), con capturas de las nueve secciones: "para cada
+sección, el título se muestra inconsistente. Deberían verse todos como en la enciclopedia, centrados y
+con la imagen tipo banner".
+
+#### 📋 Descripción
+
+Cada sección del menú principal encabeza la página de una manera distinta. Hoy conviven cuatro
+patrones, ninguno compartido:
+
+| Sección | Componente | Encabezado actual |
+| --- | --- | --- |
+| Enciclopedia Mística | `encyclopedia/EnciclopediaHubContent.tsx` | **Banda de marca**: gradiente noche (`HERO_GRADIENT`), estrellas `animate-twinkle`, luna CSS, `h1` Cormorant crema centrado + bajada, filete dorado inferior. Es la referencia |
+| Horóscopo | `horoscope/HoroscopeHub.tsx` | `h1` Cormorant `text-4xl/5xl font-light` **a la izquierda** + párrafo editorial (T-SEO-015) |
+| Tarot del día | `daily-reading/DailyCardPage.tsx` | Igual que Horóscopo: editorial a la izquierda |
+| Horóscopo Chino | `chinese-horoscope/ChineseHoroscopeHub.tsx` | `h1 text-4xl` centrado + `text-muted-foreground`, sin fondo |
+| Numerología | `numerology/NumerologyPage.tsx` | Igual que Chino |
+| Rituales | `rituals/RitualsPage.tsx` | `h1 text-4xl` **a la izquierda**, sin fondo |
+| Péndulo | `pendulum/PendulumConsultation.tsx` | `h1 text-4xl` centrado, sin fondo |
+| Carta Astral | `birth-chart/BirthChartPageContent/` | `h1 text-3xl font-bold` **sans** (no Cormorant), icono `Star` en círculo lila, badge "1 carta gratis" |
+| Servicios | `holistic-services/ServiciosPage.tsx` | `h1 text-3xl` a la izquierda con botones a la derecha (Mis reservas / Mis favoritos) |
+
+El resultado es que la navegación entre secciones cambia de "sitio" en cada clic. La banda de la
+enciclopedia ya es la línea visual del sitio (misma familia que el hero de la portada y que los
+medallones de T-UI-12): hay que extraerla a un componente y usarla en las nueve.
+
+#### 🎯 Diseño del componente
+
+`components/ui/section-hero.tsx` — `<SectionHero>` extraído **tal cual** del `<header>` de
+`EnciclopediaHubContent` (no rediseñar: mover). Server Component (sin hooks; las estrellas y la luna
+son CSS).
+
+```tsx
+<SectionHero
+  title="Horóscopo Chino 2026"
+  lead="Descubrí las predicciones anuales según tu animal"
+  icon={{ family: 'hubs', name: 'chinese' }}   // opcional: medallón lg centrado sobre el título
+  actions={<Button…/>}                          // opcional: fila centrada bajo la bajada (Servicios)
+  badge="1 carta gratis"                        // opcional: píldora dorada sobre el título (Carta Astral)
+  size="md"                                     // 'md' (default) | 'lg' (enciclopedia, más alto)
+/>
+```
+
+- Estructura: `<header data-testid="section-hero">` con `rounded-2xl`, `HERO_GRADIENT`,
+  `DECORATIVE_STARS`, luna CSS, filete dorado. Contenido centrado: medallón `hubs/` (si `icon`),
+  `h1` Cormorant crema `text-4xl sm:text-5xl`, bajada `max-w-xl` en `CREAM_MUTED`, `actions`.
+- `HERO_GRADIENT`, `CREAM`, `CREAM_MUTED` y `DECORATIVE_STARS` salen de `EnciclopediaHubContent` a
+  `lib/constants/section-hero.ts` (o al propio componente); `EnciclopediaHubContent` pasa a usar
+  `<SectionHero size="lg">` y su test de hero (`encyclopedia-hub-hero`) se mueve al componente.
+- `h1` **único por página**: el componente renderiza el `h1`; ninguna sección debe dejar otro.
+- `prefers-reduced-motion`: las estrellas ya lo respetan en `globals.css` (`animate-twinkle`).
+
+#### ✅ Tareas específicas
+
+- [ ] `components/ui/section-hero.tsx` + test (título, bajada, icono opcional con medallón, badge,
+      actions, `h1` único, `data-testid`, sin `'use client'`).
+- [ ] `EnciclopediaHubContent` consume `<SectionHero size="lg">`; sin cambios visuales (comparar
+      capturas antes/después a 1280 y 390 px).
+- [ ] Migrar las ocho restantes, **conservando el texto exacto de cada `h1` y bajada** (son copy
+      SEO de T-SEO-015; `check:indexable` no debe bajar):
+  - Horóscopo (`HoroscopeHub`): la bajada larga (3 líneas) queda como `lead`; icono `hubs/horoscope`.
+  - Tarot del día (`DailyCardPage`): idem; icono `hubs/tarot`.
+  - Horóscopo Chino: icono `hubs/chinese`.
+  - Numerología: icono `hubs/numerology`.
+  - Rituales: icono `hubs/rituals`.
+  - Péndulo: icono `hubs/pendulum`.
+  - Carta Astral: icono `hubs/birth-chart`; el badge "1 carta gratis" pasa a `badge`; el `h1` pasa a
+    Cormorant (hoy es el único sans del sitio). Revisar `BirthChartPageContent.test`.
+  - Servicios: icono `hubs/tarot`? **No**: usar `rituals/tarot` o dejar sin icono y decidir en el
+    PR con captura; los botones "Mis reservas / Mis favoritos" (solo con sesión) pasan a `actions`.
+- [ ] `HomeSectionHeader` (portada) y el hero de T-SEO-022 **no** se tocan: la portada tiene su
+      hero propio y sus secciones internas usan otro patrón.
+- [ ] Móvil: a 390 px la banda no supera ~40 % del viewport; el `h1` largo de Horóscopo ("Horóscopo de
+      hoy para los 12 signos") parte en dos líneas sin cortar descendentes (ver el fix de la "g" en
+      T-SEO-022, commit `be5ce49c`).
+
+#### 🧪 Criterios de aceptación
+
+- [ ] Las nueve secciones del menú abren con la misma banda: centrada, gradiente noche, Cormorant
+      crema, filete dorado. Verificado con capturas a 1280×900 y 390×844 de las nueve.
+- [ ] `EnciclopediaHubContent` se ve igual que hoy (es la referencia, no cambia).
+- [ ] Un solo `h1` por página, con el texto actual (tests de integración existentes en verde:
+      `EditorialHome.integration`, `HoroscopeHub.test`, `DailyCardPage.test`, etc.).
+- [ ] `npm run check:indexable` contra un build local: ninguna de las nueve URLs baja su cuenta.
+- [ ] `no-emoji`, `no-ia`, `no-salud` en verde; sin `any`; `data-testid="section-hero"`.
+- [ ] Ciclo de calidad completo.
+
+#### 📁 Archivos involucrados
+
+Nuevos: `components/ui/section-hero.tsx` (+ test), `lib/constants/section-hero.ts`.
+Modificados: los nueve componentes de la tabla y sus tests.
+
+---
+
 ## ORDEN DE IMPLEMENTACIÓN RECOMENDADO
 
 ```
