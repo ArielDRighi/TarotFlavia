@@ -1,5 +1,6 @@
 'use client';
 
+import { Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NUMEROLOGY_NUMBERS_INFO } from '@/lib/utils/numerology';
@@ -64,8 +65,9 @@ export function NumberCard({ number, context, variant = 'compact', onClick, clas
 
         {/* Master Number Badge */}
         {number.isMaster && (
-          <Badge variant="secondary" className="mb-2">
-            ⭐ Número Maestro
+          <Badge variant="secondary" className="mb-2 gap-1">
+            <Star className="h-3 w-3" aria-hidden="true" />
+            Número Maestro
           </Badge>
         )}
 

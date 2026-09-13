@@ -5,6 +5,7 @@ import { UserPlus, LogIn } from 'lucide-react';
 import { ROUTES } from '@/lib/constants/routes';
 
 import { Button } from '@/components/ui/button';
+import { CheckItem } from '@/components/ui/check-item';
 import {
   Card,
   CardContent,
@@ -53,21 +54,11 @@ export function AnonymousLimitReached() {
         <div className="bg-primary/5 rounded-lg p-4 text-center text-sm">
           <p className="font-medium">Con una cuenta gratuita obtienes:</p>
           <ul className="mt-2 space-y-1 text-left">
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span> 1 carta del día
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span> 1 lectura de tarot diaria
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span> Historial de tus lecturas
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span> Explorar el catálogo de rituales
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span> Ver eventos del calendario sagrado (limitado)
-            </li>
+            <CheckItem>1 carta del día</CheckItem>
+            <CheckItem>1 lectura de tarot diaria</CheckItem>
+            <CheckItem>Historial de tus lecturas</CheckItem>
+            <CheckItem>Explorar el catálogo de rituales</CheckItem>
+            <CheckItem>Ver eventos del calendario sagrado (limitado)</CheckItem>
           </ul>
         </div>
       </CardContent>

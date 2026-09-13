@@ -5,6 +5,7 @@ import { Calendar, History, Crown, Sparkles } from 'lucide-react';
 
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
+import { CheckItem } from '@/components/ui/check-item';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { ROUTES } from '@/lib/constants/routes';
 import {
@@ -139,18 +140,9 @@ export function ReadingLimitReached() {
             <div className="bg-primary/5 rounded-lg p-4 text-center text-sm">
               <p className="mb-2 font-medium">Mientras tanto, puedes:</p>
               <ul className="space-y-1 text-left">
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">✓</span> Ver todas tus lecturas pasadas en el
-                  historial
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">✓</span> Obtener tu carta del día (si aún no la
-                  recibiste)
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">✓</span> Volver mañana para una nueva lectura
-                  gratuita
-                </li>
+                <CheckItem>Ver todas tus lecturas pasadas en el historial</CheckItem>
+                <CheckItem>Obtener tu carta del día (si aún no la recibiste)</CheckItem>
+                <CheckItem>Volver mañana para una nueva lectura gratuita</CheckItem>
               </ul>
             </div>
           </>

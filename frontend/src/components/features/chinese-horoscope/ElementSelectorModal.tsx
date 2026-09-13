@@ -10,6 +10,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { Lightbulb } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -135,8 +136,9 @@ export function ElementSelectorModal({
         </div>
 
         <div className="bg-muted rounded-lg p-3 text-sm">
-          <p className="text-muted-foreground">
-            💡 <strong>¿No sabes tu elemento?</strong>
+          <p className="text-muted-foreground flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <strong>¿No sabes tu elemento?</strong>
           </p>
           <p className="text-muted-foreground mt-1">
             Usa el calculador en la página principal con tu fecha de nacimiento para calcular tu

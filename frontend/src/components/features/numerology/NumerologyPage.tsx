@@ -11,7 +11,7 @@ import { NumerologyProfile } from '@/components/features/numerology';
 import { useAuthStore } from '@/stores/authStore';
 import { useCalculateNumerology, useMyNumerologyProfile } from '@/hooks/api/useNumerology';
 import { ROUTES } from '@/lib/constants/routes';
-import { AlertCircle, RotateCcw } from 'lucide-react';
+import { AlertCircle, Lightbulb, RotateCcw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { NumerologyResponseDto } from '@/types/numerology.types';
 
@@ -116,9 +116,10 @@ export function NumerologyPage() {
                 <NumerologyProfile profile={myProfile} />
 
                 {/* Tip para actualizar nombre */}
-                <Alert className="mt-4 border-blue-200 bg-blue-50">
-                  <AlertDescription className="text-sm text-blue-900">
-                    💡 <strong>Consejo:</strong> Si cambiaste tu nombre o quieres usar tu nombre
+                <Alert variant="info" className="mt-4">
+                  <Lightbulb aria-hidden="true" />
+                  <AlertDescription>
+                    <strong>Consejo:</strong> Si cambiaste tu nombre o quieres usar tu nombre
                     completo para un análisis más preciso,{' '}
                     <Link
                       href={ROUTES.PERFIL}

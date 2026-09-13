@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Hash, Settings } from 'lucide-react';
+import { Hash, Settings, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -83,8 +83,9 @@ export function NumerologyWidget() {
             </div>
             <div className="text-foreground text-sm font-semibold">{profile.lifePath.name}</div>
             {isMasterLifePath && (
-              <div className="bg-secondary/15 text-secondary mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold">
-                ⭐ Maestro
+              <div className="bg-secondary/15 text-secondary mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
+                <Star className="h-3 w-3" aria-hidden="true" />
+                Maestro
               </div>
             )}
           </div>
@@ -116,8 +117,9 @@ export function NumerologyWidget() {
                     {dayNumber.meaning.name}
                   </div>
                   {[11, 22, 33].includes(dayNumber.dayNumber) && (
-                    <div className="bg-secondary/15 text-secondary mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold">
-                      ⭐ Maestro
+                    <div className="bg-secondary/15 text-secondary mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
+                      <Star className="h-3 w-3" aria-hidden="true" />
+                      Maestro
                     </div>
                   )}
                   <p className="text-muted-foreground mt-2 line-clamp-2 text-xs">

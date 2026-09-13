@@ -39,7 +39,7 @@ export default function UpgradeBanner() {
           <Gem className="mt-1 h-6 w-6 flex-shrink-0" />
           <div>
             <h3 className="mb-1 font-serif text-lg font-semibold">
-              💎 Desbloquea interpretaciones personalizadas
+              Desbloquea interpretaciones personalizadas
             </h3>
             <p className="text-sm text-white/90">
               Con Premium, obtén análisis detallados, 3 lecturas por día y acceso a todas las

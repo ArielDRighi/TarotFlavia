@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Star, Calendar, Clock, Link as LinkIcon } from 'lucide-react';
+import { Star, Calendar, Clock, Link as LinkIcon, PartyPopper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -216,7 +216,8 @@ export function BookingPage({ tarotistaId }: BookingPageProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-serif text-2xl">
-              <span className="text-4xl">🎉</span> ¡Sesión reservada!
+              <PartyPopper className="text-secondary h-8 w-8" aria-hidden="true" />
+              ¡Sesión reservada!
             </DialogTitle>
             <DialogDescription>
               Tu sesión ha sido confirmada. Recibirás un correo con todos los detalles.

@@ -783,8 +783,30 @@ Por tamaño, conviene dividir en **2-3 PRs**:
 **Prioridad:** 🟡 ALTA
 **Estimación:** 3 días de integración + generación de assets (Ariel, con los prompts de abajo)
 **Dependencias:** ninguna
-**Estado:** ⬜ PENDIENTE
+**Estado:** 🟡 EN CURSO — PR 1/N (base + UI genérica) hecho el 13 de septiembre de 2026; la Fase 2 espera los assets de la Fase 0
 **Reportado por:** Ariel (12 de septiembre de 2026): "hay iconos que no tienen nada que ver con el diseño de la página"
+
+#### 📌 Estado por PR
+
+| PR | Alcance | Estado |
+| --- | --- | --- |
+| **1 — base + UI genérica** (`feature/T-UI-12-iconografia-marca-base`) | Script de post-proceso (`scripts/process-brand-icons.mjs` + `npm run icons:process`, `sharp` como devDependency), registro tipado `lib/constants/brand-icons.ts` (79 slugs, 9 familias), `<BrandIcon>`, `<CheckItem>`, migración de toda la UI genérica a `lucide-react`, guardarraíl `no-emoji-user-facing.test.ts` con lista de pendientes por familia, sección "Iconografía" en `DESIGN_HAND-OFF.md` | ✅ |
+| **2..N — una familia por PR** | Al recibir los WebP de una familia en `public/images/icons/<familia>/`: migrar sus consumidores a `<BrandIcon>` y sacar los archivos de `PENDIENTES_FASE_2` en el guardarraíl. El test del registro exige que la familia esté completa y sin huérfanos | ⬜ esperan Fase 0 |
+
+**Decisiones tomadas en el PR 1** (Ariel las puede revertir):
+
+- La notación astrológica de `birth-chart.enums.ts` **se queda como texto** (opción por defecto de la
+  tabla; allowlist permanente del guardarraíl).
+- El separador editorial `✦` (U+2726) de `MarkdownArticle` / `GuiasContent` **se queda**: no tiene
+  presentación emoji en Unicode, renderiza igual en todos los SO y ya va en dorado de marca. Si igual se
+  quiere un asset, entra con la familia `hubs/`.
+- Los textos de compartir (`navigator.share` en `DailyReadingCard` / `DailyCardExperience`) conservan
+  sus emojis: no los renderiza el sitio.
+- **Un solo tamaño de asset (512)**: `next/image` ya genera las variantes de 16–256 px
+  (`imageSizes` en `next.config.ts`), así que el 128 "para badges" sobra y sólo agregaría archivos
+  huérfanos al chequeo del registro. `--size` existe por si hace falta.
+- Slugs de rituales: `cleansing → energy`, `healing → wellbeing` (glosario sin términos de salud);
+  el mapeo lo hace el consumidor cuando llegue la familia.
 
 #### 📋 Descripción
 
@@ -843,18 +865,23 @@ el código (`aries`, `rat`, `fire`, `new_moon`…).
 - [ ] Generar los ~79 assets con los prompts de abajo. Generar **de a familia completa en una
       misma sesión/chat** (los 12 signos seguidos, los 12 animales seguidos…) para que el modelo
       mantenga el trazo; si un asset se desvía, regenerar pasando uno bueno como referencia.
-- [ ] Post-proceso (script `frontend/scripts/process-brand-icons.mjs` con `sharp`): quitar el
-      fondo blanco → alfa, recortar al contenido con margen 8 %, exportar 512 y 128 en WebP.
-- [ ] Revisar los 79 en una hoja de contacto (`scripts/` genera `icons-contact-sheet.html`) y
-      descartar los que no lean bien a 32 px.
+- [x] Post-proceso (script `frontend/scripts/process-brand-icons.mjs` con `sharp`): quitar el
+      fondo blanco → alfa, recortar al contenido con margen 8 %, exportar 512 en WebP
+      (`npm run icons:process`, entrada `frontend/brand-icons-raw/<familia>/<slug>.png`, gitignored).
+- [ ] Revisar los 79 en la hoja de contacto (`brand-icons-raw/icons-contact-sheet.html`, la
+      genera el script: 32/64/128 px sobre tarjeta y sobre cósmico) y descartar los que no lean
+      bien a 32 px.
 
 **Fase 1 — Componente y registro:**
 
-- [ ] `lib/constants/brand-icons.ts`: registro tipado `BRAND_ICONS[familia][slug] = { src, alt }`
-      con `alt` en español. Un test verifica que cada entrada tiene su archivo en `public/`.
-- [ ] `components/ui/brand-icon.tsx`: `<BrandIcon family="zodiac" name="aries" size="sm|md|lg" />`
-      sobre `next/image`, `role="img"`, `aria-label` desde el registro, `decorative` para ocultar.
-      Misma API de tamaño que hoy (`text-4xl` → `size="lg"`).
+- [x] `lib/constants/brand-icons.ts`: registro tipado `BRAND_ICONS[familia][slug] = { src, alt }`
+      con `alt` en español. El test verifica que cada familia **presente** en `public/` esté
+      completa y sin huérfanos (las que aún no llegaron no se exigen: así el test es verde hoy y
+      se vuelve estricto familia por familia).
+- [x] `components/ui/brand-icon.tsx`: `<BrandIcon family="zodiac" name="aries" size="sm|md|lg|xl" />`
+      sobre `next/image`, `role="img"`, `alt` desde el registro (o `label`), `decorative` para
+      ocultar, `priority` sólo above-the-fold. Equivalencias: `text-xl` → `sm` (20), `text-2xl/3xl`
+      → `md` (32), `text-4xl/5xl` → `lg` (48), hero → `xl` (72).
 
 **Fase 2 — Migración por dominio** (un PR por familia o por dos familias; grep sobre TODO
 `src/`, incluido `src/app/`, no solo `components/features/`):
@@ -870,18 +897,26 @@ el código (`aries`, `rat`, `fire`, `new_moon`…).
       `NumerologyProfile`, `NumerologyPage`).
 - [ ] Hubs y guías (`ArticleCard`, `GuidesSection`, `AstrologySection`, `EncyclopediaHome`,
       `GuiasContent`, `MarkdownArticle` ✦, `service-intros.data.ts`, `sacred-calendar.types.ts`).
-- [ ] UI genérica → `lucide-react`: `notification.types.ts` (🔔🎁⚙️🔎 → `Bell`, `Gift`,
-      `Settings`, `Search`…), ✓ en `*LimitReached`, `SubscriptionTab`, `BirthChartPageContent`,
-      `TarotistaProfilePage` (→ `Check`), 💡 (→ `Lightbulb`), 🎉 (→ `PartyPopper`), ⭐ Maestro
-      (→ `Star`), ★ (→ `Star`), 💎 (→ `Gem`), ✨ (→ `Sparkles`).
+- [x] UI genérica → `lucide-react`: `notification.types.ts` (`icon` pasa de string a
+      `LucideIcon`: ✨🌙🕯️🔎🔮⚙️🎁🔔 → `Sparkles`, `Moon`, `Flame`, `Search`, `Layers`, `Settings`,
+      `Gift`, `Bell`), los 24 ✓ de `*LimitReached`, `SubscriptionTab`, `BirthChartPageContent`
+      (→ nuevo `<CheckItem>` en `components/ui/check-item.tsx`), ✓ en `TarotistaProfilePage`
+      (→ `Check`), 💡 (→ `Lightbulb`; el aviso de `NumerologyPage` pasa a `Alert variant="info"`),
+      🎉 (→ `PartyPopper`), ⭐ Maestro (→ `Star`), ✨ en `WelcomeModal` / `ReadingExperience`
+      (→ `Sparkles`), 💎 y ✨ redundantes con el `<Gem>`/`<Sparkles>` de al lado en
+      `UpgradeBanner` / `FreeReadingUpgradeBanner` (se quitan). ★ de `SavedChartCard` es el
+      fallback de `ZodiacSymbol`: va con la familia `zodiac/`.
 
 **Fase 3 — Guardarraíl:**
 
-- [ ] `src/no-emoji-user-facing.test.ts` (mismo patrón que `no-ia-user-facing.test.ts`): falla si
-      aparece un carácter de los bloques emoji / Misc Symbols en `src/` fuera de comentarios,
-      tests y `admin/`. Allowlist mínima y justificada (p. ej. `birth-chart.enums.ts` si se
-      confirma que la notación astrológica se queda).
-- [ ] `DESIGN_HAND-OFF.md`: sección "Iconografía" con la regla de decisión de arriba.
+- [x] `src/no-emoji-user-facing.test.ts` (mismo patrón que `no-ia-user-facing.test.ts`): falla si
+      aparece un carácter de los bloques emoji / Misc Symbols / Dingbats en `src/` fuera de
+      comentarios, tests y `admin/`. Dos listas verificadas (un archivo listado que ya no tiene
+      emojis rompe el test): `ALLOWLIST` permanente (`birth-chart.enums.ts`, textos de compartir,
+      `✦`) y `PENDIENTES_FASE_2` (20 archivos, tipada por familia de `BRAND_ICONS`), que cada PR
+      de familia va vaciando.
+- [x] `DESIGN_HAND-OFF.md` (`backend/tarot-app/docs/`): sección "6. Iconografía" con la línea
+      visual, la regla de decisión y el uso de `<BrandIcon>`.
 
 #### 🎨 Prompts para Gemini (Nano Banana)
 
@@ -1030,20 +1065,22 @@ reemplazar la línea de BACKGROUND por
 
 #### 🧪 Criterios de aceptación
 
-- [ ] Cero emojis en texto de cara al usuario fuera de `admin/` (guardarraíl en verde).
+- [ ] Cero emojis en texto de cara al usuario fuera de `admin/` (guardarraíl en verde). *PR 1:
+      verde con 20 archivos en `PENDIENTES_FASE_2`; se cumple del todo cuando la lista quede vacía.*
 - [ ] Los 24 signos (12 + 12) se ven idénticos en Linux/Windows/macOS/iOS/Android: son
       imágenes, no glifos de fuente.
 - [ ] `ZodiacSymbol` y `ChineseAnimalSymbol` conservan su firma pública; sus consumidores no
       cambian de props.
-- [ ] Cada asset tiene `alt` en español y `role="img"`; los decorativos, `aria-hidden`.
+- [x] Cada asset tiene `alt` en español y `role="img"`; los decorativos, `aria-hidden`
+      (garantizado por `<BrandIcon>` + el registro).
 - [ ] Lighthouse: sin regresión de LCP en `/horoscopo` y `/horoscopo-chino` (assets 512 WebP
       < 15 KB cada uno, `sizes` correcto, `priority` solo above-the-fold).
-- [ ] Ciclo de calidad completo por PR.
+- [x] Ciclo de calidad completo por PR (PR 1: ✅).
 
 #### 📁 Archivos involucrados
 
 Nuevos: `public/images/icons/**`, `lib/constants/brand-icons.ts`, `components/ui/brand-icon.tsx`,
-`scripts/process-brand-icons.mjs`, `src/no-emoji-user-facing.test.ts`.
+`components/ui/check-item.tsx`, `scripts/process-brand-icons.mjs`, `src/no-emoji-user-facing.test.ts`.
 Modificados: los 41 archivos del inventario (lista exacta con
 `python3` + regex de bloques emoji sobre `src/` sin tests, ver descripción).
 

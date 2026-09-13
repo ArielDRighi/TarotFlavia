@@ -31,8 +31,9 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]" aria-label="Modal de bienvenida">
         <DialogHeader>
-          <DialogTitle className="text-primary font-serif text-2xl">
-            ¡Bienvenido al Oráculo de Tarot! ✨
+          <DialogTitle className="text-primary flex items-center gap-2 font-serif text-2xl">
+            ¡Bienvenido al Oráculo de Tarot!
+            <Sparkles className="text-secondary h-6 w-6 shrink-0" aria-hidden="true" />
           </DialogTitle>
           <DialogDescription className="text-base">
             Tu cuenta ha sido creada exitosamente. Aquí está lo que puedes hacer:

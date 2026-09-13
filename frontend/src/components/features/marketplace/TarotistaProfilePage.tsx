@@ -7,7 +7,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Star, Sparkles, Calendar, MessageSquare } from 'lucide-react';
+import { Star, Sparkles, Calendar, MessageSquare, Check } from 'lucide-react';
 import { useTarotistaDetail } from '@/hooks/api/useTarotistas';
 import { getInitials } from '@/lib/utils/text';
 import {
@@ -235,7 +235,14 @@ export function TarotistaProfilePage({ id, initialTarotista }: TarotistaProfileP
                   : 'bg-gray-200 text-gray-700'
               )}
             >
-              {tarotista.isActive ? '✓ Disponible ahora' : 'No disponible'}
+              {tarotista.isActive ? (
+                <>
+                  <Check className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
+                  Disponible ahora
+                </>
+              ) : (
+                'No disponible'
+              )}
             </Badge>
 
             {/* Favorite Tarotista Button (FREE users only) */}

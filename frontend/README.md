@@ -100,6 +100,33 @@ Detalles que importan:
 - **No es un gate de CI** (decisión de T-SEO-001): correrlo a mano después de un deploy o antes de
   pedirle a Google que reindexe.
 
+## Iconos de marca (T-UI-12)
+
+La iconografía de dominio (signos, animales chinos, elementos, palos, áreas del horóscopo, fases
+lunares, categorías de rituales, arquetipos numerológicos y hubs) **no usa emojis del sistema**:
+son WebP con alfa en `public/images/icons/<familia>/<slug>.webp`, servidos por
+`<BrandIcon family name />` (`src/components/ui/brand-icon.tsx`). El inventario tipado vive en
+`src/lib/constants/brand-icons.ts` y es el contrato con los assets: cada familia presente en
+`public/` tiene que estar completa y sin huérfanos (lo verifica `brand-icons.test.ts`). La
+iconografía de UI genérica (checks, avisos, campanas, bombillas) va con `lucide-react`. El
+guardarraíl `src/no-emoji-user-facing.test.ts` impide que vuelvan a entrar emojis en texto
+user-facing; los archivos que todavía esperan su familia de assets están listados ahí.
+
+Flujo para generar una familia (los prompts están en `docs/BACKLOG_CONSISTENCIA_UI.md`, T-UI-12):
+
+```bash
+# 1. Descargar los PNG de Nano Banana en brand-icons-raw/<familia>/<slug>.png (carpeta gitignored)
+# 2. Post-procesar: blanco → alfa, recorte con margen 8 %, WebP 512 px
+npm run icons:process                       # todas las familias presentes en brand-icons-raw/
+npm run icons:process -- --family zodiac    # una sola
+# 3. Abrir brand-icons-raw/icons-contact-sheet.html y descartar los que no lean a 32 px
+# 4. npm run test:run -- brand-icons       # la familia tiene que estar completa
+```
+
+Un solo tamaño (512) a propósito: `next/image` genera las variantes de 16–256 px desde ahí. El
+script avisa si un asset pasa los 15 KB (criterio de LCP del backlog). Si en tu máquina `sharp`
+intenta compilar contra un `libvips` global, instalá con `SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

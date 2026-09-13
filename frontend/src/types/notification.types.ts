@@ -3,6 +3,9 @@
  * Frontend types for in-app notifications system
  */
 
+import type { LucideIcon } from 'lucide-react';
+import { Bell, Flame, Gift, Layers, Moon, Search, Settings, Sparkles } from 'lucide-react';
+
 // Enums
 /**
  * Tipos de notificación.
@@ -53,44 +56,45 @@ export interface NotificationFilters {
 // Helpers de UI
 export interface NotificationTypeInfo {
   name: string;
-  icon: string;
+  /** Icono de lucide (T-UI-12: sin emojis del sistema). */
+  icon: LucideIcon;
   color: string;
 }
 
 export const NOTIFICATION_TYPE_INFO: Record<NotificationType, NotificationTypeInfo> = {
   [NotificationType.SACRED_EVENT]: {
     name: 'Evento Sagrado',
-    icon: '✨',
+    icon: Sparkles,
     color: 'text-purple-500',
   },
   [NotificationType.SACRED_EVENT_REMINDER]: {
     name: 'Recordatorio',
-    icon: '🌙',
+    icon: Moon,
     color: 'text-indigo-500',
   },
   [NotificationType.RITUAL_REMINDER]: {
     name: 'Ritual',
-    icon: '🕯️',
+    icon: Flame,
     color: 'text-amber-500',
   },
   [NotificationType.PATTERN_INSIGHT]: {
     name: 'Patrón',
-    icon: '🔎',
+    icon: Search,
     color: 'text-teal-500',
   },
   [NotificationType.READING_SHARED]: {
     name: 'Lectura',
-    icon: '🔮',
+    icon: Layers,
     color: 'text-blue-500',
   },
   [NotificationType.SYSTEM]: {
     name: 'Sistema',
-    icon: '⚙️',
+    icon: Settings,
     color: 'text-gray-500',
   },
   [NotificationType.PROMOTION]: {
     name: 'Promoción',
-    icon: '🎁',
+    icon: Gift,
     color: 'text-pink-500',
   },
 };
@@ -98,7 +102,7 @@ export const NOTIFICATION_TYPE_INFO: Record<NotificationType, NotificationTypeIn
 /** Se usa cuando el backend emite un tipo que este frontend todavía no conoce. */
 const FALLBACK_NOTIFICATION_TYPE_INFO: NotificationTypeInfo = {
   name: 'Notificación',
-  icon: '🔔',
+  icon: Bell,
   color: 'text-gray-500',
 };
 

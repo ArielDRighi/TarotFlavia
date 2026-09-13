@@ -46,6 +46,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# iconos de marca crudos (T-UI-12): salen de Nano Banana, no se versionan
+/brand-icons-raw/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

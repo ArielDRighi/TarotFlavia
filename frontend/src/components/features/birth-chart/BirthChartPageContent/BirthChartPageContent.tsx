@@ -33,6 +33,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { CheckItem } from '@/components/ui/check-item';
 
 const LOADING_MESSAGES = [
   'Trazando el mapa del cielo en tu momento de nacimiento...',
@@ -249,19 +250,19 @@ export function BirthChartPageContent() {
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">
             <ul className="space-y-1">
-              <li>✓ Gráfico de tu carta natal</li>
-              <li>✓ Posiciones planetarias</li>
-              <li>✓ Tu &quot;Big Three&quot; (Sol, Luna, Ascendente)</li>
+              <CheckItem>Gráfico de tu carta natal</CheckItem>
+              <CheckItem>Posiciones planetarias</CheckItem>
+              <CheckItem>Tu &quot;Big Three&quot; (Sol, Luna, Ascendente)</CheckItem>
               {isAuthenticated && user?.plan !== 'anonymous' && (
                 <>
-                  <li>✓ Interpretaciones completas</li>
-                  <li>✓ Descarga en PDF</li>
+                  <CheckItem>Interpretaciones completas</CheckItem>
+                  <CheckItem>Descarga en PDF</CheckItem>
                 </>
               )}
               {user?.plan === 'premium' && (
                 <>
-                  <li>✓ Síntesis personalizada</li>
-                  <li>✓ Historial de cartas</li>
+                  <CheckItem>Síntesis personalizada</CheckItem>
+                  <CheckItem>Historial de cartas</CheckItem>
                 </>
               )}
             </ul>

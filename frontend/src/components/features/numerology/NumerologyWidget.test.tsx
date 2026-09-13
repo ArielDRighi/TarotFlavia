@@ -360,7 +360,7 @@ describe('NumerologyWidget', () => {
       render(<NumerologyWidget />);
 
       expect(screen.getByText('11')).toBeInTheDocument();
-      expect(screen.getByText('⭐ Maestro')).toBeInTheDocument();
+      expect(screen.getByText('Maestro')).toBeInTheDocument();
     });
 
     it('should display master number badge for day number 22', () => {
@@ -390,7 +390,7 @@ describe('NumerologyWidget', () => {
       render(<NumerologyWidget />);
 
       expect(screen.getByText('22')).toBeInTheDocument();
-      const badges = screen.getAllByText('⭐ Maestro');
+      const badges = screen.getAllByText('Maestro');
       expect(badges.length).toBeGreaterThan(0);
     });
 

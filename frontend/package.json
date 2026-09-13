@@ -15,7 +15,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "check:indexable": "node scripts/check-indexable-content.mjs"
+    "check:indexable": "node scripts/check-indexable-content.mjs",
+    "icons:process": "node scripts/process-brand-icons.mjs"
   },
   "dependencies": {
     "@astrodraw/astrochart": "^3.0.2",
@@ -74,6 +75,7 @@
     "jsdom": "^27.2.0",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.15"

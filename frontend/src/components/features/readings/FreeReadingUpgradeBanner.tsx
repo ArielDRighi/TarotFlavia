@@ -35,7 +35,7 @@ export default function FreeReadingUpgradeBanner() {
         </div>
         <div className="flex-1">
           <h3 className="mb-1 font-serif text-lg font-semibold">
-            ✨ Llevá tu lectura al siguiente nivel
+            Llevá tu lectura al siguiente nivel
           </h3>
           <p className="text-sm text-white/90">
             Con Premium obtenés una interpretación personalizada y profunda para tu pregunta exacta.

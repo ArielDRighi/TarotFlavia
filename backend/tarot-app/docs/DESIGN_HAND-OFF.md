@@ -14,7 +14,8 @@
 3. [Pantallas - Prioridad Alta](#-3-pantallas---prioridad-alta)
 4. [Pantallas - Prioridad Media](#-4-pantallas---prioridad-media)
 5. [UI Kit - Componentes Reutilizables](#-5-ui-kit---componentes-reutilizables)
-6. [Checklist de Implementación](#-6-checklist-de-implementación)
+6. [Iconografía](#-6-iconografía)
+7. [Checklist de Implementación](#-7-checklist-de-implementación)
 
 ---
 
@@ -433,7 +434,52 @@ Crea un componente SessionCard para el listado 'Mis Sesiones'.
 
 ---
 
-## ✅ 6. Checklist de Implementación
+## 🪄 6. Iconografía
+
+> Regla T-UI-12 (12 de septiembre de 2026). **Ningún emoji del sistema en texto user-facing**:
+> se ven distintos en cada SO/navegador y rompen la línea visual. El guardarraíl
+> `frontend/src/no-emoji-user-facing.test.ts` lo hace cumplir.
+
+### Línea visual de los iconos de dominio
+
+Line-art en **dorado metálico (`#D69E2E`)** de trazo fino con brillo cálido suave, filigrana
+ornamental delicada, algún destello de 4 puntas y polvo de estrellas tenue alrededor del sujeto.
+Un solo sujeto centrado, composición simétrica y márgenes generosos (el sujeto ocupa ~70 % del
+lienzo). Legible a 48 px: sin detalle diminuto, no más de 3 niveles de detalle. Sin texto ni
+números. Es la misma línea que las ilustraciones de `public/images/enciclopedia|premium|dashboard`.
+
+Se generan con Gemini (Nano Banana) sobre **fondo blanco puro** y se post-procesan a **WebP 512×512
+con alfa** (`npm run icons:process` en `frontend/`), así el mismo asset sirve sobre tarjeta crema /
+blanca y sobre fondo cósmico violeta. Los prompts completos, familia por familia, están en
+`docs/BACKLOG_CONSISTENCIA_UI.md` (T-UI-12).
+
+### Regla de decisión (qué va con qué)
+
+| Tipo de icono | Solución | Ejemplos |
+| --- | --- | --- |
+| **Iconografía de dominio**: signos, animales chinos, elementos, palos, áreas del horóscopo, fases lunares, categorías de rituales, arquetipos numerológicos, hubs | **Asset de marca** en `public/images/icons/<familia>/<slug>.webp` vía `<BrandIcon family name />` (`frontend/src/components/ui/brand-icon.tsx`). Inventario tipado en `frontend/src/lib/constants/brand-icons.ts` | ♈ 🐉 🔥 🌕 ❤️ 👑 🔮 → `zodiac/aries`, `chinese/dragon`, `elements/fire`, `moon/full_moon`, `areas/love`, `numerology/1`, `hubs/tarot` |
+| **Iconografía de UI genérica**: acciones, estados, avisos | **`lucide-react`** (ya es la librería del sitio). Listas de beneficios con `<CheckItem>` | ✓ → `Check`, 💡 → `Lightbulb`, 🎉 → `PartyPopper`, ⭐ → `Star`, 🔔 → `Bell`, 🎁 → `Gift`, ⚙️ → `Settings`, ✨ → `Sparkles`, 💎 → `Gem` |
+| **Notación astrológica** de la carta natal (`birth-chart.enums.ts`: ☉ ☽ ☿ ♀ ♂ … ☌ ☍ ⚹) | **Se mantiene como texto** con `ZodiacSymbol` / U+FE0E: es notación estándar de la disciplina, no decoración | ☉ ☽ ♃ |
+| **Ornamentos tipográficos** sin presentación emoji en Unicode | Se permiten como texto en `text-secondary` | ✦ (separador editorial) |
+| **Emojis en encabezados de texto** (`service-intros.data.ts`) | Se quitan del string; si hace falta icono, va como `<BrandIcon>` al lado | "🗂️ Los Arcanos Menores" → "Los Arcanos Menores" |
+| **Texto de compartir** (`navigator.share`, WhatsApp) | Puede llevar emojis: no lo renderiza el sitio | 🌟 ✨ en `DailyReadingCard` |
+| Panel de admin | Fuera de alcance (solo administradores) | `ChineseHoroscopeAdminPanel`, `AIUsageAlerts` |
+
+### Uso de `<BrandIcon>`
+
+```tsx
+<BrandIcon family="zodiac" name="aries" size="lg" />            // role="img", alt "Aries"
+<BrandIcon family="chinese" name="dragon" decorative />          // aria-hidden (el texto de al lado ya lo nombra)
+<BrandIcon family="areas" name="love" label="Amor y relaciones" size="sm" />
+```
+
+Tamaños: `sm` 20 px (≈ `text-xl`), `md` 32 px (≈ `text-2xl`/`3xl`), `lg` 48 px (≈ `text-4xl`/`5xl`),
+`xl` 72 px (hero). `priority` sólo above-the-fold; por defecto es lazy. Cada asset debe pesar
+< 15 KB (criterio de LCP en `/horoscopo` y `/horoscopo-chino`).
+
+---
+
+## ✅ 7. Checklist de Implementación
 
 ### Fase 1: Setup & UI Kit
 
