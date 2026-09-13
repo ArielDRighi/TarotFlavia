@@ -2,8 +2,10 @@
 
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
 import { ChineseCompatibility } from './ChineseCompatibility';
+import { HOROSCOPE_AREA_ICON } from '@/lib/constants/horoscope-areas';
 import { CHINESE_ZODIAC_INFO, getElementNameEs } from '@/lib/utils/chinese-zodiac';
 import type { ChineseHoroscope, ChineseElementCode } from '@/types/chinese-horoscope.types';
 
@@ -18,11 +20,11 @@ export interface ChineseHoroscopeDetailProps {
 }
 
 const AREA_LABELS = {
-  love: { label: 'Amor', icon: '❤️' },
-  career: { label: 'Carrera', icon: '💼' },
-  wellness: { label: 'Bienestar', icon: '✨' },
-  finance: { label: 'Finanzas', icon: '💰' },
-};
+  love: 'Amor',
+  career: 'Carrera',
+  wellness: 'Bienestar',
+  finance: 'Finanzas',
+} as const;
 
 /**
  * ChineseHoroscopeDetail Component
@@ -67,12 +69,17 @@ export function ChineseHoroscopeDetail({ horoscope, element }: ChineseHoroscopeD
       {/* Areas */}
       <div className="grid gap-4 md:grid-cols-2">
         {Object.entries(horoscope.areas).map(([key, area]) => {
-          const config = AREA_LABELS[key as keyof typeof AREA_LABELS];
+          const areaKey = key as keyof typeof AREA_LABELS;
           return (
             <Card key={key} className="p-4" data-testid={`area-card-${key}`}>
               <div className="mb-2 flex items-center gap-2">
-                <span>{config.icon}</span>
-                <h3 className="font-medium">{config.label}</h3>
+                <BrandIcon
+                  family="areas"
+                  name={HOROSCOPE_AREA_ICON[areaKey]}
+                  size="md"
+                  decorative
+                />
+                <h3 className="font-medium">{AREA_LABELS[areaKey]}</h3>
                 <Badge variant="outline" className="ml-auto">
                   {area.score}/10
                 </Badge>

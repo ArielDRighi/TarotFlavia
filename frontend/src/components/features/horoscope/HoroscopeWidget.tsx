@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { AlertCircle, ArrowRight, Clock, RefreshCw, Settings, Sparkles } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { HOROSCOPE_AREA_ICON } from '@/lib/constants/horoscope-areas';
 import { WidgetEmptyState } from '@/components/features/dashboard';
 import { useMyLocalSignHoroscope } from '@/hooks/api/useHoroscope';
 import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
@@ -129,15 +131,20 @@ export function HoroscopeWidget() {
 
       <div className="mt-4 flex gap-4 text-xs">
         <span className="flex items-center gap-1">
-          <span className="text-rose-500">❤️</span>
+          <BrandIcon family="areas" name={HOROSCOPE_AREA_ICON.love} size="sm" label="Amor" />
           {horoscope.areas.love.score}/10
         </span>
         <span className="flex items-center gap-1">
-          <span className="text-emerald-500">✨</span>
+          <BrandIcon
+            family="areas"
+            name={HOROSCOPE_AREA_ICON.wellness}
+            size="sm"
+            label="Bienestar"
+          />
           {horoscope.areas.wellness.score}/10
         </span>
         <span className="flex items-center gap-1">
-          <span className="text-amber-500">💰</span>
+          <BrandIcon family="areas" name={HOROSCOPE_AREA_ICON.money} size="sm" label="Dinero" />
           {horoscope.areas.money.score}/10
         </span>
       </div>

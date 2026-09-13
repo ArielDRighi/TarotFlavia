@@ -78,11 +78,13 @@ describe('ElementSelectorModal', () => {
     it('should show element icons', () => {
       render(<ElementSelectorModal {...defaultProps} />);
 
-      expect(screen.getByText('⚪')).toBeInTheDocument(); // Metal
-      expect(screen.getByText('🔵')).toBeInTheDocument(); // Water
-      expect(screen.getByText('🟢')).toBeInTheDocument(); // Wood
-      expect(screen.getByText('🔴')).toBeInTheDocument(); // Fire
-      expect(screen.getByText('🟤')).toBeInTheDocument(); // Earth
+      // T-UI-12: iconos de marca de elements/ (decorativos, el nombre está al lado)
+      const srcs = Array.from(document.querySelectorAll('img')).map((img) =>
+        decodeURIComponent(img.getAttribute('src') ?? '')
+      );
+      for (const slug of ['metal', 'water-cn', 'wood', 'fire-cn', 'earth-cn']) {
+        expect(srcs.some((s) => s.includes(`/images/icons/elements/${slug}.webp`))).toBe(true);
+      }
     });
 
     it('should display example years for each element', () => {

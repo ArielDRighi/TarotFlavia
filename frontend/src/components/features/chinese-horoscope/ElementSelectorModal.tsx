@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -27,7 +28,7 @@ import {
   ChineseElementCode,
   getExampleYearsForAnimalElement,
   getElementNameEs,
-  getElementIcon,
+  getElementBrandIcon,
 } from '@/lib/utils/chinese-zodiac';
 
 import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
@@ -113,7 +114,7 @@ export function ElementSelectorModal({
           >
             {WU_XING_ELEMENTS.map((element) => {
               const elementNameEs = getElementNameEs(element);
-              const elementIcon = getElementIcon(element);
+              const elementIcon = getElementBrandIcon(element);
               const exampleYears = getExampleYearsForAnimalElement(animal, element);
 
               return (
@@ -124,7 +125,9 @@ export function ElementSelectorModal({
                     className="flex flex-1 cursor-pointer items-center justify-between"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="text-xl">{elementIcon}</span>
+                      {elementIcon && (
+                        <BrandIcon family="elements" name={elementIcon} size="md" decorative />
+                      )}
                       <span className="font-medium">{elementNameEs}</span>
                     </span>
                     <span className="text-muted-foreground text-sm">{exampleYears.join(', ')}</span>

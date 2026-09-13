@@ -73,7 +73,6 @@ export interface SuitInfo {
   nameEs: string;
   nameEn: string;
   element: Element;
-  symbol: string;
   color: string;
 }
 
@@ -154,7 +153,6 @@ export const SUIT_INFO: Record<Suit, SuitInfo> = {
     nameEs: 'Bastos',
     nameEn: 'Wands',
     element: Element.FIRE,
-    symbol: '🔥',
     color: '#F97316',
   },
   [Suit.CUPS]: {
@@ -162,7 +160,6 @@ export const SUIT_INFO: Record<Suit, SuitInfo> = {
     nameEs: 'Copas',
     nameEn: 'Cups',
     element: Element.WATER,
-    symbol: '💧',
     color: '#3B82F6',
   },
   [Suit.SWORDS]: {
@@ -170,7 +167,6 @@ export const SUIT_INFO: Record<Suit, SuitInfo> = {
     nameEs: 'Espadas',
     nameEn: 'Swords',
     element: Element.AIR,
-    symbol: '💨',
     color: '#8B5CF6',
   },
   [Suit.PENTACLES]: {
@@ -178,7 +174,6 @@ export const SUIT_INFO: Record<Suit, SuitInfo> = {
     nameEs: 'Oros',
     nameEn: 'Pentacles',
     element: Element.EARTH,
-    symbol: '🌿',
     color: '#10B981',
   },
 };

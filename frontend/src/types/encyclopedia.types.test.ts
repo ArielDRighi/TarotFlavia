@@ -332,7 +332,6 @@ describe('encyclopedia types', () => {
         expect(info.nameEs).toBeDefined();
         expect(info.nameEn).toBeDefined();
         expect(info.element).toBeDefined();
-        expect(info.symbol).toBeDefined();
         expect(info.color).toBeDefined();
       });
     });

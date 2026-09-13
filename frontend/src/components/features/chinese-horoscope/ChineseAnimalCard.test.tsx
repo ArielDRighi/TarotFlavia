@@ -12,7 +12,6 @@ function createTestAnimalInfo(overrides: Partial<ChineseZodiacInfo> = {}): Chine
     animal: ChineseZodiacAnimal.RAT,
     nameEs: 'Rata',
     nameEn: 'Rat',
-    emoji: '🐀',
     element: 'Agua',
     characteristics: ['Inteligente', 'Adaptable', 'Ingenioso'],
     ...overrides,
@@ -336,24 +335,23 @@ describe('ChineseAnimalCard', () => {
       const animals: Array<{
         animal: ChineseZodiacAnimal;
         nameEs: string;
-        emoji: string;
       }> = [
-        { animal: ChineseZodiacAnimal.RAT, nameEs: 'Rata', emoji: '🐀' },
-        { animal: ChineseZodiacAnimal.OX, nameEs: 'Buey', emoji: '🐂' },
-        { animal: ChineseZodiacAnimal.TIGER, nameEs: 'Tigre', emoji: '🐅' },
-        { animal: ChineseZodiacAnimal.RABBIT, nameEs: 'Conejo', emoji: '🐇' },
-        { animal: ChineseZodiacAnimal.DRAGON, nameEs: 'Dragón', emoji: '🐉' },
-        { animal: ChineseZodiacAnimal.SNAKE, nameEs: 'Serpiente', emoji: '🐍' },
-        { animal: ChineseZodiacAnimal.HORSE, nameEs: 'Caballo', emoji: '🐴' },
-        { animal: ChineseZodiacAnimal.GOAT, nameEs: 'Cabra', emoji: '🐐' },
-        { animal: ChineseZodiacAnimal.MONKEY, nameEs: 'Mono', emoji: '🐒' },
-        { animal: ChineseZodiacAnimal.ROOSTER, nameEs: 'Gallo', emoji: '🐓' },
-        { animal: ChineseZodiacAnimal.DOG, nameEs: 'Perro', emoji: '🐕' },
-        { animal: ChineseZodiacAnimal.PIG, nameEs: 'Cerdo', emoji: '🐖' },
+        { animal: ChineseZodiacAnimal.RAT, nameEs: 'Rata' },
+        { animal: ChineseZodiacAnimal.OX, nameEs: 'Buey' },
+        { animal: ChineseZodiacAnimal.TIGER, nameEs: 'Tigre' },
+        { animal: ChineseZodiacAnimal.RABBIT, nameEs: 'Conejo' },
+        { animal: ChineseZodiacAnimal.DRAGON, nameEs: 'Dragón' },
+        { animal: ChineseZodiacAnimal.SNAKE, nameEs: 'Serpiente' },
+        { animal: ChineseZodiacAnimal.HORSE, nameEs: 'Caballo' },
+        { animal: ChineseZodiacAnimal.GOAT, nameEs: 'Cabra' },
+        { animal: ChineseZodiacAnimal.MONKEY, nameEs: 'Mono' },
+        { animal: ChineseZodiacAnimal.ROOSTER, nameEs: 'Gallo' },
+        { animal: ChineseZodiacAnimal.DOG, nameEs: 'Perro' },
+        { animal: ChineseZodiacAnimal.PIG, nameEs: 'Cerdo' },
       ];
 
-      animals.forEach(({ animal, nameEs, emoji }) => {
-        const animalInfo = createTestAnimalInfo({ animal, nameEs, emoji });
+      animals.forEach(({ animal, nameEs }) => {
+        const animalInfo = createTestAnimalInfo({ animal, nameEs });
         const { unmount } = render(
           <ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />
         );

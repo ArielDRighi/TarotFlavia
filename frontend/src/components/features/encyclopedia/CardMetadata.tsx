@@ -1,5 +1,6 @@
 'use client';
 
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Card } from '@/components/ui/card';
 import {
   ArcanaType,
@@ -76,8 +77,9 @@ export function CardMetadata({ card }: CardMetadataProps) {
         {suitInfo && (
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Palo</dt>
-            <dd className="font-medium">
-              {suitInfo.symbol} {suitInfo.nameEs}
+            <dd className="flex items-center gap-1.5 font-medium">
+              <BrandIcon family="suits" name={suitInfo.suit} size="sm" decorative />
+              {suitInfo.nameEs}
             </dd>
           </div>
         )}

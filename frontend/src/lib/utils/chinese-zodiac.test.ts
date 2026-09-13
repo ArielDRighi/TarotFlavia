@@ -10,7 +10,7 @@ import {
   getAllChineseZodiacAnimals,
   getAllChineseZodiacInfo,
   getAnimalBirthYears,
-  getElementIcon,
+  getElementBrandIcon,
   getElementForYear,
   CHINESE_ZODIAC_INFO,
   CHINESE_BIRTH_YEARS_RANGE,
@@ -29,7 +29,6 @@ describe('chinese zodiac utilities', () => {
         expect(info.animal).toBeDefined();
         expect(info.nameEs).toBeTruthy();
         expect(info.nameEn).toBeTruthy();
-        expect(info.emoji).toBeTruthy();
         expect(info.element).toBeTruthy();
         expect(Array.isArray(info.characteristics)).toBe(true);
         expect(info.characteristics.length).toBeGreaterThan(0);
@@ -57,7 +56,6 @@ describe('chinese zodiac utilities', () => {
       expect(info.animal).toBe(ChineseZodiacAnimal.RAT);
       expect(info.nameEs).toBe('Rata');
       expect(info.nameEn).toBe('Rat');
-      expect(info.emoji).toBe('🐀');
       expect(info.element).toBe('Agua');
     });
 
@@ -66,7 +64,6 @@ describe('chinese zodiac utilities', () => {
       expect(info.animal).toBe(ChineseZodiacAnimal.DRAGON);
       expect(info.nameEs).toBe('Dragón');
       expect(info.nameEn).toBe('Dragon');
-      expect(info.emoji).toBe('🐉');
       expect(info.element).toBe('Tierra');
     });
 
@@ -75,7 +72,6 @@ describe('chinese zodiac utilities', () => {
       expect(info.animal).toBe(ChineseZodiacAnimal.PIG);
       expect(info.nameEs).toBe('Cerdo');
       expect(info.nameEn).toBe('Pig');
-      expect(info.emoji).toBe('🐖');
       expect(info.element).toBe('Agua');
     });
 
@@ -89,7 +85,6 @@ describe('chinese zodiac utilities', () => {
         expect(info.animal).toBe(animal);
         expect(info.nameEs).toBeTruthy();
         expect(info.nameEn).toBeTruthy();
-        expect(info.emoji).toBeTruthy();
         expect(info.element).toBeTruthy();
         expect(info.characteristics).toBeTruthy();
       });
@@ -155,7 +150,6 @@ describe('chinese zodiac utilities', () => {
         expect(info.animal).toBeDefined();
         expect(info.nameEs).toBeTruthy();
         expect(info.nameEn).toBeTruthy();
-        expect(info.emoji).toBeTruthy();
         expect(info.element).toBeTruthy();
         expect(Array.isArray(info.characteristics)).toBe(true);
       });
@@ -169,7 +163,7 @@ describe('chinese zodiac utilities', () => {
     });
   });
 
-  describe('animal names and emojis', () => {
+  describe('animal names', () => {
     it('should have unique Spanish names', () => {
       const namesEs = Object.values(CHINESE_ZODIAC_INFO).map((info) => info.nameEs);
       const uniqueNames = new Set(namesEs);
@@ -182,12 +176,6 @@ describe('chinese zodiac utilities', () => {
       expect(uniqueNames.size).toBe(12);
     });
 
-    it('should have unique emojis', () => {
-      const emojis = Object.values(CHINESE_ZODIAC_INFO).map((info) => info.emoji);
-      const uniqueEmojis = new Set(emojis);
-      expect(uniqueEmojis.size).toBe(12);
-    });
-
     it('should have characteristics for all animals', () => {
       Object.values(CHINESE_ZODIAC_INFO).forEach((info) => {
         expect(info.characteristics.length).toBeGreaterThan(0);
@@ -196,36 +184,23 @@ describe('chinese zodiac utilities', () => {
     });
   });
 
-  describe('getElementIcon', () => {
-    it('should return correct icon for metal', () => {
-      expect(getElementIcon('metal')).toBe('⚪');
-    });
-
-    it('should return correct icon for water', () => {
-      expect(getElementIcon('water')).toBe('🔵');
-    });
-
-    it('should return correct icon for wood', () => {
-      expect(getElementIcon('wood')).toBe('🟢');
-    });
-
-    it('should return correct icon for fire', () => {
-      expect(getElementIcon('fire')).toBe('🔴');
-    });
-
-    it('should return correct icon for earth', () => {
-      expect(getElementIcon('earth')).toBe('🟤');
+  describe('getElementBrandIcon (T-UI-12)', () => {
+    it('should map each Wu Xing element to its elements/ brand icon slug', () => {
+      expect(getElementBrandIcon('metal')).toBe('metal');
+      expect(getElementBrandIcon('water')).toBe('water-cn');
+      expect(getElementBrandIcon('wood')).toBe('wood');
+      expect(getElementBrandIcon('fire')).toBe('fire-cn');
+      expect(getElementBrandIcon('earth')).toBe('earth-cn');
     });
 
     it('should be case insensitive', () => {
-      expect(getElementIcon('METAL')).toBe('⚪');
-      expect(getElementIcon('Water')).toBe('🔵');
-      expect(getElementIcon('EARTH')).toBe('🟤');
+      expect(getElementBrandIcon('METAL')).toBe('metal');
+      expect(getElementBrandIcon('Water')).toBe('water-cn');
     });
 
-    it('should return fallback icon for unknown element', () => {
-      expect(getElementIcon('unknown')).toBe('⭕');
-      expect(getElementIcon('')).toBe('⭕');
+    it('should return undefined for unknown element', () => {
+      expect(getElementBrandIcon('unknown')).toBeUndefined();
+      expect(getElementBrandIcon('')).toBeUndefined();
     });
   });
 

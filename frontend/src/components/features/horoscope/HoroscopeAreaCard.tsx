@@ -1,9 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { Heart, Sparkles, Wallet } from 'lucide-react';
-
 import { Card } from '@/components/ui/card';
+import { BrandIcon } from '@/components/ui/brand-icon';
+import { HOROSCOPE_AREA_ICON } from '@/lib/constants/horoscope-areas';
 import { cn } from '@/lib/utils';
 import type { HoroscopeArea } from '@/types/horoscope.types';
 
@@ -24,22 +24,16 @@ export interface HoroscopeAreaCardProps {
 const AREA_CONFIG = {
   love: {
     title: 'Amor',
-    icon: Heart,
-    color: 'text-rose-500',
     bgColor: 'bg-rose-50',
     dotColor: 'bg-rose-500',
   },
   wellness: {
     title: 'Bienestar',
-    icon: Sparkles,
-    color: 'text-emerald-500',
     bgColor: 'bg-emerald-50',
     dotColor: 'bg-emerald-500',
   },
   money: {
     title: 'Dinero',
-    icon: Wallet,
-    color: 'text-amber-500',
     bgColor: 'bg-amber-50',
     dotColor: 'bg-amber-500',
   },
@@ -71,7 +65,6 @@ const AREA_CONFIG = {
  */
 export function HoroscopeAreaCard({ area, data, className }: HoroscopeAreaCardProps) {
   const config = AREA_CONFIG[area];
-  const Icon = config.icon;
 
   // Renderizar score como puntos
   const renderScore = (score: number) => {
@@ -90,7 +83,7 @@ export function HoroscopeAreaCard({ area, data, className }: HoroscopeAreaCardPr
   return (
     <Card data-testid={`horoscope-area-${area}`} className={cn('p-4', config.bgColor, className)}>
       <div className="mb-3 flex items-center gap-2">
-        <Icon className={cn('h-5 w-5', config.color)} />
+        <BrandIcon family="areas" name={HOROSCOPE_AREA_ICON[area]} size="md" decorative />
         <h3 className="font-serif text-lg">{config.title}</h3>
       </div>
 

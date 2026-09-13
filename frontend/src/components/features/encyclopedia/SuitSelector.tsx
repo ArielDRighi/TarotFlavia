@@ -1,5 +1,6 @@
 'use client';
 
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Suit, SUIT_INFO } from '@/types/encyclopedia.types';
@@ -59,7 +60,7 @@ export function SuitSelector({ selected, onSelect, className }: SuitSelectorProp
             onClick={() => onSelect(suit)}
             className="gap-1 whitespace-nowrap"
           >
-            <span>{info.symbol}</span>
+            <BrandIcon family="suits" name={suit} size="sm" decorative />
             <span>{info.nameEs}</span>
           </Button>
         );

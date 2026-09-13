@@ -77,14 +77,6 @@ const ALLOWLIST: Record<string, string> = {
 const PENDIENTES_FASE_2: Record<string, BrandIconFamily> = {
   // zodiac/ — familia entregada; queda el fallback ★ de la carta natal guardada
   'components/features/birth-chart/SavedChartCard/SavedChartCard.tsx': 'zodiac',
-  // chinese/ (+ elementos Wu Xing en elements/)
-  'lib/utils/chinese-zodiac.ts': 'chinese',
-  // elements/ + suits/
-  'types/encyclopedia.types.ts': 'elements',
-  // areas/
-  'components/features/horoscope/HoroscopeWidget.tsx': 'areas',
-  'components/features/chinese-horoscope/ChineseHoroscopeWidget.tsx': 'areas',
-  'components/features/chinese-horoscope/ChineseHoroscopeDetail.tsx': 'areas',
   // moon/ + rituals/
   'types/ritual.types.ts': 'moon',
   // numerology/
