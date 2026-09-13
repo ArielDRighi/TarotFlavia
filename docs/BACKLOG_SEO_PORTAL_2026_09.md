@@ -95,6 +95,7 @@ con dos segundas opiniones independientes. Los tres análisis ordenaron igual:
 | T-SEO-019 | `robots.ts`: `Mediapartners-Google`; sitemap sin `lastmod` falso | Frontend | 🟢 Baja | 0,5 pts | ✅ Completada |
 | T-SEO-020 | Arcanos Mayores: romper la plantilla (invertida, caso de tirada, iconografía) | Contenido + Front | 🟢 Baja | 3 pts | ✅ Completada |
 | T-SEO-021 | Péndulo: el cristal no contrasta con el fondo | Frontend (UI) | 🟡 Media | 0,5 pts | ✅ Completada |
+| T-SEO-022 | Portada editorial: recuperar el impacto visual de la landing sin volver a la landing | Frontend (UI) | 🟠 Alta | 3 pts | ⬜ Pendiente |
 
 **⛔ No pedir la cuarta revisión hasta tener 014, 015, 016, 017 y 018 en producción en un deploy
 único, más 14–21 días de rastreo.** Ver *Puerta de salida* al final. T-SEO-020 no entra en la puerta:
@@ -115,6 +116,7 @@ es para después, o para la ventana de espera si sobra tiempo.
 | 7 | **Deploy único + Search Console + espera de 14–21 días** | — | No es código. Ver *Puerta de salida* |
 | 4b | ~~**T-SEO-021**~~ ✅ | 0,5 pts | Cerrada 12-sep-2026: cristal de amatista saturado con engarce, brillo, sombra proyectada (`drop-shadow` en el wrapper, porque el `clip-path` recortaba el `box-shadow`) y halo solo con respuesta. Verificado en desktop y móvil, reposo/oscilación/respuesta |
 | 8 | ~~**T-SEO-020**~~ ✅ | 3 pts | Cerrada 12-sep-2026, dentro de la ventana de espera: los 22 mayores con sección Invertida propia, mini-caso de tirada, nota iconográfica con diagrama de símbolos sobre la lámina y orden de secciones distinto por carta (5 sin "¿Sí o no?"). Los 56 menores no se tocaron |
+| 9 | **T-SEO-022** | 3 pts | **Antes del deploy único**: la portada de T-SEO-014 es lo primero que abre el revisor y hoy se ve más pobre que la landing que reemplazó (sin logo, sin imágenes, hero apagado, cajas vacías punteadas). Solo presentación: el contenido, la estructura y los criterios de 014 no se tocan |
 
 **Total hasta la puerta de salida: 13,5 pts.**
 
@@ -1000,6 +1002,121 @@ el soporte y el hilo; lo que cambió es el cristal:
 
 Verificado con Playwright en 1280×900 y 390×844 en reposo, oscilación (`searching`) y respuesta.
 Tests de `Pendulum.tsx`: 13 (4 nuevos para contraste, sombra, engarce y halo).
+
+---
+
+## T-SEO-022: Portada Editorial — Recuperar el Impacto Visual sin Volver a la Landing
+
+**Estado:** ⬜ PENDIENTE
+**Prioridad:** 🟠 Alta · **Estimación:** 3 pts · **Tipo:** Frontend (UI)
+**Depende de:** T-SEO-014 (estructura y contenido que hay que conservar). Se beneficia de T-UI-12
+(iconos de signos) cuando llegue la familia `zodiac/`, pero no la espera.
+**Reportado por:** Ariel (12 de septiembre de 2026), con capturas antes/después: *"quedó horrible con
+respecto a la que reemplazó, le falta impacto, calidad, diseño... todo. Le sacó el logo de Auguria,
+no muestra imágenes, sacó la ilustración del incienso."*
+
+### Problema
+
+T-SEO-014 hizo lo que tenía que hacer con el **contenido** (portada de publicación, 12 extractos,
+carta del día, guías, enciclopedia, sin precios) pero, al borrar `LandingPage`, se llevó también la
+**puesta en escena** que le daba identidad al sitio. Comparando capturas del mismo día:
+
+| | Landing anterior (`HeroSection` + `TryWithoutRegisterSection`) | Portada actual (`EditorialHome`) |
+| --- | --- | --- |
+| Hero | Pantalla completa, `hero-bg.webp` a opacidad plena, **logo Auguria** arriba a la izquierda, píldora dorada con destellos, título a dos tonos (crema + dorado con shimmer), estrellas `animate-twinkle`, luna CSS, overlay con radial dorado | Media altura, imagen al 70 % bajo un overlay violeta uniforme, sin logo, un solo tono, sin ornamento. Se lee plano y oscuro |
+| Imágenes | Ilustración del incienso (`incense-bg.webp`) en "Prueba sin compromiso", `birth-chart-promo.webp` en carta astral | Solo la lámina de la carta del día. `incense-bg.webp` fue **borrado del repo** en 014 |
+| Secciones | Tarjetas con ilustración, badges dorados, chips con icono | Bloques de texto sobre crema/blanco; "Explorá la enciclopedia" son cinco cajas con un número; "Últimas guías" muestra una **caja vacía punteada** ("Las guías no se pudieron cargar…") cuando la API no responde, que es exactamente lo que ve el revisor si el ISR pega en un mal momento |
+
+El revisor de AdSense abre la raíz primero. Una portada editorial **puede y debe** verse tan
+cuidada como la landing que reemplazó: lo que penalizaba no era el diseño, era el folleto.
+
+### Alcance
+
+**Solo presentación.** La estructura de siete bloques, el `h1` de publicación, los 12 extractos, la
+carta canónica, las guías, los números de la enciclopedia, "Quiénes somos", la franja de servicios
+y el piso de palabras de `home-editorial.data.ts` quedan como están. Nada de lo que T-SEO-014
+prohibió vuelve: **sin precios, sin tabla de planes, sin "3 pasos", sin "Crear cuenta gratis" en el
+hero** (el registro sigue en el header).
+
+1. **Hero con la puesta en escena anterior y el copy actual.** Recuperar de `HeroSection`
+   (`git show a784dba4^:frontend/src/components/features/home/HeroSection.tsx`): logo `LOGO.path`
+   arriba a la izquierda con `priority`, `hero-bg.webp` sin el `opacity-70`, el overlay original
+   (violeta + radial lila arriba + radial dorado abajo a la derecha), las estrellas `animate-twinkle`
+   y la luna CSS, la píldora dorada con `Sparkles` para el eyebrow ("Publicación de tarot y
+   astrología"). El `h1` sigue siendo el de 014 pero **a dos tonos**: *"Tarot y astrología en
+   español:"* en crema y *"enciclopedia, horóscopos y guías"* en dorado con `animate-shimmer-gold`
+   (`globals.css`, ya existe; respeta `prefers-reduced-motion`). Altura `min-h-[70vh]` en desktop,
+   no pantalla completa: el horóscopo de hoy tiene que asomar sin scroll en 1080p. **Un solo CTA,
+   editorial**, que baje al contenido: *"Leer el horóscopo de hoy"* (ancla a
+   `#horoscopo-de-hoy`) con el estilo dorado del botón anterior. Sin segundo botón.
+2. **Recuperar `incense-bg.webp`** del historial (`git show b1a42d0c^:frontend/public/images/incense-bg.webp`)
+   y usarlo como fondo de **"Carta del día"** (`DailyCardSpotlight`): la lámina a la izquierda, la
+   interpretación a la derecha, el incienso desvanecido detrás como estaba en "Prueba sin
+   compromiso". Es la única ilustración que se perdió; el resto se reutiliza.
+3. **Ilustraciones en cada sección, todas del catálogo existente** (`public/images/enciclopedia`,
+   60 assets ya en la línea de diseño; no se generan nuevos en esta tarea):
+   - *Explorá la enciclopedia:* cada una de las cinco cifras con su ilustración de fondo —
+     `hub-tarot.webp` (78 cartas), `astro-signos.webp` (12 signos), `astro-casas.webp` (12 casas),
+     `astro-planetas.webp` (10 planetas), `horoscopo-chino-animales.webp` (12 signos chinos) — con
+     el número en serif dorado encima, como las tarjetas de hub de la enciclopedia.
+   - *Últimas guías:* `ArticleCard` con miniatura, reutilizando el mapeo `guia-*-hero.webp` que ya
+     tiene `GuiasContent` (moverlo a una constante compartida en vez de duplicarlo).
+   - *Quiénes somos:* `hub-guias.webp` como ilustración lateral. **Sin foto ni persona**: la
+     decisión de T-SEO-017 sigue vigente.
+   - *Franja de servicios:* `birth-chart-promo.webp` como miniatura pequeña a la izquierda de la
+     línea. Sigue siendo una línea, no una tarjeta de venta.
+   - *Horóscopo de hoy:* el glifo de cada signo con `ZodiacSymbol` hoy; cuando T-UI-12 entregue
+     `zodiac/`, `ZodiacSymbol` ya lo resuelve solo.
+4. **Sin cajas vacías punteadas en la portada.** Si el bloque de guías o el de horóscopo no
+   llegan, no se muestra un aviso de error al visitante: `LatestGuides` cae a las **siete guías
+   fijas de `GuiasContent`** (título, extracto y miniatura estáticos, enlaces a `/enciclopedia/guias/…`),
+   y `DailyHoroscopeDigest` ya tiene su piso de texto. El aviso "no se pudieron cargar" se queda
+   solo en `console.warn` del servidor. Bonus SEO: el fallback suma palabras propias al piso.
+5. **Ritmo visual entre secciones.** Alternar fondos como hace `/premium`: crema → blanco → una
+   sección cósmica oscura (la enciclopedia, con las cifras en dorado sobre violeta) → crema. Los
+   `HomeSectionHeader` conservan el subrayado dorado. Separadores `✦` entre bloques como en los
+   artículos (`MarkdownArticle`), que es el ornamento tipográfico permitido por el guardarraíl de
+   T-UI-12.
+6. **Chips con icono en el hero o bajo el `h1`** (opcional, si no ensucia): *"Horóscopo diario ·
+   78 cartas · Guías"* con iconos de lucide, al estilo de los chips de "Prueba sin compromiso".
+   Nada de "Sin registro / 1 vez al día": eso es copy de producto.
+
+### Criterios de aceptación
+
+- [ ] La portada anónima muestra el logo de Auguria en el hero, `hero-bg.webp` a opacidad plena
+      con el overlay original, estrellas y luna, y el `h1` a dos tonos con el copy de T-SEO-014.
+- [ ] Cinco ilustraciones del catálogo existente + `incense-bg.webp` recuperado, cada una con
+      `sizes` correcto y `loading="lazy"` salvo el hero (`priority` solo ahí). Lighthouse en `/`:
+      **LCP sin regresión** respecto de hoy y **CLS < 0,1** (reservar alto de cada imagen).
+- [ ] `EditorialHome.integration.test.tsx` sigue en verde sin cambios de aserciones: `h1` único,
+      12 extractos, sin precios, sin "Crear cuenta", ≥ `MIN_HOME_EDITORIAL_WORDS`.
+- [ ] Con la API de guías caída, la portada renderiza siete guías estáticas con miniatura; no hay
+      ningún texto "no se pudieron cargar" en el HTML servido (test de `LatestGuides`).
+- [ ] Sin emojis nuevos (`no-emoji-user-facing.test.ts`), sin "IA" (`no-ia`), sin términos de
+      salud (`no-salud`). Los ornamentos van con `✦` o `lucide-react`.
+- [ ] `npm run check:indexable -- --base-url <host>` contra un build local: `/` no baja de la
+      cuenta actual (las ilustraciones son `alt=""` decorativas, no cambian el conteo).
+- [ ] Verificado con Playwright en 1280×900 y 390×844: el hero no tapa el horóscopo en desktop,
+      el logo no pisa el título en móvil, las tarjetas de la enciclopedia se leen sobre la
+      ilustración.
+- [ ] Ciclo de calidad completo.
+
+### Fuera de alcance
+
+Generar ilustraciones nuevas (si hiciera falta alguna, va por T-UI-12 con la *variante
+ilustración* del prompt base); cambiar el copy editorial; `UserDashboard`; el header y el footer.
+
+### Notas para quien la desarrolle
+
+- La landing anterior está entera en el historial: `git show a784dba4^:frontend/src/components/features/home/HeroSection.tsx`
+  y `…/TryWithoutRegisterSection.tsx`. Copiar la puesta en escena, **no** el copy ni los CTAs.
+- `HomePageContent` es client solo por el store de sesión; `EditorialHome` y sus secciones siguen
+  siendo Server Components. Las estrellas y la luna son CSS puro (sin `useEffect`), así que no
+  obligan a `'use client'`.
+- Las miniaturas por categoría ya están tipadas en `GuiasContent.tsx` (`GUIDE_THEME`, con
+  `guia-*-hero.webp` por categoría; los ocho assets son definitivos, no placeholders): extraerlas a
+  `lib/constants/guides-catalog.data.ts` junto con título y extracto estáticos de cada guía, y
+  consumirlas desde `GuiasContent` y `LatestGuides`.
 
 ---
 
