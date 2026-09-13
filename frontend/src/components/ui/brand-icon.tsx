@@ -139,7 +139,7 @@ export function BrandIcon<F extends BrandIconFamily>({
       draggable={false}
       className={cn(
         'inline-block shrink-0 select-none',
-        medallion ? 'brightness-125 saturate-[1.1]' : className
+        medallion ? 'brightness-[1.35] saturate-[1.1]' : className
       )}
       data-testid={medallion ? undefined : testId}
     />

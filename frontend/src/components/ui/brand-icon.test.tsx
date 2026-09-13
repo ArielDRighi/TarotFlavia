@@ -67,7 +67,7 @@ describe('BrandIcon', () => {
       width: `${BRAND_ICON_MEDALLION_SIZES.lg}px`,
       height: `${BRAND_ICON_MEDALLION_SIZES.lg}px`,
     });
-    expect(img).toHaveClass('brightness-125');
+    expect(img).toHaveClass('brightness-[1.35]');
     // el icono ocupa ~78 % del disco
     expect(Number(img.getAttribute('width'))).toBeLessThan(BRAND_ICON_MEDALLION_SIZES.lg);
     expect(Number(img.getAttribute('width'))).toBeGreaterThan(BRAND_ICON_MEDALLION_SIZES.lg * 0.7);

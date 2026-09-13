@@ -827,9 +827,10 @@ Por tamaño, conviene dividir en **2-3 PRs**:
   pantallas"):** engrosar y oscurecer no alcanzó. Un line-art ornamental de trazo fino **no lee sobre
   blanco a 48–112 px**, le falta masa. Lo que sí funciona es la propia regla del `DESIGN_HAND-OFF`:
   dorado sobre **violeta cósmico**. `BrandIcon` suma `frame="medallion"`: disco con degradé radial
-  (`#6B46C1 → #3F2A7A`; el primer intento `#4C2A85 → #22114F` le pareció muy oscuro a Ariel y se
-  comparó contra tres más claros: por debajo de este el dorado pierde contraste), borde dorado fino (`.brand-icon-medallion` en `globals.css`) y el icono al
-  78 % del disco con `brightness-125 saturate-[1.1]` (el dorado entonado para fondo claro quedaba
+  (`#8B5CF6 → #5B3AA6`, dorado a `brightness-[1.35]`; los dos primeros intentos, `#4C2A85 → #22114F`
+  y `#6B46C1 → #3F2A7A`, le parecieron oscuros a Ariel sobre todo en los medallones de 44 px; se
+  comparó a 44 y 96 px y por debajo de este el dorado se funde en los chicos), borde dorado fino (`.brand-icon-medallion` en `globals.css`) y el icono al
+  78 % del disco con `brightness-[1.35] saturate-[1.1]` (el dorado entonado para fondo claro quedaba
   apagado sobre violeta). Diámetros `BRAND_ICON_MEDALLION_SIZES`: 28/44/64/96/144. Se comparó a 1x
   contra el icono suelto a 72 y 104 px y contra el medallón sin avivar. Aplicado en grillas de signos
   y animales (`xl`), encabezados de ficha (`2xl`), encabezados de detalle y widgets (`xl`/`md`),
