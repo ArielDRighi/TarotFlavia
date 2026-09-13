@@ -1,4 +1,5 @@
 // 5. Components
+import { SectionHero } from '@/components/ui/section-hero';
 import { ServiceIntro } from '@/components/features/encyclopedia/ServiceIntro';
 import { DailyHoroscopeList } from './DailyHoroscopeList';
 import { HoroscopeHubSelector } from './HoroscopeHubSelector';
@@ -32,16 +33,12 @@ const EMPTY_STATE =
 export function HoroscopeHub({ daily }: HoroscopeHubProps) {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-text-primary mb-3 font-serif text-4xl font-light md:text-5xl">
-          Horóscopo de hoy para los 12 signos
-        </h1>
-        <p className="text-text-muted max-w-3xl font-sans leading-relaxed">
-          La predicción del día, signo por signo. Cada extracto resume la energía general de la
-          jornada; el enlace lleva a la lectura completa, con amor, dinero, bienestar y los números
-          del día. Se renueva cada madrugada.
-        </p>
-      </header>
+      <SectionHero
+        className="mb-8"
+        title="Horóscopo de hoy para los 12 signos"
+        lead="La predicción del día, signo por signo. Cada extracto resume la energía general de la jornada; el enlace lleva a la lectura completa, con amor, dinero, bienestar y los números del día. Se renueva cada madrugada."
+        icon={{ family: 'hubs', name: 'horoscope' }}
+      />
 
       <section data-testid="horoscope-hub-digest" aria-label="Horóscopo de hoy por signo">
         <DailyHoroscopeList

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { BirthChartPageContent } from './BirthChartPageContent';
@@ -119,5 +119,49 @@ describe('BirthChartPageContent', () => {
     renderWithProviders(<BirthChartPageContent />);
 
     expect(screen.getByText('Carta Astral')).toBeInTheDocument();
+  });
+
+  it('T-UI-13: abre con la banda de marca <SectionHero> y un solo h1', () => {
+    renderWithProviders(<BirthChartPageContent />);
+
+    const hero = screen.getByTestId('section-hero');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(within(hero).getByRole('heading', { level: 1 })).toHaveTextContent('Carta Astral');
+    expect(within(hero).getByTestId('section-hero-icon')).toBeInTheDocument();
+  });
+
+  describe('T-UI-13: píldora de plan sobre el título', () => {
+    it('anónimo: "1 carta gratis"', () => {
+      renderWithProviders(<BirthChartPageContent />);
+      expect(screen.getByTestId('section-hero-badge')).toHaveTextContent('1 carta gratis');
+    });
+
+    it('free: cartas restantes del mes', () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: 1, plan: 'free' },
+      });
+      mockUseCanGenerateChart.mockReturnValue({
+        canGenerate: true,
+        remaining: 2,
+        isLoading: false,
+        message: null,
+      });
+      renderWithProviders(<BirthChartPageContent />);
+      expect(screen.getByTestId('section-hero-badge')).toHaveTextContent(
+        'Quedan 2 cartas este mes'
+      );
+    });
+
+    it('premium: cartas ilimitadas', () => {
+      mockUseAuth.mockReturnValue({
+        isAuthenticated: true,
+        user: { id: 1, plan: 'premium' },
+      });
+      renderWithProviders(<BirthChartPageContent />);
+      expect(screen.getByTestId('section-hero-badge')).toHaveTextContent(
+        'Premium • Cartas ilimitadas'
+      );
+    });
   });
 });

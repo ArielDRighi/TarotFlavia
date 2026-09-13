@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -93,6 +93,18 @@ describe('HoroscopoChinoPage', () => {
     expect(
       screen.getByText('Descubrí las predicciones anuales según tu animal')
     ).toBeInTheDocument();
+  });
+
+  it('T-UI-13: abre con la banda de marca <SectionHero> y un solo h1', () => {
+    mockUseChineseHoroscopesByYear.mockReturnValue({ isLoading: false, data: [] });
+    renderWithProviders(<HoroscopoChinoPage />);
+
+    const hero = screen.getByTestId('section-hero');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(within(hero).getByRole('heading', { level: 1 })).toHaveTextContent(
+      /^Horóscopo Chino \d{4}$/
+    );
+    expect(within(hero).getByTestId('section-hero-icon')).toBeInTheDocument();
   });
 
   it('should render animal selector when not loading', () => {

@@ -103,7 +103,7 @@ describe('EnciclopediaPage (Hub principal)', () => {
   it('debe mostrar una banda de cabecera con identidad de marca', () => {
     renderWithProviders(<EnciclopediaPage />);
 
-    const hero = screen.getByTestId('encyclopedia-hub-hero');
+    const hero = screen.getByTestId('section-hero');
     expect(hero).toBeInTheDocument();
     expect(hero).toHaveTextContent('Enciclopedia Mística');
   });

@@ -10,6 +10,7 @@ import {
 } from '@/components/features/chinese-horoscope';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SectionHero } from '@/components/ui/section-hero';
 import { useChineseHoroscopeMainPage } from '@/hooks/utils/useChineseHoroscopeMainPage';
 import { ServiceIntro } from '@/components/features/encyclopedia';
 import { SERVICE_INTROS } from '@/lib/constants/service-intros.data';
@@ -39,10 +40,12 @@ export function ChineseHoroscopeHub() {
 
   return (
     <div className="container mx-auto px-4 pt-8 pb-4">
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 font-serif text-4xl">Horóscopo Chino {currentYear}</h1>
-        <p className="text-muted-foreground">Descubrí las predicciones anuales según tu animal</p>
-      </div>
+      <SectionHero
+        className="mb-8"
+        title={`Horóscopo Chino ${currentYear}`}
+        lead="Descubrí las predicciones anuales según tu animal"
+        icon={{ family: 'hubs', name: 'chinese' }}
+      />
 
       {/* User's horoscope card (if authenticated and has birthDate) */}
       {isAuthenticated && userBirthDate && myHoroscope && (

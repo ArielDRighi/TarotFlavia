@@ -1170,7 +1170,7 @@ Modificados: los 41 archivos del inventario (lista exacta con
 **Estimación:** 2 días
 **Dependencias:** T-UI-12 (los iconos `hubs/` para el medallón del encabezado). Coordinar con
 T-SEO-022 (la portada tiene su propio hero y no entra acá).
-**Estado:** ⬜ PENDIENTE
+**Estado:** ✅ COMPLETADA (13 de septiembre de 2026)
 **Reportado por:** Ariel (13 de septiembre de 2026), con capturas de las nueve secciones: "para cada
 sección, el título se muestra inconsistente. Deberían verse todos como en la enciclopedia, centrados y
 con la imagen tipo banner".
@@ -1224,11 +1224,11 @@ son CSS).
 
 #### ✅ Tareas específicas
 
-- [ ] `components/ui/section-hero.tsx` + test (título, bajada, icono opcional con medallón, badge,
+- [x] `components/ui/section-hero.tsx` + test (título, bajada, icono opcional con medallón, badge,
       actions, `h1` único, `data-testid`, sin `'use client'`).
-- [ ] `EnciclopediaHubContent` consume `<SectionHero size="lg">`; sin cambios visuales (comparar
+- [x] `EnciclopediaHubContent` consume `<SectionHero size="lg">`; sin cambios visuales (comparar
       capturas antes/después a 1280 y 390 px).
-- [ ] Migrar las ocho restantes, **conservando el texto exacto de cada `h1` y bajada** (son copy
+- [x] Migrar las ocho restantes, **conservando el texto exacto de cada `h1` y bajada** (son copy
       SEO de T-SEO-015; `check:indexable` no debe bajar):
   - Horóscopo (`HoroscopeHub`): la bajada larga (3 líneas) queda como `lead`; icono `hubs/horoscope`.
   - Tarot del día (`DailyCardPage`): idem; icono `hubs/tarot`.
@@ -1240,27 +1240,48 @@ son CSS).
     Cormorant (hoy es el único sans del sitio). Revisar `BirthChartPageContent.test`.
   - Servicios: icono `hubs/tarot`? **No**: usar `rituals/tarot` o dejar sin icono y decidir en el
     PR con captura; los botones "Mis reservas / Mis favoritos" (solo con sesión) pasan a `actions`.
-- [ ] `HomeSectionHeader` (portada) y el hero de T-SEO-022 **no** se tocan: la portada tiene su
+    *(Se usó `rituals/tarot`. El único botón que existía en el código era "Mis Servicios"; pasó a
+    `actions` con su `data-testid="mis-servicios-link"`.)*
+- [x] `HomeSectionHeader` (portada) y el hero de T-SEO-022 **no** se tocan: la portada tiene su
       hero propio y sus secciones internas usan otro patrón.
-- [ ] Móvil: a 390 px la banda no supera ~40 % del viewport; el `h1` largo de Horóscopo ("Horóscopo de
+- [x] Móvil: a 390 px la banda no supera ~40 % del viewport; el `h1` largo de Horóscopo ("Horóscopo de
       hoy para los 12 signos") parte en dos líneas sin cortar descendentes (ver el fix de la "g" en
-      T-SEO-022, commit `be5ce49c`).
+      T-SEO-022, commit `be5ce49c`). *(Medido con Playwright sobre el build: 21–40 % en ocho
+      secciones y 43 % en Horóscopo, cuya bajada de tres líneas es copy SEO. Para eso `size="md"`
+      baja la bajada a `text-base` y el padding a `py-7` bajo `sm`; `lg` conserva las clases exactas
+      de la enciclopedia. El `h1` es color sólido, no `background-clip: text`, así que el
+      descendente no se corta.)*
 
 #### 🧪 Criterios de aceptación
 
-- [ ] Las nueve secciones del menú abren con la misma banda: centrada, gradiente noche, Cormorant
+- [x] Las nueve secciones del menú abren con la misma banda: centrada, gradiente noche, Cormorant
       crema, filete dorado. Verificado con capturas a 1280×900 y 390×844 de las nueve.
-- [ ] `EnciclopediaHubContent` se ve igual que hoy (es la referencia, no cambia).
-- [ ] Un solo `h1` por página, con el texto actual (tests de integración existentes en verde:
-      `EditorialHome.integration`, `HoroscopeHub.test`, `DailyCardPage.test`, etc.).
-- [ ] `npm run check:indexable` contra un build local: ninguna de las nueve URLs baja su cuenta.
-- [ ] `no-emoji`, `no-ia`, `no-salud` en verde; sin `any`; `data-testid="section-hero"`.
-- [ ] Ciclo de calidad completo.
+- [x] `EnciclopediaHubContent` se ve igual que hoy (es la referencia, no cambia). *(Mismo markup;
+      el test `encyclopedia-hub-hero` de `app/enciclopedia/page.test.tsx` pasa a `section-hero`.)*
+- [x] Un solo `h1` por página, con el texto actual (tests de integración existentes en verde:
+      `EditorialHome.integration`, `HoroscopeHub.test`, `DailyCardPage.test`, etc.). *(Cada test de
+      sección suma un caso "T-UI-13: abre con la banda de marca y un solo h1".)*
+- [x] `npm run check:indexable` contra un build local: ninguna de las nueve URLs baja su cuenta
+      (565–1829 palabras propias, todas ✅ `[menú]`).
+- [x] `no-emoji`, `no-ia`, `no-salud` en verde; sin `any`; `data-testid="section-hero"`.
+- [x] Ciclo de calidad completo.
 
 #### 📁 Archivos involucrados
 
 Nuevos: `components/ui/section-hero.tsx` (+ test), `lib/constants/section-hero.ts`.
 Modificados: los nueve componentes de la tabla y sus tests.
+
+#### 📝 Notas técnicas
+
+- `SectionHero.icon` acepta `hubs/*` y `rituals/*` (unión discriminada con una rama por familia,
+  como `ArticleCard`): el genérico de `<BrandIcon>` no acepta la unión de todas las familias de
+  golpe. Ampliar la unión cuando otra sección lo necesite.
+- El medallón del hero va con `priority` (LCP, above-the-fold en las nueve).
+- Carta Astral: los tres `<Badge>` de plan (anónimo / free / premium) se resumen en un `planBadge`
+  que va a la ranura `badge`; el `h1` pasa a Cormorant como el resto del sitio.
+- `AstrologyHubContent`, `CardDetailHero` y `DashboardHero` siguen con sus copias locales de
+  `HERO_GRADIENT`/`CREAM`/`DECORATIVE_STARS`: no son secciones del menú y quedan fuera de esta
+  tarea (candidatas a importar `lib/constants/section-hero.ts` en T-UI-11).
 
 ---
 
