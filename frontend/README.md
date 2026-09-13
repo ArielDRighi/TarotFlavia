@@ -123,7 +123,7 @@ npm run icons:process -- --family zodiac    # una sola
 # 4. npm run test:run -- brand-icons       # la familia tiene que estar completa
 ```
 
-Un solo tamaño (512) a propósito: `next/image` genera las variantes de 16–256 px desde ahí. El
+Un solo tamaño (512) a propósito: `next/image` genera las variantes de 16–384 px desde ahí. El
 script avisa si un asset pasa los 15 KB (criterio de LCP del backlog). Si en tu máquina `sharp`
 intenta compilar contra un `libvips` global, instalá con `SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install`.
 

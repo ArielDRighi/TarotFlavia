@@ -783,7 +783,7 @@ Por tamaño, conviene dividir en **2-3 PRs**:
 **Prioridad:** 🟡 ALTA
 **Estimación:** 3 días de integración + generación de assets (Ariel, con los prompts de abajo)
 **Dependencias:** ninguna
-**Estado:** 🟡 EN CURSO — PR 1/N (base + UI genérica) hecho el 13 de septiembre de 2026; la Fase 2 espera los assets de la Fase 0
+**Estado:** 🟡 EN CURSO — PR 1/N (base + UI genérica) hecho el 12 de septiembre de 2026; la Fase 2 espera los assets de la Fase 0
 **Reportado por:** Ariel (12 de septiembre de 2026): "hay iconos que no tienen nada que ver con el diseño de la página"
 
 #### 📌 Estado por PR
@@ -802,7 +802,7 @@ Por tamaño, conviene dividir en **2-3 PRs**:
   quiere un asset, entra con la familia `hubs/`.
 - Los textos de compartir (`navigator.share` en `DailyReadingCard` / `DailyCardExperience`) conservan
   sus emojis: no los renderiza el sitio.
-- **Un solo tamaño de asset (512)**: `next/image` ya genera las variantes de 16–256 px
+- **Un solo tamaño de asset (512)**: `next/image` ya genera las variantes de 16–384 px
   (`imageSizes` en `next.config.ts`), así que el 128 "para badges" sobra y sólo agregaría archivos
   huérfanos al chequeo del registro. `--size` existe por si hace falta.
 - Slugs de rituales: `cleansing → energy`, `healing → wellbeing` (glosario sin términos de salud);

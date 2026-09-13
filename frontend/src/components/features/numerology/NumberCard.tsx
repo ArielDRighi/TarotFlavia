@@ -65,8 +65,8 @@ export function NumberCard({ number, context, variant = 'compact', onClick, clas
 
         {/* Master Number Badge */}
         {number.isMaster && (
-          <Badge variant="secondary" className="mb-2 gap-1">
-            <Star className="h-3 w-3" aria-hidden="true" />
+          <Badge variant="secondary" className="mb-2">
+            <Star aria-hidden="true" />
             Número Maestro
           </Badge>
         )}

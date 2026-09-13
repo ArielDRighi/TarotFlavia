@@ -36,11 +36,23 @@ const SRC = path.dirname(fileURLToPath(import.meta.url));
 /**
  * Bloques Unicode que renderizan como emoji/pictograma del sistema:
  *  - U+1F000–U+1FAFF: naipes 🃏, pictogramas 🌙🔮, emoticonos, transporte, suplementarios.
+ *  - U+2300–U+23FF: Misc Technical (⏰ ⌛ ⏳ ⏱).
+ *  - U+25A0–U+25FF: Geometric Shapes (▶ ◀ ◼ □ △).
  *  - U+2600–U+27BF: Misc Symbols (☀ ★ ♈ ⚠ ⚙) + Dingbats (✓ ✦ ✨ ❌).
  *  - U+2B00–U+2BFF: Misc Symbols & Arrows (⭐ ⭕).
+ *  - U+2139 ℹ, U+203C ‼, U+2049 ⁉.
  *  - U+FE0E/U+FE0F: selectores de presentación texto/emoji.
  */
-const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0E}\u{FE0F}]/u;
+const EMOJI =
+  /[\u{1F000}-\u{1FAFF}\u{2300}-\u{23FF}\u{25A0}-\u{25FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2139}\u{203C}\u{2049}\u{FE0E}\u{FE0F}]/u;
+
+/**
+ * Lo mismo escrito como escape (`'\\uFE0E'`, `'\\u{1F409}'`, par sustituto
+ * `'\\uD83D\\uDC09'`): el escaneo es sobre el código fuente, no sobre el string
+ * evaluado, así que sin esto un emoji escapado pasaría.
+ */
+const EMOJI_ESCAPE =
+  /\\u(?:\{(?:1F[0-9A-F]{3}|2[3567][0-9A-F]{2}|2B[0-9A-F]{2}|FE0[EF])\}|(?:2[3567][0-9A-F]{2}|2B[0-9A-F]{2}|FE0[EF]|D83[C-E][0-9A-F]{2}))/i;
 
 /** Permanentes. Clave relativa a `src/`, valor = por qué. */
 const ALLOWLIST: Record<string, string> = {
@@ -63,6 +75,7 @@ const ALLOWLIST: Record<string, string> = {
 const PENDIENTES_FASE_2: Record<string, BrandIconFamily> = {
   // zodiac/
   'lib/utils/zodiac.ts': 'zodiac',
+  'components/features/horoscope/ZodiacSymbol.tsx': 'zodiac',
   'components/features/birth-chart/SavedChartCard/SavedChartCard.tsx': 'zodiac',
   // chinese/ (+ elementos Wu Xing en elements/)
   'lib/utils/chinese-zodiac.ts': 'chinese',
@@ -127,7 +140,7 @@ function scan(file: string): string[] {
   const lines = stripComments(fs.readFileSync(file, 'utf8')).split('\n');
   const hits: string[] = [];
   lines.forEach((line, i) => {
-    if (EMOJI.test(line)) {
+    if (EMOJI.test(line) || EMOJI_ESCAPE.test(line)) {
       hits.push(`${rel(file)}:${i + 1} → ${line.trim()}`);
     }
   });

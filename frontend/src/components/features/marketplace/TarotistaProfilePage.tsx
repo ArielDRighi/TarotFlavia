@@ -237,7 +237,7 @@ export function TarotistaProfilePage({ id, initialTarotista }: TarotistaProfileP
             >
               {tarotista.isActive ? (
                 <>
-                  <Check className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
+                  <Check aria-hidden="true" />
                   Disponible ahora
                 </>
               ) : (

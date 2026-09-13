@@ -54,8 +54,13 @@ async function pixelAt(buffer, x, y) {
 // =============================================================================
 
 describe('whiteToAlpha (color-to-alpha para blanco)', () => {
-  it('vuelve transparente el blanco puro', () => {
+  it('vuelve transparente el blanco puro (y limpia el RGB)', () => {
     const px = whiteToAlpha(Buffer.from([255, 255, 255, 255]));
+    expect([...px]).toEqual([0, 0, 0, 0]);
+  });
+
+  it('trata como fondo el "casi blanco" de un JPEG (piso de ruido)', () => {
+    const px = whiteToAlpha(Buffer.from([250, 248, 251, 255]));
     expect(px[3]).toBe(0);
   });
 
@@ -64,15 +69,22 @@ describe('whiteToAlpha (color-to-alpha para blanco)', () => {
     expect([...px]).toEqual([0, 0, 0, 255]);
   });
 
-  it('al dorado le da alfa parcial y un color que compuesto sobre blanco devuelve el original', () => {
+  it('el dorado de marca es trazo sólido: conserva su color y queda opaco (fiel sobre cósmico)', () => {
     const px = whiteToAlpha(Buffer.from([GOLD.r, GOLD.g, GOLD.b, 255]));
+    expect([...px]).toEqual([GOLD.r, GOLD.g, GOLD.b, 255]);
+  });
+
+  it('al brillo suave le da alfa parcial y un color que compuesto sobre blanco devuelve el original', () => {
+    const glow = { r: 240, g: 225, b: 190 };
+    const px = whiteToAlpha(Buffer.from([glow.r, glow.g, glow.b, 255]));
     const a = px[3] / 255;
-    expect(px[3]).toBe(255 - Math.min(GOLD.r, GOLD.g, GOLD.b));
+    expect(px[3]).toBe(255 - Math.min(glow.r, glow.g, glow.b));
+    expect(px[3]).toBeLessThan(Math.round(0.75 * 255));
     // composición "source over" sobre blanco
     const over = (c) => Math.round(c * a + 255 * (1 - a));
-    expect(over(px[0])).toBeCloseTo(GOLD.r, -0.5);
-    expect(over(px[1])).toBeCloseTo(GOLD.g, -0.5);
-    expect(over(px[2])).toBeCloseTo(GOLD.b, -0.5);
+    expect(over(px[0])).toBeCloseTo(glow.r, -0.5);
+    expect(over(px[1])).toBeCloseTo(glow.g, -0.5);
+    expect(over(px[2])).toBeCloseTo(glow.b, -0.5);
   });
 
   it('respeta el alfa previo (multiplica, no lo pisa)', () => {
@@ -108,9 +120,13 @@ describe('processIcon', () => {
     expect((await pixelAt(out, 0, 0)).a).toBe(0);
     expect((await pixelAt(out, 63, 63)).a).toBe(0);
 
-    // Centro: el cuadrado (que en el original estaba descentrado) ahora está en el medio.
+    // Centro: el cuadrado (que en el original estaba descentrado) ahora está en el medio,
+    // opaco y con el dorado original (tolerancia por la compresión WebP).
     const center = await pixelAt(out, 32, 32);
-    expect(center.a).toBeGreaterThan(150);
+    expect(center.a).toBeGreaterThan(250);
+    expect(Math.abs(center.r - GOLD.r)).toBeLessThan(8);
+    expect(Math.abs(center.g - GOLD.g)).toBeLessThan(8);
+    expect(Math.abs(center.b - GOLD.b)).toBeLessThan(8);
 
     // Y llega hasta cerca del borde menos el margen: ~10 % de 64 ≈ 6 px.
     expect((await pixelAt(out, 8, 32)).a).toBeGreaterThan(150);

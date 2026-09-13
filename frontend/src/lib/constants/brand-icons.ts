@@ -158,7 +158,7 @@ function buildRegistry(): BrandIconRegistry {
   for (const family of BRAND_ICON_FAMILIES) {
     const entries: Record<string, BrandIconDef> = {};
     for (const [name, alt] of Object.entries<string>(BRAND_ICON_ALTS[family])) {
-      entries[name] = { src: `${BRAND_ICONS_PUBLIC_DIR}/${family}/${name}.webp`, alt };
+      entries[name] = { src: getBrandIconSrc(family, name as BrandIconName<typeof family>), alt };
     }
     registry[family] = entries;
   }

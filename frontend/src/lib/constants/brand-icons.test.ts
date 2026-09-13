@@ -143,11 +143,10 @@ describe('BRAND_ICONS (registro de iconos de marca)', () => {
 
       it(`${family}: ${exists ? 'completa y sin huérfanos' : 'todavía sin assets (pendiente de Fase 0)'}`, () => {
         if (!exists) return;
-        const onDisk = fs
-          .readdirSync(dir)
-          .filter((f) => f.endsWith('.webp'))
-          .map((f) => f.replace(/\.webp$/, ''))
-          .sort();
+        const files = fs.readdirSync(dir);
+        // Todo lo que no sea <slug>.webp (un .png sin procesar, un Aries.webp) es huérfano.
+        expect(files.filter((f) => !/^[a-z0-9][a-z0-9_-]*\.webp$/.test(f))).toEqual([]);
+        const onDisk = files.map((f) => f.replace(/\.webp$/, '')).sort();
         expect(onDisk).toEqual(Object.keys(BRAND_ICONS[family]).sort());
       });
     }

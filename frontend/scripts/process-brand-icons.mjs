@@ -12,7 +12,7 @@
  *   2. Recorte al contenido y re-centrado, con margen del 8 % (configurable).
  *   3. Exporta WebP cuadrado de 512 px con alfa a `public/images/icons/<familia>/<slug>.webp`.
  *      Un solo tamaño a propósito: `next/image` ya genera las variantes de
- *      16–256 px (`imageSizes` en `next.config.ts`).
+ *      16–384 px (`imageSizes` en `next.config.ts`).
  *   4. Escribe una hoja de contacto (`<in>/icons-contact-sheet.html`) con cada
  *      icono a 32/64/128 px sobre fondo claro y cósmico, para descartar los que
  *      no leen bien chicos, y avisa si alguno pasa los 15 KB (criterio de LCP).
@@ -59,6 +59,22 @@ const COSMIC_BACKGROUND = 'linear-gradient(160deg, #2D1B69, #1A0A2E)';
 
 const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
 
+/**
+ * Píxeles con esta "distancia al blanco" o menos se consideran fondo: el blanco
+ * de un JPEG es 248–255 y sin piso cada píxel del lienzo quedaría con alfa 1–7
+ * (velo sobre cósmico + hasta 8× de peso). Mismo umbral que usa `trim`.
+ */
+const NOISE_FLOOR = 8;
+
+/**
+ * Píxeles con esta "distancia al blanco" o más son trazo sólido: conservan su
+ * color y quedan opacos. Sin esto el dorado de marca (#D69E2E, alfa 82 %) se
+ * compone ~18 % más oscuro y marrón sobre el fondo cósmico; con el color
+ * original y opaco, sobre blanco da lo mismo y sobre violeta es el dorado real.
+ * Sólo el brillo suave (por debajo) se des-premultiplica.
+ */
+const SOLID_ALPHA = Math.round(0.75 * 255);
+
 const AYUDA = `
 Post-proceso de iconos de marca (T-UI-12)
 
@@ -82,10 +98,12 @@ Opciones:
  * Color-to-alpha para blanco, in-place sobre un buffer RGBA.
  *
  * Para cada píxel, el alfa nuevo es "cuánto se aleja del blanco"
- * (`255 - min(r,g,b)`) y el color se des-premultiplica para que, compuesto
- * sobre blanco, devuelva el original. Es la misma fórmula que "Color a alfa"
- * de GIMP: el blanco puro queda transparente, el negro opaco, y el dorado con
- * brillo suave conserva su degradé.
+ * (`255 - min(r,g,b)`), como "Color a alfa" de GIMP, con dos ajustes:
+ *  - por debajo de `NOISE_FLOOR` es fondo → transparente (tolera JPEG);
+ *  - desde `SOLID_ALPHA` es trazo → color original y opaco (dorado fiel sobre
+ *    cualquier fondo);
+ *  - en el medio (el brillo suave) el color se des-premultiplica para que,
+ *    compuesto sobre blanco, devuelva el original.
  *
  * @param {Buffer} data RGBA, 4 bytes por píxel. Se modifica y se devuelve.
  * @returns {Buffer}
@@ -98,8 +116,16 @@ export function whiteToAlpha(data) {
     const prevAlpha = data[i + 3];
 
     const alpha = 255 - Math.min(r, g, b);
-    if (alpha === 0 || prevAlpha === 0) {
+    if (alpha <= NOISE_FLOOR || prevAlpha === 0) {
+      data[i] = 0;
+      data[i + 1] = 0;
+      data[i + 2] = 0;
       data[i + 3] = 0;
+      continue;
+    }
+
+    if (alpha >= SOLID_ALPHA) {
+      data[i + 3] = prevAlpha;
       continue;
     }
 
