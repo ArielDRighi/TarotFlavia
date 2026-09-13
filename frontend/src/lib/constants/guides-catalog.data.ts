@@ -23,7 +23,7 @@
  * - Título y extracto son los del corpus, para que el fallback sea igual a lo
  *   que muestra la API y no un texto paralelo.
  * - Sin "salud", sin promesas de resultado (T-SEO-013 / T-SEO-018).
- * - Los ocho assets `guia-*-hero.webp` son definitivos (no placeholders).
+ * - Los siete assets `guia-*-hero.webp` son definitivos (no placeholders).
  */
 
 import { ArticleCategory, GUIDE_CATEGORIES } from '@/types/encyclopedia-article.types';

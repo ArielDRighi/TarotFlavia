@@ -53,7 +53,7 @@ export function EncyclopediaShowcase() {
                   src={figure.image}
                   alt=""
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 224px"
                   className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   aria-hidden="true"
                 />

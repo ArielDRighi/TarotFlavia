@@ -25,10 +25,14 @@ export interface LatestGuidesProps {
   guides: ArticleSummary[] | undefined;
 }
 
-/** Tarjeta de guía: la miniatura de la API, si la trae, tiene prioridad sobre la del catálogo. */
-function GuideCard({ guide, imageUrl }: { guide: ArticleCardData; imageUrl?: string | null }) {
-  const thumbnailSrc = imageUrl ?? getGuideTheme(guide.category).image?.src;
-  return <ArticleCard article={guide} thumbnailSrc={thumbnailSrc} />;
+/**
+ * Tarjeta de guía con la miniatura del catálogo. A propósito no usa el
+ * `imageUrl` de la API: `next/image` optimizado con un host externo (no hay
+ * `remotePatterns`) tiraría el render de `/` entera, y los assets
+ * `guia-*-hero.webp` son definitivos.
+ */
+function GuideCard({ guide }: { guide: ArticleCardData }) {
+  return <ArticleCard article={guide} thumbnailSrc={getGuideTheme(guide.category).image?.src} />;
 }
 
 export function LatestGuides({ guides }: LatestGuidesProps) {
@@ -44,7 +48,7 @@ export function LatestGuides({ guides }: LatestGuidesProps) {
         {apiGuides ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {apiGuides.map((guide) => (
-              <GuideCard key={guide.id} guide={guide} imageUrl={guide.imageUrl} />
+              <GuideCard key={guide.id} guide={guide} />
             ))}
           </div>
         ) : (

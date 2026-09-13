@@ -79,6 +79,8 @@ export interface HomeEditorialData {
     highlights: [string, string, string];
   };
   horoscope: HomeSectionCopy & {
+    /** `id` de la sección: ancla del único CTA del hero (T-SEO-022). */
+    anchorId: string;
     /** Se muestra cuando no hay horóscopo disponible (API caída). */
     emptyState: string;
   };
@@ -154,6 +156,7 @@ export const HOME_EDITORIAL: HomeEditorialData = {
 
   horoscope: {
     heading: 'Horóscopo de hoy',
+    anchorId: 'horoscopo-de-hoy',
     lead: 'Los doce signos, con la energía general de la jornada en dos o tres líneas. Cada extracto abre la predicción completa del signo: amor, trabajo, energía y bienestar, más el número, el color y la hora que acompañan el día. Se renueva todas las madrugadas, hora de Argentina.',
     href: ROUTES.HOROSCOPO,
     linkLabel: 'Ver el horóscopo completo',

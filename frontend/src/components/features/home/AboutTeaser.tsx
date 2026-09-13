@@ -35,7 +35,7 @@ export function AboutTeaser() {
             src="/images/enciclopedia/hub-guias.webp"
             alt=""
             fill
-            sizes="(max-width: 768px) 100vw, 320px"
+            sizes="320px"
             className="object-cover"
             aria-hidden="true"
           />

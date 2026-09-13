@@ -1,5 +1,3 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -58,6 +56,10 @@ export interface ArticleCardProps {
  * Adaptive card that renders different content depending on the article category.
  * Supports zodiac signs, planets, astrological houses, elements, modalities, and guides.
  *
+ * Sin `'use client'` a propósito: no usa hooks, y la portada (Server
+ * Component) la renderiza para las siete guías del catálogo; con la directiva
+ * viajarían en el HTML y otra vez en el payload RSC (T-SEO-022).
+ *
  * @example
  * ```tsx
  * <ArticleCard article={articleSummary} />
@@ -72,20 +74,20 @@ export function ArticleCard({ article, thumbnailSrc, className }: ArticleCardPro
       href={getArticlePath(article.category, article.slug)}
       data-testid="article-card"
       className={cn(
-        'bg-card hover:bg-accent hover:border-secondary group flex flex-col gap-2 overflow-hidden rounded-lg border transition-colors',
-        thumbnailSrc ? 'pb-4' : 'p-4',
+        'bg-card hover:bg-accent group flex flex-col rounded-lg border transition-colors',
+        thumbnailSrc ? 'hover:border-secondary overflow-hidden pb-4' : 'gap-2 p-4',
         className
       )}
     >
       {thumbnailSrc ? (
         /* Miniatura: alto reservado por el aspect-ratio, sin CLS */
-        <div className="relative -mb-1 aspect-[16/9] w-full overflow-hidden">
+        <div className="relative aspect-[16/9] w-full overflow-hidden">
           <Image
             data-testid="article-card-thumbnail"
             src={thumbnailSrc}
             alt=""
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 384px"
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             aria-hidden="true"
           />

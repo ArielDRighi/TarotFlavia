@@ -6,7 +6,6 @@ import { BookOpen, Layers, Sparkles, Sun } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 // 5. Components
 import { Button } from '@/components/ui/button';
-import { HOROSCOPE_ANCHOR_ID } from './DailyHoroscopeDigest';
 // 6. Utils & types
 import { LOGO } from '@/lib/constants/branding';
 import { HOME_EDITORIAL } from '@/lib/constants/home-editorial.data';
@@ -60,6 +59,7 @@ const HIGHLIGHT_ICONS: [LucideIcon, LucideIcon, LucideIcon] = [Sun, Layers, Book
 
 export function EditorialHero() {
   const { eyebrow, title, titleAccent, lead, ctaLabel, highlights } = HOME_EDITORIAL.hero;
+  const { anchorId } = HOME_EDITORIAL.horoscope;
   // El remate dorado es el final exacto del título (lo garantiza el test de datos).
   const titleLead = title.slice(0, title.length - titleAccent.length);
 
@@ -126,6 +126,7 @@ export function EditorialHero() {
           width={LOGO.width}
           height={LOGO.height}
           className="h-16 w-auto drop-shadow-lg md:h-24"
+          sizes="(max-width: 768px) 109px, 163px"
           priority
         />
       </div>
@@ -141,17 +142,14 @@ export function EditorialHero() {
           <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
         </p>
 
-        <h1 className="font-serif leading-tight" style={{ color: '#f9f7f2' }}>
+        <h1 className="text-text-on-dark font-serif leading-tight">
           <span className="block text-3xl font-light md:text-5xl lg:text-6xl">{titleLead}</span>
           <span className="animate-shimmer-gold mt-1 block text-3xl font-semibold md:text-5xl lg:text-6xl">
             {titleAccent}
           </span>
         </h1>
 
-        <p
-          className="mx-auto mt-6 max-w-2xl font-sans text-base leading-relaxed md:text-lg"
-          style={{ color: 'rgba(249, 247, 242, 0.8)' }}
-        >
+        <p className="text-text-on-dark/80 mx-auto mt-6 max-w-2xl font-sans text-base leading-relaxed md:text-lg">
           {lead}
         </p>
 
@@ -161,7 +159,7 @@ export function EditorialHero() {
           className="mt-8 min-w-[220px] border-0 font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-amber-500/25"
           style={{ background: GOLD_BUTTON, color: '#1a0a2e' }}
         >
-          <Link href={`#${HOROSCOPE_ANCHOR_ID}`}>{ctaLabel}</Link>
+          <Link href={`#${anchorId}`}>{ctaLabel}</Link>
         </Button>
 
         <ul className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">

@@ -4,7 +4,6 @@ import { describe, it, expect } from 'vitest';
 import { EditorialHero } from './EditorialHero';
 import { LOGO } from '@/lib/constants/branding';
 import { HOME_EDITORIAL } from '@/lib/constants/home-editorial.data';
-import { HOROSCOPE_ANCHOR_ID } from './DailyHoroscopeDigest';
 
 describe('EditorialHero (T-SEO-014)', () => {
   it('renderiza el h1 de publicación y la bajada', () => {
@@ -77,6 +76,6 @@ describe('EditorialHero — puesta en escena (T-SEO-022)', () => {
     const links = screen.getAllByRole('link');
     expect(links).toHaveLength(1);
     expect(links[0]).toHaveTextContent(HOME_EDITORIAL.hero.ctaLabel);
-    expect(links[0]).toHaveAttribute('href', `#${HOROSCOPE_ANCHOR_ID}`);
+    expect(links[0]).toHaveAttribute('href', `#${HOME_EDITORIAL.horoscope.anchorId}`);
   });
 });

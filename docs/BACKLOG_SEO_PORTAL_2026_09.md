@@ -1136,7 +1136,14 @@ ilustración* del prompt base); cambiar el copy editorial; `UserDashboard`; el h
 - **Sin cajas punteadas**: los estados vacíos que quedan (horóscopo y carta, copy de 014) son
   avisos planos sobre `bg-card`.
 - **Glifos**: `DailyHoroscopeList` usa `<ZodiacSymbol>` dentro de un `span aria-hidden` (el nombre
-  está al lado); cuando T-UI-12 mergee la familia `zodiac/`, cambia solo el componente.
+  está al lado). Transitorio: hasta que T-UI-12 mergee la familia `zodiac/`, el glifo sale lila
+  (`ZodiacSymbol` fija `text-primary`) en vez del dorado anterior, también en el hub `/horoscopo`;
+  con el icono de marca desaparece. Al mergear T-UI-12, pasar a `sign=… decorative` y quitar el
+  `span` envolvente.
+- **Revisión local (PR #657)**: `LatestGuides` ignora el `imageUrl` de la API (un host externo
+  rompería `next/image` sin `remotePatterns` y tiraría `/`); `ArticleCard` sin `'use client'` (no
+  usa hooks; evita duplicar las siete guías en el payload RSC); `sizes` ajustados a los anchos
+  reales; el ancla vive en `HOME_EDITORIAL.horoscope.anchorId`.
 
 ### Notas para quien la desarrolle
 
@@ -1146,7 +1153,7 @@ ilustración* del prompt base); cambiar el copy editorial; `UserDashboard`; el h
   siendo Server Components. Las estrellas y la luna son CSS puro (sin `useEffect`), así que no
   obligan a `'use client'`.
 - Las miniaturas por categoría ya están tipadas en `GuiasContent.tsx` (`GUIDE_THEME`, con
-  `guia-*-hero.webp` por categoría; los ocho assets son definitivos, no placeholders): extraerlas a
+  `guia-*-hero.webp` por categoría; los siete assets son definitivos, no placeholders): extraerlas a
   `lib/constants/guides-catalog.data.ts` junto con título y extracto estáticos de cada guía, y
   consumirlas desde `GuiasContent` y `LatestGuides`.
 

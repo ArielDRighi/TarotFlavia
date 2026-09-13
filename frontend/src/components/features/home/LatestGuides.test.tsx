@@ -24,7 +24,7 @@ const GUIDES: ArticleSummary[] = [
     nameEs: 'Guía del Péndulo',
     category: ArticleCategory.GUIDE_PENDULUM,
     snippet: 'Cómo preguntar con un péndulo.',
-    imageUrl: '/images/enciclopedia/desde-la-api.webp',
+    imageUrl: 'https://cdn.example.com/desde-la-api.webp',
     sortOrder: 1,
   },
 ];
@@ -56,7 +56,7 @@ describe('LatestGuides (T-SEO-014)', () => {
 });
 
 describe('LatestGuides — miniaturas y fallback (T-SEO-022)', () => {
-  it('cada tarjeta lleva la miniatura de su categoría; la de la API tiene prioridad', () => {
+  it('cada tarjeta lleva la miniatura de su categoría, aunque la API traiga un imageUrl', () => {
     render(<LatestGuides guides={GUIDES} />);
 
     const [tarot, pendulum] = screen.getAllByTestId('article-card');
@@ -64,9 +64,10 @@ describe('LatestGuides — miniaturas y fallback (T-SEO-022)', () => {
       'src',
       expect.stringContaining('guia-tarot-hero.webp')
     );
+    // Un host externo en `imageUrl` rompería `next/image` sin `remotePatterns`: se ignora.
     expect(within(pendulum).getByTestId('article-card-thumbnail')).toHaveAttribute(
       'src',
-      expect.stringContaining('desde-la-api.webp')
+      expect.stringContaining('guia-pendulo-hero.webp')
     );
   });
 
