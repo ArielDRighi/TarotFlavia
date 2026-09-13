@@ -37,13 +37,12 @@ export interface SectionHeroProps {
   /** `lg`: banda alta de la enciclopedia; `md` (default): el resto de las secciones. */
   size?: SectionHeroSize;
   className?: string;
-  'data-testid'?: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CONTENT_PADDING: Record<SectionHeroSize, string> = {
-  md: 'px-5 py-7 sm:px-10 sm:py-10',
+  md: 'px-6 py-7 sm:px-10 sm:py-10',
   lg: 'px-6 py-12 sm:px-10 sm:py-16',
 };
 
@@ -106,11 +105,10 @@ export function SectionHero({
   actions,
   size = 'md',
   className,
-  'data-testid': testId = 'section-hero',
 }: SectionHeroProps) {
   return (
     <header
-      data-testid={testId}
+      data-testid="section-hero"
       className={cn('relative overflow-hidden rounded-2xl', className)}
       style={{ background: HERO_GRADIENT }}
     >

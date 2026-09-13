@@ -240,6 +240,10 @@ describe('ServiciosPage', () => {
 
     const link = screen.getByTestId('mis-servicios-link');
     expect(link).toBeInTheDocument();
+    // T-UI-13: el enlace vive en la ranura de acciones de la banda
+    expect(
+      within(screen.getByTestId('section-hero-actions')).getByTestId('mis-servicios-link')
+    ).toBe(link);
     expect(link).toHaveAttribute('href', '/mis-servicios');
     expect(screen.getByText('Mis Servicios')).toBeInTheDocument();
   });
@@ -255,6 +259,8 @@ describe('ServiciosPage', () => {
     render(<ServiciosPage />, { wrapper });
 
     expect(screen.queryByTestId('mis-servicios-link')).not.toBeInTheDocument();
+    // T-UI-13: sin sesión la banda no renderiza la ranura de acciones
+    expect(screen.queryByTestId('section-hero-actions')).not.toBeInTheDocument();
   });
 
   describe('Sembrado desde el servidor (T-SEO-003)', () => {

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 
 import { SectionHero } from './section-hero';
+import { DECORATIVE_STARS } from '@/lib/constants/section-hero';
 
 describe('SectionHero', () => {
   it('renderiza un <header> con data-testid="section-hero" y el título como h1 único', () => {
@@ -76,12 +77,6 @@ describe('SectionHero', () => {
     expect(screen.queryByTestId('section-hero-actions')).not.toBeInTheDocument();
   });
 
-  it('permite sobreescribir el data-testid (compatibilidad con encyclopedia-hub-hero)', () => {
-    render(<SectionHero title="Enciclopedia Mística" data-testid="encyclopedia-hub-hero" />);
-    expect(screen.getByTestId('encyclopedia-hub-hero')).toBeInTheDocument();
-    expect(screen.queryByTestId('section-hero')).not.toBeInTheDocument();
-  });
-
   it('size="lg" usa el padding alto de la enciclopedia y "md" el compacto', () => {
     const { rerender } = render(<SectionHero title="Enciclopedia Mística" size="lg" />);
     expect(screen.getByTestId('section-hero-content')).toHaveClass('py-12', 'sm:py-16');
@@ -103,8 +98,8 @@ describe('SectionHero', () => {
     render(<SectionHero title="Horóscopo" />);
     const hero = screen.getByTestId('section-hero');
     const decorative = hero.querySelectorAll('[aria-hidden="true"]');
-    // 4 estrellas + luna + filete dorado
-    expect(decorative.length).toBeGreaterThanOrEqual(6);
+    // estrellas + luna + filete dorado
+    expect(decorative).toHaveLength(DECORATIVE_STARS.length + 2);
   });
 
   it('acepta className adicional en el header', () => {

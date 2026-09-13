@@ -1277,6 +1277,9 @@ Modificados: los nueve componentes de la tabla y sus tests.
   como `ArticleCard`): el genérico de `<BrandIcon>` no acepta la unión de todas las familias de
   golpe. Ampliar la unión cuando otra sección lo necesite.
 - El medallón del hero va con `priority` (LCP, above-the-fold en las nueve).
+- Revisión local del PR: `NumerologyProfile` tenía un segundo `h1` ("Tu Perfil Numerológico") que
+  aparecía con sesión y perfil cargado; pasó a `h2` para cumplir el `h1` único. Los botones con
+  sesión de Rituales y Servicios tienen test dentro de `section-hero-actions`.
 - Carta Astral: los tres `<Badge>` de plan (anónimo / free / premium) se resumen en un `planBadge`
   que va a la ranura `badge`; el `h1` pasa a Cormorant como el resto del sitio.
 - `AstrologyHubContent`, `CardDetailHero` y `DashboardHero` siguen con sus copias locales de
