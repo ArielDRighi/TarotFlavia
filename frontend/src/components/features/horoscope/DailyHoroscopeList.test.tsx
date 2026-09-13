@@ -1,7 +1,16 @@
 import { render, screen, within } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import { DailyHoroscopeList } from './DailyHoroscopeList';
+
+// El glifo lo resuelve ZodiacSymbol (hoy texto, mañana el icono de marca de T-UI-12).
+vi.mock('./ZodiacSymbol', () => ({
+  ZodiacSymbol: ({ label, symbol }: { label: string; symbol: string }) => (
+    <span data-testid="zodiac-symbol" data-symbol={symbol}>
+      {label}
+    </span>
+  ),
+}));
 import { ROUTES } from '@/lib/constants/routes';
 import { ZodiacSign } from '@/types/horoscope.types';
 import type { CanonicalDailyHoroscopes, DailyHoroscope } from '@/types/horoscope.types';
@@ -105,5 +114,23 @@ describe('DailyHoroscopeList (T-SEO-015)', () => {
     render(<DailyHoroscopeList daily={DAILY} testIdPrefix="x" emptyState="" headingLevel={2} />);
 
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(12);
+  });
+
+  it('cada signo lleva su glifo vía ZodiacSymbol, decorativo (el nombre ya está al lado)', () => {
+    render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    const symbols = screen.getAllByTestId('zodiac-symbol');
+    expect(symbols).toHaveLength(12);
+    const aries = screen.getByTestId('hub-horoscope-sign-aries');
+    const symbol = within(aries).getByTestId('zodiac-symbol');
+    expect(symbol).toHaveAttribute('data-symbol', '♈');
+    expect(symbol.closest('[aria-hidden="true"]')).not.toBeNull();
+    expect(within(aries).getByRole('heading', { level: 3 })).toHaveAccessibleName('Aries');
+  });
+
+  it('el estado vacío es un aviso plano, no una caja punteada (T-SEO-022)', () => {
+    render(<DailyHoroscopeList daily={undefined} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    expect(screen.getByTestId('hub-horoscope-empty')).not.toHaveClass('border-dashed');
   });
 });

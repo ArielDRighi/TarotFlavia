@@ -31,4 +31,31 @@ describe('EncyclopediaShowcase (T-SEO-014)', () => {
       screen.getByRole('link', { name: HOME_EDITORIAL.encyclopedia.linkLabel })
     ).toHaveAttribute('href', HOME_EDITORIAL.encyclopedia.href);
   });
+
+  it('cada cifra va sobre su ilustración del catálogo, decorativa y con carga diferida (T-SEO-022)', () => {
+    render(<EncyclopediaShowcase />);
+
+    const expected = [
+      'hub-tarot.webp',
+      'astro-signos.webp',
+      'astro-casas.webp',
+      'astro-planetas.webp',
+      'horoscopo-chino-animales.webp',
+    ];
+    const images = screen.getAllByTestId('home-encyclopedia-figure-image');
+    expect(images).toHaveLength(5);
+    images.forEach((image, index) => {
+      expect(image).toHaveAttribute('src', expect.stringContaining(expected[index]));
+      expect(image).toHaveAttribute('alt', '');
+      expect(image).toHaveAttribute('loading', 'lazy');
+      expect(image).toHaveAttribute('sizes');
+    });
+  });
+
+  it('es la sección oscura de la portada: encabezado en tono oscuro (T-SEO-022)', () => {
+    render(<EncyclopediaShowcase />);
+
+    expect(screen.getByTestId('home-encyclopedia')).toHaveAttribute('data-tone', 'dark');
+    expect(screen.getByTestId('home-section-header')).toHaveAttribute('data-tone', 'dark');
+  });
 });

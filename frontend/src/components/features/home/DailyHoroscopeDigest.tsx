@@ -25,11 +25,21 @@ export interface DailyHoroscopeDigestProps {
   daily: CanonicalDailyHoroscopes | undefined;
 }
 
+/**
+ * Ancla del único CTA del hero ("Leer el horóscopo de hoy", T-SEO-022). El
+ * `scroll-mt` compensa el header sticky (`h-16`).
+ */
+export const HOROSCOPE_ANCHOR_ID = 'horoscopo-de-hoy';
+
 export function DailyHoroscopeDigest({ daily }: DailyHoroscopeDigestProps) {
   const copy = HOME_EDITORIAL.horoscope;
 
   return (
-    <section data-testid="home-horoscope" className="bg-bg-main px-4 py-14 md:py-20">
+    <section
+      id={HOROSCOPE_ANCHOR_ID}
+      data-testid="home-horoscope"
+      className="bg-bg-main scroll-mt-20 px-4 py-14 md:py-20"
+    >
       <div className="container mx-auto max-w-6xl">
         <HomeSectionHeader copy={copy} />
         <DailyHoroscopeList

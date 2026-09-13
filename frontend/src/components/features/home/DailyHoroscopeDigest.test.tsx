@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
-import { DailyHoroscopeDigest } from './DailyHoroscopeDigest';
+import { DailyHoroscopeDigest, HOROSCOPE_ANCHOR_ID } from './DailyHoroscopeDigest';
 import { HOME_EDITORIAL } from '@/lib/constants/home-editorial.data';
 import { ROUTES } from '@/lib/constants/routes';
 import { ZodiacSign } from '@/types/horoscope.types';
@@ -101,5 +101,12 @@ describe('DailyHoroscopeDigest (T-SEO-014)', () => {
     render(<DailyHoroscopeDigest daily={{ ...DAILY, horoscopes: [] }} />);
 
     expect(screen.getByTestId('home-horoscope-empty')).toBeInTheDocument();
+  });
+
+  it('es el ancla del CTA del hero (T-SEO-022)', () => {
+    render(<DailyHoroscopeDigest daily={DAILY} />);
+
+    expect(HOROSCOPE_ANCHOR_ID).toBe('horoscopo-de-hoy');
+    expect(screen.getByTestId('home-horoscope')).toHaveAttribute('id', HOROSCOPE_ANCHOR_ID);
   });
 });

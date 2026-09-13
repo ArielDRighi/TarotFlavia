@@ -8,22 +8,14 @@ import Link from 'next/link';
 import { Reveal } from '@/components/common';
 // 6. Utils & types
 import { useArticlesByCategory } from '@/hooks/api/useEncyclopediaArticles';
+// Chip + miniatura por categoría: fuente única compartida con la portada (T-SEO-022).
+import { getGuideTheme } from '@/lib/constants/guides-catalog.data';
+import type { GuideTheme } from '@/lib/constants/guides-catalog.data';
 import { ROUTES } from '@/lib/constants/routes';
 import { ArticleCategory, GUIDE_CATEGORIES } from '@/types/encyclopedia-article.types';
 import type { ArticleSummary } from '@/types/encyclopedia-article.types';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface GuideTheme {
-  /** Short category label shown in the gold chip. */
-  chip: string;
-  /** Themed thumbnail; falls back to a brand gradient when absent. */
-  image?: { src: string; alt: string };
-}
-
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const IMAGE_BASE = '/images/enciclopedia';
 
 /**
  * Brand-night gradient used as the header band background and as the thumbnail
@@ -37,73 +29,7 @@ const GOLD_FILLET = 'linear-gradient(90deg, transparent, #d69e2e, transparent)';
 const CREAM = '#f9f7f2';
 const CREAM_MUTED = 'rgba(249, 247, 242, 0.72)';
 
-/**
- * Per-category editorial theme: short gold chip label and a themed thumbnail.
- * Each guide reuses its own hero (`guia-*-hero.webp`) as the listing thumbnail
- * (T-ENC-011), so the `✦` gradient fallback is now only a defensive safety net
- * for non-themed categories or a missing asset.
- *
- * NOTE: the 6 non-tarot heroes ship as provisional placeholders (copies of
- * `hub-guias.webp`) until T-ENC-014 generates the definitive WebP assets per the
- * §C base formula; replacing the files needs no code change.
- */
-const GUIDE_THEME: Partial<Record<ArticleCategory, GuideTheme>> = {
-  [ArticleCategory.GUIDE_TAROT]: {
-    chip: 'Tarot',
-    image: {
-      src: `${IMAGE_BASE}/guia-tarot-hero.webp`,
-      alt: 'Ilustración mística de cartas de tarot con resplandor dorado',
-    },
-  },
-  [ArticleCategory.GUIDE_NUMEROLOGY]: {
-    chip: 'Numerología',
-    image: {
-      src: `${IMAGE_BASE}/guia-numerologia-hero.webp`,
-      alt: 'Numerales dorados luminosos del 1 al 9 dentro de una geometría sagrada',
-    },
-  },
-  [ArticleCategory.GUIDE_PENDULUM]: {
-    chip: 'Péndulo',
-    image: {
-      src: `${IMAGE_BASE}/guia-pendulo-hero.webp`,
-      alt: 'Péndulo de cristal suspendido trazando arcos dorados sobre una carta mística',
-    },
-  },
-  [ArticleCategory.GUIDE_BIRTH_CHART]: {
-    chip: 'Carta Astral',
-    image: {
-      src: `${IMAGE_BASE}/guia-carta-astral-hero.webp`,
-      alt: 'Rueda de carta natal luminosa con planetas y glifos zodiacales en finas líneas doradas',
-    },
-  },
-  [ArticleCategory.GUIDE_RITUAL]: {
-    chip: 'Rituales',
-    image: {
-      src: `${IMAGE_BASE}/guia-rituales-hero.webp`,
-      alt: 'Altar místico con velas encendidas, cristales y hierbas en una atmósfera ritual',
-    },
-  },
-  [ArticleCategory.GUIDE_HOROSCOPE]: {
-    chip: 'Horóscopo',
-    image: {
-      src: `${IMAGE_BASE}/guia-horoscopo-hero.webp`,
-      alt: 'Rueda zodiacal completa con los doce glifos brillando y finas líneas de constelaciones',
-    },
-  },
-  [ArticleCategory.GUIDE_CHINESE]: {
-    chip: 'Horóscopo Chino',
-    image: {
-      src: `${IMAGE_BASE}/guia-horoscopo-chino-hero.webp`,
-      alt: 'Los doce animales del zodíaco chino en finas líneas doradas dispuestos en círculo luminoso',
-    },
-  },
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getGuideTheme(category: ArticleCategory): GuideTheme {
-  return GUIDE_THEME[category] ?? { chip: 'Guía' };
-}
 
 /**
  * Resolves the thumbnail for an article: prefers a backend-provided `imageUrl`

@@ -19,4 +19,15 @@ describe('AboutTeaser (T-SEO-014)', () => {
       ROUTES.SOBRE_NOSOTROS
     );
   });
+
+  it('lleva la ilustración del hub de guías al costado, sin foto ni persona (T-SEO-022)', () => {
+    render(<AboutTeaser />);
+
+    const illustration = screen.getByTestId('home-about-illustration');
+    expect(illustration).toHaveAttribute('src', expect.stringContaining('hub-guias.webp'));
+    expect(illustration).toHaveAttribute('alt', '');
+    expect(illustration).toHaveAttribute('loading', 'lazy');
+    expect(illustration).toHaveAttribute('sizes');
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
 });

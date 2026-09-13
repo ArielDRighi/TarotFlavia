@@ -2,6 +2,7 @@
 import Link from 'next/link';
 // 5. Components
 import { HoroscopeEditorialNote } from './HoroscopeEditorialNote';
+import { ZodiacSymbol } from './ZodiacSymbol';
 // 6. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
 import { formatDateFullWithYear } from '@/lib/utils/date';
@@ -62,8 +63,10 @@ function SignExcerpt({
       className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4"
     >
       <Heading className="text-text-primary flex items-center gap-2 font-serif text-lg font-semibold">
-        <span className="text-secondary text-xl" aria-hidden="true">
-          {info.symbol}
+        {/* Decorativo: el nombre del signo va al lado. Hoy es el glifo; con
+            T-UI-12 (familia zodiac/) ZodiacSymbol lo resuelve al icono de marca. */}
+        <span className="inline-flex shrink-0 items-center" aria-hidden="true">
+          <ZodiacSymbol symbol={info.symbol} label={info.nameEs} className="text-2xl" />
         </span>
         <Link
           href={ROUTES.HOROSCOPO_SIGN(horoscope.zodiacSign)}
@@ -94,7 +97,7 @@ export function DailyHoroscopeList({
     return (
       <p
         data-testid={`${testIdPrefix}-empty`}
-        className="text-text-muted border-border rounded-xl border border-dashed p-6 font-sans leading-relaxed"
+        className="text-text-muted bg-card border-border rounded-xl border p-6 font-sans leading-relaxed"
       >
         {emptyState}
       </p>

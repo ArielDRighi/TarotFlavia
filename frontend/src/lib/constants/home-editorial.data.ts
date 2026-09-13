@@ -44,6 +44,8 @@ export interface HomeLink {
 export interface HomeFigure extends HomeLink {
   /** Qué es lo que se cuenta, para la lectura de la cifra (p. ej. "con ficha propia"). */
   detail: string;
+  /** Ilustración de fondo, del catálogo de la enciclopedia (decorativa, T-SEO-022). */
+  image: string;
 }
 
 /** Encabezado + bajada de una sección, y el enlace a la página completa. */
@@ -57,10 +59,24 @@ export interface HomeSectionCopy {
 
 export interface HomeEditorialData {
   hero: {
+    /** Píldora dorada sobre el `h1`: qué tipo de sitio es. */
+    eyebrow: string;
     /** `h1` único de la portada. */
     title: string;
+    /**
+     * Remate del `title` que va en dorado con shimmer (T-SEO-022). Tiene que
+     * ser el final exacto de `title`: el hero lo separa por longitud.
+     */
+    titleAccent: string;
     /** Bajada de dos líneas: qué es el sitio. */
     lead: string;
+    /** Único CTA del hero: baja al horóscopo de hoy. Editorial, no de producto. */
+    ctaLabel: string;
+    /**
+     * Tres chips bajo el CTA con lo que hay para leer. Nada de "Sin registro" o
+     * "1 vez al día": eso es copy de producto.
+     */
+    highlights: [string, string, string];
   };
   horoscope: HomeSectionCopy & {
     /** Se muestra cuando no hay horóscopo disponible (API caída). */
@@ -72,9 +88,13 @@ export interface HomeEditorialData {
     /** Texto del enlace a la ficha de la carta en la enciclopedia. */
     encyclopediaLinkLabel: string;
   };
-  guides: HomeSectionCopy & {
-    emptyState: string;
-  };
+  /**
+   * Sin `emptyState`: cuando la API no responde, la portada cae a las siete
+   * guías de `guides-catalog.data.ts` (T-SEO-022). Un aviso de error en la
+   * portada es lo primero que vería el revisor de AdSense si el ISR pega en un
+   * mal momento.
+   */
+  guides: HomeSectionCopy;
   encyclopedia: HomeSectionCopy & {
     figures: HomeFigure[];
     /** Párrafo de cierre debajo de las cifras. */
@@ -124,7 +144,11 @@ export function getHomeEditorialWordCount(): number {
 
 export const HOME_EDITORIAL: HomeEditorialData = {
   hero: {
+    eyebrow: 'Publicación de tarot y astrología',
     title: 'Tarot y astrología en español: enciclopedia, horóscopos y guías',
+    titleAccent: 'enciclopedia, horóscopos y guías',
+    ctaLabel: 'Leer el horóscopo de hoy',
+    highlights: ['Horóscopo diario', '78 cartas', 'Guías'],
     lead: 'Auguria es una publicación sobre tarot, astrología, numerología y práctica ritual, escrita en español rioplatense por gente que lleva años en esto. Cada día publicamos el horóscopo de los doce signos y una carta para leer con calma; el resto del sitio es material de referencia para volver cuando haga falta.',
   },
 
@@ -152,8 +176,6 @@ export const HOME_EDITORIAL: HomeEditorialData = {
     lead: 'Las guías explican cómo se hace cada consulta: cómo formular una pregunta al tarot, qué mira una carta natal, cómo se calcula el número de vida, cómo se pregunta con un péndulo y qué necesita un ritual para tener sentido. Están escritas para leerse enteras, no para saltar entre bullets.',
     href: ROUTES.ENCICLOPEDIA_GUIAS,
     linkLabel: 'Todas las guías',
-    emptyState:
-      'Las guías no se pudieron cargar en este momento. Están todas en la sección de guías de la enciclopedia.',
   },
 
   encyclopedia: {
@@ -167,30 +189,35 @@ export const HOME_EDITORIAL: HomeEditorialData = {
         detail:
           'Los 22 arcanos mayores y los 56 menores, carta por carta, con significado al derecho e invertido.',
         href: ROUTES.ENCICLOPEDIA_TAROT,
+        image: '/images/enciclopedia/hub-tarot.webp',
       },
       {
         label: '12 signos',
         detail:
           'Perfil de cada signo del zodíaco: elemento, modalidad, regente y cómo se lleva con los demás.',
         href: ROUTES.ENCICLOPEDIA_ASTROLOGIA_SIGNOS,
+        image: '/images/enciclopedia/astro-signos.webp',
       },
       {
         label: '12 casas',
         detail:
           'Qué área de la vida gobierna cada casa astrológica y cómo leerla en una carta natal.',
         href: ROUTES.ENCICLOPEDIA_ASTROLOGIA_CASAS,
+        image: '/images/enciclopedia/astro-casas.webp',
       },
       {
         label: '10 planetas',
         detail:
           'Del Sol a Plutón: qué representa cada planeta y qué cambia según el signo en que cae.',
         href: ROUTES.ENCICLOPEDIA_ASTROLOGIA_PLANETAS,
+        image: '/images/enciclopedia/astro-planetas.webp',
       },
       {
         label: '12 signos chinos',
         detail:
           'Los doce animales del calendario chino, con su carácter, sus años y su horóscopo anual.',
         href: ROUTES.HOROSCOPO_CHINO,
+        image: '/images/enciclopedia/horoscopo-chino-animales.webp',
       },
     ],
     body: 'Si llegaste buscando una carta puntual, un signo o un planeta, lo más rápido es entrar directo por la cifra que corresponda. Si venís a leer sin rumbo, la portada de la enciclopedia ordena todo por disciplina y las fichas se enlazan entre sí: de una carta a sus combinaciones, de un signo a su regente, de un planeta a las casas donde pesa más.',
