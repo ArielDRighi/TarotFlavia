@@ -30,6 +30,19 @@ const DAILY: CanonicalDailyHoroscopes = {
 };
 
 describe('DailyHoroscopeList (T-SEO-015)', () => {
+  it('cada signo lleva su icono de marca decorativo (T-UI-12), no un glifo del sistema', () => {
+    render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    const aries = screen.getByTestId('hub-horoscope-sign-aries');
+    const icon = aries.querySelector('img');
+    expect(icon).not.toBeNull();
+    expect(decodeURIComponent(icon?.getAttribute('src') ?? '')).toContain(
+      '/images/icons/zodiac/aries.webp'
+    );
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+    expect(aries.textContent).not.toMatch(/[♈-♓]/u);
+  });
+
   it('renderiza la fecha y los 12 extractos con link a cada signo, con el prefijo de testid pedido', () => {
     render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
 

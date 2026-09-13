@@ -5,6 +5,7 @@ import { HoroscopeEditorialNote } from './HoroscopeEditorialNote';
 // 6. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
 import { formatDateFullWithYear } from '@/lib/utils/date';
+import { ZodiacSymbol } from './ZodiacSymbol';
 import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
 import { ZodiacSign } from '@/types/horoscope.types';
 import type { CanonicalDailyHoroscopes, DailyHoroscope } from '@/types/horoscope.types';
@@ -62,9 +63,7 @@ function SignExcerpt({
       className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4"
     >
       <Heading className="text-text-primary flex items-center gap-2 font-serif text-lg font-semibold">
-        <span className="text-secondary text-xl" aria-hidden="true">
-          {info.symbol}
-        </span>
+        <ZodiacSymbol sign={horoscope.zodiacSign} label={info.nameEs} size="md" decorative />
         <Link
           href={ROUTES.HOROSCOPO_SIGN(horoscope.zodiacSign)}
           className="underline-offset-4 hover:underline"

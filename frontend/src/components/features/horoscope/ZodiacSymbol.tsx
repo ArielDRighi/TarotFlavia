@@ -25,6 +25,8 @@ export interface ZodiacSymbolProps {
   label: string;
   /** Tamaño; si se omite se deriva de la clase `text-*` de `className` (default `md`). */
   size?: BrandIconSize;
+  /** Oculto a lectores de pantalla (cuando el nombre del signo ya está al lado). */
+  decorative?: boolean;
   /** Clases CSS adicionales (layout). Las clases `text-*` sólo se usan para derivar el tamaño. */
   className?: string;
 }
@@ -45,7 +47,14 @@ export interface ZodiacSymbolProps {
  * <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-4xl" />
  * ```
  */
-export function ZodiacSymbol({ sign, symbol, label, size, className }: ZodiacSymbolProps) {
+export function ZodiacSymbol({
+  sign,
+  symbol,
+  label,
+  size,
+  decorative,
+  className,
+}: ZodiacSymbolProps) {
   const resolved = sign ?? (symbol ? SIGN_BY_SYMBOL.get(symbol) : undefined);
   if (!resolved) return null;
 
@@ -55,6 +64,7 @@ export function ZodiacSymbol({ sign, symbol, label, size, className }: ZodiacSym
       name={resolved}
       label={label}
       size={size ?? brandIconSizeFromClassName(className)}
+      decorative={decorative}
       className={className}
     />
   );

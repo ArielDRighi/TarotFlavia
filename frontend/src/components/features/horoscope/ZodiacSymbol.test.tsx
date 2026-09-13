@@ -65,6 +65,13 @@ describe('ZodiacSymbol (T-UI-12: asset de marca en lugar del glifo Unicode)', ()
     expect(screen.getByRole('img')).toHaveClass('mx-auto');
   });
 
+  it('con decorative se oculta a lectores de pantalla', () => {
+    const { container } = render(<ZodiacSymbol sign={ZodiacSign.LEO} label="Leo" decorative />);
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(container.querySelector('img')).toHaveAttribute('aria-hidden', 'true');
+  });
+
   it('no renderiza nada con un glifo que no es un signo', () => {
     const { container } = render(<ZodiacSymbol symbol="★" label="Desconocido" />);
 

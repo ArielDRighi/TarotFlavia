@@ -126,7 +126,8 @@ npm run icons:process -- --family zodiac    # una sola
 Un solo tamaño (512) a propósito: `next/image` genera las variantes de 16–384 px desde ahí. El
 script avisa si un máster pasa los 48 KB; lo que viaja al navegador son 1,5–6 KB (48–128 px). El
 halo lleva color fijo (el dorado mediano del trazo) y alfa cuantizado: sin eso el ruido del degradé
-duplicaba el peso. Si en tu máquina `sharp`
+duplicaba el peso. El trazo se engrosa ~5 px antes de reducir y el dorado se oscurece un 15 %
+(`--stroke 0.0025`, `--tone 0.85`): la línea del modelo es fina y a 48–72 px se lavaba. Si en tu máquina `sharp`
 intenta compilar contra un `libvips` global, instalá con `SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install`.
 
 ## Learn More

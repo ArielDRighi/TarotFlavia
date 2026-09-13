@@ -9,13 +9,15 @@
  *
  *   1. Blanco → alfa (color-to-alpha): el fondo queda transparente y el brillo
  *      dorado conserva su suavidad sobre cualquier fondo.
- *   2. Recorte al contenido y re-centrado, con margen del 8 % (configurable).
- *   3. Exporta WebP cuadrado de 512 px con alfa a `public/images/icons/<familia>/<slug>.webp`.
+ *   2. Trazo engrosado (~5 px sobre 2048) y dorado un 15 % más profundo: la
+ *      línea del modelo es fina y a 48–72 px se lavaba (`--stroke`, `--tone`).
+ *   3. Recorte al contenido y re-centrado, con margen del 8 % (configurable).
+ *   4. Exporta WebP cuadrado de 512 px con alfa a `public/images/icons/<familia>/<slug>.webp`.
  *      Un solo tamaño a propósito: `next/image` ya genera las variantes de
  *      16–384 px (`imageSizes` en `next.config.ts`). El halo lleva color fijo
  *      (el dorado mediano del trazo) y alfa cuantizado: sin eso, el ruido del
  *      degradé duplica el peso.
- *   4. Escribe una hoja de contacto (`<in>/icons-contact-sheet.html`) con cada
+ *   5. Escribe una hoja de contacto (`<in>/icons-contact-sheet.html`) con cada
  *      icono a 32/64/128 px sobre fondo claro y cósmico, para descartar los que
  *      no leen bien chicos, y avisa si alguno pasa los 48 KB (el máster; lo
  *      servido a 48–128 px pesa 1,5–6 KB).
@@ -49,6 +51,19 @@ export const DEFAULTS = Object.freeze({
   size: 512,
   /** Margen alrededor del sujeto, como fracción del lado. */
   margin: 0.08,
+  /**
+   * Engrosado del trazo sólido, como fracción del lado de la imagen de entrada
+   * (0,0025 × 2048 = 5 px). El modelo dibuja líneas de ~8 px sobre 2048: a
+   * 48–72 px quedan en medio píxel y el antialiasing las lava. Se dilata la
+   * máscara del trazo antes de reducir; a 0 se desactiva.
+   */
+  stroke: 0.0025,
+  /**
+   * Factor sobre el RGB del trazo (1 = tal cual). 0,85 acerca el dorado del
+   * modelo (#CE9739 típico) al dorado profundo de la marca (#B7791F) y sube el
+   * contraste sobre tarjeta crema/blanca sin cambiar el matiz.
+   */
+  tone: 0.85,
   /**
    * Peso máximo aconsejado para el máster de 512 px. Un halo ancho y suave es
    * un degradé de alfa grande y eso pesa 30–45 KB por más que se comprima; lo
@@ -102,6 +117,8 @@ Opciones:
   --family <slug>  Procesar sólo esa familia (zodiac, chinese, moon…)
   --size <px>      Lado del WebP final                            (default: ${DEFAULTS.size})
   --margin <0-1>   Margen alrededor del sujeto                    (default: ${DEFAULTS.margin})
+  --stroke <0-0.02> Engrosado del trazo, fracción del lado        (default: ${DEFAULTS.stroke})
+  --tone <0.5-1>   Factor de oscurecido del dorado                (default: ${DEFAULTS.tone})
   --max-kb <n>     Aviso si un asset pesa más                     (default: ${DEFAULTS.maxBytes / 1024})
   --help           Esta ayuda
 `;
@@ -135,6 +152,54 @@ export function solidColor(data) {
 }
 
 /**
+ * Dilata el trazo sólido (píxeles opacos) `radius` px en cada dirección,
+ * in-place: los píxeles nuevos toman `color` y alfa 255. Máximo separable en
+ * ventana de (2·radius + 1): dos pasadas lineales sobre la máscara.
+ *
+ * @param {Buffer} data RGBA, 4 bytes por píxel. Se modifica y se devuelve.
+ * @param {number} width
+ * @param {number} height
+ * @param {number} radius Píxeles; 0 no hace nada.
+ * @param {[number, number, number]} color RGB para los píxeles agregados.
+ * @returns {Buffer}
+ */
+export function growStrokes(data, width, height, radius, color) {
+  if (radius <= 0) return data;
+  const n = width * height;
+  const mask = new Uint8Array(n);
+  for (let p = 0; p < n; p += 1) mask[p] = data[p * 4 + 3] === 255 ? 1 : 0;
+
+  const horizontal = new Uint8Array(n);
+  for (let y = 0; y < height; y += 1) {
+    const row = y * width;
+    for (let x = 0; x < width; x += 1) {
+      let hit = 0;
+      for (let k = Math.max(0, x - radius); k <= Math.min(width - 1, x + radius) && !hit; k += 1) {
+        hit = mask[row + k];
+      }
+      horizontal[row + x] = hit;
+    }
+  }
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      const p = y * width + x;
+      if (mask[p]) continue;
+      let hit = 0;
+      for (let k = Math.max(0, y - radius); k <= Math.min(height - 1, y + radius) && !hit; k += 1) {
+        hit = horizontal[k * width + x];
+      }
+      if (hit) {
+        data[p * 4] = color[0];
+        data[p * 4 + 1] = color[1];
+        data[p * 4 + 2] = color[2];
+        data[p * 4 + 3] = 255;
+      }
+    }
+  }
+  return data;
+}
+
+/**
  * Color-to-alpha para blanco, in-place sobre un buffer RGBA.
  *
  * Para cada píxel, el alfa nuevo es "cuánto se aleja del blanco"
@@ -148,12 +213,14 @@ export function solidColor(data) {
  *    "dorado fundido sobre blanco", así que su color des-premultiplicado
  *    debería ser constante; lo que lo varía es el ruido, que des-premultiplicar
  *    con alfa bajo amplifica hasta duplicar el peso del WebP.
+ *  - `tone` multiplica el RGB del trazo sólido (1 = sin cambio): sube el
+ *    contraste del dorado sobre fondo claro conservando el matiz.
  *
  * @param {Buffer} data RGBA, 4 bytes por píxel. Se modifica y se devuelve.
- * @param {{ glowColor?: [number, number, number] }} [options]
+ * @param {{ glowColor?: [number, number, number], tone?: number }} [options]
  * @returns {Buffer}
  */
-export function whiteToAlpha(data, { glowColor } = {}) {
+export function whiteToAlpha(data, { glowColor, tone = 1 } = {}) {
   for (let i = 0; i < data.length; i += 4) {
     const r = data[i];
     const g = data[i + 1];
@@ -170,6 +237,11 @@ export function whiteToAlpha(data, { glowColor } = {}) {
     }
 
     if (alpha >= SOLID_ALPHA) {
+      if (tone !== 1) {
+        data[i] = clampByte(r * tone);
+        data[i + 1] = clampByte(g * tone);
+        data[i + 2] = clampByte(b * tone);
+      }
       data[i + 3] = prevAlpha;
       continue;
     }
@@ -200,16 +272,38 @@ function clampByte(n) {
  * Procesa un asset crudo (buffer o ruta) y devuelve el WebP final.
  *
  * @param {Buffer | string} input
- * @param {{ size?: number, margin?: number }} [options]
+ * @param {{ size?: number, margin?: number, stroke?: number, tone?: number }} [options]
  * @returns {Promise<Buffer>}
  */
-export async function processIcon(input, { size = DEFAULTS.size, margin = DEFAULTS.margin } = {}) {
-  // 1. Blanco → alfa sobre los píxeles crudos.
+export async function processIcon(
+  input,
+  {
+    size = DEFAULTS.size,
+    margin = DEFAULTS.margin,
+    stroke = DEFAULTS.stroke,
+    tone = DEFAULTS.tone,
+  } = {}
+) {
+  // 1. Blanco → alfa sobre los píxeles crudos; el halo y el engrosado toman el
+  //    dorado del trazo ya entonado.
   const { data, info } = await sharp(input)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  const rgba = whiteToAlpha(data, { glowColor: solidColor(data) });
+  const gold = solidColor(data);
+  const toned = gold
+    ? /** @type {[number, number, number]} */ (gold.map((c) => clampByte(c * tone)))
+    : undefined;
+  const rgba = whiteToAlpha(data, { glowColor: toned, tone });
+  if (toned) {
+    growStrokes(
+      rgba,
+      info.width,
+      info.height,
+      Math.round(Math.max(info.width, info.height) * stroke),
+      toned
+    );
+  }
 
   // 2. Recorte al contenido (todo lo que no sea transparente).
   const trimmed = await sharp(rgba, {
@@ -339,12 +433,14 @@ ${rows}
  * @param {string[]} argv
  */
 export function parseArgs(argv = []) {
-  /** @type {{ inDir: string, outDir: string, size: number, margin: number, maxBytes: number, family: string | undefined, help: boolean }} */
+  /** @type {{ inDir: string, outDir: string, size: number, margin: number, stroke: number, tone: number, maxBytes: number, family: string | undefined, help: boolean }} */
   const opciones = {
     inDir: DEFAULTS.inDir,
     outDir: DEFAULTS.outDir,
     size: DEFAULTS.size,
     margin: DEFAULTS.margin,
+    stroke: DEFAULTS.stroke,
+    tone: DEFAULTS.tone,
     maxBytes: DEFAULTS.maxBytes,
     family: undefined,
     help: false,
@@ -382,6 +478,22 @@ export function parseArgs(argv = []) {
         opciones.margin = margin;
         break;
       }
+      case '--stroke': {
+        const stroke = Number(next());
+        if (!Number.isFinite(stroke) || stroke < 0 || stroke > 0.02) {
+          throw new Error('--stroke debe estar entre 0 y 0.02');
+        }
+        opciones.stroke = stroke;
+        break;
+      }
+      case '--tone': {
+        const tone = Number(next());
+        if (!Number.isFinite(tone) || tone < 0.5 || tone > 1) {
+          throw new Error('--tone debe estar entre 0.5 y 1');
+        }
+        opciones.tone = tone;
+        break;
+      }
       case '--max-kb': {
         const kb = Number(next());
         if (!Number.isFinite(kb) || kb <= 0) throw new Error('--max-kb debe ser un número > 0');
@@ -401,11 +513,20 @@ export function parseArgs(argv = []) {
 }
 
 /**
- * @param {{ inDir: string, outDir: string, size: number, margin: number, maxBytes?: number, family?: string }} opciones
+ * @param {{ inDir: string, outDir: string, size: number, margin: number, stroke?: number, tone?: number, maxBytes?: number, family?: string }} opciones
  * @param {{ log?: (msg: string) => void }} [deps]
  */
 export async function run(opciones, { log = console.log } = {}) {
-  const { inDir, outDir, size, margin, family, maxBytes = DEFAULTS.maxBytes } = opciones;
+  const {
+    inDir,
+    outDir,
+    size,
+    margin,
+    stroke = DEFAULTS.stroke,
+    tone = DEFAULTS.tone,
+    family,
+    maxBytes = DEFAULTS.maxBytes,
+  } = opciones;
   const icons = await listRawIcons(inDir, { family });
 
   if (icons.length === 0) {
@@ -419,7 +540,7 @@ export async function run(opciones, { log = console.log } = {}) {
   const warnings = [];
 
   for (const icon of icons) {
-    const webp = await processIcon(icon.file, { size, margin });
+    const webp = await processIcon(icon.file, { size, margin, stroke, tone });
     const outFile = path.join(outDir, icon.family, `${icon.slug}.webp`);
     await mkdir(path.dirname(outFile), { recursive: true });
     await writeFile(outFile, webp);

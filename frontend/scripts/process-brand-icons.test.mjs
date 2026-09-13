@@ -9,6 +9,7 @@ import {
   parseArgs,
   whiteToAlpha,
   solidColor,
+  growStrokes,
   listRawIcons,
   processIcon,
   renderContactSheet,
@@ -115,6 +116,47 @@ describe('whiteToAlpha (color-to-alpha para blanco)', () => {
   });
 });
 
+describe('whiteToAlpha con tone', () => {
+  it('oscurece el trazo sólido por el factor, sin tocar el halo ni el fondo', () => {
+    const px = whiteToAlpha(Buffer.from([200, 150, 50, 255]), { tone: 0.5 });
+    expect([...px]).toEqual([100, 75, 25, 255]);
+    const glow = whiteToAlpha(Buffer.from([240, 225, 190, 255]), {
+      tone: 0.5,
+      glowColor: [1, 2, 3],
+    });
+    expect([...glow.subarray(0, 3)]).toEqual([1, 2, 3]);
+  });
+});
+
+describe('growStrokes (engrosado del trazo)', () => {
+  const gold = [180, 120, 30];
+
+  it('con radio 1, un píxel opaco se vuelve un bloque 3×3 del color dado', () => {
+    // 5×5 transparente con el centro opaco
+    const data = Buffer.alloc(5 * 5 * 4, 0);
+    data.set([9, 9, 9, 255], (2 * 5 + 2) * 4);
+    growStrokes(data, 5, 5, 1, gold);
+    let opaque = 0;
+    for (let p = 0; p < 25; p += 1) if (data[p * 4 + 3] === 255) opaque += 1;
+    expect(opaque).toBe(9);
+    // el original conserva su color; el vecino toma el dorado
+    expect([...data.subarray((2 * 5 + 2) * 4, (2 * 5 + 2) * 4 + 4)]).toEqual([9, 9, 9, 255]);
+    expect([...data.subarray((1 * 5 + 2) * 4, (1 * 5 + 2) * 4 + 4)]).toEqual([...gold, 255]);
+    // la esquina (distancia 2) sigue transparente
+    expect(data[3]).toBe(0);
+  });
+
+  it('no dilata píxeles semitransparentes (halo) ni hace nada con radio 0', () => {
+    const data = Buffer.alloc(3 * 3 * 4, 0);
+    data.set([9, 9, 9, 128], (1 * 3 + 1) * 4);
+    growStrokes(data, 3, 3, 1, gold);
+    expect(data[3]).toBe(0);
+    const solid = Buffer.from([9, 9, 9, 255, 0, 0, 0, 0]);
+    growStrokes(solid, 2, 1, 0, gold);
+    expect(solid[7]).toBe(0);
+  });
+});
+
 describe('solidColor', () => {
   it('devuelve la mediana RGB de los píxeles de trazo sólido', () => {
     const px = Buffer.from([
@@ -139,7 +181,7 @@ describe('solidColor', () => {
 describe('processIcon', () => {
   it('quita el fondo blanco, recorta al sujeto, lo centra con margen y exporta WebP cuadrado', async () => {
     const input = await goldSquareOnWhite();
-    const out = await processIcon(input, { size: 64, margin: 0.1 });
+    const out = await processIcon(input, { size: 64, margin: 0.1, tone: 1, stroke: 0 });
 
     const meta = await sharp(out).metadata();
     expect(meta.format).toBe('webp');
@@ -152,7 +194,7 @@ describe('processIcon', () => {
     expect((await pixelAt(out, 63, 63)).a).toBe(0);
 
     // Centro: el cuadrado (que en el original estaba descentrado) ahora está en el medio,
-    // opaco y con el dorado original (tolerancia por la compresión WebP).
+    // opaco y con el dorado original (tone 1 en este test; tolerancia por la compresión WebP).
     const center = await pixelAt(out, 32, 32);
     expect(center.a).toBeGreaterThan(250);
     expect(Math.abs(center.r - GOLD.r)).toBeLessThan(8);
@@ -163,6 +205,27 @@ describe('processIcon', () => {
     expect((await pixelAt(out, 8, 32)).a).toBeGreaterThan(150);
     // (WebP con alfa con pérdida: tolera un residuo mínimo en el margen.)
     expect((await pixelAt(out, 3, 32)).a).toBeLessThan(16);
+  });
+
+  it('con tone y stroke por defecto, el trazo sale más oscuro y más ancho', async () => {
+    const input = await goldSquareOnWhite({ size: 200, square: 20, offset: 90 });
+    const plain = await processIcon(input, { size: 200, margin: 0, tone: 1, stroke: 0 });
+    const boosted = await processIcon(input, { size: 200, margin: 0 });
+
+    // Más oscuro: el centro del cuadrado baja de valor en los tres canales.
+    const c0 = await pixelAt(plain, 100, 100);
+    const c1 = await pixelAt(boosted, 100, 100);
+    expect(c1.r).toBeLessThan(c0.r - 10);
+    expect(c1.g).toBeLessThan(c0.g - 10);
+    // Más ancho: el cuadrado dilatado ocupa más del lienzo (el recorte es al contenido,
+    // así que se compara el peso relativo de píxeles opacos).
+    const opaqueRatio = async (buf) => {
+      const { data } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      let n = 0;
+      for (let i = 3; i < data.length; i += 4) if (data[i] > 250) n += 1;
+      return n / (data.length / 4);
+    };
+    expect(await opaqueRatio(boosted)).toBeGreaterThanOrEqual(await opaqueRatio(plain));
   });
 
   it('usa el tamaño y margen por defecto', async () => {
@@ -224,10 +287,18 @@ describe('parseArgs', () => {
       outDir: DEFAULTS.outDir,
       size: DEFAULTS.size,
       margin: DEFAULTS.margin,
+      stroke: DEFAULTS.stroke,
+      tone: DEFAULTS.tone,
       maxBytes: DEFAULTS.maxBytes,
       family: undefined,
       help: false,
     });
+  });
+
+  it('lee --stroke y --tone y rechaza valores fuera de rango', () => {
+    expect(parseArgs(['--stroke', '0', '--tone', '1'])).toMatchObject({ stroke: 0, tone: 1 });
+    expect(() => parseArgs(['--stroke', '0.5'])).toThrow(/--stroke/);
+    expect(() => parseArgs(['--tone', '0.2'])).toThrow(/--tone/);
   });
 
   it('lee --in, --out, --size, --margin, --family, --max-kb y --help', () => {

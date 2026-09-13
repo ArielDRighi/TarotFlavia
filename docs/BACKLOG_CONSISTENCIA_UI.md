@@ -816,6 +816,12 @@ Por tamaño, conviene dividir en **2-3 PRs**:
 - El halo lleva **color fijo** (el dorado mediano del trazo de ese asset) y alfa cuantizado de a 8:
   des-premultiplicar un color casi blanco con alfa bajo amplifica el ruido del JPEG y duplicaba el
   peso; el trazo sólido (≥ 75 % de distancia al blanco) conserva su color y queda opaco.
+- **Contraste (feedback de Ariel, 12-sep):** el trazo del modelo es de ~8 px sobre 2048 y a 48–72 px
+  quedaba en medio píxel: el antialiasing lo lavaba. Oscurecer solo no alcanzaba; lo que resuelve es
+  **engrosar el trazo** antes de reducir (`--stroke`, dilatación de la máscara del trazo sólido,
+  0,25 % del lado ≈ 5 px) más un dorado un 15 % más profundo (`--tone 0.85`, acerca el dorado del
+  modelo al `#B7791F` de la marca sin cambiar el matiz). Se comparó a 48/72 px: `r3`, `r5`, `r8`, con y
+  sin tono; `r5 + 0.85` es la que mejor lee sin cerrar el detalle interior.
 
 #### 📋 Descripción
 
@@ -907,7 +913,9 @@ el código (`aries`, `rat`, `fire`, `new_moon`…).
       explícito + `mx-auto` como la occidental. Nuevo tamaño `2xl` (112 px) para el encabezado de
       ficha de signo y de animal (`ZodiacSignProfile`, `AnimalProfile`): a 72 px el animal se perdía.
       El helper `brandIconSizeFromClassName` (clase `text-*` → tamaño) vive en `brand-icon.tsx` y lo
-      comparten los dos wrappers. `app/horoscopo-chino/page.tsx` ya no tenía emoji. Queda como deuda
+      comparten los dos wrappers. `DailyHoroscopeList` (digest de la home y del hub `/horoscopo`)
+      renderizaba `info.symbol` como texto: pasa a `ZodiacSymbol` decorativo (`decorative` nuevo,
+      el nombre del signo ya está al lado). `app/horoscopo-chino/page.tsx` ya no tenía emoji. Queda como deuda
       menor: `CHINESE_ZODIAC_INFO[x].emoji` y `getAnimalEmoji` del hook no tienen consumidor
       (`YearSelectorModal` tampoco); se limpian con la familia `elements/`, que toca el mismo archivo.
 - [ ] Elementos y palos (`encyclopedia.types.ts`, `chinese-zodiac.ts`, `ElementSelectorModal`).
