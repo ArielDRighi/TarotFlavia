@@ -29,7 +29,12 @@ export function DailyHoroscopeDigest({ daily }: DailyHoroscopeDigestProps) {
   const copy = HOME_EDITORIAL.horoscope;
 
   return (
-    <section data-testid="home-horoscope" className="bg-bg-main px-4 py-14 md:py-20">
+    /* `id` = ancla del único CTA del hero (T-SEO-022); `scroll-mt` compensa el header sticky */
+    <section
+      id={copy.anchorId}
+      data-testid="home-horoscope"
+      className="bg-bg-main scroll-mt-20 px-4 py-14 md:py-20"
+    >
       <div className="container mx-auto max-w-6xl">
         <HomeSectionHeader copy={copy} />
         <DailyHoroscopeList

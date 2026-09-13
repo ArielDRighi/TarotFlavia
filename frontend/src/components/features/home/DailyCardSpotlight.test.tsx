@@ -96,4 +96,20 @@ describe('DailyCardSpotlight (T-SEO-014)', () => {
     );
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
+
+  it('la carta va sobre el incienso recuperado, decorativo y con carga diferida (T-SEO-022)', () => {
+    render(<DailyCardSpotlight dailyCard={DAILY_CARD} />);
+
+    const incense = screen.getByTestId('home-daily-card-incense');
+    expect(incense).toHaveAttribute('src', expect.stringContaining('incense-bg.webp'));
+    expect(incense).toHaveAttribute('alt', '');
+    expect(incense).toHaveAttribute('loading', 'lazy');
+    expect(incense).toHaveAttribute('sizes');
+  });
+
+  it('el estado vacío es un aviso plano, no una caja punteada (T-SEO-022)', () => {
+    render(<DailyCardSpotlight dailyCard={undefined} />);
+
+    expect(screen.getByTestId('home-daily-card-empty')).not.toHaveClass('border-dashed');
+  });
 });

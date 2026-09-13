@@ -106,4 +106,22 @@ describe('DailyHoroscopeList (T-SEO-015)', () => {
 
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(12);
   });
+
+  it('cada signo lleva su símbolo (ZodiacSymbol), decorativo: el nombre ya está al lado', () => {
+    render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    // Independiente de cómo se dibuje el símbolo (glifo hoy, icono de marca con
+    // T-UI-12): es una imagen con el nombre del signo, oculta a lectores de pantalla.
+    const aries = screen.getByTestId('hub-horoscope-sign-aries');
+    const symbol = within(aries).getByRole('img', { name: 'Aries', hidden: true });
+    expect(symbol.closest('[aria-hidden="true"]')).not.toBeNull();
+    expect(within(aries).getByRole('heading', { level: 3 })).toHaveAccessibleName('Aries');
+    expect(screen.getAllByRole('img', { hidden: true })).toHaveLength(12);
+  });
+
+  it('el estado vacío es un aviso plano, no una caja punteada (T-SEO-022)', () => {
+    render(<DailyHoroscopeList daily={undefined} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    expect(screen.getByTestId('hub-horoscope-empty')).not.toHaveClass('border-dashed');
+  });
 });

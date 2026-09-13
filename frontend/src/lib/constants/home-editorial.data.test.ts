@@ -26,6 +26,25 @@ describe('HOME_EDITORIAL', () => {
     expect(HOME_EDITORIAL.hero.lead).not.toMatch(/\$|precio|premium|crear cuenta/i);
   });
 
+  it('el remate dorado del h1 es el final exacto del título (T-SEO-022)', () => {
+    const { title, titleAccent } = HOME_EDITORIAL.hero;
+    expect(title.endsWith(titleAccent)).toBe(true);
+    expect(titleAccent.length).toBeLessThan(title.length);
+  });
+
+  it('el hero baja al contenido con un único CTA editorial, sin copy de producto (T-SEO-022)', () => {
+    const { eyebrow, ctaLabel, highlights } = HOME_EDITORIAL.hero;
+    expect(eyebrow).toMatch(/publicación/i);
+    expect(ctaLabel).toMatch(/horóscopo de hoy/i);
+    expect(highlights).toHaveLength(3);
+    const chips = highlights.join(' ');
+    expect(chips).not.toMatch(/registro|1 vez|gratis|cuenta|inmediato/i);
+  });
+
+  it('las guías no tienen estado vacío: la portada cae al catálogo estático (T-SEO-022)', () => {
+    expect('emptyState' in HOME_EDITORIAL.guides).toBe(false);
+  });
+
   it('⚠️ la home anónima no menciona precios ni planes en su texto propio', () => {
     const everything = JSON.stringify(HOME_EDITORIAL);
     expect(everything).not.toMatch(/\$\s?\d/);
@@ -54,6 +73,17 @@ describe('HOME_EDITORIAL', () => {
       ROUTES.ENCICLOPEDIA_ASTROLOGIA_CASAS,
       ROUTES.ENCICLOPEDIA_ASTROLOGIA_PLANETAS,
       ROUTES.HOROSCOPO_CHINO,
+    ]);
+  });
+
+  it('cada cifra de la enciclopedia lleva su ilustración del catálogo existente (T-SEO-022)', () => {
+    const images = HOME_EDITORIAL.encyclopedia.figures.map((figure) => figure.image);
+    expect(images).toEqual([
+      '/images/enciclopedia/hub-tarot.webp',
+      '/images/enciclopedia/astro-signos.webp',
+      '/images/enciclopedia/astro-casas.webp',
+      '/images/enciclopedia/astro-planetas.webp',
+      '/images/enciclopedia/horoscopo-chino-animales.webp',
     ]);
   });
 

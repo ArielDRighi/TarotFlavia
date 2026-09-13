@@ -412,6 +412,37 @@ body {
 }
 
 /* ===========================================
+   Ornamento editorial ✦ (T-SEO-022)
+   El mismo separador tipográfico de los artículos (MarkdownArticle), como
+   apertura de cada sección de la portada. Va por CSS y no como texto en el
+   JSX para que el guardarraíl de emojis (T-UI-12) no lo cuente: U+2726 no
+   tiene presentación emoji en Unicode y renderiza igual en todos los SO.
+   =========================================== */
+.editorial-ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-secondary);
+  font-family: var(--font-serif), 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.875rem;
+  line-height: 1;
+}
+.editorial-ornament::before,
+.editorial-ornament::after {
+  content: '';
+  height: 1px;
+  width: 2.5rem;
+  background: linear-gradient(90deg, transparent, var(--color-secondary));
+  opacity: 0.7;
+}
+.editorial-ornament::after {
+  background: linear-gradient(90deg, var(--color-secondary), transparent);
+}
+.editorial-ornament > span::before {
+  content: '\2726';
+}
+
+/* ===========================================
    Scroll Reveal — fade-up escalonado (T-ENC-008)
    El estado lo controla el componente <Reveal> vía `data-revealed`; el retardo
    escalonado llega por la variable `--reveal-delay`.
