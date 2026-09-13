@@ -44,12 +44,12 @@ export interface ChineseAnimalCardProps {
 const DENSITY_CLASSES = {
   grid: {
     padding: 'p-3 md:p-4',
-    symbol: 'mx-auto block text-3xl md:text-4xl',
+    symbol: 'xl',
     name: 'text-sm leading-tight break-words hyphens-auto md:text-lg md:leading-normal md:break-normal md:hyphens-none',
   },
   carousel: {
     padding: 'p-3 lg:p-4',
-    symbol: 'mx-auto block text-3xl lg:text-4xl',
+    symbol: 'lg',
     name: 'text-sm leading-tight break-words hyphens-auto lg:text-lg lg:leading-normal lg:break-normal lg:hyphens-none',
   },
 } as const;
@@ -126,7 +126,8 @@ export function ChineseAnimalCard({
       <ChineseAnimalSymbol
         animal={animalInfo.animal}
         label={animalInfo.nameEs}
-        className={density.symbol}
+        size={density.symbol}
+        className="mx-auto"
       />
       <p className={cn('mt-2 font-serif', density.name)}>{animalInfo.nameEs}</p>
     </Card>

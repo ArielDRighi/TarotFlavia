@@ -27,14 +27,16 @@ describe('ChineseAnimalCard', () => {
   });
 
   describe('Rendering', () => {
-    it('should render the monochrome animal symbol (colorable with text-primary)', () => {
+    it('should render the brand animal icon (T-UI-12)', () => {
       const animalInfo = createTestAnimalInfo();
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
       const symbol = screen.getByRole('img', { name: 'Rata' });
       expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/'
+      );
     });
 
     it('should center the animal symbol like the western zodiac card', () => {
@@ -45,7 +47,6 @@ describe('ChineseAnimalCard', () => {
       // El <svg> es display:block por el preflight de Tailwind, así que `text-center`
       // no lo centra: se fuerza `block mx-auto` para alinearlo igual que el occidental.
       const symbol = screen.getByRole('img', { name: 'Rata' });
-      expect(symbol).toHaveClass('block');
       expect(symbol).toHaveClass('mx-auto');
     });
 

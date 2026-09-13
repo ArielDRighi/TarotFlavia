@@ -84,7 +84,7 @@ export function AnimalProfile({ animal }: AnimalProfileProps) {
   return (
     <article className="space-y-6" data-testid="animal-profile">
       <header className="text-center">
-        <ChineseAnimalSymbol animal={animal} label={info.nameEs} className="text-6xl" />
+        <ChineseAnimalSymbol animal={animal} label={info.nameEs} size="2xl" />
         <h1 className="mt-2 font-serif text-3xl">{info.nameEs}</h1>
         <p className="text-muted-foreground mt-2 text-lg">{profile.tagline}</p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">

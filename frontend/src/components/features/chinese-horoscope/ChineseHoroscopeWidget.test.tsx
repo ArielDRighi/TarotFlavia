@@ -177,7 +177,7 @@ describe('ChineseHoroscopeWidget', () => {
       expect(screen.getByTestId('chinese-horoscope-widget')).toBeInTheDocument();
     });
 
-    it('should display the monochrome animal symbol', () => {
+    it('should display the brand animal icon (T-UI-12)', () => {
       mockUseMyAnimalHoroscope.mockReturnValue({
         data: createMockHoroscope(),
         isLoading: false,
@@ -188,7 +188,9 @@ describe('ChineseHoroscopeWidget', () => {
 
       const symbol = screen.getByRole('img', { name: 'Dragón' });
       expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/'
+      );
     });
 
     it('should display animal name in Spanish', () => {

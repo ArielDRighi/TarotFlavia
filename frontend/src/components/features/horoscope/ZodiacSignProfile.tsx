@@ -80,7 +80,7 @@ function DailyAreaCard({ title, children }: { title: string; children: string })
  * ```
  */
 export function ZodiacSignProfile({ sign, children }: ZodiacSignProfileProps) {
-  const { nameEs, symbol, element } = ZODIAC_SIGNS_INFO[sign];
+  const { nameEs, element } = ZODIAC_SIGNS_INFO[sign];
   const profile = getZodiacSignProfile(sign);
   const harmonicSigns = getHarmonicSigns(sign);
   const oppositeSign = getOppositeSign(sign);
@@ -93,7 +93,7 @@ export function ZodiacSignProfile({ sign, children }: ZodiacSignProfileProps) {
     // artículo lo empujaba abajo de 300 palabras de ficha.
     <article className="space-y-6" data-testid="zodiac-sign-profile">
       <header className="text-center">
-        <ZodiacSymbol symbol={symbol} label={nameEs} className="text-6xl" />
+        <ZodiacSymbol sign={sign} label={nameEs} size="2xl" />
         <h1 className="mt-2 font-serif text-3xl">Horóscopo de {nameEs}</h1>
         <p className="text-muted-foreground mt-2 text-lg">{profile.tagline}</p>
         {/* Los datos del signo van solo acá, y cada etiqueta se explica sola:

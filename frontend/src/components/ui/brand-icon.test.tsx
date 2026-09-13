@@ -46,6 +46,7 @@ describe('BrandIcon', () => {
     expect(BRAND_ICON_SIZES.sm).toBeLessThan(BRAND_ICON_SIZES.md);
     expect(BRAND_ICON_SIZES.md).toBeLessThan(BRAND_ICON_SIZES.lg);
     expect(BRAND_ICON_SIZES.lg).toBeLessThan(BRAND_ICON_SIZES.xl);
+    expect(BRAND_ICON_SIZES.xl).toBeLessThan(BRAND_ICON_SIZES['2xl']);
   });
 
   it('es lazy por defecto y acepta priority para above-the-fold', () => {

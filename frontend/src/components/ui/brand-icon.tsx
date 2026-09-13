@@ -10,16 +10,43 @@ import {
 /**
  * Tamaños en píxeles CSS. Equivalencias con los emojis que reemplazan:
  * `text-xl` → `sm`, `text-2xl`/`text-3xl` → `md`, `text-4xl`/`text-5xl` → `lg`,
- * hero → `xl`. El asset es 512×512, así que `next/image` sirve 1x y 2x nítidos.
+ * `text-6xl` → `xl`, encabezado de ficha → `2xl`. El asset es 512×512, así que `next/image` sirve 1x y 2x nítidos.
  */
 export const BRAND_ICON_SIZES = {
   sm: 20,
   md: 32,
   lg: 48,
   xl: 72,
+  /** Encabezado de ficha (signo, animal): el sujeto tiene detalle y a 72 px se pierde. */
+  '2xl': 112,
 } as const;
 
 export type BrandIconSize = keyof typeof BRAND_ICON_SIZES;
+
+const SIZE_ORDER: readonly BrandIconSize[] = ['sm', 'md', 'lg', 'xl', '2xl'];
+
+/** Clase `text-*` con la que los consumidores dimensionaban el glifo → tamaño del icono. */
+const SIZE_BY_TEXT_CLASS: ReadonlyArray<[RegExp, BrandIconSize]> = [
+  [/\btext-(?:xs|sm|base|lg|xl)\b/, 'sm'],
+  [/\btext-(?:2|3)xl\b/, 'md'],
+  [/\btext-(?:4|5)xl\b/, 'lg'],
+  [/\btext-[6-9]xl\b/, 'xl'],
+];
+
+/**
+ * Deriva el tamaño de la clase de texto (`text-4xl` → `lg`) para los wrappers
+ * que reemplazan un glifo de fuente por un `<BrandIcon>` sin cambiar la firma
+ * (`ZodiacSymbol`, `ChineseAnimalSymbol`). Si hay varias (responsive), gana
+ * la mayor; sin ninguna, `md`.
+ */
+export function brandIconSizeFromClassName(className?: string): BrandIconSize {
+  if (!className) return 'md';
+  const found = SIZE_BY_TEXT_CLASS.filter(([re]) => re.test(className)).map(([, size]) => size);
+  if (found.length === 0) return 'md';
+  return found.reduce((max, size) =>
+    SIZE_ORDER.indexOf(size) > SIZE_ORDER.indexOf(max) ? size : max
+  );
+}
 
 export interface BrandIconProps<F extends BrandIconFamily = BrandIconFamily> {
   /** Familia del registro (`zodiac`, `chinese`, `elements`, `hubs`…). */

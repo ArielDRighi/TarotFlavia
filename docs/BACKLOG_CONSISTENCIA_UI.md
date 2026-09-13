@@ -790,8 +790,8 @@ Por tamaño, conviene dividir en **2-3 PRs**:
 
 | PR | Alcance | Estado |
 | --- | --- | --- |
-| **1 — base + UI genérica + `zodiac/`** (`feature/T-UI-12-iconografia-marca-base`, PR #656) | Script de post-proceso (`scripts/process-brand-icons.mjs` + `npm run icons:process`, `sharp` como devDependency), registro tipado `lib/constants/brand-icons.ts` (79 slugs, 9 familias), `<BrandIcon>`, `<CheckItem>`, migración de toda la UI genérica a `lucide-react`, guardarraíl `no-emoji-user-facing.test.ts` con lista de pendientes por familia, sección "Iconografía" en `DESIGN_HAND-OFF.md`. **Familia `zodiac/` entregada en el mismo PR** (Ariel generó los 12 el 12-sep): `ZodiacSymbol` envuelve `<BrandIcon family="zodiac">`, verificado en `/horoscopo` y `/horoscopo/[signo]` en desktop y móvil | ✅ |
-| **2..N — una familia por PR** | Al recibir los WebP de una familia en `public/images/icons/<familia>/`: migrar sus consumidores a `<BrandIcon>` y sacar los archivos de `PENDIENTES_FASE_2` en el guardarraíl. El test del registro exige que la familia esté completa y sin huérfanos | ⬜ esperan Fase 0 (chinese, elements, suits, areas, moon, rituals, numerology, hubs) |
+| **1 — base + UI genérica + `zodiac/`** (`feature/T-UI-12-iconografia-marca-base`, PR #656) | Script de post-proceso (`scripts/process-brand-icons.mjs` + `npm run icons:process`, `sharp` como devDependency), registro tipado `lib/constants/brand-icons.ts` (79 slugs, 9 familias), `<BrandIcon>`, `<CheckItem>`, migración de toda la UI genérica a `lucide-react`, guardarraíl `no-emoji-user-facing.test.ts` con lista de pendientes por familia, sección "Iconografía" en `DESIGN_HAND-OFF.md`. **Familias `zodiac/` y `chinese/` entregadas en el mismo PR** (Ariel generó los 24 el 12-sep): `ZodiacSymbol` y `ChineseAnimalSymbol` envuelven `<BrandIcon>`, verificado en `/horoscopo`, `/horoscopo/[signo]`, `/horoscopo-chino` y `/horoscopo-chino/[animal]` | ✅ |
+| **2..N — una familia por PR** | Al recibir los WebP de una familia en `public/images/icons/<familia>/`: migrar sus consumidores a `<BrandIcon>` y sacar los archivos de `PENDIENTES_FASE_2` en el guardarraíl. El test del registro exige que la familia esté completa y sin huérfanos | ⬜ esperan Fase 0 (elements, suits, areas, moon, rituals, numerology, hubs) |
 
 **Decisiones tomadas en el PR 1** (Ariel las puede revertir):
 
@@ -811,7 +811,8 @@ Por tamaño, conviene dividir en **2-3 PRs**:
   el halo suave de la línea visual —es un degradé ancho de alfa, y eso pesa 27–48 KB por más que se
   comprima (se probó color de halo constante, alfa cuantizado, reducir antes de recortar, `alphaQuality`
   60–90). Lo que cuenta para LCP es lo que sirve `next/image`: **1,5 KB a 48 px, 3,7 KB a 96 px,
-  5,3 KB a 128 px**. El script avisa desde 48 KB en el máster. Los 12 de `zodiac/` pesan 27–48 KB.
+  5,3 KB a 128 px**. El script avisa desde 48 KB en el máster. Los 12 de `zodiac/` pesan 27–48 KB;
+  los 12 de `chinese/` 32–69 KB (más trazo; servidos a 128 px, 7–9 KB).
 - El halo lleva **color fijo** (el dorado mediano del trazo de ese asset) y alfa cuantizado de a 8:
   des-premultiplicar un color casi blanco con alfa bajo amplifica el ruido del JPEG y duplicaba el
   peso; el trazo sólido (≥ 75 % de distancia al blanco) conserva su color y queda opaco.
@@ -901,8 +902,14 @@ el código (`aries`, `rat`, `fire`, `new_moon`…).
       grilla, `lg` en carrusel) y `mx-auto` porque el `Card` es flex-column y el `<img>` no se
       centraba como el `<span>`. `zodiac.ts` conserva `symbol` como dato (allowlist del guardarraíl:
       nadie lo renderiza como glifo).
-- [ ] Animales chinos: `ChineseAnimalSymbol` pasa a envolver `<BrandIcon family="chinese">`; se
-      borra `ANIMAL_GLYPHS`. Incluye `app/horoscopo-chino/page.tsx:46`.
+- [x] Animales chinos: `ChineseAnimalSymbol` pasa a envolver `<BrandIcon family="chinese">` (misma
+      firma más `size`); se borran los 12 SVG de `ANIMAL_GLYPHS`. `ChineseAnimalCard` con `size`
+      explícito + `mx-auto` como la occidental. Nuevo tamaño `2xl` (112 px) para el encabezado de
+      ficha de signo y de animal (`ZodiacSignProfile`, `AnimalProfile`): a 72 px el animal se perdía.
+      El helper `brandIconSizeFromClassName` (clase `text-*` → tamaño) vive en `brand-icon.tsx` y lo
+      comparten los dos wrappers. `app/horoscopo-chino/page.tsx` ya no tenía emoji. Queda como deuda
+      menor: `CHINESE_ZODIAC_INFO[x].emoji` y `getAnimalEmoji` del hook no tienen consumidor
+      (`YearSelectorModal` tampoco); se limpian con la familia `elements/`, que toca el mismo archivo.
 - [ ] Elementos y palos (`encyclopedia.types.ts`, `chinese-zodiac.ts`, `ElementSelectorModal`).
 - [ ] Áreas del horóscopo (`HoroscopeWidget`, `ChineseHoroscopeWidget`, `ChineseHoroscopeDetail`).
 - [ ] Fases lunares y categorías de rituales (`ritual.types.ts` + consumidores).
@@ -1081,9 +1088,10 @@ reemplazar la línea de BACKGROUND por
 - [ ] Cero emojis en texto de cara al usuario fuera de `admin/` (guardarraíl en verde). *PR 1:
       verde con 20 archivos en `PENDIENTES_FASE_2`; se cumple del todo cuando la lista quede vacía.*
 - [ ] Los 24 signos (12 + 12) se ven idénticos en Linux/Windows/macOS/iOS/Android: son
-      imágenes, no glifos de fuente. *(12 occidentales ✅; los 12 chinos esperan assets.)*
-- [ ] `ZodiacSymbol` y `ChineseAnimalSymbol` conservan su firma pública; sus consumidores no
-      cambian de props.
+      imágenes, no glifos de fuente. *(12 + 12 ✅.)*
+- [x] `ZodiacSymbol` y `ChineseAnimalSymbol` conservan su firma pública; sus consumidores no
+      cambian de props (las dos tarjetas de grilla pasan a `size` explícito por decisión visual,
+      no por obligación).
 - [x] Cada asset tiene `alt` en español y `role="img"`; los decorativos, `aria-hidden`
       (garantizado por `<BrandIcon>` + el registro).
 - [ ] Lighthouse: sin regresión de LCP en `/horoscopo` y `/horoscopo-chino` (máster 512 WebP

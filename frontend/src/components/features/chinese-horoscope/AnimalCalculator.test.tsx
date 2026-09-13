@@ -183,7 +183,7 @@ describe('AnimalCalculator', () => {
       expect(screen.getByTestId('animal-calculator-result')).toBeInTheDocument();
     });
 
-    it('should display the monochrome animal symbol', () => {
+    it('should display the brand animal icon (T-UI-12)', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
         isLoading: false,
@@ -194,7 +194,9 @@ describe('AnimalCalculator', () => {
 
       const symbol = screen.getByRole('img', { name: 'Dragón' });
       expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/'
+      );
     });
 
     it('should display full zodiac type (animal + element)', () => {

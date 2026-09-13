@@ -47,12 +47,14 @@ describe('ElementSelectorModal', () => {
       expect(screen.getByTestId('element-selector-modal')).toBeInTheDocument();
     });
 
-    it('should show the monochrome animal symbol in title', () => {
+    it('should show the brand animal icon (T-UI-12) in title', () => {
       render(<ElementSelectorModal {...defaultProps} />);
 
       const symbol = screen.getByRole('img', { name: 'Mono' });
       expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/'
+      );
     });
 
     it('should show animal name in title', () => {
