@@ -790,8 +790,8 @@ Por tamaño, conviene dividir en **2-3 PRs**:
 
 | PR | Alcance | Estado |
 | --- | --- | --- |
-| **1 — base + UI genérica + `zodiac/`** (`feature/T-UI-12-iconografia-marca-base`, PR #656) | Script de post-proceso (`scripts/process-brand-icons.mjs` + `npm run icons:process`, `sharp` como devDependency), registro tipado `lib/constants/brand-icons.ts` (79 slugs, 9 familias), `<BrandIcon>`, `<CheckItem>`, migración de toda la UI genérica a `lucide-react`, guardarraíl `no-emoji-user-facing.test.ts` con lista de pendientes por familia, sección "Iconografía" en `DESIGN_HAND-OFF.md`. **Familias `zodiac/`, `chinese/`, `areas/`, `elements/` y `suits/` entregadas en el mismo PR** (Ariel generó las 42 el 12-sep): `ZodiacSymbol` y `ChineseAnimalSymbol` envuelven `<BrandIcon>`; áreas, elementos Wu Xing y palos van con `<BrandIcon>` directo. Verificado en `/`, `/horoscopo`, `/horoscopo/[signo]`, `/horoscopo-chino`, `/horoscopo-chino/[animal]` y el modal de elemento | ✅ |
-| **2..N — una familia por PR** | Al recibir los WebP de una familia en `public/images/icons/<familia>/`: migrar sus consumidores a `<BrandIcon>` y sacar los archivos de `PENDIENTES_FASE_2` en el guardarraíl. El test del registro exige que la familia esté completa y sin huérfanos | ⬜ esperan Fase 0 (moon, rituals, numerology, hubs) |
+| **1 — base + UI genérica + `zodiac/`** (`feature/T-UI-12-iconografia-marca-base`, PR #656) | Script de post-proceso (`scripts/process-brand-icons.mjs` + `npm run icons:process`, `sharp` como devDependency), registro tipado `lib/constants/brand-icons.ts` (79 slugs, 9 familias), `<BrandIcon>`, `<CheckItem>`, migración de toda la UI genérica a `lucide-react`, guardarraíl `no-emoji-user-facing.test.ts` con lista de pendientes por familia, sección "Iconografía" en `DESIGN_HAND-OFF.md`. **Las 9 familias entregadas en el mismo PR** (Ariel generó los 79 assets el 12 y 13-sep): `ZodiacSymbol` y `ChineseAnimalSymbol` envuelven `<BrandIcon>`; áreas, elementos Wu Xing y palos van con `<BrandIcon>` directo. Verificado en `/`, `/horoscopo`, `/horoscopo/[signo]`, `/horoscopo-chino`, `/horoscopo-chino/[animal]` y el modal de elemento | ✅ |
+| **2..N — una familia por PR** | Al recibir los WebP de una familia en `public/images/icons/<familia>/`: migrar sus consumidores a `<BrandIcon>` y sacar los archivos de `PENDIENTES_FASE_2` en el guardarraíl. El test del registro exige que la familia esté completa y sin huérfanos | — todas entregadas en el PR 1 |
 
 **Decisiones tomadas en el PR 1** (Ariel las puede revertir):
 
@@ -950,11 +950,18 @@ el código (`aries`, `rat`, `fire`, `new_moon`…).
       `HoroscopeAreaCard` (el detalle del signo occidental usaba `Heart`/`Sparkles`/`Wallet` de
       lucide: es iconografía de dominio, va con la familia). Tamaños: `sm` en las filas de puntaje
       (`text-xs`), `md` en tarjetas y en el modal de elemento (a 20 px no leen).
-- [ ] Fases lunares y categorías de rituales (`ritual.types.ts` + consumidores).
-- [ ] Numerología (`numerology.ts`, `NumberCard`, `NumberGallery`, `NumerologyWidget`,
-      `NumerologyProfile`, `NumerologyPage`).
-- [ ] Hubs y guías (`ArticleCard`, `GuidesSection`, `AstrologySection`, `EncyclopediaHome`,
-      `GuiasContent`, `MarkdownArticle` ✦, `service-intros.data.ts`, `sacred-calendar.types.ts`).
+- [x] Fases lunares y categorías de rituales: `CATEGORY_INFO.icon` y `LUNAR_PHASE_INFO.icon` pasan de
+      emoji a slug tipado (`BrandIconName<'rituals' | 'moon'>`); `RitualCategorySelector`, `RitualCard`,
+      `RitualHeader` y `app/rituales/historial` renderizan `<BrandIcon>` con medallón claro (`sm`).
+- [x] Numerología: `NUMEROLOGY_NUMBERS_INFO.emoji` → `icon` (slug = número); `NumberCard`,
+      `NumberGallery`, `NumerologyWidget` y `NumerologyProfile` con medallón; fallback `Hash` /
+      `CalendarDays` de lucide cuando el número no tiene arquetipo (antes 🔢 / 📅).
+- [x] Hubs y guías: `ArticleCard` mapea cada `ArticleCategory` a `{ family, name }` (modalidad usa la
+      rueda `hubs/horoscope`, no tiene asset propio); `GuidesSection` y `AstrologySection` con slugs de
+      `hubs/`; `EncyclopediaHome` (🃏 → `hubs/tarot`, 🌟 → `rituals/tarot`); el placeholder de
+      `TarotCard` sin imagen → `hubs/tarot`; `service-intros.data.ts` sin emojis en los encabezados;
+      `sacred-calendar.types.ts` → lucide (sin consumidor hoy). `MarkdownArticle`/`GuiasContent` ✦ se
+      quedan (decisión del PR 1).
 - [x] UI genérica → `lucide-react`: `notification.types.ts` (`icon` pasa de string a
       `LucideIcon`: ✨🌙🕯️🔎🔮⚙️🎁🔔 → `Sparkles`, `Moon`, `Flame`, `Search`, `Layers`, `Settings`,
       `Gift`, `Bell`), los 24 ✓ de `*LimitReached`, `SubscriptionTab`, `BirthChartPageContent`
@@ -1123,8 +1130,9 @@ reemplazar la línea de BACKGROUND por
 
 #### 🧪 Criterios de aceptación
 
-- [ ] Cero emojis en texto de cara al usuario fuera de `admin/` (guardarraíl en verde). *PR 1:
-      verde con 20 archivos en `PENDIENTES_FASE_2`; se cumple del todo cuando la lista quede vacía.*
+- [x] Cero emojis en texto de cara al usuario fuera de `admin/` (guardarraíl en verde).
+      `PENDIENTES_FASE_2` queda con un solo archivo: el fallback `★` de `SavedChartCard` para un signo
+      desconocido, que es notación de la carta natal.
 - [ ] Los 24 signos (12 + 12) se ven idénticos en Linux/Windows/macOS/iOS/Android: son
       imágenes, no glifos de fuente. *(12 + 12 ✅.)*
 - [x] `ZodiacSymbol` y `ChineseAnimalSymbol` conservan su firma pública; sus consumidores no
@@ -1133,8 +1141,9 @@ reemplazar la línea de BACKGROUND por
 - [x] Cada asset tiene `alt` en español y `role="img"`; los decorativos, `aria-hidden`
       (garantizado por `<BrandIcon>` + el registro).
 - [ ] Lighthouse: sin regresión de LCP en `/horoscopo` y `/horoscopo-chino` (máster 512 WebP
-      < 48 KB; servido por `next/image` ≤ 6 KB hasta 128 px; `priority` solo above-the-fold). *Ver
-      "Peso de los assets" arriba: el criterio original de 15 KB se ajustó.*
+      < 48 KB; servido por `next/image` ≤ 9 KB hasta 128 px; `priority` solo above-the-fold). *Ver
+      "Peso de los assets" arriba: el criterio original de 15 KB se ajustó. Pendiente de medir en
+      producción tras el deploy.*
 - [x] Ciclo de calidad completo por PR (PR 1: ✅).
 
 #### 📁 Archivos involucrados

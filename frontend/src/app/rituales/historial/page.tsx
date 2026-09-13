@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Calendar, Moon, Star, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -119,7 +120,14 @@ export default function RitualHistorialPage() {
                           {entry.ritual.title}
                         </Link>
                         <Badge variant="outline" className={categoryInfo.color}>
-                          {categoryInfo.icon} {categoryInfo.name}
+                          <BrandIcon
+                            family="rituals"
+                            name={categoryInfo.icon}
+                            size="sm"
+                            frame="medallion"
+                            decorative
+                          />
+                          {categoryInfo.name}
                         </Badge>
                       </div>
 
@@ -133,7 +141,14 @@ export default function RitualHistorialPage() {
 
                         {lunarInfo && entry.lunarSign && (
                           <span className="flex items-center gap-1">
-                            {lunarInfo.icon} {lunarInfo.name} en {entry.lunarSign}
+                            <BrandIcon
+                              family="moon"
+                              name={lunarInfo.icon}
+                              size="sm"
+                              frame="medallion"
+                              decorative
+                            />
+                            {lunarInfo.name} en {entry.lunarSign}
                           </span>
                         )}
 

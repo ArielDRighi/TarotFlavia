@@ -1,5 +1,7 @@
 'use client';
 
+import { BrandIcon } from '@/components/ui/brand-icon';
+import type { BrandIconName } from '@/lib/constants/brand-icons';
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
@@ -11,42 +13,42 @@ const GUIDES = [
     id: 'numerologia',
     title: 'Numerología',
     description: 'Descubre el significado de los números y su influencia en tu vida.',
-    icon: '🔢',
+    icon: 'numerology',
     href: '/enciclopedia?categoria=guide_numerology',
   },
   {
     id: 'pendulo',
     title: 'Péndulo',
     description: 'Aprende a usar el péndulo como herramienta de radiestesia y adivinación.',
-    icon: '⚖️',
+    icon: 'pendulum',
     href: '/enciclopedia?categoria=guide_pendulum',
   },
   {
     id: 'carta-astral',
     title: 'Carta Astral',
     description: 'Interpreta tu carta natal y comprende la posición de los planetas al nacer.',
-    icon: '🌟',
+    icon: 'birth-chart',
     href: '/enciclopedia?categoria=guide_birth_chart',
   },
   {
     id: 'rituales',
     title: 'Rituales',
     description: 'Guías de rituales para conectar con las energías del universo.',
-    icon: '🕯️',
+    icon: 'rituals',
     href: '/enciclopedia?categoria=guide_ritual',
   },
   {
     id: 'horoscopo-occidental',
     title: 'Horóscopo Occidental',
     description: 'Comprende las predicciones y características del horóscopo occidental.',
-    icon: '♏',
+    icon: 'horoscope',
     href: '/enciclopedia?categoria=guide_horoscope',
   },
   {
     id: 'horoscopo-chino',
     title: 'Horóscopo Chino',
     description: 'Explora los 12 animales del zodíaco chino y sus significados.',
-    icon: '🐉',
+    icon: 'chinese',
     href: '/enciclopedia?categoria=guide_chinese',
   },
 ] as const;
@@ -63,7 +65,7 @@ export interface GuidesSectionProps {
 interface GuideCardProps {
   title: string;
   description: string;
-  icon: string;
+  icon: BrandIconName<'hubs'>;
   href: string;
 }
 
@@ -74,9 +76,7 @@ function GuideCard({ title, description, icon, href }: GuideCardProps) {
       data-testid="guide-card"
       className="bg-card hover:bg-accent group flex flex-col gap-2 rounded-lg border p-5 transition-colors"
     >
-      <div className="text-3xl" aria-hidden="true">
-        {icon}
-      </div>
+      <BrandIcon family="hubs" name={icon} size="lg" frame="medallion" decorative />
       <h3 className="text-foreground font-semibold">{title}</h3>
       <p className="text-muted-foreground text-sm">{description}</p>
     </Link>

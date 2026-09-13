@@ -1,3 +1,5 @@
+import type { BrandIconName } from '@/lib/constants/brand-icons';
+
 // Enums
 export enum RitualCategory {
   TAROT = 'tarot',
@@ -145,48 +147,53 @@ export interface RitualRecommendationsResponse {
 }
 
 // Helpers de UI
+/**
+ * Info de UI por categoría. `icon` es el slug de `rituals/` en `BRAND_ICONS`
+ * (T-UI-12): `cleansing → energy`, `healing → wellbeing` (glosario sin
+ * términos de salud); el resto coincide con el enum.
+ */
 export const CATEGORY_INFO: Record<
   RitualCategory,
   {
     name: string;
-    icon: string;
+    icon: BrandIconName<'rituals'>;
     color: string;
   }
 > = {
   [RitualCategory.TAROT]: {
     name: 'Tarot',
-    icon: '🎴',
+    icon: 'tarot',
     color: 'text-purple-500',
   },
   [RitualCategory.LUNAR]: {
     name: 'Lunar',
-    icon: '🌙',
+    icon: 'lunar',
     color: 'text-blue-400',
   },
   [RitualCategory.CLEANSING]: {
     name: 'Limpieza',
-    icon: '✨',
+    icon: 'energy',
     color: 'text-cyan-500',
   },
   [RitualCategory.MEDITATION]: {
     name: 'Meditación',
-    icon: '🧘',
+    icon: 'meditation',
     color: 'text-indigo-500',
   },
   [RitualCategory.PROTECTION]: {
     name: 'Protección',
-    icon: '🛡️',
+    icon: 'protection',
     color: 'text-amber-500',
   },
   [RitualCategory.ABUNDANCE]: {
     name: 'Abundancia',
-    icon: '💰',
+    icon: 'abundance',
     color: 'text-green-500',
   },
-  [RitualCategory.LOVE]: { name: 'Amor', icon: '💕', color: 'text-pink-500' },
+  [RitualCategory.LOVE]: { name: 'Amor', icon: 'love', color: 'text-pink-500' },
   [RitualCategory.HEALING]: {
     name: 'Bienestar',
-    icon: '💚',
+    icon: 'wellbeing',
     color: 'text-emerald-500',
   },
 };
@@ -209,37 +216,38 @@ export const DIFFICULTY_INFO: Record<
   [RitualDifficulty.ADVANCED]: { name: 'Avanzado', color: 'text-red-500' },
 };
 
+/** `icon` es el slug de `moon/` en `BRAND_ICONS` (coincide con el enum). */
 export const LUNAR_PHASE_INFO: Record<
   LunarPhase,
   {
     name: string;
-    icon: string;
+    icon: BrandIconName<'moon'>;
   }
 > = {
-  [LunarPhase.NEW_MOON]: { name: 'Luna Nueva', icon: '🌑' },
+  [LunarPhase.NEW_MOON]: { name: 'Luna Nueva', icon: 'new_moon' },
   [LunarPhase.WAXING_CRESCENT]: {
     name: 'Luna Creciente',
-    icon: '🌒',
+    icon: 'waxing_crescent',
   },
   [LunarPhase.FIRST_QUARTER]: {
     name: 'Cuarto Creciente',
-    icon: '🌓',
+    icon: 'first_quarter',
   },
   [LunarPhase.WAXING_GIBBOUS]: {
     name: 'Gibosa Creciente',
-    icon: '🌔',
+    icon: 'waxing_gibbous',
   },
-  [LunarPhase.FULL_MOON]: { name: 'Luna Llena', icon: '🌕' },
+  [LunarPhase.FULL_MOON]: { name: 'Luna Llena', icon: 'full_moon' },
   [LunarPhase.WANING_GIBBOUS]: {
     name: 'Gibosa Menguante',
-    icon: '🌖',
+    icon: 'waning_gibbous',
   },
   [LunarPhase.LAST_QUARTER]: {
     name: 'Cuarto Menguante',
-    icon: '🌗',
+    icon: 'last_quarter',
   },
   [LunarPhase.WANING_CRESCENT]: {
     name: 'Luna Menguante',
-    icon: '🌘',
+    icon: 'waning_crescent',
   },
 };

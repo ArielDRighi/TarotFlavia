@@ -1,5 +1,7 @@
 'use client';
 
+import { BrandIcon } from '@/components/ui/brand-icon';
+import type { BrandIconName } from '@/lib/constants/brand-icons';
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
@@ -11,21 +13,21 @@ const ASTROLOGY_SUBSECTIONS = [
     id: 'signos',
     title: 'Signos Zodiacales',
     description: 'Descubre los 12 signos del zodíaco, sus características, elementos y más.',
-    icon: '♈',
+    icon: 'horoscope',
     href: '/enciclopedia?categoria=zodiac_sign',
   },
   {
     id: 'planetas',
     title: 'Planetas',
     description: 'Conoce los planetas del sistema solar y su influencia astrológica.',
-    icon: '🪐',
+    icon: 'planets',
     href: '/enciclopedia?categoria=planet',
   },
   {
     id: 'casas',
     title: 'Casas Astrales',
     description: 'Explora las 12 casas astrológicas y las áreas de vida que rigen.',
-    icon: '🏠',
+    icon: 'houses',
     href: '/enciclopedia?categoria=astro_house',
   },
 ] as const;
@@ -43,7 +45,7 @@ interface SubsectionCardProps {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: BrandIconName<'hubs'>;
   href: string;
 }
 
@@ -54,9 +56,7 @@ function SubsectionCard({ title, description, icon, href }: SubsectionCardProps)
       data-testid="astrology-subsection"
       className="bg-card hover:bg-accent group flex flex-col gap-2 rounded-lg border p-5 transition-colors"
     >
-      <div className="text-3xl" aria-hidden="true">
-        {icon}
-      </div>
+      <BrandIcon family="hubs" name={icon} size="lg" frame="medallion" decorative />
       <h3 className="text-foreground font-semibold">{title}</h3>
       <p className="text-muted-foreground text-sm">{description}</p>
     </Link>

@@ -1,3 +1,6 @@
+import type { LucideIcon } from 'lucide-react';
+import { Eclipse, Moon, Sparkles, Star, Sun } from 'lucide-react';
+
 import { RitualCategory } from './ritual.types';
 
 // Enums
@@ -46,33 +49,34 @@ export const EVENT_TYPE_INFO: Record<
   SacredEventType,
   {
     name: string;
-    icon: string;
+    /** Icono de lucide (T-UI-12: sin emojis del sistema). */
+    icon: LucideIcon;
     color: string;
   }
 > = {
   [SacredEventType.SABBAT]: {
     name: 'Sabbat',
-    icon: '☀️',
+    icon: Sun,
     color: 'text-orange-500',
   },
   [SacredEventType.LUNAR_PHASE]: {
     name: 'Fase Lunar',
-    icon: '🌙',
+    icon: Moon,
     color: 'text-blue-400',
   },
   [SacredEventType.PORTAL]: {
     name: 'Portal',
-    icon: '✨',
+    icon: Sparkles,
     color: 'text-purple-500',
   },
   [SacredEventType.CULTURAL]: {
     name: 'Cultural',
-    icon: '💫',
+    icon: Star,
     color: 'text-pink-500',
   },
   [SacredEventType.ECLIPSE]: {
     name: 'Eclipse',
-    icon: '🌑',
+    icon: Eclipse,
     color: 'text-indigo-600',
   },
 };

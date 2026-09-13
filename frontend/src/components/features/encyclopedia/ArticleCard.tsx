@@ -1,26 +1,34 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { BrandIcon } from '@/components/ui/brand-icon';
+
 import { ArticleCategory, ARTICLE_CATEGORY_LABELS } from '@/types/encyclopedia-article.types';
 import type { ArticleSnippet } from '@/types/encyclopedia-article.types';
 import { cn } from '@/lib/utils';
 import { getArticlePath } from '@/lib/constants/article-routes';
+import type { BrandIconName } from '@/lib/constants/brand-icons';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORY_ICONS: Record<ArticleCategory, string> = {
-  [ArticleCategory.ZODIAC_SIGN]: '♈',
-  [ArticleCategory.PLANET]: '🪐',
-  [ArticleCategory.ASTROLOGICAL_HOUSE]: '🏠',
-  [ArticleCategory.ELEMENT]: '🔥',
-  [ArticleCategory.MODALITY]: '⟳',
-  [ArticleCategory.GUIDE_NUMEROLOGY]: '🔢',
-  [ArticleCategory.GUIDE_PENDULUM]: '⚖️',
-  [ArticleCategory.GUIDE_BIRTH_CHART]: '🌟',
-  [ArticleCategory.GUIDE_RITUAL]: '🕯️',
-  [ArticleCategory.GUIDE_HOROSCOPE]: '♏',
-  [ArticleCategory.GUIDE_CHINESE]: '🐉',
-  [ArticleCategory.GUIDE_TAROT]: '🃏',
+type CategoryIcon =
+  | { family: 'hubs'; name: BrandIconName<'hubs'> }
+  | { family: 'elements'; name: BrandIconName<'elements'> };
+
+/** Icono de marca por categoría (T-UI-12). Modalidad usa la rueda zodiacal: no tiene asset propio. */
+const CATEGORY_ICONS: Record<ArticleCategory, CategoryIcon> = {
+  [ArticleCategory.ZODIAC_SIGN]: { family: 'hubs', name: 'horoscope' },
+  [ArticleCategory.PLANET]: { family: 'hubs', name: 'planets' },
+  [ArticleCategory.ASTROLOGICAL_HOUSE]: { family: 'hubs', name: 'houses' },
+  [ArticleCategory.ELEMENT]: { family: 'elements', name: 'fire' },
+  [ArticleCategory.MODALITY]: { family: 'hubs', name: 'horoscope' },
+  [ArticleCategory.GUIDE_NUMEROLOGY]: { family: 'hubs', name: 'numerology' },
+  [ArticleCategory.GUIDE_PENDULUM]: { family: 'hubs', name: 'pendulum' },
+  [ArticleCategory.GUIDE_BIRTH_CHART]: { family: 'hubs', name: 'birth-chart' },
+  [ArticleCategory.GUIDE_RITUAL]: { family: 'hubs', name: 'rituals' },
+  [ArticleCategory.GUIDE_HOROSCOPE]: { family: 'hubs', name: 'horoscope' },
+  [ArticleCategory.GUIDE_CHINESE]: { family: 'hubs', name: 'chinese' },
+  [ArticleCategory.GUIDE_TAROT]: { family: 'hubs', name: 'tarot' },
 };
 
 /** Sombra de legibilidad sobre la miniatura (misma que `GuiaCard`). */
@@ -65,6 +73,16 @@ export interface ArticleCardProps {
  * <ArticleCard article={articleSummary} />
  * ```
  */
+/** Un `<BrandIcon>` por familia: el genérico no acepta la unión discriminada de golpe. */
+function CategoryBrandIcon({ icon }: { icon: CategoryIcon }) {
+  const shared = { size: 'md', frame: 'medallion', decorative: true } as const;
+  return icon.family === 'hubs' ? (
+    <BrandIcon family="hubs" name={icon.name} {...shared} data-testid="article-card-icon" />
+  ) : (
+    <BrandIcon family="elements" name={icon.name} {...shared} data-testid="article-card-icon" />
+  );
+}
+
 export function ArticleCard({ article, thumbnailSrc, className }: ArticleCardProps) {
   const icon = CATEGORY_ICONS[article.category];
   const categoryLabel = ARTICLE_CATEGORY_LABELS[article.category];
@@ -99,9 +117,7 @@ export function ArticleCard({ article, thumbnailSrc, className }: ArticleCardPro
         </div>
       ) : (
         /* Icon */
-        <div data-testid="article-card-icon" className="text-2xl" aria-hidden="true">
-          {icon}
-        </div>
+        <CategoryBrandIcon icon={icon} />
       )}
 
       <div className={cn('flex flex-col gap-2', thumbnailSrc && 'px-4 pt-3')}>

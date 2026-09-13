@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Hash, Settings, Star } from 'lucide-react';
+import { CalendarDays, Hash, Settings, Star } from 'lucide-react';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,9 +58,10 @@ export function NumerologyWidget() {
 
   // Success state
   const lifePathInfo = NUMEROLOGY_NUMBERS_INFO[profile.lifePath.value] || {
-    emoji: '🔢',
+    icon: undefined,
     color: 'text-muted-foreground',
   };
+  const dayNumberIcon = dayNumber ? NUMEROLOGY_NUMBERS_INFO[dayNumber.dayNumber]?.icon : undefined;
 
   const isMasterLifePath = profile.lifePath.isMaster;
 
@@ -73,7 +75,17 @@ export function NumerologyWidget() {
       {/* Life Path Number */}
       <div className="border-primary/20 bg-primary/5 rounded-lg border p-4">
         <div className="flex items-center gap-3">
-          <div className="text-4xl">{lifePathInfo.emoji}</div>
+          {lifePathInfo.icon ? (
+            <BrandIcon
+              family="numerology"
+              name={lifePathInfo.icon}
+              size="lg"
+              frame="medallion"
+              decorative
+            />
+          ) : (
+            <Hash className="text-muted-foreground h-10 w-10" aria-hidden="true" />
+          )}
           <div className="flex-1">
             <div className="text-muted-foreground text-sm font-medium uppercase">
               Camino de Vida
@@ -96,9 +108,17 @@ export function NumerologyWidget() {
       {dayNumber && (
         <div className="rounded-lg border p-4">
           <div className="flex items-start gap-3">
-            <div className="text-3xl">
-              {NUMEROLOGY_NUMBERS_INFO[dayNumber.dayNumber]?.emoji || '📅'}
-            </div>
+            {dayNumberIcon ? (
+              <BrandIcon
+                family="numerology"
+                name={dayNumberIcon}
+                size="md"
+                frame="medallion"
+                decorative
+              />
+            ) : (
+              <CalendarDays className="text-muted-foreground h-8 w-8" aria-hidden="true" />
+            )}
             <div className="flex-1">
               <div className="text-muted-foreground text-sm font-medium uppercase">
                 Número del Día

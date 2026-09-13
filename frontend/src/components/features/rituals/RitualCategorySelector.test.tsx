@@ -35,7 +35,7 @@ describe('RitualCategorySelector', () => {
       render(<RitualCategorySelector onSelect={mockOnSelect} />);
 
       // Icons are rendered as text content, verify buttons have both icon and name
-      const lunarButton = screen.getByRole('button', { name: /🌙lunar/i });
+      const lunarButton = screen.getByRole('button', { name: /lunar/i });
       expect(lunarButton).toBeInTheDocument();
     });
 
@@ -60,14 +60,14 @@ describe('RitualCategorySelector', () => {
     it('should highlight selected category button', () => {
       render(<RitualCategorySelector selected={RitualCategory.LUNAR} onSelect={mockOnSelect} />);
 
-      const lunarButton = screen.getByRole('button', { name: /🌙lunar/i });
+      const lunarButton = screen.getByRole('button', { name: /lunar/i });
       expect(lunarButton).toHaveAttribute('data-variant', 'default');
     });
 
     it('should show outline variant for unselected categories', () => {
       render(<RitualCategorySelector selected={RitualCategory.LUNAR} onSelect={mockOnSelect} />);
 
-      const tarotButton = screen.getByRole('button', { name: /🎴tarot/i });
+      const tarotButton = screen.getByRole('button', { name: /tarot/i });
       expect(tarotButton).toHaveAttribute('data-variant', 'outline');
     });
 
@@ -95,7 +95,7 @@ describe('RitualCategorySelector', () => {
       const user = userEvent.setup();
       render(<RitualCategorySelector onSelect={mockOnSelect} />);
 
-      const lunarButton = screen.getByRole('button', { name: /🌙lunar/i });
+      const lunarButton = screen.getByRole('button', { name: /lunar/i });
       await user.click(lunarButton);
 
       expect(mockOnSelect).toHaveBeenCalledTimes(1);
@@ -106,12 +106,12 @@ describe('RitualCategorySelector', () => {
       const user = userEvent.setup();
       render(<RitualCategorySelector onSelect={mockOnSelect} />);
 
-      const lunarButton = screen.getByRole('button', { name: /🌙lunar/i });
+      const lunarButton = screen.getByRole('button', { name: /lunar/i });
       await user.click(lunarButton);
 
       expect(mockOnSelect).toHaveBeenLastCalledWith(RitualCategory.LUNAR);
 
-      const tarotButton = screen.getByRole('button', { name: /🎴tarot/i });
+      const tarotButton = screen.getByRole('button', { name: /tarot/i });
       await user.click(tarotButton);
 
       expect(mockOnSelect).toHaveBeenLastCalledWith(RitualCategory.TAROT);
@@ -122,7 +122,7 @@ describe('RitualCategorySelector', () => {
       const user = userEvent.setup();
       render(<RitualCategorySelector selected={RitualCategory.LUNAR} onSelect={mockOnSelect} />);
 
-      const lunarButton = screen.getByRole('button', { name: /🌙lunar/i });
+      const lunarButton = screen.getByRole('button', { name: /lunar/i });
       await user.click(lunarButton);
 
       expect(mockOnSelect).toHaveBeenCalledWith(RitualCategory.LUNAR);
@@ -138,8 +138,8 @@ describe('RitualCategorySelector', () => {
 
       render(<RitualCategorySelector onSelect={mockOnSelect} categories={categories} />);
 
-      expect(screen.getByRole('button', { name: /🌙lunar.*5/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /🎴tarot.*3/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /lunar.*5/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /tarot.*3/i })).toBeInTheDocument();
     });
 
     it('should not display count when count is 0', () => {
@@ -148,7 +148,7 @@ describe('RitualCategorySelector', () => {
       render(<RitualCategorySelector onSelect={mockOnSelect} categories={categories} />);
 
       // Should show just "Lunar" without count
-      const lunarButton = screen.getByRole('button', { name: /🌙lunar/i });
+      const lunarButton = screen.getByRole('button', { name: /lunar/i });
       expect(lunarButton.textContent).not.toContain('(0)');
     });
 
@@ -157,7 +157,7 @@ describe('RitualCategorySelector', () => {
 
       render(<RitualCategorySelector onSelect={mockOnSelect} categories={categories} />);
 
-      const tarotButton = screen.getByRole('button', { name: /🎴tarot/i });
+      const tarotButton = screen.getByRole('button', { name: /tarot/i });
       expect(tarotButton.textContent).not.toContain('(');
     });
 
@@ -211,14 +211,14 @@ describe('RitualCategorySelector', () => {
       render(<RitualCategorySelector onSelect={mockOnSelect} />);
 
       const categories = [
-        { name: /🎴tarot/i, value: RitualCategory.TAROT },
-        { name: /🌙lunar/i, value: RitualCategory.LUNAR },
-        { name: /✨limpieza/i, value: RitualCategory.CLEANSING },
-        { name: /🧘meditación/i, value: RitualCategory.MEDITATION },
-        { name: /🛡️protección/i, value: RitualCategory.PROTECTION },
-        { name: /💰abundancia/i, value: RitualCategory.ABUNDANCE },
-        { name: /💕amor/i, value: RitualCategory.LOVE },
-        { name: /💚bienestar/i, value: RitualCategory.HEALING },
+        { name: /tarot/i, value: RitualCategory.TAROT },
+        { name: /lunar/i, value: RitualCategory.LUNAR },
+        { name: /limpieza/i, value: RitualCategory.CLEANSING },
+        { name: /meditación/i, value: RitualCategory.MEDITATION },
+        { name: /protección/i, value: RitualCategory.PROTECTION },
+        { name: /abundancia/i, value: RitualCategory.ABUNDANCE },
+        { name: /amor/i, value: RitualCategory.LOVE },
+        { name: /bienestar/i, value: RitualCategory.HEALING },
       ];
 
       for (const { name, value } of categories) {

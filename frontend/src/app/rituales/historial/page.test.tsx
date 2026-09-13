@@ -120,7 +120,8 @@ describe('RitualHistorialPage', () => {
     expect(screen.getByText('3 días')).toBeInTheDocument();
 
     expect(screen.getByText('Categoría Favorita')).toBeInTheDocument();
-    expect(screen.getByText('Lunar')).toBeInTheDocument();
+    // 'Lunar' aparece en la tarjeta de estadística y en el badge de categoría de la entrada
+    expect(screen.getAllByText('Lunar').length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders history entries', () => {
@@ -149,8 +150,10 @@ describe('RitualHistorialPage', () => {
   it('shows lunar phase information', () => {
     render(<RitualHistorialPage />);
 
-    // Check for lunar phase with emoji
-    expect(screen.getByText(/🌑/)).toBeInTheDocument();
+    // Fase lunar como icono de marca (T-UI-12)
+    expect(
+      decodeURIComponent(document.querySelector('img[src*="moon"]')?.getAttribute('src') ?? '')
+    ).toContain('/images/icons/moon/new_moon.webp');
     expect(screen.getByText(/Capricornio/)).toBeInTheDocument();
   });
 

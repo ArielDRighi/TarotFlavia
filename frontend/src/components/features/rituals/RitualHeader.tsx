@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Clock, Layers, Star } from 'lucide-react';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Badge } from '@/components/ui/badge';
 import { CATEGORY_INFO, DIFFICULTY_INFO, LUNAR_PHASE_INFO } from '@/types/ritual.types';
 import type { RitualDetail } from '@/types/ritual.types';
@@ -65,14 +66,28 @@ export function RitualHeader({ ritual }: RitualHeaderProps) {
       <div className="absolute right-0 bottom-0 left-0 p-6">
         <div className="mb-3 flex flex-wrap gap-2">
           <Badge className={categoryInfo.color}>
-            {categoryInfo.icon} {categoryInfo.name}
+            <BrandIcon
+              family="rituals"
+              name={categoryInfo.icon}
+              size="sm"
+              frame="medallion"
+              decorative
+            />
+            {categoryInfo.name}
           </Badge>
           <Badge variant="outline" className={difficultyInfo.color}>
             {difficultyInfo.name}
           </Badge>
           {lunarInfo && (
             <Badge variant="secondary">
-              {lunarInfo.icon} Mejor en {lunarInfo.name}
+              <BrandIcon
+                family="moon"
+                name={lunarInfo.icon}
+                size="sm"
+                frame="medallion"
+                decorative
+              />
+              Mejor en {lunarInfo.name}
             </Badge>
           )}
         </div>

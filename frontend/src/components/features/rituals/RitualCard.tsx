@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Clock, Layers, Package } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { CATEGORY_INFO, DIFFICULTY_INFO, LUNAR_PHASE_INFO } from '@/types/ritual.types';
@@ -70,12 +71,29 @@ export function RitualCard({ ritual, className }: RitualCardProps) {
           />
           {/* Badge de categoría */}
           <Badge className={cn('bg-background/90 absolute top-2 left-2', categoryInfo.color)}>
-            {categoryInfo.icon} {categoryInfo.name}
+            <BrandIcon
+              family="rituals"
+              name={categoryInfo.icon}
+              size="sm"
+              frame="medallion"
+              decorative
+            />
+            {categoryInfo.name}
           </Badge>
           {/* Badge de fase lunar */}
           {lunarInfo && (
-            <Badge variant="secondary" className="bg-background/90 absolute top-2 right-2">
-              {lunarInfo.icon}
+            <Badge
+              variant="secondary"
+              className="bg-background/90 absolute top-2 right-2"
+              data-testid="lunar-phase-badge"
+            >
+              <BrandIcon
+                family="moon"
+                name={lunarInfo.icon}
+                size="sm"
+                frame="medallion"
+                label={lunarInfo.name}
+              />
             </Badge>
           )}
         </div>

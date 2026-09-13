@@ -75,24 +75,8 @@ const ALLOWLIST: Record<string, string> = {
  * Clave relativa a `src/`, valor = familia de `BRAND_ICONS` que los reemplaza.
  */
 const PENDIENTES_FASE_2: Record<string, BrandIconFamily> = {
-  // zodiac/ — familia entregada; queda el fallback ★ de la carta natal guardada
+  // zodiac/ — el fallback ★ de la carta natal guardada (signo desconocido) sigue como glifo
   'components/features/birth-chart/SavedChartCard/SavedChartCard.tsx': 'zodiac',
-  // moon/ + rituals/
-  'types/ritual.types.ts': 'moon',
-  // numerology/
-  'lib/utils/numerology.ts': 'numerology',
-  'components/features/numerology/NumberCard.tsx': 'numerology',
-  'components/features/numerology/NumberGallery.tsx': 'numerology',
-  'components/features/numerology/NumerologyWidget.tsx': 'numerology',
-  'components/features/numerology/NumerologyProfile.tsx': 'numerology',
-  // hubs/
-  'components/features/encyclopedia/ArticleCard.tsx': 'hubs',
-  'components/features/encyclopedia/GuidesSection.tsx': 'hubs',
-  'components/features/encyclopedia/AstrologySection.tsx': 'hubs',
-  'components/features/encyclopedia/EncyclopediaHome.tsx': 'hubs',
-  'components/features/readings/TarotCard.tsx': 'hubs',
-  'lib/constants/service-intros.data.ts': 'hubs',
-  'types/sacred-calendar.types.ts': 'hubs',
 };
 
 function blankKeepNewlines(match: string): string {

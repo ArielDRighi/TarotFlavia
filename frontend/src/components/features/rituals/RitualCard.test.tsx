@@ -39,6 +39,13 @@ function createTestRitual(overrides: Partial<RitualSummary> = {}): RitualSummary
   };
 }
 
+const iconSrc = (el: Element | null) => decodeURIComponent(el?.getAttribute('src') ?? '');
+/** src decodificados de los iconos de marca renderizados (next/image codifica la url). */
+const brandIconSrcs = () =>
+  Array.from(document.querySelectorAll('img'))
+    .map(iconSrc)
+    .filter((src) => src.includes('/images/icons/'));
+
 describe('RitualCard', () => {
   describe('Rendering', () => {
     it('should render ritual title', () => {
@@ -100,7 +107,7 @@ describe('RitualCard', () => {
 
       render(<RitualCard ritual={ritual} />);
 
-      expect(screen.getByText(/🌙/)).toBeInTheDocument();
+      expect(brandIconSrcs().join(' ')).toContain('/images/icons/rituals/lunar.webp');
       expect(screen.getByText(/Lunar/)).toBeInTheDocument();
     });
 
@@ -109,7 +116,7 @@ describe('RitualCard', () => {
 
       render(<RitualCard ritual={ritual} />);
 
-      expect(screen.getByText(/🎴/)).toBeInTheDocument();
+      expect(brandIconSrcs().join(' ')).toContain('/images/icons/rituals/tarot.webp');
       expect(screen.getByText(/Tarot/)).toBeInTheDocument();
     });
 
@@ -118,7 +125,7 @@ describe('RitualCard', () => {
 
       render(<RitualCard ritual={ritual} />);
 
-      expect(screen.getByText(/✨/)).toBeInTheDocument();
+      expect(brandIconSrcs().join(' ')).toContain('/images/icons/rituals/energy.webp');
       expect(screen.getByText(/Limpieza/)).toBeInTheDocument();
     });
 
@@ -183,7 +190,9 @@ describe('RitualCard', () => {
 
       render(<RitualCard ritual={ritual} />);
 
-      expect(screen.getByText('🌕')).toBeInTheDocument();
+      expect(iconSrc(screen.getByTestId('lunar-phase-badge').querySelector('img'))).toContain(
+        '/images/icons/moon/full_moon.webp'
+      );
     });
 
     it('should not display lunar phase badge when bestLunarPhase is null', () => {
@@ -191,8 +200,7 @@ describe('RitualCard', () => {
 
       render(<RitualCard ritual={ritual} />);
 
-      expect(screen.queryByText('🌕')).not.toBeInTheDocument();
-      expect(screen.queryByText('🌑')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('lunar-phase-badge')).not.toBeInTheDocument();
     });
   });
 
@@ -273,33 +281,33 @@ describe('RitualCard', () => {
   describe('All ritual categories', () => {
     it('should render correctly for all categories', () => {
       const categories = [
-        { category: RitualCategory.TAROT, icon: '🎴', name: 'Tarot' },
-        { category: RitualCategory.LUNAR, icon: '🌙', name: 'Lunar' },
-        { category: RitualCategory.CLEANSING, icon: '✨', name: 'Limpieza' },
+        { category: RitualCategory.TAROT, icon: 'tarot', name: 'Tarot' },
+        { category: RitualCategory.LUNAR, icon: 'lunar', name: 'Lunar' },
+        { category: RitualCategory.CLEANSING, icon: 'energy', name: 'Limpieza' },
         {
           category: RitualCategory.MEDITATION,
-          icon: '🧘',
+          icon: 'meditation',
           name: 'Meditación',
         },
         {
           category: RitualCategory.PROTECTION,
-          icon: '🛡️',
+          icon: 'protection',
           name: 'Protección',
         },
         {
           category: RitualCategory.ABUNDANCE,
-          icon: '💰',
+          icon: 'abundance',
           name: 'Abundancia',
         },
-        { category: RitualCategory.LOVE, icon: '💕', name: 'Amor' },
-        { category: RitualCategory.HEALING, icon: '💚', name: 'Bienestar' },
+        { category: RitualCategory.LOVE, icon: 'love', name: 'Amor' },
+        { category: RitualCategory.HEALING, icon: 'wellbeing', name: 'Bienestar' },
       ];
 
       categories.forEach(({ category, icon, name }) => {
         const ritual = createTestRitual({ category });
         const { unmount } = render(<RitualCard ritual={ritual} />);
 
-        expect(screen.getByText(new RegExp(icon))).toBeInTheDocument();
+        expect(brandIconSrcs().join(' ')).toContain(`/images/icons/rituals/${icon}.webp`);
         expect(screen.getByText(new RegExp(name))).toBeInTheDocument();
 
         unmount();

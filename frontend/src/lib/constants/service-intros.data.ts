@@ -70,7 +70,7 @@ export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
       'El tarot es un sistema simbólico de 78 cartas que actúa como un espejo de tu mundo interior. Cada tirada combina las cartas, sus posiciones y tu pregunta para ofrecerte una guía reflexiva sobre tu presente y tus posibilidades.',
     sections: [
       {
-        heading: '🃏 Los Arcanos Mayores',
+        heading: 'Los Arcanos Mayores',
         accent: 'purple',
         items: [
           {
@@ -91,7 +91,7 @@ export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
         ],
       },
       {
-        heading: '🗂️ Los Arcanos Menores',
+        heading: 'Los Arcanos Menores',
         accent: 'indigo',
         items: [
           {
@@ -123,7 +123,7 @@ export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
       'El horóscopo occidental interpreta la posición del Sol en el zodíaco para describir tendencias, energías y oportunidades. Tu signo solar es la base de tu carácter astrológico y de las predicciones diarias.',
     sections: [
       {
-        heading: '♈ Los 12 Signos',
+        heading: 'Los 12 Signos',
         accent: 'purple',
         items: [
           {
@@ -144,7 +144,7 @@ export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
         ],
       },
       {
-        heading: '🌗 Elementos y Modalidades',
+        heading: 'Elementos y Modalidades',
         accent: 'indigo',
         items: [
           {
@@ -176,7 +176,7 @@ export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
       'El horóscopo chino es una tradición milenaria que asocia cada año a un animal y a un elemento. Tu animal del zodíaco describe tu temperamento, tus fortalezas y la energía que te acompaña a lo largo de la vida.',
     sections: [
       {
-        heading: '🐉 Los 12 Animales',
+        heading: 'Los 12 Animales',
         accent: 'purple',
         items: [
           {
@@ -197,7 +197,7 @@ export const SERVICE_INTROS: Record<ServiceIntroKey, ServiceIntroData> = {
         ],
       },
       {
-        heading: '🌳 Los Cinco Elementos',
+        heading: 'Los Cinco Elementos',
         accent: 'indigo',
         items: [
           {
