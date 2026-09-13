@@ -144,7 +144,9 @@ export function EditorialHero() {
 
         <h1 className="text-text-on-dark font-serif leading-tight">
           <span className="block text-3xl font-light md:text-5xl lg:text-6xl">{titleLead}</span>
-          <span className="animate-shimmer-gold mt-1 block text-3xl font-semibold md:text-5xl lg:text-6xl">
+          {/* `pb` porque el dorado va con `background-clip: text`: sin caja debajo, el
+              descendente de la "g" de "guías" queda transparente. */}
+          <span className="animate-shimmer-gold mt-1 block pb-[0.18em] text-3xl font-semibold md:text-5xl lg:text-6xl">
             {titleAccent}
           </span>
         </h1>
