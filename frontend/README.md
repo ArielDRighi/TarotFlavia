@@ -124,7 +124,9 @@ npm run icons:process -- --family zodiac    # una sola
 ```
 
 Un solo tamaño (512) a propósito: `next/image` genera las variantes de 16–384 px desde ahí. El
-script avisa si un asset pasa los 15 KB (criterio de LCP del backlog). Si en tu máquina `sharp`
+script avisa si un máster pasa los 48 KB; lo que viaja al navegador son 1,5–6 KB (48–128 px). El
+halo lleva color fijo (el dorado mediano del trazo) y alfa cuantizado: sin eso el ruido del degradé
+duplicaba el peso. Si en tu máquina `sharp`
 intenta compilar contra un `libvips` global, instalá con `SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install`.
 
 ## Learn More

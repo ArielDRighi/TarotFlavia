@@ -66,6 +66,8 @@ const ALLOWLIST: Record<string, string> = {
     'Separador editorial ✦ (U+2726): ornamento tipográfico sin presentación emoji en Unicode, renderiza igual en todos los SO, en dorado de marca.',
   'components/features/encyclopedia/GuiasContent.tsx':
     'Placeholder ✦ (U+2726) sobre degradé de marca cuando la guía no tiene miniatura; mismo ornamento tipográfico que MarkdownArticle.',
+  'lib/utils/zodiac.ts':
+    'ZodiacSignInfo.symbol es el símbolo Unicode del signo como DATO (♈…♓); ZodiacSymbol lo resuelve al asset de marca y ningún componente lo renderiza como glifo desde T-UI-12 (familia zodiac/).',
 };
 
 /**
@@ -73,9 +75,7 @@ const ALLOWLIST: Record<string, string> = {
  * Clave relativa a `src/`, valor = familia de `BRAND_ICONS` que los reemplaza.
  */
 const PENDIENTES_FASE_2: Record<string, BrandIconFamily> = {
-  // zodiac/
-  'lib/utils/zodiac.ts': 'zodiac',
-  'components/features/horoscope/ZodiacSymbol.tsx': 'zodiac',
+  // zodiac/ — familia entregada; queda el fallback ★ de la carta natal guardada
   'components/features/birth-chart/SavedChartCard/SavedChartCard.tsx': 'zodiac',
   // chinese/ (+ elementos Wu Xing en elements/)
   'lib/utils/chinese-zodiac.ts': 'chinese',

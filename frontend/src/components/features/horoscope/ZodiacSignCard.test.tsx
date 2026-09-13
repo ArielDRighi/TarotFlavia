@@ -31,7 +31,11 @@ describe('ZodiacSignCard', () => {
 
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-      expect(screen.getByLabelText('Aries')).toHaveTextContent('♈');
+      // T-UI-12: el glifo se resuelve al icono de marca del signo
+      const icon = screen.getByRole('img', { name: 'Aries' });
+      expect(decodeURIComponent(icon.getAttribute('src') ?? '')).toContain(
+        '/images/icons/zodiac/aries.webp'
+      );
     });
 
     it('should render zodiac sign name in Spanish', () => {
@@ -47,8 +51,7 @@ describe('ZodiacSignCard', () => {
 
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-      const symbol = screen.getByLabelText('Aries');
-      expect(symbol).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Aries' })).toBeInTheDocument();
     });
 
     it('should have correct testid with sign value', () => {
@@ -329,7 +332,7 @@ describe('ZodiacSignCard', () => {
         const signInfo = createTestSignInfo({ sign, nameEs, symbol });
         const { unmount } = render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-        expect(screen.getByLabelText(nameEs)).toHaveTextContent(symbol);
+        expect(screen.getByRole('img', { name: nameEs })).toBeInTheDocument();
         expect(screen.getByText(nameEs)).toBeInTheDocument();
         expect(screen.getByTestId(`zodiac-card-${sign}`)).toBeInTheDocument();
 

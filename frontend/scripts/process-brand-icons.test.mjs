@@ -8,6 +8,7 @@ import {
   DEFAULTS,
   parseArgs,
   whiteToAlpha,
+  solidColor,
   listRawIcons,
   processIcon,
   renderContactSheet,
@@ -94,10 +95,40 @@ describe('whiteToAlpha (color-to-alpha para blanco)', () => {
     expect(transparent[3]).toBe(0);
   });
 
+  it('con glowColor, el halo toma ese color fijo y el alfa se cuantiza de a 8', () => {
+    const glow = { r: 240, g: 225, b: 190 }; // distancia al blanco = 65 → 64
+    const px = whiteToAlpha(Buffer.from([glow.r, glow.g, glow.b, 255]), {
+      glowColor: [GOLD.r, GOLD.g, GOLD.b],
+    });
+    expect([...px]).toEqual([GOLD.r, GOLD.g, GOLD.b, 64]);
+    // el trazo sólido y el fondo no cambian con glowColor
+    expect([
+      ...whiteToAlpha(Buffer.from([GOLD.r, GOLD.g, GOLD.b, 255]), { glowColor: [0, 0, 0] }),
+    ]).toEqual([GOLD.r, GOLD.g, GOLD.b, 255]);
+    expect(whiteToAlpha(Buffer.from([255, 255, 255, 255]), { glowColor: [0, 0, 0] })[3]).toBe(0);
+  });
+
   it('procesa varios píxeles en el mismo buffer', () => {
     const px = whiteToAlpha(Buffer.from([255, 255, 255, 255, 0, 0, 0, 255]));
     expect(px[3]).toBe(0);
     expect(px[7]).toBe(255);
+  });
+});
+
+describe('solidColor', () => {
+  it('devuelve la mediana RGB de los píxeles de trazo sólido', () => {
+    const px = Buffer.from([
+      ...[GOLD.r, GOLD.g, GOLD.b, 255],
+      ...[GOLD.r + 4, GOLD.g - 2, GOLD.b + 1, 255],
+      ...[GOLD.r - 3, GOLD.g + 5, GOLD.b - 2, 255],
+      ...[255, 255, 255, 255], // fondo: no cuenta
+      ...[240, 225, 190, 255], // halo: no cuenta
+    ]);
+    expect(solidColor(px)).toEqual([GOLD.r, GOLD.g, GOLD.b]);
+  });
+
+  it('devuelve undefined si no hay trazo sólido', () => {
+    expect(solidColor(Buffer.from([255, 255, 255, 255, 240, 225, 190, 255]))).toBeUndefined();
   });
 });
 

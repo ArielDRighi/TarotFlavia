@@ -474,8 +474,9 @@ blanca y sobre fondo cósmico violeta. Los prompts completos, familia por famili
 ```
 
 Tamaños: `sm` 20 px (≈ `text-xl`), `md` 32 px (≈ `text-2xl`/`3xl`), `lg` 48 px (≈ `text-4xl`/`5xl`),
-`xl` 72 px (hero). `priority` sólo above-the-fold; por defecto es lazy. Cada asset debe pesar
-< 15 KB (criterio de LCP en `/horoscopo` y `/horoscopo-chino`).
+`xl` 72 px (hero). `priority` sólo above-the-fold; por defecto es lazy. El máster de 512 px pesa
+27–48 KB por el halo (degradé de alfa); lo que se sirve a 48–128 px son 1,5–6 KB, que es lo que
+cuenta para LCP en `/horoscopo` y `/horoscopo-chino`.
 
 ---
 

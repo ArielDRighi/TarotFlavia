@@ -12,10 +12,13 @@
  *   2. Recorte al contenido y re-centrado, con margen del 8 % (configurable).
  *   3. Exporta WebP cuadrado de 512 px con alfa a `public/images/icons/<familia>/<slug>.webp`.
  *      Un solo tamaño a propósito: `next/image` ya genera las variantes de
- *      16–384 px (`imageSizes` en `next.config.ts`).
+ *      16–384 px (`imageSizes` en `next.config.ts`). El halo lleva color fijo
+ *      (el dorado mediano del trazo) y alfa cuantizado: sin eso, el ruido del
+ *      degradé duplica el peso.
  *   4. Escribe una hoja de contacto (`<in>/icons-contact-sheet.html`) con cada
  *      icono a 32/64/128 px sobre fondo claro y cósmico, para descartar los que
- *      no leen bien chicos, y avisa si alguno pasa los 15 KB (criterio de LCP).
+ *      no leen bien chicos, y avisa si alguno pasa los 48 KB (el máster; lo
+ *      servido a 48–128 px pesa 1,5–6 KB).
  *
  * Entrada: `<in>/<familia>/<slug>.(png|jpg|jpeg|webp)`. La familia y el slug
  * tienen que coincidir con `src/lib/constants/brand-icons.ts`; el test de ese
@@ -46,8 +49,12 @@ export const DEFAULTS = Object.freeze({
   size: 512,
   /** Margen alrededor del sujeto, como fracción del lado. */
   margin: 0.08,
-  /** Peso máximo aconsejado por asset (criterio de LCP del backlog). */
-  maxBytes: 15 * 1024,
+  /**
+   * Peso máximo aconsejado para el máster de 512 px. Un halo ancho y suave es
+   * un degradé de alfa grande y eso pesa 30–45 KB por más que se comprima; lo
+   * que viaja al navegador es lo que sirve `next/image` (48–128 px → 1,5–6 KB).
+   */
+  maxBytes: 48 * 1024,
 });
 
 const RAW_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp']);
@@ -75,6 +82,15 @@ const NOISE_FLOOR = 8;
  */
 const SOLID_ALPHA = Math.round(0.75 * 255);
 
+/**
+ * Paso de cuantización del alfa del halo. Un degradé con 256 niveles es ruido
+ * para el codificador; con 32 niveles se ve igual y pesa bastante menos.
+ */
+const ALPHA_STEP = 8;
+
+/** Parámetros WebP: probados a ojo sobre tarjeta y sobre cósmico a 128/400/512 px. */
+const WEBP_OPTIONS = { quality: 75, alphaQuality: 60, effort: 6 };
+
 const AYUDA = `
 Post-proceso de iconos de marca (T-UI-12)
 
@@ -95,20 +111,49 @@ Opciones:
 // =============================================================================
 
 /**
+ * Color mediano de los píxeles de trazo sólido (los que `whiteToAlpha` deja
+ * opacos): el dorado real que usó el modelo en ese asset. `undefined` si la
+ * imagen no tiene trazo sólido.
+ *
+ * @param {Buffer} data RGBA, 4 bytes por píxel.
+ * @returns {[number, number, number] | undefined}
+ */
+export function solidColor(data) {
+  /** @type {number[][]} */
+  const channels = [[], [], []];
+  for (let i = 0; i < data.length; i += 4) {
+    if (255 - Math.min(data[i], data[i + 1], data[i + 2]) >= SOLID_ALPHA) {
+      channels[0].push(data[i]);
+      channels[1].push(data[i + 1]);
+      channels[2].push(data[i + 2]);
+    }
+  }
+  if (channels[0].length === 0) return undefined;
+  const median = (/** @type {number[]} */ values) =>
+    values.sort((a, b) => a - b)[values.length >> 1];
+  return [median(channels[0]), median(channels[1]), median(channels[2])];
+}
+
+/**
  * Color-to-alpha para blanco, in-place sobre un buffer RGBA.
  *
  * Para cada píxel, el alfa nuevo es "cuánto se aleja del blanco"
- * (`255 - min(r,g,b)`), como "Color a alfa" de GIMP, con dos ajustes:
+ * (`255 - min(r,g,b)`), como "Color a alfa" de GIMP, con tres ajustes:
  *  - por debajo de `NOISE_FLOOR` es fondo → transparente (tolera JPEG);
  *  - desde `SOLID_ALPHA` es trazo → color original y opaco (dorado fiel sobre
  *    cualquier fondo);
  *  - en el medio (el brillo suave) el color se des-premultiplica para que,
- *    compuesto sobre blanco, devuelva el original.
+ *    compuesto sobre blanco, devuelva el original. Si se pasa `glowColor`, el
+ *    halo toma ese color fijo y el alfa se cuantiza a `ALPHA_STEP`: un halo es
+ *    "dorado fundido sobre blanco", así que su color des-premultiplicado
+ *    debería ser constante; lo que lo varía es el ruido, que des-premultiplicar
+ *    con alfa bajo amplifica hasta duplicar el peso del WebP.
  *
  * @param {Buffer} data RGBA, 4 bytes por píxel. Se modifica y se devuelve.
+ * @param {{ glowColor?: [number, number, number] }} [options]
  * @returns {Buffer}
  */
-export function whiteToAlpha(data) {
+export function whiteToAlpha(data, { glowColor } = {}) {
   for (let i = 0; i < data.length; i += 4) {
     const r = data[i];
     const g = data[i + 1];
@@ -126,6 +171,14 @@ export function whiteToAlpha(data) {
 
     if (alpha >= SOLID_ALPHA) {
       data[i + 3] = prevAlpha;
+      continue;
+    }
+
+    if (glowColor) {
+      data[i] = glowColor[0];
+      data[i + 1] = glowColor[1];
+      data[i + 2] = glowColor[2];
+      data[i + 3] = clampByte((Math.round(alpha / ALPHA_STEP) * ALPHA_STEP * prevAlpha) / 255);
       continue;
     }
 
@@ -156,7 +209,7 @@ export async function processIcon(input, { size = DEFAULTS.size, margin = DEFAUL
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  const rgba = whiteToAlpha(data);
+  const rgba = whiteToAlpha(data, { glowColor: solidColor(data) });
 
   // 2. Recorte al contenido (todo lo que no sea transparente).
   const trimmed = await sharp(rgba, {
@@ -182,7 +235,7 @@ export async function processIcon(input, { size = DEFAULTS.size, margin = DEFAUL
     .then((buf) =>
       sharp(buf)
         .resize(size, size, { fit: 'contain', background: TRANSPARENT })
-        .webp({ quality: 85, alphaQuality: 90, effort: 6 })
+        .webp(WEBP_OPTIONS)
         .toBuffer()
     );
 }
