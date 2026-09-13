@@ -33,7 +33,7 @@ const AREA_CONFIG = {
     dotColor: 'bg-emerald-500',
   },
   money: {
-    title: 'Dinero',
+    title: 'Prosperidad y abundancia',
     bgColor: 'bg-amber-50',
     dotColor: 'bg-amber-500',
   },

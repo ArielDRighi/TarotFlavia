@@ -85,7 +85,7 @@ const BRAND_ICON_ALTS = {
     love: 'Amor',
     work: 'Trabajo',
     wellbeing: 'Bienestar',
-    money: 'Dinero',
+    money: 'Prosperidad y abundancia',
   },
   moon: {
     new_moon: 'Luna nueva',

@@ -144,7 +144,12 @@ export function HoroscopeWidget() {
           {horoscope.areas.wellness.score}/10
         </span>
         <span className="flex items-center gap-1">
-          <BrandIcon family="areas" name={HOROSCOPE_AREA_ICON.money} size="sm" label="Dinero" />
+          <BrandIcon
+            family="areas"
+            name={HOROSCOPE_AREA_ICON.money}
+            size="sm"
+            label="Prosperidad y abundancia"
+          />
           {horoscope.areas.money.score}/10
         </span>
       </div>

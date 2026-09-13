@@ -37,8 +37,8 @@ export function HoroscopeHubSelector() {
         Consultá tu signo
       </h2>
       <p className="text-text-muted mb-6 font-sans">
-        Elegí tu signo para leer la predicción completa de hoy: amor, dinero, bienestar y tus
-        números del día.
+        Elegí tu signo para leer la predicción completa de hoy: amor, prosperidad y abundancia,
+        bienestar y tus números del día.
       </p>
 
       {!isAuthenticated && (

@@ -60,7 +60,7 @@ describe('HoroscopeAreaCard', () => {
     it('should render money title', () => {
       render(<HoroscopeAreaCard area="money" data={mockArea} />);
 
-      expect(screen.getByText('Dinero')).toBeInTheDocument();
+      expect(screen.getByText('Prosperidad y abundancia')).toBeInTheDocument();
     });
   });
 

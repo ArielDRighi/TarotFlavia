@@ -36,7 +36,7 @@ export function HoroscopeHub({ daily }: HoroscopeHubProps) {
       <SectionHero
         className="mb-8"
         title="Horóscopo de hoy para los 12 signos"
-        lead="La predicción del día, signo por signo. Cada extracto resume la energía general de la jornada; el enlace lleva a la lectura completa, con amor, dinero, bienestar y los números del día. Se renueva cada madrugada."
+        lead="La predicción del día, signo por signo. Cada extracto resume la energía general de la jornada; el enlace lleva a la lectura completa, con amor, prosperidad y abundancia, bienestar y los números del día. Se renueva cada madrugada."
         icon={{ family: 'hubs', name: 'horoscope' }}
       />
 
