@@ -190,7 +190,7 @@ describe('RitualCard', () => {
 
       render(<RitualCard ritual={ritual} />);
 
-      expect(iconSrc(screen.getByTestId('lunar-phase-badge').querySelector('img'))).toContain(
+      expect(iconSrc(screen.getByRole('img', { name: 'Luna Llena' }))).toContain(
         '/images/icons/moon/full_moon.webp'
       );
     });

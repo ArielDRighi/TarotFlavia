@@ -1,7 +1,6 @@
 'use client';
 
-import { Hash } from 'lucide-react';
-import { BrandIcon } from '@/components/ui/brand-icon';
+import { NumerologyNumberIcon } from './NumerologyNumberIcon';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNumerologyMeanings } from '@/hooks/api/useNumerology';
@@ -58,22 +57,7 @@ export function NumberGallery({ onNumberClick, className }: Props) {
             data-testid={`gallery-number-${num}`}
           >
             <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
-              {info?.icon ? (
-                <BrandIcon
-                  family="numerology"
-                  name={info.icon}
-                  size="lg"
-                  frame="medallion"
-                  decorative
-                  data-testid={`gallery-emoji-${num}`}
-                />
-              ) : (
-                <Hash
-                  className="text-muted-foreground h-10 w-10"
-                  aria-hidden="true"
-                  data-testid={`gallery-emoji-${num}`}
-                />
-              )}
+              <NumerologyNumberIcon number={num} size="lg" data-testid={`gallery-emoji-${num}`} />
 
               {/* Number */}
               <div className={cn('text-2xl font-bold', info?.color || 'text-gray-700')}>{num}</div>

@@ -76,7 +76,9 @@ export function ChineseHoroscopeWidget() {
 
   const animalInfo = CHINESE_ZODIAC_INFO[horoscope.animal];
   const displayName = horoscope.fullZodiacType || animalInfo.nameEs;
-  const birthElementIcon = getElementBrandIcon(horoscope.birthElement || '');
+  const birthElementIcon = horoscope.birthElement
+    ? getElementBrandIcon(horoscope.birthElement)
+    : undefined;
 
   return (
     <Card data-testid="chinese-horoscope-widget" className="p-6">

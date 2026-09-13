@@ -130,19 +130,15 @@ describe('BRAND_ICONS (registro de iconos de marca)', () => {
   });
 
   /**
-   * Sincronía con el disco. Las familias llegan de a una (Fase 0 es manual, con
-   * Nano Banana): una familia cuyo directorio existe en `public/` tiene que
-   * estar COMPLETA y sin archivos huérfanos; una que todavía no existe no se
-   * exige. Así el test es verde hoy y se vuelve estricto a medida que llegan
-   * los assets.
+   * Sincronía con el disco: cada familia tiene su carpeta en `public/`, COMPLETA
+   * y sin archivos huérfanos (las 9 se entregaron en el PR #656).
    */
   describe('sincronía con public/images/icons', () => {
     for (const family of BRAND_ICON_FAMILIES) {
       const dir = path.join(PUBLIC_ICONS_DIR, family);
-      const exists = fs.existsSync(dir);
 
-      it(`${family}: ${exists ? 'completa y sin huérfanos' : 'todavía sin assets (pendiente de Fase 0)'}`, () => {
-        if (!exists) return;
+      it(`${family}: carpeta presente, completa y sin huérfanos`, () => {
+        expect(fs.existsSync(dir), `falta public/images/icons/${family}`).toBe(true);
         const files = fs.readdirSync(dir);
         // Todo lo que no sea <slug>.webp (un .png sin procesar, un Aries.webp) es huérfano.
         expect(files.filter((f) => !/^[a-z0-9][a-z0-9_-]*\.webp$/.test(f))).toEqual([]);

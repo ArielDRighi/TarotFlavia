@@ -1,10 +1,9 @@
 'use client';
 
-import { CalendarDays } from 'lucide-react';
-import { BrandIcon } from '@/components/ui/brand-icon';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 import { NumberCard } from './NumberCard';
+import { NumerologyNumberIcon } from './NumerologyNumberIcon';
 import { NUMEROLOGY_NUMBERS_INFO, getPersonalYearMeaning } from '@/lib/utils/numerology';
 import { cn } from '@/lib/utils';
 import type { NumerologyResponseDto } from '@/types/numerology.types';
@@ -12,16 +11,6 @@ import type { NumerologyResponseDto } from '@/types/numerology.types';
 interface Props {
   profile: NumerologyResponseDto;
   className?: string;
-}
-
-/** Icono del arquetipo del ciclo (año/mes personal); calendario si el número no tiene arquetipo. */
-function CycleIcon({ number }: { number: number }) {
-  const icon = NUMEROLOGY_NUMBERS_INFO[number]?.icon;
-  return icon ? (
-    <BrandIcon family="numerology" name={icon} size="md" frame="medallion" decorative />
-  ) : (
-    <CalendarDays className="text-muted-foreground h-6 w-6" aria-hidden="true" />
-  );
 }
 
 export function NumerologyProfile({ profile, className }: Props) {
@@ -164,7 +153,7 @@ export function NumerologyProfile({ profile, className }: Props) {
           <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base text-purple-900">
-                <CycleIcon number={profile.personalYear} />
+                <NumerologyNumberIcon number={profile.personalYear} fallback="cycle" />
                 Año Personal {new Date().getFullYear()}
               </CardTitle>
             </CardHeader>
@@ -188,7 +177,7 @@ export function NumerologyProfile({ profile, className }: Props) {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <CycleIcon number={profile.personalMonth} />
+                <NumerologyNumberIcon number={profile.personalMonth} fallback="cycle" />
                 Mes Personal ({new Date().toLocaleDateString('es', { month: 'long' })})
               </CardTitle>
             </CardHeader>

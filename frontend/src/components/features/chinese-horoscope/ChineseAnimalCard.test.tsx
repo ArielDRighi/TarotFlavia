@@ -18,6 +18,10 @@ function createTestAnimalInfo(overrides: Partial<ChineseZodiacInfo> = {}): Chine
   };
 }
 
+const brandIcon = (root: HTMLElement) => root.querySelector('img');
+const iconSrc = (root: HTMLElement) =>
+  decodeURIComponent(brandIcon(root)?.getAttribute('src') ?? '');
+
 describe('ChineseAnimalCard', () => {
   const mockOnClick = vi.fn();
 
@@ -31,11 +35,11 @@ describe('ChineseAnimalCard', () => {
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
-      const symbol = screen.getByRole('img', { name: 'Rata' });
-      expect(symbol).toBeInTheDocument();
-      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
-        '/images/icons/chinese/'
-      );
+      const card = screen.getByTestId('chinese-animal-rat');
+      expect(iconSrc(card)).toContain('/images/icons/chinese/rat.webp');
+      // Decorativo: el nombre va debajo y el botón no debe leerse "Rata Rata".
+      expect(brandIcon(card)).toHaveAttribute('aria-hidden', 'true');
+      expect(screen.getByRole('button', { name: 'Rata' })).toBeInTheDocument();
     });
 
     it('should center the animal symbol like the western zodiac card', () => {
@@ -45,8 +49,8 @@ describe('ChineseAnimalCard', () => {
 
       // El Card es flex-column, así que `text-center` no centra el medallón:
       // se fuerza `mx-auto`, igual que en la tarjeta occidental (T-UI-12).
-      const symbol = screen.getByRole('img', { name: 'Rata' });
-      expect(symbol.parentElement).toHaveClass('brand-icon-medallion', 'mx-auto');
+      const icon = brandIcon(screen.getByTestId('chinese-animal-rat'));
+      expect(icon?.parentElement).toHaveClass('brand-icon-medallion', 'mx-auto');
     });
 
     it('should render animal name in Spanish', () => {
@@ -356,7 +360,9 @@ describe('ChineseAnimalCard', () => {
           <ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />
         );
 
-        expect(screen.getByRole('img', { name: nameEs })).toBeInTheDocument();
+        expect(iconSrc(screen.getByTestId(`chinese-animal-${animal}`))).toContain(
+          `/images/icons/chinese/${animal}.webp`
+        );
         expect(screen.getByText(nameEs)).toBeInTheDocument();
         expect(screen.getByTestId(`chinese-animal-${animal}`)).toBeInTheDocument();
 

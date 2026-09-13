@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import {
   getBrandIcon,
+  type BrandIconDef,
   type BrandIconFamily,
   type BrandIconName,
 } from '@/lib/constants/brand-icons';
@@ -47,31 +48,6 @@ const MEDALLION_ICON_RATIO = 0.78;
 const LIGHT_MEDALLION_SIZES: ReadonlySet<BrandIconSize> = new Set(['sm', 'md']);
 
 export type BrandIconFrame = 'none' | 'medallion';
-
-const SIZE_ORDER: readonly BrandIconSize[] = ['sm', 'md', 'lg', 'xl', '2xl'];
-
-/** Clase `text-*` con la que los consumidores dimensionaban el glifo → tamaño del icono. */
-const SIZE_BY_TEXT_CLASS: ReadonlyArray<[RegExp, BrandIconSize]> = [
-  [/\btext-(?:xs|sm|base|lg|xl)\b/, 'sm'],
-  [/\btext-(?:2|3)xl\b/, 'md'],
-  [/\btext-(?:4|5)xl\b/, 'lg'],
-  [/\btext-[6-9]xl\b/, 'xl'],
-];
-
-/**
- * Deriva el tamaño de la clase de texto (`text-4xl` → `lg`) para los wrappers
- * que reemplazan un glifo de fuente por un `<BrandIcon>` sin cambiar la firma
- * (`ZodiacSymbol`, `ChineseAnimalSymbol`). Si hay varias (responsive), gana
- * la mayor; sin ninguna, `md`.
- */
-export function brandIconSizeFromClassName(className?: string): BrandIconSize {
-  if (!className) return 'md';
-  const found = SIZE_BY_TEXT_CLASS.filter(([re]) => re.test(className)).map(([, size]) => size);
-  if (found.length === 0) return 'md';
-  return found.reduce((max, size) =>
-    SIZE_ORDER.indexOf(size) > SIZE_ORDER.indexOf(max) ? size : max
-  );
-}
 
 export interface BrandIconProps<F extends BrandIconFamily = BrandIconFamily> {
   /** Familia del registro (`zodiac`, `chinese`, `elements`, `hubs`…). */
@@ -128,7 +104,16 @@ export function BrandIcon<F extends BrandIconFamily>({
   className,
   'data-testid': testId,
 }: BrandIconProps<F>) {
-  const { src, alt } = getBrandIcon(family, name);
+  const def = getBrandIcon(family, name) as BrandIconDef | undefined;
+  if (!def) {
+    // Un slug que el backend mande y el registro no conozca no debe tirar la
+    // página entera (mismo criterio que getNotificationTypeInfo).
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`BrandIcon: icono desconocido ${family}/${String(name)}`);
+    }
+    return null;
+  }
+  const { src, alt } = def;
   const medallion = frame === 'medallion';
   const lightMedallion = medallion && LIGHT_MEDALLION_SIZES.has(size);
   const px = medallion

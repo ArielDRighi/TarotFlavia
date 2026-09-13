@@ -99,6 +99,14 @@ describe('BrandIcon', () => {
     expect(screen.getByTestId('x')).toHaveClass('brand-icon-medallion');
   });
 
+  it('con un slug que el registro no conoce no renderiza nada (ni rompe)', () => {
+    const { container } = render(
+      <BrandIcon family="zodiac" name={'ofiuco' as unknown as 'aries'} />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('acepta className y data-testid', () => {
     render(<BrandIcon family="areas" name="love" className="mx-auto" data-testid="icono-amor" />);
 

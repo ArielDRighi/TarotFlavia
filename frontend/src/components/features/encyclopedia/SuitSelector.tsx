@@ -60,7 +60,7 @@ export function SuitSelector({ selected, onSelect, className }: SuitSelectorProp
             onClick={() => onSelect(suit)}
             className="gap-1 whitespace-nowrap"
           >
-            <BrandIcon family="suits" name={suit} size="sm" decorative />
+            <BrandIcon family="suits" name={suit} size="sm" frame="medallion" decorative />
             <span>{info.nameEs}</span>
           </Button>
         );

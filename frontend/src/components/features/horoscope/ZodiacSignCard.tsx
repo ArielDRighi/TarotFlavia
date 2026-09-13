@@ -128,6 +128,7 @@ export function ZodiacSignCard({
         label={signInfo.nameEs}
         size={density.symbol}
         frame="medallion"
+        decorative
         className="mx-auto"
       />
       <p className={cn('mt-2 font-serif', density.name)}>{signInfo.nameEs}</p>

@@ -807,6 +807,13 @@ Por tamaño, conviene dividir en **2-3 PRs**:
   huérfanos al chequeo del registro. `--size` existe por si hace falta.
 - Slugs de rituales: `cleansing → energy`, `healing → wellbeing` (glosario sin términos de salud);
   el mapeo lo hace el consumidor cuando llegue la familia.
+- **Revisión local final (13-sep):** `ZodiacSymbol`/`ChineseAnimalSymbol` pierden el prop legado
+  `symbol` y el helper "clase `text-*` → tamaño" (ya sin consumidores; `sign` acepta el slug, así
+  sirve para los dos enums `ZodiacSign`); `decorative` en todos los sitios donde el nombre va al lado
+  (grillas, títulos, chips) para que el botón no se lea "Aries Aries"; `BrandIcon` devuelve `null`
+  con un slug desconocido en vez de tirar la página; `NumerologyNumberIcon` unifica los cuatro
+  fallbacks; `ArticleCard` elige el elemento por slug del artículo; el test del registro exige que
+  exista la carpeta de cada familia.
 - **Peso de los assets (cambio de criterio, 12-sep):** "< 15 KB el WebP de 512" no es alcanzable con
   el halo suave de la línea visual —es un degradé ancho de alfa, y eso pesa 27–48 KB por más que se
   comprima (se probó color de halo constante, alfa cuantizado, reducir antes de recortar, `alphaQuality`
@@ -838,9 +845,10 @@ Por tamaño, conviene dividir en **2-3 PRs**:
   apagado sobre violeta). Diámetros `BRAND_ICON_MEDALLION_SIZES`: 28/44/64/96/144. Se comparó a 1x
   contra el icono suelto a 72 y 104 px y contra el medallón sin avivar. Aplicado en grillas de signos
   y animales (`xl`), encabezados de ficha (`2xl`), encabezados de detalle y widgets (`xl`/`md`),
-  digest de la home y del hub (`md`), modal de elemento (`md`), tarjetas de área (`md`) y resultado
-  de la calculadora (`lg`). Sin medallón: filas de puntaje `text-xs`, chips de compatibilidad,
-  selector de palos y ficha de carta (iconos chicos en línea con texto).
+  digest de la home y del hub (`md`), modal de elemento (`md`), tarjetas de área (`md`), resultado
+  de la calculadora (`lg`), y —tras la revisión local— también en chips y badges (`sm`, disco
+  claro de 28 px: categorías de ritual, compatibilidad china, selector de palos). Sin medallón
+  sólo en las filas de puntaje `text-xs` de los widgets y en los metadatos de la ficha de carta.
 
 #### 📋 Descripción
 
@@ -1136,8 +1144,9 @@ reemplazar la línea de BACKGROUND por
 - [ ] Los 24 signos (12 + 12) se ven idénticos en Linux/Windows/macOS/iOS/Android: son
       imágenes, no glifos de fuente. *(12 + 12 ✅.)*
 - [x] `ZodiacSymbol` y `ChineseAnimalSymbol` conservan su firma pública; sus consumidores no
-      cambian de props (las dos tarjetas de grilla pasan a `size` explícito por decisión visual,
-      no por obligación).
+      cambian de props. *(Se cumplió durante la migración; al cerrar el PR, con todos los
+      consumidores ya en `sign`/`size`, se borró el prop legado `symbol` y el helper de tamaño por
+      clase: era código sin uso.)*
 - [x] Cada asset tiene `alt` en español y `role="img"`; los decorativos, `aria-hidden`
       (garantizado por `<BrandIcon>` + el registro).
 - [ ] Lighthouse: sin regresión de LCP en `/horoscopo` y `/horoscopo-chino` (máster 512 WebP

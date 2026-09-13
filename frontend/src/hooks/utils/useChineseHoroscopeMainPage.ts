@@ -30,7 +30,6 @@ interface UseChineseHoroscopeMainPageResult {
   isModalOpen: boolean;
   /** Get animal name in Spanish */
   getAnimalNameEs: (animal: ChineseZodiacAnimal) => string;
-  /** Get animal emoji */
   /** Handle animal selection from selector */
   handleAnimalSelect: (animal: ChineseZodiacAnimal, element?: string) => void;
   /** Handle element selection from modal */

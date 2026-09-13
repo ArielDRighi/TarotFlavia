@@ -14,5 +14,3 @@ export const HOROSCOPE_AREA_ICON = {
   finance: 'money',
   money: 'money',
 } as const satisfies Record<string, BrandIconName<'areas'>>;
-
-export type HoroscopeAreaKey = keyof typeof HOROSCOPE_AREA_ICON;

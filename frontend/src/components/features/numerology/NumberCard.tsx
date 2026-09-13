@@ -1,7 +1,7 @@
 'use client';
 
-import { Hash, Star } from 'lucide-react';
-import { BrandIcon } from '@/components/ui/brand-icon';
+import { Star } from 'lucide-react';
+import { NumerologyNumberIcon } from './NumerologyNumberIcon';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NUMEROLOGY_NUMBERS_INFO } from '@/lib/utils/numerology';
@@ -28,7 +28,6 @@ interface Props {
 
 export function NumberCard({ number, context, variant = 'compact', onClick, className }: Props) {
   const info = NUMEROLOGY_NUMBERS_INFO[number.value] || {
-    icon: undefined,
     color: 'text-gray-500',
     name: 'Número',
   };
@@ -55,22 +54,7 @@ export function NumberCard({ number, context, variant = 'compact', onClick, clas
 
         {/* Number Display */}
         <div className="mb-2 flex items-center gap-3">
-          {info.icon ? (
-            <BrandIcon
-              family="numerology"
-              name={info.icon}
-              size="lg"
-              frame="medallion"
-              decorative
-              data-testid="number-emoji"
-            />
-          ) : (
-            <Hash
-              className="text-muted-foreground h-10 w-10"
-              aria-hidden="true"
-              data-testid="number-emoji"
-            />
-          )}
+          <NumerologyNumberIcon number={number.value} size="lg" data-testid="number-emoji" />
           <div>
             <div className={cn('text-3xl font-bold', info.color)}>{number.value}</div>
             <div className="text-sm font-semibold text-gray-700">{number.name}</div>

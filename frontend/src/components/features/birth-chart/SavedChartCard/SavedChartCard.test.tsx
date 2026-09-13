@@ -84,7 +84,13 @@ describe('SavedChartCard', () => {
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 
       // Tauro tiene símbolo ♉
-      expect(screen.getByText('♉')).toBeInTheDocument();
+      expect(
+        Array.from(document.querySelectorAll('img')).some((img) =>
+          decodeURIComponent(img.getAttribute('src') ?? '').includes(
+            '/images/icons/zodiac/taurus.webp'
+          )
+        )
+      ).toBe(true);
       expect(screen.getByText(/Tauro/i)).toBeInTheDocument();
     });
 
@@ -92,7 +98,13 @@ describe('SavedChartCard', () => {
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 
       // Cáncer tiene símbolo ♋
-      expect(screen.getByText('♋')).toBeInTheDocument();
+      expect(
+        Array.from(document.querySelectorAll('img')).some((img) =>
+          decodeURIComponent(img.getAttribute('src') ?? '').includes(
+            '/images/icons/zodiac/cancer.webp'
+          )
+        )
+      ).toBe(true);
       expect(screen.getByText(/Cáncer/i)).toBeInTheDocument();
     });
 
@@ -100,7 +112,13 @@ describe('SavedChartCard', () => {
       render(<SavedChartCard chart={mockChart} {...mockHandlers} />);
 
       // Leo tiene símbolo ♌
-      expect(screen.getByText('♌')).toBeInTheDocument();
+      expect(
+        Array.from(document.querySelectorAll('img')).some((img) =>
+          decodeURIComponent(img.getAttribute('src') ?? '').includes(
+            '/images/icons/zodiac/leo.webp'
+          )
+        )
+      ).toBe(true);
       expect(screen.getByText(/Leo/i)).toBeInTheDocument();
     });
 

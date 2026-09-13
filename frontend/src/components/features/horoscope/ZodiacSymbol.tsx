@@ -1,36 +1,23 @@
 // 5. Components
-import {
-  BrandIcon,
-  brandIconSizeFromClassName,
-  type BrandIconFrame,
-  type BrandIconSize,
-} from '@/components/ui/brand-icon';
+import { BrandIcon, type BrandIconFrame, type BrandIconSize } from '@/components/ui/brand-icon';
 // 6. Utils & types
-import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
-import { ZodiacSign } from '@/types/horoscope.types';
-
-/** Glifo Unicode (♈…♓) → signo, para los consumidores que siguen pasando `symbol`. */
-const SIGN_BY_SYMBOL = new Map<string, ZodiacSign>(
-  Object.values(ZODIAC_SIGNS_INFO).map((info) => [info.symbol, info.sign])
-);
+import type { BrandIconName } from '@/lib/constants/brand-icons';
 
 /**
  * ZodiacSymbol Component Props
  */
 export interface ZodiacSymbolProps {
-  /** Signo. Preferido a `symbol`. */
-  sign?: ZodiacSign;
-  /** Glifo Unicode del signo (ej. "♈"), por compatibilidad con los consumidores existentes. */
-  symbol?: string;
+  /** Slug del signo (`ZodiacSign` del horóscopo o de la carta natal: mismos valores). */
+  sign: BrandIconName<'zodiac'>;
   /** Etiqueta accesible (nombre del signo en español). Obligatoria por a11y: el `role="img"` necesita un nombre accesible. */
   label: string;
-  /** Tamaño; si se omite se deriva de la clase `text-*` de `className` (default `md`). */
+  /** Tamaño (default `md`). */
   size?: BrandIconSize;
   /** Oculto a lectores de pantalla (cuando el nombre del signo ya está al lado). */
   decorative?: boolean;
   /** `medallion`: disco violeta cósmico detrás del icono (ver `BrandIcon`). */
   frame?: BrandIconFrame;
-  /** Clases CSS adicionales (layout). Las clases `text-*` sólo se usan para derivar el tamaño. */
+  /** Clases CSS adicionales (layout). */
   className?: string;
 }
 
@@ -41,33 +28,25 @@ export interface ZodiacSymbolProps {
  * T-UI-12) en lugar del glifo Unicode: el glifo dependía de la fuente del
  * sistema y en varios navegadores salía como emoji multicolor.
  *
- * Conserva la firma anterior (`symbol` + `label` + `className`) para que los
- * consumidores no cambien; `sign` es la forma preferida para código nuevo.
- *
  * @example
  * ```tsx
- * <ZodiacSymbol sign={signInfo.sign} label={signInfo.nameEs} size="lg" />
- * <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-4xl" />
+ * <ZodiacSymbol sign={signInfo.sign} label={signInfo.nameEs} size="lg" frame="medallion" />
  * ```
  */
 export function ZodiacSymbol({
   sign,
-  symbol,
   label,
-  size,
+  size = 'md',
   decorative,
   frame,
   className,
 }: ZodiacSymbolProps) {
-  const resolved = sign ?? (symbol ? SIGN_BY_SYMBOL.get(symbol) : undefined);
-  if (!resolved) return null;
-
   return (
     <BrandIcon
       family="zodiac"
-      name={resolved}
+      name={sign}
       label={label}
-      size={size ?? brandIconSizeFromClassName(className)}
+      size={size}
       frame={frame}
       decorative={decorative}
       className={className}

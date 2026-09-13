@@ -146,6 +146,17 @@ describe('growStrokes (engrosado del trazo)', () => {
     expect(data[3]).toBe(0);
   });
 
+  it('con radio 2 en la esquina de la imagen, el clamp no se sale del buffer', () => {
+    // 4×4 con la esquina superior izquierda opaca; radio 2 cubre un 3×3 recortado por el borde.
+    const data = Buffer.alloc(4 * 4 * 4, 0);
+    data.set([9, 9, 9, 255], 0);
+    growStrokes(data, 4, 4, 2, gold);
+    let opaque = 0;
+    for (let p = 0; p < 16; p += 1) if (data[p * 4 + 3] === 255) opaque += 1;
+    expect(opaque).toBe(9);
+    expect(data[(3 * 4 + 3) * 4 + 3]).toBe(0); // esquina opuesta intacta
+  });
+
   it('no dilata píxeles semitransparentes (halo) ni hace nada con radio 0', () => {
     const data = Buffer.alloc(3 * 3 * 4, 0);
     data.set([9, 9, 9, 128], (1 * 3 + 1) * 4);

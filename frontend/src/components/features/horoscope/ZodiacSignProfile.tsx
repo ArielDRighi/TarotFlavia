@@ -47,7 +47,7 @@ export interface ZodiacSignProfileProps {
 
 /** Enlace a la ficha de otro signo. Es el enlazado interno entre las 12 URLs. */
 function SignLink({ sign, testId }: { sign: ZodiacSign; testId: string }) {
-  const { nameEs, symbol } = ZODIAC_SIGNS_INFO[sign];
+  const { nameEs } = ZODIAC_SIGNS_INFO[sign];
 
   return (
     <Link
@@ -55,7 +55,7 @@ function SignLink({ sign, testId }: { sign: ZodiacSign; testId: string }) {
       data-testid={testId}
       className="hover:border-primary hover:text-primary flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors"
     >
-      <ZodiacSymbol symbol={symbol} label={nameEs} className="text-base" />
+      <ZodiacSymbol sign={sign} label={nameEs} size="sm" decorative />
       {nameEs}
     </Link>
   );

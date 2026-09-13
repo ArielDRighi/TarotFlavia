@@ -50,11 +50,14 @@ describe('ElementSelectorModal', () => {
     it('should show the brand animal icon (T-UI-12) in title', () => {
       render(<ElementSelectorModal {...defaultProps} />);
 
-      const symbol = screen.getByRole('img', { name: 'Mono' });
-      expect(symbol).toBeInTheDocument();
-      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
-        '/images/icons/chinese/'
+      // Decorativo: el título ya dice "Mono"
+      const title =
+        screen.getByText('Mono').closest('h2') ?? screen.getByText('Mono').parentElement;
+      const img = title?.querySelector('img');
+      expect(decodeURIComponent(img?.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/monkey.webp'
       );
+      expect(img).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('should show animal name in title', () => {

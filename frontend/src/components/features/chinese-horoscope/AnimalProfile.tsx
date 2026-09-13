@@ -45,7 +45,7 @@ function AnimalLinks({ animals }: { animals: ChineseZodiacAnimal[] }) {
               href={ROUTES.HOROSCOPO_CHINO_ANIMAL(partner)}
               className="hover:border-primary hover:text-primary flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors"
             >
-              <ChineseAnimalSymbol animal={partner} label={nameEs} className="text-base" />
+              <ChineseAnimalSymbol animal={partner} label={nameEs} size="sm" decorative />
               {nameEs}
             </Link>
           </li>

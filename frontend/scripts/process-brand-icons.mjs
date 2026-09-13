@@ -130,7 +130,9 @@ Opciones:
 /**
  * Color mediano de los píxeles de trazo sólido (los que `whiteToAlpha` deja
  * opacos): el dorado real que usó el modelo en ese asset. `undefined` si la
- * imagen no tiene trazo sólido.
+ * imagen no tiene trazo sólido. Mira sólo el RGB (no el alfa previo): está
+ * pensado para la salida de Nano Banana, fondo blanco opaco; un PNG con
+ * transparencia y RGB oscuro contaría como trazo.
  *
  * @param {Buffer} data RGBA, 4 bytes por píxel.
  * @returns {[number, number, number] | undefined}

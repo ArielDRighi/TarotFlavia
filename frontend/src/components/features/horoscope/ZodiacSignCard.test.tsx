@@ -18,6 +18,10 @@ function createTestSignInfo(overrides: Partial<ZodiacSignInfo> = {}): ZodiacSign
   };
 }
 
+const brandIcon = (root: HTMLElement) => root.querySelector('img');
+const iconSrc = (root: HTMLElement) =>
+  decodeURIComponent(brandIcon(root)?.getAttribute('src') ?? '');
+
 describe('ZodiacSignCard', () => {
   const mockOnClick = vi.fn();
 
@@ -31,11 +35,10 @@ describe('ZodiacSignCard', () => {
 
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-      // T-UI-12: el glifo se resuelve al icono de marca del signo
-      const icon = screen.getByRole('img', { name: 'Aries' });
-      expect(decodeURIComponent(icon.getAttribute('src') ?? '')).toContain(
-        '/images/icons/zodiac/aries.webp'
-      );
+      // T-UI-12: icono de marca del signo, decorativo (el nombre va debajo)
+      const card = screen.getByTestId('zodiac-card-aries');
+      expect(iconSrc(card)).toContain('/images/icons/zodiac/aries.webp');
+      expect(brandIcon(card)).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('should render zodiac sign name in Spanish', () => {
@@ -46,12 +49,13 @@ describe('ZodiacSignCard', () => {
       expect(screen.getByText('Tauro')).toBeInTheDocument();
     });
 
-    it('should have appropriate aria-label with Spanish name', () => {
+    it('el nombre accesible de la tarjeta es el nombre del signo, una sola vez', () => {
       const signInfo = createTestSignInfo({ nameEs: 'Aries', symbol: '♈' });
 
       render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-      expect(screen.getByRole('img', { name: 'Aries' })).toBeInTheDocument();
+      // El icono es decorativo: sin él, el botón no se lee "Aries Aries".
+      expect(screen.getByRole('button', { name: 'Aries' })).toBeInTheDocument();
     });
 
     it('should have correct testid with sign value', () => {
@@ -332,7 +336,9 @@ describe('ZodiacSignCard', () => {
         const signInfo = createTestSignInfo({ sign, nameEs, symbol });
         const { unmount } = render(<ZodiacSignCard signInfo={signInfo} onClick={mockOnClick} />);
 
-        expect(screen.getByRole('img', { name: nameEs })).toBeInTheDocument();
+        expect(iconSrc(screen.getByTestId(`zodiac-card-${sign}`))).toContain(
+          `/images/icons/zodiac/${sign}.webp`
+        );
         expect(screen.getByText(nameEs)).toBeInTheDocument();
         expect(screen.getByTestId(`zodiac-card-${sign}`)).toBeInTheDocument();
 

@@ -459,7 +459,7 @@ blanca y sobre fondo cósmico violeta. Los prompts completos, familia por famili
 | --- | --- | --- |
 | **Iconografía de dominio**: signos, animales chinos, elementos, palos, áreas del horóscopo, fases lunares, categorías de rituales, arquetipos numerológicos, hubs | **Asset de marca** en `public/images/icons/<familia>/<slug>.webp` vía `<BrandIcon family name />` (`frontend/src/components/ui/brand-icon.tsx`). Inventario tipado en `frontend/src/lib/constants/brand-icons.ts` | ♈ 🐉 🔥 🌕 ❤️ 👑 🔮 → `zodiac/aries`, `chinese/dragon`, `elements/fire`, `moon/full_moon`, `areas/love`, `numerology/1`, `hubs/tarot` |
 | **Iconografía de UI genérica**: acciones, estados, avisos | **`lucide-react`** (ya es la librería del sitio). Listas de beneficios con `<CheckItem>` | ✓ → `Check`, 💡 → `Lightbulb`, 🎉 → `PartyPopper`, ⭐ → `Star`, 🔔 → `Bell`, 🎁 → `Gift`, ⚙️ → `Settings`, ✨ → `Sparkles`, 💎 → `Gem` |
-| **Notación astrológica** de la carta natal (`birth-chart.enums.ts`: ☉ ☽ ☿ ♀ ♂ … ☌ ☍ ⚹) | **Se mantiene como texto** con `ZodiacSymbol` / U+FE0E: es notación estándar de la disciplina, no decoración | ☉ ☽ ♃ |
+| **Notación astrológica** de la carta natal (`birth-chart.enums.ts`: ☉ ☽ ☿ ♀ ♂ … ☌ ☍ ⚹) | **Se mantiene como texto plano** (`ZODIAC_SIGNS[x].symbol` / `PLANETS[x].symbol`): es notación estándar de la disciplina, no decoración | ☉ ☽ ♃ |
 | **Ornamentos tipográficos** sin presentación emoji en Unicode | Se permiten como texto en `text-secondary` | ✦ (separador editorial) |
 | **Emojis en encabezados de texto** (`service-intros.data.ts`) | Se quitan del string; si hace falta icono, va como `<BrandIcon>` al lado | "🗂️ Los Arcanos Menores" → "Los Arcanos Menores" |
 | **Texto de compartir** (`navigator.share`, WhatsApp) | Puede llevar emojis: no lo renderiza el sitio | 🌟 ✨ en `DailyReadingCard` |
@@ -480,8 +480,8 @@ Tamaños: `sm` 20 px (≈ `text-xl`), `md` 32 px (≈ `text-2xl`/`3xl`), `lg` 48
 lavanda-violeta (`#8B5CF6 → #5B3AA6`) con borde dorado fino y el icono avivado. Un line-art de trazo
 fino no lee sobre blanco/crema a estos tamaños; sobre el violeta de marca sí. Diámetros 28/44/64/96/144.
 En `sm`/`md` (28–44 px) el medallón es **claro** (`#F5F1FF → #E6DDFB`, dorado sin avivar): a ese tamaño
-el disco violeta pesa más que el icono. Sin medallón sólo para iconos chicos en línea con texto
-(filas de puntaje, chips, selectores). `priority` sólo above-the-fold; por defecto es lazy. El máster de 512 px pesa
+el disco violeta pesa más que el icono; es el que llevan chips, badges y selectores. Sin medallón
+sólo para iconos chicos en línea con texto corrido (filas de puntaje, metadatos de ficha). `priority` sólo above-the-fold; por defecto es lazy. El máster de 512 px pesa
 27–48 KB por el halo (degradé de alfa); lo que se sirve a 48–128 px son 1,5–6 KB, que es lo que
 cuenta para LCP en `/horoscopo` y `/horoscopo-chino`.
 

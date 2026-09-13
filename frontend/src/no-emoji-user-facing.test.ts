@@ -74,10 +74,7 @@ const ALLOWLIST: Record<string, string> = {
  * Pendientes de la Fase 2 de T-UI-12 (migración por familia de assets).
  * Clave relativa a `src/`, valor = familia de `BRAND_ICONS` que los reemplaza.
  */
-const PENDIENTES_FASE_2: Record<string, BrandIconFamily> = {
-  // zodiac/ — el fallback ★ de la carta natal guardada (signo desconocido) sigue como glifo
-  'components/features/birth-chart/SavedChartCard/SavedChartCard.tsx': 'zodiac',
-};
+const PENDIENTES_FASE_2: Record<string, BrandIconFamily> = {};
 
 function blankKeepNewlines(match: string): string {
   return match.replace(/[^\n]/g, ' ');

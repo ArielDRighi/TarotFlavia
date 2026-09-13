@@ -15,6 +15,14 @@ type CategoryIcon =
   | { family: 'hubs'; name: BrandIconName<'hubs'> }
   | { family: 'elements'; name: BrandIconName<'elements'> };
 
+/** Elemento por slug del artículo (`elemento-fuego` → `fire`); `fire` si no se reconoce. */
+const ELEMENT_BY_SLUG: Record<string, BrandIconName<'elements'>> = {
+  'elemento-fuego': 'fire',
+  'elemento-agua': 'water',
+  'elemento-aire': 'air',
+  'elemento-tierra': 'earth',
+};
+
 /** Icono de marca por categoría (T-UI-12). Modalidad usa la rueda zodiacal: no tiene asset propio. */
 const CATEGORY_ICONS: Record<ArticleCategory, CategoryIcon> = {
   [ArticleCategory.ZODIAC_SIGN]: { family: 'hubs', name: 'horoscope' },
@@ -84,7 +92,10 @@ function CategoryBrandIcon({ icon }: { icon: CategoryIcon }) {
 }
 
 export function ArticleCard({ article, thumbnailSrc, className }: ArticleCardProps) {
-  const icon = CATEGORY_ICONS[article.category];
+  const icon: CategoryIcon =
+    article.category === ArticleCategory.ELEMENT
+      ? { family: 'elements', name: ELEMENT_BY_SLUG[article.slug] ?? 'fire' }
+      : CATEGORY_ICONS[article.category];
   const categoryLabel = ARTICLE_CATEGORY_LABELS[article.category];
 
   return (
