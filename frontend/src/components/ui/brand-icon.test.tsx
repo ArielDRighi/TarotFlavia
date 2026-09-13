@@ -73,9 +73,25 @@ describe('BrandIcon', () => {
     expect(Number(img.getAttribute('width'))).toBeGreaterThan(BRAND_ICON_MEDALLION_SIZES.lg * 0.7);
   });
 
+  it('en sm y md el medallón es claro y el dorado no se aviva', () => {
+    render(<BrandIcon family="areas" name="love" size="md" frame="medallion" />);
+
+    const img = screen.getByRole('img', { name: 'Amor' });
+    expect(img.parentElement).toHaveClass('brand-icon-medallion-light');
+    expect(img.parentElement).not.toHaveClass('brand-icon-medallion');
+    expect(img).not.toHaveClass('brightness-[1.35]');
+  });
+
   it('el medallón es decorativo cuando el icono lo es', () => {
     const { container } = render(
-      <BrandIcon family="zodiac" name="aries" frame="medallion" decorative data-testid="x" />
+      <BrandIcon
+        family="zodiac"
+        name="aries"
+        size="lg"
+        frame="medallion"
+        decorative
+        data-testid="x"
+      />
     );
 
     expect(screen.queryByRole('img')).not.toBeInTheDocument();

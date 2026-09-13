@@ -39,6 +39,13 @@ export const BRAND_ICON_MEDALLION_SIZES = {
 /** Lado del icono dentro del medallón. */
 const MEDALLION_ICON_RATIO = 0.78;
 
+/**
+ * Tamaños que usan el medallón claro (lavanda pálido, dorado sin avivar): a
+ * 28–44 px el disco violeta pesa más que el icono y se lee como un punto
+ * (feedback de Ariel, 13-sep). De `lg` en adelante va el violeta.
+ */
+const LIGHT_MEDALLION_SIZES: ReadonlySet<BrandIconSize> = new Set(['sm', 'md']);
+
 export type BrandIconFrame = 'none' | 'medallion';
 
 const SIZE_ORDER: readonly BrandIconSize[] = ['sm', 'md', 'lg', 'xl', '2xl'];
@@ -123,6 +130,7 @@ export function BrandIcon<F extends BrandIconFamily>({
 }: BrandIconProps<F>) {
   const { src, alt } = getBrandIcon(family, name);
   const medallion = frame === 'medallion';
+  const lightMedallion = medallion && LIGHT_MEDALLION_SIZES.has(size);
   const px = medallion
     ? Math.round(BRAND_ICON_MEDALLION_SIZES[size] * MEDALLION_ICON_RATIO)
     : BRAND_ICON_SIZES[size];
@@ -139,7 +147,11 @@ export function BrandIcon<F extends BrandIconFamily>({
       draggable={false}
       className={cn(
         'inline-block shrink-0 select-none',
-        medallion ? 'brightness-[1.35] saturate-[1.1]' : className
+        medallion
+          ? lightMedallion
+            ? 'saturate-[1.1]'
+            : 'brightness-[1.35] saturate-[1.1]'
+          : className
       )}
       data-testid={medallion ? undefined : testId}
     />
@@ -151,7 +163,8 @@ export function BrandIcon<F extends BrandIconFamily>({
   return (
     <span
       className={cn(
-        'brand-icon-medallion inline-flex shrink-0 items-center justify-center rounded-full',
+        'inline-flex shrink-0 items-center justify-center rounded-full',
+        lightMedallion ? 'brand-icon-medallion-light' : 'brand-icon-medallion',
         className
       )}
       style={{ width: diameter, height: diameter }}
