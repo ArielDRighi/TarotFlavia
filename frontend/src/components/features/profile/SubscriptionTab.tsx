@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PlanBadge } from '@/components/ui/plan-badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { CheckItem } from '@/components/ui/check-item';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -260,22 +261,12 @@ export function SubscriptionTab({ profile }: SubscriptionTabProps) {
               </p>
 
               <ul className="text-muted-foreground space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <span className="text-green-600">✓</span>3 tiradas de tarot por día (vs 1
-                  gratuita)
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-green-600">✓</span>
-                  Interpretaciones personalizadas
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-green-600">✓</span>
+                <CheckItem tone="success">3 tiradas de tarot por día (vs 1 gratuita)</CheckItem>
+                <CheckItem tone="success">Interpretaciones personalizadas</CheckItem>
+                <CheckItem tone="success">
                   Acceso a todas las tiradas (Cruz Céltica, 5 cartas)
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-green-600">✓</span>
-                  Preguntas personalizadas
-                </li>
+                </CheckItem>
+                <CheckItem tone="success">Preguntas personalizadas</CheckItem>
               </ul>
 
               <Button asChild>

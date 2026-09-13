@@ -22,7 +22,6 @@ function createMockCalculateResponse(
       animal: ChineseZodiacAnimal.DRAGON,
       nameEs: 'Dragón',
       nameEn: 'Dragon',
-      emoji: '🐉',
       element: 'Tierra',
       characteristics: ['Confiado', 'Inteligente', 'Entusiasta'],
     },
@@ -183,7 +182,7 @@ describe('AnimalCalculator', () => {
       expect(screen.getByTestId('animal-calculator-result')).toBeInTheDocument();
     });
 
-    it('should display the monochrome animal symbol', () => {
+    it('should display the brand animal icon (T-UI-12)', () => {
       mockUseCalculateAnimal.mockReturnValue({
         data: createMockCalculateResponse(),
         isLoading: false,
@@ -194,7 +193,9 @@ describe('AnimalCalculator', () => {
 
       const symbol = screen.getByRole('img', { name: 'Dragón' });
       expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/'
+      );
     });
 
     it('should display full zodiac type (animal + element)', () => {
@@ -231,7 +232,7 @@ describe('AnimalCalculator', () => {
       render(<AnimalCalculator />);
 
       const elementText = screen.getByTestId('birth-element');
-      expect(elementText).toHaveTextContent('Elemento: 🟤 Tierra');
+      expect(elementText).toHaveTextContent('Elemento: Tierra');
     });
 
     it('should display characteristics', () => {
@@ -345,7 +346,6 @@ describe('AnimalCalculator', () => {
             animal: ChineseZodiacAnimal.RAT,
             nameEs: 'Rata',
             nameEn: 'Rat',
-            emoji: '🐀',
             element: 'Agua',
             characteristics: ['Inteligente', 'Adaptable'],
           },
@@ -364,7 +364,7 @@ describe('AnimalCalculator', () => {
       expect(screen.getByRole('img', { name: 'Rata' })).toBeInTheDocument();
       expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Rata de Metal');
       expect(screen.getByText('Año chino: 2020')).toBeInTheDocument();
-      expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: ⚪ Metal');
+      expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: Metal');
     });
 
     it('should display correct info for Snake with Fire element', () => {
@@ -375,7 +375,6 @@ describe('AnimalCalculator', () => {
             animal: ChineseZodiacAnimal.SNAKE,
             nameEs: 'Serpiente',
             nameEn: 'Snake',
-            emoji: '🐍',
             element: 'Fuego',
             characteristics: ['Enigmático', 'Sabio'],
           },
@@ -394,7 +393,7 @@ describe('AnimalCalculator', () => {
       expect(screen.getByRole('img', { name: 'Serpiente' })).toBeInTheDocument();
       expect(screen.getByTestId('full-zodiac-type')).toHaveTextContent('Eres Serpiente de Madera');
       expect(screen.getByText('Año chino: 2025')).toBeInTheDocument();
-      expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: 🟢 Madera');
+      expect(screen.getByTestId('birth-element')).toHaveTextContent('Elemento: Madera');
     });
 
     it('should fallback to animal name when fullZodiacType is not available', () => {

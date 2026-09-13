@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Hash, Settings } from 'lucide-react';
+import { Hash, Settings, Star } from 'lucide-react';
+import { NumerologyNumberIcon } from './NumerologyNumberIcon';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -57,7 +58,6 @@ export function NumerologyWidget() {
 
   // Success state
   const lifePathInfo = NUMEROLOGY_NUMBERS_INFO[profile.lifePath.value] || {
-    emoji: '🔢',
     color: 'text-muted-foreground',
   };
 
@@ -73,7 +73,7 @@ export function NumerologyWidget() {
       {/* Life Path Number */}
       <div className="border-primary/20 bg-primary/5 rounded-lg border p-4">
         <div className="flex items-center gap-3">
-          <div className="text-4xl">{lifePathInfo.emoji}</div>
+          <NumerologyNumberIcon number={profile.lifePath.value} size="lg" />
           <div className="flex-1">
             <div className="text-muted-foreground text-sm font-medium uppercase">
               Camino de Vida
@@ -83,8 +83,9 @@ export function NumerologyWidget() {
             </div>
             <div className="text-foreground text-sm font-semibold">{profile.lifePath.name}</div>
             {isMasterLifePath && (
-              <div className="bg-secondary/15 text-secondary mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold">
-                ⭐ Maestro
+              <div className="bg-secondary/15 text-secondary mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
+                <Star className="h-3 w-3" aria-hidden="true" />
+                Maestro
               </div>
             )}
           </div>
@@ -95,9 +96,7 @@ export function NumerologyWidget() {
       {dayNumber && (
         <div className="rounded-lg border p-4">
           <div className="flex items-start gap-3">
-            <div className="text-3xl">
-              {NUMEROLOGY_NUMBERS_INFO[dayNumber.dayNumber]?.emoji || '📅'}
-            </div>
+            <NumerologyNumberIcon number={dayNumber.dayNumber} fallback="cycle" />
             <div className="flex-1">
               <div className="text-muted-foreground text-sm font-medium uppercase">
                 Número del Día
@@ -116,8 +115,9 @@ export function NumerologyWidget() {
                     {dayNumber.meaning.name}
                   </div>
                   {[11, 22, 33].includes(dayNumber.dayNumber) && (
-                    <div className="bg-secondary/15 text-secondary mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold">
-                      ⭐ Maestro
+                    <div className="bg-secondary/15 text-secondary mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
+                      <Star className="h-3 w-3" aria-hidden="true" />
+                      Maestro
                     </div>
                   )}
                   <p className="text-muted-foreground mt-2 line-clamp-2 text-xs">

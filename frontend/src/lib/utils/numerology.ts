@@ -1,3 +1,5 @@
+import type { BrandIconName } from '@/lib/constants/brand-icons';
+
 /**
  * Numerology Utilities
  *
@@ -45,26 +47,30 @@ export function calculateLifePathNumber(birthDate: Date): number {
 /**
  * Info básica de números para UI
  */
+/**
+ * Arquetipo por número. `icon` es el slug de `numerology/` en `BRAND_ICONS`
+ * (T-UI-12): coincide con el número como string.
+ */
 export const NUMEROLOGY_NUMBERS_INFO: Record<
   number,
   {
     name: string;
-    emoji: string;
+    icon: BrandIconName<'numerology'>;
     color: string;
   }
 > = {
-  1: { name: 'El Líder', emoji: '👑', color: 'text-red-500' },
-  2: { name: 'El Diplomático', emoji: '🤝', color: 'text-blue-500' },
-  3: { name: 'El Creativo', emoji: '🎨', color: 'text-yellow-500' },
-  4: { name: 'El Constructor', emoji: '🏗️', color: 'text-green-500' },
-  5: { name: 'El Aventurero', emoji: '🌍', color: 'text-orange-500' },
-  6: { name: 'El Protector', emoji: '💖', color: 'text-pink-500' },
-  7: { name: 'El Buscador', emoji: '🔮', color: 'text-purple-500' },
-  8: { name: 'El Exitoso', emoji: '💎', color: 'text-amber-500' },
-  9: { name: 'El Humanitario', emoji: '🕊️', color: 'text-teal-500' },
-  11: { name: 'El Visionario', emoji: '✨', color: 'text-indigo-500' },
-  22: { name: 'El Constructor Maestro', emoji: '🌟', color: 'text-cyan-500' },
-  33: { name: 'El Maestro Compasivo', emoji: '💫', color: 'text-rose-500' },
+  1: { name: 'El Líder', icon: '1', color: 'text-red-500' },
+  2: { name: 'El Diplomático', icon: '2', color: 'text-blue-500' },
+  3: { name: 'El Creativo', icon: '3', color: 'text-yellow-500' },
+  4: { name: 'El Constructor', icon: '4', color: 'text-green-500' },
+  5: { name: 'El Aventurero', icon: '5', color: 'text-orange-500' },
+  6: { name: 'El Protector', icon: '6', color: 'text-pink-500' },
+  7: { name: 'El Buscador', icon: '7', color: 'text-purple-500' },
+  8: { name: 'El Exitoso', icon: '8', color: 'text-amber-500' },
+  9: { name: 'El Humanitario', icon: '9', color: 'text-teal-500' },
+  11: { name: 'El Visionario', icon: '11', color: 'text-indigo-500' },
+  22: { name: 'El Constructor Maestro', icon: '22', color: 'text-cyan-500' },
+  33: { name: 'El Maestro Compasivo', icon: '33', color: 'text-rose-500' },
 };
 
 /**

@@ -30,8 +30,6 @@ interface UseChineseHoroscopeMainPageResult {
   isModalOpen: boolean;
   /** Get animal name in Spanish */
   getAnimalNameEs: (animal: ChineseZodiacAnimal) => string;
-  /** Get animal emoji */
-  getAnimalEmoji: (animal: ChineseZodiacAnimal) => string;
   /** Handle animal selection from selector */
   handleAnimalSelect: (animal: ChineseZodiacAnimal, element?: string) => void;
   /** Handle element selection from modal */
@@ -74,10 +72,6 @@ export function useChineseHoroscopeMainPage(): UseChineseHoroscopeMainPageResult
   // Utility functions
   const getAnimalNameEs = useCallback((animal: ChineseZodiacAnimal) => {
     return CHINESE_ZODIAC_INFO[animal]?.nameEs || '';
-  }, []);
-
-  const getAnimalEmoji = useCallback((animal: ChineseZodiacAnimal) => {
-    return CHINESE_ZODIAC_INFO[animal]?.emoji || '';
   }, []);
 
   // Handlers
@@ -140,7 +134,6 @@ export function useChineseHoroscopeMainPage(): UseChineseHoroscopeMainPageResult
     selectedAnimalForModal,
     isModalOpen,
     getAnimalNameEs,
-    getAnimalEmoji,
     handleAnimalSelect,
     handleElementSelect,
     handleModalOpenChange,

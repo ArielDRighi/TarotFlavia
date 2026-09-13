@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContentDisclaimer } from '@/components/common/ContentDisclaimer';
 import { NumberCard } from './NumberCard';
+import { NumerologyNumberIcon } from './NumerologyNumberIcon';
 import { NUMEROLOGY_NUMBERS_INFO, getPersonalYearMeaning } from '@/lib/utils/numerology';
 import { cn } from '@/lib/utils';
 import type { NumerologyResponseDto } from '@/types/numerology.types';
@@ -152,9 +153,7 @@ export function NumerologyProfile({ profile, className }: Props) {
           <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base text-purple-900">
-                <span className="text-2xl">
-                  {NUMEROLOGY_NUMBERS_INFO[profile.personalYear]?.emoji || '📅'}
-                </span>
+                <NumerologyNumberIcon number={profile.personalYear} fallback="cycle" />
                 Año Personal {new Date().getFullYear()}
               </CardTitle>
             </CardHeader>
@@ -178,9 +177,7 @@ export function NumerologyProfile({ profile, className }: Props) {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-base">
-                <span className="text-2xl">
-                  {NUMEROLOGY_NUMBERS_INFO[profile.personalMonth]?.emoji || '📅'}
-                </span>
+                <NumerologyNumberIcon number={profile.personalMonth} fallback="cycle" />
                 Mes Personal ({new Date().toLocaleDateString('es', { month: 'long' })})
               </CardTitle>
             </CardHeader>

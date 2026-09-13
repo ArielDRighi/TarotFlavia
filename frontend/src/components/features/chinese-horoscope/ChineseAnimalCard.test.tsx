@@ -12,12 +12,15 @@ function createTestAnimalInfo(overrides: Partial<ChineseZodiacInfo> = {}): Chine
     animal: ChineseZodiacAnimal.RAT,
     nameEs: 'Rata',
     nameEn: 'Rat',
-    emoji: '🐀',
     element: 'Agua',
     characteristics: ['Inteligente', 'Adaptable', 'Ingenioso'],
     ...overrides,
   };
 }
+
+const brandIcon = (root: HTMLElement) => root.querySelector('img');
+const iconSrc = (root: HTMLElement) =>
+  decodeURIComponent(brandIcon(root)?.getAttribute('src') ?? '');
 
 describe('ChineseAnimalCard', () => {
   const mockOnClick = vi.fn();
@@ -27,14 +30,16 @@ describe('ChineseAnimalCard', () => {
   });
 
   describe('Rendering', () => {
-    it('should render the monochrome animal symbol (colorable with text-primary)', () => {
+    it('should render the brand animal icon (T-UI-12)', () => {
       const animalInfo = createTestAnimalInfo();
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
-      const symbol = screen.getByRole('img', { name: 'Rata' });
-      expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      const card = screen.getByTestId('chinese-animal-rat');
+      expect(iconSrc(card)).toContain('/images/icons/chinese/rat.webp');
+      // Decorativo: el nombre va debajo y el botón no debe leerse "Rata Rata".
+      expect(brandIcon(card)).toHaveAttribute('aria-hidden', 'true');
+      expect(screen.getByRole('button', { name: 'Rata' })).toBeInTheDocument();
     });
 
     it('should center the animal symbol like the western zodiac card', () => {
@@ -42,11 +47,10 @@ describe('ChineseAnimalCard', () => {
 
       render(<ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />);
 
-      // El <svg> es display:block por el preflight de Tailwind, así que `text-center`
-      // no lo centra: se fuerza `block mx-auto` para alinearlo igual que el occidental.
-      const symbol = screen.getByRole('img', { name: 'Rata' });
-      expect(symbol).toHaveClass('block');
-      expect(symbol).toHaveClass('mx-auto');
+      // El Card es flex-column, así que `text-center` no centra el medallón:
+      // se fuerza `mx-auto`, igual que en la tarjeta occidental (T-UI-12).
+      const icon = brandIcon(screen.getByTestId('chinese-animal-rat'));
+      expect(icon?.parentElement).toHaveClass('brand-icon-medallion', 'mx-auto');
     });
 
     it('should render animal name in Spanish', () => {
@@ -335,29 +339,30 @@ describe('ChineseAnimalCard', () => {
       const animals: Array<{
         animal: ChineseZodiacAnimal;
         nameEs: string;
-        emoji: string;
       }> = [
-        { animal: ChineseZodiacAnimal.RAT, nameEs: 'Rata', emoji: '🐀' },
-        { animal: ChineseZodiacAnimal.OX, nameEs: 'Buey', emoji: '🐂' },
-        { animal: ChineseZodiacAnimal.TIGER, nameEs: 'Tigre', emoji: '🐅' },
-        { animal: ChineseZodiacAnimal.RABBIT, nameEs: 'Conejo', emoji: '🐇' },
-        { animal: ChineseZodiacAnimal.DRAGON, nameEs: 'Dragón', emoji: '🐉' },
-        { animal: ChineseZodiacAnimal.SNAKE, nameEs: 'Serpiente', emoji: '🐍' },
-        { animal: ChineseZodiacAnimal.HORSE, nameEs: 'Caballo', emoji: '🐴' },
-        { animal: ChineseZodiacAnimal.GOAT, nameEs: 'Cabra', emoji: '🐐' },
-        { animal: ChineseZodiacAnimal.MONKEY, nameEs: 'Mono', emoji: '🐒' },
-        { animal: ChineseZodiacAnimal.ROOSTER, nameEs: 'Gallo', emoji: '🐓' },
-        { animal: ChineseZodiacAnimal.DOG, nameEs: 'Perro', emoji: '🐕' },
-        { animal: ChineseZodiacAnimal.PIG, nameEs: 'Cerdo', emoji: '🐖' },
+        { animal: ChineseZodiacAnimal.RAT, nameEs: 'Rata' },
+        { animal: ChineseZodiacAnimal.OX, nameEs: 'Buey' },
+        { animal: ChineseZodiacAnimal.TIGER, nameEs: 'Tigre' },
+        { animal: ChineseZodiacAnimal.RABBIT, nameEs: 'Conejo' },
+        { animal: ChineseZodiacAnimal.DRAGON, nameEs: 'Dragón' },
+        { animal: ChineseZodiacAnimal.SNAKE, nameEs: 'Serpiente' },
+        { animal: ChineseZodiacAnimal.HORSE, nameEs: 'Caballo' },
+        { animal: ChineseZodiacAnimal.GOAT, nameEs: 'Cabra' },
+        { animal: ChineseZodiacAnimal.MONKEY, nameEs: 'Mono' },
+        { animal: ChineseZodiacAnimal.ROOSTER, nameEs: 'Gallo' },
+        { animal: ChineseZodiacAnimal.DOG, nameEs: 'Perro' },
+        { animal: ChineseZodiacAnimal.PIG, nameEs: 'Cerdo' },
       ];
 
-      animals.forEach(({ animal, nameEs, emoji }) => {
-        const animalInfo = createTestAnimalInfo({ animal, nameEs, emoji });
+      animals.forEach(({ animal, nameEs }) => {
+        const animalInfo = createTestAnimalInfo({ animal, nameEs });
         const { unmount } = render(
           <ChineseAnimalCard animalInfo={animalInfo} onClick={mockOnClick} />
         );
 
-        expect(screen.getByRole('img', { name: nameEs })).toBeInTheDocument();
+        expect(iconSrc(screen.getByTestId(`chinese-animal-${animal}`))).toContain(
+          `/images/icons/chinese/${animal}.webp`
+        );
         expect(screen.getByText(nameEs)).toBeInTheDocument();
         expect(screen.getByTestId(`chinese-animal-${animal}`)).toBeInTheDocument();
 

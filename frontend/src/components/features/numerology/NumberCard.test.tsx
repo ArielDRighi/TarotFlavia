@@ -110,26 +110,38 @@ describe('NumberCard', () => {
     });
   });
 
-  describe('Emoji Display', () => {
+  describe('Icono del arquetipo (T-UI-12)', () => {
     it('should display emoji for number 1', () => {
       const number = createMockNumber({ value: 1, name: 'El Líder' });
       render(<NumberCard number={number} />);
 
-      expect(screen.getByText('👑')).toBeInTheDocument();
+      expect(
+        decodeURIComponent(
+          screen.getByTestId('number-emoji').querySelector('img')?.getAttribute('src') ?? ''
+        )
+      ).toContain('/images/icons/numerology/1.webp');
     });
 
     it('should display emoji for number 7', () => {
       const number = createMockNumber({ value: 7 });
       render(<NumberCard number={number} />);
 
-      expect(screen.getByText('🔮')).toBeInTheDocument();
+      expect(
+        decodeURIComponent(
+          screen.getByTestId('number-emoji').querySelector('img')?.getAttribute('src') ?? ''
+        )
+      ).toContain('/images/icons/numerology/7.webp');
     });
 
     it('should display emoji for master number 11', () => {
       const number = createMockNumber({ value: 11, isMaster: true, name: 'El Visionario' });
       render(<NumberCard number={number} />);
 
-      expect(screen.getByText('✨')).toBeInTheDocument();
+      expect(
+        decodeURIComponent(
+          screen.getByTestId('number-emoji').querySelector('img')?.getAttribute('src') ?? ''
+        )
+      ).toContain('/images/icons/numerology/11.webp');
     });
   });
 
@@ -212,7 +224,11 @@ describe('NumberCard', () => {
 
       expect(screen.getByText('3')).toBeInTheDocument();
       expect(screen.getByText('El Creativo')).toBeInTheDocument();
-      expect(screen.getByText('🎨')).toBeInTheDocument();
+      expect(
+        decodeURIComponent(
+          screen.getByTestId('number-emoji').querySelector('img')?.getAttribute('src') ?? ''
+        )
+      ).toContain('/images/icons/numerology/3.webp');
     });
 
     it('should render correctly for master number 33', () => {
@@ -226,7 +242,11 @@ describe('NumberCard', () => {
 
       expect(screen.getByText('33')).toBeInTheDocument();
       expect(screen.getByText('El Maestro Compasivo')).toBeInTheDocument();
-      expect(screen.getByText('💫')).toBeInTheDocument();
+      expect(
+        decodeURIComponent(
+          screen.getByTestId('number-emoji').querySelector('img')?.getAttribute('src') ?? ''
+        )
+      ).toContain('/images/icons/numerology/33.webp');
       expect(screen.getByText(/número maestro/i)).toBeInTheDocument();
     });
   });

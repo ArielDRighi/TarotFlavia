@@ -282,11 +282,11 @@ export function getHoroscopeSignMetadata(sign: ZodiacSign): Metadata {
 
 /** Ficha de horóscopo chino por animal. */
 export function getChineseZodiacMetadata(animal: ChineseZodiacAnimal): Metadata {
-  const { nameEs, emoji } = CHINESE_ZODIAC_INFO[animal];
+  const { nameEs } = CHINESE_ZODIAC_INFO[animal];
 
   return buildPageMetadata({
     title: `Horóscopo Chino: ${nameEs}`,
-    description: `Predicción para el signo ${nameEs} ${emoji} del zodíaco chino: personalidad, elemento y años de nacimiento.`,
+    description: `Predicción para el signo ${nameEs} del zodíaco chino: personalidad, elemento y años de nacimiento.`,
     canonical: ROUTES.HOROSCOPO_CHINO_ANIMAL(animal),
   });
 }

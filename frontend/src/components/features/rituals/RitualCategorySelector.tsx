@@ -1,5 +1,6 @@
 'use client';
 
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { RitualCategory, CATEGORY_INFO } from '@/types/ritual.types';
@@ -76,7 +77,7 @@ export function RitualCategorySelector({
             onClick={() => onSelect(category)}
             className="gap-1 whitespace-nowrap"
           >
-            <span>{info.icon}</span>
+            <BrandIcon family="rituals" name={info.icon} size="sm" frame="medallion" decorative />
             <span>{info.name}</span>
             {count > 0 && <span className="text-xs opacity-60">({count})</span>}
           </Button>

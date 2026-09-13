@@ -16,6 +16,7 @@ import {
   Pencil,
   Trash2,
   MoreVertical,
+  Star,
 } from 'lucide-react';
 
 // 3. Third-party
@@ -34,6 +35,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { ZodiacSymbol } from '@/components/features/horoscope/ZodiacSymbol';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -97,6 +99,24 @@ function getElementGradient(sunSign: string): string {
  * - Indicador de tiempo desde creación
  * - Link a vista detallada
  */
+/**
+ * Icono de marca del signo (T-UI-12); estrella de lucide si el backend manda un
+ * signo que el frontend no conoce. Decorativo: el nombre va al lado.
+ */
+function SignIcon({ sign }: { sign: ZodiacSign }) {
+  return ZODIAC_SIGNS[sign] ? (
+    <ZodiacSymbol
+      sign={sign}
+      label={ZODIAC_SIGNS[sign].name}
+      size="md"
+      frame="medallion"
+      decorative
+    />
+  ) : (
+    <Star className="text-secondary h-6 w-6" aria-hidden="true" />
+  );
+}
+
 export function SavedChartCard({
   chart,
   onView,
@@ -111,17 +131,14 @@ export function SavedChartCard({
 
   const sunSignData = ZODIAC_SIGNS[sunSignKey] ?? {
     name: chart.sunSign,
-    symbol: '★',
     element: 'air' as const,
   };
   const moonSignData = ZODIAC_SIGNS[moonSignKey] ?? {
     name: chart.moonSign,
-    symbol: '★',
     element: 'air' as const,
   };
   const ascendantSignData = ZODIAC_SIGNS[ascendantSignKey] ?? {
     name: chart.ascendantSign,
-    symbol: '★',
     element: 'air' as const,
   };
 
@@ -263,9 +280,7 @@ export function SavedChartCard({
                       aria-label={`Sol en ${sunSignData.name}`}
                     >
                       <Sun className="text-muted-foreground h-4 w-4" />
-                      <span className="text-2xl" role="img" aria-hidden="true">
-                        {sunSignData.symbol}
-                      </span>
+                      <SignIcon sign={sunSignKey} />
                       <span className="text-muted-foreground text-xs">{sunSignData.name}</span>
                     </div>
                   </TooltipTrigger>
@@ -284,9 +299,7 @@ export function SavedChartCard({
                       aria-label={`Luna en ${moonSignData.name}`}
                     >
                       <Moon className="text-muted-foreground h-4 w-4" />
-                      <span className="text-2xl" role="img" aria-hidden="true">
-                        {moonSignData.symbol}
-                      </span>
+                      <SignIcon sign={moonSignKey} />
                       <span className="text-muted-foreground text-xs">{moonSignData.name}</span>
                     </div>
                   </TooltipTrigger>
@@ -305,9 +318,7 @@ export function SavedChartCard({
                       aria-label={`Ascendente en ${ascendantSignData.name}`}
                     >
                       <Sunrise className="text-muted-foreground h-4 w-4" />
-                      <span className="text-2xl" role="img" aria-hidden="true">
-                        {ascendantSignData.symbol}
-                      </span>
+                      <SignIcon sign={ascendantSignKey} />
                       <span className="text-muted-foreground text-xs">
                         {ascendantSignData.name}
                       </span>

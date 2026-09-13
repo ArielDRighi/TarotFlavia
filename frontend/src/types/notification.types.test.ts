@@ -1,3 +1,4 @@
+import { Bell, Flame, Gift, Layers, Settings, Sparkles } from 'lucide-react';
 import { describe, it, expect } from 'vitest';
 import {
   NotificationType,
@@ -115,35 +116,35 @@ describe('NOTIFICATION_TYPE_INFO', () => {
   it('should have SACRED_EVENT info with Spanish name', () => {
     const info = NOTIFICATION_TYPE_INFO[NotificationType.SACRED_EVENT];
     expect(info.name).toBe('Evento Sagrado');
-    expect(info.icon).toBe('✨');
+    expect(info.icon).toBe(Sparkles);
     expect(info.color).toBe('text-purple-500');
   });
 
   it('should have RITUAL_REMINDER info with Spanish name', () => {
     const info = NOTIFICATION_TYPE_INFO[NotificationType.RITUAL_REMINDER];
     expect(info.name).toBe('Ritual');
-    expect(info.icon).toBe('🕯️');
+    expect(info.icon).toBe(Flame);
     expect(info.color).toBe('text-amber-500');
   });
 
   it('should have READING_SHARED info with Spanish name', () => {
     const info = NOTIFICATION_TYPE_INFO[NotificationType.READING_SHARED];
     expect(info.name).toBe('Lectura');
-    expect(info.icon).toBe('🔮');
+    expect(info.icon).toBe(Layers);
     expect(info.color).toBe('text-blue-500');
   });
 
   it('should have SYSTEM info with Spanish name', () => {
     const info = NOTIFICATION_TYPE_INFO[NotificationType.SYSTEM];
     expect(info.name).toBe('Sistema');
-    expect(info.icon).toBe('⚙️');
+    expect(info.icon).toBe(Settings);
     expect(info.color).toBe('text-gray-500');
   });
 
   it('should have PROMOTION info with Spanish name', () => {
     const info = NOTIFICATION_TYPE_INFO[NotificationType.PROMOTION];
     expect(info.name).toBe('Promoción');
-    expect(info.icon).toBe('🎁');
+    expect(info.icon).toBe(Gift);
     expect(info.color).toBe('text-pink-500');
   });
 
@@ -155,7 +156,7 @@ describe('NOTIFICATION_TYPE_INFO', () => {
       expect(info).toHaveProperty('icon');
       expect(info).toHaveProperty('color');
       expect(typeof info.name).toBe('string');
-      expect(typeof info.icon).toBe('string');
+      expect(typeof info.icon).toBe('object'); // forwardRef de lucide
       expect(typeof info.color).toBe('string');
     });
   });
@@ -168,13 +169,18 @@ describe('NOTIFICATION_TYPE_INFO', () => {
     });
   });
 
-  it('should have emoji icons', () => {
+  it('should use lucide icons instead of system emojis (T-UI-12)', () => {
     const allTypes = Object.values(NotificationType);
     allTypes.forEach((type) => {
       const info = NOTIFICATION_TYPE_INFO[type];
       expect(info.icon).toBeTruthy();
-      expect(info.icon.length).toBeGreaterThan(0);
+      expect(typeof info.icon).not.toBe('string');
     });
+  });
+
+  it('should use the Bell icon for the fallback', () => {
+    const info = getNotificationTypeInfo('brand_new_backend_type' as NotificationType);
+    expect(info.icon).toBe(Bell);
   });
 });
 

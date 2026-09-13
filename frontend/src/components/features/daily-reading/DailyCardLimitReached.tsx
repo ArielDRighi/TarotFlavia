@@ -5,6 +5,7 @@ import { Calendar, History, Sparkles, Crown, CalendarHeart, Bell, Wand2 } from '
 
 import { useUserCapabilities } from '@/hooks/api/useUserCapabilities';
 import { Button } from '@/components/ui/button';
+import { CheckItem } from '@/components/ui/check-item';
 import { PREMIUM_BENEFITS } from '@/lib/constants';
 import { CTA_PREMIUM } from '@/lib/constants/cta-copy';
 import { ROUTES } from '@/lib/constants/routes';
@@ -94,13 +95,10 @@ export function DailyCardLimitReached() {
             <div className="bg-surface-secondary rounded-lg p-4 text-center text-sm">
               <p className="mb-2 font-medium">Mientras tanto:</p>
               <ul className="space-y-1 text-left">
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">✓</span> Ver tu carta de hoy en el historial
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">✓</span> Crear una nueva lectura de tarot (tienes{' '}
-                  {tarotReadingsAvailable} disponibles)
-                </li>
+                <CheckItem>Ver tu carta de hoy en el historial</CheckItem>
+                <CheckItem>
+                  Crear una nueva lectura de tarot (tienes {tarotReadingsAvailable} disponibles)
+                </CheckItem>
               </ul>
             </div>
           </>
@@ -184,16 +182,9 @@ export function DailyCardLimitReached() {
             <div className="bg-primary/5 rounded-lg p-4 text-center text-sm">
               <p className="mb-2 font-medium">O continúa explorando gratis:</p>
               <ul className="space-y-1 text-left">
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">✓</span> Ver todas tus cartas pasadas en el
-                  historial
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">✓</span> Crear una nueva lectura de tarot ahora
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">✓</span> Volver mañana para tu nueva carta del día
-                </li>
+                <CheckItem>Ver todas tus cartas pasadas en el historial</CheckItem>
+                <CheckItem>Crear una nueva lectura de tarot ahora</CheckItem>
+                <CheckItem>Volver mañana para tu nueva carta del día</CheckItem>
               </ul>
             </div>
           </>

@@ -1,5 +1,6 @@
 'use client';
 
+import { NumerologyNumberIcon } from './NumerologyNumberIcon';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNumerologyMeanings } from '@/hooks/api/useNumerology';
@@ -56,10 +57,7 @@ export function NumberGallery({ onNumberClick, className }: Props) {
             data-testid={`gallery-number-${num}`}
           >
             <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
-              {/* Emoji */}
-              <div className="text-3xl" data-testid={`gallery-emoji-${num}`}>
-                {info?.emoji || '🔢'}
-              </div>
+              <NumerologyNumberIcon number={num} size="lg" data-testid={`gallery-emoji-${num}`} />
 
               {/* Number */}
               <div className={cn('text-2xl font-bold', info?.color || 'text-gray-700')}>{num}</div>

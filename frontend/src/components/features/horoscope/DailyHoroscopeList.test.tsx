@@ -30,6 +30,19 @@ const DAILY: CanonicalDailyHoroscopes = {
 };
 
 describe('DailyHoroscopeList (T-SEO-015)', () => {
+  it('cada signo lleva su icono de marca decorativo (T-UI-12), no un glifo del sistema', () => {
+    render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
+
+    const aries = screen.getByTestId('hub-horoscope-sign-aries');
+    const icon = aries.querySelector('img');
+    expect(icon).not.toBeNull();
+    expect(decodeURIComponent(icon?.getAttribute('src') ?? '')).toContain(
+      '/images/icons/zodiac/aries.webp'
+    );
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+    expect(aries.textContent).not.toMatch(/[♈-♓]/u);
+  });
+
   it('renderiza la fecha y los 12 extractos con link a cada signo, con el prefijo de testid pedido', () => {
     render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
 
@@ -105,18 +118,6 @@ describe('DailyHoroscopeList (T-SEO-015)', () => {
     render(<DailyHoroscopeList daily={DAILY} testIdPrefix="x" emptyState="" headingLevel={2} />);
 
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(12);
-  });
-
-  it('cada signo lleva su símbolo (ZodiacSymbol), decorativo: el nombre ya está al lado', () => {
-    render(<DailyHoroscopeList daily={DAILY} testIdPrefix="hub-horoscope" emptyState="Nada" />);
-
-    // Independiente de cómo se dibuje el símbolo (glifo hoy, icono de marca con
-    // T-UI-12): es una imagen con el nombre del signo, oculta a lectores de pantalla.
-    const aries = screen.getByTestId('hub-horoscope-sign-aries');
-    const symbol = within(aries).getByRole('img', { name: 'Aries', hidden: true });
-    expect(symbol.closest('[aria-hidden="true"]')).not.toBeNull();
-    expect(within(aries).getByRole('heading', { level: 3 })).toHaveAccessibleName('Aries');
-    expect(screen.getAllByRole('img', { hidden: true })).toHaveLength(12);
   });
 
   it('el estado vacío es un aviso plano, no una caja punteada (T-SEO-022)', () => {

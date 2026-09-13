@@ -1,0 +1,162 @@
+import Image from 'next/image';
+
+import { cn } from '@/lib/utils';
+import {
+  getBrandIcon,
+  type BrandIconDef,
+  type BrandIconFamily,
+  type BrandIconName,
+} from '@/lib/constants/brand-icons';
+
+/**
+ * Tamaños en píxeles CSS. Equivalencias con los emojis que reemplazan:
+ * `text-xl` → `sm`, `text-2xl`/`text-3xl` → `md`, `text-4xl`/`text-5xl` → `lg`,
+ * `text-6xl` → `xl`, encabezado de ficha → `2xl`. El asset es 512×512, así que `next/image` sirve 1x y 2x nítidos.
+ */
+export const BRAND_ICON_SIZES = {
+  sm: 20,
+  md: 32,
+  lg: 48,
+  xl: 72,
+  /** Encabezado de ficha (signo, animal): el sujeto tiene detalle y a 72 px se pierde. */
+  '2xl': 112,
+} as const;
+
+export type BrandIconSize = keyof typeof BRAND_ICON_SIZES;
+
+/**
+ * Diámetro del medallón por tamaño. El icono ocupa ~78 % del disco: un line-art
+ * ornamental de trazo fino no lee sobre blanco a estos tamaños (feedback de
+ * Ariel, 12-sep); sobre violeta cósmico con el dorado avivado sí.
+ */
+export const BRAND_ICON_MEDALLION_SIZES = {
+  sm: 28,
+  md: 44,
+  lg: 64,
+  xl: 96,
+  '2xl': 144,
+} as const;
+
+/** Lado del icono dentro del medallón. */
+const MEDALLION_ICON_RATIO = 0.78;
+
+/**
+ * Tamaños que usan el medallón claro (lavanda pálido, dorado sin avivar): a
+ * 28–44 px el disco violeta pesa más que el icono y se lee como un punto
+ * (feedback de Ariel, 13-sep). De `lg` en adelante va el violeta.
+ */
+const LIGHT_MEDALLION_SIZES: ReadonlySet<BrandIconSize> = new Set(['sm', 'md']);
+
+export type BrandIconFrame = 'none' | 'medallion';
+
+export interface BrandIconProps<F extends BrandIconFamily = BrandIconFamily> {
+  /** Familia del registro (`zodiac`, `chinese`, `elements`, `hubs`…). */
+  family: F;
+  /** Slug dentro de la familia (`aries`, `dragon`, `full_moon`…). */
+  name: BrandIconName<F>;
+  /** Tamaño (default `md`). */
+  size?: BrandIconSize;
+  /**
+   * Oculta el icono a lectores de pantalla. Usar cuando el texto de al lado ya
+   * nombra lo mismo (p. ej. el icono de Aries junto al título "Aries").
+   */
+  decorative?: boolean;
+  /** Etiqueta accesible propia; por defecto el `alt` del registro. */
+  label?: string;
+  /** Solo para iconos above-the-fold (LCP); por defecto es lazy. */
+  priority?: boolean;
+  /**
+   * `medallion`: disco violeta cósmico con borde dorado detrás del icono, y el
+   * dorado avivado. Es el tratamiento por defecto para grillas, encabezados y
+   * tarjetas; `none` para iconos chicos en línea con texto.
+   */
+  frame?: BrandIconFrame;
+  /** Clases CSS adicionales. */
+  className?: string;
+  'data-testid'?: string;
+}
+
+/**
+ * Icono de marca (T-UI-12).
+ *
+ * Renderiza un asset de `public/images/icons/<familia>/<slug>.webp` (line-art
+ * dorado con alfa) en lugar de un emoji del sistema, así los signos, animales,
+ * elementos, etc. se ven idénticos en todos los SO/navegadores y siguen la
+ * línea de diseño del sitio.
+ *
+ * Es un Server Component compatible (sin hooks), se puede usar en páginas SSR.
+ *
+ * @example
+ * ```tsx
+ * <BrandIcon family="zodiac" name="aries" size="lg" />
+ * <BrandIcon family="chinese" name="dragon" decorative />
+ * <BrandIcon family="areas" name="love" label="Amor y relaciones" size="sm" />
+ * ```
+ */
+export function BrandIcon<F extends BrandIconFamily>({
+  family,
+  name,
+  size = 'md',
+  decorative = false,
+  label,
+  priority = false,
+  frame = 'none',
+  className,
+  'data-testid': testId,
+}: BrandIconProps<F>) {
+  const def = getBrandIcon(family, name) as BrandIconDef | undefined;
+  if (!def) {
+    // Un slug que el backend mande y el registro no conozca no debe tirar la
+    // página entera (mismo criterio que getNotificationTypeInfo).
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`BrandIcon: icono desconocido ${family}/${String(name)}`);
+    }
+    return null;
+  }
+  const { src, alt } = def;
+  const medallion = frame === 'medallion';
+  const lightMedallion = medallion && LIGHT_MEDALLION_SIZES.has(size);
+  const px = medallion
+    ? Math.round(BRAND_ICON_MEDALLION_SIZES[size] * MEDALLION_ICON_RATIO)
+    : BRAND_ICON_SIZES[size];
+
+  const image = (
+    <Image
+      src={src}
+      alt={decorative ? '' : (label ?? alt)}
+      width={px}
+      height={px}
+      priority={priority}
+      role={decorative ? undefined : 'img'}
+      aria-hidden={decorative || undefined}
+      draggable={false}
+      className={cn(
+        'inline-block shrink-0 select-none',
+        medallion
+          ? lightMedallion
+            ? 'saturate-[1.1]'
+            : 'brightness-[1.35] saturate-[1.1]'
+          : className
+      )}
+      data-testid={medallion ? undefined : testId}
+    />
+  );
+
+  if (!medallion) return image;
+
+  const diameter = BRAND_ICON_MEDALLION_SIZES[size];
+  return (
+    <span
+      className={cn(
+        'inline-flex shrink-0 items-center justify-center rounded-full',
+        lightMedallion ? 'brand-icon-medallion-light' : 'brand-icon-medallion',
+        className
+      )}
+      style={{ width: diameter, height: diameter }}
+      aria-hidden={decorative || undefined}
+      data-testid={testId}
+    >
+      {image}
+    </span>
+  );
+}

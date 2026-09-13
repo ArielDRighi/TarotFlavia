@@ -13,6 +13,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
   // Nunca indexar NOTIFICATION_TYPE_INFO directo: un tipo nuevo del backend
   // devolvería undefined y rompería el render del header entero.
   const typeInfo = getNotificationTypeInfo(notification.type);
+  const TypeIcon = typeInfo.icon;
   const isUnread = !notification.read;
 
   const handleClick = () => {
@@ -30,9 +31,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
     <div className="flex gap-3">
       {/* Icon */}
       <div className="flex-shrink-0">
-        <span className="text-2xl" aria-hidden="true">
-          {typeInfo.icon}
-        </span>
+        <TypeIcon className={cn('h-6 w-6', typeInfo.color)} aria-hidden="true" />
       </div>
 
       {/* Content */}

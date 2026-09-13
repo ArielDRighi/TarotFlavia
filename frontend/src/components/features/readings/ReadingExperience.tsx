@@ -585,7 +585,10 @@ export function ReadingExperience({
           {/* TASK-006: Show different message based on user plan */}
           <div className="text-text-muted mb-6 text-center text-sm">
             {canUseAI ? (
-              <p className="text-primary font-medium">✨ Recibirás interpretación personalizada</p>
+              <p className="text-primary flex items-center justify-center gap-1.5 font-medium">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                Recibirás interpretación personalizada
+              </p>
             ) : (
               <p>Verás las cartas y sus significados</p>
             )}

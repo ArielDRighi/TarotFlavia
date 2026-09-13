@@ -1,5 +1,6 @@
 'use client';
 
+import { BrandIcon } from '@/components/ui/brand-icon';
 import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
@@ -28,9 +29,7 @@ function TarotSection() {
           href="/enciclopedia"
           className="bg-card hover:bg-accent flex flex-col gap-2 rounded-lg border p-5 transition-colors"
         >
-          <div className="text-3xl" aria-hidden="true">
-            🃏
-          </div>
+          <BrandIcon family="hubs" name="tarot" size="lg" frame="medallion" decorative />
           <h3 className="text-foreground font-semibold">Todas las cartas</h3>
           <p className="text-muted-foreground text-sm">
             Accede al catálogo completo de las 78 cartas del Tarot.
@@ -40,9 +39,7 @@ function TarotSection() {
           href="/enciclopedia?arcana=major"
           className="bg-card hover:bg-accent flex flex-col gap-2 rounded-lg border p-5 transition-colors"
         >
-          <div className="text-3xl" aria-hidden="true">
-            🌟
-          </div>
+          <BrandIcon family="rituals" name="tarot" size="lg" frame="medallion" decorative />
           <h3 className="text-foreground font-semibold">Arcanos Mayores</h3>
           <p className="text-muted-foreground text-sm">
             Los 22 Arcanos Mayores y sus arquetipos universales.

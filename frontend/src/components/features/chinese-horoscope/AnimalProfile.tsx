@@ -45,7 +45,7 @@ function AnimalLinks({ animals }: { animals: ChineseZodiacAnimal[] }) {
               href={ROUTES.HOROSCOPO_CHINO_ANIMAL(partner)}
               className="hover:border-primary hover:text-primary flex items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors"
             >
-              <ChineseAnimalSymbol animal={partner} label={nameEs} className="text-base" />
+              <ChineseAnimalSymbol animal={partner} label={nameEs} size="sm" decorative />
               {nameEs}
             </Link>
           </li>
@@ -84,7 +84,7 @@ export function AnimalProfile({ animal }: AnimalProfileProps) {
   return (
     <article className="space-y-6" data-testid="animal-profile">
       <header className="text-center">
-        <ChineseAnimalSymbol animal={animal} label={info.nameEs} className="text-6xl" />
+        <ChineseAnimalSymbol animal={animal} label={info.nameEs} size="2xl" frame="medallion" />
         <h1 className="mt-2 font-serif text-3xl">{info.nameEs}</h1>
         <p className="text-muted-foreground mt-2 text-lg">{profile.tagline}</p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">

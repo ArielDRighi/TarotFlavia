@@ -4,6 +4,7 @@
  * Información estática de los 12 animales del zodiaco chino
  */
 
+import type { BrandIconName } from '@/lib/constants/brand-icons';
 import { ChineseZodiacAnimal, ChineseZodiacInfo } from '@/types/chinese-horoscope.types';
 
 export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo> = {
@@ -11,7 +12,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.RAT,
     nameEs: 'Rata',
     nameEn: 'Rat',
-    emoji: '🐀',
     element: 'Agua',
     characteristics: ['Inteligente', 'Adaptable', 'Ingenioso'],
   },
@@ -19,7 +19,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.OX,
     nameEs: 'Buey',
     nameEn: 'Ox',
-    emoji: '🐂',
     element: 'Tierra',
     characteristics: ['Diligente', 'Confiable', 'Fuerte'],
   },
@@ -27,7 +26,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.TIGER,
     nameEs: 'Tigre',
     nameEn: 'Tiger',
-    emoji: '🐅',
     element: 'Madera',
     characteristics: ['Valiente', 'Competitivo', 'Impredecible'],
   },
@@ -35,7 +33,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.RABBIT,
     nameEs: 'Conejo',
     nameEn: 'Rabbit',
-    emoji: '🐇',
     element: 'Madera',
     characteristics: ['Gentil', 'Elegante', 'Responsable'],
   },
@@ -43,7 +40,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.DRAGON,
     nameEs: 'Dragón',
     nameEn: 'Dragon',
-    emoji: '🐉',
     element: 'Tierra',
     characteristics: ['Confiado', 'Inteligente', 'Entusiasta'],
   },
@@ -51,7 +47,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.SNAKE,
     nameEs: 'Serpiente',
     nameEn: 'Snake',
-    emoji: '🐍',
     element: 'Fuego',
     characteristics: ['Enigmático', 'Inteligente', 'Sabio'],
   },
@@ -59,7 +54,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.HORSE,
     nameEs: 'Caballo',
     nameEn: 'Horse',
-    emoji: '🐴',
     element: 'Fuego',
     characteristics: ['Animado', 'Activo', 'Enérgico'],
   },
@@ -67,7 +61,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.GOAT,
     nameEs: 'Cabra',
     nameEn: 'Goat',
-    emoji: '🐐',
     element: 'Tierra',
     characteristics: ['Calmado', 'Gentil', 'Compasivo'],
   },
@@ -75,7 +68,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.MONKEY,
     nameEs: 'Mono',
     nameEn: 'Monkey',
-    emoji: '🐒',
     element: 'Metal',
     characteristics: ['Agudo', 'Curioso', 'Juguetón'],
   },
@@ -83,7 +75,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.ROOSTER,
     nameEs: 'Gallo',
     nameEn: 'Rooster',
-    emoji: '🐓',
     element: 'Metal',
     characteristics: ['Observador', 'Trabajador', 'Valiente'],
   },
@@ -91,7 +82,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.DOG,
     nameEs: 'Perro',
     nameEn: 'Dog',
-    emoji: '🐕',
     element: 'Tierra',
     characteristics: ['Leal', 'Honesto', 'Amable'],
   },
@@ -99,7 +89,6 @@ export const CHINESE_ZODIAC_INFO: Record<ChineseZodiacAnimal, ChineseZodiacInfo>
     animal: ChineseZodiacAnimal.PIG,
     nameEs: 'Cerdo',
     nameEn: 'Pig',
-    emoji: '🐖',
     element: 'Agua',
     characteristics: ['Compasivo', 'Generoso', 'Diligente'],
   },
@@ -188,14 +177,16 @@ export function getAnimalBirthYears(animal: ChineseZodiacAnimal): number[] {
 }
 
 /**
- * Elemento icons para Wu Xing (5 elementos chinos)
+ * Elemento Wu Xing → icono de marca de `elements/` (T-UI-12). Fuego, agua y
+ * tierra tienen su versión china (`-cn`) porque conviven en la misma familia
+ * con los elementos occidentales.
  */
-const ELEMENT_ICONS: Record<string, string> = {
-  metal: '⚪',
-  water: '🔵',
-  wood: '🟢',
-  fire: '🔴',
-  earth: '🟤',
+const ELEMENT_BRAND_ICONS: Record<ChineseElementCode, BrandIconName<'elements'>> = {
+  metal: 'metal',
+  water: 'water-cn',
+  wood: 'wood',
+  fire: 'fire-cn',
+  earth: 'earth-cn',
 };
 
 /**
@@ -263,23 +254,25 @@ export function getElementForYear(year: number): ChineseElementCode {
 }
 
 /**
- * Obtiene el ícono emoji para un elemento Wu Xing
- * @param element - Código del elemento (metal, water, wood, fire, earth)
- * @returns Emoji del elemento o fallback ⭕ si no se reconoce
+ * Slug del icono de marca (`<BrandIcon family="elements">`) de un elemento Wu Xing.
+ * @param element - Código del elemento (metal, water, wood, fire, earth), en cualquier caja
+ * @returns Slug de `elements/` o `undefined` si no se reconoce (el consumidor no dibuja nada)
  */
-export function getElementIcon(element: string): string {
+export function getElementBrandIcon(element: string): BrandIconName<'elements'> | undefined {
   const key = element.toLowerCase();
-  const icon = ELEMENT_ICONS[key];
-
-  if (icon) {
-    return icon;
+  if (isChineseElementCode(key)) {
+    return ELEMENT_BRAND_ICONS[key];
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.warn(`Unknown Chinese element in getElementIcon: "${element}"`);
+    console.warn(`Unknown Chinese element in getElementBrandIcon: "${element}"`);
   }
 
-  return '⭕';
+  return undefined;
+}
+
+function isChineseElementCode(value: string): value is ChineseElementCode {
+  return value in ELEMENT_BRAND_ICONS;
 }
 
 /**

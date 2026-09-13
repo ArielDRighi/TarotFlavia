@@ -62,13 +62,15 @@ describe('ChineseHoroscopeDetail', () => {
       expect(container).toBeInTheDocument();
     });
 
-    it('should display the monochrome animal symbol', () => {
+    it('should display the brand animal icon (T-UI-12)', () => {
       const horoscope = createMockHoroscope();
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
       const symbol = screen.getByRole('img', { name: 'Dragón' });
       expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/'
+      );
     });
 
     it('should display animal name in Spanish when no element provided', () => {
@@ -142,10 +144,19 @@ describe('ChineseHoroscopeDetail', () => {
       const horoscope = createMockHoroscope();
       render(<ChineseHoroscopeDetail horoscope={horoscope} />);
 
-      expect(screen.getByText('❤️')).toBeInTheDocument();
-      expect(screen.getByText('💼')).toBeInTheDocument();
-      expect(screen.getByText('✨')).toBeInTheDocument();
-      expect(screen.getByText('💰')).toBeInTheDocument();
+      // T-UI-12: iconos de marca decorativos (el h3 ya nombra el área)
+      for (const [key, slug] of [
+        ['love', 'love'],
+        ['career', 'work'],
+        ['wellness', 'wellbeing'],
+        ['finance', 'money'],
+      ]) {
+        const img = screen.getByTestId(`area-card-${key}`).querySelector('img');
+        expect(decodeURIComponent(img?.getAttribute('src') ?? '')).toContain(
+          `/images/icons/areas/${slug}.webp`
+        );
+        expect(img).toHaveAttribute('aria-hidden', 'true');
+      }
     });
 
     it('should display area scores', () => {

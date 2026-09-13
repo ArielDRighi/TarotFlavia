@@ -66,7 +66,6 @@ export interface ChineseZodiacInfo {
   animal: ChineseZodiacAnimal;
   nameEs: string;
   nameEn: string;
-  emoji: string;
   element: ChineseZodiacElement;
   characteristics: string[];
 }

@@ -1,51 +1,55 @@
-'use client';
-
-import * as React from 'react';
-
-import { cn } from '@/lib/utils';
-
-/**
- * Unicode text presentation variation selector (U+FE0E).
- *
- * Fuerza que el glifo precedente se renderice como **texto monocromático**
- * en lugar de como emoji multicolor del sistema. Es clave para que los
- * símbolos zodiacales (U+2648–U+2653) tomen el color lila/primary del sitio.
- */
-export const TEXT_PRESENTATION_SELECTOR = '\uFE0E';
+// 5. Components
+import { BrandIcon, type BrandIconFrame, type BrandIconSize } from '@/components/ui/brand-icon';
+// 6. Utils & types
+import type { BrandIconName } from '@/lib/constants/brand-icons';
 
 /**
  * ZodiacSymbol Component Props
  */
 export interface ZodiacSymbolProps {
-  /** Glifo Unicode del signo (ej. "♈") */
-  symbol: string;
+  /** Slug del signo (`ZodiacSign` del horóscopo o de la carta natal: mismos valores). */
+  sign: BrandIconName<'zodiac'>;
   /** Etiqueta accesible (nombre del signo en español). Obligatoria por a11y: el `role="img"` necesita un nombre accesible. */
   label: string;
-  /** Clases CSS adicionales (ej. tamaño del texto) */
+  /** Tamaño (default `md`). */
+  size?: BrandIconSize;
+  /** Oculto a lectores de pantalla (cuando el nombre del signo ya está al lado). */
+  decorative?: boolean;
+  /** `medallion`: disco violeta cósmico detrás del icono (ver `BrandIcon`). */
+  frame?: BrandIconFrame;
+  /** Clases CSS adicionales (layout). */
   className?: string;
 }
 
 /**
  * ZodiacSymbol Component
  *
- * Renderiza un símbolo zodiacal forzando su presentación como texto
- * monocromático en el color lila/primary de la página, evitando que el
- * sistema operativo/navegador lo muestre como emoji multicolor.
- *
- * Técnica:
- * - Agrega el selector de variación de texto U+FE0E al glifo.
- * - Aplica la clase utilitaria `zodiac-symbol` (`font-variant-emoji: text`).
- * - Aplica el color `text-primary`.
+ * Renderiza el icono de marca del signo (`public/images/icons/zodiac/<signo>.webp`,
+ * T-UI-12) en lugar del glifo Unicode: el glifo dependía de la fuente del
+ * sistema y en varios navegadores salía como emoji multicolor.
  *
  * @example
  * ```tsx
- * <ZodiacSymbol symbol={signInfo.symbol} label={signInfo.nameEs} className="text-4xl" />
+ * <ZodiacSymbol sign={signInfo.sign} label={signInfo.nameEs} size="lg" frame="medallion" />
  * ```
  */
-export function ZodiacSymbol({ symbol, label, className }: ZodiacSymbolProps) {
+export function ZodiacSymbol({
+  sign,
+  label,
+  size = 'md',
+  decorative,
+  frame,
+  className,
+}: ZodiacSymbolProps) {
   return (
-    <span className={cn('zodiac-symbol', className, 'text-primary')} role="img" aria-label={label}>
-      {`${symbol}${TEXT_PRESENTATION_SELECTOR}`}
-    </span>
+    <BrandIcon
+      family="zodiac"
+      name={sign}
+      label={label}
+      size={size}
+      frame={frame}
+      decorative={decorative}
+      className={className}
+    />
   );
 }

@@ -53,7 +53,8 @@ export function ChineseHoroscopeHub() {
                 <ChineseAnimalSymbol
                   animal={myHoroscope.animal}
                   label={CHINESE_ZODIAC_INFO[myHoroscope.animal].nameEs}
-                  className="text-3xl"
+                  size="md"
+                  frame="medallion"
                 />
                 <span className="text-xl">
                   Tu Horóscopo:{' '}

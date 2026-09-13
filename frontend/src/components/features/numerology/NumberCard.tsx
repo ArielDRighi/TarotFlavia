@@ -1,5 +1,7 @@
 'use client';
 
+import { Star } from 'lucide-react';
+import { NumerologyNumberIcon } from './NumerologyNumberIcon';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NUMEROLOGY_NUMBERS_INFO } from '@/lib/utils/numerology';
@@ -26,7 +28,6 @@ interface Props {
 
 export function NumberCard({ number, context, variant = 'compact', onClick, className }: Props) {
   const info = NUMEROLOGY_NUMBERS_INFO[number.value] || {
-    emoji: '🔢',
     color: 'text-gray-500',
     name: 'Número',
   };
@@ -53,9 +54,7 @@ export function NumberCard({ number, context, variant = 'compact', onClick, clas
 
         {/* Number Display */}
         <div className="mb-2 flex items-center gap-3">
-          <div className="text-4xl" data-testid="number-emoji">
-            {info.emoji}
-          </div>
+          <NumerologyNumberIcon number={number.value} size="lg" data-testid="number-emoji" />
           <div>
             <div className={cn('text-3xl font-bold', info.color)}>{number.value}</div>
             <div className="text-sm font-semibold text-gray-700">{number.name}</div>
@@ -65,7 +64,8 @@ export function NumberCard({ number, context, variant = 'compact', onClick, clas
         {/* Master Number Badge */}
         {number.isMaster && (
           <Badge variant="secondary" className="mb-2">
-            ⭐ Número Maestro
+            <Star aria-hidden="true" />
+            Número Maestro
           </Badge>
         )}
 

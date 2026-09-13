@@ -110,7 +110,7 @@ describe('RitualsPage (interacción)', () => {
     const user = userEvent.setup();
     render(<RitualesPage initialRituals={mockRituals} />);
 
-    await user.click(screen.getByRole('button', { name: /✨.*limpieza/i }));
+    await user.click(screen.getByRole('button', { name: /limpieza/i }));
 
     await waitFor(() => {
       expect(vi.mocked(useRituals)).toHaveBeenLastCalledWith(
@@ -196,7 +196,7 @@ describe('RitualsPage (interacción)', () => {
     expect(mockUseRituals).toHaveBeenCalledWith({}, expect.anything());
 
     // Click on Limpieza category button
-    const limpiezaButton = screen.getByRole('button', { name: /✨.*limpieza/i });
+    const limpiezaButton = screen.getByRole('button', { name: /limpieza/i });
     await user.click(limpiezaButton);
 
     // Should call useRituals with the category filter

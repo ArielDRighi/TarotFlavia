@@ -63,11 +63,14 @@ function SignExcerpt({
       className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4"
     >
       <Heading className="text-text-primary flex items-center gap-2 font-serif text-lg font-semibold">
-        {/* Decorativo: el nombre del signo va al lado. Hoy es el glifo; con
-            T-UI-12 (familia zodiac/) ZodiacSymbol lo resuelve al icono de marca. */}
-        <span className="inline-flex shrink-0 items-center" aria-hidden="true">
-          <ZodiacSymbol symbol={info.symbol} label={info.nameEs} className="text-2xl" />
-        </span>
+        {/* Decorativo: el nombre del signo va al lado (T-UI-12, familia zodiac/). */}
+        <ZodiacSymbol
+          sign={horoscope.zodiacSign}
+          label={info.nameEs}
+          size="md"
+          frame="medallion"
+          decorative
+        />
         <Link
           href={ROUTES.HOROSCOPO_SIGN(horoscope.zodiacSign)}
           className="underline-offset-4 hover:underline"

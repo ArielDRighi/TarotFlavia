@@ -1,5 +1,6 @@
 'use client';
 
+import { BrandIcon } from '@/components/ui/brand-icon';
 import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
@@ -159,7 +160,7 @@ export function TarotCard({ card, isRevealed, onClick, size = 'md', className }:
                 )}
               >
                 <div className="p-2 text-center">
-                  <div className="mb-2 text-4xl">🃏</div>
+                  <BrandIcon family="hubs" name="tarot" size="lg" decorative className="mb-2" />
                   <span className="text-text-muted text-xs">{card?.name || 'Sin imagen'}</span>
                 </div>
               </div>

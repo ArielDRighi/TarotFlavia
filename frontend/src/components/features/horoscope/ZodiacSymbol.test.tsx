@@ -1,53 +1,58 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
-import { ZodiacSymbol, TEXT_PRESENTATION_SELECTOR } from './ZodiacSymbol';
+import { BRAND_ICON_SIZES } from '@/components/ui/brand-icon';
+import { ZODIAC_SIGNS_INFO } from '@/lib/utils/zodiac';
+import { ZodiacSign } from '@/types/horoscope.types';
+import { ZodiacSymbol } from './ZodiacSymbol';
 
-describe('ZodiacSymbol', () => {
-  it('should render the zodiac glyph', () => {
-    render(<ZodiacSymbol symbol="♈" label="Aries" />);
+const src = (img: HTMLElement) => decodeURIComponent(img.getAttribute('src') ?? '');
 
-    expect(screen.getByLabelText('Aries')).toHaveTextContent('♈');
+describe('ZodiacSymbol (T-UI-12: asset de marca en lugar del glifo Unicode)', () => {
+  it('renderiza el icono de marca del signo con role="img" y el nombre', () => {
+    render(<ZodiacSymbol sign={ZodiacSign.ARIES} label="Aries" />);
+
+    const img = screen.getByRole('img', { name: 'Aries' });
+    expect(src(img)).toContain('/images/icons/zodiac/aries.webp');
+    expect(img).not.toHaveTextContent('♈');
   });
 
-  it('should append the text presentation variation selector (U+FE0E)', () => {
-    render(<ZodiacSymbol symbol="♈" label="Aries" />);
-
-    const span = screen.getByLabelText('Aries');
-    expect(span.textContent).toBe(`♈${TEXT_PRESENTATION_SELECTOR}`);
+  it('resuelve los 12 signos de ZODIAC_SIGNS_INFO a su asset', () => {
+    for (const info of Object.values(ZODIAC_SIGNS_INFO)) {
+      const { unmount } = render(<ZodiacSymbol sign={info.sign} label={info.nameEs} />);
+      expect(src(screen.getByRole('img', { name: info.nameEs }))).toContain(
+        `/images/icons/zodiac/${info.sign}.webp`
+      );
+      unmount();
+    }
   });
 
-  it('should apply the lila/primary color class', () => {
-    render(<ZodiacSymbol symbol="♉" label="Tauro" />);
+  it('acepta size y sin él es md', () => {
+    const { rerender } = render(<ZodiacSymbol sign={ZodiacSign.VIRGO} label="Virgo" size="sm" />);
+    expect(screen.getByRole('img')).toHaveAttribute('width', String(BRAND_ICON_SIZES.sm));
 
-    expect(screen.getByLabelText('Tauro')).toHaveClass('text-primary');
+    rerender(<ZodiacSymbol sign={ZodiacSign.VIRGO} label="Virgo" />);
+    expect(screen.getByRole('img')).toHaveAttribute('width', String(BRAND_ICON_SIZES.md));
   });
 
-  it('should apply the zodiac-symbol utility class (font-variant-emoji: text)', () => {
-    render(<ZodiacSymbol symbol="♊" label="Géminis" />);
+  it('acepta el signo de la carta natal (mismos valores que el enum del horóscopo)', () => {
+    render(<ZodiacSymbol sign="scorpio" label="Escorpio" />);
 
-    expect(screen.getByLabelText('Géminis')).toHaveClass('zodiac-symbol');
+    expect(src(screen.getByRole('img', { name: 'Escorpio' }))).toContain(
+      '/images/icons/zodiac/scorpio.webp'
+    );
   });
 
-  it('should have role="img"', () => {
-    render(<ZodiacSymbol symbol="♋" label="Cáncer" />);
+  it('conserva las clases de layout del consumidor', () => {
+    render(<ZodiacSymbol sign={ZodiacSign.LIBRA} label="Libra" className="mx-auto" />);
 
-    expect(screen.getByRole('img', { name: 'Cáncer' })).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveClass('mx-auto');
   });
 
-  it('should merge additional className', () => {
-    render(<ZodiacSymbol symbol="♌" label="Leo" className="text-6xl" />);
+  it('con decorative se oculta a lectores de pantalla', () => {
+    const { container } = render(<ZodiacSymbol sign={ZodiacSign.LEO} label="Leo" decorative />);
 
-    const span = screen.getByLabelText('Leo');
-    expect(span).toHaveClass('text-6xl');
-    expect(span).toHaveClass('text-primary');
-  });
-
-  it('should keep text-primary even when className passes a conflicting text color', () => {
-    render(<ZodiacSymbol symbol="♍" label="Virgo" className="text-red-500" />);
-
-    const span = screen.getByLabelText('Virgo');
-    expect(span).toHaveClass('text-primary');
-    expect(span).not.toHaveClass('text-red-500');
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(container.querySelector('img')).toHaveAttribute('aria-hidden', 'true');
   });
 });

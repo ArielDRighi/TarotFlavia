@@ -61,7 +61,10 @@ export function ChineseCompatibility({
             <ChineseAnimalSymbol
               animal={info.animal}
               label={info.nameEs}
-              className="mr-1 text-base"
+              size="sm"
+              frame="medallion"
+              decorative
+              className="mr-1"
             />
             {info.nameEs}
           </Badge>

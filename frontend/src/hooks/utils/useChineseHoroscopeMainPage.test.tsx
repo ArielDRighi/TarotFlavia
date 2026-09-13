@@ -157,7 +157,6 @@ describe('useChineseHoroscopeMainPage', () => {
     const { result } = renderHook(() => useChineseHoroscopeMainPage(), { wrapper });
 
     expect(result.current.getAnimalNameEs(ChineseZodiacAnimal.DRAGON)).toBe('Dragón');
-    expect(result.current.getAnimalEmoji(ChineseZodiacAnimal.DRAGON)).toBe('🐉');
   });
 
   it('should navigate directly when animal is selected with element param', async () => {

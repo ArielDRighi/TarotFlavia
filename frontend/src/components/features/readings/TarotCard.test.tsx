@@ -351,7 +351,10 @@ describe('TarotCard', () => {
       render(<TarotCard card={cardWithoutImage} isRevealed={true} />);
 
       // Check for placeholder emoji
-      expect(screen.getByText('🃏')).toBeInTheDocument();
+      // Placeholder sin imagen: icono de marca hubs/tarot (T-UI-12)
+      expect(
+        decodeURIComponent(document.querySelector('img[src*="icons"]')?.getAttribute('src') ?? '')
+      ).toContain('/images/icons/hubs/tarot.webp');
     });
 
     it('should show card name in placeholder when card is provided', () => {

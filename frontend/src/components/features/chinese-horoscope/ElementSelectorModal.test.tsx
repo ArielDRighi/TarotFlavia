@@ -47,12 +47,17 @@ describe('ElementSelectorModal', () => {
       expect(screen.getByTestId('element-selector-modal')).toBeInTheDocument();
     });
 
-    it('should show the monochrome animal symbol in title', () => {
+    it('should show the brand animal icon (T-UI-12) in title', () => {
       render(<ElementSelectorModal {...defaultProps} />);
 
-      const symbol = screen.getByRole('img', { name: 'Mono' });
-      expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      // Decorativo: el título ya dice "Mono"
+      const title =
+        screen.getByText('Mono').closest('h2') ?? screen.getByText('Mono').parentElement;
+      const img = title?.querySelector('img');
+      expect(decodeURIComponent(img?.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/monkey.webp'
+      );
+      expect(img).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('should show animal name in title', () => {
@@ -76,11 +81,13 @@ describe('ElementSelectorModal', () => {
     it('should show element icons', () => {
       render(<ElementSelectorModal {...defaultProps} />);
 
-      expect(screen.getByText('⚪')).toBeInTheDocument(); // Metal
-      expect(screen.getByText('🔵')).toBeInTheDocument(); // Water
-      expect(screen.getByText('🟢')).toBeInTheDocument(); // Wood
-      expect(screen.getByText('🔴')).toBeInTheDocument(); // Fire
-      expect(screen.getByText('🟤')).toBeInTheDocument(); // Earth
+      // T-UI-12: iconos de marca de elements/ (decorativos, el nombre está al lado)
+      const srcs = Array.from(document.querySelectorAll('img')).map((img) =>
+        decodeURIComponent(img.getAttribute('src') ?? '')
+      );
+      for (const slug of ['metal', 'water-cn', 'wood', 'fire-cn', 'earth-cn']) {
+        expect(srcs.some((s) => s.includes(`/images/icons/elements/${slug}.webp`))).toBe(true);
+      }
     });
 
     it('should display example years for each element', () => {

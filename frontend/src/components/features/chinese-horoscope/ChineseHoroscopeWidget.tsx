@@ -5,10 +5,16 @@ import Link from 'next/link';
 import { ArrowRight, Settings } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMyAnimalHoroscope } from '@/hooks/api/useChineseHoroscope';
-import { CHINESE_ZODIAC_INFO, getCurrentYear, getElementIcon } from '@/lib/utils/chinese-zodiac';
+import { HOROSCOPE_AREA_ICON } from '@/lib/constants/horoscope-areas';
+import {
+  CHINESE_ZODIAC_INFO,
+  getCurrentYear,
+  getElementBrandIcon,
+} from '@/lib/utils/chinese-zodiac';
 
 import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
 
@@ -70,6 +76,9 @@ export function ChineseHoroscopeWidget() {
 
   const animalInfo = CHINESE_ZODIAC_INFO[horoscope.animal];
   const displayName = horoscope.fullZodiacType || animalInfo.nameEs;
+  const birthElementIcon = horoscope.birthElement
+    ? getElementBrandIcon(horoscope.birthElement)
+    : undefined;
 
   return (
     <Card data-testid="chinese-horoscope-widget" className="p-6">
@@ -78,7 +87,8 @@ export function ChineseHoroscopeWidget() {
           <ChineseAnimalSymbol
             animal={animalInfo.animal}
             label={animalInfo.nameEs}
-            className="text-3xl"
+            size="md"
+            frame="medallion"
           />
           <div>
             <h2 className="font-serif text-xl">{displayName}</h2>
@@ -86,7 +96,10 @@ export function ChineseHoroscopeWidget() {
               <p className="text-muted-foreground text-xs">Horóscopo Chino {currentYear}</p>
               {horoscope.birthElementEs && (
                 <span className="text-xs" data-testid="chinese-horoscope-widget-element">
-                  {getElementIcon(horoscope.birthElement || '')} {horoscope.birthElementEs}
+                  {birthElementIcon && (
+                    <BrandIcon family="elements" name={birthElementIcon} size="sm" decorative />
+                  )}{' '}
+                  {horoscope.birthElementEs}
                 </span>
               )}
             </div>
@@ -106,19 +119,24 @@ export function ChineseHoroscopeWidget() {
 
       <div className="mt-4 flex gap-4 text-xs">
         <span className="flex items-center gap-1">
-          <span className="text-rose-500">❤️</span>
+          <BrandIcon family="areas" name={HOROSCOPE_AREA_ICON.love} size="sm" label="Amor" />
           {horoscope.areas.love.score}/10
         </span>
         <span className="flex items-center gap-1">
-          <span className="text-blue-500">💼</span>
+          <BrandIcon family="areas" name={HOROSCOPE_AREA_ICON.career} size="sm" label="Carrera" />
           {horoscope.areas.career.score}/10
         </span>
         <span className="flex items-center gap-1">
-          <span className="text-emerald-500">✨</span>
+          <BrandIcon
+            family="areas"
+            name={HOROSCOPE_AREA_ICON.wellness}
+            size="sm"
+            label="Bienestar"
+          />
           {horoscope.areas.wellness.score}/10
         </span>
         <span className="flex items-center gap-1">
-          <span className="text-amber-500">💰</span>
+          <BrandIcon family="areas" name={HOROSCOPE_AREA_ICON.finance} size="sm" label="Finanzas" />
           {horoscope.areas.finance.score}/10
         </span>
       </div>

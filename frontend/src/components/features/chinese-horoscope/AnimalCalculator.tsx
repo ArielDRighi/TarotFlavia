@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCalculateAnimal } from '@/hooks/api/useChineseHoroscope';
-import { CHINESE_ZODIAC_INFO, getElementIcon } from '@/lib/utils/chinese-zodiac';
+import { BrandIcon } from '@/components/ui/brand-icon';
+import { CHINESE_ZODIAC_INFO, getElementBrandIcon } from '@/lib/utils/chinese-zodiac';
 import type { ChineseZodiacAnimal } from '@/types/chinese-horoscope.types';
 
 import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
@@ -45,6 +46,7 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
   const [queryDate, setQueryDate] = useState<string | null>(null);
 
   const { data, isLoading, error } = useCalculateAnimal(queryDate);
+  const birthElementIcon = data ? getElementBrandIcon(data.birthElement) : undefined;
 
   const handleCalculate = () => {
     if (birthDate) {
@@ -105,7 +107,8 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
           <ChineseAnimalSymbol
             animal={data.animal}
             label={CHINESE_ZODIAC_INFO[data.animal].nameEs}
-            className="text-5xl"
+            size="lg"
+            frame="medallion"
           />
           <p className="mt-2 font-serif text-xl" data-testid="full-zodiac-type">
             Eres {data.fullZodiacType || data.animalInfo.nameEs}
@@ -113,7 +116,11 @@ export function AnimalCalculator({ onAnimalFound, className }: AnimalCalculatorP
           <p className="text-muted-foreground text-sm">Año chino: {data.chineseYear}</p>
           {data.birthElementEs && (
             <p className="text-muted-foreground mt-1 text-sm" data-testid="birth-element">
-              Elemento: {getElementIcon(data.birthElement)} {data.birthElementEs}
+              Elemento:{' '}
+              {birthElementIcon && (
+                <BrandIcon family="elements" name={birthElementIcon} size="sm" decorative />
+              )}{' '}
+              {data.birthElementEs}
             </p>
           )}
           <div className="mt-2 flex flex-wrap justify-center gap-1">

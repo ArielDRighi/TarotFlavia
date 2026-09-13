@@ -177,7 +177,7 @@ describe('ChineseHoroscopeWidget', () => {
       expect(screen.getByTestId('chinese-horoscope-widget')).toBeInTheDocument();
     });
 
-    it('should display the monochrome animal symbol', () => {
+    it('should display the brand animal icon (T-UI-12)', () => {
       mockUseMyAnimalHoroscope.mockReturnValue({
         data: createMockHoroscope(),
         isLoading: false,
@@ -188,7 +188,9 @@ describe('ChineseHoroscopeWidget', () => {
 
       const symbol = screen.getByRole('img', { name: 'Dragón' });
       expect(symbol).toBeInTheDocument();
-      expect(symbol).toHaveClass('text-primary');
+      expect(decodeURIComponent(symbol.getAttribute('src') ?? '')).toContain(
+        '/images/icons/chinese/'
+      );
     });
 
     it('should display animal name in Spanish', () => {
@@ -249,7 +251,9 @@ describe('ChineseHoroscopeWidget', () => {
       render(<ChineseHoroscopeWidget />);
 
       const elementDisplay = screen.getByTestId('chinese-horoscope-widget-element');
-      expect(elementDisplay).toHaveTextContent('🟤');
+      expect(
+        decodeURIComponent(elementDisplay.querySelector('img')?.getAttribute('src') ?? '')
+      ).toContain('/images/icons/elements/earth-cn.webp');
       expect(elementDisplay).toHaveTextContent('Tierra');
     });
 
@@ -267,7 +271,9 @@ describe('ChineseHoroscopeWidget', () => {
       render(<ChineseHoroscopeWidget />);
 
       const elementDisplay = screen.getByTestId('chinese-horoscope-widget-element');
-      expect(elementDisplay).toHaveTextContent('⚪');
+      expect(
+        decodeURIComponent(elementDisplay.querySelector('img')?.getAttribute('src') ?? '')
+      ).toContain('/images/icons/elements/metal.webp');
       expect(elementDisplay).toHaveTextContent('Metal');
     });
 
@@ -336,10 +342,11 @@ describe('ChineseHoroscopeWidget', () => {
 
       render(<ChineseHoroscopeWidget />);
 
-      expect(screen.getByText('❤️')).toBeInTheDocument();
-      expect(screen.getByText('💼')).toBeInTheDocument();
-      expect(screen.getByText('✨')).toBeInTheDocument();
-      expect(screen.getByText('💰')).toBeInTheDocument();
+      // T-UI-12: iconos de marca de areas/ con nombre accesible
+      expect(screen.getByRole('img', { name: 'Amor' })).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Carrera' })).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Bienestar' })).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Finanzas' })).toBeInTheDocument();
     });
 
     it('should render link to full horoscope page with element', () => {

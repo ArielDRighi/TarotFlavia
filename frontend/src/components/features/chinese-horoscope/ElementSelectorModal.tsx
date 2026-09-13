@@ -10,6 +10,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { Lightbulb } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { BrandIcon } from '@/components/ui/brand-icon';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -26,7 +28,7 @@ import {
   ChineseElementCode,
   getExampleYearsForAnimalElement,
   getElementNameEs,
-  getElementIcon,
+  getElementBrandIcon,
 } from '@/lib/utils/chinese-zodiac';
 
 import { ChineseAnimalSymbol } from './ChineseAnimalSymbol';
@@ -99,7 +101,13 @@ export function ElementSelectorModal({
       <DialogContent data-testid="element-selector-modal" className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ChineseAnimalSymbol animal={animal} label={animalNameEs} className="text-2xl" />
+            <ChineseAnimalSymbol
+              animal={animal}
+              label={animalNameEs}
+              size="md"
+              frame="medallion"
+              decorative
+            />
             <span>{animalNameEs}</span>
           </DialogTitle>
           <DialogDescription>Selecciona tu elemento Wu Xing</DialogDescription>
@@ -112,7 +120,7 @@ export function ElementSelectorModal({
           >
             {WU_XING_ELEMENTS.map((element) => {
               const elementNameEs = getElementNameEs(element);
-              const elementIcon = getElementIcon(element);
+              const elementIcon = getElementBrandIcon(element);
               const exampleYears = getExampleYearsForAnimalElement(animal, element);
 
               return (
@@ -123,7 +131,15 @@ export function ElementSelectorModal({
                     className="flex flex-1 cursor-pointer items-center justify-between"
                   >
                     <span className="flex items-center gap-2">
-                      <span className="text-xl">{elementIcon}</span>
+                      {elementIcon && (
+                        <BrandIcon
+                          family="elements"
+                          name={elementIcon}
+                          size="md"
+                          frame="medallion"
+                          decorative
+                        />
+                      )}
                       <span className="font-medium">{elementNameEs}</span>
                     </span>
                     <span className="text-muted-foreground text-sm">{exampleYears.join(', ')}</span>
@@ -135,8 +151,9 @@ export function ElementSelectorModal({
         </div>
 
         <div className="bg-muted rounded-lg p-3 text-sm">
-          <p className="text-muted-foreground">
-            💡 <strong>¿No sabes tu elemento?</strong>
+          <p className="text-muted-foreground flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <strong>¿No sabes tu elemento?</strong>
           </p>
           <p className="text-muted-foreground mt-1">
             Usa el calculador en la página principal con tu fecha de nacimiento para calcular tu

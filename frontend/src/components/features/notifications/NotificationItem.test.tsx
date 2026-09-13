@@ -34,8 +34,10 @@ describe('NotificationItem', () => {
   it('should render notification type icon', () => {
     render(<NotificationItem notification={baseNotification} />);
 
-    // SACRED_EVENT icon is ✨
-    expect(screen.getByText('✨')).toBeInTheDocument();
+    // SACRED_EVENT icon is lucide Sparkles (decorativo, aria-hidden)
+    const icon = screen.getByTestId('notification-item').querySelector('svg');
+    expect(icon).not.toBeNull();
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('should render relative time', () => {
@@ -103,7 +105,9 @@ describe('NotificationItem', () => {
 
     render(<NotificationItem notification={notification} />);
 
-    expect(screen.getByText('🕯️')).toBeInTheDocument();
+    expect(screen.getByTestId('notification-item').querySelector('svg')).toHaveClass(
+      'text-amber-500'
+    );
   });
 
   it('should render READING_SHARED type with correct icon', () => {
@@ -115,7 +119,9 @@ describe('NotificationItem', () => {
 
     render(<NotificationItem notification={notification} />);
 
-    expect(screen.getByText('🔮')).toBeInTheDocument();
+    expect(screen.getByTestId('notification-item').querySelector('svg')).toHaveClass(
+      'text-blue-500'
+    );
   });
 
   it('should render SYSTEM type with correct icon', () => {
@@ -127,7 +133,9 @@ describe('NotificationItem', () => {
 
     render(<NotificationItem notification={notification} />);
 
-    expect(screen.getByText('⚙️')).toBeInTheDocument();
+    expect(screen.getByTestId('notification-item').querySelector('svg')).toHaveClass(
+      'text-gray-500'
+    );
   });
 
   it('should render PROMOTION type with correct icon', () => {
@@ -139,7 +147,9 @@ describe('NotificationItem', () => {
 
     render(<NotificationItem notification={notification} />);
 
-    expect(screen.getByText('🎁')).toBeInTheDocument();
+    expect(screen.getByTestId('notification-item').querySelector('svg')).toHaveClass(
+      'text-pink-500'
+    );
   });
 
   it('should handle very long messages gracefully', () => {
