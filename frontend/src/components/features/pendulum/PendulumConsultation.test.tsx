@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
@@ -136,6 +136,15 @@ describe('PendulumConsultation', () => {
     renderWithProviders(<PendulumConsultation />);
 
     expect(screen.getByText('Péndulo Digital')).toBeInTheDocument();
+  });
+
+  it('T-UI-13: abre con la banda de marca <SectionHero> y un solo h1', () => {
+    renderWithProviders(<PendulumConsultation />);
+
+    const hero = screen.getByTestId('section-hero');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(within(hero).getByRole('heading', { level: 1 })).toHaveTextContent('Péndulo Digital');
+    expect(within(hero).getByTestId('section-hero-icon')).toBeInTheDocument();
   });
 
   // ==========================================================================

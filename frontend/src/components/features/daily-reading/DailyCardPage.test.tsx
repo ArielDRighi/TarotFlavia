@@ -82,6 +82,15 @@ describe('DailyCardPage (T-SEO-015)', () => {
     );
   });
 
+  it('T-UI-13: abre con la banda de marca <SectionHero> y un solo h1', () => {
+    render(<DailyCardPage data={DATA} />);
+
+    const hero = screen.getByTestId('section-hero');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(within(hero).getByRole('heading', { level: 1 })).toHaveTextContent('Tarot del día');
+    expect(within(hero).getByTestId('section-hero-icon')).toBeInTheDocument();
+  });
+
   it('monta la herramienta interactiva debajo de la carta de hoy: sigue usable sin registro', () => {
     render(<DailyCardPage data={DATA} />);
 

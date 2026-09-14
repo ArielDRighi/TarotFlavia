@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SectionHero } from '@/components/ui/section-hero';
 import { NumerologyProfile } from '@/components/features/numerology';
 import { useAuthStore } from '@/stores/authStore';
 import { useCalculateNumerology, useMyNumerologyProfile } from '@/hooks/api/useNumerology';
@@ -72,10 +73,12 @@ export function NumerologyPage() {
   return (
     <div className="container mx-auto px-4 py-8" data-testid="numerologia-page">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-8 text-center">
-          <h1 className="mb-2 font-serif text-4xl">Numerología</h1>
-          <p className="text-muted-foreground">Descubre los números que rigen tu vida</p>
-        </div>
+        <SectionHero
+          className="mb-8"
+          title="Numerología"
+          lead="Descubre los números que rigen tu vida"
+          icon={{ family: 'hubs', name: 'numerology' }}
+        />
 
         {/* Alert for incomplete profile */}
         {hasIncompleteProfile && (

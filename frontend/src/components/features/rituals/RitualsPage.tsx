@@ -8,6 +8,7 @@ import {
   RitualsSkeleton,
 } from '@/components/features/rituals';
 import { SearchBar } from '@/components/ui/search-bar';
+import { SectionHero } from '@/components/ui/section-hero';
 import { useRituals, useFeaturedRituals, useRitualCategories } from '@/hooks/api/useRituals';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -66,21 +67,22 @@ export function RitualsPage({ initialRituals }: RitualsPageProps = {}) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <h1 className="mb-2 font-serif text-4xl">Rituales</h1>
-          <p className="text-muted-foreground">Guías paso a paso para tu práctica espiritual</p>
-        </div>
-        {isAuthenticated && (
-          <Button variant="outline" asChild>
-            <Link href={ROUTES.RITUALES_HISTORIAL}>
-              <History className="mr-2 h-4 w-4" />
-              Mi Historial
-            </Link>
-          </Button>
-        )}
-      </div>
+      <SectionHero
+        className="mb-8"
+        title="Rituales"
+        lead="Guías paso a paso para tu práctica espiritual"
+        icon={{ family: 'hubs', name: 'rituals' }}
+        actions={
+          isAuthenticated ? (
+            <Button variant="outline" asChild>
+              <Link href={ROUTES.RITUALES_HISTORIAL}>
+                <History className="mr-2 h-4 w-4" />
+                Mi Historial
+              </Link>
+            </Button>
+          ) : undefined
+        }
+      />
 
       {/* Rituales destacados */}
       {!hasFilters && (

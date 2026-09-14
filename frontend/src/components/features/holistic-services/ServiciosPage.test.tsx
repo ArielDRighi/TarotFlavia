@@ -4,7 +4,7 @@
  * TDD RED phase — tests written before implementation.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ServiciosPage } from './ServiciosPage';
@@ -97,6 +97,23 @@ describe('ServiciosPage', () => {
     render(<ServiciosPage />, { wrapper });
 
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+  });
+
+  it('T-UI-13: abre con la banda de marca <SectionHero> y un solo h1', () => {
+    vi.mocked(useHolisticServicesHook.useHolisticServices).mockReturnValue({
+      data: mockServices,
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useHolisticServicesHook.useHolisticServices>);
+    render(<ServiciosPage />, { wrapper });
+
+    const hero = screen.getByTestId('section-hero');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(within(hero).getByRole('heading', { level: 1 })).toHaveTextContent(
+      'Servicios Holísticos'
+    );
+    expect(within(hero).getByTestId('section-hero-icon')).toBeInTheDocument();
   });
 
   it('should have data-testid attribute', () => {
@@ -223,6 +240,10 @@ describe('ServiciosPage', () => {
 
     const link = screen.getByTestId('mis-servicios-link');
     expect(link).toBeInTheDocument();
+    // T-UI-13: el enlace vive en la ranura de acciones de la banda
+    expect(
+      within(screen.getByTestId('section-hero-actions')).getByTestId('mis-servicios-link')
+    ).toBe(link);
     expect(link).toHaveAttribute('href', '/mis-servicios');
     expect(screen.getByText('Mis Servicios')).toBeInTheDocument();
   });
@@ -238,6 +259,8 @@ describe('ServiciosPage', () => {
     render(<ServiciosPage />, { wrapper });
 
     expect(screen.queryByTestId('mis-servicios-link')).not.toBeInTheDocument();
+    // T-UI-13: sin sesión la banda no renderiza la ranura de acciones
+    expect(screen.queryByTestId('section-hero-actions')).not.toBeInTheDocument();
   });
 
   describe('Sembrado desde el servidor (T-SEO-003)', () => {

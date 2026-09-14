@@ -8,6 +8,7 @@ import {
   GuideLinks,
   GuideParagraphs,
 } from '@/components/common/EditorialGuide';
+import { SectionHero } from '@/components/ui/section-hero';
 import { DailyCardExperience } from './DailyCardExperience';
 // 6. Utils & types
 import { DAILY_CARD_GUIDE } from '@/lib/constants/daily-card-guide.data';
@@ -233,16 +234,12 @@ export function DailyCardPage({ data }: DailyCardPageProps) {
   return (
     <div className="from-bg-main to-primary/5 min-h-screen bg-gradient-to-b">
       <div className="container mx-auto max-w-4xl px-4 py-8">
-        <header className="mb-10">
-          <h1 className="text-text-primary mb-3 font-serif text-4xl font-light md:text-5xl">
-            Tarot del día
-          </h1>
-          <p className="text-text-muted max-w-3xl font-sans leading-relaxed">
-            Una carta del tarot para leer la jornada. Arriba, la carta de hoy del sitio con su
-            interpretación; después, la herramienta para sacar la tuya —una por día, sin registro—;
-            y más abajo, una guía para usarla bien y el archivo de los últimos treinta días.
-          </p>
-        </header>
+        <SectionHero
+          className="mb-10"
+          title="Tarot del día"
+          lead="Una carta del tarot para leer la jornada. Arriba, la carta de hoy del sitio con su interpretación; después, la herramienta para sacar la tuya —una por día, sin registro—; y más abajo, una guía para usarla bien y el archivo de los últimos treinta días."
+          icon={{ family: 'hubs', name: 'tarot' }}
+        />
 
         <TodayCardSection today={data.today} />
 

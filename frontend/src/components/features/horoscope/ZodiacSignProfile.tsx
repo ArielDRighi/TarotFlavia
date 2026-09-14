@@ -124,7 +124,7 @@ export function ZodiacSignProfile({ sign, children }: ZodiacSignProfileProps) {
         <div className="grid gap-4 md:grid-cols-3">
           <DailyAreaCard title="Amor">{profile.dailyAreas.love}</DailyAreaCard>
           <DailyAreaCard title="Bienestar">{profile.dailyAreas.wellness}</DailyAreaCard>
-          <DailyAreaCard title="Dinero">{profile.dailyAreas.money}</DailyAreaCard>
+          <DailyAreaCard title="Prosperidad y abundancia">{profile.dailyAreas.money}</DailyAreaCard>
         </div>
       </section>
 

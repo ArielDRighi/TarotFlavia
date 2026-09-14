@@ -12,6 +12,7 @@ import { ShoppingBag, PackageSearch } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorDisplay } from '@/components/ui/error-display';
+import { SectionHero } from '@/components/ui/section-hero';
 import { useHolisticServices } from '@/hooks/api/useHolisticServices';
 import { useAuthStore } from '@/stores/authStore';
 import { ROUTES } from '@/lib/constants/routes';
@@ -35,20 +36,23 @@ export function ServiciosPage({ initialServices }: ServiciosPageProps = {}) {
 
   return (
     <div className="bg-bg-main min-h-screen px-4 py-8 md:px-8" data-testid="servicios-page">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-serif text-3xl">Servicios Holísticos</h1>
-
-        {isAuthenticated && (
-          <Link
-            href={ROUTES.MIS_SERVICIOS}
-            data-testid="mis-servicios-link"
-            className="inline-flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 transition-colors hover:border-purple-300 hover:bg-purple-100"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            Mis Servicios
-          </Link>
-        )}
-      </div>
+      <SectionHero
+        className="mb-8"
+        title="Servicios Holísticos"
+        icon={{ family: 'rituals', name: 'tarot' }}
+        actions={
+          isAuthenticated ? (
+            <Link
+              href={ROUTES.MIS_SERVICIOS}
+              data-testid="mis-servicios-link"
+              className="inline-flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 transition-colors hover:border-purple-300 hover:bg-purple-100"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Mis Servicios
+            </Link>
+          ) : undefined
+        }
+      />
 
       {/* Loading state */}
       {isLoading && (

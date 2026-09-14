@@ -8,9 +8,9 @@
  * that app/ pages must not contain business logic (useState, useEffect, hooks).
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { Star, Sparkles, Crown, AlertCircle } from 'lucide-react';
+import { Sparkles, Crown, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 
@@ -31,7 +31,7 @@ import { isPremiumChartResponse } from '@/types/birth-chart-api.types';
 import { BirthChartLoading } from '@/components/features/birth-chart/BirthChartLoading';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
+import { SectionHero } from '@/components/ui/section-hero';
 import { Button } from '@/components/ui/button';
 import { CheckItem } from '@/components/ui/check-item';
 
@@ -134,6 +134,25 @@ export function BirthChartPageContent() {
 
   const isSubmitting = generateChart.isPending || generateChartAnonymous.isPending;
 
+  // Píldora de plan sobre el título (T-UI-13): antes eran tres <Badge> bajo el h1.
+  let planBadge: ReactNode;
+  if (!isAuthenticated) {
+    planBadge = (
+      <>
+        <Sparkles className="h-3 w-3" />1 carta gratis
+      </>
+    );
+  } else if (user?.plan === 'free') {
+    planBadge = `Quedan ${remaining} cartas este mes`;
+  } else if (user?.plan === 'premium') {
+    planBadge = (
+      <>
+        <Crown className="h-3 w-3" />
+        Premium • Cartas ilimitadas
+      </>
+    );
+  }
+
   useEffect(() => {
     if (!isSubmitting) return;
 
@@ -154,34 +173,13 @@ export function BirthChartPageContent() {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <div className="bg-primary/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
-          <Star className="text-primary h-8 w-8" />
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight">Carta Astral</h1>
-        <p className="text-muted-foreground mt-2">
-          Descubre el mapa del cielo en el momento de tu nacimiento
-        </p>
-      </div>
-
-      {/* Badges de plan */}
-      <div className="mb-6 flex justify-center gap-2">
-        {!isAuthenticated && (
-          <Badge variant="secondary">
-            <Sparkles className="mr-1 h-3 w-3" />1 carta gratis
-          </Badge>
-        )}
-        {isAuthenticated && user?.plan === 'free' && (
-          <Badge variant="secondary">Quedan {remaining} cartas este mes</Badge>
-        )}
-        {isAuthenticated && user?.plan === 'premium' && (
-          <Badge variant="default" className="bg-amber-500">
-            <Crown className="mr-1 h-3 w-3" />
-            Premium • Cartas ilimitadas
-          </Badge>
-        )}
-      </div>
+      <SectionHero
+        className="mb-8"
+        title="Carta Astral"
+        lead="Descubre el mapa del cielo en el momento de tu nacimiento"
+        icon={{ family: 'hubs', name: 'birth-chart' }}
+        badge={planBadge}
+      />
 
       {/* Error global */}
       {error && (

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 import { HoroscopeHub } from './HoroscopeHub';
 import { ZodiacSign } from '@/types/horoscope.types';
@@ -40,6 +40,17 @@ describe('HoroscopeHub (T-SEO-015)', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/horóscopo de hoy/i);
     expect(screen.getByTestId('horoscope-hub-date')).toHaveTextContent(/12 de septiembre de 2026/i);
     expect(screen.getAllByTestId(/^horoscope-hub-sign-/)).toHaveLength(12);
+  });
+
+  it('T-UI-13: abre con la banda de marca <SectionHero> y un solo h1', () => {
+    render(<HoroscopeHub daily={DAILY} />);
+
+    const hero = screen.getByTestId('section-hero');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(within(hero).getByRole('heading', { level: 1 })).toHaveTextContent(
+      'Horóscopo de hoy para los 12 signos'
+    );
+    expect(within(hero).getByTestId('section-hero-icon')).toBeInTheDocument();
   });
 
   it('el selector (consulta puntual) va debajo de los extractos, y el texto explicativo al final', () => {

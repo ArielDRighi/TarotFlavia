@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { RitualsPage } from './RitualsPage';
@@ -101,5 +101,25 @@ describe('RitualsPage', () => {
     renderWithProviders(<RitualsPage />);
 
     expect(screen.getByText('Rituales')).toBeInTheDocument();
+  });
+
+  it('T-UI-13: sin sesión no hay fila de acciones; con sesión "Mi Historial" va dentro de la banda', () => {
+    renderWithProviders(<RitualsPage />);
+    expect(screen.queryByTestId('section-hero-actions')).not.toBeInTheDocument();
+
+    mockUseAuthStore.mockReturnValue({ isAuthenticated: true });
+    renderWithProviders(<RitualsPage />);
+    expect(
+      within(screen.getByTestId('section-hero-actions')).getByRole('link', { name: /Mi Historial/ })
+    ).toHaveAttribute('href', '/rituales/historial');
+  });
+
+  it('T-UI-13: abre con la banda de marca <SectionHero> y un solo h1', () => {
+    renderWithProviders(<RitualsPage />);
+
+    const hero = screen.getByTestId('section-hero');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(within(hero).getByRole('heading', { level: 1 })).toHaveTextContent('Rituales');
+    expect(within(hero).getByTestId('section-hero-icon')).toBeInTheDocument();
   });
 });

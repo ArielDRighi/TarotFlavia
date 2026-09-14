@@ -41,7 +41,7 @@ export const HOROSCOPE_HUB_GUIDE: HoroscopeHubGuideData = {
     },
     {
       heading: 'Qué mirar primero',
-      body: 'El extracto de arriba es la energía general de la jornada; la ficha completa la reparte en amor, dinero y bienestar, con una puntuación por área y el número, el color y la franja horaria del día. Conviene leer primero el general y después sólo el área que te importa hoy: leer las tres como si fueran una lista de tareas es la manera más segura de no sacarle nada.',
+      body: 'El extracto de arriba es la energía general de la jornada; la ficha completa la reparte en amor, prosperidad y abundancia, y bienestar, con una puntuación por área y el número, el color y la franja horaria del día. Conviene leer primero el general y después sólo el área que te importa hoy: leer las tres como si fueran una lista de tareas es la manera más segura de no sacarle nada.',
     },
     {
       heading: 'Sol, Luna o Ascendente',

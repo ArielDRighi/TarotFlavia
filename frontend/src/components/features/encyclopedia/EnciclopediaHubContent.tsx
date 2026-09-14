@@ -3,9 +3,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 // 5. Components (ui → features)
+import { SectionHero } from '@/components/ui/section-hero';
 import { Reveal } from '@/components/common';
 // 6. Utils & types
 import { ROUTES } from '@/lib/constants/routes';
+import { CREAM, CREAM_MUTED, GOLD_RULE } from '@/lib/constants/section-hero';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,22 +25,11 @@ interface SectionConfig {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /**
- * Brand-night gradient used as the header band background and as the card image
- * overlay (kept in sync with `ArticleHero` and the `--color-bg-hero` tokens).
+ * Card image overlay, on the same brand-night palette as the header band
+ * (`HERO_GRADIENT` in `lib/constants/section-hero.ts`).
  */
-const HERO_GRADIENT = 'linear-gradient(160deg, #1a0a2e 0%, #2d1b69 55%, #1a0a2e 100%)';
 const CARD_OVERLAY =
   'linear-gradient(180deg, rgba(26, 10, 46, 0.15) 0%, rgba(26, 10, 46, 0.55) 55%, rgba(26, 10, 46, 0.9) 100%)';
-const CREAM = '#f9f7f2';
-const CREAM_MUTED = 'rgba(249, 247, 242, 0.72)';
-
-// Decorative star positions — purely visual, no logic.
-const DECORATIVE_STARS = [
-  { top: '22%', left: '12%', size: 3, delay: '0s', duration: '2.8s' },
-  { top: '34%', left: '88%', size: 2, delay: '0.6s', duration: '3.2s' },
-  { top: '68%', left: '8%', size: 2, delay: '1s', duration: '2.5s' },
-  { top: '28%', left: '64%', size: 2, delay: '1.3s', duration: '3.4s' },
-];
 
 const IMAGE_BASE = '/images/enciclopedia';
 
@@ -142,7 +133,7 @@ function SectionCard({ section }: { section: SectionConfig }) {
         {/* Filete dorado inferior */}
         <div
           className="absolute inset-x-0 bottom-0 h-0.5"
-          style={{ background: 'linear-gradient(90deg, transparent, #d69e2e, transparent)' }}
+          style={{ background: GOLD_RULE }}
           aria-hidden="true"
         />
       </div>
@@ -155,8 +146,8 @@ function SectionCard({ section }: { section: SectionConfig }) {
 /**
  * EnciclopediaHubContent
  *
- * Hub principal de la Enciclopedia. Muestra una banda de cabecera con identidad
- * de marca (gradiente noche + título Cormorant + filete dorado) y las 3 grandes
+ * Hub principal de la Enciclopedia. Muestra la banda de cabecera con identidad
+ * de marca (`<SectionHero size="lg">`, la referencia de T-UI-13) y las 3 grandes
  * secciones (Tarot, Astrología y Guías) como tarjetas editoriales con imagen
  * temática y micro-interacción de hover (zoom + glow dorado).
  *
@@ -166,66 +157,13 @@ function SectionCard({ section }: { section: SectionConfig }) {
 export function EnciclopediaHubContent() {
   return (
     <div data-testid="encyclopedia-hub" className="container mx-auto px-4 py-8">
-      {/* Banda de cabecera con identidad de marca */}
-      <header
-        data-testid="encyclopedia-hub-hero"
-        className="relative mb-10 overflow-hidden rounded-2xl"
-        style={{ background: HERO_GRADIENT }}
-      >
-        {/* Estrellas decorativas */}
-        {DECORATIVE_STARS.map((star, i) => (
-          <span
-            key={i}
-            className="animate-twinkle absolute rounded-full bg-amber-200/80"
-            style={{
-              top: star.top,
-              left: star.left,
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              animationDelay: star.delay,
-              animationDuration: star.duration,
-            }}
-            aria-hidden="true"
-          />
-        ))}
-
-        {/* Luna creciente decorativa (solo CSS) */}
-        <div
-          className="absolute top-6 right-8 z-0 opacity-30"
-          style={{
-            width: '72px',
-            height: '72px',
-            borderRadius: '50%',
-            boxShadow: 'inset -18px -6px 0 0 #d69e2e',
-            filter: 'blur(1px)',
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Contenido */}
-        <div className="relative z-10 px-6 py-12 text-center sm:px-10 sm:py-16">
-          <h1
-            className="font-serif text-4xl leading-tight font-bold sm:text-5xl"
-            style={{ color: CREAM }}
-          >
-            Enciclopedia Mística
-          </h1>
-          <p
-            className="mx-auto mt-4 max-w-xl text-lg leading-relaxed"
-            style={{ color: CREAM_MUTED }}
-          >
-            Explora nuestro completo repositorio de conocimiento esotérico: tarot, astrología y
-            guías prácticas.
-          </p>
-        </div>
-
-        {/* Filete dorado inferior */}
-        <div
-          className="absolute inset-x-0 bottom-0 h-0.5"
-          style={{ background: 'linear-gradient(90deg, transparent, #d69e2e, transparent)' }}
-          aria-hidden="true"
-        />
-      </header>
+      {/* Banda de cabecera con identidad de marca (T-UI-13: <SectionHero size="lg">) */}
+      <SectionHero
+        size="lg"
+        className="mb-10"
+        title="Enciclopedia Mística"
+        lead="Explora nuestro completo repositorio de conocimiento esotérico: tarot, astrología y guías prácticas."
+      />
 
       {/* Grid de secciones — reveal fade-up escalonado al entrar en viewport */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

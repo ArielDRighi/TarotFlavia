@@ -6,6 +6,7 @@ import { Info } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SectionHero } from '@/components/ui/section-hero';
 import {
   Sheet,
   SheetContent,
@@ -151,11 +152,12 @@ export function PendulumConsultation() {
       />
 
       <div className="container mx-auto max-w-2xl px-4 py-8">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="mb-2 font-serif text-4xl">Péndulo Digital</h1>
-          <p className="text-muted-foreground">Formula tu pregunta y deja que el péndulo te guíe</p>
-        </div>
+        <SectionHero
+          className="mb-8"
+          title="Péndulo Digital"
+          lead="Formula tu pregunta y deja que el péndulo te guíe"
+          icon={{ family: 'hubs', name: 'pendulum' }}
+        />
 
         {/* Límites */}
         <PendulumLimitBanner />

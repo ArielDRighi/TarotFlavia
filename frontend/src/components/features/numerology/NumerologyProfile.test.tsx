@@ -23,6 +23,15 @@ describe('NumerologyProfile', () => {
     expect(screen.getByText('Tu Perfil Numerológico')).toBeInTheDocument();
   });
 
+  it('T-UI-13: el encabezado del perfil es h2 (el h1 de la página lo pone SectionHero)', () => {
+    render(<NumerologyProfile profile={mockProfile} />);
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Tu Perfil Numerológico' })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument();
+  });
+
   it('cierra con el aviso legal al pie del análisis (T-SEO-018)', () => {
     render(<NumerologyProfile profile={mockProfile} />);
 

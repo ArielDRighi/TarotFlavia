@@ -18,7 +18,7 @@ export function NumerologyProfile({ profile, className }: Props) {
     <div className={className} data-testid="numerology-profile">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Tu Perfil Numerológico</h1>
+        <h2 className="text-3xl font-bold text-gray-900">Tu Perfil Numerológico</h2>
         <p className="mt-1 text-gray-600">
           Fecha de nacimiento: <span className="font-semibold">{profile.birthDate}</span>
         </p>
